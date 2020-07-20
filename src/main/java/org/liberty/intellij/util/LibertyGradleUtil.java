@@ -1,5 +1,6 @@
 package org.liberty.intellij.util;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 
@@ -11,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LibertyGradleUtil {
-
+    private static Logger log = Logger.getInstance(LibertyGradleUtil.class);;
     /**
      * Given the gradle build file get the project name
      * This method looks for a settings.gradle file in the same parent dir
@@ -34,15 +35,19 @@ public class LibertyGradleUtil {
                     // return name without surrounding quotes
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Could not read " + settingsPath, e.getMessage());
             }
         }
         return null;
     }
 
+    /**
+     * Given a path return the String content of the file
+     * @param path to file
+     * @return content of file
+     * @throws IOException
+     */
     public static String fileToString(String path) throws IOException {
         FileInputStream in = null;
         try {
@@ -70,7 +75,6 @@ public class LibertyGradleUtil {
      * @throws IOException
      */
     public static boolean validBuildGradle(PsiFile file) throws IOException {
-
             String buildFile = fileToString(file.getVirtualFile().getCanonicalPath());
             if (buildFile.isEmpty()) { return false; }
 
@@ -104,7 +108,6 @@ public class LibertyGradleUtil {
                     }
                 }
             }
-
         return false;
     }
 
