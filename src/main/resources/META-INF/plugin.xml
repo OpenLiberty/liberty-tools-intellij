@@ -1,0 +1,62 @@
+<idea-plugin>
+    <id>open-liberty.intellij</id>
+    <name>Open Liberty Tools</name>
+
+    <vendor url="https://github.com/OpenLiberty/open-liberty-tools-intellij">Open Liberty</vendor>
+
+    <description><![CDATA[
+    Open Liberty Tools is an IntelliJ extension that detects your Open Liberty projects and allows you to
+     interact with Liberty Dev mode via the Open Liberty Tools dashboard.<br>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow anchor="right" id="Liberty Dev Dashboard" icon="/icons/OL_logo_13.svg"
+                    factoryClass="org.liberty.intellij.LibertyDevToolWindowFactory"/>
+    </extensions>
+
+
+    <actions>
+        <action id="org.liberty.intellij.actions.LibertyDevStartAction"
+                class="org.liberty.intellij.actions.LibertyDevStartAction" text="Start"
+                description="Start Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />
+
+        <action id="org.liberty.intellij.actions.LibertyDevCustomStartAction"
+                class="org.liberty.intellij.actions.LibertyDevCustomStartAction" text="Start..."
+                description="Custom Start Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />
+
+        <action id="org.liberty.intellij.actions.LibertyDevStopAction"
+                class="org.liberty.intellij.actions.LibertyDevStopAction" text="Stop"
+                description="Stop Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />
+
+        <action id="org.liberty.intellij.actions.LibertyDevRunTestsAction"
+                class="org.liberty.intellij.actions.LibertyDevRunTestsAction" text="Run Tests"
+                description="Run tests on current build file" icon="AllIcons.General.GearPlain" />
+
+        <action id="org.liberty.intellij.actions.ViewIntegrationTestReport"
+                class="org.liberty.intellij.actions.ViewIntegrationTestReport" text="View integration test report"
+                description="Open the Maven Failsafe test report" icon="AllIcons.General.Web" />
+
+        <action id="org.liberty.intellij.actions.ViewUnitTestReport"
+                class="org.liberty.intellij.actions.ViewUnitTestReport" text="View unit test report"
+                description="Open the Maven Surefire test report" icon="AllIcons.General.Web" />
+
+        <action id="org.liberty.intellij.actions.ViewTestReport"
+                class="org.liberty.intellij.actions.ViewTestReport" text="View test report"
+                description="Open the Gradle test report" icon="AllIcons.General.Web" />
+
+        <action id="org.liberty.intellij.actions.ViewEffectivePom"
+                class="org.liberty.intellij.actions.ViewEffectivePom" text="View Effective POM"
+                description="Open the pom.xml" icon="AllIcons.FileTypes.Config" />
+
+        <action id="org.liberty.intellij.actions.ViewGradleConfig"
+                class="org.liberty.intellij.actions.ViewGradleConfig" text="View Gradle Config"
+                description="Open the build.gradle" icon="AllIcons.FileTypes.Config" />
+
+        <action id="org.liberty.intellij.actions.RefreshLibertyToolbar"
+                class="org.liberty.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty Dev Dashboard"
+                description="Refresh Liberty Dev Dashboard projects" icon="AllIcons.Actions.Refresh"/>
+    </actions>
+</idea-plugin>
