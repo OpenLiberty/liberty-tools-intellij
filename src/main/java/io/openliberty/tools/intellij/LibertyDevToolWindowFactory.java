@@ -1,4 +1,4 @@
-package org.liberty.intellij;
+package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;

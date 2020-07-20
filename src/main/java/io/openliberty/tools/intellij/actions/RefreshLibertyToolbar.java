@@ -1,4 +1,4 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -8,9 +8,9 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.LibertyExplorer;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.LibertyExplorer;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package org.liberty.intellij.util;
+package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -31,6 +31,5 @@ public class TreeDataProvider implements DataProvider {
         this.projectName = projectName;
         this.projectType = projectType;
     }
-
 
 }

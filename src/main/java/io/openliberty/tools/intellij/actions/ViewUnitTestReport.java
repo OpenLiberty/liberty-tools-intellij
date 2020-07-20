@@ -1,4 +1,4 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -7,15 +7,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.Constants;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 
-public class ViewIntegrationTestReport extends AnAction {
+public class ViewUnitTestReport extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
@@ -32,18 +31,17 @@ public class ViewIntegrationTestReport extends AnAction {
 
         // get path to project folder
         final VirtualFile parentFile = file.getParent();
-        File failsafeReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();
-        VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
+        File surefireReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
+        VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
 
-
-        if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
-            Messages.showErrorDialog(project, "Test report (" + failsafeReportFile.getAbsolutePath() + ") does not exist.  " +
+        if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
+            Messages.showErrorDialog(project, "Test report (" + surefireReportFile.getAbsolutePath() + ") does not exist.  " +
                             "Run tests to generate a test report.  Ensure your test report is generating at the correct location.",
-                    "Integration Test Report Does Not Exist");
+                    "Unit Test Report Does Not Exist");
             return;
         }
 
         // open test report in browser
-        BrowserUtil.browse(failsafeReportVirtualFile.getUrl());
+        BrowserUtil.browse(surefireReportVirtualFile.getUrl());
     }
 }

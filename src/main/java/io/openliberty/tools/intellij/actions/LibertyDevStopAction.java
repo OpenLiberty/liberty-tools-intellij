@@ -1,16 +1,13 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyActionUtil;
-import org.liberty.intellij.util.LibertyProjectUtil;
-
-import java.io.IOException;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyActionUtil;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 
 public class LibertyDevStopAction extends AnAction {
 

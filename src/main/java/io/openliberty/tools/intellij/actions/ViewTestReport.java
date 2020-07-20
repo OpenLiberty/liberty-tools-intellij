@@ -1,4 +1,4 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -7,10 +7,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyGradleUtil;
-import org.liberty.intellij.util.LibertyProjectUtil;
 
 import java.io.File;
 import java.io.IOException;

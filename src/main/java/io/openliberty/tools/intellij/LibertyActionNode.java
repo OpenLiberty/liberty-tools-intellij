@@ -1,4 +1,4 @@
-package org.liberty.intellij;
+package io.openliberty.tools.intellij;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

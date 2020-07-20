@@ -1,4 +1,4 @@
-package org.liberty.intellij.util;
+package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;

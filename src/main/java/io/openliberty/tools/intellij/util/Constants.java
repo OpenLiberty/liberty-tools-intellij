@@ -1,4 +1,4 @@
-package org.liberty.intellij.util;
+package io.openliberty.tools.intellij.util;
 
 public final class Constants {
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty Dev Dashboard";

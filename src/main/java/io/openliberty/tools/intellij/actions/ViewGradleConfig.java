@@ -1,4 +1,4 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -7,8 +7,8 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 
 public class ViewGradleConfig extends AnAction {
 
