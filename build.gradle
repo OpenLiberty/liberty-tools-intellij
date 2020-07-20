@@ -16,6 +16,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
+runIde {
+    jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
+}
+
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.3.3'

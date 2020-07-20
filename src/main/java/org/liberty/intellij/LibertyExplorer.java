@@ -25,11 +25,15 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+import com.intellij.openapi.diagnostic.Logger;
+
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private Project currentProject;
+    private static Logger log;
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
+        log = Logger.getInstance(LibertyExplorer.class);
 
         // create ActionToolBar
         final ActionManager actionManager = ActionManager.getInstance();
@@ -44,16 +48,22 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         setContent(tree);
     }
 
+    /**
+     * Builds the Open Liberty Tools Dashboard tree
+     * @param project current project
+     * @param backgroundColor
+     * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
+     */
     public static Tree buildTree(Project project, Color backgroundColor) {
         String projectName = null;
-        ArrayList<PsiFile> buildFiles = null;
         ArrayList<PsiFile> mavenBuildFiles = null;
         ArrayList<PsiFile> gradleBuildFiles = null;
         try {
             mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
             gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Could not find Open Liberty Maven or Gradle projects in workspace",
+                    e.getMessage());
         }
 
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
@@ -61,15 +71,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         for (PsiFile file : mavenBuildFiles) {
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
-                throw new Error("Could not resolve current project");
+                log.error("Could not resolve current Maven project");
             }
             LibertyProjectNode node;
             try {
                 projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
-
             } catch (Exception e) {
-                throw new Error("Could not resolve project name from pom.xml", e);
+                log.error("Could not resolve project name from pom.xml", e.getMessage());
             }
+            log.info("Liberty Maven Project: " + file);
             if (projectName != null) {
                 node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_MAVEN_PROJECT);
             } else {
@@ -87,14 +97,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         for (PsiFile file : gradleBuildFiles) {
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
-                throw new Error("Could not resolve current project");
+                log.error("Could not resolve current Gradle project");
             }
             LibertyProjectNode node;
             try {
                 projectName = LibertyGradleUtil.getProjectName(virtualFile);
             } catch (Exception e) {
-                throw new Error("Could not resolve project name from settings.gradle", e);
+                log.error("Could not resolve project name from settings.gradle", e.getMessage());
             }
+            log.info("Liberty Gradle Project: " + file);
             if (projectName != null) {
                 node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_GRADLE_PROJECT);
             } else {
@@ -102,7 +113,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
             top.add(node);
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
-
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
@@ -184,6 +194,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 if (node instanceof LibertyActionNode) {
                     ActionManager am = ActionManager.getInstance();
                     String actionNodeName = ((LibertyActionNode) node).getName();
+                    log.debug("Selected: " + actionNodeName);
                     if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
                         // calls action on double click
                         am.getAction("org.liberty.intellij.actions.LibertyDevStartAction").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),

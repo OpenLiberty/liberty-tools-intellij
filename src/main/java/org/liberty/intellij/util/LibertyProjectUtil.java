@@ -2,6 +2,7 @@ package org.liberty.intellij.util;
 
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class LibertyProjectUtil {
+    private static Logger log = Logger.getInstance(LibertyProjectUtil.class);;
 
     @Nullable
     public static Project getProject(DataContext context) {
@@ -79,27 +81,23 @@ public class LibertyProjectUtil {
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             PsiFile[] mavenFiles = FilenameIndex.getFilesByName(project, "pom.xml", GlobalSearchScope.projectScope(project));
             for (int i = 0; i < mavenFiles.length; i++) {
-                System.out.println(mavenFiles[i].getVirtualFile().getPath());
                 try {
                     if (LibertyMavenUtil.validPom(mavenFiles[i])) {
                         buildFiles.add(mavenFiles[i]);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error parsing pom.xml");
+                    log.error("Error parsing pom.xml", e.getMessage());
                 }
             }
         } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
             PsiFile[] gradleFiles = FilenameIndex.getFilesByName(project, "build.gradle", GlobalSearchScope.projectScope(project));
             for (int i = 0; i < gradleFiles.length; i++) {
-                System.out.println(gradleFiles[i].getVirtualFile().getPath());
                 try {
                     if (LibertyGradleUtil.validBuildGradle(gradleFiles[i])) {
                         buildFiles.add(gradleFiles[i]);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error parsing build.gradle");
+                    log.error("Error parsing build.gradle", e.getMessage());
                 }
             }
         }
