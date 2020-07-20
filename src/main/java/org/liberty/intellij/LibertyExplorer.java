@@ -27,7 +27,6 @@ import java.util.ArrayList;
 
 import com.intellij.openapi.diagnostic.Logger;
 
-@SuppressWarnings("deprecation")
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private Project currentProject;
     private static Logger log;
