@@ -1,4 +1,4 @@
-package org.liberty.intellij.actions;
+package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -8,13 +8,13 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.util.Constants;
-import org.liberty.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
 
-public class ViewUnitTestReport extends AnAction {
+public class ViewIntegrationTestReport extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
@@ -31,17 +31,18 @@ public class ViewUnitTestReport extends AnAction {
 
         // get path to project folder
         final VirtualFile parentFile = file.getParent();
-        File surefireReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
-        VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
+        File failsafeReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();
+        VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
 
-        if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
-            Messages.showErrorDialog(project, "Test report (" + surefireReportFile.getAbsolutePath() + ") does not exist.  " +
+
+        if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
+            Messages.showErrorDialog(project, "Test report (" + failsafeReportFile.getAbsolutePath() + ") does not exist.  " +
                             "Run tests to generate a test report.  Ensure your test report is generating at the correct location.",
-                    "Unit Test Report Does Not Exist");
+                    "Integration Test Report Does Not Exist");
             return;
         }
 
         // open test report in browser
-        BrowserUtil.browse(surefireReportVirtualFile.getUrl());
+        BrowserUtil.browse(failsafeReportVirtualFile.getUrl());
     }
 }

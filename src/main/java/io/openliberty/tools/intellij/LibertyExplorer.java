@@ -1,4 +1,4 @@
-package org.liberty.intellij;
+package io.openliberty.tools.intellij;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
@@ -12,8 +12,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.treeStructure.Tree;
+import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
-import org.liberty.intellij.util.*;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -38,7 +38,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         // create ActionToolBar
         final ActionManager actionManager = ActionManager.getInstance();
         DefaultActionGroup actionGroup = new DefaultActionGroup("DefaultActionGroup", false);
-        actionGroup.add(ActionManager.getInstance().getAction("org.liberty.intellij.actions.RefreshLibertyToolbar"));
+        actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
         ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
         actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
         this.setToolbar(actionToolbar.getComponent());
@@ -116,7 +116,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
-            node.add(new LibertyActionNode(Constants.VIEW_TEST_REPORT));
+            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT));
         }
 
         Tree tree = new Tree(top);
@@ -156,27 +156,27 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         LibertyProjectNode libertyNode = ((LibertyProjectNode) node);
                         final DefaultActionGroup group = new DefaultActionGroup();
                         if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-                            AnAction viewEffectivePom = ActionManager.getInstance().getAction("org.liberty.intellij.actions.ViewEffectivePom");
+                            AnAction viewEffectivePom = ActionManager.getInstance().getAction(Constants.VIEW_EFFECTIVE_POM_ACTION_ID);
                             group.add(viewEffectivePom);
-                            AnAction viewIntegrationReport = ActionManager.getInstance().getAction("org.liberty.intellij.actions.ViewIntegrationTestReport");
+                            AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
                             group.add(viewIntegrationReport);
-                            AnAction viewUnitTestReport = ActionManager.getInstance().getAction("org.liberty.intellij.actions.ViewUnitTestReport");
+                            AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
                             group.add(viewUnitTestReport);
                             group.addSeparator();
                         } else if (libertyNode.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-                            AnAction viewGradleConfig = ActionManager.getInstance().getAction("org.liberty.intellij.actions.ViewGradleConfig");
+                            AnAction viewGradleConfig = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_CONFIG_ACTION_ID);
                             group.add(viewGradleConfig);
-                            AnAction viewTestReport = ActionManager.getInstance().getAction("org.liberty.intellij.actions.ViewTestReport");
+                            AnAction viewTestReport = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
                             group.add(viewTestReport);
                             group.addSeparator();
                         }
-                        AnAction startAction = ActionManager.getInstance().getAction("org.liberty.intellij.actions.LibertyDevStartAction");
+                        AnAction startAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
                         group.add(startAction);
-                        AnAction customStartAction = ActionManager.getInstance().getAction("org.liberty.intellij.actions.LibertyDevCustomStartAction");
+                        AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
                         group.add(customStartAction);
-                        AnAction stopAction = ActionManager.getInstance().getAction("org.liberty.intellij.actions.LibertyDevStopAction");
+                        AnAction stopAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
                         group.add(stopAction);
-                        AnAction runTestsAction = ActionManager.getInstance().getAction("org.liberty.intellij.actions.LibertyDevRunTestsAction");
+                        AnAction runTestsAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
                         group.add(runTestsAction);
 
                         ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
@@ -197,31 +197,31 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     log.debug("Selected: " + actionNodeName);
                     if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
                         // calls action on double click
-                        am.getAction("org.liberty.intellij.actions.LibertyDevStartAction").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
-                        am.getAction("org.liberty.intellij.actions.LibertyDevCustomStartAction").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
-                        am.getAction("org.liberty.intellij.actions.LibertyDevStopAction").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
-                        am.getAction("org.liberty.intellij.actions.LibertyDevRunTestsAction").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
-                        am.getAction("org.liberty.intellij.actions.ViewIntegrationTestReport").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
-                        am.getAction("org.liberty.intellij.actions.ViewUnitTestReport").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.VIEW_TEST_REPORT)) {
-                        am.getAction("org.liberty.intellij.actions.ViewTestReport").actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                    } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
+                        am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     }
