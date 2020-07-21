@@ -1,5 +1,9 @@
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.util.IconLoader;
+
+import javax.swing.*;
+
 public final class Constants {
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty Dev Dashboard";
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
@@ -19,6 +23,9 @@ public final class Constants {
     public static final String TEST_REPORT_STRING = "Test Summary";
 
     public static final String LIBERTY_TREE = "LibertyTree";
+
+    public static final Icon libertyIcon = IconLoader.getIcon("/icons/OL_logo_13.svg");
+
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
