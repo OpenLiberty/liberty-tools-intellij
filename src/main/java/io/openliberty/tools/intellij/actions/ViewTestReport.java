@@ -1,10 +1,14 @@
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationListener;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.Constants;
@@ -33,6 +37,8 @@ public class ViewTestReport extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        Logger log = Logger.getInstance(ViewTestReport.class);;
+
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
 
@@ -56,7 +62,6 @@ public class ViewTestReport extends AnAction {
             if (!testReportFile.exists()) {
                 try {
                     testReportFile = findCustomTestReport(parentFile);
-                    System.out.println("CUSTOM TEST REPORT: " + testReportFile.getCanonicalPath());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -70,9 +75,16 @@ public class ViewTestReport extends AnAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Messages.showErrorDialog(project, "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +
-                            "Run tests to generate a test report.  Ensure your test report is generating at the correct location.",
-                    "Gradle Test Report Does Not Exist");
+            Notification notif = new Notification("Liberty Dev Dashboard"
+                    , Constants.libertyIcon
+                    , "Gradle Test Report Does Not Exist"
+                    , ""
+                    , "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +
+                    "Run tests to generate a test report.  Ensure your test report is generating at the correct location."
+                    , NotificationType.ERROR
+                    , NotificationListener.URL_OPENING_LISTENER);
+            Notifications.Bus.notify(notif, project);
+            log.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;
         }
 

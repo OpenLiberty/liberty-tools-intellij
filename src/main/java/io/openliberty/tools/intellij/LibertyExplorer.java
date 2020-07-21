@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import com.intellij.openapi.diagnostic.Logger;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
-    private Project currentProject;
     private static Logger log;
 
     public LibertyExplorer(@NotNull Project project) {
@@ -234,8 +233,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         // set tree icons and colours
         DefaultTreeCellRenderer newRenderer = new DefaultTreeCellRenderer();
         newRenderer.setLeafIcon(IconLoader.getIcon("AllIcons.General.GearPlain"));
-        newRenderer.setClosedIcon(IconLoader.getIcon("/icons/OL_logo_13.svg"));
-        newRenderer.setOpenIcon(IconLoader.getIcon("/icons/OL_logo_13.svg"));
+        newRenderer.setClosedIcon(Constants.libertyIcon);
+        newRenderer.setOpenIcon(Constants.libertyIcon);
         newRenderer.setBackgroundNonSelectionColor(backgroundColor);
 
         tree.setCellRenderer(newRenderer);
