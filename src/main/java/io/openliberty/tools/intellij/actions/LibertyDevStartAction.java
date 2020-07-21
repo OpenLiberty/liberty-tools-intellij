@@ -1,6 +1,7 @@
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.Constants;
@@ -18,6 +19,8 @@ public class LibertyDevStartAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        Logger log = Logger.getInstance(LibertyDevStartAction.class);;
+
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
 
@@ -35,7 +38,11 @@ public class LibertyDevStartAction extends AnAction {
         }
 
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
-        if (widget == null) return;
-        LibertyActionUtil.executeCommand(widget, startCmd);
+        if (widget == null) {
+            log.debug("Could not get or create terminal widget for " + projectName);
+            return;
+        } else {
+            LibertyActionUtil.executeCommand(widget, startCmd);
+        }
     }
 }
