@@ -39,7 +39,7 @@ public class LibertyDevStartAction extends AnAction {
 
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
         if (widget == null) {
-            log.debug("Could not get or create terminal widget for the given project");
+            log.debug("Could not get or create terminal widget for " + projectName);
             return;
         } else {
             LibertyActionUtil.executeCommand(widget, startCmd);
