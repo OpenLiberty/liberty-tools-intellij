@@ -14,7 +14,7 @@
      The following features are available through the Liberty Dev Dashboard:
      <ul>
      <li> View supported <code>liberty-maven-plugin</code>(version <code>3.1</code> or higher) or
-     <code>liberty-gradle-plugin</code>(version <code>3.0</code or higher) projects in the workspace
+     <code>liberty-gradle-plugin</code>(version <code>3.0</code> or higher) projects in the workspace
      <li> Start/Stop dev mode
      <li> Start dev mode with custom parameters
      <li> Run tests
