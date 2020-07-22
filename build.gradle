@@ -23,10 +23,16 @@ runIde {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.3.3'
+    updateSinceUntilBuild false
     plugins 'terminal'
-    pluginName 'Open Liberty Tools'
 }
+
 patchPluginXml {
     changeNotes """
-            """
+        <b> 0.0.1 </b>
+        <ul>
+        <li> First preview release
+        <ul>
+        """
+    version project.version
 }

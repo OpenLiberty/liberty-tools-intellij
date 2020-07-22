@@ -40,11 +40,14 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
         ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
         actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
+        actionToolbar.setShowSeparatorTitles(true);
         this.setToolbar(actionToolbar.getComponent());
 
         // build tree
         Tree tree = buildTree(project, getBackground());
-        setContent(tree);
+        if (tree != null) {
+            setContent(tree);
+        }
     }
 
     /**
@@ -63,6 +66,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         } catch (Exception e) {
             log.error("Could not find Open Liberty Maven or Gradle projects in workspace",
                     e.getMessage());
+            return null;
         }
 
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");

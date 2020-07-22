@@ -2,11 +2,24 @@
     <id>open-liberty.intellij</id>
     <name>Open Liberty Tools</name>
 
-    <vendor url="https://github.com/OpenLiberty/open-liberty-tools-intellij">Open Liberty</vendor>
+    <vendor url="https://openliberty.io/">Open Liberty</vendor>
+
+    <category>Framework Integration</category>
 
     <description><![CDATA[
-    Open Liberty Tools is an IntelliJ extension that detects your Open Liberty projects and allows you to
-     interact with Liberty Dev mode via the Open Liberty Tools dashboard.<br>
+    <b>This is a preview release.</b>
+    <br> Adds support for
+    <a href="https://openliberty.io/">Open Liberty</a>
+    projects.<br>
+     The following features are available through the Liberty Dev Dashboard:
+     <ul>
+     <li> View supported <a "href=https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev"><code>liberty-maven-plugin</code></a>(version <code>3.1</code> or higher) or
+     <a "href=https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md"><code>liberty-gradle-plugin</code></a>(version <code>3.0</code or higher) projects in the workspace
+     <li> Start/Stop dev mode
+     <li> Start dev mode with custom parameters
+     <li> Run tests
+     <li> View unit and integration test reports
+     </ul>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -16,7 +29,6 @@
         <toolWindow anchor="right" id="Liberty Dev Dashboard" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
     </extensions>
-
 
     <actions>
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartAction"
