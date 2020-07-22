@@ -39,5 +39,4 @@ git commit -s
 This project follows Eclipse standard Java language [coding conventions](https://wiki.eclipse.org/Coding_Conventions).
 
 Please note:
- - all PRs must pass Java CheckStyle checks
  - all PRs must have passing builds

@@ -13,8 +13,8 @@
     projects.<br>
      The following features are available through the Liberty Dev Dashboard:
      <ul>
-     <li> View supported <a "href=https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev"><code>liberty-maven-plugin</code></a>(version <code>3.1</code> or higher) or
-     <a "href=https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md"><code>liberty-gradle-plugin</code></a>(version <code>3.0</code or higher) projects in the workspace
+     <li> View supported <code>liberty-maven-plugin</code>(version <code>3.1</code> or higher) or
+     <code>liberty-gradle-plugin</code>(version <code>3.0</code or higher) projects in the workspace
      <li> Start/Stop dev mode
      <li> Start dev mode with custom parameters
      <li> Run tests

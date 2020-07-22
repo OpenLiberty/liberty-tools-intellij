@@ -14,7 +14,7 @@ Note that this extension requires the [Integrated Terminal plugin](https://plugi
 
 ## Quick Start
 
-- Search for _Open Liberty Tools_ in IntelliJ **Settings > Plugins > Marketplace** and click the Install button.
+- Search for _Open Liberty Tools_ in IntelliJ **Settings > Plugins > Marketplace** and click the Install button
 - Open Liberty supported projects will appear in the Liberty Dev Dashboard on the side bar
 - Click a project in the Liberty Dev Dashboard to view the available commands
 
@@ -31,7 +31,7 @@ Note that this extension requires the [Integrated Terminal plugin](https://plugi
 | Command                      | Description                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Start                        | Starts dev mode.                                                                                                                                                                                                                                                                                                             |
-| Start…​                      | Starts dev mode with custom parameters. Supported parameters can be found in the documentation for the [dev goal of the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and the [libertyDev task of the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md#command-line-parameters). |
+| Start…​                      | Starts dev mode with custom parameters. Supported parameters can be found in the documentation for the [dev goal of the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#additional-parameters) and the [libertyDev task of the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md#command-line-parameters). |
 | Stop                         | Stops dev mode.                                                                                                                                                                                                                                                                                                              |
 | Run tests                    | Runs the unit tests and integration tests that are configured for your project. This command requires dev mode to be already started.                                                                                                                                                                                        |
 | View integration test report | Views the integration test report file.                                                                                                                                                                                                                                                                                      |
