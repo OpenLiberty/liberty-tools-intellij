@@ -12,6 +12,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.ui.treeStructure.actions.CollapseAllAction;
+import com.intellij.ui.treeStructure.actions.ExpandAllAction;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,16 +40,20 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         final ActionManager actionManager = ActionManager.getInstance();
         DefaultActionGroup actionGroup = new DefaultActionGroup("DefaultActionGroup", false);
         actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
-        actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
-        actionToolbar.setShowSeparatorTitles(true);
-        this.setToolbar(actionToolbar.getComponent());
+        actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask"));
 
         // build tree
         Tree tree = buildTree(project, getBackground());
         if (tree != null) {
+            actionGroup.add(new CollapseAllAction(tree));
+            actionGroup.add(new ExpandAllAction(tree));
             setContent(tree);
         }
+
+        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+        actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
+        actionToolbar.setShowSeparatorTitles(true);
+        this.setToolbar(actionToolbar.getComponent());
     }
 
     /**
