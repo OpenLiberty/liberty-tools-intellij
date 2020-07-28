@@ -1,10 +1,27 @@
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vcs.VcsShowConfirmationOption;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.ui.ConfirmationDialog;
+import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.TreeDataProvider;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ExecuteLibertyDevTask extends AnAction {
 
@@ -15,10 +32,97 @@ public class ExecuteLibertyDevTask extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        Logger log = Logger.getInstance(ExecuteLibertyDevTask.class);
+
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
 
-//        RunAnythingManager runAnythingManager = RunAnythingManager.getInstance(project);
-//        runAnythingManager.show("libertyDev" + " ", false, e);
+        ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
+
+        Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+
+        JComponent libertyWindow = content.getComponent();
+
+        libertyWindow.list();
+        Component[] components = libertyWindow.getComponents();
+
+        for (Component comp : components) {
+            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
+                Tree libertyTree = (Tree) comp;
+
+                TreePath[] selectionPaths = libertyTree.getSelectionPaths();
+                if (selectionPaths != null && selectionPaths.length == 1) {
+                    // if one node is selected confirm that you would like to execute that task
+                    String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
+                    if (Constants.ACTIONS_MAP.containsKey(lastPathComponent)) {
+                        // verify user would like to execute this action
+                        final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
+                        boolean confirm = ConfirmationDialog.requestForConfirmation(
+                                VcsShowConfirmationOption.STATIC_SHOW_CONFIRMATION, project
+                                , "Execute Liberty Dev " + lastPathComponent + " on " + projectName + "?"
+                                , "Confirm Liberty Dev " + lastPathComponent
+                                , Constants.libertyIcon_40);
+                        if (confirm) {
+                            // calls action
+                            AnAction action = ActionManager.getInstance().getAction(Constants.ACTIONS_MAP.get(lastPathComponent));
+                            action.actionPerformed(new AnActionEvent(null,
+                                    DataManager.getInstance().getDataContext(libertyTree),
+                                    ActionPlaces.UNKNOWN, new Presentation(),
+                                    ActionManager.getInstance(), 0));
+                        }
+                    } else {
+                        // if node selected is not an action show dialog to choose action to execute
+                        chooseActionToExecute(libertyTree);
+                    }
+                } else {
+                    chooseActionToExecute(libertyTree);
+                }
+            } else {
+                log.debug("Tree view not built, no valid projects to execute Liberty Dev actions on");
+            }
+        }
+    }
+
+    private void chooseActionToExecute(Tree libertyTree) {
+        // if 0 or multiple nodes are selected display all possible nodes and allow users to select talk
+        String[] keyArray = Constants.ACTIONS_MAP.keySet().toArray(new String[Constants.ACTIONS_MAP.keySet().size()]);
+
+        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to execute"
+                , "Execute Liberty Dev Task"
+                , keyArray, keyArray[0]
+                , Constants.libertyIcon_40);
+        if (taskSelected == -1) {
+            return; // -1 indicates users cancelled dialog
+        }
+
+        String task = keyArray[taskSelected];
+
+        HashMap<String, ArrayList<Object>> map = (HashMap<String, ArrayList<Object>>) DataManager.getInstance()
+                .getDataContext(libertyTree).getData(Constants.LIBERTY_PROJECT_MAP);
+        String[] projectNamesArr = map.keySet().toArray(new String[map.keySet().size()]);
+
+        int projectSelected = Messages.showChooseDialog(
+                "Choose a project to execute Liberty Dev " + task
+                , "Choose a project"
+                , projectNamesArr, projectNamesArr[0]
+                , Constants.libertyIcon_40);
+        if (projectSelected == -1) {
+            return;
+        }
+
+        String project = projectNamesArr[projectSelected];
+
+        TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(libertyTree);
+        ArrayList<Object> settings = map.get(project);
+        VirtualFile file = (VirtualFile) settings.get(0);
+        String projectType = (String) settings.get(1);
+        treeDataProvider.saveData(file, project, projectType);
+
+        // execute selected task on selected project
+        AnAction action = ActionManager.getInstance().getAction(Constants.ACTIONS_MAP.get(task));
+        action.actionPerformed(new AnActionEvent(null,
+                DataManager.getInstance().getDataContext(libertyTree),
+                ActionPlaces.UNKNOWN, new Presentation(),
+                ActionManager.getInstance(), 0));
     }
 }

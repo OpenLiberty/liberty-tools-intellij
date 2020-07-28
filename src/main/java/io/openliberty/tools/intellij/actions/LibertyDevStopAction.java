@@ -26,7 +26,10 @@ public class LibertyDevStopAction extends AnAction {
         Logger log = Logger.getInstance(LibertyDevStopAction.class);;
 
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) return;
+        if (project == null) {
+            log.debug("Unable to stop liberty dev, could not resolve project");
+            return;
+        }
 
         final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
 

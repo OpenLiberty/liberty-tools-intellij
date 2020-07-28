@@ -5,23 +5,27 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class TreeDataProvider implements DataProvider {
 
     public VirtualFile currentFile;
     public String projectName;
     public String projectType;
+    HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
 
     @Nullable
     @Override
     public Object getData(@NotNull String dataId) {
         if (dataId.equals(Constants.LIBERTY_BUILD_FILE)) {
-            if (this.currentFile != null) {
-                return this.currentFile;
-            }
+            return this.currentFile;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_NAME)) {
             return this.projectName;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_TYPE)) {
             return this.projectType;
+        } else if (dataId.equals(Constants.LIBERTY_PROJECT_MAP)) {
+            return this.map;
         }
         return null;
     }
@@ -31,5 +35,10 @@ public class TreeDataProvider implements DataProvider {
         this.projectName = projectName;
         this.projectType = projectType;
     }
+
+    public void setProjectMap(@NotNull HashMap<String, ArrayList<Object>> map) {
+        this.map = map;
+    }
+
 
 }

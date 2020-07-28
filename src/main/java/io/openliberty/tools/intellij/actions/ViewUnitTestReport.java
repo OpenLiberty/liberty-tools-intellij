@@ -29,10 +29,16 @@ public class ViewUnitTestReport extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         Logger log = Logger.getInstance(ViewUnitTestReport.class);;
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) return;
+        if (project == null) {
+            log.debug("Unable to view unit test report, could not resolve project");
+            return;
+        }
 
         final VirtualFile file = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-        if (file == null) return;
+        if (file == null) {
+            log.debug("Unable to view unit test report, could not resolve configuration file for  " + project.getName());
+            return;
+        }
 
         // get path to project folder
         final VirtualFile parentFile = file.getParent();

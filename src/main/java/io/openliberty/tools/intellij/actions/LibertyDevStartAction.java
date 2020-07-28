@@ -22,10 +22,16 @@ public class LibertyDevStartAction extends AnAction {
         Logger log = Logger.getInstance(LibertyDevStartAction.class);;
 
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) return;
+        if (project == null) {
+            log.debug("Unable to start dev mode, could not resolve project");
+            return;
+        }
 
         final VirtualFile file = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-        if (file == null) return;
+        if (file == null) {
+            log.debug("Unable to start dev mode, could not resolve configuration file for  " + project.getName());
+            return;
+        }
 
         final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
         final String projectType = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_TYPE);
@@ -39,7 +45,7 @@ public class LibertyDevStartAction extends AnAction {
 
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
         if (widget == null) {
-            log.debug("Could not get or create terminal widget for " + projectName);
+            log.debug("Unable to start dev mode, could not get or create terminal widget for " + projectName);
             return;
         } else {
             LibertyActionUtil.executeCommand(widget, startCmd);
