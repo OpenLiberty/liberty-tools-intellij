@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -24,8 +25,13 @@ public class RefreshLibertyToolbar extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        Logger log = Logger.getInstance(RefreshLibertyToolbar.class);;
+
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) return;
+        if (project == null) {
+            log.debug("Unable to refresh Liberty toolbar, could not resolve project");
+            return;
+        }
 
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 

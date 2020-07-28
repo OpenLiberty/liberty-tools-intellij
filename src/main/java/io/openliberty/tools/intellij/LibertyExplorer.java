@@ -12,6 +12,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.ui.treeStructure.actions.CollapseAllAction;
+import com.intellij.ui.treeStructure.actions.ExpandAllAction;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +26,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.intellij.openapi.diagnostic.Logger;
 
@@ -38,16 +41,22 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         final ActionManager actionManager = ActionManager.getInstance();
         DefaultActionGroup actionGroup = new DefaultActionGroup("DefaultActionGroup", false);
         actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
-        actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
-        actionToolbar.setShowSeparatorTitles(true);
-        this.setToolbar(actionToolbar.getComponent());
+        actionGroup.addSeparator();
+        actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask"));
 
         // build tree
         Tree tree = buildTree(project, getBackground());
         if (tree != null) {
+            actionGroup.addSeparator();
+            actionGroup.add(new CollapseAllAction(tree));
+            actionGroup.add(new ExpandAllAction(tree));
             setContent(tree);
         }
+
+        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+        actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
+        actionToolbar.setShowSeparatorTitles(true);
+        this.setToolbar(actionToolbar.getComponent());
     }
 
     /**
@@ -57,9 +66,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
-        String projectName = null;
         ArrayList<PsiFile> mavenBuildFiles = null;
         ArrayList<PsiFile> gradleBuildFiles = null;
+        ArrayList<String> projectNames = new ArrayList<String>();
+        HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
         try {
             mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
             gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
@@ -72,6 +82,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         for (PsiFile file : mavenBuildFiles) {
+            String projectName = null;
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Maven project");
@@ -83,12 +94,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 log.error("Could not resolve project name from pom.xml", e.getMessage());
             }
             log.info("Liberty Maven Project: " + file);
-            if (projectName != null) {
-                node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_MAVEN_PROJECT);
-            } else {
-                node = new LibertyProjectNode(file, project.getName(), Constants.LIBERTY_MAVEN_PROJECT);
+            if (projectName == null) {
+                projectName = project.getName();
             }
+            node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_MAVEN_PROJECT);
+
             top.add(node);
+            projectNames.add(projectName);
+            ArrayList<Object> settings = new ArrayList<Object>();
+            settings.add(virtualFile);
+            settings.add(Constants.LIBERTY_MAVEN_PROJECT);
+            map.put(projectName, settings);
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
@@ -98,6 +114,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         }
 
         for (PsiFile file : gradleBuildFiles) {
+            String projectName = null;
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Gradle project");
@@ -109,12 +126,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 log.error("Could not resolve project name from settings.gradle", e.getMessage());
             }
             log.info("Liberty Gradle Project: " + file);
-            if (projectName != null) {
-                node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_GRADLE_PROJECT);
-            } else {
-                node = new LibertyProjectNode(file, project.getName(), Constants.LIBERTY_GRADLE_PROJECT);
+            if (projectName == null) {
+                projectName = project.getName();
             }
+            node = new LibertyProjectNode(file, project.getName(), Constants.LIBERTY_GRADLE_PROJECT);
+
             top.add(node);
+            projectNames.add(projectName);
+            ArrayList<Object> settings = new ArrayList<Object>();
+            settings.add(virtualFile);
+            settings.add(Constants.LIBERTY_GRADLE_PROJECT);
+            map.put(projectName, settings);
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
@@ -130,16 +152,16 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         DataManager.registerDataProvider(tree, newDataProvider);
         TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
 
+        treeDataProvider.setProjectMap(map);
+
         tree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 Object node = e.getPath().getLastPathComponent();
                 if (node instanceof LibertyProjectNode) {
                     LibertyProjectNode libertyNode = (LibertyProjectNode) node;
-
                     // open build file
                     FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, libertyNode.getFilePath()), true);
-
                     treeDataProvider.saveData(libertyNode.getFilePath(), libertyNode.getName(), libertyNode.getProjectType());
                 } else if (node instanceof LibertyActionNode) {
                     DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
