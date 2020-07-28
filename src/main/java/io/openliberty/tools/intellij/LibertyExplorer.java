@@ -66,7 +66,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
-        String projectName = null;
         ArrayList<PsiFile> mavenBuildFiles = null;
         ArrayList<PsiFile> gradleBuildFiles = null;
         ArrayList<String> projectNames = new ArrayList<String>();
@@ -83,6 +82,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         for (PsiFile file : mavenBuildFiles) {
+            String projectName = null;
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Maven project");
@@ -114,6 +114,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         }
 
         for (PsiFile file : gradleBuildFiles) {
+            String projectName = null;
             VirtualFile virtualFile = file.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Gradle project");
