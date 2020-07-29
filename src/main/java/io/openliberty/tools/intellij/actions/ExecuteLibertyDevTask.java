@@ -43,7 +43,6 @@ public class ExecuteLibertyDevTask extends AnAction {
 
         JComponent libertyWindow = content.getComponent();
 
-        libertyWindow.list();
         Component[] components = libertyWindow.getComponents();
 
         for (Component comp : components) {
@@ -54,7 +53,7 @@ public class ExecuteLibertyDevTask extends AnAction {
                 if (selectionPaths != null && selectionPaths.length == 1) {
                     // if one node is selected confirm that you would like to execute that task
                     String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
-                    if (Constants.ACTIONS_MAP.containsKey(lastPathComponent)) {
+                    if (Constants.getFullActionMap().containsKey(lastPathComponent)) {
                         // verify user would like to execute this action
                         final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
                         boolean confirm = ConfirmationDialog.requestForConfirmation(
@@ -64,7 +63,7 @@ public class ExecuteLibertyDevTask extends AnAction {
                                 , Constants.libertyIcon_40);
                         if (confirm) {
                             // calls action
-                            AnAction action = ActionManager.getInstance().getAction(Constants.ACTIONS_MAP.get(lastPathComponent));
+                            AnAction action = ActionManager.getInstance().getAction(Constants.getFullActionMap().get(lastPathComponent));
                             action.actionPerformed(new AnActionEvent(null,
                                     DataManager.getInstance().getDataContext(libertyTree),
                                     ActionPlaces.UNKNOWN, new Presentation(),
@@ -85,24 +84,12 @@ public class ExecuteLibertyDevTask extends AnAction {
 
     private void chooseActionToExecute(Tree libertyTree) {
         // if 0 or multiple nodes are selected display all possible nodes and allow users to select talk
-        String[] keyArray = Constants.ACTIONS_MAP.keySet().toArray(new String[Constants.ACTIONS_MAP.keySet().size()]);
-
-        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to execute"
-                , "Execute Liberty Dev Task"
-                , keyArray, keyArray[0]
-                , Constants.libertyIcon_40);
-        if (taskSelected == -1) {
-            return; // -1 indicates users cancelled dialog
-        }
-
-        String task = keyArray[taskSelected];
-
         HashMap<String, ArrayList<Object>> map = (HashMap<String, ArrayList<Object>>) DataManager.getInstance()
                 .getDataContext(libertyTree).getData(Constants.LIBERTY_PROJECT_MAP);
         String[] projectNamesArr = map.keySet().toArray(new String[map.keySet().size()]);
 
         int projectSelected = Messages.showChooseDialog(
-                "Choose a project to execute Liberty Dev " + task
+                "Choose a project to execute a Liberty Dev task on"
                 , "Choose a project"
                 , projectNamesArr, projectNamesArr[0]
                 , Constants.libertyIcon_40);
@@ -116,10 +103,29 @@ public class ExecuteLibertyDevTask extends AnAction {
         ArrayList<Object> settings = map.get(project);
         VirtualFile file = (VirtualFile) settings.get(0);
         String projectType = (String) settings.get(1);
+
+        HashMap<String, String> actionsMap = new HashMap<String, String>();
+        if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
+            actionsMap = Constants.getGradleMap();
+        } else if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+            actionsMap = Constants.getMavenMap();
+        }
+        String[] keyArray = actionsMap.keySet().toArray(new String[actionsMap.keySet().size()]);
+
+        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to execute on " + project
+                , "Execute Liberty Dev Task"
+                , keyArray, keyArray[0]
+                , Constants.libertyIcon_40);
+        if (taskSelected == -1) {
+            return; // -1 indicates users cancelled dialog
+        }
+
+        String task = keyArray[taskSelected];
+
         treeDataProvider.saveData(file, project, projectType);
 
         // execute selected task on selected project
-        AnAction action = ActionManager.getInstance().getAction(Constants.ACTIONS_MAP.get(task));
+        AnAction action = ActionManager.getInstance().getAction(actionsMap.get(task));
         action.actionPerformed(new AnActionEvent(null,
                 DataManager.getInstance().getDataContext(libertyTree),
                 ActionPlaces.UNKNOWN, new Presentation(),
