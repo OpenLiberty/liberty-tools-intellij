@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.treeStructure.Tree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,8 @@ public class TreeDataProvider implements DataProvider {
     public VirtualFile currentFile;
     public String projectName;
     public String projectType;
-    HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
+    public HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
+    public Tree tree;
 
     @Nullable
     @Override
@@ -26,6 +28,8 @@ public class TreeDataProvider implements DataProvider {
             return this.projectType;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_MAP)) {
             return this.map;
+        } else if (dataId.equals(Constants.LIBERTY_DASHBOARD_TREE)) {
+            return this.tree;
         }
         return null;
     }
@@ -40,5 +44,8 @@ public class TreeDataProvider implements DataProvider {
         this.map = map;
     }
 
+    public void setTreeOnRefresh(@NotNull Tree tree) {
+        this.tree = tree;
+    }
 
 }

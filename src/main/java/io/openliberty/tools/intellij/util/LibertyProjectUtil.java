@@ -12,10 +12,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
 import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
-import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-import org.jetbrains.plugins.terminal.TerminalTabState;
-import org.jetbrains.plugins.terminal.TerminalView;
+import org.jetbrains.plugins.terminal.*;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -64,11 +61,11 @@ public class LibertyProjectUtil {
         } else if (createWidget) {
             // create a new terminal tab
             TerminalView terminalView = TerminalView.getInstance(project);
-            AbstractTerminalRunner terminalRunner = terminalView.getTerminalRunner();
+            LocalTerminalDirectRunner terminalRun = new LocalTerminalDirectRunner(project);
             TerminalTabState tabState = new TerminalTabState();
             tabState.myTabName = projectName;
             tabState.myWorkingDirectory = project.getBasePath();
-            terminalView.createNewSession(terminalRunner, tabState);
+            terminalView.createNewSession(terminalRun, tabState);
             return getTerminalWidget(terminalWindow, projectName);
         }
         return null;

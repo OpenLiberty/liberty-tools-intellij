@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
@@ -12,8 +13,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.treeStructure.Tree;
-import com.intellij.ui.treeStructure.actions.CollapseAllAction;
-import com.intellij.ui.treeStructure.actions.ExpandAllAction;
+import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +28,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.intellij.openapi.diagnostic.Logger;
-
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private static Logger log;
 
@@ -37,26 +35,27 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         super(true, true);
         log = Logger.getInstance(LibertyExplorer.class);
 
-        // create ActionToolBar
-        final ActionManager actionManager = ActionManager.getInstance();
-        DefaultActionGroup actionGroup = new DefaultActionGroup("DefaultActionGroup", false);
-        actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
-        actionGroup.addSeparator();
-        actionGroup.add(ActionManager.getInstance().getAction("io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask"));
-
         // build tree
         Tree tree = buildTree(project, getBackground());
+
         if (tree != null) {
-            actionGroup.addSeparator();
-            actionGroup.add(new CollapseAllAction(tree));
-            actionGroup.add(new ExpandAllAction(tree));
-            setContent(tree);
+            this.setContent(tree);
         }
 
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+        ActionToolbar actionToolbar = buildActionToolbar(tree);
+        this.setToolbar(actionToolbar.getComponent());
+    }
+
+    public static ActionToolbar buildActionToolbar(Tree tree) {
+        // create ActionToolBar
+        final ActionManager actionManager = ActionManager.getInstance();
+        LibertyToolbarActionGroup libertyActionGroup = new LibertyToolbarActionGroup(tree);
+
+        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, libertyActionGroup, true);
         actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
         actionToolbar.setShowSeparatorTitles(true);
-        this.setToolbar(actionToolbar.getComponent());
+        actionToolbar.getComponent().setName(Constants.LIBERTY_ACTION_TOOLBAR);
+        return actionToolbar;
     }
 
     /**
@@ -66,6 +65,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
+
         ArrayList<PsiFile> mavenBuildFiles = null;
         ArrayList<PsiFile> gradleBuildFiles = null;
         ArrayList<String> projectNames = new ArrayList<String>();
@@ -78,8 +79,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     e.getMessage());
             return null;
         }
-
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         for (PsiFile file : mavenBuildFiles) {
             String projectName = null;
@@ -264,6 +263,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         newRenderer.setBackgroundNonSelectionColor(backgroundColor);
 
         tree.setCellRenderer(newRenderer);
+
+        treeDataProvider.setTreeOnRefresh(tree);
         return tree;
     }
 

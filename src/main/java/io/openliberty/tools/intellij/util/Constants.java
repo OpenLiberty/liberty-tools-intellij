@@ -4,7 +4,6 @@ import com.intellij.openapi.util.IconLoader;
 
 import javax.swing.*;
 import java.util.HashMap;
-import java.util.Map;
 
 public final class Constants {
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty Dev Dashboard";
@@ -36,6 +35,8 @@ public final class Constants {
     public static final String LIBERTY_PROJECT_NAME = "LIBERTY_PROJECT_NAME";
     public static final String LIBERTY_PROJECT_TYPE = "LIBERTY_PROJECT_TYPE";
     public static final String LIBERTY_PROJECT_MAP = "LIBERTY_PROJECT_MAP";
+    public static final String LIBERTY_DASHBOARD_TREE = "LIBERTY_DASHBOARD_TREE";
+    public static final String LIBERTY_ACTION_TOOLBAR = "LIBERTY_ACTION_TOOLBAR";
 
     /**
      * Constants for Action IDs
@@ -50,16 +51,36 @@ public final class Constants {
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
     public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
 
-    public static final Map<String, String> ACTIONS_MAP = new HashMap<String, String>() {
+    private static HashMap<String, String> CORE_ACTIONS_MAP = new HashMap<String, String>() {
         {
             put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
             put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
             put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
             put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
-            put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-            put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-            put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
         }
     };
 
+    public static HashMap<String, String> getFullActionMap() {
+        HashMap<String, String> fullActionsMap = new HashMap<String, String>();
+        fullActionsMap.putAll(CORE_ACTIONS_MAP);
+        fullActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
+        fullActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+        fullActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+        return fullActionsMap;
+    }
+
+    public static HashMap<String, String> getMavenMap() {
+        HashMap<String, String> mavenActionsMap = new HashMap<String, String>();
+        mavenActionsMap.putAll(CORE_ACTIONS_MAP);
+        mavenActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
+        mavenActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+        return mavenActionsMap;
+    }
+
+    public static HashMap<String, String> getGradleMap() {
+        HashMap<String, String> gradleActionsMap = new HashMap<String, String>();
+        gradleActionsMap.putAll(CORE_ACTIONS_MAP);
+        gradleActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+        return gradleActionsMap;
+    }
 }
