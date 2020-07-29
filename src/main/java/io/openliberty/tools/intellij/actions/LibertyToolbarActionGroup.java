@@ -10,9 +10,10 @@ import io.openliberty.tools.intellij.util.Constants;
 
 public class LibertyToolbarActionGroup extends DefaultActionGroup {
 
-    CollapseAllAction collapseAction;
-    ExpandAllAction expandAction;
-    Tree tree;
+    private CollapseAllAction collapseAction;
+    private ExpandAllAction expandAction;
+    private Tree tree;
+
     public LibertyToolbarActionGroup(Tree tree) {
         super("LibertyActionToolBar", false);
         this.tree = tree;
