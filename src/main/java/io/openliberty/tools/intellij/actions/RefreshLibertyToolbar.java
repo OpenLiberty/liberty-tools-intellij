@@ -1,12 +1,12 @@
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.ide.DataManager;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
@@ -14,7 +14,6 @@ import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.TreeDataProvider;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -43,6 +42,8 @@ public class RefreshLibertyToolbar extends AnAction {
 
         Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
 
+        SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
+
         JComponent libertyWindow = content.getComponent();
 
         Component[] components = libertyWindow.getComponents();
@@ -60,18 +61,15 @@ public class RefreshLibertyToolbar extends AnAction {
 
         if (existingTree != null && existingActionToolbar != null) {
             Tree tree = LibertyExplorer.buildTree(project, content.getComponent().getBackground());
+            ActionToolbar actionToolbar = LibertyExplorer.buildActionToolbar(tree);
 
-            ActionToolbar actionToolbar = (ActionToolbar) existingActionToolbar;
+            simpleToolWindowPanel.remove(existingActionToolbar);
+            simpleToolWindowPanel.remove(existingTree);
 
-            libertyWindow.remove(existingTree);
-            libertyWindow.add(tree, BorderLayout.CENTER);
-            libertyWindow.revalidate();
-            libertyWindow.repaint();
-
-            TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
-            treeDataProvider.setTreeOnRefresh(tree);
-            actionToolbar.updateActionsImmediately();
-            actionToolbar.setShowSeparatorTitles(true);
+            simpleToolWindowPanel.setToolbar(actionToolbar.getComponent());
+            simpleToolWindowPanel.setContent(tree);
+            simpleToolWindowPanel.revalidate();
+            simpleToolWindowPanel.repaint();
         }
     }
 }
