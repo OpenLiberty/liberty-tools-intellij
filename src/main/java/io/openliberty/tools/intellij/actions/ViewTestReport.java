@@ -31,11 +31,6 @@ import java.util.stream.Stream;
 public class ViewTestReport extends AnAction {
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-        super.update(e);
-    }
-
-    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Logger log = Logger.getInstance(ViewTestReport.class);;
 

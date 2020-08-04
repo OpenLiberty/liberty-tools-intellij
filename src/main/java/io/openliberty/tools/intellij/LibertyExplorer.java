@@ -264,7 +264,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         tree.setCellRenderer(newRenderer);
 
-        treeDataProvider.setTreeOnRefresh(tree);
         return tree;
     }
 

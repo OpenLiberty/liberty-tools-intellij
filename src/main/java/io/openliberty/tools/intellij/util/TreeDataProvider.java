@@ -15,7 +15,6 @@ public class TreeDataProvider implements DataProvider {
     public String projectName;
     public String projectType;
     public HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
-    public Tree tree;
 
     @Nullable
     @Override
@@ -28,8 +27,6 @@ public class TreeDataProvider implements DataProvider {
             return this.projectType;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_MAP)) {
             return this.map;
-        } else if (dataId.equals(Constants.LIBERTY_DASHBOARD_TREE)) {
-            return this.tree;
         }
         return null;
     }
@@ -43,9 +40,4 @@ public class TreeDataProvider implements DataProvider {
     public void setProjectMap(@NotNull HashMap<String, ArrayList<Object>> map) {
         this.map = map;
     }
-
-    public void setTreeOnRefresh(@NotNull Tree tree) {
-        this.tree = tree;
-    }
-
 }
