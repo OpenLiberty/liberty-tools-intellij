@@ -14,11 +14,6 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 public class ViewEffectivePom extends AnAction {
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-        super.update(e);
-    }
-
-    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Logger log = Logger.getInstance(ViewEffectivePom.class);
 

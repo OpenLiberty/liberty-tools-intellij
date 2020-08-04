@@ -21,11 +21,6 @@ import java.nio.file.Paths;
 public class ViewUnitTestReport extends AnAction {
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-        super.update(e);
-    }
-
-    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Logger log = Logger.getInstance(ViewUnitTestReport.class);;
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());

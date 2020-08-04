@@ -1,7 +1,6 @@
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.ui.treeStructure.actions.CollapseAllAction;
@@ -27,10 +26,4 @@ public class LibertyToolbarActionGroup extends DefaultActionGroup {
         add(this.collapseAction);
         add(this.expandAction);
     }
-
-    @Override
-    public void update(AnActionEvent event) {
-        super.update(event);
-    }
-
 }
