@@ -12,10 +12,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -23,8 +25,10 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
+import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -40,6 +44,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         if (tree != null) {
             this.setContent(tree);
+        } else {
+            JBTextArea jbTextArea = new JBTextArea("No Liberty Maven or Liberty Gradle projects detected in this workspace.");
+            jbTextArea.setEditable(false);
+            jbTextArea.setBackground(getBackground());
+            jbTextArea.setLineWrap(true);
+
+            this.setContent(jbTextArea);
         }
 
         ActionToolbar actionToolbar = buildActionToolbar(tree);
@@ -67,16 +78,20 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public static Tree buildTree(Project project, Color backgroundColor) {
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
-        ArrayList<PsiFile> mavenBuildFiles = null;
-        ArrayList<PsiFile> gradleBuildFiles = null;
+        ArrayList<PsiFile> mavenBuildFiles;
+        ArrayList<PsiFile> gradleBuildFiles;
         ArrayList<String> projectNames = new ArrayList<String>();
         HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
         try {
             mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
             gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
-        } catch (Exception e) {
+        } catch (IOException | SAXException | ParserConfigurationException e) {
             log.error("Could not find Open Liberty Maven or Gradle projects in workspace",
                     e.getMessage());
+            return null;
+        }
+
+        if (mavenBuildFiles.isEmpty() && gradleBuildFiles.isEmpty()) {
             return null;
         }
 
