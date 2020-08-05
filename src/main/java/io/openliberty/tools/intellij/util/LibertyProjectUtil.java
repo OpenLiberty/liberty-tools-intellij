@@ -13,7 +13,10 @@ import com.intellij.terminal.JBTerminalWidget;
 import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
 import org.jetbrains.plugins.terminal.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -30,7 +33,7 @@ public class LibertyProjectUtil {
      * @param project
      * @return ArrayList of PsiFiles
      */
-    public static ArrayList<PsiFile> getGradleBuildFiles(Project project) {
+    public static ArrayList<PsiFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT);
     }
 
@@ -39,7 +42,7 @@ public class LibertyProjectUtil {
      * @param project
      * @return ArrayList of PsiFiles
      */
-    public static ArrayList<PsiFile> getMavenBuildFiles(Project project) {
+    public static ArrayList<PsiFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT);
     }
 
@@ -72,18 +75,14 @@ public class LibertyProjectUtil {
     }
 
     // returns valid build files for the current project
-    private static ArrayList<PsiFile> getBuildFiles(Project project, String buildFileType) {
+    private static ArrayList<PsiFile> getBuildFiles(Project project, String buildFileType) throws ParserConfigurationException, SAXException, IOException {
         ArrayList<PsiFile> buildFiles = new ArrayList<PsiFile>();
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             PsiFile[] mavenFiles = FilenameIndex.getFilesByName(project, "pom.xml", GlobalSearchScope.projectScope(project));
             for (int i = 0; i < mavenFiles.length; i++) {
-                try {
-                    if (LibertyMavenUtil.validPom(mavenFiles[i])) {
-                        buildFiles.add(mavenFiles[i]);
-                    }
-                } catch (Exception e) {
-                    log.error("Error parsing pom.xml", e.getMessage());
+                if (LibertyMavenUtil.validPom(mavenFiles[i])) {
+                    buildFiles.add(mavenFiles[i]);
                 }
             }
         } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {

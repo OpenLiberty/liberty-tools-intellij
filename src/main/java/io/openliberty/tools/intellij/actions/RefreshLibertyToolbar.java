@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
@@ -54,15 +55,24 @@ public class RefreshLibertyToolbar extends AnAction {
             }
         }
 
-        if (existingTree != null && existingActionToolbar != null) {
+        if (existingActionToolbar != null) {
             Tree tree = LibertyExplorer.buildTree(project, content.getComponent().getBackground());
             ActionToolbar actionToolbar = LibertyExplorer.buildActionToolbar(tree);
-
             simpleToolWindowPanel.remove(existingActionToolbar);
-            simpleToolWindowPanel.remove(existingTree);
 
+            if (existingTree != null) {
+                simpleToolWindowPanel.remove(existingTree);
+            }
             simpleToolWindowPanel.setToolbar(actionToolbar.getComponent());
-            simpleToolWindowPanel.setContent(tree);
+            if (tree != null) {
+                simpleToolWindowPanel.setContent(tree);
+            } else {
+                JBTextArea jbTextArea = new JBTextArea("No Liberty Maven or Liberty Gradle projects detected in this workspace.");
+                jbTextArea.setEditable(false);
+                jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
+                jbTextArea.setLineWrap(true);
+                simpleToolWindowPanel.setContent(jbTextArea);
+            }
             simpleToolWindowPanel.revalidate();
             simpleToolWindowPanel.repaint();
         }
