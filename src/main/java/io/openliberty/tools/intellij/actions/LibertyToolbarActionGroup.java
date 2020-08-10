@@ -18,7 +18,7 @@ public class LibertyToolbarActionGroup extends DefaultActionGroup {
         final ActionManager actionManager = ActionManager.getInstance();
         add(actionManager.getAction("io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"));
         addSeparator();
-        add(actionManager.getAction("io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask"));
+        add(actionManager.getAction("io.openliberty.tools.intellij.actions.RunLibertyDevTask"));
         addSeparator();
 
         this.collapseAction = new CollapseAllAction(tree);

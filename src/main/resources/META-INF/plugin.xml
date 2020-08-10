@@ -71,8 +71,8 @@
                 class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty Dev Dashboard"
                 description="Refresh Liberty Dev Dashboard projects" icon="AllIcons.Actions.Refresh"/>
 
-        <action id="io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask"
-                class="io.openliberty.tools.intellij.actions.ExecuteLibertyDevTask" text="Execute Liberty Dev Task"
+        <action id="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
+                class="io.openliberty.tools.intellij.actions.RunLibertyDevTask" text="Run Liberty Dev Task"
                 description="Execute the selected liberty dev task" icon="AllIcons.Actions.Execute"/>
 
     </actions>
