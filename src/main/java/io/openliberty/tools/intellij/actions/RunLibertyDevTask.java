@@ -23,11 +23,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ExecuteLibertyDevTask extends AnAction {
+public class RunLibertyDevTask extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        Logger log = Logger.getInstance(ExecuteLibertyDevTask.class);
+        Logger log = Logger.getInstance(RunLibertyDevTask.class);
 
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
@@ -46,14 +46,14 @@ public class ExecuteLibertyDevTask extends AnAction {
 
                 TreePath[] selectionPaths = libertyTree.getSelectionPaths();
                 if (selectionPaths != null && selectionPaths.length == 1) {
-                    // if one node is selected confirm that you would like to execute that task
+                    // if one node is selected confirm that you would like to run that task
                     String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
                     if (Constants.getFullActionMap().containsKey(lastPathComponent)) {
-                        // verify user would like to execute this action
+                        // verify user would like to run this action
                         final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
                         boolean confirm = ConfirmationDialog.requestForConfirmation(
                                 VcsShowConfirmationOption.STATIC_SHOW_CONFIRMATION, project
-                                , "Execute Liberty Dev " + lastPathComponent + " on " + projectName + "?"
+                                , "Run Liberty Dev " + lastPathComponent + " on " + projectName + "?"
                                 , "Confirm Liberty Dev " + lastPathComponent
                                 , Constants.libertyIcon_40);
                         if (confirm) {
@@ -65,26 +65,26 @@ public class ExecuteLibertyDevTask extends AnAction {
                                     ActionManager.getInstance(), 0));
                         }
                     } else {
-                        // if node selected is not an action show dialog to choose action to execute
-                        chooseActionToExecute(libertyTree);
+                        // if node selected is not an action show dialog to choose action to run
+                        chooseActionToRun(libertyTree);
                     }
                 } else {
-                    chooseActionToExecute(libertyTree);
+                    chooseActionToRun(libertyTree);
                 }
             } else {
-                log.debug("Tree view not built, no valid projects to execute Liberty Dev actions on");
+                log.debug("Tree view not built, no valid projects to Run Liberty Dev actions on");
             }
         }
     }
 
-    private void chooseActionToExecute(Tree libertyTree) {
+    private void chooseActionToRun(Tree libertyTree) {
         // if 0 or multiple nodes are selected display all possible nodes and allow users to select talk
         HashMap<String, ArrayList<Object>> map = (HashMap<String, ArrayList<Object>>) DataManager.getInstance()
                 .getDataContext(libertyTree).getData(Constants.LIBERTY_PROJECT_MAP);
         String[] projectNamesArr = map.keySet().toArray(new String[map.keySet().size()]);
 
         int projectSelected = Messages.showChooseDialog(
-                "Choose a project to execute a Liberty Dev task on"
+                "Choose a project to run a Liberty Dev task on"
                 , "Choose a project"
                 , projectNamesArr, projectNamesArr[0]
                 , Constants.libertyIcon_40);
@@ -107,8 +107,8 @@ public class ExecuteLibertyDevTask extends AnAction {
         }
         String[] keyArray = actionsMap.keySet().toArray(new String[actionsMap.keySet().size()]);
 
-        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to execute on " + project
-                , "Execute Liberty Dev Task"
+        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to run on " + project
+                , "Run Liberty Dev Task"
                 , keyArray, keyArray[0]
                 , Constants.libertyIcon_40);
         if (taskSelected == -1) {
@@ -119,7 +119,7 @@ public class ExecuteLibertyDevTask extends AnAction {
 
         treeDataProvider.saveData(file, project, projectType);
 
-        // execute selected task on selected project
+        // run selected task on selected project
         AnAction action = ActionManager.getInstance().getAction(actionsMap.get(task));
         action.actionPerformed(new AnActionEvent(null,
                 DataManager.getInstance().getDataContext(libertyTree),

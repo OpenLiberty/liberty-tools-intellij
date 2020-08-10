@@ -49,7 +49,7 @@ Developing this extension using the built-in [gradle-intellij-plugin](https://gi
 
 1. Clone this repository: `git clone git@github.com:OpenLiberty/open-liberty-tools-intellij.git`
 2. Import this repository as a gradle project in IntelliJ IDEA
-3. Run `./gradlew buildPlugin` to build a `.zip` that can be imported as gradle plugin or execute the following Gradle task to build and execute an IntelliJ instance:
+3. Run `./gradlew buildPlugin` to build a `.zip` that can be imported as gradle plugin or run the following Gradle task to build and run an IntelliJ instance:
 `./gradlew runIde`
 
 ## Issues
