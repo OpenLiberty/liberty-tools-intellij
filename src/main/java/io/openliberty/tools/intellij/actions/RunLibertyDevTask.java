@@ -50,7 +50,10 @@ public class RunLibertyDevTask extends AnAction {
                     String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
                     if (Constants.getFullActionMap().containsKey(lastPathComponent)) {
                         // verify user would like to run this action
-                        final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
+                        String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
+                        if (projectName == null) {
+                            projectName = project.getName();
+                        }
                         boolean confirm = ConfirmationDialog.requestForConfirmation(
                                 VcsShowConfirmationOption.STATIC_SHOW_CONFIRMATION, project
                                 , "Run Liberty Dev " + lastPathComponent + " on " + projectName + "?"
