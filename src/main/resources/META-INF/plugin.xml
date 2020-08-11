@@ -25,6 +25,8 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.plugins.terminal</depends>
 
+    <idea-version since-build="193" until-build="193.*"/>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty Dev Dashboard" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
