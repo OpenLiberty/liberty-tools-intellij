@@ -12,16 +12,19 @@ public final class Constants {
 
     public static final String LIBERTY_DEV_START = "Start";
     public static final String LIBERTY_DEV_CUSTOM_START = "Start...";
+    public static final String LIBERTY_DEV_START_CONTAINER = "Start in container (tech preview)";
     public static final String LIBERTY_DEV_STOP = "Stop";
     public static final String LIBERTY_DEV_TESTS = "Run Tests";
 
     // Maven
     public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";
     public static final String VIEW_UNIT_TEST_REPORT = "View unit test report";
+    public static final double LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = 3.3;
 
     // Gradle
     public static final String VIEW_GRADLE_TEST_REPORT = "View test report";
     public static final String TEST_REPORT_STRING = "Test Summary";
+    public static final double LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = 3.1;
 
     public static final String LIBERTY_TREE = "LibertyTree";
 
@@ -43,6 +46,7 @@ public final class Constants {
      */
     public static final String LIBERTY_DEV_START_ACTION_ID = "io.openliberty.tools.intellij.actions.LibertyDevStartAction";
     public static final String LIBERTY_DEV_CUSTOM_START_ACTION_ID = "io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction";
+    public static final String LIBERTY_DEV_START_CONTAINER_ACTION_ID = "io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction";
     public static final String LIBERTY_DEV_STOP_ACTION_ID = "io.openliberty.tools.intellij.actions.LibertyDevStopAction";
     public static final String LIBERTY_DEV_TESTS_ACTION_ID = "io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction";
     public static final String VIEW_INTEGRATION_TEST_REPORT_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewIntegrationTestReport";
@@ -56,6 +60,7 @@ public final class Constants {
             put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
             put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
             put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
+            put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
             put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
         }
     };

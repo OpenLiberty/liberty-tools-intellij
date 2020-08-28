@@ -71,12 +71,13 @@ public class LibertyGradleUtil {
      * Check if a Gradle build file is using the liberty gradle plugin
      *
      * @param file build.gradle file
-     * @return true if the liberty gradle plugin is detected in the build.gradle
+     * @return BuildFile, validBuildFile true if using the liberty gradle plugin,
+     * validContainerVersion true if plugin version is valid for dev mode in containers
      * @throws IOException
      */
-    public static boolean validBuildGradle(PsiFile file) throws IOException {
+    public static BuildFile validBuildGradle(PsiFile file) throws IOException {
             String buildFile = fileToString(file.getVirtualFile().getCanonicalPath());
-            if (buildFile.isEmpty()) { return false; }
+            if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
 
             // check if "apply plugin: 'liberty'" is specified in the build.gradle
             boolean libertyPlugin = false;
@@ -104,10 +105,39 @@ public class LibertyGradleUtil {
                     Pattern pattern2 = Pattern.compile(regex2);
                     Matcher matcher2 = pattern2.matcher(sub);
                     while (matcher2.find()) {
-                        return true;
+                        String plugin = sub.substring(matcher2.start(), matcher2.end());
+                        boolean vaildContainerVersion = containerVersion(plugin);
+
+                        return (new BuildFile(true, vaildContainerVersion));
                     }
                 }
             }
+        return (new BuildFile(false, false));
+    }
+
+    /**
+     * Given the plugin object as a string, use a regex to
+     * get the version.
+     *
+     * @param plugin plugin object as a string
+     * @return true if liberty-gradle-plugin is compatible for dev mode with containers
+     */
+    private static boolean containerVersion(String plugin) {
+        // get the version from the plugin
+        String versionRegex = "(?<=:liberty-gradle-plugin:).*";
+        Pattern versionPattern = Pattern.compile(versionRegex);
+        Matcher versionMatcher = versionPattern.matcher(plugin);
+        while (versionMatcher.find()) {
+            try {
+                String version = plugin.substring(versionMatcher.start(), versionMatcher.end());
+                Double versionPrefix = Double.parseDouble(version.substring(0, 3));
+                if (versionPrefix >= Constants.LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION) {
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
         return false;
     }
 

@@ -31,18 +31,18 @@ public class LibertyProjectUtil {
     /**
      * Returns a list of valid Gradle build files in the project
      * @param project
-     * @return ArrayList of PsiFiles
+     * @return ArrayList of BuildFiles
      */
-    public static ArrayList<PsiFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+    public static ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT);
     }
 
     /**
      * Returns a list of valid Maven build files in the project
      * @param project
-     * @return ArrayList of PsiFiles
+     * @return ArrayList of BuildFiles
      */
-    public static ArrayList<PsiFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+    public static ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT);
     }
 
@@ -75,22 +75,26 @@ public class LibertyProjectUtil {
     }
 
     // returns valid build files for the current project
-    private static ArrayList<PsiFile> getBuildFiles(Project project, String buildFileType) throws ParserConfigurationException, SAXException, IOException {
-        ArrayList<PsiFile> buildFiles = new ArrayList<PsiFile>();
+    private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType) throws ParserConfigurationException, SAXException, IOException {
+        ArrayList<BuildFile> buildFiles = new ArrayList<BuildFile>();
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             PsiFile[] mavenFiles = FilenameIndex.getFilesByName(project, "pom.xml", GlobalSearchScope.projectScope(project));
             for (int i = 0; i < mavenFiles.length; i++) {
-                if (LibertyMavenUtil.validPom(mavenFiles[i])) {
-                    buildFiles.add(mavenFiles[i]);
+                BuildFile buildFile = LibertyMavenUtil.validPom(mavenFiles[i]);
+                if (buildFile.isValidBuildFile()) {
+                    buildFile.setBuildFile(mavenFiles[i]);
+                    buildFiles.add(buildFile);
                 }
             }
         } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
             PsiFile[] gradleFiles = FilenameIndex.getFilesByName(project, "build.gradle", GlobalSearchScope.projectScope(project));
             for (int i = 0; i < gradleFiles.length; i++) {
                 try {
-                    if (LibertyGradleUtil.validBuildGradle(gradleFiles[i])) {
-                        buildFiles.add(gradleFiles[i]);
+                    BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFiles[i]);
+                    if (buildFile.isValidBuildFile()) {
+                        buildFile.setBuildFile(gradleFiles[i]);
+                        buildFiles.add(buildFile);
                     }
                 } catch (Exception e) {
                     log.error("Error parsing build.gradle", e.getMessage());
