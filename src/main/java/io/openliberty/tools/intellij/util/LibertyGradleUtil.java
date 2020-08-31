@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class LibertyGradleUtil {
     private static Logger log = Logger.getInstance(LibertyGradleUtil.class);;
@@ -124,17 +125,19 @@ public class LibertyGradleUtil {
      */
     private static boolean containerVersion(String plugin) {
         // get the version from the plugin
-        String versionRegex = "(?<=:liberty-gradle-plugin:).*";
+        String versionRegex = "(?<=:liberty-gradle-plugin:).*(?=\')";
         Pattern versionPattern = Pattern.compile(versionRegex);
         Matcher versionMatcher = versionPattern.matcher(plugin);
         while (versionMatcher.find()) {
             try {
                 String version = plugin.substring(versionMatcher.start(), versionMatcher.end());
-                Double versionPrefix = Double.parseDouble(version.substring(0, 3));
-                if (versionPrefix >= Constants.LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION) {
+                ComparableVersion pluginVersion = new ComparableVersion(version);
+                ComparableVersion containerVersion = new ComparableVersion(Constants.LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION);
+                if (pluginVersion.compareTo(containerVersion) >= 0) {
                     return true;
                 }
-            } catch (NumberFormatException e) {
+                return false;
+            } catch (NullPointerException | ClassCastException e) {
                 return false;
             }
         }

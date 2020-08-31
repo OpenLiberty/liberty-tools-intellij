@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class LibertyMavenUtil {
 
@@ -160,13 +161,13 @@ public class LibertyMavenUtil {
             if (version.isEmpty()) {
                 return true;
             }
-            String versionPrefix = version.substring(0,3);
-            Double versionDouble = Double.parseDouble(versionPrefix);
-            if (versionDouble >= Constants.LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION) {
+            ComparableVersion pluginVersion = new ComparableVersion(version);
+            ComparableVersion containerVersion = new ComparableVersion(Constants.LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION);
+            if (pluginVersion.compareTo(containerVersion) >= 0) {
                 return true;
             }
             return false;
-        } catch (NumberFormatException e) {
+        } catch (NullPointerException | ClassCastException e) {
             return false;
         }
     }

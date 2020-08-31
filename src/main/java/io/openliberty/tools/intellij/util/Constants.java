@@ -19,12 +19,12 @@ public final class Constants {
     // Maven
     public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";
     public static final String VIEW_UNIT_TEST_REPORT = "View unit test report";
-    public static final double LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = 3.3;
+    public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
 
     // Gradle
     public static final String VIEW_GRADLE_TEST_REPORT = "View test report";
     public static final String TEST_REPORT_STRING = "Test Summary";
-    public static final double LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = 3.1;
+    public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
 
     public static final String LIBERTY_TREE = "LibertyTree";
 
