@@ -41,6 +41,10 @@
                 class="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction" text="Start..."
                 description="Custom Start Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />
 
+        <action id="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
+                class="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction" text="Start in container (tech preview)"
+                description="Start Liberty Dev on current build file in a container (tech preview)" icon="AllIcons.General.GearPlain" />
+
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStopAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevStopAction" text="Stop"
                 description="Stop Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />

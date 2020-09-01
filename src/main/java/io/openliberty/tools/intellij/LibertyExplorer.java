@@ -78,8 +78,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public static Tree buildTree(Project project, Color backgroundColor) {
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
-        ArrayList<PsiFile> mavenBuildFiles;
-        ArrayList<PsiFile> gradleBuildFiles;
+        ArrayList<BuildFile> mavenBuildFiles;
+        ArrayList<BuildFile> gradleBuildFiles;
         ArrayList<String> projectNames = new ArrayList<String>();
         HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
         try {
@@ -95,9 +95,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             return null;
         }
 
-        for (PsiFile file : mavenBuildFiles) {
+        for (BuildFile buildFile : mavenBuildFiles) {
+            PsiFile psiFile = buildFile.getBuildFile();
             String projectName = null;
-            VirtualFile virtualFile = file.getVirtualFile();
+            VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Maven project");
             }
@@ -107,11 +108,12 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             } catch (Exception e) {
                 log.error("Could not resolve project name from pom.xml", e.getMessage());
             }
-            log.info("Liberty Maven Project: " + file);
+            log.info("Liberty Maven Project: " + psiFile);
             if (projectName == null) {
                 projectName = project.getName();
             }
-            node = new LibertyProjectNode(file, projectName, Constants.LIBERTY_MAVEN_PROJECT);
+            boolean validContainerVersion = buildFile.isValidContainerVersion();
+            node = new LibertyProjectNode(psiFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion);
 
             top.add(node);
             projectNames.add(projectName);
@@ -121,15 +123,23 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             map.put(projectName, settings);
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+
+            // check if Liberty Maven Plugin is 3.3-M1+
+            // if version is not specified in pom, assume latest version as downloaded from maven central
+            if (validContainerVersion){
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+            }
+
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
             node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT));
             node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT));
         }
 
-        for (PsiFile file : gradleBuildFiles) {
+        for (BuildFile buildFile : gradleBuildFiles) {
+            PsiFile psiFile = buildFile.getBuildFile();
             String projectName = null;
-            VirtualFile virtualFile = file.getVirtualFile();
+            VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
                 log.error("Could not resolve current Gradle project");
             }
@@ -139,11 +149,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             } catch (Exception e) {
                 log.error("Could not resolve project name from settings.gradle", e.getMessage());
             }
-            log.info("Liberty Gradle Project: " + file);
+            log.info("Liberty Gradle Project: " + psiFile);
             if (projectName == null) {
                 projectName = project.getName();
             }
-            node = new LibertyProjectNode(file, project.getName(), Constants.LIBERTY_GRADLE_PROJECT);
+            node = new LibertyProjectNode(psiFile, project.getName(), Constants.LIBERTY_GRADLE_PROJECT, buildFile.isValidContainerVersion());
 
             top.add(node);
             projectNames.add(projectName);
@@ -153,6 +163,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             map.put(projectName, settings);
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+
+            // check if Liberty Gradle Plugin is 3.1-M1+
+            // TODO: handle version specified in a gradle.setings file
+            if (buildFile.isValidContainerVersion()) {
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+            }
+
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
             node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT));
@@ -211,6 +228,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         }
                         AnAction startAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
                         group.add(startAction);
+                        if (libertyNode.isValidContainerVersion()){
+                            AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
+                            group.add(customStartAction);
+                        }
                         AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
                         group.add(customStartAction);
                         AnAction stopAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
@@ -237,6 +258,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
                         // calls action on double click
                         am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                                ActionPlaces.UNKNOWN, new Presentation(),
+                                ActionManager.getInstance(), 0));
+                    }  else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
+                        am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                                 ActionPlaces.UNKNOWN, new Presentation(),
                                 ActionManager.getInstance(), 0));
                     } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
@@ -281,6 +306,5 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         return tree;
     }
-
 
 }

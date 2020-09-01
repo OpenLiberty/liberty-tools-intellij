@@ -10,12 +10,14 @@ public class LibertyProjectNode extends DefaultMutableTreeNode {
     public VirtualFile path;
     public String name;
     public String projectType;
+    public boolean validContainerVersion;
 
-    public LibertyProjectNode(PsiFile file, String name, String projectType) {
+    public LibertyProjectNode(PsiFile file, String name, String projectType, boolean validContainerVersion) {
         super(name);
         this.name = name;
         this.projectType = projectType;
         this.path = file.getVirtualFile();
+        this.validContainerVersion = validContainerVersion;
     }
 
     public String getName() {
@@ -27,4 +29,6 @@ public class LibertyProjectNode extends DefaultMutableTreeNode {
     }
 
     public String getProjectType() { return this.projectType; }
+
+    public boolean isValidContainerVersion() { return this.validContainerVersion; }
 }
