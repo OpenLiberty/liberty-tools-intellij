@@ -56,8 +56,8 @@ public class RunLibertyDevTask extends AnAction {
                         }
                         boolean confirm = ConfirmationDialog.requestForConfirmation(
                                 VcsShowConfirmationOption.STATIC_SHOW_CONFIRMATION, project
-                                , "Run Liberty Dev " + lastPathComponent + " on " + projectName + "?"
-                                , "Confirm Liberty Dev " + lastPathComponent
+                                , lastPathComponent + " Liberty on " + projectName + "?"
+                                , "Confirm Liberty " + lastPathComponent
                                 , Constants.libertyIcon_40);
                         if (confirm) {
                             // calls action
@@ -87,7 +87,7 @@ public class RunLibertyDevTask extends AnAction {
         String[] projectNamesArr = map.keySet().toArray(new String[map.keySet().size()]);
 
         int projectSelected = Messages.showChooseDialog(
-                "Choose a project to run a Liberty Dev task on"
+                "Choose a project to run a Liberty task on"
                 , "Choose a project"
                 , projectNamesArr, projectNamesArr[0]
                 , Constants.libertyIcon_40);
@@ -110,8 +110,8 @@ public class RunLibertyDevTask extends AnAction {
         }
         String[] keyArray = actionsMap.keySet().toArray(new String[actionsMap.keySet().size()]);
 
-        int taskSelected = Messages.showChooseDialog("Choose a Liberty Dev task to run on " + project
-                , "Run Liberty Dev Task"
+        int taskSelected = Messages.showChooseDialog("Choose a Liberty task to run on " + project
+                , "Run Liberty Task"
                 , keyArray, keyArray[0]
                 , Constants.libertyIcon_40);
         if (taskSelected == -1) {

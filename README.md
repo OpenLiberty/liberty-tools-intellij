@@ -14,6 +14,7 @@ and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/l
 
 Note that this extension requires the [Integrated Terminal plugin](https://plugins.jetbrains.com/plugin/13123-terminal) to be enabled.
 
+![Open Liberty Tools Extension](images/open-liberty-tools.png)
 ## Quick Start
 
 - Search for _Open Liberty Tools_ in IntelliJ **Settings > Plugins > Marketplace** and click the Install button
