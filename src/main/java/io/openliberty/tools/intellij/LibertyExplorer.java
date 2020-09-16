@@ -27,6 +27,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -249,51 +251,20 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         DoubleClickListener doubleClickListener = new DoubleClickListener() {
             @Override
             protected boolean onDoubleClick(MouseEvent event) {
-                final TreePath path = tree.getSelectionPath();
-                Object node = path.getLastPathComponent();
-                if (node instanceof LibertyActionNode) {
-                    ActionManager am = ActionManager.getInstance();
-                    String actionNodeName = ((LibertyActionNode) node).getName();
-                    log.debug("Selected: " + actionNodeName);
-                    if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
-                        // calls action on double click
-                        am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    }  else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
-                        am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
-                        am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
-                        am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
-                        am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
-                        am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
-                        am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
-                        am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
-                    }
-                }
+                executeAction(tree);
                 return false;
             }
         };
         doubleClickListener.installOn(tree);
+
+        tree.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode()==KeyEvent.VK_ENTER) {
+                    executeAction(tree);
+                }
+            }
+        });
 
         // set tree icons and colours
         DefaultTreeCellRenderer newRenderer = new DefaultTreeCellRenderer();
@@ -305,6 +276,50 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         tree.setCellRenderer(newRenderer);
 
         return tree;
+    }
+
+    private static void executeAction(Tree tree) {
+        final TreePath path = tree.getSelectionPath();
+        Object node = path.getLastPathComponent();
+        if (node instanceof LibertyActionNode) {
+            ActionManager am = ActionManager.getInstance();
+            String actionNodeName = ((LibertyActionNode) node).getName();
+            log.debug("Selected: " + actionNodeName);
+            if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
+                // calls action on double click
+                am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
+                am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
+                am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
+                am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
+                am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
+                am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
+                am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
+                am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        ActionManager.getInstance(), 0));
+            }
+        }
     }
 
 }
