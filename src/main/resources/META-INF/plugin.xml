@@ -7,10 +7,10 @@
     <category>Framework Integration</category>
 
     <description><![CDATA[
-    <b>This is a preview release.</b>
-    <br> Adds support for
-    <a href="https://openliberty.io/">Open Liberty</a>
-    projects.<br>
+     Open Liberty Tools adds support in IntelliJ for your <a href="https://openliberty.io/">Open Liberty</a> projects.
+     Open Liberty development mode allows you to easily develop your cloud-native Jakarta EE and Java microservices (with MicroProfile) applications with hot reload and deployment.
+     <b>This is a preview release.</b>
+     <br/>
      The following features are available through the Liberty Dev Dashboard:
      <ul>
      <li> View supported <a "href=https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev"><code>liberty-maven-plugin</code></a> or
