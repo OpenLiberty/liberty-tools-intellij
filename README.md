@@ -4,6 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
+![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-open-liberty-tools)
 
 An [Open Liberty](https://openliberty.io/) extension for IntelliJ. The extension will detect your Liberty Maven or Liberty 
 Gradle project if it detects the `io.openliberty.tools:liberty-maven-plugin` in the `pom.xml` or 
