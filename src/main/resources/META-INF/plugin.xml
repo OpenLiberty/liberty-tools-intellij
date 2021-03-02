@@ -50,7 +50,7 @@
                 description="Stop Liberty Dev on current build file" icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction" text="Run Tests"
+                class="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction" text="Run tests"
                 description="Run tests on current build file" icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport"
@@ -66,20 +66,20 @@
                 description="Open the Gradle test report" icon="AllIcons.General.Web" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewEffectivePom"
-                class="io.openliberty.tools.intellij.actions.ViewEffectivePom" text="View Effective POM"
+                class="io.openliberty.tools.intellij.actions.ViewEffectivePom" text="View effective POM"
                 description="Open the pom.xml" icon="AllIcons.FileTypes.Config" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewGradleConfig"
-                class="io.openliberty.tools.intellij.actions.ViewGradleConfig" text="View Gradle Config"
+                class="io.openliberty.tools.intellij.actions.ViewGradleConfig" text="View Gradle config"
                 description="Open the build.gradle" icon="AllIcons.FileTypes.Config" />
 
         <action id="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"
-                class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty Dev Dashboard"
-                description="Refresh Liberty Dev Dashboard projects" icon="AllIcons.Actions.Refresh"/>
+                class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty tool window"
+                description="Refresh Liberty tool window projects" icon="AllIcons.Actions.Refresh"/>
 
         <action id="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
-                class="io.openliberty.tools.intellij.actions.RunLibertyDevTask" text="Run Liberty Dev Action"
-                description="Execute the selected liberty dev task" icon="AllIcons.Actions.Execute"/>
+                class="io.openliberty.tools.intellij.actions.RunLibertyDevTask" text="Run Liberty action"
+                description="Run the selected Liberty action" icon="AllIcons.Actions.Execute"/>
 
     </actions>
 </idea-plugin>
