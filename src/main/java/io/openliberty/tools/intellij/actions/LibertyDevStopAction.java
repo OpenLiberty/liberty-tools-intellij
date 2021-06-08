@@ -4,45 +4,29 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
-public class LibertyDevStopAction extends AnAction {
+public class LibertyDevStopAction extends LibertyGeneralAction {
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        Logger log = Logger.getInstance(LibertyDevStopAction.class);;
-
-        final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) {
-            log.debug("Unable to stop liberty dev, could not resolve project");
-            return;
-        }
-
-        final String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
-
-        String stopCmd = "q";
-
+    protected void executeLibertyAction() {
+        setActionCmd("stop Liberty dev mode");
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
-
+        String stopCmd = "q";
         if (widget == null) {
-            Notification notif = new Notification("Liberty Dev Dashboard"
+            Notification notif = new Notification("Liberty"
                     , Constants.libertyIcon
-                    , "Liberty dev has not been started"
+                    , "Liberty dev mode has not been started"
                     , ""
-                    , "Liberty dev has not been started on " + projectName
-                    + ". \nStart liberty dev from the Liberty Dev Dashboard."
+                    , "Liberty dev mode has not been started on " + projectName
+                    + ". \nStart Liberty dev mode from the Liberty tool window."
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.error("Cannot stop liberty dev, corresponding project terminal does not exist.");
+            log.error("Cannot stop Liberty dev mode, corresponding project terminal does not exist.");
             return;
         }
         LibertyActionUtil.executeCommand(widget, stopCmd);
