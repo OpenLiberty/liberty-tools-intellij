@@ -10,11 +10,11 @@ public final class Constants {
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
     public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
 
-    public static final String LIBERTY_DEV_START = "Start";
-    public static final String LIBERTY_DEV_CUSTOM_START = "Start...";
-    public static final String LIBERTY_DEV_START_CONTAINER = "Start in container";
-    public static final String LIBERTY_DEV_STOP = "Stop";
-    public static final String LIBERTY_DEV_TESTS = "Run Tests";
+    public static final String LIBERTY_DEV_START = "Start dev mode";
+    public static final String LIBERTY_DEV_CUSTOM_START = "Start dev mode...";
+    public static final String LIBERTY_DEV_START_CONTAINER = "Start dev mode in a container";
+    public static final String LIBERTY_DEV_STOP = "Stop dev mode";
+    public static final String LIBERTY_DEV_TESTS = "Run dev mode tests";
 
     // Maven
     public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";

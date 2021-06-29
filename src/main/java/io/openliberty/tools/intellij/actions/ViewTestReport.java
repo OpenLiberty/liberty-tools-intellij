@@ -5,16 +5,10 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,32 +22,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ViewTestReport extends AnAction {
+public class ViewTestReport extends LibertyGeneralAction {
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        Logger log = Logger.getInstance(ViewTestReport.class);;
-
-        final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) {
-            log.debug("Unable to view Gradle test report, could not resolve project");
-            return;
-        }
-
-        final VirtualFile file = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-        if (file == null) {
-            log.debug("Unable to view Gradle test report, could not resolve configuration file for  " + project.getName());
-            return;
-        }
-
+    protected void executeLibertyAction() {
+        setActionCmd("view Gradle test report");
         // get path to project folder
-        final VirtualFile parentFile = file.getParent();
+        final VirtualFile parentFile = buildFile.getParent();
 
         // parse the build.gradle for test.reports.html.destination
         File testReportFile = null;
         String testReportDest = null;
         try {
-            testReportDest = getTestReportDestination(file);
+            testReportDest = getTestReportDestination(buildFile);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -76,7 +57,7 @@ public class ViewTestReport extends AnAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification("Liberty Dev Dashboard"
+            Notification notif = new Notification("Liberty"
                     , Constants.libertyIcon
                     , "Gradle Test Report Does Not Exist"
                     , ""
@@ -91,8 +72,6 @@ public class ViewTestReport extends AnAction {
 
         // open test report in browser
         BrowserUtil.browse(testReportVirtualFile.getUrl());
-
-
     }
 
     private String getTestReportDestination(VirtualFile file) throws IOException {
@@ -101,7 +80,7 @@ public class ViewTestReport extends AnAction {
 
         Pattern pattern = Pattern.compile(testReportRegex);
         Matcher matcher = pattern.matcher(buildFile);
-        if (matcher.find( )) {
+        if (matcher.find()) {
             if (!matcher.group(2).isEmpty()) {
                 // group 2 is the string enclosed in quotation marks
                 return matcher.group(2);
@@ -118,7 +97,7 @@ public class ViewTestReport extends AnAction {
                 .filter(Files::isRegularFile)) {
             List<String> result = walk.map(x -> x.toString())
                     // exclude files from {bin, classes, target} dirs
-                    .filter(f-> !f.contains("bin") || !f.contains("classes") || !f.contains("target"))
+                    .filter(f -> !f.contains("bin") || !f.contains("classes") || !f.contains("target"))
                     .filter(f -> f.endsWith("index.html")).collect(Collectors.toList());
 
             // check to see if the index.html contains the TEST_REPORT_STRING
