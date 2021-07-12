@@ -7,6 +7,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
 
@@ -58,7 +59,7 @@ public class ViewTestReport extends LibertyGeneralAction {
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
             Notification notif = new Notification("Liberty"
-                    , Constants.libertyIcon
+                    , LibertyPluginIcons.libertyIcon
                     , "Gradle Test Report Does Not Exist"
                     , ""
                     , "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +

@@ -11,7 +11,7 @@
      Open Liberty development mode allows you to easily develop your cloud-native Jakarta EE and Java microservices (with MicroProfile) applications with hot reload and deployment.
      <b>This is a preview release.</b>
      <br/>
-     The following features are available through the Liberty Dev Dashboard:
+     The following features are available through the Liberty tool window:
      <ul>
      <li> View supported <a "href=https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev"><code>liberty-maven-plugin</code></a> or
      <a "href=https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md"><code>liberty-gradle-plugin</code></a> projects in the workspace

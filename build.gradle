@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '0.0.4'
+version '0.0.5'
 
 sourceCompatibility = 1.8
 
@@ -30,6 +30,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+        <b> 0.0.5 </b>
+        <ul>
+        <li> Update action wording and documentation
+        </ul>
         <b> 0.0.4 </b>
         <ul>
         <li> Removed tech preview wording from "start in container" action

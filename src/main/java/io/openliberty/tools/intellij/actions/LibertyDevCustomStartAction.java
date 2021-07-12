@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
@@ -39,7 +40,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         };
 
         String customParams = Messages.showInputDialog(project, msg, "Liberty dev mode custom parameters",
-                Constants.libertyIcon_40, initialVal, validator);
+                LibertyPluginIcons.libertyIcon_40, initialVal, validator);
 
         String startCmd = null;
         if (customParams == null) {

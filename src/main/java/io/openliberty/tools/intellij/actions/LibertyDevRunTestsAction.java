@@ -4,7 +4,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
@@ -19,7 +19,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
 
         if (widget == null) {
             Notification notif = new Notification("Liberty"
-                    , Constants.libertyIcon
+                    , LibertyPluginIcons.libertyIcon
                     , "Liberty dev mode has not been started"
                     , ""
                     , "Liberty dev mode has not been started on " + projectName

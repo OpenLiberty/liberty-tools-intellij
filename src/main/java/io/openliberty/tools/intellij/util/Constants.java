@@ -1,8 +1,5 @@
 package io.openliberty.tools.intellij.util;
 
-import com.intellij.openapi.util.IconLoader;
-
-import javax.swing.*;
 import java.util.HashMap;
 
 public final class Constants {
@@ -28,9 +25,6 @@ public final class Constants {
 
     public static final String LIBERTY_TREE = "LibertyTree";
 
-    public static final Icon libertyIcon = IconLoader.getIcon("/icons/OL_logo_13.svg");
-    public static final Icon libertyIcon_40 = IconLoader.getIcon("/icons/OL_logo_40.svg");
-
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
@@ -55,7 +49,7 @@ public final class Constants {
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
     public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
 
-    private static HashMap<String, String> CORE_ACTIONS_MAP = new HashMap<String, String>() {
+    private static final HashMap<String, String> CORE_ACTIONS_MAP = new HashMap<String, String>() {
         {
             put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
             put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
@@ -66,7 +60,7 @@ public final class Constants {
     };
 
     public static HashMap<String, String> getFullActionMap() {
-        HashMap<String, String> fullActionsMap = new HashMap<String, String>();
+        HashMap<String, String> fullActionsMap = new HashMap<>();
         fullActionsMap.putAll(CORE_ACTIONS_MAP);
         fullActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
         fullActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
@@ -75,7 +69,7 @@ public final class Constants {
     }
 
     public static HashMap<String, String> getMavenMap() {
-        HashMap<String, String> mavenActionsMap = new HashMap<String, String>();
+        HashMap<String, String> mavenActionsMap = new HashMap<>();
         mavenActionsMap.putAll(CORE_ACTIONS_MAP);
         mavenActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
         mavenActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
@@ -83,7 +77,7 @@ public final class Constants {
     }
 
     public static HashMap<String, String> getGradleMap() {
-        HashMap<String, String> gradleActionsMap = new HashMap<String, String>();
+        HashMap<String, String> gradleActionsMap = new HashMap<>();
         gradleActionsMap.putAll(CORE_ACTIONS_MAP);
         gradleActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
         return gradleActionsMap;

@@ -7,7 +7,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification("Liberty"
-                    , Constants.libertyIcon
+                    , LibertyPluginIcons.libertyIcon
                     , "Unit Test Report Does Not Exist"
                     , ""
                     , "Test report (" + surefireReportFile.getAbsolutePath() + ") does not exist.  " +
