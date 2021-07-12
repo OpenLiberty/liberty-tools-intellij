@@ -7,7 +7,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
@@ -268,9 +267,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         // set tree icons and colours
         DefaultTreeCellRenderer newRenderer = new DefaultTreeCellRenderer();
-        newRenderer.setLeafIcon(IconLoader.getIcon("AllIcons.General.GearPlain"));
-        newRenderer.setClosedIcon(Constants.libertyIcon);
-        newRenderer.setOpenIcon(Constants.libertyIcon);
+
+        newRenderer.setLeafIcon(LibertyPluginIcons.IntelliJGear);
+        newRenderer.setClosedIcon(LibertyPluginIcons.libertyIcon);
+        newRenderer.setOpenIcon(LibertyPluginIcons.libertyIcon);
         newRenderer.setBackgroundNonSelectionColor(backgroundColor);
 
         tree.setCellRenderer(newRenderer);
