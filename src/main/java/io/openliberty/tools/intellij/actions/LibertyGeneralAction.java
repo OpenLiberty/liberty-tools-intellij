@@ -27,7 +27,7 @@ public class LibertyGeneralAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            String msg = "Unable to " + actionCmd + ", could not resolve project. Ensure you run the Liberty action from the Liberty tool window";
+            String msg = "Unable to " + actionCmd + ": Could not resolve project. Ensure you run the Liberty action from the Liberty tool window";
             notifyError(msg);
             log.debug(msg);
             return;
@@ -35,7 +35,7 @@ public class LibertyGeneralAction extends AnAction {
 
         buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = "Unable to " + actionCmd + ", could not resolve configuration file for  " + project.getName() + ". Ensure you run the Liberty action from the Liberty tool window";
+            String msg = "Unable to " + actionCmd + ": Could not resolve configuration file for  " + project.getName() + ". Ensure you run the Liberty action from the Liberty tool window";
             notifyError(msg);
             log.debug(msg);
             return;
