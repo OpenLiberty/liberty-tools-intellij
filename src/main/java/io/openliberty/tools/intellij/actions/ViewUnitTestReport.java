@@ -14,9 +14,12 @@ import java.nio.file.Paths;
 
 public class ViewUnitTestReport extends LibertyGeneralAction {
 
+    public ViewUnitTestReport() {
+        setActionCmd("view unit test report");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("view unit test report");
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
         File surefireReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();

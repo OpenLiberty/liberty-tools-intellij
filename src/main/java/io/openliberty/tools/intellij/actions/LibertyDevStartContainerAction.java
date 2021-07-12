@@ -7,9 +7,12 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
+    public LibertyDevStartContainerAction() {
+        setActionCmd("start Liberty dev mode in a container");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("start Liberty dev mode in a container");
         String startCmd = null;
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:devc -f \"" + buildFile.getCanonicalPath() + "\"";

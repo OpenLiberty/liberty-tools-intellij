@@ -25,9 +25,12 @@ import java.util.stream.Stream;
 
 public class ViewTestReport extends LibertyGeneralAction {
 
+    public ViewTestReport() {
+        setActionCmd("view Gradle test report");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("view Gradle test report");
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
 

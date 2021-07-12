@@ -5,10 +5,12 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 
 public class ViewGradleConfig extends LibertyGeneralAction {
 
+    public ViewGradleConfig() {
+        setActionCmd("view Gradle configuration file");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("view Gradle configuration file");
-
         // open build file
         FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, buildFile), true);
     }
