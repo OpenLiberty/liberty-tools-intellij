@@ -7,9 +7,6 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.Tree;
 
 public class LibertyToolbarActionGroup extends DefaultActionGroup {
-
-//    private CollapseAllAction collapseAction;
-//    private ExpandAllAction expandAction;
     private Tree tree;
 
     public LibertyToolbarActionGroup(Tree tree) {

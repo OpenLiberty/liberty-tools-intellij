@@ -11,7 +11,7 @@
 An [Open Liberty](https://openliberty.io/) extension for IntelliJ. The extension will detect your Liberty Maven or
 Liberty Gradle project if it detects the `io.openliberty.tools:liberty-maven-plugin` in the `pom.xml` or
 `io.openliberty.tools:liberty-gradle-plugin` in the `build.gradle`. Through the Liberty tool window, you can start,
-stop, or interact with [Liberty dev mode](https://openliberty.io/docs/21.0.0.6/development-mode.html) on all available
+stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured
 [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev)
 and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your
 workspace.

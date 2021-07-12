@@ -10,7 +10,7 @@ Startup IntelliJ IDEA and then choose "Import Project" from the main menu and se
 ![IntelliJ import project](images/IntelliJ_import_project.png)
 
 Ensure your project is configured with the Liberty Maven Plugin or Liberty Gradle Plugin to make use
-of [dev mode](https://openliberty.io/docs/21.0.0.6/development-mode.html).
+of [dev mode](https://openliberty.io/docs/latest/development-mode.html).
 
 For Maven projects, configure the Liberty Maven Plugin in your `pom.xml` file.
 
@@ -19,7 +19,7 @@ For Maven projects, configure the Liberty Maven Plugin in your `pom.xml` file.
 <plugin>
     <groupId>io.openliberty.tools</groupId>
     <artifactId>liberty-maven-plugin</artifactId>
-    <version>3.3</version>
+    <version>3.3.4</version>
 </plugin>
 ```
 
@@ -33,7 +33,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.1'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.2'
     }
 }
 ```
@@ -43,7 +43,7 @@ Liberty**. Your Open Liberty project should appear in the Liberty tool window. I
 configured the Liberty Maven Plugin or Liberty Gradle plugin and refresh the tool window.
 ![Open Liberty tool window](images/Liberty_tool_window.png)
 
-### Interacting with Liberty dev mode
+### Running Liberty in dev mode
 
 When you run Open Liberty in dev mode, you can rapidly code, deploy, test, and debug your application.
 
@@ -62,9 +62,7 @@ the [Liberty Gradle dev task parameters](https://github.com/OpenLiberty/ci.gradl
 .
 ![Liberty start dev mode with custom parameters](images/Liberty_start_custom_param.png)
 
-If you would like to make use of dev mode for containers, select _Start dev mode in a container_. Note that
-the `liberty-maven-plugin` must be version `3.3-M1` or higher. The `liberty-gradle-plugin` must be version `3.1-M1` or
-higher. For more information on dev mode for containers, check out
+If you would like to make use of dev mode for containers, select _Start dev mode in a container_. For more information on dev mode for containers, check out
 the [Liberty Maven devc goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#devc-container-mode) or
 the [Liberty Gradle libertyDevc task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#libertydevc-task-container-mode)
 .
