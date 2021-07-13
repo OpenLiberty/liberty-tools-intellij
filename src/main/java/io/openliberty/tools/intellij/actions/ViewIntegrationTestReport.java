@@ -14,10 +14,12 @@ import java.nio.file.Paths;
 
 public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
+    public ViewIntegrationTestReport() {
+        setActionCmd("view integration test report");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("view integration test report");
-
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
         File failsafeReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();

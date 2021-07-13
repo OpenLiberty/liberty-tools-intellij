@@ -11,9 +11,12 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStopAction extends LibertyGeneralAction {
 
+    public LibertyDevStopAction() {
+        setActionCmd("stop Liberty dev mode");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("stop Liberty dev mode");
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
         String stopCmd = "q";
         if (widget == null) {

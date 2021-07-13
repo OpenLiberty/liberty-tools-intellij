@@ -7,11 +7,15 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartAction extends LibertyGeneralAction {
 
+    public LibertyDevStartAction() {
+        setActionCmd("start Liberty dev mode");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("start Liberty dev mode");
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
         String startCmd = null;
+
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev -f \"" + buildFile.getCanonicalPath() + "\"";
         } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {

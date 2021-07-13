@@ -11,9 +11,12 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
 
+    public LibertyDevRunTestsAction() {
+        setActionCmd("run tests with Liberty dev mode");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("run tests with Liberty dev mode");
         String runTestsCommand = " ";
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
 

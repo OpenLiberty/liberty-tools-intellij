@@ -10,10 +10,12 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevCustomStartAction extends LibertyGeneralAction {
 
+    public LibertyDevCustomStartAction() {
+        setActionCmd("start Liberty dev mode with custom parameters");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("start Liberty dev mode with custom parameters");
-
         String msg;
         String initialVal;
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {

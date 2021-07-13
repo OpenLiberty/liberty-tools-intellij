@@ -5,9 +5,12 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 
 public class ViewEffectivePom extends LibertyGeneralAction {
 
+    public ViewEffectivePom() {
+        setActionCmd("view effective POM");
+    }
+
     @Override
     protected void executeLibertyAction() {
-        setActionCmd("view effective POM");
         // open build file
         FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, buildFile), true);
     }
