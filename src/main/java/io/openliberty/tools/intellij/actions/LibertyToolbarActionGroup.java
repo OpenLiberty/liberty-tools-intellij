@@ -18,9 +18,11 @@ public class LibertyToolbarActionGroup extends DefaultActionGroup {
         add(actionManager.getAction("io.openliberty.tools.intellij.actions.RunLibertyDevTask"));
         addSeparator();
 
-        DefaultTreeExpander expander = new DefaultTreeExpander(tree);
-        CommonActionsManager commonActionsManager = CommonActionsManager.getInstance();
-        add(commonActionsManager.createCollapseAllAction(expander, tree));
-        add(commonActionsManager.createExpandAllAction(expander, tree));
+        if (tree != null) {
+            DefaultTreeExpander expander = new DefaultTreeExpander(tree);
+            CommonActionsManager commonActionsManager = CommonActionsManager.getInstance();
+            add(commonActionsManager.createCollapseAllAction(expander, tree));
+            add(commonActionsManager.createExpandAllAction(expander, tree));
+        }
     }
 }
