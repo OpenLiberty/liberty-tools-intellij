@@ -53,7 +53,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
             this.setContent(jbTextArea);
         }
-
         ActionToolbar actionToolbar = buildActionToolbar(tree);
         this.setToolbar(actionToolbar.getComponent());
     }
