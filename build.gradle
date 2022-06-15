@@ -10,11 +10,18 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    // lsp4intellij is not published to maven yet
+    // See: https://github.com/ballerina-platform/lsp4intellij#1-add-the-lsp4intellij-dependency-in-the-build-file-of-the-project
+    maven { url 'https://jitpack.io' }
+    // lsp4mp
+    maven {url 'https://repo.eclipse.org/content/repositories/lsp4mp/'}
 }
 
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
+//    implementation 'com.github.ballerina-platform:lsp4intellij:master-SNAPSHOT'
+    implementation 'com.github.ballerina-platform:lsp4intellij:0.94.2'
 }
 
 runIde {
@@ -25,7 +32,7 @@ runIde {
 intellij {
     version '2019.3.3'
     updateSinceUntilBuild false
-    plugins 'terminal'
+    plugins 'terminal', 'java'
 }
 
 patchPluginXml {
