@@ -1,4 +1,5 @@
 package io.openliberty.tools.intellij;
+/*package io.openliberty.tools.intellij;
 
 
 import com.intellij.ide.util.projectWizard.*;
@@ -23,7 +24,7 @@ import javax.swing.*;
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */
-public class LibertyModuleBuilder extends JavaModuleBuilder {
+/*public class LibertyModuleBuilder extends JavaModuleBuilder {
 
     public static final String STARTER_REST_BASE_URL = "https://start.microprofile.io";
     private static final Logger LOG = Logger.getInstance("#org.microprofile.starter.intellij.MicroProfileModuleBuilder");
@@ -75,7 +76,7 @@ public class LibertyModuleBuilder extends JavaModuleBuilder {
      * @param settingsStep step to be modified
      * @return callback ({@link ModuleWizardStep#validate()} and {@link ModuleWizardStep#updateDataModel()} will be invoked)
      */
-    @Nullable
+   /* @Nullable
     @Override
     public ModuleWizardStep modifySettingsStep(@NotNull SettingsStep settingsStep) {
         ModuleNameLocationSettings moduleNameLocationSettings = settingsStep.getModuleNameLocationSettings();
@@ -84,5 +85,53 @@ public class LibertyModuleBuilder extends JavaModuleBuilder {
         }
 
         return super.modifySettingsStep(settingsStep);
+    }
+}*/
+
+import com.intellij.ide.util.projectWizard.ModuleBuilder;
+import com.intellij.ide.util.projectWizard.ModuleWizardStep;
+import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+
+public class LibertyModuleBuilder extends ModuleBuilder {
+    @Override
+    public void setupRootModel(@NotNull ModifiableRootModel modifiableRootModel) {
+    }
+
+    @Override
+    public LibertyModuleType getModuleType() {
+        return LibertyModuleType.getInstance();
+        //TODO: change module type
+    }
+
+    /*@Override
+    public ModuleWizardStep[] createWizardSteps(
+            @NotNull WizardContext wizardContext,
+            @NotNull ModulesProvider modulesProvider) {
+        return new ModuleWizardStep[]{new ModuleWizardStep() {
+            @Override
+            public JComponent getComponent() {
+                return new JLabel("Put your content here");
+            }
+
+            @Override
+            public void updateDataModel() {
+
+            }
+        }};
+    }*/
+
+    @Nullable
+    @Override
+    public ModuleWizardStep getCustomOptionsStep(WizardContext context, Disposable parentDisposable) {
+        return new LibertyModuleWizardStep();
     }
 }

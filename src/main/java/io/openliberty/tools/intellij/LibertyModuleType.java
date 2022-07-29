@@ -1,4 +1,4 @@
-package io.openliberty.tools.intellij;
+/*package io.openliberty.tools.intellij;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
@@ -86,5 +86,60 @@ public class LibertyCompatibleJavaModuleType extends ModuleType<LibertyProfileMo
         };
     }
 }
+
+}*/
+package io.openliberty.tools.intellij;
+
+import com.intellij.ide.util.projectWizard.ModuleWizardStep;
+import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.module.ModuleTypeManager;
+import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+
+public class LibertyModuleType extends ModuleType<LibertyModuleBuilder> {
+
+    private static final String ID = "DEMO_MODULE_TYPE";
+
+    public LibertyModuleType() {
+        super(ID);
+    }
+
+    public static LibertyModuleType getInstance() {
+        return (LibertyModuleType) ModuleTypeManager.getInstance().findByID(ID);
+    }
+
+    @NotNull
+    @Override
+    public LibertyModuleBuilder createModuleBuilder() {
+        return new LibertyModuleBuilder();
+    }
+
+    @NotNull
+    @Override
+    public String getName() {
+        return "OpenLiberty Starter";
+    }
+
+    @NotNull
+    @Override
+    public String getDescription() {
+        return "Example custom module type";
+    }
+
+    @NotNull
+    @Override
+    public Icon getNodeIcon(@Deprecated boolean b) {
+        return LibertyPluginIcons.libertyIcon;
+    }
+
+    @Override
+    public ModuleWizardStep @NotNull [] createWizardSteps(@NotNull WizardContext wizardContext,
+                                                          @NotNull LibertyModuleBuilder moduleBuilder,
+                                                          @NotNull ModulesProvider modulesProvider) {
+        return super.createWizardSteps(wizardContext, moduleBuilder, modulesProvider);
+    }
 
 }

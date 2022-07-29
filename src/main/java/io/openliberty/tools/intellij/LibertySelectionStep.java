@@ -1,4 +1,4 @@
-package io.openliberty.tools.intellij.;
+/*package io.openliberty.tools.intellij.;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */
-public class LibertySelectionStep extends ModuleWizardStep {
+/*public class LibertySelectionStep extends ModuleWizardStep {
 
     private static final Logger LOG = Logger.getInstance("#org.microprofile.starter.intellij.steps.MicroProfileSelectionStep");
 
@@ -53,7 +53,7 @@ public class LibertySelectionStep extends ModuleWizardStep {
     private JTextField groupIdTextField;
     private JTextField artifactIdTextField;
 
-    public LibertySelectionStep(ModuleInitializationData moduleCreationData, WizardContext context) {
+    /*public LibertySelectionStep(ModuleInitializationData moduleCreationData, WizardContext context) {
         this.moduleCreationData = moduleCreationData;
         this.wizardContext = context;
     }
@@ -170,7 +170,7 @@ public class LibertySelectionStep extends ModuleWizardStep {
         bottomPanel.setPreferredSize(new Dimension(100, 100));
 
         return bottomPanel;
-    }
+    }*/
 
     /**
      * Fetches the specification matrix and maps them to an instance of {@link SpecMatrix}.
@@ -178,10 +178,10 @@ public class LibertySelectionStep extends ModuleWizardStep {
      * TODO: Consider downloading the spec in an asynchronous way and then update the UI. In case of slow internet connection, this slows down the
      * initialization of the new project wizard window.
      */
-    private void initializeSpecMatrix() {
+    /*private void initializeSpecMatrix() {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            specMatrix = mapper.readValue(new URL(MicroProfileModuleBuilder.STARTER_REST_BASE_URL + "/api/2/supportMatrix"), SpecMatrix.class);
+            specMatrix = mapper.readValue(new URL(LibertyModuleBuilder.STARTER_REST_BASE_URL + "/api/2/supportMatrix"), SpecMatrix.class);
         } catch (Exception e) {
             LOG.warn(e);
         }
@@ -218,9 +218,9 @@ public class LibertySelectionStep extends ModuleWizardStep {
 
     private String getSelectedArtifactId() {
         return StringUtil.sanitizeJavaIdentifier(artifactIdTextField.getText().trim());
-    }
+    }*/
 
-    private List<String> getSelectedMpSpecs() {
+    /*private List<String> getSelectedMpSpecs() {
         MicroProfileSpec[] selectedSpecs = mpSpecsCheckboxTree.getCheckedNodes(MicroProfileSpec.class, null);
         return Arrays.stream(selectedSpecs).map(MicroProfileSpec::getName).collect(Collectors.toList());
     }
@@ -232,4 +232,4 @@ public class LibertySelectionStep extends ModuleWizardStep {
     private String getSelectedMpVersion() {
         return (String) mpVersionsComboBox.getSelectedItem();
     }
-}
+}*/
