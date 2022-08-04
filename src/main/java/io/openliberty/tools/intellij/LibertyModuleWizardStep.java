@@ -3,7 +3,9 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
-
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 import javax.swing.*;
@@ -14,6 +16,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 public class LibertyModuleWizardStep extends ModuleWizardStep {
 
@@ -27,6 +30,15 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
 
     private SpecMatrix specMatrix;
 
+    // initial value stores
+    private String initialProjectFieldValue;
+    private String initialProjectGroupFieldValue = "com.demo";
+
+    JSONArray optionsBuild;
+    JSONArray optionsSE;
+    JSONArray optionsEE;
+    JSONArray optionsMP;
+
     @Override
     public JComponent getComponent() {
         //return new JLabel("Provide some setting here");
@@ -37,9 +49,32 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
         return rootPanel;
     }
 
+    /**
+     * Sets the initial project name that this page will use when created. The name
+     * is ignored if the createControl(Composite) method has already been called.
+     * Leading and trailing spaces in the name are ignored. Providing the name of an
+     * existing project will not necessarily cause the wizard to warn the user.
+     * Callers of this method should first check if the project name passed already
+     * exists in the workspace.
+     *
+     * @param name initial project name for this page
+     *
+     * @see IWorkspace#validateName(String, int)
+     *
+     */
+    /*public void setInitialProjectName(String name) {
+        if (name == null) {
+            initialProjectFieldValue = null;
+        } else {
+            initialProjectFieldValue = name.trim();
+            if (locationArea != null) {
+                locationArea.updateProjectName(name.trim());
+            }
+        }
+    }*/
     private JPanel createTopPanel() {
 
-        HttpClient client = HttpClient.newHttpClient();
+        /*HttpClient client = HttpClient.newHttpClient();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("https://start.openliberty.io/api/start/info"))
@@ -100,7 +135,7 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
         } catch (InterruptedException e) {
             System.out.println("uhoh3");
             e.printStackTrace();
-        }
+        }*/
 
         JPanel topPanel = new JPanel();
         GridBagLayout topPanelLayout = new GridBagLayout();

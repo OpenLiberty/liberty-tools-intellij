@@ -30,6 +30,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
+        <moduleBuilder
+                builderClass="io.openliberty.tools.intellij.LibertyModuleBuilder"
+                id="DEMO_STEP"
+                order="first"/>
+        <moduleType
+                id="DEMO_MODULE_TYPE"
+                implementationClass="io.openliberty.tools.intellij.LibertyModuleType"/>
     </extensions>
 
     <actions>
