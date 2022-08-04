@@ -26,6 +26,8 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
     private ComboBox<String> mpVersionsComboBox;
     private ComboBox<String> javaVersionsComboBox;
 
+    private ComboBox<String> buildToolComboBox;
+
     private ComboBox<String> jakartaVersionsComboBox;
 
     private SpecMatrix specMatrix;
@@ -34,10 +36,19 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
     private String initialProjectFieldValue;
     private String initialProjectGroupFieldValue = "com.demo";
 
+    HashMap<String, JSONArray> dependenciesEE2MP;
+    HashMap<String, JSONArray> dependenciesMP2EE;
+
+    int ctr=0;
+
+    String defaultBuild;
+    String defaultSE;
+
     JSONArray optionsBuild;
     JSONArray optionsSE;
     JSONArray optionsEE;
     JSONArray optionsMP;
+
 
     @Override
     public JComponent getComponent() {
@@ -74,7 +85,7 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
     }*/
     private JPanel createTopPanel() {
 
-        /*HttpClient client = HttpClient.newHttpClient();
+        HttpClient client = HttpClient.newHttpClient();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("https://start.openliberty.io/api/start/info"))
@@ -88,7 +99,7 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
 
             try {
                 JSONObject jsonObject = new JSONObject(response.body());
-                setInitialProjectName(jsonObject.getJSONObject("a").get("default").toString());
+                initialProjectFieldValue=(jsonObject.getJSONObject("a").get("default").toString());
                 System.out.println(jsonObject.getJSONObject("a").get("default").toString());
                 optionsBuild = jsonObject.getJSONObject("b").getJSONArray("options");
                 optionsSE = jsonObject.getJSONObject("j").getJSONArray("options");
@@ -135,7 +146,7 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
         } catch (InterruptedException e) {
             System.out.println("uhoh3");
             e.printStackTrace();
-        }*/
+        }
 
         JPanel topPanel = new JPanel();
         GridBagLayout topPanelLayout = new GridBagLayout();
@@ -155,29 +166,56 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
         topPanelLayoutConstraint.gridy++;
         topPanel.add(new LabeledComponent("ArtifactId", artifactIdTextField), topPanelLayoutConstraint);
 
+        buildToolComboBox = new ComboBox<String>();
+        buildToolComboBox.addItem(defaultBuild);
+        try {
+            buildToolComboBox.addItem(optionsBuild.getString(1));
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
+        topPanelLayoutConstraint.gridy++;
+        topPanel.add(new LabeledComponent("Build Tool", buildToolComboBox), topPanelLayoutConstraint);
+
         mpVersionsComboBox = new ComboBox<String>();
-        mpVersionsComboBox.addItem("Test1");
-        mpVersionsComboBox.addItem("Test2");
-        mpVersionsComboBox.addItem("Test3");
-        mpVersionsComboBox.setRenderer(new MPVersionComboBoxRenderer());
+        try {
+            mpVersionsComboBox.addItem(optionsMP.getString(0));
+            mpVersionsComboBox.addItem(optionsMP.getString(1));
+            mpVersionsComboBox.addItem(optionsMP.getString(2));
+            mpVersionsComboBox.addItem(optionsMP.getString(3));
+            mpVersionsComboBox.addItem(optionsMP.getString(4));
+            mpVersionsComboBox.addItem(optionsMP.getString(5));
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
         topPanelLayoutConstraint.gridy++;
         topPanel.add(new LabeledComponent("MicroProfile Versions", mpVersionsComboBox), topPanelLayoutConstraint);
 
         javaVersionsComboBox = new ComboBox<String>();
-        javaVersionsComboBox.addItem("Test1");
-        javaVersionsComboBox.addItem("Test2");
-        javaVersionsComboBox.addItem("Test3");
-        javaVersionsComboBox.setRenderer(new MPVersionComboBoxRenderer());
+        javaVersionsComboBox.addItem(defaultSE);
+        try {
+            javaVersionsComboBox.addItem(optionsSE.getString(0));
+            javaVersionsComboBox.addItem(optionsSE.getString(2));
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
         topPanelLayoutConstraint.gridy++;
-        topPanel.add(new LabeledComponent("Java Versions", javaVersionsComboBox), topPanelLayoutConstraint);
+        topPanel.add(new LabeledComponent("Java SE Versions", javaVersionsComboBox), topPanelLayoutConstraint);
 
         jakartaVersionsComboBox = new ComboBox<String>();
-        jakartaVersionsComboBox.addItem("Test1");
-        jakartaVersionsComboBox.addItem("Test2");
-        jakartaVersionsComboBox.addItem("Test3");
-        jakartaVersionsComboBox.setRenderer(new MPVersionComboBoxRenderer());
+        try {
+            jakartaVersionsComboBox.addItem(optionsEE.getString(0));
+            jakartaVersionsComboBox.addItem(optionsEE.getString(1));
+            jakartaVersionsComboBox.addItem(optionsEE.getString(2));
+            jakartaVersionsComboBox.addItem(optionsEE.getString(3));
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
         topPanelLayoutConstraint.gridy++;
-        topPanel.add(new LabeledComponent("Jakarta Versions", jakartaVersionsComboBox), topPanelLayoutConstraint);
+        topPanel.add(new LabeledComponent("Java EE/Jakarta EE Versions", jakartaVersionsComboBox), topPanelLayoutConstraint);
 
 
         return topPanel;
