@@ -21,6 +21,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction() {
+
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
         String startCmd = "https://start.openliberty.io/api/start?a=app-name&b=gradle&e=9.1&g=com.demo&j=11&m=5.0";
 

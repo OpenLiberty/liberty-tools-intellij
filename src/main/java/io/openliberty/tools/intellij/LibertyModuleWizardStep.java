@@ -3,6 +3,10 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyActionUtil;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +14,7 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -217,6 +221,47 @@ public class LibertyModuleWizardStep extends ModuleWizardStep {
         topPanelLayoutConstraint.gridy++;
         topPanel.add(new LabeledComponent("Java EE/Jakarta EE Versions", jakartaVersionsComboBox), topPanelLayoutConstraint);
 
+        String appName = artifactIdTextField.getText();
+        String groupName = groupIdTextField.getText();
+        String build = buildToolComboBox.getItemAt(buildToolComboBox.getSelectedIndex());
+        String SE = javaVersionsComboBox.getItemAt(javaVersionsComboBox.getSelectedIndex());
+        String EE = buildToolComboBox.getItemAt(jakartaVersionsComboBox.getSelectedIndex());
+        String MP = mpVersionsComboBox.getItemAt(mpVersionsComboBox.getSelectedIndex());
+
+        HttpClient Client = HttpClient.newHttpClient();
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("https://start.openliberty.io/api/start?a=" + appName + "&b=" + build + "&e="+ EE +"&g=" + groupName + "&j="+ SE +"&m=" +MP))
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response =
+                    Client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            InputStream in = new BufferedInputStream(response.body());
+
+            String home = System.getProperty("user.home");
+            File file = new File(new File(home, "Downloads"), appName + ".zip");
+
+
+            try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+                int read;
+                byte[] bytes = new byte[8192];
+                while ((read = in.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                }
+            }
+        } catch (URISyntaxException e) {
+            System.out.println("uhoh");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("uhoh2");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("uhoh3");
+            e.printStackTrace();
+        }
 
         return topPanel;
     }
