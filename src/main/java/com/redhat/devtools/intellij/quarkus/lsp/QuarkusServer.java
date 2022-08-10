@@ -27,6 +27,7 @@ public class QuarkusServer extends ProcessStreamConnectionProvider {
 //        IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("com.redhat.devtools.intellij.quarkus"));
         IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4mpServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
+//        File lemminxServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lemminx-uber.jar");
 //        File lsp4mpServerPath = new File(descriptor.getPath(), "lib/org.eclipse.lsp4mp.ls-0.4.0.jar");
 
 //        File quarkusServerPath = new File(descriptor.getPath(), "lib/server/com.redhat.quarkus.ls.jar");

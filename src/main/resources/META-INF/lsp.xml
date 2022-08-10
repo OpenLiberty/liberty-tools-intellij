@@ -16,7 +16,7 @@
         <!--    <languageMapping language="JAVA" serverId="qute"/>-->
 
         <!-- Lemminx LSP -->
-        <server id="libertyXml" class="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlServer" clientImpl="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient" serverInterface="org.eclipse.lemminx.customservice.XMLLanguageClientAPI"/>
+        <server id="libertyXml" class="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlServer" clientImpl="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient" serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="XML" serverId="libertyXml"/>
 
     </extensions>
