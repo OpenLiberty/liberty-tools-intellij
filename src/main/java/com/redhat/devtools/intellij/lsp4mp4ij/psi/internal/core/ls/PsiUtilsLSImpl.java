@@ -32,7 +32,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.redhat.devtools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import com.redhat.devtools.intellij.lsp4mp4ij.psi.core.PsiUtils;
-import com.redhat.devtools.intellij.quarkus.javadoc.JavadocContentAccess;
+//import com.redhat.devtools.intellij.quarkus.javadoc.JavadocContentAccess;
 import com.redhat.devtools.intellij.quarkus.lsp4ij.LSPIJUtils;
 import com.redhat.devtools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import org.eclipse.lsp4j.Location;
@@ -134,10 +134,12 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public String getJavadoc(PsiMethod method, DocumentFormat documentFormat) {
-        boolean markdown = DocumentFormat.Markdown.equals(documentFormat);
-        Reader reader = markdown ? JavadocContentAccess.getMarkdownContentReader(method)
-                : JavadocContentAccess.getPlainTextContentReader(method);
-        return reader != null ? toString(reader) : null;
+//        boolean markdown = DocumentFormat.Markdown.equals(documentFormat);
+//        Reader reader = markdown ? JavadocContentAccess.getMarkdownContentReader(method)
+//                : JavadocContentAccess.getPlainTextContentReader(method);
+//        return reader != null ? toString(reader) : null;
+        // TODO not needed for lsp4mp
+        return null;
     }
 
     private static String toString(Reader reader) {
