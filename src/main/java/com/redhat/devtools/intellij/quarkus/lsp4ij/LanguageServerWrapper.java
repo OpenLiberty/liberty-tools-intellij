@@ -240,8 +240,7 @@ public class LanguageServerWrapper {
                             currentConnectionProvider.handleMessage(message, this.languageServer, root);
                         }
                     }));
-
-            this.languageServer = launcher.getRemoteProxy();
+            this.languageServer = launcher.getRemoteProxy(); // TODO this is where lemminx is failing
             client.connect(languageServer, this);
             this.launcherFuture = launcher.startListening();
 

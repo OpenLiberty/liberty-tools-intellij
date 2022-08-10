@@ -14,6 +14,11 @@
         <!--    <server id="qute" class="com.redhat.devtools.intellij.qute.lsp.QuteServer" clientImpl="com.redhat.devtools.intellij.qute.lsp.QuteLanguageClient" serverInterface="com.redhat.qute.ls.api.QuteLanguageServerAPI"/>-->
         <!--    <languageMapping language="Qute_" serverId="qute"/>-->
         <!--    <languageMapping language="JAVA" serverId="qute"/>-->
+
+        <!-- Lemminx LSP -->
+        <server id="libertyXml" class="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlServer" clientImpl="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient" serverInterface="org.eclipse.lemminx.customservice.XMLLanguageClientAPI"/>
+        <languageMapping language="XML" serverId="libertyXml"/>
+
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <!-- Generic -->
