@@ -1,14 +1,14 @@
 <idea-plugin>
     <id>open-liberty.intellij</id>
-    <name>Open Liberty Tools</name>
+    <name>Liberty Tools</name>
 
     <vendor url="https://openliberty.io/">Open-Liberty</vendor>
 
     <category>Framework Integration</category>
 
     <description><![CDATA[
-     Open Liberty Tools adds support in IntelliJ for your <a href="https://openliberty.io/">Open Liberty</a> projects.
-     Open Liberty development mode allows you to easily develop your cloud-native Jakarta EE and Java microservices (with MicroProfile) applications with hot reload and deployment.
+     Liberty Tools adds support in IntelliJ for your <a href="https://openliberty.io/">Open Liberty</a> projects.
+     Liberty dev mode allows you to easily develop your cloud-native Jakarta EE and Java microservices (with MicroProfile) applications with hot reload and deployment.
      <b>This is a preview release.</b>
      <br/>
      The following features are available through the Liberty tool window:
