@@ -1,4 +1,4 @@
-# Open Liberty Tools for IntelliJ
+# Liberty Tools for IntelliJ
 
 [plugin-repo]: https://plugins.jetbrains.com/plugin/14856-open-liberty-tools
 
@@ -19,17 +19,16 @@ workspace.
 Note that this extension requires the [Integrated Terminal plugin](https://plugins.jetbrains.com/plugin/13123-terminal)
 to be enabled.
 
-![Open Liberty Tools Extension](docs/images/open-liberty-tools.png)
+![Liberty Tools Extension](docs/images/open-liberty-tools.png)
 
 ## Quick Start
 
-- Install [_Open Liberty
-  Tools_ from the IntelliJ Marketplace](https://plugins.jetbrains.com/plugin/14856-open-liberty-tools).
+- Install [_Liberty Tools_ from the IntelliJ Marketplace](https://plugins.jetbrains.com/plugin/14856-open-liberty-tools).
 - Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on
   the side bar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
 
-For more detailed instructions on your configuring your Open Liberty project and making use of the Open Liberty Tools
+For more detailed instructions on your configuring your Liberty project and making use of the Liberty Tools
 commands, check out [Getting Started](docs/GettingStarted.md).
 
 ## Features
@@ -59,7 +58,7 @@ the default `index.html` file.
 
 ## Contributing
 
-Contributions to the Open Liberty Tools extension are welcome!
+Contributions to the Liberty Tools extension are welcome!
 
 Our [CONTRIBUTING](CONTRIBUTING.md) document contains details for submitting pull requests.
 
@@ -75,4 +74,4 @@ built-in [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-p
 ## Issues
 
 Please report bugs, issues and feature requests by creating
-a [GitHub issue](https://github.com/OpenLiberty/open-liberty-tools-intellij/issues)
+a [GitHub issue](https://github.com/OpenLiberty/liberty-tools-intellij/issues)
