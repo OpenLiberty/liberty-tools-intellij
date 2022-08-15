@@ -1,7 +1,5 @@
 package io.openliberty.tools.intellij.actions;
 
-import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import java.io.*;
 import java.net.URI;
@@ -60,17 +58,8 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             e.printStackTrace();
         }
 
-       /*if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "curl -o ./app-name.zip https://start.openliberty.io/api/start?a=app-name&b=maven&e=9.1&g=com.demo&j=11&m=5.0";
-            //startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev -f \"" + buildFile.getCanonicalPath() + "\"";
-        } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            //startCmd = "gradle libertyDev -b=" + buildFile.getCanonicalPath();
-            startCmd = "curl -o ./app-name.zip https://start.openliberty.io/api/start?a=app-name&b=maven&e=9.1&g=com.demo&j=11&m=5.0";
-        }*/
         if (widget == null) {
             log.debug("Unable to start Liberty dev mode, could not get or create terminal widget for " + projectName);
-            //return;
         }
-        //LibertyActionUtil.executeCommand(widget, startCmd);
     }
 }

@@ -1,7 +1,5 @@
 package io.openliberty.tools.intellij;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,22 +25,5 @@ public class SpecMatrix {
     public void setDescriptions(Map<String, String> descriptions) {
         this.descriptions = descriptions;
     }
-
-    /**
-     * Each description begins with the name of the spec, followed by a "-" and then the actual description. This method converts the internal list of
-     * specs to a map having spec name as a key and the actual description as value
-     *
-     * @return Map of human readable spec names to their corresponding description
-     */
-    /*public List<MicroProfileSpec> getParsedDescription() {
-        List<MicroProfileSpec> result = new ArrayList<>(descriptions.size());
-
-        descriptions.forEach((key, value) -> {
-            String[] specDetails = value.split(" - ");
-            result.add(new MicroProfileSpec(key, specDetails[0], specDetails[1]));
-        });
-
-        return result;
-    }*/
 
 }
