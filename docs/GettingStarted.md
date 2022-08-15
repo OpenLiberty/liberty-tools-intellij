@@ -1,11 +1,11 @@
 # Getting Started
 
-Detailed instructions on how to import and configure your Open Liberty Project to make use of the Open Liberty Tools
+Detailed instructions on how to import and configure your Liberty project to make use of the Liberty Tools
 IntelliJ Plugin.
 
-### Importing your Open Liberty project into IntelliJ
+### Importing your Liberty project into IntelliJ
 
-Startup IntelliJ IDEA and then choose "Import Project" from the main menu and select your Open Liberty project.
+Startup IntelliJ IDEA and then choose "Import Project" from the main menu and select your Liberty project.
 
 ![IntelliJ import project](images/IntelliJ_import_project.png)
 
@@ -39,13 +39,13 @@ buildscript {
 ```
 
 Ensure you can access the Liberty tool window in IntelliJ. This can be enabled by selecting **View > Tool Windows >
-Liberty**. Your Open Liberty project should appear in the Liberty tool window. If it does not, ensure you have properly
+Liberty**. Your Liberty project should appear in the Liberty tool window. If it does not, ensure you have properly
 configured the Liberty Maven Plugin or Liberty Gradle plugin and refresh the tool window.
-![Open Liberty tool window](images/Liberty_tool_window.png)
+![Liberty tool window](images/Liberty_tool_window.png)
 
 ### Running Liberty in dev mode
 
-When you run Open Liberty in dev mode, you can rapidly code, deploy, test, and debug your application.
+When you run Liberty in dev mode, you can rapidly code, deploy, test, and debug your application.
 
 **Starting Liberty dev mode**
 
