@@ -35,23 +35,24 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
         File lemminxServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lemminx-uber.jar");
 //        File lsp4mpServerPath = new File(descriptor.getPath(), "lib/org.eclipse.lsp4mp.ls-0.4.0.jar");
 
-        File libertyServerPath = new File(descriptor.getPath(), "lib/server/lemminx-liberty-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        File libertyServerPath = new File(descriptor.getPath(), "lib/server/liberty-langserver-lemminx-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
+        LOGGER.warn("lemminxServerPath.exists(): " + lemminxServerPath.exists() + " ;" + lemminxServerPath.getAbsolutePath());
+        LOGGER.warn("libertyServerPath.exists(): " + libertyServerPath.exists() + " ;" + libertyServerPath.getAbsolutePath());
 
-        // Testing
-        ArrayList<String> params = new ArrayList<>();
-        params.add(javaHome + File.separator + "bin" + File.separator + "java");
-        params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
-//        params.add("-noVerify");
-        params.add("-jar");
-        params.add(lemminxServerPath.getAbsolutePath());
-        params.add("-cp");
-        params.add(libertyServerPath.getAbsolutePath());
-        params.add("org.eclipse.lemminx.XMLServerLauncher");
-
-        setCommands(params);
-        LOGGER.warn("Set commands: " + params.toString());
-
+        if (lemminxServerPath.exists() && libertyServerPath.exists()) {
+            ArrayList<String> params = new ArrayList<>();
+            params.add(javaHome + File.separator + "bin" + File.separator + "java");
+//            params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054"); // use for debugging Lemminx, will pause server until debugger attaches to port 1054
+            params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
+            params.add("-cp");
+            params.add(lemminxServerPath.getAbsolutePath() + ":" + libertyServerPath.getAbsolutePath());
+            params.add("org.eclipse.lemminx.XMLServerLauncher");
+            setCommands(params);
+            LOGGER.warn("Commands for starting LemMinX LS: " + params.toString());
+        } else {
+            LOGGER.warn("lemminxServerPath or libertyServerPath does not exist");
+        }
 
 //        setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
 //                lemminxServerPath.getAbsolutePath(), "-DrunAsync=true"));
@@ -64,23 +65,26 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
     public Object getInitializationOptions(URI rootUri) {
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> settings = new HashMap<>();
-        Map<String, Object> quarkus = new HashMap<>();
-        Map<String, Object> tools = new HashMap<>();
+//        Map<String, Object> quarkus = new HashMap<>();
+        Map<String, Object> xml = new HashMap<>();
+//        Map<String, Object> tools = new HashMap<>();
         Map<String, Object> trace = new HashMap<>();
         trace.put("server", "verbose");
-        tools.put("trace", trace);
+//        tools.put("trace", trace);
         Map<String, Object> codeLens = new HashMap<>();
         codeLens.put("urlCodeLensEnabled", "true");
-        tools.put("codeLens", codeLens);
-        quarkus.put("tools", tools);
-        settings.put("microprofile", quarkus);
+//        tools.put("codeLens", codeLens);
+//        quarkus.put("tools", tools);
+//        settings.put("microprofile", quarkus);
+        xml.put("trace", trace);
+        settings.put("xml", xml);
         root.put("settings", settings);
         Map<String, Object> extendedClientCapabilities = new HashMap<>();
-        Map<String, Object> commands = new HashMap<>();
+//        Map<String, Object> commands = new HashMap<>();
         Map<String, Object> commandsKind = new HashMap<>();
-        commandsKind.put("valueSet", Arrays.asList("microprofile.command.configuration.update", "microprofile.command.open.uri"));
-        commands.put("commandsKind", commandsKind);
-        extendedClientCapabilities.put("commands", commands);
+//        commandsKind.put("valueSet", Arrays.asList("microprofile.command.configuration.update", "microprofile.command.open.uri"));
+//        commands.put("commandsKind", commandsKind);
+//        extendedClientCapabilities.put("commands", commands);
         extendedClientCapabilities.put("completion", new HashMap<>());
         extendedClientCapabilities.put("shouldLanguageServerExitOnShutdown", Boolean.TRUE);
         root.put("extendedClientCapabilities", extendedClientCapabilities);

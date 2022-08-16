@@ -16,6 +16,7 @@
         <!--    <languageMapping language="JAVA" serverId="qute"/>-->
 
         <!-- Lemminx LSP -->
+        <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
         <server id="libertyXml" class="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlServer" clientImpl="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient" serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="XML" serverId="libertyXml"/>
 

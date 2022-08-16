@@ -29,6 +29,7 @@ import com.redhat.devtools.intellij.quarkus.QuarkusModuleUtil;
 import com.redhat.devtools.intellij.quarkus.QuarkusProjectService;
 import com.redhat.devtools.intellij.quarkus.lsp4ij.LanguageClientImpl;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.lemminx.customservice.XMLLanguageClientAPI;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Hover;
@@ -60,17 +61,20 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
-public class LibertyXmlLanguageClient extends LanguageClientImpl implements MicroProfileLanguageClientAPI, QuarkusProjectService.Listener {
+//public class LibertyXmlLanguageClient extends LanguageClientImpl implements MicroProfileLanguageClientAPI, QuarkusProjectService.Listener {
+public class LibertyXmlLanguageClient extends LanguageClientImpl implements XMLLanguageClientAPI, QuarkusProjectService.Listener {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LibertyXmlLanguageClient.class);
+
     private static final String JAVA_FILE_EXTENSION = "java";
 
-    private final MessageBusConnection connection;
+//    private final MessageBusConnection connection;
 
     public LibertyXmlLanguageClient(Project project) {
         super(project);
-        connection = project.getMessageBus().connect(project);
-        connection.subscribe(QuarkusProjectService.TOPIC, this);
-        QuarkusProjectService.getInstance(project);
+//        connection = project.getMessageBus().connect(project);
+//        connection.subscribe(QuarkusProjectService.TOPIC, this);
+//        QuarkusProjectService.getInstance(project);
     }
 
     private void sendPropertiesChangeEvent(List<MicroProfilePropertiesScope> scope, Set<String> uris) {
@@ -131,43 +135,43 @@ public class LibertyXmlLanguageClient extends LanguageClientImpl implements Micr
         return future;
     }
 
-    @Override
-    public CompletableFuture<MicroProfileProjectInfo> getProjectInfo(MicroProfileProjectInfoParams params) {
-        return runAsBackground("Computing project information", () -> PropertiesManager.getInstance().getMicroProfileProjectInfo(params, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<Hover> getJavaHover(MicroProfileJavaHoverParams javaParams) {
-        return runAsBackground("Computing Java hover", () -> PropertiesManagerForJava.getInstance().hover(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(MicroProfileJavaDiagnosticsParams javaParams) {
-        return runAsBackground("Computing Java diagnostics", () -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<Location> getPropertyDefinition(MicroProfilePropertyDefinitionParams params) {
-        return runAsBackground("Computing property definition", () -> PropertiesManager.getInstance().findPropertyLocation(params, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectlabels(MicroProfileJavaProjectLabelsParams javaParams) {
-        return runAsBackground("Computing Java projects labels", () -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<JavaFileInfo> getJavaFileInfo(MicroProfileJavaFileInfoParams javaParams) {
-        return runAsBackground("Computing Java file info", () -> PropertiesManagerForJava.getInstance().fileInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<CompletionList> getJavaCompletion(MicroProfileJavaCompletionParams javaParams) {
-        return runAsBackground("Computing Java completion", () -> PropertiesManagerForJava.getInstance().completion(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
-
-    @Override
-    public CompletableFuture<List<? extends CodeLens>> getJavaCodelens(MicroProfileJavaCodeLensParams javaParams) {
-        return runAsBackground("Computing Java codelens", () -> PropertiesManagerForJava.getInstance().codeLens(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    }
+//    @Override
+//    public CompletableFuture<MicroProfileProjectInfo> getProjectInfo(MicroProfileProjectInfoParams params) {
+//        return runAsBackground("Computing project information", () -> PropertiesManager.getInstance().getMicroProfileProjectInfo(params, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<Hover> getJavaHover(MicroProfileJavaHoverParams javaParams) {
+//        return runAsBackground("Computing Java hover", () -> PropertiesManagerForJava.getInstance().hover(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(MicroProfileJavaDiagnosticsParams javaParams) {
+//        return runAsBackground("Computing Java diagnostics", () -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<Location> getPropertyDefinition(MicroProfilePropertyDefinitionParams params) {
+//        return runAsBackground("Computing property definition", () -> PropertiesManager.getInstance().findPropertyLocation(params, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectlabels(MicroProfileJavaProjectLabelsParams javaParams) {
+//        return runAsBackground("Computing Java projects labels", () -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<JavaFileInfo> getJavaFileInfo(MicroProfileJavaFileInfoParams javaParams) {
+//        return runAsBackground("Computing Java file info", () -> PropertiesManagerForJava.getInstance().fileInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<CompletionList> getJavaCompletion(MicroProfileJavaCompletionParams javaParams) {
+//        return runAsBackground("Computing Java completion", () -> PropertiesManagerForJava.getInstance().completion(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
+//
+//    @Override
+//    public CompletableFuture<List<? extends CodeLens>> getJavaCodelens(MicroProfileJavaCodeLensParams javaParams) {
+//        return runAsBackground("Computing Java codelens", () -> PropertiesManagerForJava.getInstance().codeLens(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+//    }
 }
