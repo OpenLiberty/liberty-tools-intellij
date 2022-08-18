@@ -1,43 +1,54 @@
 <idea-plugin>
+    <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
     <extensionPoints>
-        <extensionPoint name="server" beanClass="com.redhat.devtools.intellij.quarkus.lsp4ij.ServerExtensionPointBean"/>
-        <extensionPoint name="languageMapping" beanClass="com.redhat.devtools.intellij.quarkus.lsp4ij.LanguageMappingExtensionPointBean"/>
+        <extensionPoint name="server"
+                        beanClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.ServerExtensionPointBean"/>
+        <extensionPoint name="languageMapping"
+                        beanClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.LanguageMappingExtensionPointBean"/>
     </extensionPoints>
-<!--    <extensions defaultExtensionNs="com.redhat.devtools.intellij.quarkus">-->
     <extensions defaultExtensionNs="open-liberty.intellij">
-        <!-- Quarkus LSP -->
-        <server id="quarkus" class="com.redhat.devtools.intellij.quarkus.lsp.QuarkusServer" clientImpl="com.redhat.devtools.intellij.quarkus.lsp.QuarkusLanguageClient" serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
-        <languageMapping language="Properties" serverId="quarkus"/>
-        <languageMapping language="JAVA" serverId="quarkus"/>
+        <!-- MicroProfile LS -->
+        <server id="lsp4mp" class="com.langserver.devtools.intellij.lsp4mp.lsp.MicroProfileServer"
+                clientImpl="com.langserver.devtools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <languageMapping language="Properties" serverId="lsp4mp"/>
+        <languageMapping language="JAVA" serverId="lsp4mp"/>
 
-        <!--    &lt;!&ndash; Qute LSP &ndash;&gt;-->
-        <!--    <server id="qute" class="com.redhat.devtools.intellij.qute.lsp.QuteServer" clientImpl="com.redhat.devtools.intellij.qute.lsp.QuteLanguageClient" serverInterface="com.redhat.qute.ls.api.QuteLanguageServerAPI"/>-->
-        <!--    <languageMapping language="Qute_" serverId="qute"/>-->
-        <!--    <languageMapping language="JAVA" serverId="qute"/>-->
-
-        <!-- Lemminx LSP -->
+        <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
-        <server id="libertyXml" class="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlServer" clientImpl="com.redhat.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient" serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <server id="libertyXml" class="com.langserver.devtools.intellij.liberty.lsp.LibertyXmlServer"
+                clientImpl="com.langserver.devtools.intellij.liberty.lsp.LibertyXmlLanguageClient"
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="XML" serverId="libertyXml"/>
 
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <!-- Generic -->
-        <completion.contributor id="LSPCompletionContributor" language="any" implementationClass="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.completion.LSContentAssistProcessor" order="first"/>
-        <inspectionToolProvider implementation="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
-        <projectService serviceImplementation="com.redhat.devtools.intellij.quarkus.lsp4ij.LanguageServiceAccessor"/>
-        <gotoDeclarationHandler implementation="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/>
+        <completion.contributor id="LSPCompletionContributor" language="any"
+                                implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
+                                order="first"/>
+        <inspectionToolProvider
+                implementation="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
+        <projectService serviceImplementation="com.langserver.devtools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
+        <gotoDeclarationHandler
+                implementation="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/>
 
-        <!-- Quarkus -->
-        <lang.documentationProvider id="LSPTextHoverProperties" language="Properties" implementationClass="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.hover.LSPTextHover" order="first"/>
-        <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA" implementationClass="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.hover.LSPTextHover" order="first"/>
-        <codeInsight.inlayProvider language="JAVA" implementationClass="com.redhat.devtools.intellij.quarkus.lsp4ij.operations.codelens.LSPInlayProvider"/>
+        <!-- MicroProfile -->
+        <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
+                                    implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    order="first"/>
+        <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA"
+                                    implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    order="first"/>
+        <codeInsight.inlayProvider language="JAVA"
+                                   implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp4ij.operations.codelens.LSPInlayProvider"/>
     </extensions>
-
 
     <project-components>
         <component>
-            <implementation-class>com.redhat.devtools.intellij.quarkus.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
+            <implementation-class>
+                com.langserver.devtools.intellij.lsp4mp.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant
+            </implementation-class>
         </component>
     </project-components>
 

@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.6.5'
-//    id "org.jetbrains.intellij" version "1.5.2"
 }
 
 group 'io.openliberty.tools'
@@ -10,7 +9,7 @@ version '0.0.6'
 sourceCompatibility = 11
 
 repositories {
-    mavenLocal()
+    mavenLocal() // TODO remove once Liberty LS is publicly available
     mavenCentral()
     maven {
         url 'https://repo.eclipse.org/content/repositories/lsp4mp-snapshots'
@@ -42,7 +41,6 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
 
-    // intellij quarkus
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0:uber') {
         transitive = false
     }
@@ -57,7 +55,6 @@ dependencies {
     }
 }
 
-// intellij quarkus
 task copyDeps(type: Copy) {
     from configurations.lsp
     into new File(buildDir, 'server/server')
@@ -73,13 +70,6 @@ intellij {
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
     updateSinceUntilBuild = false
 }
-
-//// See https://github.com/JetBrains/gradle-intellij-plugin/
-//intellij {
-//    version '2019.3.3'
-//    updateSinceUntilBuild false
-//    plugins 'terminal'
-//}
 
 patchPluginXml {
     changeNotes """
