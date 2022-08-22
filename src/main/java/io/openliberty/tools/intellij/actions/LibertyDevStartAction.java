@@ -10,7 +10,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
     public LibertyDevStartAction() {
         setActionCmd("start Liberty dev mode");
     }
-
+    
     @Override
     protected void executeLibertyAction() {
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);

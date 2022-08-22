@@ -6,26 +6,69 @@ plugins {
 group 'io.openliberty.tools'
 version '0.0.7'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 repositories {
+    mavenLocal() // TODO remove once Liberty LS is publicly available
     mavenCentral()
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/lsp4mp-snapshots'
+    }
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/lsp4mp-releases'
+    }
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/lemminx-releases'
+    }
+}
+
+configurations {
+    lsp
 }
 
 dependencies {
+    // LSP4IJ dependencies
+    compile 'org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0'
+    compile 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.14.0'
+    compile 'org.eclipse.lemminx:org.eclipse.lemminx:0.20.0'
+    compile 'io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT'
+    //required by lsp4j as the version from IJ is incompatible
+    compile 'com.google.code.gson:gson:2.8.9'
+    compile 'com.vladsch.flexmark:flexmark:0.50.50'
+    compile 'com.kotcrab.remark:remark:1.2.0'
+    compile 'org.jsoup:jsoup:1.14.2'
+
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
+
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0:uber') {
+        transitive = false
+    }
+    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.20.0:uber') {
+        transitive = false
+    }
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT:jar-with-dependencies') {
+        transitive = false
+    }
+    compile files(new File(buildDir, 'server')) {
+        builtBy 'copyDeps'
+    }
+}
+
+task copyDeps(type: Copy) {
+    from configurations.lsp
+    into new File(buildDir, 'server/server')
+    rename '^(.*)(-[0-9]+.[0-9]+.[0-9]+(-SNAPSHOT)?)(.*)$', '$1$4'
 }
 
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2019.3.3'
-    updateSinceUntilBuild false
-    plugins 'terminal'
+    version = '2020.2.4' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
+    updateSinceUntilBuild = false
 }
 
 patchPluginXml {
