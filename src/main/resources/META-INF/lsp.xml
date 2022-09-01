@@ -34,7 +34,6 @@
         <fileType name="microprofile-config.properties file"
                   implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp.MicroProfileConfigFileType"
                   fieldName="INSTANCE"
-                  language="MicroProfileConfigProperties"
                   patterns="microprofile-config.properties;microprofile-config-?*.properties"/>
 
         <!-- Generic -->
