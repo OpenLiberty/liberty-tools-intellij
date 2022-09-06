@@ -22,19 +22,32 @@
         <languageMapping language="XML" serverId="libertyXml"/>
 
         <!-- Liberty LS -->
-<!--        <server id="libertyls" class="com.langserver.devtools.intellij.liberty.lsp.LibertyLanguageServer"-->
-<!--                clientImpl="com.langserver.devtools.intellij.liberty.lsp.LibertyLanguageClient"-->
-<!--                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>-->
-<!--        <languageMapping language="Properties" serverId="libertyls"/>-->
-<!--        <languageMapping language="TEXT" serverId="libertyls"/>-->
+        <server id="libertyls" class="com.langserver.devtools.intellij.liberty.lsp.LibertyLanguageServer"
+                clientImpl="com.langserver.devtools.intellij.liberty.lsp.LibertyLanguageClient"
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <languageMapping language="BootstrapProperties" serverId="libertyls"/>
+        <languageMapping language="ServerEnv" serverId="libertyls"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
-        <!-- File Types -->
+        <!-- File types for language server activation -->
         <!-- microprofile-config.properties for LSP4MP -->
         <fileType name="microprofile-config.properties file"
                   implementationClass="com.langserver.devtools.intellij.lsp4mp.lsp.MicroProfileConfigFileType"
                   fieldName="INSTANCE"
                   patterns="microprofile-config.properties;microprofile-config-?*.properties"/>
+
+        <!-- bootstrap.properties for Liberty LS -->
+        <fileType name="bootstrap.properties file"
+                  implementationClass="com.langserver.devtools.intellij.liberty.lsp.BoostrapPropertiesFileType"
+                  fieldName="INSTANCE"
+                  fileNames="bootstrap.properties" /> <!-- FIXME this will start the Liberty LS on any bootstrap.properties files, not just src/main/liberty/config/bootstrap.properties -->
+
+        <!-- server.env for Liberty LS -->
+        <fileType name="server.env file"
+                  implementationClass="com.langserver.devtools.intellij.liberty.lsp.ServerEnvFileType"
+                  fieldName="INSTANCE"
+                  language="ServerEnv"
+                  fileNames="server.env" /> <!-- FIXME this will start the Liberty LS on any server.env files, not just src/main/liberty/config/server.env -->
 
         <!-- Generic -->
         <completion.contributor id="LSPCompletionContributor" language="any"

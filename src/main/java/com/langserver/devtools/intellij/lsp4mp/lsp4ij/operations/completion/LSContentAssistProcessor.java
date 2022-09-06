@@ -88,9 +88,10 @@ public class LSContentAssistProcessor extends CompletionContributor {
         if (completion != null) {
             List<CompletionItem> items = completion.isLeft()?completion.getLeft():completion.getRight().getItems();
             boolean isIncomplete = completion.isLeft()?false:completion.getRight().isIncomplete();
+            // Added check for when completion item kind is null, needed for Liberty LS integration
             return items.stream().map(item -> createLookupItem(project, editor, offset, item, isIncomplete, languageServer)).
                     filter(item -> item.validate(document, offset, null)).
-                    map(item -> PrioritizedLookupElement.withGrouping(item, item.getItem().getKind().getValue())).
+                    map(item -> PrioritizedLookupElement.withGrouping(item, item.getItem().getKind() != null ? item.getItem().getKind().getValue() : 0)).
                     collect(Collectors.toList());
         }
         return Collections.emptyList();

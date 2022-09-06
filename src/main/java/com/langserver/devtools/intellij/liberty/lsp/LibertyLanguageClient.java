@@ -22,8 +22,8 @@ import com.langserver.devtools.intellij.lsp4mp.MicroProfileModuleUtil;
 import com.langserver.devtools.intellij.lsp4mp.MicroProfileProjectService;
 import com.langserver.devtools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
 import com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import io.openliberty.tools.langserver.api.LibertyLanguageClientAPI;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.lemminx.customservice.XMLLanguageClientAPI;
 import org.eclipse.lsp4mp.commons.MicroProfilePropertiesChangeEvent;
 import org.eclipse.lsp4mp.commons.MicroProfilePropertiesScope;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
@@ -38,24 +38,24 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Client for LemMinX language server and Liberty LemMinX ext
+ * Client for Liberty language server
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusLanguageClient.java
  */
-public class LibertyXmlLanguageClient extends LanguageClientImpl implements XMLLanguageClientAPI, MicroProfileProjectService.Listener {
+public class LibertyLanguageClient extends LanguageClientImpl implements LibertyLanguageClientAPI, MicroProfileProjectService.Listener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyXmlLanguageClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyLanguageClient.class);
 
-    public LibertyXmlLanguageClient(Project project) {
+    public LibertyLanguageClient(Project project) {
         super(project);
     }
 
     @Override
     public void libraryUpdated(Library library) {
-        // not needed for LemMinX LS
+        // not needed for Liberty LS
     }
 
     @Override
     public void sourceUpdated(List<Pair<Module, VirtualFile>> sources) {
-        // not needed for LemMinX LS
+        // not needed for Liberty LS
     }
 }
