@@ -7,43 +7,43 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package com.langserver.devtools.intellij.lsp4mp.lsp;
+package com.langserver.devtools.intellij.liberty.lsp;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
 /**
- * Custom properties file type for microprofile-config.properties
+ * Custom file type for server.env files
  */
-public class MicroProfileConfigFileType extends LanguageFileType {
+public class ServerEnvFileType extends LanguageFileType {
+    public static final ServerEnvFileType INSTANCE = new ServerEnvFileType();
 
-    public static final MicroProfileConfigFileType INSTANCE = new MicroProfileConfigFileType();
-
-    protected MicroProfileConfigFileType() {
-        super(MicroProfileConfigLanguage.INSTANCE, true);
+    private ServerEnvFileType() {
+        super(ServerEnvLanguage.INSTANCE);
     }
 
     @Override
     public @NotNull String getName() {
-        return "microprofile-config.properties file";
+        return "server.env file";
     }
 
     @Override
     public @NotNull @NlsContexts.Label String getDescription() {
-        return "microprofile-config.properties file";
+        return "server.env file";
     }
 
+    @Override
     public @NotNull String getDefaultExtension() {
-        return "properties";
+        return "env";
     }
 
     @Override
     public @Nullable Icon getIcon() {
-        return AllIcons.FileTypes.Properties;
+        return LibertyPluginIcons.libertyIcon;
     }
 }

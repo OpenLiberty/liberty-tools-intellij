@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package com.langserver.devtools.intellij.lsp4mp.lsp;
+package com.langserver.devtools.intellij.liberty.lsp;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
@@ -18,26 +18,26 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 /**
- * Custom properties file type for microprofile-config.properties
+ * Custom file type for bootstrap.properties files
  */
-public class MicroProfileConfigFileType extends LanguageFileType {
+public class BootstrapPropertiesFileType extends LanguageFileType {
+    public static final BootstrapPropertiesFileType INSTANCE = new BootstrapPropertiesFileType();
 
-    public static final MicroProfileConfigFileType INSTANCE = new MicroProfileConfigFileType();
-
-    protected MicroProfileConfigFileType() {
-        super(MicroProfileConfigLanguage.INSTANCE, true);
+    private BootstrapPropertiesFileType() {
+        super(BootstrapPropertiesLanguage.INSTANCE, true);
     }
 
     @Override
     public @NotNull String getName() {
-        return "microprofile-config.properties file";
+        return "bootstrap.properties file";
     }
 
     @Override
     public @NotNull @NlsContexts.Label String getDescription() {
-        return "microprofile-config.properties file";
+        return "bootstrap.properties file";
     }
 
+    @Override
     public @NotNull String getDefaultExtension() {
         return "properties";
     }

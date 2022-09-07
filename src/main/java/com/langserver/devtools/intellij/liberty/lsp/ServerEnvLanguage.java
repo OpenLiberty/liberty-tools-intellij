@@ -7,18 +7,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package com.langserver.devtools.intellij.lsp4mp.lsp;
+package com.langserver.devtools.intellij.liberty.lsp;
 
 import com.intellij.lang.Language;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Custom language for microprofile-config.properties files
+ * Custom language for server.env files
  */
-public class MicroProfileConfigLanguage extends Language {
+public class ServerEnvLanguage extends Language {
 
-    public static final MicroProfileConfigLanguage INSTANCE = new MicroProfileConfigLanguage();
+    public static final ServerEnvLanguage INSTANCE = new ServerEnvLanguage();
 
-    private MicroProfileConfigLanguage() {
-        super("MicroProfileConfigProperties", "text/properties");
+    protected ServerEnvLanguage() {
+        super("ServerEnv");
     }
 }

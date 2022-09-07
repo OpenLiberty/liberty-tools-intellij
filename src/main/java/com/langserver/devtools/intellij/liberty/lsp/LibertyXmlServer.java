@@ -36,22 +36,20 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
 
         File libertyServerPath = new File(descriptor.getPath(), "lib/server/liberty-langserver-lemminx-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
-        LOGGER.warn("lemminxServerPath.exists(): " + lemminxServerPath.exists() + " ;" + lemminxServerPath.getAbsolutePath());
-        LOGGER.warn("libertyServerPath.exists(): " + libertyServerPath.exists() + " ;" + libertyServerPath.getAbsolutePath());
 
         if (lemminxServerPath.exists() && libertyServerPath.exists()) {
             ArrayList<String> params = new ArrayList<>();
             params.add(javaHome + File.separator + "bin" + File.separator + "java");
-            // Config for debugging LemMinX, will pause server until debugger attaches to port 1054
+            // TODO enable debugging via IntelliJ configuration without manually changing this line of code
+            // Comment out line 46 and replace with the one below for debugging LemMinX, will pause server until debugger attaches to port 1054
             // params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");
             params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
             params.add("-cp");
             params.add(lemminxServerPath.getAbsolutePath() + ":" + libertyServerPath.getAbsolutePath());
             params.add("org.eclipse.lemminx.XMLServerLauncher");
             setCommands(params);
-            LOGGER.warn("Commands for starting LemMinX LS: " + params.toString());
         } else {
-            LOGGER.warn("lemminxServerPath or libertyServerPath does not exist");
+            LOGGER.warn("Unable to start the LemMinX language server, LemMinX server path or Liberty LemMinX ext server path does not exist");
         }
     }
 
