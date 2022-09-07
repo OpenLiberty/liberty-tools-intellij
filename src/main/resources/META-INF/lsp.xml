@@ -38,7 +38,7 @@
 
         <!-- bootstrap.properties for Liberty LS -->
         <fileType name="bootstrap.properties file"
-                  implementationClass="com.langserver.devtools.intellij.liberty.lsp.BoostrapPropertiesFileType"
+                  implementationClass="com.langserver.devtools.intellij.liberty.lsp.BootstrapPropertiesFileType"
                   fieldName="INSTANCE"
                   fileNames="bootstrap.properties" /> <!-- FIXME this will start the Liberty LS on any bootstrap.properties files, not just src/main/liberty/config/bootstrap.properties -->
 

@@ -14,11 +14,11 @@ import com.intellij.lang.Language;
 /**
  * Custom language for bootstrap.properties files
  */
-public class BoostrapPropertiesLanguage extends Language {
+public class BootstrapPropertiesLanguage extends Language {
 
-    public static final BoostrapPropertiesLanguage INSTANCE = new BoostrapPropertiesLanguage();
+    public static final BootstrapPropertiesLanguage INSTANCE = new BootstrapPropertiesLanguage();
 
-    protected BoostrapPropertiesLanguage() {
+    protected BootstrapPropertiesLanguage() {
         super("BootstrapProperties", "text/properties");
     }
 }

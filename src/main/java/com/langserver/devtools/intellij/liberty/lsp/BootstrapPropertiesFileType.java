@@ -20,11 +20,11 @@ import javax.swing.*;
 /**
  * Custom file type for bootstrap.properties files
  */
-public class BoostrapPropertiesFileType extends LanguageFileType {
-    public static final BoostrapPropertiesFileType INSTANCE = new BoostrapPropertiesFileType();
+public class BootstrapPropertiesFileType extends LanguageFileType {
+    public static final BootstrapPropertiesFileType INSTANCE = new BootstrapPropertiesFileType();
 
-    private BoostrapPropertiesFileType() {
-        super(BoostrapPropertiesLanguage.INSTANCE, true);
+    private BootstrapPropertiesFileType() {
+        super(BootstrapPropertiesLanguage.INSTANCE, true);
     }
 
     @Override
