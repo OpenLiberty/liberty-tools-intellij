@@ -32,54 +32,57 @@
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
     </extensions>
 
-    <actions>
+    <!-- Default resource location for localizing Liberty actions strings -->
+    <resource-bundle>messages.LibertyBundles</resource-bundle>
+
+    <actions resource-bundle="messages.LibertyBundles">
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevStartAction" text="Start Liberty dev mode"
-                description="Start Liberty dev mode on current build file" icon="AllIcons.General.GearPlain" />
+                class="io.openliberty.tools.intellij.actions.LibertyDevStartAction"
+                icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction" text="Start Liberty dev mode..."
                 description="Custom Start Liberty dev mode on current build file" icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction" text="Start Liberty dev mode in container"
-                description="Start Liberty dev mode on current build file in a container" icon="AllIcons.General.GearPlain" />
+                class="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
+                icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStopAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevStopAction" text="Stop Liberty dev mode"
-                description="Stop Liberty dev mode on current build file" icon="AllIcons.General.GearPlain" />
+                class="io.openliberty.tools.intellij.actions.LibertyDevStopAction"
+                icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction" text="Run Liberty dev mode tests"
-                description="Run Liberty dev mode tests on current build file" icon="AllIcons.General.GearPlain" />
+                class="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction"
+                icon="AllIcons.General.GearPlain" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport"
-                class="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport" text="View integration test report"
-                description="Open the Maven Failsafe test report for the corresponding Liberty project" icon="AllIcons.General.Web" />
+                class="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport"
+                icon="AllIcons.General.Web" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewUnitTestReport"
-                class="io.openliberty.tools.intellij.actions.ViewUnitTestReport" text="View unit test report"
-                description="Open the Maven Surefire test report for the corresponding Liberty project" icon="AllIcons.General.Web" />
+                class="io.openliberty.tools.intellij.actions.ViewUnitTestReport"
+                icon="AllIcons.General.Web" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewTestReport"
-                class="io.openliberty.tools.intellij.actions.ViewTestReport" text="View test report"
-                description="Open the Gradle test report for the corresponding Liberty project" icon="AllIcons.General.Web" />
+                class="io.openliberty.tools.intellij.actions.ViewTestReport"
+                icon="AllIcons.General.Web" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewEffectivePom"
-                class="io.openliberty.tools.intellij.actions.ViewEffectivePom" text="View effective POM"
-                description="Open the pom.xml for the corresponding Liberty project" icon="AllIcons.FileTypes.Config" />
+                class="io.openliberty.tools.intellij.actions.ViewEffectivePom"
+                icon="AllIcons.FileTypes.Config" />
 
         <action id="io.openliberty.tools.intellij.actions.ViewGradleConfig"
-                class="io.openliberty.tools.intellij.actions.ViewGradleConfig" text="View Gradle config"
-                description="Open the build.gradle for the corresponding Liberty project" icon="AllIcons.FileTypes.Config" />
+                class="io.openliberty.tools.intellij.actions.ViewGradleConfig"
+                icon="AllIcons.FileTypes.Config" />
 
         <action id="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"
                 class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty tool window"
                 description="Refresh Liberty tool window projects" icon="AllIcons.Actions.Refresh"/>
 
         <action id="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
-                class="io.openliberty.tools.intellij.actions.RunLibertyDevTask" text="Run Liberty action"
-                description="Run the selected Liberty action" icon="AllIcons.Actions.Execute"/>
+                class="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
+                icon="AllIcons.Actions.Execute"/>
 
     </actions>
 </idea-plugin>

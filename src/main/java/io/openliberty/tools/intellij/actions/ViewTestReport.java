@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -23,10 +24,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 public class ViewTestReport extends LibertyGeneralAction {
 
     public ViewTestReport() {
-        setActionCmd("view Gradle test report");
+        setActionCmd(LibertyRB.getString("view.gradle.test.report"));
     }
 
     @Override
@@ -61,12 +64,11 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification("Liberty"
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , "Gradle Test Report Does Not Exist"
+                    , LibertyRB.getString("gradle.test.report.does.not.exist")
                     , ""
-                    , "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +
-                    "Run tests to generate a test report.  Ensure your test report is generating at the correct location."
+                    , MessageFormat.format(LibertyRB.getString("test.report.does.not.exist"), testReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

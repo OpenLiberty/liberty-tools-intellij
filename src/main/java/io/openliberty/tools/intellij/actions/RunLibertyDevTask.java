@@ -16,6 +16,8 @@ import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 
 public class RunLibertyDevTask extends AnAction {
     Logger log = Logger.getInstance(RunLibertyDevTask.class);
@@ -27,7 +29,7 @@ public class RunLibertyDevTask extends AnAction {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
-            Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+            Content content = libertyDevToolWindow.getContentManager().findContent(LibertyRB.getString("liberty.tool.window.display.name"));
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
             for (Component comp : components) {
@@ -57,7 +59,7 @@ public class RunLibertyDevTask extends AnAction {
 
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
-        Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+        Content content = libertyDevToolWindow.getContentManager().findContent(LibertyRB.getString("liberty.tool.window.display.name"));
 
         JComponent libertyWindow = content.getComponent();
 

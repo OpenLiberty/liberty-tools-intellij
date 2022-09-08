@@ -14,6 +14,10 @@ import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.MessageFormat;
+
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 public class LibertyGeneralAction extends AnAction {
 
     protected Logger log = Logger.getInstance(LibertyGeneralAction.class);
@@ -27,7 +31,7 @@ public class LibertyGeneralAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            String msg = "Unable to " + actionCmd + ": Could not resolve project. Ensure you run the Liberty action from the Liberty tool window";
+            String msg = MessageFormat.format(LibertyRB.getString("liberty.project.does.not.resolve"), actionCmd);
             notifyError(msg);
             log.debug(msg);
             return;
@@ -35,7 +39,7 @@ public class LibertyGeneralAction extends AnAction {
 
         buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = "Unable to " + actionCmd + ": Could not resolve configuration file for  " + project.getName() + ". Ensure you run the Liberty action from the Liberty tool window";
+            String msg = MessageFormat.format(LibertyRB.getString("liberty.build.file.does.not.resolve"), actionCmd,project.getName());
             notifyError(msg);
             log.debug(msg);
             return;
@@ -55,9 +59,9 @@ public class LibertyGeneralAction extends AnAction {
     }
 
     protected void notifyError(String errMsg) {
-        Notification notif = new Notification("Liberty"
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                 , LibertyPluginIcons.libertyIcon
-                , "Liberty action was not able to start"
+                , LibertyRB.getString("liberty.action.cannot.start")
                 , ""
                 , errMsg
                 , NotificationType.WARNING

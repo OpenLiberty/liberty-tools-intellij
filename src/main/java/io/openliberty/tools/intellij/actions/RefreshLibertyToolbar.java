@@ -20,13 +20,13 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 public class RefreshLibertyToolbar extends AnAction {
+    Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
-
-
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
             log.debug("Unable to refresh Liberty toolbar, could not resolve project");
@@ -36,7 +36,8 @@ public class RefreshLibertyToolbar extends AnAction {
 
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
-        Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+        Content content = libertyDevToolWindow.getContentManager().findContent(
+                LibertyRB.getString("liberty.tool.window.display.name"));
 
         SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
 
@@ -67,7 +68,7 @@ public class RefreshLibertyToolbar extends AnAction {
             if (tree != null) {
                 simpleToolWindowPanel.setContent(tree);
             } else {
-                JBTextArea jbTextArea = new JBTextArea("No Liberty Maven or Liberty Gradle projects detected in this workspace.");
+                JBTextArea jbTextArea = new JBTextArea(LibertyRB.getString("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
                 jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
                 jbTextArea.setLineWrap(true);

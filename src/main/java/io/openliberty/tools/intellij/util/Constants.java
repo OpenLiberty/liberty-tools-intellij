@@ -1,26 +1,28 @@
 package io.openliberty.tools.intellij.util;
 
 import java.util.HashMap;
+import java.util.ResourceBundle;
 
 public final class Constants {
+    public static final ResourceBundle LibertyRB = ResourceBundle.getBundle("messages.LibertyBundles");
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
     public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
 
-    public static final String LIBERTY_DEV_START = "Start dev mode";
-    public static final String LIBERTY_DEV_CUSTOM_START = "Start dev mode...";
-    public static final String LIBERTY_DEV_START_CONTAINER = "Start dev mode in a container";
-    public static final String LIBERTY_DEV_STOP = "Stop dev mode";
-    public static final String LIBERTY_DEV_TESTS = "Run dev mode tests";
+    public static final String LIBERTY_DEV_START = LibertyRB.getString("start.dev");
+    public static final String LIBERTY_DEV_CUSTOM_START = LibertyRB.getString("start.dev.custom.params");
+    public static final String LIBERTY_DEV_START_CONTAINER = LibertyRB.getString("start.dev.container");
+    public static final String LIBERTY_DEV_STOP = LibertyRB.getString("stop.dev");
+    public static final String LIBERTY_DEV_TESTS = LibertyRB.getString("run.tests.dev");
 
     // Maven
-    public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";
-    public static final String VIEW_UNIT_TEST_REPORT = "View unit test report";
+    public static final String VIEW_INTEGRATION_TEST_REPORT = LibertyRB.getString("action.io.openliberty.tools.intellij.actions.ViewIntegrationTestReport.text");
+    public static final String VIEW_UNIT_TEST_REPORT = LibertyRB.getString("action.io.openliberty.tools.intellij.actions.ViewUnitTestReport.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
 
     // Gradle
-    public static final String VIEW_GRADLE_TEST_REPORT = "View test report";
-    public static final String TEST_REPORT_STRING = "Test Summary";
+    public static final String VIEW_GRADLE_TEST_REPORT = LibertyRB.getString("action.io.openliberty.tools.intellij.actions.ViewTestReport.text");
+    public static final String TEST_REPORT_STRING = LibertyRB.getString("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
 
     public static final String LIBERTY_TREE = "LibertyTree";

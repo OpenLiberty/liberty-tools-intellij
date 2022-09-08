@@ -5,14 +5,19 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
+import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
+import java.text.MessageFormat;
+
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
 
     public LibertyDevRunTestsAction() {
-        setActionCmd("run tests with Liberty dev mode");
+        setActionCmd(LibertyRB.getString("run.tests.liberty.dev"));
     }
 
     @Override
@@ -21,12 +26,11 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
 
         if (widget == null) {
-            Notification notif = new Notification("Liberty"
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , "Liberty dev mode has not been started"
+                    , LibertyRB.getString("liberty.dev.not.started.notification.title")
                     , ""
-                    , "Liberty dev mode has not been started on " + projectName
-                    + ". \nStart Liberty dev mode from the Liberty tool window."
+                    , MessageFormat.format(LibertyRB.getString("liberty.dev.not.started.notification.content"), projectName)
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

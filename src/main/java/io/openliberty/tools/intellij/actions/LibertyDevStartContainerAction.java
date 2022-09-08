@@ -5,10 +5,12 @@ import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+
 public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
     public LibertyDevStartContainerAction() {
-        setActionCmd("start Liberty dev mode in a container");
+        setActionCmd(LibertyRB.getString("start.liberty.dev.container"));
     }
 
     @Override

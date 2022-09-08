@@ -8,14 +8,18 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
+import io.openliberty.tools.intellij.util.Constants;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
+
+import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
     public ViewIntegrationTestReport() {
-        setActionCmd("view integration test report");
+        setActionCmd(LibertyRB.getString("view.integration.test.report"));
     }
 
     @Override
@@ -27,12 +31,11 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
 
         if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
-            Notification notif = new Notification("Liberty"
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , "Integration Test Report Does Not Exist"
+                    , LibertyRB.getString("integration.test.report.does.not.exist.notification.title")
                     , ""
-                    , "Test report (" + failsafeReportFile.getAbsolutePath() + ") does not exist.  " +
-                    "Run tests to generate a test report.  Ensure your test report is generating at the correct location."
+                    , MessageFormat.format(LibertyRB.getString("test.report.does.not.exist"), failsafeReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
