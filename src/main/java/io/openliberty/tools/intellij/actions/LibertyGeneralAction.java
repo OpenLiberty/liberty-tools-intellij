@@ -30,7 +30,7 @@ public class LibertyGeneralAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            String msg = MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve"), actionCmd);
+            String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
             notifyError(msg);
             log.debug(msg);
             return;
@@ -38,7 +38,7 @@ public class LibertyGeneralAction extends AnAction {
 
         buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve"), actionCmd,project.getName());
+            String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd,project.getName());
             notifyError(msg);
             log.debug(msg);
             return;

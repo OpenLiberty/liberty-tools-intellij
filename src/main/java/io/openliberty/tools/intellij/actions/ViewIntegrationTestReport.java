@@ -34,7 +34,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
                     , LibertyPluginIcons.libertyIcon
                     , LocalizedResourceUtil.getMessage("integration.test.report.does.not.exist.notification.title")
                     , ""
-                    , MessageFormat.format(LocalizedResourceUtil.getMessage("test.report.does.not.exist"), failsafeReportFile.getAbsolutePath())
+                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", failsafeReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

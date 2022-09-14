@@ -29,7 +29,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
                     , LibertyPluginIcons.libertyIcon
                     , LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.title")
                     , ""
-                    , MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content"), projectName)
+                    , LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", projectName)
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

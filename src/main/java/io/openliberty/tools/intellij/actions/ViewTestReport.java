@@ -67,7 +67,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                     , LibertyPluginIcons.libertyIcon
                     , LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist")
                     , ""
-                    , MessageFormat.format(LocalizedResourceUtil.getMessage("test.report.does.not.exist"), testReportFile.getAbsolutePath())
+                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

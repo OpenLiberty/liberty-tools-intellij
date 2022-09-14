@@ -33,7 +33,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
                     , LibertyPluginIcons.libertyIcon
                     , LocalizedResourceUtil.getMessage("unit.test.report.does.not.exist")
                     , ""
-                    , MessageFormat.format(LocalizedResourceUtil.getMessage("test.report.does.not.exist"), surefireReportFile.getAbsolutePath())
+                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", surefireReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
