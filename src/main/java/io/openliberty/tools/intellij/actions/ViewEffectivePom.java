@@ -2,13 +2,12 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 public class ViewEffectivePom extends LibertyGeneralAction {
 
     public ViewEffectivePom() {
-        setActionCmd(LibertyRB.getString("view.effective.pom"));
+        setActionCmd(LocalizedResourceUtil.getMessage("view.effective.pom"));
     }
 
     @Override

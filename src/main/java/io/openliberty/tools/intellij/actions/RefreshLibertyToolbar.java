@@ -15,12 +15,11 @@ import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 public class RefreshLibertyToolbar extends AnAction {
     Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
@@ -37,7 +36,7 @@ public class RefreshLibertyToolbar extends AnAction {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
         Content content = libertyDevToolWindow.getContentManager().findContent(
-                LibertyRB.getString("liberty.tool.window.display.name"));
+                LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
 
         SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
 
@@ -68,7 +67,7 @@ public class RefreshLibertyToolbar extends AnAction {
             if (tree != null) {
                 simpleToolWindowPanel.setContent(tree);
             } else {
-                JBTextArea jbTextArea = new JBTextArea(LibertyRB.getString("no.liberty.projects.detected"));
+                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
                 jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
                 jbTextArea.setLineWrap(true);

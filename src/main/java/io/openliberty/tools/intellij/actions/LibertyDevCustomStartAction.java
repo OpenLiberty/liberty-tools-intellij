@@ -6,14 +6,13 @@ import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 public class LibertyDevCustomStartAction extends LibertyGeneralAction {
 
     public LibertyDevCustomStartAction() {
-        setActionCmd(LibertyRB.getString("start.liberty.dev.custom.params"));
+        setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params"));
     }
 
     @Override
@@ -21,10 +20,10 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         String msg;
         String initialVal;
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            msg = LibertyRB.getString("start.liberty.dev.custom.params.message.maven");
+            msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.maven");
             initialVal = "-DhotTests=true";
         } else {
-            msg = LibertyRB.getString("start.liberty.dev.custom.params.message.gradle");
+            msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.gradle");
             initialVal = "--hotTests";
         }
 
@@ -44,7 +43,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         };
 
         String customParams = Messages.showInputDialog(project, msg,
-                LibertyRB.getString("liberty.dev.custom.params"),
+                LocalizedResourceUtil.getMessage("liberty.dev.custom.params"),
                 LibertyPluginIcons.libertyIcon_40, initialVal, validator);
 
         String startCmd = null;

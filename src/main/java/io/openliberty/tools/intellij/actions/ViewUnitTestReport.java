@@ -9,17 +9,16 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
-
 public class ViewUnitTestReport extends LibertyGeneralAction {
 
     public ViewUnitTestReport() {
-        setActionCmd(LibertyRB.getString("view.unit.test.report"));
+        setActionCmd(LocalizedResourceUtil.getMessage("view.unit.test.report"));
     }
 
     @Override
@@ -32,9 +31,9 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , LibertyRB.getString("unit.test.report.does.not.exist")
+                    , LocalizedResourceUtil.getMessage("unit.test.report.does.not.exist")
                     , ""
-                    , MessageFormat.format(LibertyRB.getString("test.report.does.not.exist"), surefireReportFile.getAbsolutePath())
+                    , MessageFormat.format(LocalizedResourceUtil.getMessage("test.report.does.not.exist"), surefireReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

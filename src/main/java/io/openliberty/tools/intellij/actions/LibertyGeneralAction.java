@@ -12,11 +12,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 public class LibertyGeneralAction extends AnAction {
 
@@ -31,7 +30,7 @@ public class LibertyGeneralAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            String msg = MessageFormat.format(LibertyRB.getString("liberty.project.does.not.resolve"), actionCmd);
+            String msg = MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve"), actionCmd);
             notifyError(msg);
             log.debug(msg);
             return;
@@ -39,7 +38,7 @@ public class LibertyGeneralAction extends AnAction {
 
         buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = MessageFormat.format(LibertyRB.getString("liberty.build.file.does.not.resolve"), actionCmd,project.getName());
+            String msg = MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve"), actionCmd,project.getName());
             notifyError(msg);
             log.debug(msg);
             return;
@@ -61,7 +60,7 @@ public class LibertyGeneralAction extends AnAction {
     protected void notifyError(String errMsg) {
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                 , LibertyPluginIcons.libertyIcon
-                , LibertyRB.getString("liberty.action.cannot.start")
+                , LocalizedResourceUtil.getMessage("liberty.action.cannot.start")
                 , ""
                 , errMsg
                 , NotificationType.WARNING

@@ -2,13 +2,12 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 public class ViewGradleConfig extends LibertyGeneralAction {
 
     public ViewGradleConfig() {
-        setActionCmd(LibertyRB.getString("view.gradle.config.file"));
+        setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.config.file"));
     }
 
     @Override

@@ -3,14 +3,13 @@ package io.openliberty.tools.intellij.actions;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
     public LibertyDevStartContainerAction() {
-        setActionCmd(LibertyRB.getString("start.liberty.dev.container"));
+        setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev.container"));
     }
 
     @Override

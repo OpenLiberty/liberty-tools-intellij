@@ -8,16 +8,15 @@ import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.text.MessageFormat;
 
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
-
 public class LibertyDevStopAction extends LibertyGeneralAction {
 
     public LibertyDevStopAction() {
-        setActionCmd(LibertyRB.getString("stop.liberty.dev"));
+        setActionCmd(LocalizedResourceUtil.getMessage("stop.liberty.dev"));
     }
 
     @Override
@@ -27,9 +26,9 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
         if (widget == null) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , LibertyRB.getString("liberty.dev.not.started.notification.title")
+                    , LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.title")
                     , ""
-                    , MessageFormat.format(LibertyRB.getString("liberty.dev.not.started.notification.content"), projectName)
+                    , MessageFormat.format(LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content"), projectName)
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +25,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
-
 public class ViewTestReport extends LibertyGeneralAction {
 
     public ViewTestReport() {
-        setActionCmd(LibertyRB.getString("view.gradle.test.report"));
+        setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.test.report"));
     }
 
     @Override
@@ -66,9 +65,9 @@ public class ViewTestReport extends LibertyGeneralAction {
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , LibertyRB.getString("gradle.test.report.does.not.exist")
+                    , LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist")
                     , ""
-                    , MessageFormat.format(LibertyRB.getString("test.report.does.not.exist"), testReportFile.getAbsolutePath())
+                    , MessageFormat.format(LocalizedResourceUtil.getMessage("test.report.does.not.exist"), testReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

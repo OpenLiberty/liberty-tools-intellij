@@ -83,18 +83,18 @@ Add localized strings in `src/main/resources/messages/LibertyBundles_{locale}.pr
 2. Add the following import statement in your source code:
 
    ```java
-   import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
+   import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
    ```
 
-3. Call method `LibertyRB.toString` to return localized message.
+3. Call method `LocalizedResourceUtil.getMessage` to return localized message.
 
    Example without parameters:
    ```java
-   String message = LibertyRB.getString("my.message.key");
+   String message = LocalizedResourceUtil.getMessage("my.message.key");
    ```
    Example with parameters:
    ```java
-   String message = LibertyRB.getString("my.message.key.with.params", param1, param2);
+   String message = LocalizedResourceUtil.getMessage("my.message.key.with.params", param1, param2);
    ```
 
 ## Issues

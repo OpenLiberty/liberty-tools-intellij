@@ -5,9 +5,8 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
-
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
 
 final class LibertyDevToolWindowFactory implements ToolWindowFactory {
     @Override
@@ -17,7 +16,7 @@ final class LibertyDevToolWindowFactory implements ToolWindowFactory {
         LibertyExplorer explorer = new LibertyExplorer(project);
         ContentManager contentManager = toolWindow.getContentManager();
         Content content = contentManager.getFactory().createContent(explorer,
-                LibertyRB.getString("liberty.tool.window.display.name"), false);
+                LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"), false);
         contentManager.addContent(content);
 
     }

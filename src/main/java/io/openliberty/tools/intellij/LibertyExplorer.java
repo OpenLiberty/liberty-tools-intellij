@@ -33,8 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static io.openliberty.tools.intellij.util.Constants.LibertyRB;
-
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private static Logger log = Logger.getInstance(LibertyExplorer.class);
 
@@ -46,7 +44,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (tree != null) {
             this.setContent(tree);
         } else {
-            JBTextArea jbTextArea = new JBTextArea(LibertyRB.getString("no.liberty.projects.detected"));
+            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
             jbTextArea.setEditable(false);
             jbTextArea.setBackground(getBackground());
             jbTextArea.setLineWrap(true);
