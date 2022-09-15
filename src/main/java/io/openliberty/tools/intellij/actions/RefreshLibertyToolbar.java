@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.projectView.ProjectView;
@@ -15,18 +24,17 @@ import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class RefreshLibertyToolbar extends AnAction {
+    Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
-
-
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
             log.debug("Unable to refresh Liberty toolbar, could not resolve project");
@@ -36,7 +44,8 @@ public class RefreshLibertyToolbar extends AnAction {
 
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
-        Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+        Content content = libertyDevToolWindow.getContentManager().findContent(
+                LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
 
         SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
 
@@ -67,7 +76,7 @@ public class RefreshLibertyToolbar extends AnAction {
             if (tree != null) {
                 simpleToolWindowPanel.setContent(tree);
             } else {
-                JBTextArea jbTextArea = new JBTextArea("No Liberty Maven or Liberty Gradle projects detected in this workspace.");
+                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
                 jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
                 jbTextArea.setLineWrap(true);
