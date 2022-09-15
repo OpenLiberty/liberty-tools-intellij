@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.DataManager;
@@ -10,12 +19,12 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-
 
 public class RunLibertyDevTask extends AnAction {
     Logger log = Logger.getInstance(RunLibertyDevTask.class);
@@ -27,7 +36,7 @@ public class RunLibertyDevTask extends AnAction {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
-            Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+            Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
             for (Component comp : components) {
@@ -57,7 +66,7 @@ public class RunLibertyDevTask extends AnAction {
 
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
-        Content content = libertyDevToolWindow.getContentManager().findContent("Projects");
+        Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
 
         JComponent libertyWindow = content.getComponent();
 

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij;
 
 import com.intellij.ide.DataManager;
@@ -34,19 +43,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
-    private static Logger log;
+    private static Logger log = Logger.getInstance(LibertyExplorer.class);
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
-        log = Logger.getInstance(LibertyExplorer.class);
-
         // build tree
         Tree tree = buildTree(project, getBackground());
 
         if (tree != null) {
             this.setContent(tree);
         } else {
-            JBTextArea jbTextArea = new JBTextArea("No Liberty Maven or Liberty Gradle projects detected in this workspace.");
+            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
             jbTextArea.setEditable(false);
             jbTextArea.setBackground(getBackground());
             jbTextArea.setLineWrap(true);
@@ -165,7 +172,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
 
             // check if Liberty Gradle Plugin is 3.1-M1+
-            // TODO: handle version specified in a gradle.setings file
+            // TODO: handle version specified in a gradle.settings file
             if (buildFile.isValidContainerVersion()) {
                 node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
             }
