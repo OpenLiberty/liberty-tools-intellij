@@ -24,8 +24,6 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.MessageFormat;
-
 public class LibertyGeneralAction extends AnAction {
 
     protected Logger log = Logger.getInstance(LibertyGeneralAction.class);
@@ -47,7 +45,7 @@ public class LibertyGeneralAction extends AnAction {
 
         buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd,project.getName());
+            String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
             notifyError(msg);
             log.debug(msg);
             return;

@@ -20,8 +20,6 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
-import java.text.MessageFormat;
-
 public class LibertyDevStopAction extends LibertyGeneralAction {
 
     public LibertyDevStopAction() {

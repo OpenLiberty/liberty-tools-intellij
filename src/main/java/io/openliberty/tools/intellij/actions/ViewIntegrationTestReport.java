@@ -22,7 +22,6 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 
 public class ViewIntegrationTestReport extends LibertyGeneralAction {
 

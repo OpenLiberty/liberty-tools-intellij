@@ -13,7 +13,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 public class LibertyProjectNode extends DefaultMutableTreeNode {
     public VirtualFile path;

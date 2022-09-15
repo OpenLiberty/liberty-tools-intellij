@@ -12,7 +12,6 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.treeStructure.Tree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
