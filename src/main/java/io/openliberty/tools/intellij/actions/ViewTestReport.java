@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
@@ -10,6 +19,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +36,7 @@ import java.util.stream.Stream;
 public class ViewTestReport extends LibertyGeneralAction {
 
     public ViewTestReport() {
-        setActionCmd("view Gradle test report");
+        setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.test.report"));
     }
 
     @Override
@@ -61,12 +71,11 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification("Liberty"
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
                     , LibertyPluginIcons.libertyIcon
-                    , "Gradle Test Report Does Not Exist"
+                    , LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist")
                     , ""
-                    , "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +
-                    "Run tests to generate a test report.  Ensure your test report is generating at the correct location."
+                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath())
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);

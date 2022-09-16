@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
 import java.util.HashMap;
@@ -7,20 +16,20 @@ public final class Constants {
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
     public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
 
-    public static final String LIBERTY_DEV_START = "Start dev mode";
-    public static final String LIBERTY_DEV_CUSTOM_START = "Start dev mode...";
-    public static final String LIBERTY_DEV_START_CONTAINER = "Start dev mode in a container";
-    public static final String LIBERTY_DEV_STOP = "Stop dev mode";
-    public static final String LIBERTY_DEV_TESTS = "Run dev mode tests";
+    public static final String LIBERTY_DEV_START = LocalizedResourceUtil.getMessage("start.dev");
+    public static final String LIBERTY_DEV_CUSTOM_START = LocalizedResourceUtil.getMessage("start.dev.custom.params");
+    public static final String LIBERTY_DEV_START_CONTAINER = LocalizedResourceUtil.getMessage("start.dev.container");
+    public static final String LIBERTY_DEV_STOP = LocalizedResourceUtil.getMessage("stop.dev");
+    public static final String LIBERTY_DEV_TESTS = LocalizedResourceUtil.getMessage("run.tests.dev");
 
     // Maven
-    public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";
-    public static final String VIEW_UNIT_TEST_REPORT = "View unit test report";
+    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewIntegrationTestReport.text");
+    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewUnitTestReport.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
 
     // Gradle
-    public static final String VIEW_GRADLE_TEST_REPORT = "View test report";
-    public static final String TEST_REPORT_STRING = "Test Summary";
+    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewTestReport.text");
+    public static final String TEST_REPORT_STRING = LocalizedResourceUtil.getMessage("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
 
     public static final String LIBERTY_TREE = "LibertyTree";

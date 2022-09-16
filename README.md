@@ -71,6 +71,32 @@ built-in [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-p
    to build and run an IntelliJ instance:
    `./gradlew runIde`
 
+### Localization
+
+#### LibertyBundles.properties
+Add localized strings in `src/main/resources/messages/LibertyBundles_{locale}.properties`. The default message file is `LibertyBundles.properties`.
+
+#### Source code
+
+1. Add new messages in `src/main/resources/messages/LibertyBunldes_{locale}.properties` file. If message has parameters, use curly brackets to enclose them: `{0}`, `{1}`...
+
+2. Add the following import statement in your source code:
+
+   ```java
+   import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+   ```
+
+3. Call method `LocalizedResourceUtil.getMessage` to return localized message.
+
+   Example without parameters:
+   ```java
+   String message = LocalizedResourceUtil.getMessage("my.message.key");
+   ```
+   Example with parameters:
+   ```java
+   String message = LocalizedResourceUtil.getMessage("my.message.key.with.params", param1, param2);
+   ```
+
 ## Issues
 
 Please report bugs, issues and feature requests by creating
