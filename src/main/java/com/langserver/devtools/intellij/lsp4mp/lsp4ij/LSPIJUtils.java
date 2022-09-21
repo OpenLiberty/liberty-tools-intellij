@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at https://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package com.langserver.devtools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
@@ -51,7 +61,6 @@ public class LSPIJUtils {
         param.setPosition(start);
         TextDocumentIdentifier id = new TextDocumentIdentifier();
         if (uri != null) {
-            param.setUri(uri.toString());
             id.setUri(uri.toString());
         }
         param.setTextDocument(id);
@@ -176,7 +185,6 @@ public class LSPIJUtils {
         Position start = toPosition(offset, document);
         CompletionParams param = new CompletionParams();
         param.setPosition(start);
-        param.setUri(fileUri.toString());
         TextDocumentIdentifier id = new TextDocumentIdentifier();
         id.setUri(fileUri.toString());
         param.setTextDocument(id);
