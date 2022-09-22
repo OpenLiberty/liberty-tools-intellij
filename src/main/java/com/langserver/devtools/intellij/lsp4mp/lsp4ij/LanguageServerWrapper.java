@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at https://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package com.langserver.devtools.intellij.lsp4mp.lsp4ij;
 
 import com.google.gson.Gson;
@@ -19,6 +29,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import com.langserver.devtools.intellij.lsp4mp.lsp4ij.server.StreamConnectionProvider;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.ClientInfo;
 import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.CodeActionKindCapabilities;
@@ -301,7 +312,7 @@ public class LanguageServerWrapper {
                     .setSynchronization(new SynchronizationCapabilities(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
             initParams.setCapabilities(
                     new ClientCapabilities(workspaceClientCapabilities, textDocumentClientCapabilities, lspStreamProvider.getExperimentalFeaturesPOJO()));
-            initParams.setClientName(CLIENT_NAME);
+            initParams.setClientInfo(new ClientInfo(CLIENT_NAME));
 
             initParams.setInitializationOptions(this.lspStreamProvider.getInitializationOptions(rootURI));
             initParams.setTrace(this.lspStreamProvider.getTrace(rootURI));
