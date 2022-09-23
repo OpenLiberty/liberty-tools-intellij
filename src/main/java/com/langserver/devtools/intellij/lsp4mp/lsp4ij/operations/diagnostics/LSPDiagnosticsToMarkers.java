@@ -102,6 +102,10 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
     }
 
     private Color getColor(DiagnosticSeverity severity) {
+        if (severity == null) {
+            // if not set, default to Error
+            return Color.RED;
+        }
         switch (severity) {
             case Hint:
                 return Color.GRAY;
@@ -111,6 +115,7 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
                 return Color.GRAY;
             case Warning:
                 return Color.YELLOW;
+
         }
         return Color.GRAY;
     }
