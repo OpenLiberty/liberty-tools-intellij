@@ -77,7 +77,7 @@ public class LSPLocalInspectionTool extends LocalInspectionTool {
                                 } else {
                                     element = PsiUtilCore.getElementAtOffset(file, highlighter.getStartOffset());
                                 }
-                                ProblemHighlightType highlightType = getHighlighType(((Diagnostic)highlighter.getErrorStripeTooltip()).getSeverity());
+                                ProblemHighlightType highlightType = getHighlightType(((Diagnostic)highlighter.getErrorStripeTooltip()).getSeverity());
                                 problemDescriptors.add(manager.createProblemDescriptor(element, ((Diagnostic)highlighter.getErrorStripeTooltip()).getMessage(), true, highlightType, isOnTheFly));
                             }
                         }
@@ -92,7 +92,11 @@ public class LSPLocalInspectionTool extends LocalInspectionTool {
         return super.checkFile(file, manager, isOnTheFly);
     }
 
-    private ProblemHighlightType getHighlighType(DiagnosticSeverity severity) {
+    private ProblemHighlightType getHighlightType(DiagnosticSeverity severity) {
+        if (severity == null) {
+            // if severity is not set, default to Error
+            return ProblemHighlightType.ERROR;
+        }
         switch (severity) {
             case Error:
                 return ProblemHighlightType.ERROR;
