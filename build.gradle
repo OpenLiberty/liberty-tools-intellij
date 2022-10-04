@@ -6,7 +6,7 @@ plugins {
 group 'io.openliberty.tools'
 version '0.0.7'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -23,7 +23,7 @@ runIde {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2019.3.3'
+    version '2021.3.2'
     updateSinceUntilBuild false
     plugins 'terminal'
 }
