@@ -27,6 +27,12 @@
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="BootstrapProperties" serverId="libertyls"/>
         <languageMapping language="ServerEnv" serverId="libertyls"/>
+
+        <!-- Jakarta LS -->
+        <server id="jakartals" class="com.langserver.devtools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
+                clientImpl="com.langserver.devtools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <!-- File types for language server activation -->
