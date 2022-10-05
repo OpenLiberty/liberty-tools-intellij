@@ -39,7 +39,7 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.error("Cannot stop Liberty dev mode, corresponding project terminal does not exist.");
+            LOGGER.error("Cannot stop Liberty dev mode, corresponding project terminal does not exist.");
             return;
         }
         LibertyActionUtil.executeCommand(widget, stopCmd);

@@ -32,7 +32,7 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
         if (widget == null) {
-            log.debug("Unable to start Liberty dev mode in a container, could not get or create terminal widget for " + projectName);
+            LOGGER.debug("Unable to start Liberty dev mode in a container, could not get or create terminal widget for " + projectName);
             return;
         }
         LibertyActionUtil.executeCommand(widget, startCmd);

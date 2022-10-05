@@ -32,7 +32,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             startCmd = "gradle libertyDev -b=" + buildFile.getCanonicalPath();
         }
         if (widget == null) {
-            log.debug("Unable to start Liberty dev mode, could not get or create terminal widget for " + projectName);
+            LOGGER.debug("Unable to start Liberty dev mode, could not get or create terminal widget for " + projectName);
             return;
         }
         LibertyActionUtil.executeCommand(widget, startCmd);

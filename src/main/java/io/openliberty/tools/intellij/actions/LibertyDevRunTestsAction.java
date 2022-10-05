@@ -40,7 +40,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
                     , NotificationType.WARNING
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.error("Cannot run tests, corresponding project terminal does not exist.");
+            LOGGER.error("Cannot run tests, corresponding project terminal does not exist.");
             return;
         }
         LibertyActionUtil.executeCommand(widget, runTestsCommand);

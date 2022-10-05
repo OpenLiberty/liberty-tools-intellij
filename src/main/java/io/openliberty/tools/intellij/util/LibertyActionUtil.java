@@ -26,7 +26,7 @@ public class LibertyActionUtil {
      * @param cmd
      */
     public static void executeCommand(ShellTerminalWidget widget, String cmd) {
-        Logger log = Logger.getInstance(LibertyActionUtil.class);
+        Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
         try {
             widget.grabFocus();
             TtyConnector connector = widget.getTtyConnector();
@@ -41,7 +41,7 @@ public class LibertyActionUtil {
             result.append(cmd).append(enterCode);
             connector.write(result.toString());
         } catch (IOException ex) {
-            log.error(ex.getMessage());
+            LOGGER.error(ex.getMessage());
         }
 
     }

@@ -45,7 +45,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.debug("Unit test report does not exist at : " + surefireReportFile.getAbsolutePath());
+            LOGGER.debug("Unit test report does not exist at : " + surefireReportFile.getAbsolutePath());
             return;
         }
 

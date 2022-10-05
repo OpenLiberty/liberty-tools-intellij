@@ -27,7 +27,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 
 public class RunLibertyDevTask extends AnAction {
-    Logger log = Logger.getInstance(RunLibertyDevTask.class);
+    Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
 
     @Override
     public void update(@NotNull AnActionEvent e) {
@@ -53,7 +53,7 @@ public class RunLibertyDevTask extends AnAction {
                         }
                     }
                 } else {
-                    log.debug("Tree view not built, no valid projects to run Liberty dev actions on");
+                    LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
                 }
             }
         }
@@ -93,7 +93,7 @@ public class RunLibertyDevTask extends AnAction {
                     }
                 }
             } else {
-                log.debug("Tree view not built, no valid projects to run Liberty dev actions on");
+                LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
             }
         }
     }
