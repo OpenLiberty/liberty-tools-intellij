@@ -160,7 +160,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             if (projectName == null) {
                 projectName = project.getName();
             }
-            node = new LibertyProjectNode(psiFile, project.getName(), Constants.LIBERTY_GRADLE_PROJECT, buildFile.isValidContainerVersion());
+            node = new LibertyProjectNode(psiFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, buildFile.isValidContainerVersion());
 
             top.add(node);
             projectNames.add(projectName);
