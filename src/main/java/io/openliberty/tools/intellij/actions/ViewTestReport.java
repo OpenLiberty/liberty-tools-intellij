@@ -79,7 +79,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
+            LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;
         }
 

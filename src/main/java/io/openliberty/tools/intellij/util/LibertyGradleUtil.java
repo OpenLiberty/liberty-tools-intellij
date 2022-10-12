@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class LibertyGradleUtil {
-    private static Logger log = Logger.getInstance(LibertyGradleUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);;
     /**
      * Given the gradle build file get the project name
      * This method looks for a settings.gradle file in the same parent dir
@@ -46,7 +46,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                log.error("Could not read " + settingsPath, e.getMessage());
+                LOGGER.error("Could not read " + settingsPath, e.getMessage());
             }
         }
         return null;

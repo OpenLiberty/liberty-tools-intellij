@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class LibertyProjectUtil {
-    private static Logger log = Logger.getInstance(LibertyProjectUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
 
     @Nullable
     public static Project getProject(DataContext context) {
@@ -106,7 +106,7 @@ public class LibertyProjectUtil {
                         buildFiles.add(buildFile);
                     }
                 } catch (Exception e) {
-                    log.error("Error parsing build.gradle", e.getMessage());
+                    LOGGER.error("Error parsing build.gradle", e.getMessage());
                 }
             }
         }

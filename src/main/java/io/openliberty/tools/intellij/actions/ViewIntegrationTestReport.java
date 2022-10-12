@@ -46,7 +46,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
+            LOGGER.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
             return;
         }
 

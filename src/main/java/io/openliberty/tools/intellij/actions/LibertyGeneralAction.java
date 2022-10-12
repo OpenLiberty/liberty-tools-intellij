@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class LibertyGeneralAction extends AnAction {
 
-    protected Logger log = Logger.getInstance(LibertyGeneralAction.class);
+    protected Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
     protected Project project;
     protected String projectName;
     protected String projectType;
@@ -37,9 +37,10 @@ public class LibertyGeneralAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
+            // TODO prompt user to select project
             String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
             notifyError(msg);
-            log.debug(msg);
+            LOGGER.debug(msg);
             return;
         }
 
@@ -47,7 +48,7 @@ public class LibertyGeneralAction extends AnAction {
         if (buildFile == null) {
             String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
             notifyError(msg);
-            log.debug(msg);
+            LOGGER.debug(msg);
             return;
         }
 
