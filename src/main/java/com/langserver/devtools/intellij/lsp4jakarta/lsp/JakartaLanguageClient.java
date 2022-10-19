@@ -9,6 +9,7 @@
  * Red Hat, Inc. - initial API and implementation
  * IBM Corporation
  ******************************************************************************/
+
 package com.langserver.devtools.intellij.lsp4jakarta.lsp;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -19,8 +20,11 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import com.langserver.devtools.intellij.lsp4mp.MicroProfileProjectService;
 import com.langserver.devtools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
+import com.langserver.devtools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
@@ -64,8 +68,10 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   }
 
   // Support the message "jakarta/java/diagnostics"
-  public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams javaParams) {
-    return CompletableFuture.completedFuture(null);
+  public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
+    IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+    List<PublishDiagnosticsParams> diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
+    return CompletableFuture.completedFuture(diagnostics);
   }
 
   @Override
