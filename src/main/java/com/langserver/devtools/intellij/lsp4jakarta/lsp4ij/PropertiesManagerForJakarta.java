@@ -18,6 +18,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.*;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.FilterDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.ServletDiagnosticsCollector;
@@ -48,7 +49,7 @@ public class PropertiesManagerForJakarta {
 
     private PropertiesManagerForJakarta() {
         diagnosticsCollectors.add(new ServletDiagnosticsCollector());
-//        diagnosticsCollectors.add(new AnnotationDiagnosticsCollector());
+        diagnosticsCollectors.add(new AnnotationDiagnosticsCollector());
         diagnosticsCollectors.add(new FilterDiagnosticsCollector());
         diagnosticsCollectors.add(new ListenerDiagnosticsCollector());
 //        diagnosticsCollectors.add(new BeanValidationDiagnosticsCollector());
