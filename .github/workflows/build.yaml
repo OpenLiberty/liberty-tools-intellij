@@ -20,9 +20,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 11
+          cache: 'gradle'
       - name: Build Liberty-Tools-Intellij
         run: gradle buildPlugin
-      - name: Archive jars
+      - name: Archive artifacts
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
