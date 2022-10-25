@@ -1,12 +1,12 @@
 # Liberty Tools for IntelliJ
 
-[plugin-repo]: https://plugins.jetbrains.com/plugin/14856-open-liberty-tools
+[plugin-repo]: https://plugins.jetbrains.com/plugin/14856-liberty-tools
 
-[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/14856-open-liberty-tools.svg
+[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/14856-liberty-tools.svg
 
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
-![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-open-liberty-tools)
+![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-liberty-tools)
 
 An [Open Liberty](https://openliberty.io/) extension for IntelliJ. The extension will detect your Liberty Maven or
 Liberty Gradle project if it detects the `io.openliberty.tools:liberty-maven-plugin` in the `pom.xml` or
@@ -23,7 +23,7 @@ to be enabled.
 
 ## Quick Start
 
-- Install [_Liberty Tools_ from the IntelliJ Marketplace](https://plugins.jetbrains.com/plugin/14856-open-liberty-tools).
+- Install [_Liberty Tools_ from the IntelliJ Marketplace](https://plugins.jetbrains.com/plugin/14856-liberty-tools).
 - Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on
   the side bar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
@@ -65,7 +65,7 @@ Our [CONTRIBUTING](CONTRIBUTING.md) document contains details for submitting pul
 Developing this extension using the
 built-in [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin/).
 
-1. Clone this repository: `git clone git@github.com:OpenLiberty/open-liberty-tools-intellij.git`
+1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
 2. Import this repository as a gradle project in IntelliJ IDEA
 3. Run `./gradlew buildPlugin` to build a `.zip` that can be imported as gradle plugin or run the following Gradle task
    to build and run an IntelliJ instance:
