@@ -30,10 +30,10 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         String initialVal;
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.maven");
-            initialVal = "-f \"" + buildFile.getName() + "\"";
+            initialVal = "";
         } else {
             msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.gradle");
-            initialVal = "--project-dir=.";
+            initialVal = "";
         }
 
         InputValidator validator = new InputValidator() {
@@ -70,6 +70,8 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             LOGGER.debug("Unable to start Liberty dev mode with custom parameters, could not get or create terminal widget for " + projectName);
             return;
         }
+        String cdToProjectCmd = "cd " + buildFile.getParent().getCanonicalPath();
+        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
         LibertyActionUtil.executeCommand(widget, startCmd);
     }
 }
