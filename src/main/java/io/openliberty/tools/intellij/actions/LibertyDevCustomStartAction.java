@@ -70,7 +70,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             LOGGER.debug("Unable to start Liberty dev mode with custom parameters, could not get or create terminal widget for " + projectName);
             return;
         }
-        String cdToProjectCmd = "cd " + buildFile.getParent().getCanonicalPath();
+        String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
         LibertyActionUtil.executeCommand(widget, startCmd);
     }
