@@ -27,7 +27,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
-          name: liberty-tools-intellij
+          name: liberty-tools-intellij-${{ github.sha }}
           path: ./**/*liberty-tools-intellij*.zip
           if-no-files-found: warn
           retention-days: 7
