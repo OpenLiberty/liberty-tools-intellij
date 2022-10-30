@@ -66,6 +66,7 @@ public class WebSocketConstants {
 
     // Superclass
     public static final String ENDPOINT_SUPERCLASS = "Endpoint";
+    public static final String FQ_ENDPOINT_SUPERCLASS = "jakarta.websocket.Endpoint";
     public static final String IS_SUPERCLASS = "isSuperclass";
 
     public static final String[] WS_ANNOTATION_CLASS = { SERVER_ENDPOINT_ANNOTATION, CLIENT_ENDPOINT_ANNOTATION };

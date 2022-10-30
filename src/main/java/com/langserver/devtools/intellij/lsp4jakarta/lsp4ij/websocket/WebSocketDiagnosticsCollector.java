@@ -19,13 +19,11 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.InheritanceUtil;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
-import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-
-//import static com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.TypeHierarchyUtils.doesITypeHaveSuperType;
 
 public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector {
     public WebSocketDiagnosticsCollector() {
@@ -45,32 +43,32 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
         PsiClass[] alltypes = null;
         HashMap<String, Boolean> checkWSEnd = null;
-            alltypes = unit.getClasses();
-            for (PsiClass type : alltypes) {
-                checkWSEnd = isWSEndpoint(type);
-                // checks if the class uses annotation to create a WebSocket endpoint
-                if (checkWSEnd.get(WebSocketConstants.IS_ANNOTATION)) {
-                    // WebSocket Invalid Parameters Diagnostic
-                    invalidParamsCheck(type, unit, diagnostics);
+        alltypes = unit.getClasses();
+        for (PsiClass type : alltypes) {
+            checkWSEnd = isWSEndpoint(type);
+            // checks if the class uses annotation to create a WebSocket endpoint
+            if (checkWSEnd.get(WebSocketConstants.IS_ANNOTATION)) {
+                // WebSocket Invalid Parameters Diagnostic
+                invalidParamsCheck(type, unit, diagnostics);
 
-                    /* @PathParam Value Mismatch Warning */
-                    List<String> endpointPathVars = findAndProcessEndpointURI(type);
-                    /*
-                     * WebSocket endpoint annotations must be attached to a class, and thus is
-                     * guaranteed to be processed before any of the member method annotations
-                     */
-                    if (endpointPathVars != null) {
-                        // PathParam URI Mismatch Warning Diagnostic
-                        uriMismatchWarningCheck(type, endpointPathVars, diagnostics, unit);
-                    }
-
-                    // OnMessage validation for WebSocket message formats
-                    onMessageWSMessageFormats(type, diagnostics, unit);
-
-                    // ServerEndpoint annotation diagnostics
-                    serverEndpointErrorCheck(type, diagnostics, unit);
+                /* @PathParam Value Mismatch Warning */
+                List<String> endpointPathVars = findAndProcessEndpointURI(type);
+                /*
+                 * WebSocket endpoint annotations must be attached to a class, and thus is
+                 * guaranteed to be processed before any of the member method annotations
+                 */
+                if (endpointPathVars != null && !endpointPathVars.isEmpty()) {
+                    // PathParam URI Mismatch Warning Diagnostic
+                    uriMismatchWarningCheck(type, endpointPathVars, diagnostics, unit);
                 }
+
+                // OnMessage validation for WebSocket message formats
+                onMessageWSMessageFormats(type, diagnostics, unit);
+
+                // ServerEndpoint annotation diagnostics
+                serverEndpointErrorCheck(type, diagnostics, unit);
             }
+        }
     }
 
     private void invalidParamsCheck(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
@@ -95,26 +93,10 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                 if (diagnosticCode != null) {
                     PsiParameter[] allParams = method.getParameterList().getParameters();
                     for (PsiParameter param : allParams) {
-                        // TODO NEED TO CHECK
-//                        String signature = param.getTypeSignature();
-//                        String formatSignature = signature.replace("/", ".");
-//                        String resolvedTypeName = JavaModelUtil.getResolvedTypeName(formatSignature, type);
-//                        boolean isPrimitive = JavaModelUtil.isPrimitive(formatSignature);
-//                        boolean isSpecialType;
-//                        boolean isPrimWrapped;
                         String resolvedTypeName = param.getType().getCanonicalText();
                         boolean isPrimitive = param.getType() instanceof PsiPrimitiveType;
                         boolean isSpecialType = specialParamTypes.contains(resolvedTypeName);
                         boolean isPrimWrapped = isWrapper(resolvedTypeName);
-
-//                        if (resolvedTypeName != null) {
-//                            isSpecialType = specialParamTypes.contains(resolvedTypeName);
-//                            isPrimWrapped = isWrapper(resolvedTypeName);
-//                        } else {
-//                            String simpleParamType = Signature.getSignatureSimpleName(signature);
-//                            isSpecialType = rawSpecialParamTypes.contains(simpleParamType);
-//                            isPrimWrapped = isWrapper(simpleParamType);
-//                        }
 
                         // check parameters valid types
                         if (!(isSpecialType || isPrimWrapped || isPrimitive)) {
@@ -163,7 +145,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                             WebSocketConstants.PATHPARAM_ANNOTATION)) {
                         PsiNameValuePair[] valuePairs = annotation.getParameterList().getAttributes();
                         for (PsiNameValuePair pair : valuePairs) {
-                            if (pair.getName().equals(WebSocketConstants.ANNOTATION_VALUE)) {
+                            String annoArgName = pair.getName();
+                            if (annoArgName == null || annoArgName.equals(WebSocketConstants.ANNOTATION_VALUE)) {
                                 String pathValue = pair.getLiteralValue();
                                 if (!endpointPathVars.contains(pathValue)) {
                                     diagnostics.add(createDiagnostic(annotation, unit,
@@ -200,19 +183,10 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                     PsiParameter[] allParams = method.getParameterList().getParameters();
                     for (PsiParameter param : allParams) {
                         if (!isParamPath(type, param)) {
-                            // TODO NEED TO CHECK
-//                            String signature = param.getTypeSignature();
-//                            String formatSignature = signature.replace("/", ".");
-//                            String resolvedTypeName = JavaModelUtil.getResolvedTypeName(formatSignature, type);
-//                            String typeName = null;
-//                            if (resolvedTypeName == null) {
-//                                typeName = Signature.getSignatureSimpleName(signature);
-//                            }
                             String typeName = param.getType().getCanonicalText();
 
-                            if ((typeName != null
-                                    && WebSocketConstants.LONG_MESSAGE_CLASSES.contains(typeName))
-                                    || WebSocketConstants.SHORT_MESSAGE_CLASSES.contains(typeName)) {
+                            if (typeName != null
+                                    && WebSocketConstants.LONG_MESSAGE_CLASSES.contains(typeName)) {
                                 WebSocketConstants.MESSAGE_FORMAT messageFormat = typeName != null
                                         ? getMessageFormat(typeName, true)
                                         : getMessageFormat(typeName, false);
@@ -276,7 +250,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
             if (isMatchedJavaElement(type, annotation.getQualifiedName(),
                     WebSocketConstants.SERVER_ENDPOINT_ANNOTATION)) {
                 for (PsiNameValuePair annotationMemberValuePair : annotation.getParameterList().getAttributes()) {
-                    if (annotationMemberValuePair.getName().equals(WebSocketConstants.ANNOTATION_VALUE)) {
+                    String annoArgName = annotationMemberValuePair.getName();
+                    if (annoArgName == null || annoArgName.equals(WebSocketConstants.ANNOTATION_VALUE)) {
                         String path = annotationMemberValuePair.getLiteralValue();
                         if (!JDTUtils.hasLeadingSlash(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
@@ -320,7 +295,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
             if (matchedAnnotation != null) {
                 PsiNameValuePair[] valuePairs = annotation.getParameterList().getAttributes();
                 for (PsiNameValuePair pair : valuePairs) {
-                    if (pair.getName().equals(WebSocketConstants.ANNOTATION_VALUE)) {
+                    String annoArgName = pair.getName();
+                    if (annoArgName == null || annoArgName.equals(WebSocketConstants.ANNOTATION_VALUE)) {
                         endpointURI = pair.getLiteralValue();
                     }
                 }
@@ -377,8 +353,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                 Stream.of(type.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                 WebSocketConstants.WS_ANNOTATION_CLASS);
 
-        boolean useSuperclass = false;
-//        useSuperclass = doesITypeHaveSuperType(type, WebSocketConstants.ENDPOINT_SUPERCLASS) >= 0;
+        boolean useSuperclass = InheritanceUtil.isInheritor(type, WebSocketConstants.FQ_ENDPOINT_SUPERCLASS);
 
         wsEndpoint.put(WebSocketConstants.IS_ANNOTATION, (endpointAnnotations.size() > 0));
         wsEndpoint.put(WebSocketConstants.IS_SUPERCLASS, useSuperclass);
