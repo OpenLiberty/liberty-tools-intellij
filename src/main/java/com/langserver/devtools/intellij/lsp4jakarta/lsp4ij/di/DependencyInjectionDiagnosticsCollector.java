@@ -75,7 +75,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                 boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
                 boolean isAbstract = method.hasModifierProperty(PsiModifier.ABSTRACT);
                 boolean isStatic = method.hasModifierProperty(PsiModifier.STATIC);
-                boolean isGeneric = method.getParameterList().getParametersCount() != 0;
+                boolean isGeneric = method.hasTypeParameters();
 
                 if (containsAnnotation(type, method.getAnnotations(), INJECT_FQ_NAME)) {
                     if (isConstructorMethod(method))
@@ -112,14 +112,14 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
             if (injectedConstructors.size() > 1) {
                 String msg = createAnnotationDiagnostic(INJECT, "more than one constructor.");
                 for (PsiMethod m : injectedConstructors) {
-                    diagnostics.add(createDiagnostic(m, unit,msg,
+                    diagnostics.add(createDiagnostic(m, unit, msg,
                             DIAGNOSTIC_CODE_INJECT_CONSTRUCTOR, null, DiagnosticSeverity.Error));
                 }
             }
-            }
+        }
     }
 
-    private  String createAnnotationDiagnostic(String annotation, String attributeType) {
+    private String createAnnotationDiagnostic(String annotation, String attributeType) {
         return "The annotation @" + annotation + " must not define " + attributeType;
     }
 
