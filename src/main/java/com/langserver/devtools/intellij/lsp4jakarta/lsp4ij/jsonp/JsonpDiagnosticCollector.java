@@ -16,12 +16,9 @@ package com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jsonp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.PsiUtil;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -77,8 +74,12 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
 
     private boolean isMatchedJsonCreatePointer(PsiMethodCallExpression mi) {
         String fqName = JsonpConstants.JSON_FQ_NAME + "." + JsonpConstants.CREATE_POINTER;
+        String miName = null;
+        PsiMethod m = mi.resolveMethod();
+        if (m != null && m.getClass() != null) {
+            miName = m.getContainingClass().getQualifiedName() + "." + m.getName();
+        }
         return mi.getArgumentList().getExpressionCount() == 1
-                && mi.resolveMethod() != null
-                && fqName.equals(mi.resolveMethod().getName());
+                && fqName.equals(miName);
     }
 }
