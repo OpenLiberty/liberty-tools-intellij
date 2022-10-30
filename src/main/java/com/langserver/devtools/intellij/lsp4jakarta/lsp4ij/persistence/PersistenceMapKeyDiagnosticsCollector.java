@@ -109,7 +109,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, field, unit, diagnostics);
                     }
                 }
-                }
+            }
         }
     }
 
