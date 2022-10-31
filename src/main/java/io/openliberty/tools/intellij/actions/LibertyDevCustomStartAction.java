@@ -30,10 +30,10 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         String initialVal;
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.maven");
-            initialVal = "-DhotTests=true";
+            initialVal = "";
         } else {
             msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.gradle");
-            initialVal = "--hotTests";
+            initialVal = "";
         }
 
         InputValidator validator = new InputValidator() {
@@ -60,9 +60,9 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             return;
         }
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev " + customParams + " -f \"" + buildFile.getCanonicalPath() + "\"";
+            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev " + customParams;
         } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            startCmd = "gradle libertyDev " + customParams + " -b=" + buildFile.getCanonicalPath();
+            startCmd = "gradle libertyDev " + customParams;
         }
 
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
@@ -70,6 +70,8 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             LOGGER.debug("Unable to start Liberty dev mode with custom parameters, could not get or create terminal widget for " + projectName);
             return;
         }
+        String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";
+        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
         LibertyActionUtil.executeCommand(widget, startCmd);
     }
 }
