@@ -27,14 +27,16 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String startCmd = null;
 
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev -f \"" + buildFile.getCanonicalPath() + "\"";
+            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev";
         } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            startCmd = "gradle libertyDev -b=" + buildFile.getCanonicalPath();
+            startCmd = "gradle libertyDev";
         }
         if (widget == null) {
             LOGGER.debug("Unable to start Liberty dev mode, could not get or create terminal widget for " + projectName);
             return;
         }
+        String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";
+        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
         LibertyActionUtil.executeCommand(widget, startCmd);
     }
 }
