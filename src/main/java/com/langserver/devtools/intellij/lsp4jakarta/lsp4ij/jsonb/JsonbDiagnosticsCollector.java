@@ -1,0 +1,166 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2022 IBM Corporation, Matheus Cruz and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation, Matheus Cruz, Yijia Jing - initial API and implementation
+ *******************************************************************************/
+
+package com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jsonb;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.intellij.psi.*;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
+/**
+ * This class contains logic for Jsonb diagnostics:
+ * 1) Multiple JsonbCreator annotations on constructors will cause a diagnostic.
+ * 2) JsonbTransient not being a mutually exclusive Jsonb annotation will cause a diagnostic.
+ */
+public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    public JsonbDiagnosticsCollector() {
+        super();
+    }
+
+    @Override
+    protected String getDiagnosticSource() {
+        return JsonbConstants.DIAGNOSTIC_SOURCE;
+    }
+
+    @Override
+    public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        if (unit == null)
+            return;
+        PsiClass[] types = unit.getClasses();
+        PsiMethod[] methods;
+        PsiAnnotation[] allAnnotations;
+
+        for (PsiClass type : types) {
+            methods = type.getMethods();
+            List<PsiMethod> jonbMethods = new ArrayList<PsiMethod>();
+            // methods
+            for (PsiMethod method : type.getMethods()) {
+                if (isConstructorMethod(method) || method.hasModifierProperty(PsiModifier.STATIC)) {
+                    allAnnotations = method.getAnnotations();
+                    for (PsiAnnotation annotation : allAnnotations) {
+                        if (isMatchedJavaElement(type, annotation.getQualifiedName(), JsonbConstants.JSONB_CREATOR))
+                            jonbMethods.add(method);
+                    }
+                }
+            }
+            if (jonbMethods.size() > JsonbConstants.MAX_METHOD_WITH_JSONBCREATOR) {
+                for (PsiMethod method : methods) {
+                    diagnostics.add(createDiagnostic(method, unit, JsonbConstants.ERROR_MESSAGE_JSONB_CREATOR,
+                            JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION, null, DiagnosticSeverity.Error));
+                }
+            }
+            // fields
+            for (PsiField field : type.getFields()) {
+                collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
+                collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
+            }
+        }
+    }
+
+    private void collectJsonbTransientFieldDiagnostics(PsiJavaFile unit, PsiClass type, List<Diagnostic> diagnostics, PsiField field) {
+        List<String> jsonbAnnotationsForField = getJsonbAnnotationNames(type, field);
+        if (jsonbAnnotationsForField.contains(JsonbConstants.JSONB_TRANSIENT_FQ_NAME)) {
+            boolean hasAccessorConflict = false;
+            // Diagnostics on the accessors of the field are created when they are
+            // annotated with Jsonb annotations other than JsonbTransient.
+            List<PsiMethod> accessors = JDTUtils.getFieldAccessors(unit, field);
+            for (PsiMethod accessor : accessors) {
+                List<String> jsonbAnnotationsForAccessor = getJsonbAnnotationNames(type, accessor);
+                if (hasJsonbAnnotationOtherThanTransient(jsonbAnnotationsForAccessor)) {
+                    createJsonbTransientDiagnostic(unit, diagnostics, accessor, jsonbAnnotationsForAccessor,
+                            JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_FIELD);
+                    hasAccessorConflict = true;
+                }
+            }
+            // Diagnostic is created on the field if @JsonbTransient is not mutually
+            // exclusive or
+            // accessor has annotations other than JsonbTransient
+            if (hasAccessorConflict || hasJsonbAnnotationOtherThanTransient(jsonbAnnotationsForField))
+                createJsonbTransientDiagnostic(unit, diagnostics, field, jsonbAnnotationsForField,
+                        JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_FIELD);
+        }
+    }
+
+    private void collectJsonbTransientAccessorDiagnostics(PsiJavaFile unit, PsiClass type, List<Diagnostic> diagnostics, PsiField field) {
+        boolean createDiagnosticForField = false;
+        List<String> jsonbAnnotationsForField = getJsonbAnnotationNames(type, field);
+        List<PsiMethod> accessors = JDTUtils.getFieldAccessors(unit, field);
+        for (PsiMethod accessor : accessors) {
+            List<String> jsonbAnnotationsForAccessor = getJsonbAnnotationNames(type, accessor);
+            boolean hasFieldConflict = false;
+            if (jsonbAnnotationsForAccessor.contains(JsonbConstants.JSONB_TRANSIENT_FQ_NAME)) {
+                // Diagnostic is created if the field of this accessor has a annotation other
+                // then JsonbTransient
+                if (hasJsonbAnnotationOtherThanTransient(jsonbAnnotationsForField)) {
+                    createDiagnosticForField = true;
+                    hasFieldConflict = true;
+                }
+
+                // Diagnostic is created on the accessor if field has annotation other than
+                // JsonbTransient
+                // or if @JsonbTransient is not mutually exclusive
+                if (hasFieldConflict || hasJsonbAnnotationOtherThanTransient(jsonbAnnotationsForAccessor))
+                    createJsonbTransientDiagnostic(unit, diagnostics, accessor, jsonbAnnotationsForAccessor,
+                            JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_ACCESSOR);
+
+            }
+        }
+        if (createDiagnosticForField)
+            createJsonbTransientDiagnostic(unit, diagnostics, field, jsonbAnnotationsForField,
+                    JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_ACCESSOR);
+    }
+
+    private boolean createJsonbTransientDiagnostic(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiElement member,
+                                                   List<String> jsonbAnnotations, String diagnosticErrorMessage) {
+        String code = null;
+        if (diagnosticErrorMessage.equals(JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_FIELD))
+            code = JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_FIELD;
+        else if (diagnosticErrorMessage.equals(JsonbConstants.ERROR_MESSAGE_JSONB_TRANSIENT_ON_ACCESSOR))
+            code = JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_ACCESSOR;
+        // convert to simple name for current tests
+        List<String> diagnosticData = jsonbAnnotations.stream().map(annotation -> getSimpleName(annotation))
+                .collect(Collectors.toList());
+        diagnostics.add(createDiagnostic(member, unit, diagnosticErrorMessage, code,
+                (JsonArray) (new Gson().toJsonTree(diagnosticData)), DiagnosticSeverity.Error));
+        return true;
+    }
+
+    private List<String> getJsonbAnnotationNames(PsiClass type, PsiJvmModifiersOwner annotable) {
+        List<String> jsonbAnnotationNames = new ArrayList<String>();
+        PsiAnnotation annotations[] = annotable.getAnnotations();
+        for (PsiAnnotation annotation : annotations) {
+            String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), JsonbConstants.JSONB_ANNOTATIONS.toArray(String[]::new));
+            if (matchedAnnotation != null) {
+                jsonbAnnotationNames.add(matchedAnnotation);
+            }
+        }
+        return jsonbAnnotationNames;
+    }
+
+    private boolean hasJsonbAnnotationOtherThanTransient(List<String> jsonbAnnotations) {
+        for (String annotationName : jsonbAnnotations)
+            if (JsonbConstants.JSONB_ANNOTATIONS.contains(annotationName)
+                    && !annotationName.equals(JsonbConstants.JSONB_TRANSIENT_FQ_NAME))
+                return true;
+        return false;
+    }
+}

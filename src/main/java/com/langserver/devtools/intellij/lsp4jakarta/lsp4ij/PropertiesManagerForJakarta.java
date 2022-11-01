@@ -19,9 +19,19 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.*;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSClassDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.jsonp.JsonpDiagnosticCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceMapKeyDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.FilterDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.servlet.ServletDiagnosticsCollector;
+import com.langserver.devtools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector;
 import com.langserver.devtools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4mp.commons.*;
@@ -52,17 +62,16 @@ public class PropertiesManagerForJakarta {
         diagnosticsCollectors.add(new AnnotationDiagnosticsCollector());
         diagnosticsCollectors.add(new FilterDiagnosticsCollector());
         diagnosticsCollectors.add(new ListenerDiagnosticsCollector());
-//        diagnosticsCollectors.add(new BeanValidationDiagnosticsCollector());
-//        diagnosticsCollectors.add(new PersistenceEntityDiagnosticsCollector());
-//        diagnosticsCollectors.add(new PersistenceMapKeyDiagnosticsCollector());
-//        diagnosticsCollectors.add(new ResourceMethodDiagnosticsCollector());
-//        diagnosticsCollectors.add(new Jax_RSClassDiagnosticsCollector());
-//        diagnosticsCollectors.add(new JsonbDiagnosticsCollector());
-//        diagnosticsCollectors.add(new ManagedBeanDiagnosticsCollector());
-//        diagnosticsCollectors.add(new DependencyInjectionDiagnosticsCollector());
-//        diagnosticsCollectors.add(new JsonpDiagnosticCollector());
-//        diagnosticsCollectors.add(new WebSocketDiagnosticsCollector());
-//        diagnosticsCollectors.add(new TransactionsDiagnosticsCollector());
+        diagnosticsCollectors.add(new BeanValidationDiagnosticsCollector());
+        diagnosticsCollectors.add(new PersistenceEntityDiagnosticsCollector());
+        diagnosticsCollectors.add(new PersistenceMapKeyDiagnosticsCollector());
+        diagnosticsCollectors.add(new ResourceMethodDiagnosticsCollector());
+        diagnosticsCollectors.add(new Jax_RSClassDiagnosticsCollector());
+        diagnosticsCollectors.add(new JsonbDiagnosticsCollector());
+        diagnosticsCollectors.add(new ManagedBeanDiagnosticsCollector());
+        diagnosticsCollectors.add(new DependencyInjectionDiagnosticsCollector());
+        diagnosticsCollectors.add(new JsonpDiagnosticCollector());
+        diagnosticsCollectors.add(new WebSocketDiagnosticsCollector());
     }
 
     /**

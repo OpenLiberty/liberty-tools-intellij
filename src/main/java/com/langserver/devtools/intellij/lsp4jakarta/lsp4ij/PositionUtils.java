@@ -36,7 +36,7 @@ public class PositionUtils {
         } else if (element instanceof PsiAnnotation) {
             sourceRange = ((PsiAnnotation) element).getTextRange();
         } else {
-            sourceRange = new TextRange(30, 36); // dummy value we can spot in testing
+            sourceRange = element.getTextRange();
         }
         return PsiUtils.toRange(openable, sourceRange.getStartOffset(), sourceRange.getLength());
     }
