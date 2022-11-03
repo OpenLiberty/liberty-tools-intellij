@@ -25,6 +25,8 @@ import org.jetbrains.plugins.terminal.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -89,20 +91,22 @@ public class LibertyProjectUtil {
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             PsiFile[] mavenFiles = FilenameIndex.getFilesByName(project, "pom.xml", GlobalSearchScope.projectScope(project));
-            for (int i = 0; i < mavenFiles.length; i++) {
-                BuildFile buildFile = LibertyMavenUtil.validPom(mavenFiles[i]);
-                if (buildFile.isValidBuildFile()) {
-                    buildFile.setBuildFile(mavenFiles[i]);
+            for (PsiFile mavenFile : mavenFiles) {
+                BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
+                // check if valid pom.xml, or if part of Liberty project
+                if (buildFile.isValidBuildFile() || isLibertyProject(mavenFile)) {
+                    buildFile.setBuildFile(mavenFile);
                     buildFiles.add(buildFile);
                 }
             }
         } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
             PsiFile[] gradleFiles = FilenameIndex.getFilesByName(project, "build.gradle", GlobalSearchScope.projectScope(project));
-            for (int i = 0; i < gradleFiles.length; i++) {
+            for (PsiFile gradleFile : gradleFiles) {
                 try {
-                    BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFiles[i]);
-                    if (buildFile.isValidBuildFile()) {
-                        buildFile.setBuildFile(gradleFiles[i]);
+                    BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
+                    // check if valid build.gradle, or if part of Liberty project
+                    if (buildFile.isValidBuildFile() || isLibertyProject(gradleFile)) {
+                        buildFile.setBuildFile(gradleFile);
                         buildFiles.add(buildFile);
                     }
                 } catch (Exception e) {
@@ -111,6 +115,16 @@ public class LibertyProjectUtil {
             }
         }
         return buildFiles;
+    }
+
+    /**
+     * 
+     * @param buildFile maven or gradle build file in the form of PsiFile
+     * @return <code>true</code> if the project contains src/main/liberty/config/server.xml relative to the build file; <code>false</code> otherwise
+     */
+    private static boolean isLibertyProject(PsiFile buildFile) {
+        String rootDir = buildFile.getVirtualFile().getParent().getCanonicalPath();
+        return new File(rootDir, "src/main/liberty/config/server.xml").exists();
     }
 
     private static ShellTerminalWidget getTerminalWidget(ToolWindow terminalWindow, String projectName) {
