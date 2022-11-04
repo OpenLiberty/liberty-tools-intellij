@@ -71,6 +71,10 @@ public class LibertyGeneralAction extends AnAction {
                     if (ret >= 0 && ret < buildFileInfoList.size()) {
                         buildFileInfoList.get(ret).writeTo(this);
                     }
+                    // The user pressed cancel on the dialog.
+                    else {
+                        return;
+                    }
                 }
             }
             if (buildFile == null) {
@@ -87,13 +91,21 @@ public class LibertyGeneralAction extends AnAction {
         executeLibertyAction();
     }
 
-    /* Returns an aggregated list containing info of all Maven and Gradle build files. */
+    /* Returns true if the specified project type applies to this action. */
+    protected boolean isProjectTypeSupported(String projectType) {
+        return Constants.LIBERTY_MAVEN_PROJECT.equals(projectType) ||
+                Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
+    }
+
+    /* Returns an aggregated list containing info for all Maven and Gradle build files. */
     protected final List<BuildFileInfo> getBuildFileInfoList() {
         final List<BuildFile> mavenBuildFiles;
         final List<BuildFile> gradleBuildFiles;
         try {
-            mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
-            gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
+            mavenBuildFiles = isProjectTypeSupported(Constants.LIBERTY_MAVEN_PROJECT) ?
+                    LibertyProjectUtil.getMavenBuildFiles(project) : Collections.emptyList();
+            gradleBuildFiles = isProjectTypeSupported(Constants.LIBERTY_GRADLE_PROJECT) ?
+                    LibertyProjectUtil.getGradleBuildFiles(project) : Collections.emptyList();
         }
         catch (IOException | SAXException | ParserConfigurationException e) {
             LOGGER.error("Could not find Open Liberty Maven or Gradle projects in workspace",

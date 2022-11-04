@@ -40,6 +40,11 @@ public class ViewTestReport extends LibertyGeneralAction {
     }
 
     @Override
+    protected boolean isProjectTypeSupported(String projectType) {
+        return Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
+    }
+
+    @Override
     protected void executeLibertyAction() {
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();

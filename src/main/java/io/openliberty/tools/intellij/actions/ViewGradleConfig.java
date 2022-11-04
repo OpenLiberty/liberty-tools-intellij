@@ -11,12 +11,18 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 public class ViewGradleConfig extends LibertyGeneralAction {
 
     public ViewGradleConfig() {
         setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.config.file"));
+    }
+
+    @Override
+    protected boolean isProjectTypeSupported(String projectType) {
+        return Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
     }
 
     @Override
