@@ -36,55 +36,55 @@
     </extensions>
 
     <extensionPoints>
-        <extensionPoint name="propertiesProvider" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.IPropertiesProvider"/>
-        <extensionPoint name="javaHoverParticipant" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
-        <extensionPoint name="javaDiagnosticsParticipant" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant"/>
-        <extensionPoint name="projectLabelProvider" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
-        <extensionPoint name="javaDefinitionParticipant" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
-        <extensionPoint name="javaCompletionParticipant" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
-        <extensionPoint name="javaCodeLensParticipant" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
-        <extensionPoint name="configSourceProvider" interface="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
-        <extensionPoint name="javaASTValidator.validator" beanClass="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
-        <extensionPoint name="javaASTValidator.annotationValidator" beanClass="com.langserver.devtools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
+        <extensionPoint name="propertiesProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesProvider"/>
+        <extensionPoint name="javaHoverParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
+        <extensionPoint name="javaDiagnosticsParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant"/>
+        <extensionPoint name="projectLabelProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
+        <extensionPoint name="javaDefinitionParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
+        <extensionPoint name="javaCompletionParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
+        <extensionPoint name="javaCodeLensParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
+        <extensionPoint name="configSourceProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
+        <extensionPoint name="javaASTValidator.validator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
+        <extensionPoint name="javaASTValidator.annotationValidator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!--LSP4MP-->
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertyProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertiesProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.restclient.properties.MicroProfileRegisterRestClientProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.lra.properties.MicroProfileLRAProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.metrics.properties.MicroProfileMetricsProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.openapi.properties.MicroProfileOpenAPIProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.opentracing.properties.MicroProfileOpenTracingProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.graphql.properties.MicroProfileGraphQLProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.health.properties.MicroProfileHealthProvider"/>
-        <propertiesProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.jwt.properties.MicroProfileJWTProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertyProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertiesProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.properties.MicroProfileRegisterRestClientProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.lra.properties.MicroProfileLRAProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.properties.MicroProfileMetricsProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.properties.MicroProfileOpenAPIProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.opentracing.properties.MicroProfileOpenTracingProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.properties.MicroProfileGraphQLProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.properties.MicroProfileHealthProvider"/>
+        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jwt.properties.MicroProfileJWTProvider"/>
 
-        <javaHoverParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
+        <javaHoverParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
 
-        <javaDiagnosticsParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
 
-        <projectLabelProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
+        <projectLabelProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
 
-        <javaDefinitionParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigDefinitionParticipant"/>
-        <javaDefinitionParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
+        <javaDefinitionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigDefinitionParticipant"/>
+        <javaDefinitionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
 
-        <javaCompletionParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
+        <javaCompletionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
 
-        <javaCodeLensParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
-        <javaCodeLensParticipant implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
+        <javaCodeLensParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
+        <javaCodeLensParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
 
-        <configSourceProvider implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
+        <configSourceProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
 
-        <javaASTValidator.validator implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTValidator"/>
-        <javaASTValidator.validator implementation="com.langserver.devtools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator"/>
+        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTValidator"/>
+        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator"/>
         <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.CircuitBreaker" source="microprofile-faulttolerance">
             <attribute name="delay" range="0"/>
             <attribute name="requestVolumeThreshold" range="1"/>
