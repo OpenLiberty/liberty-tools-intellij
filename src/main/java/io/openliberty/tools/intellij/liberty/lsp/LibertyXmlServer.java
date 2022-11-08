@@ -45,7 +45,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
             // params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");
             params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
             params.add("-cp");
-            params.add(lemminxServerPath.getAbsolutePath() + ":" + libertyServerPath.getAbsolutePath());
+            params.add(lemminxServerPath.getAbsolutePath() + File.pathSeparator + libertyServerPath.getAbsolutePath());
             params.add("org.eclipse.lemminx.XMLServerLauncher");
             setCommands(params);
         } else {

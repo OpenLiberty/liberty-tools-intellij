@@ -28,6 +28,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
+import org.eclipse.lsp4jakarta.commons.JakartaClasspathParams;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,9 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   }
 
   // Support the message "jakarta/java/classpath"
-  public CompletableFuture<List<String>> getContextBasedFilter(String uri, List<String> snippetContexts) {
+  @Override
+  public CompletableFuture<List<String>> getContextBasedFilter(JakartaClasspathParams classpathParams) {
+    List<String> snippetContexts = classpathParams.getSnippetCtx();
     // ask the Java component if the classpath of the current module contains the specified Jakarta types.
     JavaPsiFacade javaFacade = JavaPsiFacade.getInstance(getProject());
     GlobalSearchScope scope = GlobalSearchScope.allScope(getProject());
@@ -68,6 +71,7 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   }
 
   // Support the message "jakarta/java/diagnostics"
+  @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     List<PublishDiagnosticsParams> diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
