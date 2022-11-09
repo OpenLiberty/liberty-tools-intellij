@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches: '**'
+  pull_request:
+    branches: [main, ls-integration]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+          cache: 'gradle'
+      - name: Build Liberty-Tools-Intellij
+        run: gradle buildPlugin
+      - name: Archive artifacts
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: liberty-tools-intellij-${{ github.sha }}
+          path: ./**/*liberty-tools-intellij*.zip
+          if-no-files-found: warn
+          retention-days: 7
