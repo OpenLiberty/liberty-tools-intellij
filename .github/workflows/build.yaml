@@ -45,8 +45,8 @@ jobs:
       - name: Build Liberty-Tools-Intellij
         working-directory: ./liberty-tools-intellij
         run: |
-          gradle buildJakarta
-          gradle buildPlugin
+          ./gradlew buildJakarta
+          ./gradlew buildPlugin
       - name: Archive artifacts
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
