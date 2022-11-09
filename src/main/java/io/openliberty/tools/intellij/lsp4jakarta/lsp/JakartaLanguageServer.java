@@ -31,11 +31,15 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4JakartaServerPath = new File(descriptor.getPath(), JAR_DIR + LANGUAGESERVER_JAR);
         String javaHome = System.getProperty("java.home");
+        if (javaHome == null) {
+            LOGGER.error("Unable to launch the Eclipse LSP4Jakarta language server. Could not resolve the java home system property");
+            return;
+        }
         if (lsp4JakartaServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4JakartaServerPath.getAbsolutePath(), "-DrunAsync=true"));
         } else {
-            LOGGER.warn("Unable to start the Jakarta language server. The Jakarta language server path does not exist.");
+            LOGGER.warn(String.format("Unable to start Eclipse LSP4Jakarata. Eclipse LSP4Jakarta server path: %s does not exist"), lsp4JakartaServerPath);
         }
     }
 

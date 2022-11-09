@@ -9,7 +9,6 @@ version '0.0.7'
 sourceCompatibility = 11
 
 repositories {
-    mavenLocal() // TODO remove once Liberty LS is publicly available
     mavenCentral()
     maven {
         url 'https://repo.eclipse.org/content/repositories/lsp4mp-snapshots'
@@ -20,6 +19,7 @@ repositories {
     maven {
         url 'https://repo.eclipse.org/content/repositories/lemminx-releases'
     }
+    mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
 configurations {
@@ -33,7 +33,7 @@ dependencies {
     // LSP4IJ dependencies
     implementation 'org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0'
     implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
-    implementation 'org.eclipse.lemminx:org.eclipse.lemminx:0.21.0'
+    implementation 'org.eclipse.lemminx:org.eclipse.lemminx:0.22.0'
     implementation 'io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT'
     implementation 'io.openliberty.tools:liberty-langserver:1.0-SNAPSHOT'
     implementation 'org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.0.1-SNAPSHOT'
@@ -47,7 +47,7 @@ dependencies {
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0:uber') {
         transitive = false
     }
-    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.21.0:uber') {
+    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.22.0:uber') {
             transitive = false
     }
     lsp('io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT:jar-with-dependencies') {
