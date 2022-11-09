@@ -30,6 +30,7 @@ jobs:
           java-version: 17
           cache: 'gradle'
       - name: Build Liberty-Tools-Intellij
+        working-directory: ./liberty-tools-intellij
         run: |
           gradle buildJakarta
           gradle buildPlugin
