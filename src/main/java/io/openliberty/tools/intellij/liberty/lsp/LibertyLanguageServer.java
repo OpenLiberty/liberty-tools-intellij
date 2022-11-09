@@ -34,11 +34,15 @@ public class LibertyLanguageServer extends ProcessStreamConnectionProvider {
         IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("open-liberty.intellij"));
         File libertyServerPath = new File(descriptor.getPath(), "lib/server/liberty-langserver-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
+        if (javaHome == null) {
+            LOGGER.error("Unable to launch the Liberty language server. Could not resolve the java home system property");
+            return;
+        }
         if (libertyServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     libertyServerPath.getAbsolutePath(), "-DrunAsync=true"));
         } else {
-            LOGGER.warn("Unable to start the Liberty language server, liberty language server path does not exist");
+            LOGGER.warn(String.format("Unable to start the Liberty language server, Liberty language server path: %s does not exist", libertyServerPath));
         }
 
     }

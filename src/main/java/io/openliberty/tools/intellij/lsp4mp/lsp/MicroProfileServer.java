@@ -13,7 +13,10 @@ package io.openliberty.tools.intellij.lsp4mp.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.extensions.PluginId;
+import io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -26,12 +29,23 @@ import java.util.Map;
  * to start LSP4MP, Language Server for MicroProfile
  */
 public class MicroProfileServer extends ProcessStreamConnectionProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
+
     public MicroProfileServer() {
         IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4mpServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
         String javaHome = System.getProperty("java.home");
-        setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
-                lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true"));
+        if (javaHome == null) {
+            LOGGER.error("Unable to launch Eclipse LSP4MP language server. Could not resolve the java home system property");
+            return;
+        }
+        if (lsp4mpServerPath.exists()) {
+            setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
+                    lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true"));
+        } else {
+            LOGGER.warn(String.format("Unable to start Eclipse LSP4MP. Eclipse LSP4MP server path: %s does not exist"), lsp4mpServerPath);
+        }
     }
 
     @Override

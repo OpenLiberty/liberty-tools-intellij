@@ -36,7 +36,10 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
 
         File libertyServerPath = new File(descriptor.getPath(), "lib/server/liberty-langserver-lemminx-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
-
+        if (javaHome == null) {
+            LOGGER.error("Unable to launch the LemMinX language server. Could not resolve the java home system property");
+            return;
+        }
         if (lemminxServerPath.exists() && libertyServerPath.exists()) {
             ArrayList<String> params = new ArrayList<>();
             params.add(javaHome + File.separator + "bin" + File.separator + "java");
@@ -49,7 +52,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
             params.add("org.eclipse.lemminx.XMLServerLauncher");
             setCommands(params);
         } else {
-            LOGGER.warn("Unable to start the LemMinX language server, LemMinX server path or Liberty LemMinX ext server path does not exist");
+            LOGGER.warn(String.format("Unable to start the LemMinX language server. LemMinX server path: %s or Liberty LemMinX extension server path: %s does not exist"), lemminxServerPath, libertyServerPath);
         }
     }
 
