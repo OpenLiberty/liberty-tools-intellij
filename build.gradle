@@ -80,12 +80,12 @@ runIde {
 
 task buildJakartaCore(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
-    commandLine 'mvn', 'clean', 'install'
+    commandLine 'mvn', 'clean', 'install', '-q'
 }
 
 task buildJakartaLs(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.ls"
-    commandLine 'mvn',  'clean', 'install'
+    commandLine 'mvn',  'clean', 'install', '-q'
 }
 
 task buildJakarta {
