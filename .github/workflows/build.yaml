@@ -51,6 +51,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liberty-tools-intellij-${{ github.sha }}
-          path: ./**/*liberty-tools-intellij*.zip
+          path: |
+            ./**/*liberty-tools-intellij*.zip
+            ./**/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
