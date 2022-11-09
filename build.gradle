@@ -77,6 +77,23 @@ runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
 }
 
+
+task buildJakartaCore(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
+    commandLine 'mvn', 'clean', 'install'
+}
+
+task buildJakartaLs(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.ls"
+    commandLine 'mvn',  'clean', 'install'
+}
+
+task buildJakarta {
+    dependsOn 'buildJakartaCore'
+    dependsOn 'buildJakartaLs'
+    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
+}
+
 intellij {
     version = '2021.1.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
