@@ -19,6 +19,9 @@ repositories {
     maven {
         url 'https://repo.eclipse.org/content/repositories/lemminx-releases'
     }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
