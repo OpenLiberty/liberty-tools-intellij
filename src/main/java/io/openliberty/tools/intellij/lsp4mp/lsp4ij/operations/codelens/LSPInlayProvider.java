@@ -193,7 +193,7 @@ public class LSPInlayProvider implements InlayHintsProvider<NoSettings> {
         if (resolvedCodeLens.getCommand() != null) {
             AnAction action = ActionManager.getInstance().getAction(resolvedCodeLens.getCommand().getCommand());
             if (action != null) {
-                DataContext context = SimpleDataContext.getSimpleContext(LSP_COMMAND.getName(), resolvedCodeLens.getCommand(), DataManager.getInstance().getDataContext(source));
+                DataContext context = SimpleDataContext.getSimpleContext(LSP_COMMAND, resolvedCodeLens.getCommand(), DataManager.getInstance().getDataContext(source));
                 action.actionPerformed(new AnActionEvent(null, context,
                         ActionPlaces.UNKNOWN, new Presentation(),
                         ActionManager.getInstance(), 0));

@@ -28,7 +28,7 @@
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.properties</depends>
 
-    <idea-version since-build="211"/>
+    <idea-version since-build="222"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
