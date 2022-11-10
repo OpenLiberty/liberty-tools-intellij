@@ -94,6 +94,22 @@ task buildJakarta {
     tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
 }
 
+task buildJakartaCoreWindows(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
+    commandLine 'mvn.cmd', 'clean', 'install', '-q'
+}
+
+task buildJakartaLsWindows(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.ls"
+    commandLine 'mvn.cmd',  'clean', 'install', '-q'
+}
+
+task buildJakartaWindows {
+    dependsOn 'buildJakartaCoreWindows'
+    dependsOn 'buildJakartaLsWindows'
+    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
+}
+
 intellij {
     version = '2022.2.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
