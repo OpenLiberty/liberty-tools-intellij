@@ -11,7 +11,7 @@
 package io.openliberty.tools.intellij.liberty.lsp;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
@@ -31,10 +31,9 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibertyXmlServer.class);
 
     public LibertyXmlServer() {
-        IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lemminxServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lemminx-uber.jar");
-
-        File libertyServerPath = new File(descriptor.getPath(), "lib/server/liberty-langserver-lemminx-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
+        File lemminxServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lemminx-uber.jar");
+        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-lemminx-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             LOGGER.error("Unable to launch the LemMinX language server. Could not resolve the java home system property");
@@ -46,7 +45,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
             // TODO enable debugging via IntelliJ configuration without manually changing this line of code
             // Comment out line 46 and replace with the one below for debugging LemMinX, will pause server until debugger attaches to port 1054
             // params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");
-            params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
+            // params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");
             params.add("-cp");
             params.add(lemminxServerPath.getAbsolutePath() + File.pathSeparator + libertyServerPath.getAbsolutePath());
             params.add("org.eclipse.lemminx.XMLServerLauncher");
