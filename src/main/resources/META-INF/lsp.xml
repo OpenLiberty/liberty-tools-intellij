@@ -46,14 +46,13 @@
         <fileType name="bootstrap.properties file"
                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.BootstrapPropertiesFileType"
                   fieldName="INSTANCE"
-                  fileNames="bootstrap.properties" /> <!-- FIXME this will start the Liberty LS on any bootstrap.properties files, not just src/main/liberty/config/bootstrap.properties -->
+                  language="BootstrapProperties"/>
 
         <!-- server.env for Liberty LS -->
         <fileType name="server.env file"
                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"
                   fieldName="INSTANCE"
-                  language="ServerEnv"
-                  fileNames="server.env" /> <!-- FIXME this will start the Liberty LS on any server.env files, not just src/main/liberty/config/server.env -->
+                  language="ServerEnv"/>
 
         <!-- Generic -->
         <completion.contributor id="LSPCompletionContributor" language="any"
