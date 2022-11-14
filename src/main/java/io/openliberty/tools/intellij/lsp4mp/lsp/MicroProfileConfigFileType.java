@@ -25,7 +25,7 @@ public class MicroProfileConfigFileType extends LanguageFileType {
     public static final MicroProfileConfigFileType INSTANCE = new MicroProfileConfigFileType();
 
     protected MicroProfileConfigFileType() {
-        super(MicroProfileConfigLanguage.INSTANCE, true);
+        super(MicroProfileConfigLanguage.INSTANCE);
     }
 
     @Override
