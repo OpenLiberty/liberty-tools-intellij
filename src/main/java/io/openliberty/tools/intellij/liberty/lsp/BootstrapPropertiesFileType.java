@@ -33,7 +33,7 @@ public class BootstrapPropertiesFileType extends LanguageFileType implements Fil
     public static final String BOOTSTRAP_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/bootstrap.properties";
 
     private BootstrapPropertiesFileType() {
-        super(BootstrapPropertiesLanguage.INSTANCE, true);
+        super(BootstrapPropertiesLanguage.INSTANCE);
     }
 
     @Override
