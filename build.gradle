@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem;
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '1.9.0'
@@ -80,8 +81,7 @@ runIde {
 
 task buildJakartaCore(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
-    String osName = System.getProperty("os.name").toLowerCase();
-    if (osName.contains("windows")) {
+    if (OperatingSystem.current().isWindows()) {
         commandLine 'mvn.cmd', 'clean', 'install', '-q'
     } else {
         commandLine 'mvn', 'clean', 'install', '-q'
@@ -90,8 +90,7 @@ task buildJakartaCore(type: Exec) {
 
 task buildJakartaLs(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.ls"
-    String osName = System.getProperty("os.name").toLowerCase();
-    if (osName.contains("windows")) {
+    if (OperatingSystem.current().isWindows()) {
         commandLine 'mvn.cmd', 'clean', 'install', '-q'
     } else {
         commandLine 'mvn', 'clean', 'install', '-q'
