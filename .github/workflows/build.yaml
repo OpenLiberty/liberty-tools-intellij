@@ -44,14 +44,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Build lsp4jakarta for Linux
-        if: runner.os == 'Linux'
+      - name: Build lsp4jakarta
         working-directory: ./liberty-tools-intellij
         run: ./gradlew buildJakarta
-      - name: Build lsp4jakarta for Windows
-        if: runner.os == 'Windows'
-        working-directory: ./liberty-tools-intellij
-        run: ./gradlew buildJakartaWindows
       - name: Build Liberty-Tools-Intellij
         working-directory: ./liberty-tools-intellij
         run: ./gradlew buildPlugin
