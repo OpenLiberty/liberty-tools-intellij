@@ -107,7 +107,7 @@ task buildJakartaLsWindows(type: Exec) {
 task buildJakartaWindows {
     dependsOn 'buildJakartaCoreWindows'
     dependsOn 'buildJakartaLsWindows'
-    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
+    tasks.findByName('buildJakartaLsWindows').mustRunAfter 'buildJakartaCoreWindows'
 }
 
 intellij {
