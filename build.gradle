@@ -80,34 +80,28 @@ runIde {
 
 task buildJakartaCore(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
-    commandLine 'mvn', 'clean', 'install', '-q'
+    String osName = System.getProperty("os.name").toLowerCase();
+    if (osName.contains("windows")) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
 }
 
 task buildJakartaLs(type: Exec) {
     workingDir "../lsp4jakarta/jakarta.ls"
-    commandLine 'mvn',  'clean', 'install', '-q'
+    String osName = System.getProperty("os.name").toLowerCase();
+    if (osName.contains("windows")) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
 }
 
 task buildJakarta {
     dependsOn 'buildJakartaCore'
     dependsOn 'buildJakartaLs'
     tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
-}
-
-task buildJakartaCoreWindows(type: Exec) {
-    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
-    commandLine 'mvn.cmd', 'clean', 'install', '-q'
-}
-
-task buildJakartaLsWindows(type: Exec) {
-    workingDir "../lsp4jakarta/jakarta.ls"
-    commandLine 'mvn.cmd',  'clean', 'install', '-q'
-}
-
-task buildJakartaWindows {
-    dependsOn 'buildJakartaCoreWindows'
-    dependsOn 'buildJakartaLsWindows'
-    tasks.findByName('buildJakartaLsWindows').mustRunAfter 'buildJakartaCoreWindows'
 }
 
 intellij {
