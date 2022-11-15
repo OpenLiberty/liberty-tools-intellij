@@ -10,6 +10,8 @@
 package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 
@@ -20,6 +22,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.jetbrains.plugins.gradle.settings.DistributionType;
+import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
+import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
 public class LibertyGradleUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);;
@@ -153,4 +158,40 @@ public class LibertyGradleUtil {
         return false;
     }
 
+    public static String getGradleConfigPreference(Project project) {
+        GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
+
+        // To know all gradle options available for settings, look at org.jetbrains.plugins.gradle.settings.DistributionType
+        if (gradleProjectSettings.getDistributionType().isWrapped()) {
+            // a wrapper will be used
+            String wrapperPath = getLocalGradleWrapper(project);
+            if (wrapperPath != null) {
+                return wrapperPath;
+            }
+        }
+        else if (DistributionType.LOCAL.equals(gradleProjectSettings.getDistributionType())) {
+            // local gradle to be used
+            String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
+            if (gradleHome != null) {
+                return gradleHome + File.separator + "bin"+ File.separator + "gradle";
+            }
+        }
+
+        return "gradle";
+    }
+
+    private static String getLocalGradleWrapper(Project project) {
+        String gradlew = SystemInfo.isWindows ? "gradlew.bat" : "./gradlew";
+        File file = new File(project.getBasePath() + File.separator + gradlew);
+        return file.exists() ? gradlew : null;
+    }
+
+    private static File getCustomGradlePath (String customGradleHome) {
+        File gradleHomeFile = new File(customGradleHome);
+        if (gradleHomeFile != null) {
+            File file = new File(gradleHomeFile.getAbsolutePath() + File.separator + "bin" + File.separator + "gradle");
+            return file.exists() ? file : null;
+        }
+        return null;
+    }
 }

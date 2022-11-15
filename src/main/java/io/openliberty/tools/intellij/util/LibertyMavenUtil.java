@@ -9,8 +9,13 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import org.jetbrains.idea.maven.project.MavenGeneralSettings;
+import org.jetbrains.idea.maven.project.MavenWorkspaceSettingsComponent;
+import org.jetbrains.idea.maven.server.MavenServerManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -181,4 +186,40 @@ public class LibertyMavenUtil {
         }
     }
 
+    public static String getMavenConfigPreference(Project project) {
+        MavenServerManager mavenManager = MavenServerManager.getInstance();
+        MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
+        String mavenHome = mavenSettings.getMavenHome();
+
+        if (mavenManager.WRAPPED_MAVEN.equals(mavenHome)) {
+            // it is set to use the wrapper
+            String mvnwPath = getLocalMavenWrapper(project);
+            if (mvnwPath != null) {
+                return mvnwPath;
+            }
+        } else {
+            // try to use maven home path defined in the settings
+            File mavenHomeFile = getCustomMavenPath(mavenHome);
+            if (mavenHomeFile != null) {
+                return mavenHomeFile.getAbsolutePath();
+            }
+        }
+        // default maven
+        return "mvn";
+    }
+
+    private static String getLocalMavenWrapper(Project project) {
+        String mvnw = SystemInfo.isWindows ? "mvnw.cmd" : "./mvnw";
+        File file = new File(project.getBasePath() + File.separator + mvnw);
+        return file.exists() ? mvnw : null;
+    }
+
+    private static File getCustomMavenPath(String customMavenHome) {
+        File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
+        if (mavenHomeFile != null) {
+            File file = new File(mavenHomeFile.getAbsolutePath() + File.separator + "bin" + File.separator + "mvn");
+            return file.exists() ? file : null;
+        }
+        return null;
+    }
 }
