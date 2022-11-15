@@ -186,7 +186,7 @@ public class LibertyMavenUtil {
         }
     }
 
-    public static String getMavenConfigPreference(Project project) {
+    public static String getMavenSettingsCmd(Project project) {
         MavenServerManager mavenManager = MavenServerManager.getInstance();
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
@@ -199,13 +199,12 @@ public class LibertyMavenUtil {
             }
         } else {
             // try to use maven home path defined in the settings
-            File mavenHomeFile = getCustomMavenPath(mavenHome);
-            if (mavenHomeFile != null) {
-                return mavenHomeFile.getAbsolutePath();
+            String mavenPath = getCustomMavenPath(mavenHome);
+            if (mavenPath != null) {
+                return mavenPath;
             }
         }
-        // default maven
-        return "mvn";
+        return "mvn"; // default maven
     }
 
     private static String getLocalMavenWrapper(Project project) {
@@ -214,11 +213,11 @@ public class LibertyMavenUtil {
         return file.exists() ? mvnw : null;
     }
 
-    private static File getCustomMavenPath(String customMavenHome) {
+    private static String getCustomMavenPath(String customMavenHome) {
         File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
         if (mavenHomeFile != null) {
             File file = new File(mavenHomeFile.getAbsolutePath() + File.separator + "bin" + File.separator + "mvn");
-            return file.exists() ? file : null;
+            return file.exists() ? file.getAbsolutePath() : null;
         }
         return null;
     }

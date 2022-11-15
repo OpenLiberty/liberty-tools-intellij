@@ -158,13 +158,12 @@ public class LibertyGradleUtil {
         return false;
     }
 
-    public static String getGradleConfigPreference(Project project) {
+    public static String getGradleSettingsCmd(Project project) {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
 
-        // To know all gradle options available for settings, look at org.jetbrains.plugins.gradle.settings.DistributionType
         if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
-            String wrapperPath = getLocalGradleWrapper(project);
+            String wrapperPath = getLocalGradleWrapperPath(project);
             if (wrapperPath != null) {
                 return wrapperPath;
             }
@@ -173,24 +172,26 @@ public class LibertyGradleUtil {
             // local gradle to be used
             String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
             if (gradleHome != null) {
-                return gradleHome + File.separator + "bin"+ File.separator + "gradle";
+                String gradlePath = getCustomGradlePath(gradleHome);
+                if (gradlePath != null) {
+                    return gradlePath;
+                }
             }
         }
-
-        return "gradle";
+        return "gradle"; // default gradle
     }
 
-    private static String getLocalGradleWrapper(Project project) {
+    private static String getLocalGradleWrapperPath(Project project) {
         String gradlew = SystemInfo.isWindows ? "gradlew.bat" : "./gradlew";
         File file = new File(project.getBasePath() + File.separator + gradlew);
         return file.exists() ? gradlew : null;
     }
 
-    private static File getCustomGradlePath (String customGradleHome) {
+    private static String getCustomGradlePath (String customGradleHome) {
         File gradleHomeFile = new File(customGradleHome);
         if (gradleHomeFile != null) {
-            File file = new File(gradleHomeFile.getAbsolutePath() + File.separator + "bin" + File.separator + "gradle");
-            return file.exists() ? file : null;
+            File file = new File(gradleHomeFile.getAbsolutePath() + File.separator + "bin"+ File.separator + "gradle");
+            return file.exists() ? file.getAbsolutePath() : null;
         }
         return null;
     }
