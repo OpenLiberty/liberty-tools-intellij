@@ -97,15 +97,23 @@ public class LibertyGeneralAction extends AnAction {
                 Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
     }
 
+    protected ArrayList<BuildFile> getMavenBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+        return LibertyProjectUtil.getMavenBuildFiles(project);
+    }
+
+    protected ArrayList<BuildFile> getGradleBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+        return LibertyProjectUtil.getGradleBuildFiles(project);
+    }
+
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
     protected final List<BuildFileInfo> getBuildFileInfoList() {
         final List<BuildFile> mavenBuildFiles;
         final List<BuildFile> gradleBuildFiles;
         try {
             mavenBuildFiles = isProjectTypeSupported(Constants.LIBERTY_MAVEN_PROJECT) ?
-                    LibertyProjectUtil.getMavenBuildFiles(project) : Collections.emptyList();
+                    getMavenBuildFiles() : Collections.emptyList();
             gradleBuildFiles = isProjectTypeSupported(Constants.LIBERTY_GRADLE_PROJECT) ?
-                    LibertyProjectUtil.getGradleBuildFiles(project) : Collections.emptyList();
+                    getGradleBuildFiles() : Collections.emptyList();
         }
         catch (IOException | SAXException | ParserConfigurationException e) {
             LOGGER.error("Could not find Open Liberty Maven or Gradle projects in workspace",
