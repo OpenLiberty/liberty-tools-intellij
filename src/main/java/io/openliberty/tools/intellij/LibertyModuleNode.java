@@ -14,29 +14,27 @@ import com.intellij.psi.PsiFile;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class LibertyProjectNode extends DefaultMutableTreeNode {
-    public VirtualFile path;
-    public String name;
-    public String projectType;
-    public boolean validContainerVersion;
+public class LibertyModuleNode extends DefaultMutableTreeNode {
+    private LibertyModule libertyModule;
 
-    public LibertyProjectNode(PsiFile file, String name, String projectType, boolean validContainerVersion) {
-        super(name);
-        this.name = name;
-        this.projectType = projectType;
-        this.path = file.getVirtualFile();
-        this.validContainerVersion = validContainerVersion;
+    public LibertyModuleNode(LibertyModule libertyModule) {
+        super(libertyModule.getName());
+        this.libertyModule = libertyModule;
     }
 
     public String getName() {
-        return this.name;
+        return libertyModule.getName();
     }
 
     public VirtualFile getFilePath() {
-        return this.path;
+        return libertyModule.getBuildFile();
     }
 
-    public String getProjectType() { return this.projectType; }
+    public String getProjectType() {
+        return libertyModule.getProjectType();
+    }
 
-    public boolean isValidContainerVersion() { return this.validContainerVersion; }
+    public boolean isValidContainerVersion() {
+        return libertyModule.isValidContainerVersion();
+    }
 }
