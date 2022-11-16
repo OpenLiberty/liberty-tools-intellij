@@ -27,15 +27,11 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
 
-<!--    <idea-version since-build="193"/>-->
-    <idea-version since-build="194"/>
+    <idea-version since-build="193"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
-
-        <applicationService
-                serviceImplementation="io.openliberty.tools.intellij.actions.AppSettingsState"/>
     </extensions>
 
     <!-- Default resource location for localizing Liberty actions strings -->

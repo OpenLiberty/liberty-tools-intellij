@@ -9,7 +9,12 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import io.openliberty.tools.intellij.util.*;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyActionUtil;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LibertyMavenUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartAction extends LibertyGeneralAction {
