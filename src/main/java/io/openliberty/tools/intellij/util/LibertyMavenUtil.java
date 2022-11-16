@@ -208,18 +208,19 @@ public class LibertyMavenUtil {
     }
 
     private static String getLocalMavenWrapper(Project project) {
-        String mvnw = SystemInfo.isWindows ? "mvnw.cmd" : "./mvnw";
+        String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
         File file = new File(project.getBasePath() + File.separator + mvnw);
         return file.exists() ? mvnw : null;
     }
 
     private static String getCustomMavenPath(String customMavenHome) {
+        String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
         File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
         if (mavenHomeFile != null) {
             // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
             // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
             File file = new File(mavenHomeFile.getAbsolutePath() + File.separator + "bin" + File.separator + "mvn");
-            return file.exists() ? file.getAbsolutePath() : null;
+            return file.exists() ? additionalCMD + file.getAbsolutePath() : null;
         }
         return null;
     }
