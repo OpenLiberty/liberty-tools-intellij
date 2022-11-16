@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiFile;
@@ -21,22 +22,60 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
 import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
-import org.jetbrains.plugins.terminal.*;
+import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
+import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import org.jetbrains.plugins.terminal.TerminalTabState;
+import org.jetbrains.plugins.terminal.TerminalView;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
 
+    enum BuildFileFilter {
+        ADDABLE {
+            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
+                return !LIST.matches(buildFile, psiFile);
+            }
+        },
+        REMOVABLE {
+            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
+                return isCustomLibertyProject(psiFile) && !(buildFile.isValidBuildFile() || isLibertyProject(psiFile));
+            }
+        },
+        LIST {
+            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
+                return buildFile.isValidBuildFile() || isLibertyProject(psiFile) || isCustomLibertyProject(psiFile);
+            }
+        };
+        public abstract boolean matches(BuildFile buildFile, PsiFile _buildFile);
+    }
+
+    /** REVISIT: In memory collection of Liberty projects but need to persist. **/
+    private static final Set<String> customLibertyProjects = Collections.synchronizedSet(new HashSet<>());
+
     @Nullable
     public static Project getProject(DataContext context) {
         return CommonDataKeys.PROJECT.getData(context);
+    }
+
+    public static void addCustomLibertyProject(VirtualFile buildFile) {
+        final String path = buildFile.getCanonicalPath();
+        if (path != null) {
+            customLibertyProjects.add(path);
+        }
+    }
+
+    public static void removeCustomLibertyProject(VirtualFile buildFile) {
+        customLibertyProjects.remove(buildFile.getCanonicalPath());
+    }
+
+    public static boolean isCustomLibertyProject(PsiFile buildFile) {
+        return customLibertyProjects.contains(buildFile.getVirtualFile().getCanonicalPath());
     }
 
     /**
@@ -45,7 +84,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT);
+        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.LIST);
     }
 
     /**
@@ -54,7 +93,43 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT);
+        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.LIST);
+    }
+
+    /**
+     * Returns a list of Gradle build files in the project that can be added as Liberty projects
+     * @param project
+     * @return ArrayList of BuildFiles
+     */
+    public static ArrayList<BuildFile> getAddableGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.ADDABLE);
+    }
+
+    /**
+     * Returns a list of Maven build files in the project that can be added as Liberty projects
+     * @param project
+     * @return ArrayList of BuildFiles
+     */
+    public static ArrayList<BuildFile> getAddableMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.ADDABLE);
+    }
+
+    /**
+     * Returns a list of Gradle build files in the project that can be removed as Liberty projects
+     * @param project
+     * @return ArrayList of BuildFiles
+     */
+    public static ArrayList<BuildFile> getRemovableGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.REMOVABLE);
+    }
+
+    /**
+     * Returns a list of Maven build files in the project that can be removed as Liberty projects
+     * @param project
+     * @return ArrayList of BuildFiles
+     */
+    public static ArrayList<BuildFile> getRemovableMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
+        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.REMOVABLE);
     }
 
     /**
@@ -86,7 +161,7 @@ public class LibertyProjectUtil {
     }
 
     // returns valid build files for the current project
-    private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType) throws ParserConfigurationException, SAXException, IOException {
+    private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType, BuildFileFilter filter) throws ParserConfigurationException, SAXException, IOException {
         ArrayList<BuildFile> buildFiles = new ArrayList<BuildFile>();
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
@@ -94,7 +169,7 @@ public class LibertyProjectUtil {
             for (PsiFile mavenFile : mavenFiles) {
                 BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
                 // check if valid pom.xml, or if part of Liberty project
-                if (buildFile.isValidBuildFile() || isLibertyProject(mavenFile)) {
+                if (filter.matches(buildFile, mavenFile)) {
                     buildFile.setBuildFile(mavenFile);
                     buildFiles.add(buildFile);
                 }
@@ -105,7 +180,7 @@ public class LibertyProjectUtil {
                 try {
                     BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
                     // check if valid build.gradle, or if part of Liberty project
-                    if (buildFile.isValidBuildFile() || isLibertyProject(gradleFile)) {
+                    if (filter.matches(buildFile, gradleFile)) {
                         buildFile.setBuildFile(gradleFile);
                         buildFiles.add(buildFile);
                     }
