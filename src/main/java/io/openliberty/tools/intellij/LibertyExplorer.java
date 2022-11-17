@@ -69,8 +69,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         final ActionManager actionManager = ActionManager.getInstance();
         LibertyToolbarActionGroup libertyActionGroup = new LibertyToolbarActionGroup(tree);
 
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.TOOLBAR, libertyActionGroup, true);
-        actionToolbar.setTargetComponent(tree);
+        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, libertyActionGroup, true);
         actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
         actionToolbar.setShowSeparatorTitles(true);
         actionToolbar.getComponent().setName(Constants.LIBERTY_ACTION_TOOLBAR);
