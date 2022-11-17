@@ -27,6 +27,7 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LibertyGeneralAction extends AnAction {
@@ -68,7 +69,8 @@ public class LibertyGeneralAction extends AnAction {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
             // if still null, prompt for user to select
             if (buildFile == null) {
-                List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules();
+                List<LibertyModule> libertyModules = LibertyModules.getInstance()
+                        .getLibertyModules(getSupportedProjectTypes());
                 if (!libertyModules.isEmpty()) {
                     // Only one project. Select it.
                     if (libertyModules.size() == 1) {
@@ -110,11 +112,13 @@ public class LibertyGeneralAction extends AnAction {
         executeLibertyAction();
     }
 
-    /* Returns true if the specified project type applies to this action. */
-    protected boolean isProjectTypeSupported(String projectType) {
-        return Constants.LIBERTY_MAVEN_PROJECT.equals(projectType) ||
-                Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
+    /* Returns project type(s) applicable to this action. */
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(
+                Constants.LIBERTY_MAVEN_PROJECT, Constants.LIBERTY_GRADLE_PROJECT);
+
     }
+
     protected final String[] toProjectNames(@NotNull List<LibertyModule> list) {
         final int size = list.size();
         final String[] projectNames = new String[size];

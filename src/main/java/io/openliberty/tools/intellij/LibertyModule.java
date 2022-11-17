@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.util.BuildFile;
 
 /**
  * Represents a Liberty server module
@@ -30,6 +31,14 @@ public class LibertyModule {
         this.name = name;
         this.projectType = projectType;
         this.validContainerVersion = validContainerVersion;
+    }
+
+    public LibertyModule(Project project, BuildFile buildFile) {
+        this.project = project;
+        this.buildFile = buildFile.getBuildFile().getVirtualFile();
+        this.name = buildFile.getProjectName();
+        this.projectType = buildFile.getProjectType();
+        this.validContainerVersion = buildFile.isValidContainerVersion();
     }
 
     public VirtualFile getBuildFile() {

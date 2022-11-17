@@ -87,4 +87,29 @@ public class LibertyModules {
     public List<LibertyModule> getLibertyModules() {
         return new ArrayList(libertyModules.values());
     }
+
+    /**
+     * Returns all Liberty modules with the supported project type(s), ex. all Liberty Maven projects
+     *
+     * @param projectTypes
+     * @return Liberty modules with the given project type(s)
+     */
+    public List<LibertyModule> getLibertyModules(List<String> projectTypes) {
+        ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
+        libertyModules.values().forEach(libertyModule -> {
+            if (projectTypes.contains(libertyModule.getProjectType())) {
+                supportedLibertyModules.add(libertyModule);
+            }
+        });
+        return supportedLibertyModules;
+    }
+
+    /**
+     * Remove the given Liberty module
+     *
+     * @param libertyModule
+     */
+    public void removeLibertyModule(LibertyModule libertyModule) {
+        libertyModules.remove(libertyModule.getBuildFile());
+    }
 }

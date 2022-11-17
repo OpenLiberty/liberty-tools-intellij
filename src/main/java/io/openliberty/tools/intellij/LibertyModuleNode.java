@@ -10,7 +10,6 @@
 package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

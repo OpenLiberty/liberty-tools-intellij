@@ -14,6 +14,9 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ViewGradleConfig extends LibertyGeneralAction {
 
     public ViewGradleConfig() {
@@ -21,8 +24,8 @@ public class ViewGradleConfig extends LibertyGeneralAction {
     }
 
     @Override
-    protected boolean isProjectTypeSupported(String projectType) {
-        return Constants.LIBERTY_GRADLE_PROJECT.equals(projectType);
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(Constants.LIBERTY_GRADLE_PROJECT);
     }
 
     @Override
