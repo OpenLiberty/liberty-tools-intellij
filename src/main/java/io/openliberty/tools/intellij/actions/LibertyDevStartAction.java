@@ -13,6 +13,8 @@ import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LibertyMavenUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartAction extends LibertyGeneralAction {
@@ -27,9 +29,9 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String startCmd = null;
 
         if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev";
+            startCmd = LibertyMavenUtil.getMavenSettingsCmd(project) + " io.openliberty.tools:liberty-maven-plugin:dev";
         } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            startCmd = "gradle libertyDev";
+            startCmd = LibertyGradleUtil.getGradleSettingsCmd(project) + " libertyDev";
         }
         if (widget == null) {
             LOGGER.debug("Unable to start Liberty dev mode, could not get or create terminal widget for " + projectName);
