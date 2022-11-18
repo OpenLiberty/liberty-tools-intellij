@@ -158,9 +158,9 @@ public class LSIncompleteCompletionProposal extends LookupElement {
         }
         String insertText = getInsertText();
         try {
-            String subDoc = document.getText(new TextRange(
-                    Math.max(0, completionOffset - insertText.length()),
-                    Math.min(insertText.length(), completionOffset)));
+            int startOffset = Math.max(0, completionOffset - insertText.length());
+            int endOffset = Math.min(startOffset + insertText.length(), completionOffset);
+            String subDoc = document.getText(new TextRange(startOffset, endOffset));
             for (int i = 0; i < insertText.length() && i < completionOffset; i++) {
                 String tentativeCommonString = subDoc.substring(i);
                 if (insertText.startsWith(tentativeCommonString)) {
