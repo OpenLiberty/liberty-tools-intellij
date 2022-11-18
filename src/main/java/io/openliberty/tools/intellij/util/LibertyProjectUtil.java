@@ -209,6 +209,7 @@ public class LibertyProjectUtil {
     private static ShellTerminalWidget getTerminalWidget(ToolWindow terminalWindow, String projectName) {
         Content[] terminalContents = terminalWindow.getContentManager().getContents();
         for (int i = 0; i < terminalContents.length; i++) {
+            // TODO use LibertyModule rather than projectName see https://github.com/OpenLiberty/liberty-tools-intellij/issues/143
             if (terminalContents[i].getTabName().equals(projectName)) {
                 JBTerminalWidget widget = TerminalView.getWidgetByContent(terminalContents[i]);
                 ShellTerminalWidget shellWidget = (ShellTerminalWidget) Objects.requireNonNull(widget);
@@ -217,5 +218,7 @@ public class LibertyProjectUtil {
         }
         return null;
     }
+
+
 
 }

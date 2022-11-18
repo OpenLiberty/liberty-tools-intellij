@@ -22,6 +22,7 @@ import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
+import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -127,19 +128,19 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_MAVEN_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
             // check if Liberty Maven Plugin is 3.3-M1+
             // if version is not specified in pom, assume latest version as downloaded from maven central
             if (validContainerVersion){
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
 
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
-            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT));
-            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
+            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, module));
+            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, module));
         }
 
         for (BuildFile buildFile : gradleBuildFiles) {
@@ -169,18 +170,18 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_GRADLE_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
             // check if Liberty Gradle Plugin is 3.1-M1+
             // TODO: handle version specified in a gradle.settings file
             if (buildFile.isValidContainerVersion()) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
 
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
-            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
+            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, module));
         }
 
         Tree tree = new Tree(top);
@@ -288,38 +289,31 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
+            LibertyModule module = ((LibertyActionNode) node).getLibertyModule();
             LOGGER.debug("Selected: " + actionNodeName);
+            LibertyGeneralAction action = null;
             if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
-                // calls action on double click
-                am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
-                am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
-                am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
-                am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
-                am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+            }
+            if (action != null) {
+                // TODO set Liberty module for the corresponding action
+                action.setLibertyModule(module);
+                // calls action on double click
+                action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                         ActionPlaces.UNKNOWN, new Presentation(),
                         ActionManager.getInstance(), 0));
             }
