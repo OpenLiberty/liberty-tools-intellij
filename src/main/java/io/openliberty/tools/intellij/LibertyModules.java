@@ -15,13 +15,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Singleton to save the LibertyModules in the open project
+ * Singleton to save the Liberty modules in the open project
  */
 public class LibertyModules {
 
@@ -31,10 +28,10 @@ public class LibertyModules {
     Map<VirtualFile, LibertyModule> libertyModules;
 
     private LibertyModules() {
-        libertyModules = new HashMap<>();
+        libertyModules = Collections.synchronizedMap(new HashMap<>());
     }
 
-    public static LibertyModules getInstance() {
+    public synchronized static LibertyModules getInstance() {
         if (instance == null) {
             instance = new LibertyModules();
         }
@@ -59,7 +56,7 @@ public class LibertyModules {
     }
 
     /**
-     * Returns the Liberty project associated with a build file
+     * Returns the Liberty project associated with a build file path string
      *
      * @param buildFile String, path to build file
      * @return LibertyModule
@@ -96,11 +93,13 @@ public class LibertyModules {
      */
     public List<LibertyModule> getLibertyModules(List<String> projectTypes) {
         ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
-        libertyModules.values().forEach(libertyModule -> {
-            if (projectTypes.contains(libertyModule.getProjectType())) {
-                supportedLibertyModules.add(libertyModule);
-            }
-        });
+        synchronized (libertyModules) {
+            libertyModules.values().forEach(libertyModule -> {
+                if (projectTypes.contains(libertyModule.getProjectType())) {
+                    supportedLibertyModules.add(libertyModule);
+                }
+            });
+        }
         return supportedLibertyModules;
     }
 
@@ -111,5 +110,12 @@ public class LibertyModules {
      */
     public void removeLibertyModule(LibertyModule libertyModule) {
         libertyModules.remove(libertyModule.getBuildFile());
+    }
+
+    /**
+     * Clear all saved Liberty modules
+     */
+    public void clear() {
+        libertyModules.clear();
     }
 }

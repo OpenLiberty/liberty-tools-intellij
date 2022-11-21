@@ -83,6 +83,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
         LibertyModules libertyModules = LibertyModules.getInstance();
+        // clear all stored Liberty modules
+        libertyModules.clear();
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         ArrayList<BuildFile> mavenBuildFiles;
