@@ -11,7 +11,7 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
@@ -33,8 +33,8 @@ public class MicroProfileServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
 
     public MicroProfileServer() {
-        IdeaPluginDescriptor descriptor = PluginManager.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lsp4mpServerPath = new File(descriptor.getPath(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
+        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
+        File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             LOGGER.error("Unable to launch Eclipse LSP4MP language server. Could not resolve the java home system property");

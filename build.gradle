@@ -1,12 +1,13 @@
+import org.gradle.internal.os.OperatingSystem;
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.6.5'
+    id 'org.jetbrains.intellij' version '1.10.0'
 }
 
 group 'io.openliberty.tools'
 version '0.0.7'
 
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 repositories {
     mavenCentral()
@@ -18,6 +19,9 @@ repositories {
     }
     maven {
         url 'https://repo.eclipse.org/content/repositories/lemminx-releases'
+    }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
     }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
@@ -74,14 +78,39 @@ runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
 }
 
+
+task buildJakartaCore(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
+    if (OperatingSystem.current().isWindows()) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
+}
+
+task buildJakartaLs(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.ls"
+    if (OperatingSystem.current().isWindows()) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
+}
+
+task buildJakarta {
+    dependsOn 'buildJakartaCore'
+    dependsOn 'buildJakartaLs'
+    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
+}
+
 intellij {
-    version = '2020.2.4' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    version = '2022.2.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
     updateSinceUntilBuild = false
 }
 
 patchPluginXml {
-    changeNotes """
+    changeNotes = """
         <b> 0.0.7 </b>
         <ul>
         <li> Rename plugin to Liberty Tools for IntelliJ
