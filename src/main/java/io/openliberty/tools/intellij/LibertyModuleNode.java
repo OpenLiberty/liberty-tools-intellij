@@ -14,7 +14,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class LibertyModuleNode extends DefaultMutableTreeNode {
-    private LibertyModule libertyModule;
+    private final LibertyModule libertyModule;
 
     public LibertyModuleNode(LibertyModule libertyModule) {
         super(libertyModule.getName());

@@ -9,14 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import io.openliberty.tools.intellij.LibertyPluginIcons;
-import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
@@ -28,18 +21,9 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction() {
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
+        ShellTerminalWidget widget = getTerminalWidget(false);
         String stopCmd = "q";
         if (widget == null) {
-            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
-                    , LibertyPluginIcons.libertyIcon
-                    , LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.title")
-                    , ""
-                    , LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", projectName)
-                    , NotificationType.WARNING
-                    , NotificationListener.URL_OPENING_LISTENER);
-            Notifications.Bus.notify(notif, project);
-            LOGGER.error("Cannot stop Liberty dev mode, corresponding project terminal does not exist.");
             return;
         }
         LibertyActionUtil.executeCommand(widget, stopCmd);

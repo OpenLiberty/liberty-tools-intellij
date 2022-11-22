@@ -192,7 +192,7 @@ public class LibertyProjectUtil {
                         buildFiles.add(buildFile);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Error parsing build.gradle", e.getMessage());
+                    LOGGER.error(String.format("Error parsing build.gradle %s", gradleFile), e.getMessage());
                 }
             }
         }
