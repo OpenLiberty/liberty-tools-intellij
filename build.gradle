@@ -12,6 +12,9 @@ sourceCompatibility = 17
 repositories {
     mavenCentral()
     maven {
+        url 'https://repo.eclipse.org/content/repositories/lsp4jakarta-snapshots'
+    }
+    maven {
         url 'https://repo.eclipse.org/content/repositories/lsp4mp-snapshots'
     }
     maven {
