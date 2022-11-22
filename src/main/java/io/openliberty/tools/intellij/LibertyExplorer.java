@@ -22,14 +22,13 @@ import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
+import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -43,7 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
-    private static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
+    private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
@@ -83,12 +82,14 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
+        LibertyModules libertyModules = LibertyModules.getInstance();
+        // clear all stored Liberty modules
+        libertyModules.clear();
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         ArrayList<BuildFile> mavenBuildFiles;
         ArrayList<BuildFile> gradleBuildFiles;
-        ArrayList<String> projectNames = new ArrayList<String>();
-        HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
+        HashMap<String, ArrayList<Object>> map = new HashMap<>();
         try {
             mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
             gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
@@ -103,44 +104,45 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         }
 
         for (BuildFile buildFile : mavenBuildFiles) {
+            // create a new Liberty project
             PsiFile psiFile = buildFile.getBuildFile();
             String projectName = null;
             VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
                 LOGGER.error("Could not resolve current Maven project");
             }
-            LibertyProjectNode node;
+            LibertyModuleNode node;
             try {
                 projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
             } catch (Exception e) {
                 LOGGER.error("Could not resolve project name from pom.xml", e.getMessage());
             }
-            LOGGER.info("Liberty Maven Project: " + psiFile);
             if (projectName == null) {
                 projectName = project.getName();
             }
             boolean validContainerVersion = buildFile.isValidContainerVersion();
-            node = new LibertyProjectNode(psiFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion);
+            LibertyModule module = new LibertyModule(project, psiFile.getVirtualFile(), projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion);
+            node = new LibertyModuleNode(module);
+            libertyModules.addLibertyModule(module);
 
             top.add(node);
-            projectNames.add(projectName);
             ArrayList<Object> settings = new ArrayList<Object>();
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_MAVEN_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
             // check if Liberty Maven Plugin is 3.3-M1+
             // if version is not specified in pom, assume latest version as downloaded from maven central
             if (validContainerVersion){
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
 
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
-            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT));
-            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
+            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, module));
+            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, module));
         }
 
         for (BuildFile buildFile : gradleBuildFiles) {
@@ -150,36 +152,38 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             if (virtualFile == null) {
                 LOGGER.error("Could not resolve current Gradle project");
             }
-            LibertyProjectNode node;
+            LibertyModuleNode node;
             try {
                 projectName = LibertyGradleUtil.getProjectName(virtualFile);
             } catch (Exception e) {
                 LOGGER.error("Could not resolve project name from settings.gradle", e.getMessage());
             }
-            LOGGER.info("Liberty Gradle Project: " + psiFile);
             if (projectName == null) {
                 projectName = project.getName();
             }
-            node = new LibertyProjectNode(psiFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, buildFile.isValidContainerVersion());
+
+            boolean validContainerVersion = buildFile.isValidContainerVersion();
+            LibertyModule module = new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion);
+            node = new LibertyModuleNode(module);
+            libertyModules.addLibertyModule(module);
 
             top.add(node);
-            projectNames.add(projectName);
             ArrayList<Object> settings = new ArrayList<Object>();
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_GRADLE_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
             // check if Liberty Gradle Plugin is 3.1-M1+
             // TODO: handle version specified in a gradle.settings file
             if (buildFile.isValidContainerVersion()) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER));
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
 
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS));
-            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
+            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, module));
         }
 
         Tree tree = new Tree(top);
@@ -192,20 +196,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         treeDataProvider.setProjectMap(map);
 
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                Object node = e.getPath().getLastPathComponent();
-                if (node instanceof LibertyProjectNode) {
-                    LibertyProjectNode libertyNode = (LibertyProjectNode) node;
-                    // open build file
-                    FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, libertyNode.getFilePath()), true);
-                    treeDataProvider.saveData(libertyNode.getFilePath(), libertyNode.getName(), libertyNode.getProjectType());
-                } else if (node instanceof LibertyActionNode) {
-                    DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
-                    LibertyProjectNode parentNode = (LibertyProjectNode) treeNode.getParent();
-                    treeDataProvider.saveData(parentNode.getFilePath(), parentNode.getName(), parentNode.getProjectType());
-                }
+        tree.addTreeSelectionListener(e -> {
+            Object node = e.getPath().getLastPathComponent();
+            if (node instanceof LibertyModuleNode) {
+                LibertyModuleNode libertyNode = (LibertyModuleNode) node;
+                // open build file
+                FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, libertyNode.getFilePath()), true);
+                treeDataProvider.saveData(libertyNode.getFilePath(), libertyNode.getName(), libertyNode.getProjectType());
+            } else if (node instanceof LibertyActionNode) {
+                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
+                LibertyModuleNode parentNode = (LibertyModuleNode) treeNode.getParent();
+                treeDataProvider.saveData(parentNode.getFilePath(), parentNode.getName(), parentNode.getProjectType());
             }
         });
 
@@ -215,8 +216,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 final TreePath path = tree.getSelectionPath();
                 if (path != null) {
                     Object node = path.getLastPathComponent();
-                    if (node instanceof LibertyProjectNode) {
-                        LibertyProjectNode libertyNode = ((LibertyProjectNode) node);
+                    if (node instanceof LibertyModuleNode) {
+                        LibertyModuleNode libertyNode = ((LibertyModuleNode) node);
                         final DefaultActionGroup group = new DefaultActionGroup();
                         if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
                             AnAction viewEffectivePom = ActionManager.getInstance().getAction(Constants.VIEW_EFFECTIVE_POM_ACTION_ID);
@@ -290,38 +291,31 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
+            LibertyModule module = ((LibertyActionNode) node).getLibertyModule();
             LOGGER.debug("Selected: " + actionNodeName);
+            LibertyGeneralAction action = null;
             if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
-                // calls action on double click
-                am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
-                am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
-                am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
-                am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
             } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
-                am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
             } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
-                am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID).actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
+                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+            }
+            if (action != null) {
+                // TODO set Liberty module for the corresponding action
+                action.setLibertyModule(module);
+                // calls action on double click
+                action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
                         ActionPlaces.UNKNOWN, new Presentation(),
                         ActionManager.getInstance(), 0));
             }

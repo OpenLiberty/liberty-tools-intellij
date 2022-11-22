@@ -22,6 +22,8 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
@@ -30,8 +32,8 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
     }
 
     @Override
-    protected boolean isProjectTypeSupported(String projectType) {
-        return Constants.LIBERTY_MAVEN_PROJECT.equals(projectType);
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(Constants.LIBERTY_MAVEN_PROJECT);
     }
 
     @Override

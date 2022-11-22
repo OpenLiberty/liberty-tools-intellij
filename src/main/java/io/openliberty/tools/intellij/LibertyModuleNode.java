@@ -9,24 +9,31 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij;
 
+import com.intellij.openapi.vfs.VirtualFile;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class LibertyActionNode extends DefaultMutableTreeNode {
-    public String name;
+public class LibertyModuleNode extends DefaultMutableTreeNode {
     private LibertyModule libertyModule;
 
-    public LibertyActionNode(String name, LibertyModule libertyModule) {
-        super(name);
-        this.name = name;
+    public LibertyModuleNode(LibertyModule libertyModule) {
+        super(libertyModule.getName());
         this.libertyModule = libertyModule;
     }
 
     public String getName() {
-        return this.name;
+        return libertyModule.getName();
     }
 
-    public LibertyModule getLibertyModule() {
-        return libertyModule;
+    public VirtualFile getFilePath() {
+        return libertyModule.getBuildFile();
     }
 
+    public String getProjectType() {
+        return libertyModule.getProjectType();
+    }
+
+    public boolean isValidContainerVersion() {
+        return libertyModule.isValidContainerVersion();
+    }
 }

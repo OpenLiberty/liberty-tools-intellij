@@ -36,7 +36,7 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     protected void executeLibertyAction() {
-        LibertyProjectUtil.addCustomLibertyProject(buildFile);
+        LibertyProjectUtil.addCustomLibertyProject(libertyModule);
     }
 
     @Override

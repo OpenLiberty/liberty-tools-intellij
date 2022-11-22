@@ -19,6 +19,18 @@ public class BuildFile {
     public boolean validBuildFile;
     public boolean validContainerVersion;
 
+    private String projectName;
+
+    public String getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(String projectType) {
+        this.projectType = projectType;
+    }
+
+    private String projectType;
+
     public BuildFile(boolean validBuildFile, boolean validContainerVersion) {
         this.validBuildFile = validBuildFile;
         this.validContainerVersion = validContainerVersion;
@@ -38,5 +50,14 @@ public class BuildFile {
     public boolean isValidContainerVersion() {
         return this.validContainerVersion;
     }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
 
 }

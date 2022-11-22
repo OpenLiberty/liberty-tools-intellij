@@ -12,11 +12,19 @@ package io.openliberty.tools.intellij.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
@@ -38,9 +46,9 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             LOGGER.debug(msg);
             return;
         }
-        List<BuildFileInfo> buildFileInfoList = getBuildFileInfoList();
-        if (!buildFileInfoList.isEmpty()) {
-            final String[] projectNames = toProjectNames(buildFileInfoList);
+        List<BuildFile> buildFileList = getBuildFileList();
+        if (!buildFileList.isEmpty()) {
+            final String[] projectNames = buildFileToProjectNames(buildFileList);
             final int ret = Messages.showChooseDialog(project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
@@ -48,8 +56,9 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     projectNames,
                     projectNames[0]);
             // Execute the action if a project was selected.
-            if (ret >= 0 && ret < buildFileInfoList.size()) {
-                buildFileInfoList.get(ret).writeTo(this);
+            if (ret >= 0 && ret < buildFileList.size()) {
+                BuildFile selectedBuildFile = buildFileList.get(ret);
+                setLibertyModule(new LibertyModule(project, selectedBuildFile));
                 executeLibertyAction();
                 refreshLibertyToolbar.actionPerformed(e);
             }
@@ -62,4 +71,73 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     LibertyPluginIcons.libertyIcon_40);
         }
     }
+
+    /* Returns an aggregated list containing info for all Maven and Gradle build files. */
+    protected final List<BuildFile> getBuildFileList() {
+        final List<BuildFile> buildFiles = new ArrayList<BuildFile>();
+        final List<BuildFile> mavenBuildFiles;
+        final List<BuildFile> gradleBuildFiles;
+        try {
+            mavenBuildFiles = getMavenBuildFiles();
+            gradleBuildFiles = getGradleBuildFiles();
+        } catch (IOException | SAXException | ParserConfigurationException e) {
+            LOGGER.error("Could not find Maven or Gradle projects in workspace",
+                    e.getMessage());
+            return Collections.emptyList();
+        }
+        if (mavenBuildFiles.isEmpty() && gradleBuildFiles.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Resolve project names and add to list
+        mavenBuildFiles.forEach(mavenBuildFile -> {
+            // resolve project name
+            VirtualFile virtualFile = mavenBuildFile.getBuildFile().getVirtualFile();
+            if (virtualFile == null) {
+                LOGGER.error(String.format("Could not resolve Maven project for build file: %s", mavenBuildFile.getBuildFile()));
+            } else {
+                try {
+                    mavenBuildFile.setProjectName(LibertyMavenUtil.getProjectNameFromPom(virtualFile));
+                    mavenBuildFile.setProjectType(Constants.LIBERTY_MAVEN_PROJECT);
+                    buildFiles.add(mavenBuildFile);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Could not resolve project name from pom.xml: %s", virtualFile), e.getMessage());
+                }
+            }
+
+        });
+        gradleBuildFiles.forEach(gradleBuildFile -> {
+            VirtualFile virtualFile = gradleBuildFile.getBuildFile().getVirtualFile();
+            if (virtualFile == null) {
+                LOGGER.error(String.format("Could not resolve Gradle project for build file: %s", gradleBuildFile.getBuildFile()));
+            } else {
+                try {
+                    gradleBuildFile.setProjectName(LibertyGradleUtil.getProjectName(virtualFile));
+                    gradleBuildFile.setProjectType(Constants.LIBERTY_GRADLE_PROJECT);
+                    buildFiles.add(gradleBuildFile);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Could not resolve project name from settings.gradle: %s", virtualFile), e.getMessage());
+                }
+            }
+
+        });
+        return buildFiles;
+    }
+
+    protected final String[] buildFileToProjectNames(@NotNull List<BuildFile> list) {
+        final int size = list.size();
+        final String[] projectNames = new String[size];
+        for (int i = 0; i < size; ++i) {
+            projectNames[i] = list.get(i).getProjectName();
+        }
+        return projectNames;
+    }
+
+    protected ArrayList<BuildFile> getGradleBuildFiles() throws IOException, ParserConfigurationException, SAXException {
+        return LibertyProjectUtil.getGradleBuildFiles(project);
+    }
+
+    protected ArrayList<BuildFile> getMavenBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+        return LibertyProjectUtil.getMavenBuildFiles(project);
+    }
+
 }

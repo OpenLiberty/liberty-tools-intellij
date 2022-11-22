@@ -22,6 +22,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
 import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
+import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalTabState;
@@ -63,15 +65,17 @@ public class LibertyProjectUtil {
         return CommonDataKeys.PROJECT.getData(context);
     }
 
-    public static void addCustomLibertyProject(VirtualFile buildFile) {
-        final String path = buildFile.getCanonicalPath();
+    public static void addCustomLibertyProject(LibertyModule libertyModule) {
+        final String path = libertyModule.getBuildFile().getCanonicalPath();
         if (path != null) {
             customLibertyProjects.add(path);
+            LibertyModules.getInstance().addLibertyModule(libertyModule);
         }
     }
 
-    public static void removeCustomLibertyProject(VirtualFile buildFile) {
-        customLibertyProjects.remove(buildFile.getCanonicalPath());
+    public static void removeCustomLibertyProject(LibertyModule libertyModule) {
+        customLibertyProjects.remove(libertyModule.getBuildFile().getCanonicalPath());
+        LibertyModules.getInstance().removeLibertyModule(libertyModule);
     }
 
     public static boolean isCustomLibertyProject(PsiFile buildFile) {
@@ -205,6 +209,7 @@ public class LibertyProjectUtil {
     private static ShellTerminalWidget getTerminalWidget(ToolWindow terminalWindow, String projectName) {
         Content[] terminalContents = terminalWindow.getContentManager().getContents();
         for (int i = 0; i < terminalContents.length; i++) {
+            // TODO use LibertyModule rather than projectName see https://github.com/OpenLiberty/liberty-tools-intellij/issues/143
             if (terminalContents[i].getTabName().equals(projectName)) {
                 JBTerminalWidget widget = TerminalView.getWidgetByContent(terminalContents[i]);
                 ShellTerminalWidget shellWidget = (ShellTerminalWidget) Objects.requireNonNull(widget);
@@ -213,5 +218,7 @@ public class LibertyProjectUtil {
         }
         return null;
     }
+
+
 
 }

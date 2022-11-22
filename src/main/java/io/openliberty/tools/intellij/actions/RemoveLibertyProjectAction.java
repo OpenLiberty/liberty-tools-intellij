@@ -44,7 +44,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
                 LibertyPluginIcons.libertyIcon_40);
         // Remove the project only if the user confirms it.
         if (result == Messages.YES) {
-            LibertyProjectUtil.removeCustomLibertyProject(buildFile);
+            LibertyProjectUtil.removeCustomLibertyProject(libertyModule);
         }
     }
 
