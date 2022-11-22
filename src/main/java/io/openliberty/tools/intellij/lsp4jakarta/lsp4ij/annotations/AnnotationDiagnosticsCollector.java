@@ -228,9 +228,11 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     }
 
     private static boolean isValidAnnotation(String annotationName, String[] validAnnotations) {
-        for (String fqName : validAnnotations) {
-            if (fqName.endsWith(annotationName)) {
-                return true;
+        if (annotationName != null) {
+            for (String fqName : validAnnotations) {
+                if (fqName.endsWith(annotationName)) {
+                    return true;
+                }
             }
         }
         return false;
