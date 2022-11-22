@@ -68,10 +68,12 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
 
             PsiPackage psiPackage = JavaPsiFacade.getInstance(unit.getProject())
                     .findPackage(unit.getPackageName());
-            PsiAnnotation[] pkgAnnotations = psiPackage.getAnnotations();
-            for (PsiAnnotation annotation : pkgAnnotations) {
-                if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
-                    annotatables.add(new Tuple.Two<>(annotation, psiPackage));
+            if (psiPackage != null) {
+                PsiAnnotation[] pkgAnnotations = psiPackage.getAnnotations();
+                for (PsiAnnotation annotation : pkgAnnotations) {
+                    if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                        annotatables.add(new Tuple.Two<>(annotation, psiPackage));
+                }
             }
 
             PsiClass[] types = unit.getClasses();
