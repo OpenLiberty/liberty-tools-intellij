@@ -123,7 +123,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         // If date element exists and is non-empty, it must follow ISO 8601 format.
                         if (pair.getAttributeName().equals("date")) {
                             String date = pair.getLiteralValue();
-                            if (!date.equals("")) {
+                            if (date != null && !date.equals("")) {
                                 if (!Pattern.matches(AnnotationConstants.ISO_8601_REGEX, date)) {
                                     String diagnosticMessage = Messages.getMessage(
                                             "AnnotationMustDefineAttributeFollowing8601", "@Generated", "date");
