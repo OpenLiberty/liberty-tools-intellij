@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import io.openliberty.tools.intellij.util.Constants;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -39,4 +40,12 @@ public class LibertyProjectNode extends DefaultMutableTreeNode {
     public String getProjectType() { return this.projectType; }
 
     public boolean isValidContainerVersion() { return this.validContainerVersion; }
+
+    public boolean isGradleProjectType() {
+        return this.projectType.equals(Constants.LIBERTY_GRADLE_PROJECT);
+    }
+
+    public boolean isMavenProjectType() {
+        return this.projectType.equals(Constants.LIBERTY_MAVEN_PROJECT);
+    }
 }
