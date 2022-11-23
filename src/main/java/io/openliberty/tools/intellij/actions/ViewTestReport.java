@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,11 @@ public class ViewTestReport extends LibertyGeneralAction {
 
     public ViewTestReport() {
         setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.test.report"));
+    }
+
+    @Override
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(Constants.LIBERTY_GRADLE_PROJECT);
     }
 
     @Override
@@ -79,7 +85,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
+            LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;
         }
 

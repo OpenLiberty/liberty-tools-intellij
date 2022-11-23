@@ -17,43 +17,115 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class LibertyGeneralAction extends AnAction {
 
-    protected Logger log = Logger.getInstance(LibertyGeneralAction.class);
+    protected Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
     protected Project project;
+    protected LibertyModule libertyModule;
     protected String projectName;
     protected String projectType;
     protected VirtualFile buildFile;
     protected String actionCmd;
 
+    /**
+     * Set the LibertyModule that the action should run on
+     * @param libertyModule
+     */
+    public void setLibertyModule(LibertyModule libertyModule) {
+        this.libertyModule = libertyModule;
+        this.project = libertyModule.getProject();
+        this.projectName = libertyModule.getName();
+        this.projectType = libertyModule.getProjectType();
+        this.buildFile = libertyModule.getBuildFile();
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
-            notifyError(msg);
-            log.debug(msg);
-            return;
+            project = LibertyProjectUtil.getProject(e.getDataContext());
+            // if still null deliver error message
+            if (project == null) {
+                // TODO prompt user to select project
+                String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
+                notifyError(msg);
+                LOGGER.debug(msg);
+                return;
+            }
         }
-
-        buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile == null) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
-            notifyError(msg);
-            log.debug(msg);
-            return;
+            buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+            // if still null, prompt for user to select
+            if (buildFile == null) {
+                List<LibertyModule> libertyModules = LibertyModules.getInstance()
+                        .getLibertyModules(getSupportedProjectTypes());
+                if (!libertyModules.isEmpty()) {
+                    // Only one project. Select it.
+                    if (libertyModules.size() == 1) {
+                        setLibertyModule(libertyModules.get(0));
+                    }
+                    // Multiple projects. Pop up dialog for user to select.
+                    else {
+                        final String[] projectNames = toProjectNames(libertyModules);
+                        final int ret = Messages.showChooseDialog(project,
+                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
+                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                                LibertyPluginIcons.libertyIcon_40,
+                                projectNames,
+                                projectNames[0]);
+                        if (ret >= 0 && ret < libertyModules.size()) {
+                            setLibertyModule(libertyModules.get(ret));
+                        }
+                        // The user pressed cancel on the dialog.
+                        else {
+                            return;
+                        }
+                    }
+                }
+                // if buildFile is still null, deliver error message
+                if (buildFile == null) {
+                    String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
+                    notifyError(msg);
+                    LOGGER.debug(msg);
+                    return;
+                }
+            }
         }
-
-        projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
-        projectType = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_TYPE);
+        if (projectName == null) {
+            projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
+        }
+        if (projectType == null) {
+            projectType = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_TYPE);
+        }
         executeLibertyAction();
+    }
+
+    /* Returns project type(s) applicable to this action. */
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(
+                Constants.LIBERTY_MAVEN_PROJECT, Constants.LIBERTY_GRADLE_PROJECT);
+
+    }
+
+    protected final String[] toProjectNames(@NotNull List<LibertyModule> list) {
+        final int size = list.size();
+        final String[] projectNames = new String[size];
+        for (int i = 0; i < size; ++i) {
+            projectNames[i] = list.get(i).getName();
+        }
+        return projectNames;
     }
 
     protected void setActionCmd(String actionCmd) {
@@ -65,14 +137,13 @@ public class LibertyGeneralAction extends AnAction {
     }
 
     protected void notifyError(String errMsg) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
-                , LibertyPluginIcons.libertyIcon
-                , LocalizedResourceUtil.getMessage("liberty.action.cannot.start")
-                , ""
-                , errMsg
-                , NotificationType.WARNING
-                , NotificationListener.URL_OPENING_LISTENER);
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                LibertyPluginIcons.libertyIcon,
+                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"),
+                "",
+                errMsg,
+                NotificationType.WARNING,
+                NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
     }
-
 }

@@ -31,13 +31,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class RefreshLibertyToolbar extends AnAction {
-    Logger log = Logger.getInstance(RefreshLibertyToolbar.class);
+    Logger LOGGER = Logger.getInstance(RefreshLibertyToolbar.class);
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) {
-            log.debug("Unable to refresh Liberty toolbar, could not resolve project");
+            LOGGER.debug("Unable to refresh Liberty toolbar, could not resolve project");
             return;
         }
         ProjectView.getInstance(project).refresh();

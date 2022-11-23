@@ -27,6 +27,8 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.properties</depends>
+    <depends>org.jetbrains.idea.maven</depends>
+    <depends>com.intellij.gradle</depends>
 
     <idea-version since-build="222"/>
 
@@ -160,6 +162,14 @@
         <action id="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
                 class="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
                 icon="AllIcons.Actions.Execute"/>
+
+        <action id="io.openliberty.tools.intellij.actions.AddLibertyProjectAction"
+                class="io.openliberty.tools.intellij.actions.AddLibertyProjectAction"
+                icon="AllIcons.FileTypes.Config"/>
+
+        <action id="io.openliberty.tools.intellij.actions.RemoveLibertyProjectAction"
+                class="io.openliberty.tools.intellij.actions.RemoveLibertyProjectAction"
+                icon="AllIcons.FileTypes.Config"/>
 
     </actions>
     <!-- Point to LSP4IJ xml -->
