@@ -273,16 +273,45 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         });
 
         // set tree icons and colours
-        DefaultTreeCellRenderer newRenderer = new DefaultTreeCellRenderer();
-
-        newRenderer.setLeafIcon(LibertyPluginIcons.IntelliJGear);
-        newRenderer.setClosedIcon(LibertyPluginIcons.libertyIcon);
-        newRenderer.setOpenIcon(LibertyPluginIcons.libertyIcon);
-        newRenderer.setBackgroundNonSelectionColor(backgroundColor);
-
-        tree.setCellRenderer(newRenderer);
+        LibertyTreeRenderer libertyRenderer = new LibertyTreeRenderer(backgroundColor);
+        tree.setCellRenderer(libertyRenderer);
 
         return tree;
+    }
+
+    static class LibertyTreeRenderer extends DefaultTreeCellRenderer {
+        public LibertyTreeRenderer(Color backgroundColor) {
+            setBackgroundNonSelectionColor(backgroundColor);
+        }
+
+        public Component getTreeCellRendererComponent(
+            JTree tree,
+            Object value,
+            boolean sel,
+            boolean expanded,
+            boolean leaf,
+            int row,
+            boolean hasFocus) {
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+                // assign gear icon to action nodes
+                if (leaf) {
+                    setIcon(LibertyPluginIcons.IntelliJGear);
+                    return this;
+                } 
+
+                // select icon for node based on project type
+                LibertyProjectNode projectNode = (LibertyProjectNode) value;
+                if (projectNode.isGradleProjectType()) {
+                    setIcon(LibertyPluginIcons.gradleIcon);
+                } else if (projectNode.isMavenProjectType()) {
+                    setIcon(LibertyPluginIcons.mavenIcon);
+                } else {
+                    setIcon(LibertyPluginIcons.libertyIcon);
+                }
+
+                return this;
+            }
     }
 
     private static void executeAction(Tree tree) {
