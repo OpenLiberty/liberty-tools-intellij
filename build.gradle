@@ -12,16 +12,10 @@ sourceCompatibility = 17
 repositories {
     mavenCentral()
     maven {
-        url 'https://repo.eclipse.org/content/repositories/lsp4jakarta-snapshots'
+        url 'https://repo.eclipse.org/content/repositories/snapshots'
     }
     maven {
-        url 'https://repo.eclipse.org/content/repositories/lsp4mp-snapshots'
-    }
-    maven {
-        url 'https://repo.eclipse.org/content/repositories/lsp4mp-releases'
-    }
-    maven {
-        url 'https://repo.eclipse.org/content/repositories/lemminx-releases'
+        url 'https://repo.eclipse.org/content/repositories/releases'
     }
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
