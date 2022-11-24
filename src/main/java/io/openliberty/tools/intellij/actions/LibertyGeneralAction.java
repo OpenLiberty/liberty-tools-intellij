@@ -65,13 +65,16 @@ public class LibertyGeneralAction extends AnAction {
                 return;
             }
         }
-        if (buildFile == null) {
+
+        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
+
+        if (isActionFromShiftShift || buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-            // if still null, prompt for user to select
-            if (buildFile == null) {
+            // if still null, and it is not from shift-shift, then prompt for user to select
+            if (isActionFromShiftShift || buildFile == null) {
                 List<LibertyModule> libertyModules = LibertyModules.getInstance()
                         .getLibertyModules(getSupportedProjectTypes());
-                if (!libertyModules.isEmpty()) {
+                if (isActionFromShiftShift || !libertyModules.isEmpty()) {
                     // Only one project. Select it.
                     if (libertyModules.size() == 1) {
                         setLibertyModule(libertyModules.get(0));
