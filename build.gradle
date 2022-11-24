@@ -42,7 +42,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.vladsch.flexmark:flexmark:0.50.50'
     implementation 'org.jsoup:jsoup:1.14.2'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    //Add junit dependency back when tests are added
+    //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
 
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0:uber') {
@@ -102,7 +103,7 @@ task buildJakarta {
 
 intellij {
     version = '2022.2.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal']
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
 }
 

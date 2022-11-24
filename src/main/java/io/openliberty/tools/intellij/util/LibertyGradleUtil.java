@@ -10,6 +10,8 @@
 package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 
@@ -20,9 +22,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.jetbrains.plugins.gradle.settings.DistributionType;
+import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
+import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
 public class LibertyGradleUtil {
-    private static Logger log = Logger.getInstance(LibertyGradleUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);;
     /**
      * Given the gradle build file get the project name
      * This method looks for a settings.gradle file in the same parent dir
@@ -46,7 +51,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                log.error("Could not read " + settingsPath, e.getMessage());
+                LOGGER.error("Could not read " + settingsPath, e.getMessage());
             }
         }
         return null;
@@ -153,4 +158,44 @@ public class LibertyGradleUtil {
         return false;
     }
 
+    public static String getGradleSettingsCmd(Project project) {
+        GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
+
+        if (gradleProjectSettings.getDistributionType().isWrapped()) {
+            // a wrapper will be used
+            String wrapperPath = getLocalGradleWrapperPath(project);
+            if (wrapperPath != null) {
+                return wrapperPath;
+            }
+        }
+        else if (DistributionType.LOCAL.equals(gradleProjectSettings.getDistributionType())) {
+            // local gradle to be used
+            String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
+            if (gradleHome != null) {
+                String gradlePath = getCustomGradlePath(gradleHome);
+                if (gradlePath != null) {
+                    return gradlePath;
+                }
+            }
+        }
+        return "gradle"; // default gradle
+    }
+
+    private static String getLocalGradleWrapperPath(Project project) {
+        String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
+        File file = new File(project.getBasePath(), gradlew);
+        return file.exists() ? gradlew : null;
+    }
+
+    private static String getCustomGradlePath (String customGradleHome) {
+        String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+        File gradleHomeFile = new File(customGradleHome);
+        if (gradleHomeFile != null) {
+            // When a custom gradle is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
+            // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
+            File file = new File(gradleHomeFile.getAbsolutePath(), "bin"+ File.separator + "gradle");
+            return file.exists() ? additionalCMD + file.getAbsolutePath() : null;
+        }
+        return null;
+    }
 }

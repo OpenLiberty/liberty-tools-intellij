@@ -9,8 +9,13 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import org.jetbrains.idea.maven.project.MavenGeneralSettings;
+import org.jetbrains.idea.maven.project.MavenWorkspaceSettingsComponent;
+import org.jetbrains.idea.maven.server.MavenServerManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -181,4 +186,42 @@ public class LibertyMavenUtil {
         }
     }
 
+    public static String getMavenSettingsCmd(Project project) {
+        MavenServerManager mavenManager = MavenServerManager.getInstance();
+        MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
+        String mavenHome = mavenSettings.getMavenHome();
+
+        if (mavenManager.WRAPPED_MAVEN.equals(mavenHome)) {
+            // it is set to use the wrapper
+            String mvnwPath = getLocalMavenWrapper(project);
+            if (mvnwPath != null) {
+                return mvnwPath;
+            }
+        } else {
+            // try to use maven home path defined in the settings
+            String mavenPath = getCustomMavenPath(mavenHome);
+            if (mavenPath != null) {
+                return mavenPath;
+            }
+        }
+        return "mvn"; // default maven
+    }
+
+    private static String getLocalMavenWrapper(Project project) {
+        String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
+        File file = new File(project.getBasePath(), mvnw);
+        return file.exists() ? mvnw : null;
+    }
+
+    private static String getCustomMavenPath(String customMavenHome) {
+        String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+        File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
+        if (mavenHomeFile != null) {
+            // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
+            // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
+            File file = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
+            return file.exists() ? additionalCMD + file.getAbsolutePath() : null;
+        }
+        return null;
+    }
 }

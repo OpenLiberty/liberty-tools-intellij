@@ -1,4 +1,4 @@
-# Contributing to Open Liberty Tools IntelliJ
+# Contributing to Liberty Tools IntelliJ
 
 We welcome contributions, and request you follow these guidelines.
 
@@ -9,7 +9,7 @@ We welcome contributions, and request you follow these guidelines.
 
 ## Raising issues
 
-Please raise any bug reports on the [issue tracker](https://github.com/OpenLiberty/open-liberty-tools-intellij/issues). Be sure to search the list to see if your issue has already been raised.
+Please raise any bug reports on the [issue tracker](https://github.com/OpenLiberty/liberty-tools-intellij/issues). Be sure to search the list to see if your issue has already been raised.
 
 A good bug report is one that make it easy for us to understand what you were trying to do and what went wrong. Provide as much context as possible so we can try to recreate the issue.
 

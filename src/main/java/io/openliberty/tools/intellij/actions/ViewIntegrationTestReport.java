@@ -22,11 +22,18 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
     public ViewIntegrationTestReport() {
         setActionCmd(LocalizedResourceUtil.getMessage("view.integration.test.report"));
+    }
+
+    @Override
+    protected List<String> getSupportedProjectTypes() {
+        return Arrays.asList(Constants.LIBERTY_MAVEN_PROJECT);
     }
 
     @Override
@@ -46,7 +53,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
                     , NotificationType.ERROR
                     , NotificationListener.URL_OPENING_LISTENER);
             Notifications.Bus.notify(notif, project);
-            log.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
+            LOGGER.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
             return;
         }
 
