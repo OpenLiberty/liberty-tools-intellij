@@ -27,10 +27,10 @@ import java.util.Map;
  * Start Liberty Language Server
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusServer.java
  */
-public class LibertyLanguageServer extends ProcessStreamConnectionProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyXmlServer.class);
+public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyConfigLanguageServer.class);
 
-    public LibertyLanguageServer() {
+    public LibertyConfigLanguageServer() {
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-1.0-SNAPSHOT-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
