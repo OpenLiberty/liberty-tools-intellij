@@ -13,7 +13,6 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiFile;
@@ -24,6 +23,7 @@ import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
+import io.openliberty.tools.intellij.LibertyProjectSettings;
 import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalTabState;
@@ -40,21 +40,21 @@ public class LibertyProjectUtil {
 
     enum BuildFileFilter {
         ADDABLE {
-            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
-                return !LIST.matches(buildFile, psiFile);
+            public boolean matches(Project project, BuildFile buildFile, PsiFile psiFile) {
+                return !LIST.matches(project, buildFile, psiFile);
             }
         },
         REMOVABLE {
-            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
-                return isCustomLibertyProject(psiFile) && !(buildFile.isValidBuildFile() || isLibertyProject(psiFile));
+            public boolean matches(Project project, BuildFile buildFile, PsiFile psiFile) {
+                return isCustomLibertyProject(project, psiFile) && !(buildFile.isValidBuildFile() || isLibertyProject(psiFile));
             }
         },
         LIST {
-            public boolean matches(BuildFile buildFile, PsiFile psiFile) {
-                return buildFile.isValidBuildFile() || isLibertyProject(psiFile) || isCustomLibertyProject(psiFile);
+            public boolean matches(Project project, BuildFile buildFile, PsiFile psiFile) {
+                return buildFile.isValidBuildFile() || isLibertyProject(psiFile) || isCustomLibertyProject(project, psiFile);
             }
         };
-        public abstract boolean matches(BuildFile buildFile, PsiFile _buildFile);
+        public abstract boolean matches(Project project, BuildFile buildFile, PsiFile psiFile);
     }
 
     /** REVISIT: In memory collection of Liberty projects but need to persist. **/
@@ -68,18 +68,21 @@ public class LibertyProjectUtil {
     public static void addCustomLibertyProject(LibertyModule libertyModule) {
         final String path = libertyModule.getBuildFile().getCanonicalPath();
         if (path != null) {
-            customLibertyProjects.add(path);
+            final LibertyProjectSettings state = LibertyProjectSettings.getInstance(libertyModule.getProject());
+            state.getCustomLibertyProjects().add(path);
             LibertyModules.getInstance().addLibertyModule(libertyModule);
         }
     }
 
     public static void removeCustomLibertyProject(LibertyModule libertyModule) {
-        customLibertyProjects.remove(libertyModule.getBuildFile().getCanonicalPath());
+        final LibertyProjectSettings state = LibertyProjectSettings.getInstance(libertyModule.getProject());
+        state.getCustomLibertyProjects().remove(libertyModule.getBuildFile().getCanonicalPath());
         LibertyModules.getInstance().removeLibertyModule(libertyModule);
     }
 
-    public static boolean isCustomLibertyProject(PsiFile buildFile) {
-        return customLibertyProjects.contains(buildFile.getVirtualFile().getCanonicalPath());
+    public static boolean isCustomLibertyProject(Project project, PsiFile buildFile) {
+        final LibertyProjectSettings state = LibertyProjectSettings.getInstance(project);
+        return state.getCustomLibertyProjects().contains(buildFile.getVirtualFile().getCanonicalPath());
     }
 
     /**
@@ -173,7 +176,7 @@ public class LibertyProjectUtil {
             for (PsiFile mavenFile : mavenFiles) {
                 BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
                 // check if valid pom.xml, or if part of Liberty project
-                if (filter.matches(buildFile, mavenFile)) {
+                if (filter.matches(project, buildFile, mavenFile)) {
                     buildFile.setBuildFile(mavenFile);
                     buildFiles.add(buildFile);
                 }
@@ -184,7 +187,7 @@ public class LibertyProjectUtil {
                 try {
                     BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
                     // check if valid build.gradle, or if part of Liberty project
-                    if (filter.matches(buildFile, gradleFile)) {
+                    if (filter.matches(project, buildFile, gradleFile)) {
                         buildFile.setBuildFile(gradleFile);
                         buildFiles.add(buildFile);
                     }
