@@ -22,7 +22,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
     public LibertyDevStartAction() {
         setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev"));
     }
-
+    
     @Override
     protected void executeLibertyAction() {
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);

@@ -14,20 +14,49 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout liberty-tools-intellij
+        uses: actions/checkout@v3
+        with:
+          path: liberty-tools-intellij
+      - name: Checkout lsp4jakarta
+        uses: actions/checkout@v3
+        with:
+          repository: eclipse/lsp4jakarta
+          path: lsp4jakarta
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 11
-          cache: 'gradle'
+          java-version: 17
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Build lsp4jakarta
+        working-directory: ./liberty-tools-intellij
+        run: ./gradlew buildJakarta
       - name: Build Liberty-Tools-Intellij
-        run: gradle buildPlugin
+        working-directory: ./liberty-tools-intellij
+        run: ./gradlew buildPlugin
       - name: Archive artifacts
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
           name: liberty-tools-intellij-${{ github.sha }}
-          path: ./**/*liberty-tools-intellij*.zip
+          path: |
+            ./**/*liberty-tools-intellij*.zip
+            ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
