@@ -22,8 +22,8 @@
         <languageMapping language="XML" serverId="libertyXml"/>
 
         <!-- Liberty LS -->
-        <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyLanguageServer"
-                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyLanguageClient"
+        <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
+                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="BootstrapProperties" serverId="libertyls"/>
         <languageMapping language="ServerEnv" serverId="libertyls"/>

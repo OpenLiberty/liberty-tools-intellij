@@ -26,11 +26,11 @@ import java.util.List;
  * Client for Liberty language server
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusLanguageClient.java
  */
-public class LibertyLanguageClient extends LanguageClientImpl implements MicroProfileProjectService.Listener {
+public class LibertyConfigLanguageClient extends LanguageClientImpl implements MicroProfileProjectService.Listener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyLanguageClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyConfigLanguageClient.class);
 
-    public LibertyLanguageClient(Project project) {
+    public LibertyConfigLanguageClient(Project project) {
         super(project);
     }
 
