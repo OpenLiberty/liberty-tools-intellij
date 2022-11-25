@@ -129,12 +129,12 @@ public class DebugModeHandler {
             RemoteConfiguration remoteConfiguration = (RemoteConfiguration) settings.getConfiguration();
             remoteConfiguration.PORT = debugPortStr;
             long groupId = ExecutionEnvironment.getNextUnusedExecutionId();
-            LOGGER.debug(String.format("%s: attempting to attach debugger to port %s"), libertyModule.getName(), debugPortStr);
+            LOGGER.debug(String.format("%s: attempting to attach debugger to port %s", libertyModule.getName(), debugPortStr));
             ExecutionUtil.runConfiguration(settings, DefaultDebugExecutor.getDebugExecutorInstance(), DefaultExecutionTarget.INSTANCE, groupId);
         } catch (Exception e) {
             // do not show error if debug attachment was cancelled by user
             if (!(e instanceof ProcessCanceledException)) {
-                LOGGER.error(String.format("Cannot connect debugger to port %s", debugPort), e);
+                LOGGER.error(String.format("Cannot connect debugger to port %d", debugPort), e);
                 ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(LocalizedResourceUtil.getMessage("cannot.connect.debug.port", debugPort), "Liberty"));
             }
         }

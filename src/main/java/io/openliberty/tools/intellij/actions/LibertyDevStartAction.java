@@ -33,8 +33,9 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String startCmd = null;
         int debugPort = -1;
         DebugModeHandler debugHandler = new DebugModeHandler();
-        String start = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CMD;
-        String startInContainer = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+        String buildSettingsCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) : LibertyGradleUtil.getGradleSettingsCmd(project);
+        String start = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
+        String startInContainer = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
         startCmd = libertyModule.runInContainer() ? startInContainer : start;
         startCmd += libertyModule.getCustomStartParams();
         if (libertyModule.isDebugMode()) {

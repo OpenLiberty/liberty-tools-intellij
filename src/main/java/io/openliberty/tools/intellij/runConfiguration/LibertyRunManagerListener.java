@@ -45,7 +45,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
                     libertyModule.clearCustomStartParams();
                 }
             } catch (MalformedURLException e) {
-                LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty project associated with Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
+                LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
             }
 
         }
