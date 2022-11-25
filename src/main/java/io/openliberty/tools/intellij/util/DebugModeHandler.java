@@ -266,7 +266,9 @@ public class DebugModeHandler {
                 }
                 if (lastEntry != null) {
                     String[] parts = lastEntry.split("=");
-                    port = parts[1].trim();
+                    if (parts.length > 1) {
+                        port = parts[1].trim();
+                    }
                 }
             }
         }
