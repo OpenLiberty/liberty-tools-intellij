@@ -111,6 +111,14 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return new LibertyRunSettingsEditor(getProject());
     }
 
+    /**
+     * Runs when users select "Run" or "Debug" on a Liberty  run configuration
+     *
+     * @param executor the execution mode selected by the user (run, debug, profile etc.)
+     * @param environment the environment object containing additional settings for executing the configuration.
+     * @return
+     * @throws ExecutionException
+     */
     @Nullable
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
@@ -138,6 +146,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             libertyModule.setDebugMode(true);
         }
         action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(null), ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0));
+        // return null because we are not plugging into "Run" tool window in IntelliJ, just terminal and Debug
         return null;
     }
 

@@ -64,7 +64,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         LibertyActionUtil.executeCommand(widget, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
-            debugHandler.createDebugConfiguration(libertyModule, debugPort);
+            debugHandler.createAndRunDebugConfiguration(libertyModule, debugPort);
             libertyModule.setDebugMode(false);
         }
     }

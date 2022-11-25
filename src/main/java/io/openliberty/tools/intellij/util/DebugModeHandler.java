@@ -100,16 +100,16 @@ public class DebugModeHandler {
     }
 
     /**
-     * Creates a new debug configuration for the corresponding Liberty module
+     * Creates and runs new debug configuration for the corresponding Liberty module
      *
      * @param libertyModule Liberty module
      * @param debugPort JVM port to connect to
      */
-    public void createDebugConfiguration(LibertyModule libertyModule, int debugPort) {
+    public void createAndRunDebugConfiguration(LibertyModule libertyModule, int debugPort) {
         ProgressManager.getInstance().run(new Task.Backgroundable(libertyModule.getProject(), LocalizedResourceUtil.getMessage("liberty.run.config.title"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                createDebugConfiguration(indicator, libertyModule, debugPort);
+                createAndRunDebugConfiguration(indicator, libertyModule, debugPort);
             }
         });
     }
@@ -121,7 +121,7 @@ public class DebugModeHandler {
      * @param libertyModule Liberty module
      * @param debugPort JVM port to connect to
      */
-    private void createDebugConfiguration(ProgressIndicator indicator, LibertyModule libertyModule, int debugPort) {
+    private void createAndRunDebugConfiguration(ProgressIndicator indicator, LibertyModule libertyModule, int debugPort) {
         indicator.setText(LocalizedResourceUtil.getMessage("attaching.debugger"));
         try {
             String debugPortStr = waitForSocketActivation(indicator, libertyModule, DEFAULT_ATTACH_HOST, debugPort);
