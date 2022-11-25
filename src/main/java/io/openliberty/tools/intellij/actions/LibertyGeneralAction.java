@@ -70,11 +70,11 @@ public class LibertyGeneralAction extends AnAction {
 
         if (isActionFromShiftShift || buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-            // if still null, and it is not from shift-shift, then prompt for user to select
+            // if still null, or it is from shift-shift, then prompt for the user to select
             if (isActionFromShiftShift || buildFile == null) {
                 List<LibertyModule> libertyModules = LibertyModules.getInstance()
                         .getLibertyModules(getSupportedProjectTypes());
-                if (isActionFromShiftShift || !libertyModules.isEmpty()) {
+                if (!libertyModules.isEmpty()) {
                     // Only one project. Select it.
                     if (libertyModules.size() == 1) {
                         setLibertyModule(libertyModules.get(0));
