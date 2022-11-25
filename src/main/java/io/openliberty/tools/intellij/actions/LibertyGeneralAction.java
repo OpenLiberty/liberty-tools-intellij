@@ -80,7 +80,12 @@ public class LibertyGeneralAction extends AnAction {
                     // Multiple projects. Pop up dialog for user to select.
                     else {
                         final String[] projectNames = toProjectNames(libertyModules);
-                        final int ret = Messages.showChooseDialog(project, LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd), LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"), LibertyPluginIcons.libertyIcon_40, projectNames, projectNames[0]);
+                        final int ret = Messages.showChooseDialog(project,
+                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
+                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                                LibertyPluginIcons.libertyIcon_40,
+                                projectNames,
+                                projectNames[0]);
                         if (ret >= 0 && ret < libertyModules.size()) {
                             setLibertyModule(libertyModules.get(ret));
                         }
@@ -143,7 +148,13 @@ public class LibertyGeneralAction extends AnAction {
      * @param errMsg
      */
     protected void notifyError(String errMsg) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, LibertyPluginIcons.libertyIcon, LocalizedResourceUtil.getMessage("liberty.action.cannot.start"), "", errMsg, NotificationType.WARNING, NotificationListener.URL_OPENING_LISTENER);
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                LibertyPluginIcons.libertyIcon,
+                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"),
+                "",
+                errMsg,
+                NotificationType.WARNING,
+                NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
     }
 
