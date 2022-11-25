@@ -39,10 +39,10 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
     }
 
     public boolean isGradleProjectType() {
-        return this.projectType.equals(Constants.LIBERTY_GRADLE_PROJECT);
+        return libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT);
     }
 
     public boolean isMavenProjectType() {
-        return this.projectType.equals(Constants.LIBERTY_MAVEN_PROJECT);
+        return libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT);
     }
 }
