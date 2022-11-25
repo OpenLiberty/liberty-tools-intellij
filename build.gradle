@@ -41,7 +41,7 @@ dependencies {
     //required by lsp4j as the version from IJ is incompatible
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.vladsch.flexmark:flexmark:0.50.50'
-    implementation 'org.jsoup:jsoup:1.14.2'
+    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
