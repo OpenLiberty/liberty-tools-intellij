@@ -40,6 +40,7 @@ public class LibertyModules {
 
     /**
      * Add tracked Liberty project to workspace
+     *
      * @param module LibertyModule
      */
     public void addLibertyModule(LibertyModule module) {
@@ -48,6 +49,7 @@ public class LibertyModules {
 
     /**
      * Get a Liberty module associated with the corresponding build file
+     *
      * @param buildFile build file
      * @return LibertyModule
      */
@@ -69,6 +71,7 @@ public class LibertyModules {
 
     /**
      * Returns all build files associated with a Liberty project
+     *
      * @return List<VirtualFile> Liberty project build files
      */
     public List<VirtualFile> getLibertyBuildFiles() {
@@ -79,6 +82,7 @@ public class LibertyModules {
 
     /**
      * Returns all Liberty modules in the workspace
+     *
      * @return List<LibertyModule> Liberty project modules
      */
     public List<LibertyModule> getLibertyModules() {

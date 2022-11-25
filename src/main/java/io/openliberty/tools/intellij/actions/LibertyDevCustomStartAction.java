@@ -9,15 +9,27 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.openapi.ui.InputValidator;
-import com.intellij.openapi.ui.Messages;
-import io.openliberty.tools.intellij.LibertyPluginIcons;
-import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import com.intellij.execution.ExecutionManager;
+import com.intellij.execution.RunManager;
+import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.impl.RunManagerImpl;
+import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
+import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Opens the Liberty run config view for the corresponding Liberty module. Creates a new Liberty run config if one does not exist.
+ */
 public class LibertyDevCustomStartAction extends LibertyGeneralAction {
 
     public LibertyDevCustomStartAction() {
@@ -26,52 +38,60 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction() {
-        String msg;
-        String initialVal;
-        if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.maven");
-            initialVal = "";
-        } else {
-            msg = LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params.message.gradle");
-            initialVal = "";
-        }
+        // open run config
+        RunManager runManager = RunManager.getInstance(project);
+        List<RunnerAndConfigurationSettings> libertySettings = runManager.getConfigurationSettingsList(LibertyRunConfigurationType.getInstance());
+        List<RunnerAndConfigurationSettings> libertyModuleSettings = new ArrayList<>();
 
-        InputValidator validator = new InputValidator() {
-            @Override
-            public boolean checkInput(String inputString) {
-                if (inputString != null && !inputString.startsWith("-")) {
-                    return false;
+        libertySettings.forEach(setting -> {
+            // find all Liberty run configs associated with this build file
+            LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
+            try {
+                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(runConfig.getBuildFile()));
+                if (vBuildFile.equals(libertyModule.getBuildFile())) {
+                    libertyModuleSettings.add(setting);
                 }
-                return true;
+            } catch (MalformedURLException e) {
+                String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
+                notifyError(msg);
+                LOGGER.warn(String.format("Could not get Liberty run configuration. ", msg));
             }
-
-            @Override
-            public boolean canClose(String inputString) {
-                return true;
+        });
+        RunnerAndConfigurationSettings selectedLibertyConfig;
+        if (libertyModuleSettings.isEmpty()) {
+            // create new run config
+            selectedLibertyConfig = createNewLibertyRunConfig(runManager);
+        } else {
+            // TODO if 1+ run configs, prompt user to select the one they want see https://github.com/OpenLiberty/liberty-tools-intellij/issues/167
+            // 1+ run configs found for the given project
+            RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
+            if (libertyModuleSettings.contains(selectedConfig)) {
+                // if the selected config is for the Liberty module, use that run config
+                selectedLibertyConfig = selectedConfig;
+            } else {
+                // pick first in list run config in list
+                selectedLibertyConfig = libertyModuleSettings.get(0);
             }
-        };
-
-        String customParams = Messages.showInputDialog(project, msg,
-                LocalizedResourceUtil.getMessage("liberty.dev.custom.params"),
-                LibertyPluginIcons.libertyIcon_40, initialVal, validator);
-
-        String startCmd = null;
-        if (customParams == null) {
-            return;
         }
-        if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:dev " + customParams;
-        } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            startCmd = "gradle libertyDev " + customParams;
+        // opens run config dialog
+        selectedLibertyConfig.setEditBeforeRun(true);
+        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
+        if (builder != null) {
+            ExecutionManager.getInstance(project).restartRunProfile(builder.build());
         }
+    }
 
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
-        if (widget == null) {
-            LOGGER.debug("Unable to start Liberty dev mode with custom parameters, could not get or create terminal widget for " + projectName);
-            return;
-        }
-        String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";
-        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
-        LibertyActionUtil.executeCommand(widget, startCmd);
+    /**
+     * Creates a new run config for the libertyModule selected
+     *
+     * @param runManager
+     * @return RunnerAndConfigurationSettings newly created run config settings
+     */
+    protected RunnerAndConfigurationSettings createNewLibertyRunConfig(RunManager runManager) {
+        RunnerAndConfigurationSettings runConfigSettings = runManager.createConfiguration(runManager.suggestUniqueName(libertyModule.getName(), LibertyRunConfigurationType.getInstance()), LibertyRunConfigurationType.class);
+        LibertyRunConfiguration libertyRunConfiguration = (LibertyRunConfiguration) runConfigSettings.getConfiguration();
+        // pre-populate build file and name
+        libertyRunConfiguration.setBuildFile(String.valueOf(libertyModule.getBuildFile()));
+        return runConfigSettings;
     }
 }

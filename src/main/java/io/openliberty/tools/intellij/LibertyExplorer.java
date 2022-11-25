@@ -94,8 +94,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
             gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
         } catch (IOException | SAXException | ParserConfigurationException e) {
-            LOGGER.error("Could not find Open Liberty Maven or Gradle projects in workspace",
-                    e.getMessage());
+            LOGGER.warn("Could not find Liberty Maven or Gradle projects in workspace",
+                    e);
             return null;
         }
 
@@ -109,13 +109,14 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             String projectName = null;
             VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
-                LOGGER.error("Could not resolve current Maven project");
+                LOGGER.error(String.format("Could not resolve current Maven project %s", psiFile));
+                break;
             }
             LibertyModuleNode node;
             try {
                 projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
             } catch (Exception e) {
-                LOGGER.error("Could not resolve project name from pom.xml", e.getMessage());
+                LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
             }
             if (projectName == null) {
                 projectName = project.getName();
@@ -150,13 +151,14 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             String projectName = null;
             VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
-                LOGGER.error("Could not resolve current Gradle project");
+                LOGGER.error(String.format("Could not resolve current Gradle project %s", buildFile));
+                break;
             }
             LibertyModuleNode node;
             try {
                 projectName = LibertyGradleUtil.getProjectName(virtualFile);
             } catch (Exception e) {
-                LOGGER.error("Could not resolve project name from settings.gradle", e.getMessage());
+                LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
             }
             if (projectName == null) {
                 projectName = project.getName();
@@ -340,7 +342,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 action = (LibertyGeneralAction) am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
             }
             if (action != null) {
-                // TODO set Liberty module for the corresponding action
                 action.setLibertyModule(module);
                 // calls action on double click
                 action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),

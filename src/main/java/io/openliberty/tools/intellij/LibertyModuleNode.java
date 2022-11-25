@@ -15,7 +15,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import io.openliberty.tools.intellij.util.Constants;
 
 public class LibertyModuleNode extends DefaultMutableTreeNode {
-    private LibertyModule libertyModule;
+    private final LibertyModule libertyModule;
 
     public LibertyModuleNode(LibertyModule libertyModule) {
         super(libertyModule.getName());

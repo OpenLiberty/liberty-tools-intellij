@@ -29,13 +29,13 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-
     <idea-version since-build="222"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
         <projectService serviceImplementation="io.openliberty.tools.intellij.LibertyProjectSettings" />
+        <configurationType implementation="io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType"/>
     </extensions>
 
     <extensionPoints>
@@ -111,6 +111,10 @@
             <attribute name="maxRetries" range="-1" /> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
     </extensions>
+
+    <projectListeners>
+        <listener class="io.openliberty.tools.intellij.runConfiguration.LibertyRunManagerListener" topic="com.intellij.execution.RunManagerListener"/>
+    </projectListeners>
 
     <!-- Default resource location for localizing Liberty actions strings -->
     <resource-bundle>messages.LibertyBundles</resource-bundle>
