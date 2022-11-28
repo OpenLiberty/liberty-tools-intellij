@@ -9,24 +9,37 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.execution.configurations.JavaCommandLineState;
+import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import org.apache.tools.ant.taskdefs.Java;
+import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
 import org.jetbrains.idea.maven.project.MavenWorkspaceSettingsComponent;
+import org.jetbrains.idea.maven.server.MavenServerConnector;
 import org.jetbrains.idea.maven.server.MavenServerManager;
+import org.jetbrains.idea.maven.utils.MavenUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.codehaus.plexus.classworlds.ClassWorld;
+
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class LibertyMavenUtil {
@@ -199,7 +212,7 @@ public class LibertyMavenUtil {
             }
         } else {
             // try to use maven home path defined in the settings
-            String mavenPath = getCustomMavenPath(mavenHome);
+            String mavenPath = getCustomMavenPath(project, mavenHome);
             if (mavenPath != null) {
                 return mavenPath;
             }
@@ -213,15 +226,85 @@ public class LibertyMavenUtil {
         return file.exists() ? mvnw : null;
     }
 
-    private static String getCustomMavenPath(String customMavenHome) {
-        String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+    public String includeEscapeToString(String path) {
+        return "\"" + path + "\"";
+    }
+
+    private static String getCustomMavenPath(Project project, String customMavenHome) {
+//        String mavenPath = null;
         File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
         if (mavenHomeFile != null) {
             // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
             // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
-            File file = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
-            return file.exists() ? additionalCMD + "\"" + file.getAbsolutePath() + "\"" : null;
+            File mavenExecutable = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
+//            mavenPath = file.exists() ? "\"" + mavenHomeFile.getAbsolutePath() + "\"" : null;
+//            mavenPath = file.exists() ? mavenHomeFile.getAbsolutePath() : null;
+
+            if (mavenExecutable.exists()) {
+                if (mavenExecutable.canExecute()) {
+                    String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+                    return additionalCMD + "\"" + mavenExecutable.getAbsolutePath() + "\"";
+                } else {
+                    String mavenJdk = getMavenJdkPath(project);
+                    String mavenPath = mavenHomeFile.getAbsolutePath();
+                    String classworldsPath = LibertyMavenUtil.getMavenClassworldsPath(mavenPath);
+
+                    File java = new File (new File(mavenJdk, "bin"), "java");
+                    File classworldsConf = new File(new File (mavenPath, "bin"), MavenUtil.M2_CONF_FILE);
+
+                    if (java.exists() && classworldsConf.exists() && !classworldsPath.isEmpty() && !mavenJdk.isEmpty()) {
+
+                        return java.getAbsolutePath() + " -Dmaven.multiModuleProjectDirectory=" + project.getBasePath() +
+                                " -Dmaven.home=" + mavenPath + " -Dclassworlds.conf=" + classworldsConf.getAbsolutePath() +
+                                " -classpath " + classworldsPath + " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
+                    }
+
+//                    return mavenJdk + File.separator + "bin" + File.separator + "java" +
+//                            " -Dmaven.multiModuleProjectDirectory=" + project.getBasePath() +
+//                            " -Dmaven.home=" + mavenPath +
+//                            " -Dclassworlds.conf=" + mavenPath + File.separator + "bin" + File.separator + MavenUtil.M2_CONF_FILE +
+//                            " -classpath " + classworldsPath + //+ mavenPath + File.separator + "boot" + File.separator + "plexus-classworlds-2.6.0.jar" +
+//                            " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
+                }
+            }
         }
+
         return null;
+    }
+
+    /**
+     *
+     * This is an adaptation from the original getMavenClasspathEntries in org.jetbrains.idea.maven.execution.MavenExternalParameters
+     */
+    private static String getMavenClassworldsPath(final String mavenHome) {
+        File mavenHomeBootAsFile = new File(new File(mavenHome, "core"), "boot");
+        // if the dir "core/boot" does not exist we are using a Maven version > 2.0.5
+        // in this case the classpath must be constructed from the dir "boot"
+        if (!mavenHomeBootAsFile.exists()) {
+            mavenHomeBootAsFile = new File(mavenHome, "boot");
+        }
+
+        File[] files = mavenHomeBootAsFile.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().contains("classworlds") && file.getName().toLowerCase().endsWith(".jar")) {
+                    return file.getAbsolutePath();
+                }
+            }
+        }
+        return "";
+    }
+
+    private static String getMavenJdkPath (Project project) {
+        MavenServerManager mavenManager = MavenServerManager.getInstance();
+        Collection<MavenServerConnector> msc = mavenManager.getAllConnectors();
+
+        for (Iterator<MavenServerConnector> it = msc.iterator(); it.hasNext();){
+            MavenServerConnector ms = it.next();
+            if (ms.getProject().getProjectFilePath().equals(project.getProjectFilePath())) {
+                return ms.getJdk().getHomePath();
+            }
+        }
+        return "";
     }
 }
