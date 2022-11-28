@@ -13,27 +13,26 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
-import com.intellij.ui.content.Content;
 import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
-import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-import org.jetbrains.plugins.terminal.TerminalTabState;
 import org.jetbrains.plugins.terminal.TerminalView;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
@@ -140,31 +139,24 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Get the terminal widget for the current project
+     * Get the Terminal widget for corresponding Liberty module
+     *
      * @param project
-     * @param projectName
-     * @param createWidget true if a new widget should be created
-     * @return ShellTerminalWidget object
+     * @param libertyModule
+     * @param createWidget  true if a new widget should be created
+     * @return ShellTerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(Project project, String projectName, boolean createWidget) {
-        ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-        ToolWindow terminalWindow = toolWindowManager.getToolWindow("Terminal");
-
+    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget) {
+        TerminalView terminalView = TerminalView.getInstance(project);
         // look for existing terminal tab
-        ShellTerminalWidget widget = getTerminalWidget(terminalWindow, projectName);
-        if (widget != null) {
-            return widget;
-        } else if (createWidget) {
+        ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
+        if (widget == null && createWidget) {
             // create a new terminal tab
-            TerminalView terminalView = TerminalView.getInstance(project);
-            LocalTerminalDirectRunner terminalRun = new LocalTerminalDirectRunner(project);
-            TerminalTabState tabState = new TerminalTabState();
-            tabState.myTabName = projectName;
-            tabState.myWorkingDirectory = project.getBasePath();
-            terminalView.createNewSession(terminalRun, tabState);
-            return getTerminalWidget(terminalWindow, projectName);
+            ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
+            libertyModule.setShellWidget(newTerminal);
+            return newTerminal;
         }
-        return null;
+        return widget;
     }
 
     // returns valid build files for the current project
@@ -209,18 +201,28 @@ public class LibertyProjectUtil {
         return new File(rootDir, "src/main/liberty/config/server.xml").exists();
     }
 
-    private static ShellTerminalWidget getTerminalWidget(ToolWindow terminalWindow, String projectName) {
-        Content[] terminalContents = terminalWindow.getContentManager().getContents();
-        for (int i = 0; i < terminalContents.length; i++) {
-            // TODO use LibertyModule rather than projectName see https://github.com/OpenLiberty/liberty-tools-intellij/issues/143
-            if (terminalContents[i].getTabName().equals(projectName)) {
-                JBTerminalWidget widget = TerminalView.getWidgetByContent(terminalContents[i]);
-                ShellTerminalWidget shellWidget = (ShellTerminalWidget) Objects.requireNonNull(widget);
-                return shellWidget;
+    /**
+     * Get the Terminal widget for the corresponding Liberty module. Will check if the Terminal widget
+     * exists in the Terminal view.
+     *
+     * @param libertyModule
+     * @param terminalView
+     * @return ShellTerminalWidget or null if it does not exist
+     */
+    private static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalView terminalView) {
+        ShellTerminalWidget widget = libertyModule.getShellWidget();
+        // check if widget exists in terminal view
+        if (widget != null) {
+            for (JBTerminalWidget terminalWidget : terminalView.getWidgets()) {
+                if (widget.equals(terminalWidget)) {
+                    return widget;
+                }
             }
         }
+        libertyModule.setShellWidget(null);
         return null;
     }
+
 
 
 
