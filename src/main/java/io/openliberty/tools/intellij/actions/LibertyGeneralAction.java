@@ -166,7 +166,6 @@ public class LibertyGeneralAction extends AnAction {
      */
     protected ShellTerminalWidget getTerminalWidget(boolean createWidget) {
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget);
-        libertyModule.setShellWidget(widget);
         if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
             String msg;
             if (createWidget) {

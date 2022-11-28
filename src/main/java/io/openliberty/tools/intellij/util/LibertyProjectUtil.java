@@ -152,7 +152,9 @@ public class LibertyProjectUtil {
         ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
         if (widget == null && createWidget) {
             // create a new terminal tab
-            return terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
+            ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
+            libertyModule.setShellWidget(newTerminal);
+            return newTerminal;
         }
         return widget;
     }
@@ -217,6 +219,7 @@ public class LibertyProjectUtil {
                 }
             }
         }
+        libertyModule.setShellWidget(null);
         return null;
     }
 
