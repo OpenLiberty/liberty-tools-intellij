@@ -40,8 +40,8 @@ public class LibertyActionUtil {
             StringBuilder result = new StringBuilder();
             result.append(cmd).append(enterCode);
             connector.write(result.toString());
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+        } catch (IOException e) {
+            LOGGER.error(String.format("Failed to execute command: %s", cmd), e);
         }
 
     }

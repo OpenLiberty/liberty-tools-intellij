@@ -51,7 +51,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                LOGGER.error("Could not read " + settingsPath, e.getMessage());
+                LOGGER.error(String.format("Could not read project name from file %s", settingsPath), e);
             }
         }
         return null;
@@ -194,7 +194,7 @@ public class LibertyGradleUtil {
             // When a custom gradle is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
             // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
             File file = new File(gradleHomeFile.getAbsolutePath(), "bin"+ File.separator + "gradle");
-            return file.exists() ? additionalCMD + file.getAbsolutePath() : null;
+            return file.exists() ? additionalCMD + "\"" + file.getAbsolutePath() + "\"" : null;
         }
         return null;
     }

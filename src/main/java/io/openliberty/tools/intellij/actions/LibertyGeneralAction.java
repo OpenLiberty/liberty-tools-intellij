@@ -26,6 +26,7 @@ import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +43,7 @@ public class LibertyGeneralAction extends AnAction {
 
     /**
      * Set the LibertyModule that the action should run on
+     *
      * @param libertyModule
      */
     public void setLibertyModule(LibertyModule libertyModule) {
@@ -61,7 +63,7 @@ public class LibertyGeneralAction extends AnAction {
                 // TODO prompt user to select project
                 String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
                 notifyError(msg);
-                LOGGER.debug(msg);
+                LOGGER.warn(msg);
                 return;
             }
         }
@@ -70,10 +72,11 @@ public class LibertyGeneralAction extends AnAction {
 
         if (isActionFromShiftShift || buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+
             // if still null, or it is from shift-shift, then prompt for the user to select
             if (isActionFromShiftShift || buildFile == null) {
-                List<LibertyModule> libertyModules = LibertyModules.getInstance()
-                        .getLibertyModules(getSupportedProjectTypes());
+                List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
+
                 if (!libertyModules.isEmpty()) {
                     // Only one project. Select it.
                     if (libertyModules.size() == 1) {
@@ -101,7 +104,7 @@ public class LibertyGeneralAction extends AnAction {
                 if (buildFile == null) {
                     String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
                     notifyError(msg);
-                    LOGGER.debug(msg);
+                    LOGGER.warn(msg);
                     return;
                 }
             }
@@ -112,13 +115,18 @@ public class LibertyGeneralAction extends AnAction {
         if (projectType == null) {
             projectType = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_TYPE);
         }
+        if (projectType == null || (!projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) && !projectType.equals(Constants.LIBERTY_GRADLE_PROJECT))) {
+            String msg = LocalizedResourceUtil.getMessage("liberty.project.type.invalid", actionCmd, projectName);
+            notifyError(msg);
+            LOGGER.warn(msg);
+            return;
+        }
         executeLibertyAction();
     }
 
     /* Returns project type(s) applicable to this action. */
     protected List<String> getSupportedProjectTypes() {
-        return Arrays.asList(
-                Constants.LIBERTY_MAVEN_PROJECT, Constants.LIBERTY_GRADLE_PROJECT);
+        return Arrays.asList(Constants.LIBERTY_MAVEN_PROJECT, Constants.LIBERTY_GRADLE_PROJECT);
 
     }
 
@@ -139,6 +147,11 @@ public class LibertyGeneralAction extends AnAction {
         // must be implemented by individual actions
     }
 
+    /**
+     * Displays error message dialog to user
+     *
+     * @param errMsg
+     */
     protected void notifyError(String errMsg) {
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                 LibertyPluginIcons.libertyIcon,
@@ -148,5 +161,27 @@ public class LibertyGeneralAction extends AnAction {
                 NotificationType.WARNING,
                 NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
+    }
+
+    /**
+     * Returns the IntelliJ terminal widget for the corresponding Liberty module
+     *
+     * @param createWidget create terminal widget if it does not already exist
+     * @return ShellTerminalWidget
+     */
+    protected ShellTerminalWidget getTerminalWidget(boolean createWidget) {
+        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, createWidget);
+        if (widget == null) {
+            String msg;
+            if (createWidget) {
+                msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, projectName);
+            } else {
+                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName);
+            }
+            notifyError(msg);
+            LOGGER.warn(msg);
+            return null;
+        }
+        return widget;
     }
 }

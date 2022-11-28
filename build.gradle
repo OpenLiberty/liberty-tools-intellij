@@ -1,36 +1,114 @@
+import org.gradle.internal.os.OperatingSystem;
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.6.5'
+    id 'org.jetbrains.intellij' version '1.10.0'
 }
 
 group 'io.openliberty.tools'
 version '0.0.7'
 
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/snapshots'
+    }
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/releases'
+    }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+    mavenLocal() // TODO remove once Liberty LS is publicly available
+}
+
+configurations {
+    lsp
+    // needed to avoid ClassCastException org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to class javax.xml.parsers.DocumentBuilderFactory
+    // xml-apis interfering with xercs
+    all*.exclude group: 'xml-apis'
 }
 
 dependencies {
+    // LSP4IJ dependencies
+    implementation 'org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0'
+    implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
+    implementation 'org.eclipse.lemminx:org.eclipse.lemminx:0.22.0'
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT'
+    implementation 'io.openliberty.tools:liberty-langserver:1.0-SNAPSHOT'
+    implementation 'org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.0.1-SNAPSHOT'
+    //required by lsp4j as the version from IJ is incompatible
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.vladsch.flexmark:flexmark:0.50.50'
+    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
+
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.5.0:uber') {
+        transitive = false
+    }
+    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.22.0:uber') {
+            transitive = false
+    }
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:1.0-SNAPSHOT:jar-with-dependencies') {
+        transitive = false
+    }
+    lsp('io.openliberty.tools:liberty-langserver:1.0-SNAPSHOT:jar-with-dependencies') {
+        transitive = false
+    }
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.0.1-SNAPSHOT:jar-with-dependencies') {
+        transitive = false
+    }
+    implementation files(new File(buildDir, 'server')) {
+        builtBy 'copyDeps'
+    }
+}
+
+task copyDeps(type: Copy) {
+    from configurations.lsp
+    into new File(buildDir, 'server/server')
+    rename '^(.*)(-[0-9]+.[0-9]+.[0-9]+(-SNAPSHOT)?)(.*)$', '$1$4'
 }
 
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
+
+task buildJakartaCore(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
+    if (OperatingSystem.current().isWindows()) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
+}
+
+task buildJakartaLs(type: Exec) {
+    workingDir "../lsp4jakarta/jakarta.ls"
+    if (OperatingSystem.current().isWindows()) {
+        commandLine 'mvn.cmd', 'clean', 'install', '-q'
+    } else {
+        commandLine 'mvn', 'clean', 'install', '-q'
+    }
+}
+
+task buildJakarta {
+    dependsOn 'buildJakartaCore'
+    dependsOn 'buildJakartaLs'
+    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
+}
+
 intellij {
-    version '2021.3.2'
-    updateSinceUntilBuild false
-    plugins 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle'
+    version = '2022.2.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
+    updateSinceUntilBuild = false
 }
 
 patchPluginXml {
-    changeNotes """
+    changeNotes = """
         <b> 0.0.7 </b>
         <ul>
         <li> Rename plugin to Liberty Tools for IntelliJ

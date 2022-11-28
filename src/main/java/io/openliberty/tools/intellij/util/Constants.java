@@ -16,6 +16,10 @@ public final class Constants {
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
     public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
 
+    public static final String LIBERTY_MAVEN_START_CMD = " io.openliberty.tools:liberty-maven-plugin:dev ";
+    public static final String LIBERTY_MAVEN_START_CONTAINER_CMD = " io.openliberty.tools:liberty-maven-plugin:devc ";
+    public static final String LIBERTY_GRADLE_START_CMD = " libertyDev ";
+    public static final String LIBERTY_GRADLE_START_CONTAINER_CMD = " libertyDevc ";
     public static final String LIBERTY_DEV_START = LocalizedResourceUtil.getMessage("start.dev");
     public static final String LIBERTY_DEV_CUSTOM_START = LocalizedResourceUtil.getMessage("start.dev.custom.params");
     public static final String LIBERTY_DEV_START_CONTAINER = LocalizedResourceUtil.getMessage("start.dev.container");
@@ -26,11 +30,14 @@ public final class Constants {
     public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewIntegrationTestReport.text");
     public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewUnitTestReport.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
+    public static final String LIBERTY_MAVEN_DEBUG_PARAM = "-DdebugPort=";
 
     // Gradle
     public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewTestReport.text");
     public static final String TEST_REPORT_STRING = LocalizedResourceUtil.getMessage("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
+    public static final String LIBERTY_GRADLE_DEBUG_PARAM = "--libertyDebugPort=";
+
 
     public static final String LIBERTY_TREE = "LibertyTree";
 
@@ -75,20 +82,5 @@ public final class Constants {
         fullActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
         fullActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
         return fullActionsMap;
-    }
-
-    public static HashMap<String, String> getMavenMap() {
-        HashMap<String, String> mavenActionsMap = new HashMap<>();
-        mavenActionsMap.putAll(CORE_ACTIONS_MAP);
-        mavenActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-        mavenActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-        return mavenActionsMap;
-    }
-
-    public static HashMap<String, String> getGradleMap() {
-        HashMap<String, String> gradleActionsMap = new HashMap<>();
-        gradleActionsMap.putAll(CORE_ACTIONS_MAP);
-        gradleActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-        return gradleActionsMap;
     }
 }
