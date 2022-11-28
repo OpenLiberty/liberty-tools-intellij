@@ -166,6 +166,7 @@ public class LibertyGeneralAction extends AnAction {
      */
     protected ShellTerminalWidget getTerminalWidget(boolean createWidget) {
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget);
+        // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
         if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
             String msg;
             if (createWidget) {
