@@ -222,6 +222,7 @@ public class LibertyProjectUtil {
         return null;
     }
 
-
-
+    public static String includeEscapeToString(String path) {
+        return "\"" + path + "\"";
+    }
 }
