@@ -232,9 +232,9 @@ public class LibertyMavenUtil {
                 } else {
                     String mavenJdk = getMavenJdkPath(project);
                     String mavenPath = mavenHomeFile.getAbsolutePath();
-                    String classworldsPath = LibertyMavenUtil.getMavenClassworldsPath(mavenPath);
+                    String classworldsPath = LibertyMavenUtil.getMavenClassworldsJarPath(mavenPath);
                     File java = new File (new File(mavenJdk, "bin"), "java");
-                    File classworldsConf = new File(new File (mavenPath, "bin"), MavenUtil.M2_CONF_FILE);
+                    File classworldsConf = MavenUtil.getMavenConfFile(mavenHomeFile);
 
                     if (java.exists() && classworldsConf.exists() && !classworldsPath.isEmpty() && !mavenJdk.isEmpty()) {
                         return LibertyProjectUtil.includeEscapeToString(java.getAbsolutePath()) +
@@ -254,7 +254,7 @@ public class LibertyMavenUtil {
      *
      * This is an adaptation from the original getMavenClasspathEntries in org.jetbrains.idea.maven.execution.MavenExternalParameters
      */
-    private static String getMavenClassworldsPath(final String mavenHome) {
+    private static String getMavenClassworldsJarPath(final String mavenHome) {
         File mavenHomeBootAsFile = new File(new File(mavenHome, "core"), "boot");
         // if the dir "core/boot" does not exist we are using a Maven version > 2.0.5
         // in this case the classpath must be constructed from the dir "boot"
