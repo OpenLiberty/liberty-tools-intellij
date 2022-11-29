@@ -97,14 +97,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return (LibertyRunConfigurationOptions) super.getOptions();
     }
 
-    @Override
-    public void checkConfiguration() throws RuntimeConfigurationException {
-        if (getModule() == null) {
-            throw new RuntimeConfigurationException("No module selected", "Liberty configuration");
-        }
-        // TODO do we need additional checking here?
-    }
-
     @NotNull
     @Override
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {

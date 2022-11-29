@@ -83,8 +83,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
         LibertyModules libertyModules = LibertyModules.getInstance();
-        // clear all stored Liberty modules
-        libertyModules.clear();
+        // clear all stored Liberty modules for current project
+        libertyModules.removeForProject(project);
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
 
         ArrayList<BuildFile> mavenBuildFiles;
@@ -122,9 +122,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 projectName = project.getName();
             }
             boolean validContainerVersion = buildFile.isValidContainerVersion();
-            LibertyModule module = new LibertyModule(project, psiFile.getVirtualFile(), projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion);
+            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, psiFile.getVirtualFile(), projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
             node = new LibertyModuleNode(module);
-            libertyModules.addLibertyModule(module);
 
             top.add(node);
             ArrayList<Object> settings = new ArrayList<Object>();
@@ -165,9 +164,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
 
             boolean validContainerVersion = buildFile.isValidContainerVersion();
-            LibertyModule module = new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion);
+            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion));
             node = new LibertyModuleNode(module);
-            libertyModules.addLibertyModule(module);
 
             top.add(node);
             ArrayList<Object> settings = new ArrayList<Object>();
@@ -200,8 +198,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         tree.addTreeSelectionListener(e -> {
             Object node = e.getPath().getLastPathComponent();
-            if (node instanceof LibertyModuleNode) {
-                LibertyModuleNode libertyNode = (LibertyModuleNode) node;
+            if (node instanceof LibertyModuleNode libertyNode) {
                 // open build file
                 FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, libertyNode.getFilePath()), true);
                 treeDataProvider.saveData(libertyNode.getFilePath(), libertyNode.getName(), libertyNode.getProjectType());
@@ -218,8 +215,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 final TreePath path = tree.getSelectionPath();
                 if (path != null) {
                     Object node = path.getLastPathComponent();
-                    if (node instanceof LibertyModuleNode) {
-                        LibertyModuleNode libertyNode = ((LibertyModuleNode) node);
+                    if (node instanceof LibertyModuleNode libertyNode) {
                         final DefaultActionGroup group = new DefaultActionGroup();
                         if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
                             AnAction viewEffectivePom = ActionManager.getInstance().getAction(Constants.VIEW_EFFECTIVE_POM_ACTION_ID);

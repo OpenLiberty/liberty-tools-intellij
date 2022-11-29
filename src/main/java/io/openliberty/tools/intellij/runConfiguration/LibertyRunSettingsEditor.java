@@ -34,7 +34,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     // private LabeledComponent<StateRestoringCheckBox> runInContainer;
 
     public LibertyRunSettingsEditor(Project project) {
-        libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFiles().toArray()));
+        libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFiles(project).toArray()));
     }
 
     @Override

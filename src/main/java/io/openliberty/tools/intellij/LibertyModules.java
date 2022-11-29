@@ -10,6 +10,7 @@
 
 package io.openliberty.tools.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 
@@ -39,12 +40,21 @@ public class LibertyModules {
     }
 
     /**
-     * Add tracked Liberty project to workspace
+     * Add tracked Liberty project to workspace, update name and validContainerVersion if
+     * Liberty project is already tracked
      *
      * @param module LibertyModule
      */
-    public void addLibertyModule(LibertyModule module) {
-        libertyModules.put(module.getBuildFile(), module);
+    public LibertyModule addLibertyModule(LibertyModule module) {
+        if (libertyModules.containsKey(module.getBuildFile())) {
+            // update existing Liberty module, name and validContainerVersion
+            LibertyModule existing = libertyModules.get(module.getBuildFile());
+            existing.setName(module.getName());
+            existing.setValidContainerVersion(module.isValidContainerVersion());
+        } else {
+            libertyModules.put(module.getBuildFile(), module);
+        }
+        return libertyModules.get(module.getBuildFile());
     }
 
     /**
@@ -70,36 +80,36 @@ public class LibertyModules {
     }
 
     /**
-     * Returns all build files associated with a Liberty project
+     * Returns all build files associated with the Liberty project
      *
+     * @param project
      * @return List<VirtualFile> Liberty project build files
      */
-    public List<VirtualFile> getLibertyBuildFiles() {
+    public List<VirtualFile> getLibertyBuildFiles(Project project) {
         List<VirtualFile> buildFiles = new ArrayList<>();
-        buildFiles.addAll(libertyModules.keySet());
+        synchronized (libertyModules) {
+            libertyModules.values().forEach(libertyModule -> {
+                if (project.equals(libertyModule.getProject())) {
+                    buildFiles.add(libertyModule.getBuildFile());
+                }
+            });
+        }
         return buildFiles;
     }
 
     /**
-     * Returns all Liberty modules in the workspace
+     * Returns all Liberty modules with the supported project type(s) for the given project
+     * ex. all Liberty Maven projects
      *
-     * @return List<LibertyModule> Liberty project modules
-     */
-    public List<LibertyModule> getLibertyModules() {
-        return new ArrayList(libertyModules.values());
-    }
-
-    /**
-     * Returns all Liberty modules with the supported project type(s), ex. all Liberty Maven projects
-     *
+     * @param project
      * @param projectTypes
      * @return Liberty modules with the given project type(s)
      */
-    public List<LibertyModule> getLibertyModules(List<String> projectTypes) {
+    public List<LibertyModule> getLibertyModules(Project project, List<String> projectTypes) {
         ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {
-                if (projectTypes.contains(libertyModule.getProjectType())) {
+                if (project.equals(libertyModule.getProject()) && projectTypes.contains(libertyModule.getProjectType())) {
                     supportedLibertyModules.add(libertyModule);
                 }
             });
@@ -117,9 +127,21 @@ public class LibertyModules {
     }
 
     /**
-     * Clear all saved Liberty modules
+     * Remove all stored Liberty modules for the given project that
+     * do not have active terminal widgets (running commands)
+     *
+     * @param project
      */
-    public void clear() {
-        libertyModules.clear();
+    public void removeForProject(Project project) {
+        synchronized(libertyModules) {
+            Iterator it = libertyModules.values().iterator();
+            while (it.hasNext()) {
+                LibertyModule libertyModule = (LibertyModule) it.next();
+                // do not remove from list if the corresponding terminal widget has running commands
+                if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().hasRunningCommands())) {
+                    it.remove();
+                }
+            }
+        }
     }
 }

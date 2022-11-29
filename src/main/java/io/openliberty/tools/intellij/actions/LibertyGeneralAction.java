@@ -73,7 +73,7 @@ public class LibertyGeneralAction extends AnAction {
         boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
         // if still null, or it is from shift-shift, then prompt for the user to select
         if (isActionFromShiftShift || buildFile == null) {
-            List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
+            List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(project, getSupportedProjectTypes());
             if (!libertyModules.isEmpty()) {
                 // Only one project. Select it.
                 if (libertyModules.size() == 1) {
