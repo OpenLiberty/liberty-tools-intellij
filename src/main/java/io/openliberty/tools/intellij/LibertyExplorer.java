@@ -68,7 +68,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         final ActionManager actionManager = ActionManager.getInstance();
         LibertyToolbarActionGroup libertyActionGroup = new LibertyToolbarActionGroup(tree);
 
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.UNKNOWN, libertyActionGroup, true);
+        ActionToolbar actionToolbar = actionManager.createActionToolbar(ActionPlaces.TOOLBAR, libertyActionGroup, true);
+        actionToolbar.setTargetComponent(tree);
         actionToolbar.setOrientation(SwingConstants.HORIZONTAL);
         actionToolbar.setShowSeparatorTitles(true);
         actionToolbar.getComponent().setName(Constants.LIBERTY_ACTION_TOOLBAR);
@@ -319,31 +320,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             String actionNodeName = ((LibertyActionNode) node).getName();
             LibertyModule module = ((LibertyActionNode) node).getLibertyModule();
             LOGGER.debug("Selected: " + actionNodeName);
-            LibertyGeneralAction action = null;
-            if (actionNodeName.equals(Constants.LIBERTY_DEV_START)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_START_CONTAINER)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_CUSTOM_START)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_STOP)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.LIBERTY_DEV_TESTS)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.VIEW_INTEGRATION_TEST_REPORT)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.VIEW_UNIT_TEST_REPORT)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
-            } else if (actionNodeName.equals(Constants.VIEW_GRADLE_TEST_REPORT)) {
-                action = (LibertyGeneralAction) am.getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-            }
-            if (action != null) {
-                action.setLibertyModule(module);
-                // calls action on double click
-                action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        ActionManager.getInstance(), 0));
-            }
+            // calls action on double click
+            LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(Constants.getFullActionMap().get(actionNodeName));
+            action.setLibertyModule(module);
+            action.actionPerformed(new AnActionEvent(null, 
+                                DataManager.getInstance().getDataContext(tree), 
+                                ActionPlaces.UNKNOWN, new Presentation(),
+                                am, 0));
         }
     }
 
