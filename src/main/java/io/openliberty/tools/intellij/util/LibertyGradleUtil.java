@@ -51,7 +51,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                LOGGER.error("Could not read " + settingsPath, e.getMessage());
+                LOGGER.error(String.format("Could not read project name from file %s", settingsPath), e);
             }
         }
         return null;

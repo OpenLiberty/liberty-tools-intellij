@@ -9,10 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartContainerAction extends LibertyGeneralAction {
@@ -23,16 +20,9 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction() {
-        String startCmd = null;
-        if (projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            startCmd = "mvn io.openliberty.tools:liberty-maven-plugin:devc";
-        } else if (projectType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            startCmd = "gradle libertyDevc";
-        }
-
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, true);
+        String startCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+        ShellTerminalWidget widget = getTerminalWidget(true);
         if (widget == null) {
-            LOGGER.debug("Unable to start Liberty dev mode in a container, could not get or create terminal widget for " + projectName);
             return;
         }
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";

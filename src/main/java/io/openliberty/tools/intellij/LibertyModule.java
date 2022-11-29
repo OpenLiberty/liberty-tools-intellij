@@ -13,6 +13,7 @@ package io.openliberty.tools.intellij;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.BuildFile;
+import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 /**
  * Represents a Liberty server module
@@ -25,8 +26,23 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
 
-    public LibertyModule(Project project, VirtualFile buildFile, String name, String projectType, boolean validContainerVersion) {
+    private String customStartParams;
+    // FIXME not currently being used, need to enable runInContainer checkbox in LibertyRunConfiguration see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
+    private boolean runInContainer;
+
+    private boolean debugMode;
+    private ShellTerminalWidget shellWidget;
+
+    public LibertyModule(Project project) {
         this.project = project;
+        this.customStartParams = "";
+        this.runInContainer = false;
+        this.debugMode = false;
+        this.shellWidget = null;
+    }
+
+    public LibertyModule(Project project, VirtualFile buildFile, String name, String projectType, boolean validContainerVersion) {
+        this(project);
         this.buildFile = buildFile;
         this.name = name;
         this.projectType = projectType;
@@ -34,7 +50,7 @@ public class LibertyModule {
     }
 
     public LibertyModule(Project project, BuildFile buildFile) {
-        this.project = project;
+        this(project);
         this.buildFile = buildFile.getBuildFile().getVirtualFile();
         this.name = buildFile.getProjectName();
         this.projectType = buildFile.getProjectType();
@@ -79,5 +95,44 @@ public class LibertyModule {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public String getCustomStartParams() {
+        if (customStartParams == null) {
+            clearCustomStartParams();
+        }
+        return customStartParams;
+    }
+
+    public void setCustomStartParams(String customStartParams) {
+        this.customStartParams = customStartParams;
+    }
+
+    public void clearCustomStartParams() {
+        customStartParams = "";
+    }
+
+    public boolean runInContainer() {
+        return runInContainer;
+    }
+
+    public void setRunInContainer(boolean runInContainer) {
+        this.runInContainer = runInContainer;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+
+    public ShellTerminalWidget getShellWidget() {
+        return shellWidget;
+    }
+
+    public void setShellWidget(ShellTerminalWidget shellWidget) {
+        this.shellWidget = shellWidget;
     }
 }

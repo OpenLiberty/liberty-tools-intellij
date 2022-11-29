@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="io.openliberty.tools.intellij.runConfiguration.LibertyRunSettingsEditor">
+  <grid id="27dc6" binding="root" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="ae643" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="messages/LibertyBundles" key="specify.custom.parameters.for.the.mvn.liberty.dev.command"/>
+        </properties>
+      </component>
+      <component id="d3c7e" class="com.intellij.openapi.ui.LabeledComponent" binding="editableParams" custom-create="true">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <componentClass value="com.intellij.ui.EditorTextField"/>
+          <labelLocation value="West"/>
+          <text resource-bundle="messages/LibertyBundles" key="run.config.start.parameters"/>
+          <toolTipText resource-bundle="messages/LibertyBundles" key="run.config.start.parameters.tool.tip"/>
+        </properties>
+      </component>
+      <component id="c4371" class="com.intellij.openapi.ui.LabeledComponent" binding="libertyModule" custom-create="true">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <componentClass value="com.intellij.openapi.ui.ComboBox"/>
+          <labelLocation value="West"/>
+          <text resource-bundle="messages/LibertyBundles" key="run.config.liberty.project"/>
+          <toolTipText resource-bundle="messages/LibertyBundles" key="run.config.liberty.project.tool.tip"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

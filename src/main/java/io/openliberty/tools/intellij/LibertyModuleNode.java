@@ -12,9 +12,10 @@ package io.openliberty.tools.intellij;
 import com.intellij.openapi.vfs.VirtualFile;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import io.openliberty.tools.intellij.util.Constants;
 
 public class LibertyModuleNode extends DefaultMutableTreeNode {
-    private LibertyModule libertyModule;
+    private final LibertyModule libertyModule;
 
     public LibertyModuleNode(LibertyModule libertyModule) {
         super(libertyModule.getName());
@@ -35,5 +36,13 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
 
     public boolean isValidContainerVersion() {
         return libertyModule.isValidContainerVersion();
+    }
+
+    public boolean isGradleProjectType() {
+        return libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT);
+    }
+
+    public boolean isMavenProjectType() {
+        return libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT);
     }
 }
