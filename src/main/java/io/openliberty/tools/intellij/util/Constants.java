@@ -27,13 +27,13 @@ public final class Constants {
     public static final String LIBERTY_DEV_TESTS = LocalizedResourceUtil.getMessage("run.tests.dev");
 
     // Maven
-    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewIntegrationTestReport.text");
-    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewUnitTestReport.text");
+    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.integration.test.text");
+    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.unit.test.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
     public static final String LIBERTY_MAVEN_DEBUG_PARAM = "-DdebugPort=";
 
     // Gradle
-    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("action.io.openliberty.tools.intellij.actions.ViewTestReport.text");
+    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.gradle.test.text");
     public static final String TEST_REPORT_STRING = LocalizedResourceUtil.getMessage("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
     public static final String LIBERTY_GRADLE_DEBUG_PARAM = "--libertyDebugPort=";
