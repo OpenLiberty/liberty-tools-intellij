@@ -116,11 +116,10 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | NullPointerException e) {
             LOGGER.error(String.format("Could not resolve the Liberty module associated with build file: %s", getBuildFile()));
             throw new ExecutionException(e);
         }
-
         // run the start dev mode action
         AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
         LibertyDevStartAction libAction = (LibertyDevStartAction) action;
