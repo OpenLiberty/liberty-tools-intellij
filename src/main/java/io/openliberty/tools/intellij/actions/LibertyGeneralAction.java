@@ -164,14 +164,15 @@ public class LibertyGeneralAction extends AnAction {
     }
 
     /**
-     * Returns the IntelliJ terminal widget for the corresponding Liberty module
+     * Returns the Terminal widget for the corresponding Liberty module
      *
-     * @param createWidget create terminal widget if it does not already exist
+     * @param createWidget create Terminal widget if it does not already exist
      * @return ShellTerminalWidget
      */
     protected ShellTerminalWidget getTerminalWidget(boolean createWidget) {
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, createWidget);
-        if (widget == null) {
+        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget);
+        // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
+        if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, projectName);
@@ -182,6 +183,8 @@ public class LibertyGeneralAction extends AnAction {
             LOGGER.warn(msg);
             return null;
         }
+        widget.getComponent().setVisible(true);
+        widget.getComponent().requestFocus();
         return widget;
     }
 }
