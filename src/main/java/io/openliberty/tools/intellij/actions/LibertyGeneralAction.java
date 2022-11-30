@@ -69,39 +69,40 @@ public class LibertyGeneralAction extends AnAction {
         }
         if (buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-            // if still null, prompt for user to select
-            if (buildFile == null) {
-                List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
-                if (!libertyModules.isEmpty()) {
-                    // Only one project. Select it.
-                    if (libertyModules.size() == 1) {
-                        setLibertyModule(libertyModules.get(0));
+        }
+        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
+        // if still null, or it is from shift-shift, then prompt for the user to select
+        if (isActionFromShiftShift || buildFile == null) {
+            List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
+            if (!libertyModules.isEmpty()) {
+                // Only one project. Select it.
+                if (libertyModules.size() == 1) {
+                    setLibertyModule(libertyModules.get(0));
+                }
+                // Multiple projects. Pop up dialog for user to select.
+                else {
+                    final String[] projectNames = toProjectNames(libertyModules);
+                    final int ret = Messages.showChooseDialog(project,
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                            LibertyPluginIcons.libertyIcon_40,
+                            projectNames,
+                            projectNames[0]);
+                    if (ret >= 0 && ret < libertyModules.size()) {
+                        setLibertyModule(libertyModules.get(ret));
                     }
-                    // Multiple projects. Pop up dialog for user to select.
+                    // The user pressed cancel on the dialog.
                     else {
-                        final String[] projectNames = toProjectNames(libertyModules);
-                        final int ret = Messages.showChooseDialog(project,
-                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
-                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
-                                LibertyPluginIcons.libertyIcon_40,
-                                projectNames,
-                                projectNames[0]);
-                        if (ret >= 0 && ret < libertyModules.size()) {
-                            setLibertyModule(libertyModules.get(ret));
-                        }
-                        // The user pressed cancel on the dialog.
-                        else {
-                            return;
-                        }
+                        return;
                     }
                 }
-                // if buildFile is still null, deliver error message
-                if (buildFile == null) {
-                    String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
-                    notifyError(msg);
-                    LOGGER.warn(msg);
-                    return;
-                }
+            }
+            // if buildFile is still null, deliver error message
+            if (buildFile == null) {
+                String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
+                notifyError(msg);
+                LOGGER.warn(msg);
+                return;
             }
         }
         if (projectName == null) {
