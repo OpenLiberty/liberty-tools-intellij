@@ -131,15 +131,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_MAVEN_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
+            // ordered to align with IntelliJ's right-click menu
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
             // check if Liberty Maven Plugin is 3.3-M1+
             // if version is not specified in pom, assume latest version as downloaded from maven central
             if (validContainerVersion){
                 node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
-
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
             node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, module));
@@ -174,15 +174,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_GRADLE_PROJECT);
             map.put(projectName, settings);
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
 
+            // ordered to align with IntelliJ's right-click menu
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
             // check if Liberty Gradle Plugin is 3.1-M1+
             // TODO: handle version specified in a gradle.settings file
             if (buildFile.isValidContainerVersion()) {
                 node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
-
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
             node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, module));
