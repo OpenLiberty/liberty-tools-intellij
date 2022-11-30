@@ -105,8 +105,6 @@ public class LibertyGeneralAction extends AnAction {
                 return;
             }
         }
-
-
         if (projectName == null) {
             projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
         }
