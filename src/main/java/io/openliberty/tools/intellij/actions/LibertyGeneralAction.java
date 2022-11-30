@@ -67,48 +67,46 @@ public class LibertyGeneralAction extends AnAction {
                 return;
             }
         }
-
-        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
-
-        if (isActionFromShiftShift || buildFile == null) {
+        if (buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
-
-            // if still null, or it is from shift-shift, then prompt for the user to select
-            if (isActionFromShiftShift || buildFile == null) {
-                List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
-
-                if (!libertyModules.isEmpty()) {
-                    // Only one project. Select it.
-                    if (libertyModules.size() == 1) {
-                        setLibertyModule(libertyModules.get(0));
-                    }
-                    // Multiple projects. Pop up dialog for user to select.
-                    else {
-                        final String[] projectNames = toProjectNames(libertyModules);
-                        final int ret = Messages.showChooseDialog(project,
-                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
-                                LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
-                                LibertyPluginIcons.libertyIcon_40,
-                                projectNames,
-                                projectNames[0]);
-                        if (ret >= 0 && ret < libertyModules.size()) {
-                            setLibertyModule(libertyModules.get(ret));
-                        }
-                        // The user pressed cancel on the dialog.
-                        else {
-                            return;
-                        }
-                    }
+        }
+        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
+        // if still null, or it is from shift-shift, then prompt for the user to select
+        if (isActionFromShiftShift || buildFile == null) {
+            List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(getSupportedProjectTypes());
+            if (!libertyModules.isEmpty()) {
+                // Only one project. Select it.
+                if (libertyModules.size() == 1) {
+                    setLibertyModule(libertyModules.get(0));
                 }
-                // if buildFile is still null, deliver error message
-                if (buildFile == null) {
-                    String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
-                    notifyError(msg);
-                    LOGGER.warn(msg);
-                    return;
+                // Multiple projects. Pop up dialog for user to select.
+                else {
+                    final String[] projectNames = toProjectNames(libertyModules);
+                    final int ret = Messages.showChooseDialog(project,
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                            LibertyPluginIcons.libertyIcon_40,
+                            projectNames,
+                            projectNames[0]);
+                    if (ret >= 0 && ret < libertyModules.size()) {
+                        setLibertyModule(libertyModules.get(ret));
+                    }
+                    // The user pressed cancel on the dialog.
+                    else {
+                        return;
+                    }
                 }
             }
+            // if buildFile is still null, deliver error message
+            if (buildFile == null) {
+                String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
+                notifyError(msg);
+                LOGGER.warn(msg);
+                return;
+            }
         }
+
+
         if (projectName == null) {
             projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
         }
