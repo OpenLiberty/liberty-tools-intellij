@@ -158,44 +158,82 @@ public class LibertyGradleUtil {
         return false;
     }
 
-    public static String getGradleSettingsCmd(Project project) {
+    /**
+     * Get Gradle preferences from Build Tools in IntelliJ and return a command to execute or an exception
+     *
+     * @param project liberty project
+     * @return String command to execute in the terminal or an exception to display
+     * @throws IOException
+     */
+    public static String getGradleSettingsCmd(Project project) throws LibertyException {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
-
         if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
-            String wrapperPath = getLocalGradleWrapperPath(project);
-            if (wrapperPath != null) {
-                return wrapperPath;
-            }
+            return getLocalGradleWrapperPath(project);
         }
         else if (DistributionType.LOCAL.equals(gradleProjectSettings.getDistributionType())) {
             // local gradle to be used
             String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
-            if (gradleHome != null) {
-                String gradlePath = getCustomGradlePath(gradleHome);
-                if (gradlePath != null) {
-                    return gradlePath;
-                }
+            if (gradleHome == null) {
+                String translatedMessage = LocalizedResourceUtil.getMessage("gradle.invalid.build.preference");
+                throw new LibertyException("Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+            } else {
+                return getCustomGradlePath(gradleHome);
             }
         }
         return "gradle"; // default gradle
     }
 
-    private static String getLocalGradleWrapperPath(Project project) {
+    /**
+     * Get the local wrapper path for Gradle that is in the project level
+     *
+     * @param project liberty project
+     * @return the Graddle wrapper path to be executed or an exception to display
+     * @throws IOException
+     */
+    private static String getLocalGradleWrapperPath(Project project) throws LibertyException {
         String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
         File file = new File(project.getBasePath(), gradlew);
-        return file.exists() ? gradlew : null;
+        if (!file.exists()){
+            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.wrapper.does.not.exist");
+            throw new LibertyException("A Gradle wrapper for the project could not be found. Make sure to configure a " +
+                    "valid Gradle wrapper or change the build preferences for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+        }
+        if (!file.canExecute()) {
+            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.wrapper.cannot.execute");
+            throw new LibertyException("Could not execute Gradle wrapper because the process does not have permission to " +
+                    "execute it. Consider giving executable permission for the Gradle wrapper file or changing the build " +
+                    "preferences for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+        }
+        return gradlew;
     }
 
-    private static String getCustomGradlePath (String customGradleHome) {
-        String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+    /**
+     * Get the custom Gradle path from Built Tools in IntelliJ
+     *
+     * @param customGradleHome the custom Gradle Home
+     * @return Graddle path to be executed or an exception to display
+     * @throws IOException
+     */
+    private static String getCustomGradlePath (String customGradleHome) throws LibertyException {
         File gradleHomeFile = new File(customGradleHome);
-        if (gradleHomeFile != null) {
-            // When a custom gradle is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
-            // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
-            File file = new File(gradleHomeFile.getAbsolutePath(), "bin"+ File.separator + "gradle");
-            return file.exists() ? additionalCMD + "\"" + file.getAbsolutePath() + "\"" : null;
+        // When a custom gradle is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
+        // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
+        File gradleExecutable = new File(gradleHomeFile.getAbsolutePath(), "bin"+ File.separator + "gradle");
+        if (gradleExecutable.exists()) {
+            if (gradleExecutable.canExecute()) {
+                String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+                return additionalCMD + LibertyProjectUtil.includeEscapeToString(gradleExecutable.getAbsolutePath());
+            } else {
+                String translatedMessage = LocalizedResourceUtil.getMessage("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
+                throw new LibertyException(String.format("Could not execute Gradle from %s because the process does not "+
+                        "have permission to execute it. Consider giving executable permission for the Gradle file or " +
+                        "configure IntelliJ to use the Gradle wrapper.", gradleExecutable.getAbsolutePath()), translatedMessage);
+            }
+        } else {
+            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(String.format("Could not execute the Gradle file %s. Make sure a valid path is configured " +
+                    "inside IntelliJ Gradle preferences.", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
-        return null;
     }
 }

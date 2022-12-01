@@ -191,68 +191,103 @@ public class LibertyMavenUtil {
         }
     }
 
-    public static String getMavenSettingsCmd(Project project) {
-        MavenServerManager mavenManager = MavenServerManager.getInstance();
+    /**
+     * Get Maven preferences from Build Tools in IntelliJ and return a command to execute or an exception
+     *
+     * @param project liberty project
+     * @return String command to execute in the terminal or an exception to display
+     * @throws IOException
+     */
+    public static String getMavenSettingsCmd(Project project) throws LibertyException {
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
-
-        if (mavenManager.WRAPPED_MAVEN.equals(mavenHome)) {
+        if (MavenServerManager.WRAPPED_MAVEN.equals(mavenHome)) {
             // it is set to use the wrapper
-            String mvnwPath = getLocalMavenWrapper(project);
-            if (mvnwPath != null) {
-                return mvnwPath;
-            }
+            return getLocalMavenWrapper(project);
         } else {
             // try to use maven home path defined in the settings
-            String mavenPath = getCustomMavenPath(project, mavenHome);
-            if (mavenPath != null) {
-                return mavenPath;
-            }
+            return getCustomMavenPath(project, mavenHome);
         }
-        return "mvn"; // default maven
-    }
-
-    private static String getLocalMavenWrapper(Project project) {
-        String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
-        File file = new File(project.getBasePath(), mvnw);
-        return file.exists() ? mvnw : null;
-    }
-
-    private static String getCustomMavenPath(Project project, String customMavenHome) {
-        File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
-        if (mavenHomeFile != null) {
-            // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
-            // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
-            File mavenExecutable = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
-
-            if (mavenExecutable.exists()) {
-                if (mavenExecutable.canExecute()) {
-                    String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
-                    return additionalCMD + LibertyProjectUtil.includeEscapeToString(mavenExecutable.getAbsolutePath());
-                } else {
-                    String mavenJdk = getMavenJdkPath(project);
-                    String mavenPath = mavenHomeFile.getAbsolutePath();
-                    String classworldsPath = LibertyMavenUtil.getMavenClassworldsJarPath(mavenPath);
-                    File java = new File (new File(mavenJdk, "bin"), "java");
-                    File classworldsConf = MavenUtil.getMavenConfFile(mavenHomeFile);
-
-                    if (java.exists() && classworldsConf.exists() && !classworldsPath.isEmpty() && !mavenJdk.isEmpty()) {
-                        return LibertyProjectUtil.includeEscapeToString(java.getAbsolutePath()) +
-                                " -Dmaven.multiModuleProjectDirectory=" + LibertyProjectUtil.includeEscapeToString(project.getBasePath()) +
-                                " -Dmaven.home=" + LibertyProjectUtil.includeEscapeToString(mavenPath) +
-                                " -Dclassworlds.conf=" + LibertyProjectUtil.includeEscapeToString(classworldsConf.getAbsolutePath()) +
-                                " -classpath " + LibertyProjectUtil.includeEscapeToString(classworldsPath) +
-                                " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     /**
+     * Get the local wrapper path for Maven that is in the project level
      *
-     * This is an adaptation from the original getMavenClasspathEntries in org.jetbrains.idea.maven.execution.MavenExternalParameters
+     * @param project liberty project
+     * @return the Maven wrapper path to be executed or an exception to display
+     * @throws IOException
+     */
+    private static String getLocalMavenWrapper(Project project) throws LibertyException {
+        String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
+        File file = new File(project.getBasePath(), mvnw);
+        if (!file.exists()){
+            String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.does.not.exist");
+            throw new LibertyException("A Maven wrapper for the project could not be found. Make sure to configure a " +
+                    "valid Maven wrapper or change the build preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
+        }
+        if (!file.canExecute()) {
+            String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.cannot.execute");
+            throw new LibertyException("Could not execute Maven wrapper because the process does not have permission to " +
+                    "execute it. Consider giving executable permission for the Maven wrapper file or changing the build " +
+                    "preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
+        }
+        return mvnw;
+    }
+
+    /**
+     * Get the custom Maven path from Built Tools in IntelliJ
+     *
+     * @param project liberty project
+     * @param customMavenHome the custom Maven Home
+     * @return Maven path to be executed or an exception to display
+     * @throws IOException
+     */
+    private static String getCustomMavenPath(Project project, String customMavenHome) throws LibertyException {
+        File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
+        if (mavenHomeFile == null) {
+            String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
+            throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);
+        }
+        // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
+        // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
+        File mavenExecutable = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
+        if (mavenExecutable.exists()) {
+            if (mavenExecutable.canExecute()) {
+                String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
+                return additionalCMD + LibertyProjectUtil.includeEscapeToString(mavenExecutable.getAbsolutePath());
+            } else {
+                String mavenJdk = getMavenJdkPath(project);
+                String mavenPath = mavenHomeFile.getAbsolutePath();
+                String classworldsPath = LibertyMavenUtil.getMavenClassworldsJarPath(mavenPath);
+                File java = new File (new File(mavenJdk, "bin"), "java");
+                File classworldsConf = MavenUtil.getMavenConfFile(mavenHomeFile);
+
+                if (java.exists() && classworldsConf.exists() && classworldsPath != null && mavenJdk != null) {
+                    return LibertyProjectUtil.includeEscapeToString(java.getAbsolutePath()) +
+                            " -Dmaven.multiModuleProjectDirectory=" + LibertyProjectUtil.includeEscapeToString(project.getBasePath()) +
+                            " -Dmaven.home=" + LibertyProjectUtil.includeEscapeToString(mavenPath) +
+                            " -Dclassworlds.conf=" + LibertyProjectUtil.includeEscapeToString(classworldsConf.getAbsolutePath()) +
+                            " -classpath " + LibertyProjectUtil.includeEscapeToString(classworldsPath) +
+                            " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
+                } else {
+                    String translatedMessage = LocalizedResourceUtil.getMessage("maven.cannot.execute", mavenExecutable.getAbsolutePath());
+                    throw new LibertyException(String.format("Could not execute Maven from %s because the process does not "+
+                            "have permission to execute it. Consider giving executable permission for the Maven file or " +
+                            "configure IntelliJ to use the Maven wrapper.", mavenExecutable.getAbsolutePath()), translatedMessage);
+                }
+            }
+        } else {
+            String translatedMessage = LocalizedResourceUtil.getMessage("maven.does.not.exist", mavenExecutable.getAbsolutePath());
+            throw new LibertyException(String.format("Could not execute the Maven file %s. Make sure a valid path is configured " +
+                    "inside IntelliJ Maven preferences.", mavenExecutable.getAbsolutePath()), translatedMessage);
+        }
+    }
+
+    /**
+     * Get the classworlds jar path from maven home. This is an adaptation from the original getMavenClasspathEntries in org.jetbrains.idea.maven.execution.MavenExternalParameters
+     * @param mavenHome the custom Maven Home
+     * @return classworlds jar path
+     * @throws IOException
      */
     private static String getMavenClassworldsJarPath(final String mavenHome) {
         File mavenHomeBootAsFile = new File(new File(mavenHome, "core"), "boot");
@@ -261,7 +296,6 @@ public class LibertyMavenUtil {
         if (!mavenHomeBootAsFile.exists()) {
             mavenHomeBootAsFile = new File(mavenHome, "boot");
         }
-
         File[] files = mavenHomeBootAsFile.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -270,9 +304,15 @@ public class LibertyMavenUtil {
                 }
             }
         }
-        return "";
+        return null;
     }
 
+    /**
+     * Get the jdk path from IntelliJ Maven preferences
+     * @param project liberty project
+     * @return path for jdk used by maven
+     * @throws IOException
+     */
     private static String getMavenJdkPath (Project project) {
         MavenServerManager mavenManager = MavenServerManager.getInstance();
         Collection<MavenServerConnector> msc = mavenManager.getAllConnectors();
@@ -282,6 +322,6 @@ public class LibertyMavenUtil {
                 return ms.getJdk().getHomePath();
             }
         }
-        return "";
+        return null;
     }
 }
