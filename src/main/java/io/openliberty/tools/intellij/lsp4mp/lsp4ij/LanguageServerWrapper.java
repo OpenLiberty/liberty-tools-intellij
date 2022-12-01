@@ -136,7 +136,7 @@ public class LanguageServerWrapper {
     }
 
     private Listener fileBufferListener = new Listener();
-    private MessageBusConnection messageBusConnection;
+    private MessageBusConnection messageBusConnection = null;
 
     @Nonnull
     public final LanguageServersRegistry.LanguageServerDefinition serverDefinition;
@@ -428,7 +428,9 @@ public class LanguageServerWrapper {
         this.languageServer = null;
 
         EditorFactory.getInstance().getEventMulticaster().removeDocumentListener(fileBufferListener);
-        messageBusConnection.disconnect();
+        if (messageBusConnection != null) {
+            messageBusConnection.disconnect();
+        }
     }
 
     /**
