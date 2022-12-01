@@ -196,7 +196,7 @@ public class LibertyMavenUtil {
      *
      * @param project liberty project
      * @return String command to execute in the terminal or an exception to display
-     * @throws IOException
+     * @throws LibertyException
      */
     public static String getMavenSettingsCmd(Project project) throws LibertyException {
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
@@ -215,7 +215,7 @@ public class LibertyMavenUtil {
      *
      * @param project liberty project
      * @return the Maven wrapper path to be executed or an exception to display
-     * @throws IOException
+     * @throws LibertyException
      */
     private static String getLocalMavenWrapper(Project project) throws LibertyException {
         String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
@@ -240,7 +240,7 @@ public class LibertyMavenUtil {
      * @param project liberty project
      * @param customMavenHome the custom Maven Home
      * @return Maven path to be executed or an exception to display
-     * @throws IOException
+     * @throws LibertyException
      */
     private static String getCustomMavenPath(Project project, String customMavenHome) throws LibertyException {
         File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
@@ -250,7 +250,7 @@ public class LibertyMavenUtil {
         }
         // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
         // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
-        File mavenExecutable = new File(mavenHomeFile.getAbsolutePath(), "bin" + File.separator + "mvn");
+        File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), "mvn");
         if (mavenExecutable.exists()) {
             if (mavenExecutable.canExecute()) {
                 String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
@@ -287,7 +287,6 @@ public class LibertyMavenUtil {
      * Get the classworlds jar path from maven home. This is an adaptation from the original getMavenClasspathEntries in org.jetbrains.idea.maven.execution.MavenExternalParameters
      * @param mavenHome the custom Maven Home
      * @return classworlds jar path
-     * @throws IOException
      */
     private static String getMavenClassworldsJarPath(final String mavenHome) {
         File mavenHomeBootAsFile = new File(new File(mavenHome, "core"), "boot");
@@ -311,7 +310,6 @@ public class LibertyMavenUtil {
      * Get the jdk path from IntelliJ Maven preferences
      * @param project liberty project
      * @return path for jdk used by maven
-     * @throws IOException
      */
     private static String getMavenJdkPath (Project project) {
         MavenServerManager mavenManager = MavenServerManager.getInstance();
