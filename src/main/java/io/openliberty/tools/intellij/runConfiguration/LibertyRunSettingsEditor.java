@@ -9,7 +9,6 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.runConfiguration;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
@@ -34,7 +33,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     // private LabeledComponent<StateRestoringCheckBox> runInContainer;
 
     public LibertyRunSettingsEditor(Project project) {
-        libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFiles(project).toArray()));
+        libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFilesAsString(project).toArray()));
     }
 
     @Override

@@ -15,7 +15,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -75,26 +75,28 @@ public class LibertyModules {
      * @throws MalformedURLException
      */
     public LibertyModule getLibertyProjectFromString(String buildFile) throws MalformedURLException {
-        VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(buildFile));
+        VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(buildFile), true);
         return libertyModules.get(vBuildFile);
     }
 
     /**
-     * Returns all build files associated with the Liberty project
+     * Returns all build files as a list of strings associated with the Liberty project.
+     * Used for Liberty run configuration
      *
      * @param project
-     * @return List<VirtualFile> Liberty project build files
+     * @return List<String> Liberty project build files as strings
      */
-    public List<VirtualFile> getLibertyBuildFiles(Project project) {
-        List<VirtualFile> buildFiles = new ArrayList<>();
+    public List<String> getLibertyBuildFilesAsString(Project project) {
+        List<String> sBuildFiles = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {
                 if (project.equals(libertyModule.getProject())) {
-                    buildFiles.add(libertyModule.getBuildFile());
+                    // need to convert to NioPath for OS specific paths
+                    sBuildFiles.add(libertyModule.getBuildFile().toNioPath().toString());
                 }
             });
         }
-        return buildFiles;
+        return sBuildFiles;
     }
 
     /**
