@@ -219,7 +219,8 @@ public class LibertyGradleUtil {
         File gradleHomeFile = new File(customGradleHome);
         // When a custom gradle is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
         // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
-        File gradleExecutable = new File(new File(gradleHomeFile.getAbsolutePath(), "bin"), "gradle");
+        String gradle = SystemInfo.isWindows ? "gradle.bat" : "gradle";
+        File gradleExecutable = new File(new File(gradleHomeFile.getAbsolutePath(), "bin"), gradle);
         if (gradleExecutable.exists()) {
             if (gradleExecutable.canExecute()) {
                 String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened

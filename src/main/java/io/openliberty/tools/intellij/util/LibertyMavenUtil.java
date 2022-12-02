@@ -250,7 +250,8 @@ public class LibertyMavenUtil {
         }
         // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
         // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
-        File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), "mvn");
+        String maven = SystemInfo.isWindows ? "mvn.cmd" : "mvn";
+        File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), maven);
         if (mavenExecutable.exists()) {
             if (mavenExecutable.canExecute()) {
                 String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
