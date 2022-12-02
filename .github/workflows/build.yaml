@@ -18,23 +18,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
-      - name: Checkout lsp4jakarta
-        uses: actions/checkout@v3
-        with:
-          repository: eclipse/lsp4jakarta
-          path: lsp4jakarta
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Cache Maven
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
@@ -44,9 +32,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Build lsp4jakarta
-        working-directory: ./liberty-tools-intellij
-        run: ./gradlew buildJakarta
       - name: Build Liberty-Tools-Intellij
         working-directory: ./liberty-tools-intellij
         run: ./gradlew buildPlugin
