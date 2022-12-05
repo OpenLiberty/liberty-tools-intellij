@@ -20,8 +20,7 @@ import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,16 +43,10 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         libertySettings.forEach(setting -> {
             // find all Liberty run configs associated with this build file
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
-            try {
-                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(runConfig.getBuildFile()));
+                VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 if (vBuildFile.equals(libertyModule.getBuildFile())) {
                     libertyModuleSettings.add(setting);
                 }
-            } catch (MalformedURLException e) {
-                String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
-                notifyError(msg);
-                LOGGER.warn(String.format("Could not get Liberty run configuration. ", msg));
-            }
         });
         RunnerAndConfigurationSettings selectedLibertyConfig;
         if (libertyModuleSettings.isEmpty()) {
@@ -89,7 +82,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         RunnerAndConfigurationSettings runConfigSettings = runManager.createConfiguration(runManager.suggestUniqueName(libertyModule.getName(), LibertyRunConfigurationType.getInstance()), LibertyRunConfigurationType.class);
         LibertyRunConfiguration libertyRunConfiguration = (LibertyRunConfiguration) runConfigSettings.getConfiguration();
         // pre-populate build file and name
-        libertyRunConfiguration.setBuildFile(String.valueOf(libertyModule.getBuildFile()));
+        libertyRunConfiguration.setBuildFile(libertyModule.getBuildFile().toNioPath().toString());
         return runConfigSettings;
     }
 }
