@@ -228,12 +228,12 @@ public class LibertyGradleUtil {
             } else {
                 String translatedMessage = LocalizedResourceUtil.getMessage("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
                 throw new LibertyException(String.format("Could not execute Gradle from %s because the process does not "+
-                        "have permission to execute it. Consider giving executable permission for the Gradle file or " +
+                        "have permission to execute it. Consider giving executable permission for the Gradle executable or " +
                         "configure IntelliJ to use the Gradle wrapper.", gradleExecutable.getAbsolutePath()), translatedMessage);
             }
         } else {
             String translatedMessage = LocalizedResourceUtil.getMessage("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
-            throw new LibertyException(String.format("Could not execute the Gradle file %s. Make sure a valid path is configured " +
+            throw new LibertyException(String.format("Could not execute the Gradle executable %s. Make sure a valid path is configured " +
                     "inside IntelliJ Gradle preferences.", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
     }

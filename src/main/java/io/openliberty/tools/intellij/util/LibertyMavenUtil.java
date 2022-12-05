@@ -273,13 +273,13 @@ public class LibertyMavenUtil {
                 } else {
                     String translatedMessage = LocalizedResourceUtil.getMessage("maven.cannot.execute", mavenExecutable.getAbsolutePath());
                     throw new LibertyException(String.format("Could not execute Maven from %s because the process does not "+
-                            "have permission to execute it. Consider giving executable permission for the Maven file or " +
+                            "have permission to execute it. Consider giving executable permission for the Maven executable or " +
                             "configure IntelliJ to use the Maven wrapper.", mavenExecutable.getAbsolutePath()), translatedMessage);
                 }
             }
         } else {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.does.not.exist", mavenExecutable.getAbsolutePath());
-            throw new LibertyException(String.format("Could not execute the Maven file %s. Make sure a valid path is configured " +
+            throw new LibertyException(String.format("Could not execute the Maven executable %s. Make sure a valid path is configured " +
                     "inside IntelliJ Maven preferences.", mavenExecutable.getAbsolutePath()), translatedMessage);
         }
     }
