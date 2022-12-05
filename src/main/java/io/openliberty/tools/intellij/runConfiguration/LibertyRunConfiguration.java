@@ -116,7 +116,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
-        } catch (MalformedURLException | NullPointerException e) {
+        } catch (NullPointerException e) {
             LOGGER.error(String.format("Could not resolve the Liberty module associated with build file: %s", getBuildFile()));
             throw new ExecutionException(e);
         }

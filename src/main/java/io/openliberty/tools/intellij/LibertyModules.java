@@ -14,7 +14,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 
-import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -72,9 +71,8 @@ public class LibertyModules {
      *
      * @param buildFile String, path to build file
      * @return LibertyModule
-     * @throws MalformedURLException
      */
-    public LibertyModule getLibertyProjectFromString(String buildFile) throws MalformedURLException {
+    public LibertyModule getLibertyProjectFromString(String buildFile) {
         VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(buildFile), true);
         return libertyModules.get(vBuildFile);
     }

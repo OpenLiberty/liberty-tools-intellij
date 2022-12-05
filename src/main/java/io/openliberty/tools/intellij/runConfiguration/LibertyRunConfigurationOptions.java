@@ -20,6 +20,7 @@ public class LibertyRunConfigurationOptions extends ModuleBasedConfigurationOpti
     protected static Logger LOGGER = Logger.getInstance(LibertyRunConfigurationOptions.class);
     private final StoredProperty<String> paramsProperty = string("").provideDelegate(this, "params");
 
+    // expects build file as NioPath toString()
     private final StoredProperty<String> buildFileProperty = string("").provideDelegate(this, "buildFile");
 
     private final StoredProperty<Boolean> runInContainerProperty = property(false).provideDelegate(this, "runInContainer");

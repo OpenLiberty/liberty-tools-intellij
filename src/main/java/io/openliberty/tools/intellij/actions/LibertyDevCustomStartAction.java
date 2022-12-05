@@ -81,7 +81,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     protected RunnerAndConfigurationSettings createNewLibertyRunConfig(RunManager runManager) {
         RunnerAndConfigurationSettings runConfigSettings = runManager.createConfiguration(runManager.suggestUniqueName(libertyModule.getName(), LibertyRunConfigurationType.getInstance()), LibertyRunConfigurationType.class);
         LibertyRunConfiguration libertyRunConfiguration = (LibertyRunConfiguration) runConfigSettings.getConfiguration();
-        // pre-populate build file and name
+        // pre-populate build file and name, need to convert build file to NioPath for OS specific paths
         libertyRunConfiguration.setBuildFile(libertyModule.getBuildFile().toNioPath().toString());
         return runConfigSettings;
     }
