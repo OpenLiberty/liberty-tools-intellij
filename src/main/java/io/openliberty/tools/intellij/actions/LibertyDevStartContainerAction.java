@@ -20,9 +20,18 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction() {
-        String startCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+        String startCmd;
         ShellTerminalWidget widget = getTerminalWidget(true);
         if (widget == null) {
+            return;
+        }
+        try {
+            startCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+        }
+        catch (LibertyException ex) {
+            // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd
+            LOGGER.warn(ex.getMessage()); // Logger.error creates an entry on "IDE Internal Errors", which we do not want
+            notifyError(ex.getTranslatedMessage());
             return;
         }
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";

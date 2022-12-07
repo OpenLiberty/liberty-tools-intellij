@@ -1,4 +1,3 @@
-import org.gradle.internal.os.OperatingSystem;
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '1.10.0'
@@ -74,31 +73,6 @@ task copyDeps(type: Copy) {
 
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
-}
-
-
-task buildJakartaCore(type: Exec) {
-    workingDir "../lsp4jakarta/jakarta.jdt/org.eclipse.lsp4jakarta.jdt.core"
-    if (OperatingSystem.current().isWindows()) {
-        commandLine 'mvn.cmd', 'clean', 'install', '-q'
-    } else {
-        commandLine 'mvn', 'clean', 'install', '-q'
-    }
-}
-
-task buildJakartaLs(type: Exec) {
-    workingDir "../lsp4jakarta/jakarta.ls"
-    if (OperatingSystem.current().isWindows()) {
-        commandLine 'mvn.cmd', 'clean', 'install', '-q'
-    } else {
-        commandLine 'mvn', 'clean', 'install', '-q'
-    }
-}
-
-task buildJakarta {
-    dependsOn 'buildJakartaCore'
-    dependsOn 'buildJakartaLs'
-    tasks.findByName('buildJakartaLs').mustRunAfter 'buildJakartaCore'
 }
 
 intellij {
