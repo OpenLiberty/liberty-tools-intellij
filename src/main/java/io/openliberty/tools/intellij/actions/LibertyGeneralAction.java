@@ -149,13 +149,11 @@ public class LibertyGeneralAction extends AnAction {
      * @param errMsg
      */
     protected void notifyError(String errMsg) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                LibertyPluginIcons.libertyIcon,
-                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"),
-                "",
-                errMsg,
-                NotificationType.WARNING,
-                NotificationListener.URL_OPENING_LISTENER);
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
+                                .setTitle(LocalizedResourceUtil.getMessage("liberty.action.cannot.start"))
+                                .setIcon(LibertyPluginIcons.libertyIcon)
+                                .setSubtitle("")
+                                .setListener(NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
     }
 
