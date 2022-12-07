@@ -18,6 +18,7 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
@@ -76,7 +77,12 @@ public class LSContentAssistProcessor extends CompletionContributor {
 
             }
         } catch (RuntimeException | InterruptedException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
+            if (e instanceof ProcessCanceledException) {
+                // quietly log if the process was cancelled
+                LOGGER.trace("LSPContentAssistProcessor process cancelled: ", (ProcessCanceledException) e);
+            } else {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            }
             result.addElement(createErrorProposal(offset, e));
         }
         super.fillCompletionVariants(parameters, result);

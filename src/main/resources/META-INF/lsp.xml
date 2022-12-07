@@ -59,8 +59,9 @@
         <completion.contributor id="LSPCompletionContributor" language="any"
                                 implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
                                 order="first"/>
-        <inspectionToolProvider
-                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
+        <!-- TODO re-enable diagnostics -->
+<!--        <inspectionToolProvider-->
+<!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
         <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
         <gotoDeclarationHandler
                 implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/>

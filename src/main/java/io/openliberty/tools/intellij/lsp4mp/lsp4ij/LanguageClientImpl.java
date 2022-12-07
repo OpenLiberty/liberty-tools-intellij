@@ -38,7 +38,9 @@ public class LanguageClientImpl implements LanguageClient {
     public final void connect(LanguageServer server, LanguageServerWrapper wrapper) {
         this.server = server;
         this.wrapper = wrapper;
-        this.diagnosticHandler = new LSPDiagnosticsToMarkers(wrapper.serverDefinition.id);
+        this.diagnosticHandler = null;
+        // TODO re-enable diagnostics
+        // this.diagnosticHandler = new LSPDiagnosticsToMarkers(wrapper.serverDefinition.id);
     }
 
     protected final LanguageServer getLanguageServer() {
@@ -62,7 +64,9 @@ public class LanguageClientImpl implements LanguageClient {
 
     @Override
     public final void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-        this.diagnosticHandler.accept(diagnostics);
+        if (this.diagnosticHandler != null) {
+            this.diagnosticHandler.accept(diagnostics);
+        }
     }
 
     @Override
