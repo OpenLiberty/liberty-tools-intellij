@@ -73,9 +73,11 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   // Support the message "jakarta/java/diagnostics"
   @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
-    IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-    List<PublishDiagnosticsParams> diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
-    return CompletableFuture.completedFuture(diagnostics);
+    // TODO re-enable diagnostics
+    // IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+    // List<PublishDiagnosticsParams> diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
+    // return CompletableFuture.completedFuture(diagnostics);
+    return CompletableFuture.completedFuture(null);
   }
 
   @Override
