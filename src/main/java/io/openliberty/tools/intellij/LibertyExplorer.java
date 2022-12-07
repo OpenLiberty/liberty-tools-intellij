@@ -321,12 +321,18 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             LibertyModule module = ((LibertyActionNode) node).getLibertyModule();
             LOGGER.debug("Selected: " + actionNodeName);
             // calls action on double click
-            LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(Constants.getFullActionMap().get(actionNodeName));
-            action.setLibertyModule(module);
-            action.actionPerformed(new AnActionEvent(null, 
-                                DataManager.getInstance().getDataContext(tree), 
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                am, 0));
+            String actionId = Constants.getFullActionMap().get(actionNodeName);
+            if (actionId == null) {
+                LOGGER.error("Could not find action ID for action name: " + actionNodeName);
+            }
+            LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
+            if (action != null) {
+                action.setLibertyModule(module);
+                action.actionPerformed(new AnActionEvent(null, 
+                                    DataManager.getInstance().getDataContext(tree), 
+                                    ActionPlaces.UNKNOWN, new Presentation(),
+                                    am, 0));
+            }
         }
     }
 
