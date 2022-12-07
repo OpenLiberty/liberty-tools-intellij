@@ -97,14 +97,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return (LibertyRunConfigurationOptions) super.getOptions();
     }
 
-    @Override
-    public void checkConfiguration() throws RuntimeConfigurationException {
-        if (getModule() == null) {
-            throw new RuntimeConfigurationException("No module selected", "Liberty configuration");
-        }
-        // TODO do we need additional checking here?
-    }
-
     @NotNull
     @Override
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
@@ -124,11 +116,10 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
-        } catch (MalformedURLException e) {
+        } catch (NullPointerException e) {
             LOGGER.error(String.format("Could not resolve the Liberty module associated with build file: %s", getBuildFile()));
             throw new ExecutionException(e);
         }
-
         // run the start dev mode action
         AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
         LibertyDevStartAction libAction = (LibertyDevStartAction) action;

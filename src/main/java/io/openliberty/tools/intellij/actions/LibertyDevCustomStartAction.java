@@ -13,17 +13,14 @@ import com.intellij.execution.ExecutionManager;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.executors.DefaultRunExecutor;
-import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,16 +43,10 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         libertySettings.forEach(setting -> {
             // find all Liberty run configs associated with this build file
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
-            try {
-                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(runConfig.getBuildFile()));
+                VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 if (vBuildFile.equals(libertyModule.getBuildFile())) {
                     libertyModuleSettings.add(setting);
                 }
-            } catch (MalformedURLException e) {
-                String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
-                notifyError(msg);
-                LOGGER.warn(String.format("Could not get Liberty run configuration. ", msg));
-            }
         });
         RunnerAndConfigurationSettings selectedLibertyConfig;
         if (libertyModuleSettings.isEmpty()) {
@@ -90,8 +81,8 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     protected RunnerAndConfigurationSettings createNewLibertyRunConfig(RunManager runManager) {
         RunnerAndConfigurationSettings runConfigSettings = runManager.createConfiguration(runManager.suggestUniqueName(libertyModule.getName(), LibertyRunConfigurationType.getInstance()), LibertyRunConfigurationType.class);
         LibertyRunConfiguration libertyRunConfiguration = (LibertyRunConfiguration) runConfigSettings.getConfiguration();
-        // pre-populate build file and name
-        libertyRunConfiguration.setBuildFile(String.valueOf(libertyModule.getBuildFile()));
+        // pre-populate build file and name, need to convert build file to NioPath for OS specific paths
+        libertyRunConfiguration.setBuildFile(libertyModule.getBuildFile().toNioPath().toString());
         return runConfigSettings;
     }
 }
