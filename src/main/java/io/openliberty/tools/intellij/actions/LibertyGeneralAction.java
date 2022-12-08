@@ -174,7 +174,7 @@ public class LibertyGeneralAction extends AnAction {
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, projectName);
             } else {
-                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName);
+                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName, System.lineSeparator());
             }
             notifyError(msg);
             LOGGER.warn(msg);

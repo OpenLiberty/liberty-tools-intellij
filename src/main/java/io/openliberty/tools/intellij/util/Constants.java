@@ -68,16 +68,16 @@ public final class Constants {
     // action triggered from shift-shift "Search Everywhere" IntelliJ menu or "cmd/ctl + shift + A" Actions menu
     public static final String GO_TO_ACTION_TRIGGERED = "GoToAction";
 
-    public static final LinkedHashMap<String, String> FULL_ACTIONS_MAP = new LinkedHashMap<String, String>() {
-        {
-            put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
-            put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
-            put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
-            put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
-            put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
-            put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-            put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-            put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-        }
-    };
+    public static final Map<String, String> FULL_ACTIONS_MAP = Collections.unmodifiableMap(new LinkedHashMap<String, String>() {
+                {
+                    put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
+                    put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
+                    put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
+                    put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
+                    put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
+                    put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
+                    put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+                    put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+                }
+            });
 }
