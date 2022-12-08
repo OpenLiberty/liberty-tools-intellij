@@ -69,8 +69,11 @@ public class LibertyGeneralAction extends AnAction {
         }
         if (buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+            if (buildFile != null && libertyModule == null) {
+                setLibertyModule(LibertyModules.getInstance().getLibertyModule(buildFile));
+            }
         }
-        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
+        boolean isActionFromShiftShift = Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace());
         // if still null, or it is from shift-shift, then prompt for the user to select
         if (isActionFromShiftShift || buildFile == null) {
             List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(project, getSupportedProjectTypes());
@@ -171,7 +174,7 @@ public class LibertyGeneralAction extends AnAction {
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, projectName);
             } else {
-                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName);
+                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName, System.lineSeparator());
             }
             notifyError(msg);
             LOGGER.warn(msg);
