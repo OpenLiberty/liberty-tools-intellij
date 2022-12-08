@@ -29,7 +29,7 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="222" until-build="223"/>
+    <idea-version since-build="222" until-build="223.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
