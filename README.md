@@ -1,4 +1,4 @@
-# Liberty Tools for IntelliJ
+# Liberty Tools for IntelliJ IDEA
 
 [plugin-repo]: https://plugins.jetbrains.com/plugin/14856-liberty-tools
 
@@ -8,7 +8,7 @@
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 ![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-liberty-tools)
 
-An [Open Liberty](https://openliberty.io/) extension for IntelliJ. The extension will detect your Liberty Maven or
+A [Liberty](https://openliberty.io/) extension for IntelliJ IDEA. The extension will detect your Liberty Maven or
 Liberty Gradle project if it detects the `io.openliberty.tools:liberty-maven-plugin` in the `pom.xml` or
 `io.openliberty.tools:liberty-gradle-plugin` in the `build.gradle`. Through the Liberty tool window, you can start,
 stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured
@@ -23,7 +23,7 @@ to be enabled.
 
 ## Quick Start
 
-- Install [_Liberty Tools_ from the IntelliJ Marketplace](https://plugins.jetbrains.com/plugin/14856-liberty-tools).
+- Install [_Liberty Tools_ from the JetBrains Marketplace](https://plugins.jetbrains.com/plugin/14856-liberty-tools).
 - Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on
   the side bar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
