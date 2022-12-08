@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -169,19 +170,16 @@ public class PropertiesManagerForJakarta {
                 }
                 packageName = javaFile.getPackageName();
                 if (packageName == null || packageName.isEmpty()) {
-                    String path = javaFile.getParent().getVirtualFile().getCanonicalPath(); // f=/U/me/proj/src/main/java/pkg  not /cls.java
+                    Path path = javaFile.getParent().getVirtualFile().toNioPath(); // f=/U/me/proj/src/main/java/pkg  not /cls.java
                     VirtualFile[] contentRoots = ProjectRootManager.getInstance(project).getContentSourceRoots();
                     for (VirtualFile vf : contentRoots) {
-                        String vfp = vf.getCanonicalPath();
+                        Path vfp = vf.toNioPath();
                         if (path.startsWith(vfp)) {
-                            path = path.substring(vfp.length()); // remove the project part of the path
+                            path = vfp.relativize(path); // remove the project part of the path
                             break;
                         }
                     }
-                    if (path.startsWith(File.separator)) {
-                        path = path.substring(File.separator.length()); // remove leading File.separator
-                    }
-                    packageName = path.replace(File.separator, "."); // convert pkg1/pkg2
+                    packageName = path.toString().replace(File.separator, "."); // convert pkg1/pkg2
                 }
             }
             validCtx.add(packageName);
