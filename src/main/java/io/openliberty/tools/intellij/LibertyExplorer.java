@@ -246,7 +246,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         AnAction runTestsAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
                         group.add(runTestsAction);
 
-                        ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
+                        ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
                         menu.getComponent().show(comp, x, y);
                     }
                 }
