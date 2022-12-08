@@ -63,8 +63,9 @@
 <!--        <inspectionToolProvider-->
 <!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
         <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
-        <gotoDeclarationHandler
-                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/>
+        <!-- TODO re-enable goto handler -->
+        <!-- <gotoDeclarationHandler
+                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
 
         <!-- MicroProfile -->
         <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
