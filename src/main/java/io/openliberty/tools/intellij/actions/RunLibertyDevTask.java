@@ -13,10 +13,12 @@ import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
@@ -25,14 +27,20 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.Arrays;
 
 public class RunLibertyDevTask extends AnAction {
     Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        // default behaviour for this action is disabled
-        e.getPresentation().setEnabled(false);
+        if (e.getPlace().equalsIgnoreCase(Constants.GO_TO_ACTION_TRIGGERED)) {
+            // always enable through shift+shift/go to action menu
+            e.getPresentation().setEnabled(true);
+            return;
+        } else {
+            e.getPresentation().setEnabled(false);
+        }
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
@@ -48,7 +56,7 @@ public class RunLibertyDevTask extends AnAction {
                     // when only one child node is selected, enable this action
                     if (selectionPaths != null && selectionPaths.length == 1) {
                         String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
-                        if (Constants.getFullActionMap().containsKey(lastPathComponent)) {
+                        if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
                             e.getPresentation().setEnabled(true);
                         }
                     }
@@ -64,38 +72,47 @@ public class RunLibertyDevTask extends AnAction {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
 
-        ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
+        // triggered through shift+shift/go to action menu
+        if (Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace())) {
+            // prompt user to select action to run
+            final String[] libertyActions = Constants.FULL_ACTIONS_MAP.keySet().toArray(new String[0]);
+            final int ret = Messages.showChooseDialog(project, LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.message"), LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.title"), LibertyPluginIcons.libertyIcon_40, libertyActions, libertyActions[0]);
+            // ret < 0  the user pressed cancel on the dialog, take no action
+            if (ret >= 0) {
+                String selectedAction = libertyActions[ret];
+                // run selected action
+                AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(selectedAction));
+                action.actionPerformed(new AnActionEvent(null, e.getDataContext(), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
+            }
+        } else {
+            // triggered through icon on tool window
+            ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
-        Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
+            Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
 
-        JComponent libertyWindow = content.getComponent();
+            JComponent libertyWindow = content.getComponent();
 
-        Component[] components = libertyWindow.getComponents();
+            Component[] components = libertyWindow.getComponents();
 
-        for (Component comp : components) {
-            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                Tree libertyTree = (Tree) comp;
-
-                TreePath[] selectionPaths = libertyTree.getSelectionPaths();
-                if (selectionPaths != null && selectionPaths.length == 1) {
-                    String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
-                    if (Constants.getFullActionMap().containsKey(lastPathComponent)) {
-                        String projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
-                        if (projectName == null) {
-                            projectName = project.getName();
+            for (Component comp : components) {
+                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
+                    Tree libertyTree = (Tree) comp;
+                    TreePath[] selectionPaths = libertyTree.getSelectionPaths();
+                    if (selectionPaths != null && selectionPaths.length == 1) {
+                        String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
+                        if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
+                            // calls selected action
+                            AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
+                            action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(libertyTree), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
                         }
-                        // calls selected action
-                        AnAction action = ActionManager.getInstance().getAction(Constants.getFullActionMap().get(lastPathComponent));
-                        action.actionPerformed(new AnActionEvent(null,
-                                DataManager.getInstance().getDataContext(libertyTree),
-                                ActionPlaces.UNKNOWN, new Presentation(),
-                                ActionManager.getInstance(), 0));
                     }
+                } else {
+                    LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
                 }
-            } else {
-                LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
             }
         }
+
+
     }
 
 }

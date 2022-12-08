@@ -9,7 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
-import java.util.HashMap;
+import java.util.*;
 
 public final class Constants {
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
@@ -65,22 +65,19 @@ public final class Constants {
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
     public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
 
-    private static final HashMap<String, String> CORE_ACTIONS_MAP = new HashMap<String, String>() {
+    // action triggered from shift-shift "Search Everywhere" IntelliJ menu or "cmd/ctl + shift + A" Actions menu
+    public static final String GO_TO_ACTION_TRIGGERED = "GoToAction";
+
+    public static final LinkedHashMap<String, String> FULL_ACTIONS_MAP = new LinkedHashMap<String, String>() {
         {
             put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
-            put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
             put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
             put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
             put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
+            put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
+            put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
+            put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+            put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
         }
     };
-
-    public static HashMap<String, String> getFullActionMap() {
-        HashMap<String, String> fullActionsMap = new HashMap<>();
-        fullActionsMap.putAll(CORE_ACTIONS_MAP);
-        fullActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-        fullActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-        fullActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-        return fullActionsMap;
-    }
 }
