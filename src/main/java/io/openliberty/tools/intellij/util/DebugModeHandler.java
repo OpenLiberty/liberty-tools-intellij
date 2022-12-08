@@ -64,6 +64,12 @@ public class DebugModeHandler {
     // Debug address key in Liberty server.env files
     private static String WLP_ENV_DEBUG_ADDRESS = "WLP_DEBUG_ADDRESS";
 
+    // WLP server environment file name.
+    public static String WLP_SERVER_ENV_FILE_NAME = "server.env";
+
+    // WLP server environment file backup name.
+    public static String WLP_SERVER_ENV_BAK_FILE_NAME = "server.env.bak";
+
     /**
      * Gets a debug port for the Liberty module. First checks if the debug port was specified as part of the start parameters,
      * otherwise allocates a random port.
@@ -73,7 +79,7 @@ public class DebugModeHandler {
      * @throws IOException
      */
     public int getDebugPort(LibertyModule libertyModule) throws IOException {
-        // 1. Check if debug port was specified as part of start parameters, if so try that port first
+        // 1. Check if debug port was specified as part of start parameters, if so use that port first
         String configParams = libertyModule.getCustomStartParams();
         Matcher m;
         if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
@@ -117,14 +123,17 @@ public class DebugModeHandler {
     /**
      * Creates a new remote Java application debug configuration
      *
-     * @param indicator progress monitor
+     * @param indicator     progress monitor
      * @param libertyModule Liberty module
-     * @param debugPort JVM port to connect to
+     * @param debugPort     JVM port to connect to
      */
     private void createAndRunDebugConfiguration(ProgressIndicator indicator, LibertyModule libertyModule, int debugPort) {
         indicator.setText(LocalizedResourceUtil.getMessage("attaching.debugger"));
         try {
             String debugPortStr = waitForSocketActivation(indicator, libertyModule, DEFAULT_ATTACH_HOST, debugPort);
+            if (debugPortStr == null) {
+                return;
+            }
             RunnerAndConfigurationSettings settings = RunManager.getInstance(libertyModule.getProject()).createConfiguration(libertyModule.getName() + " (Remote)", RemoteConfigurationType.class);
             RemoteConfiguration remoteConfiguration = (RemoteConfiguration) settings.getConfiguration();
             remoteConfiguration.PORT = debugPortStr;
@@ -134,8 +143,8 @@ public class DebugModeHandler {
         } catch (Exception e) {
             // do not show error if debug attachment was cancelled by user
             if (!(e instanceof ProcessCanceledException)) {
-                LOGGER.error(String.format("Cannot connect debugger to port %d", debugPort), e);
-                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(LocalizedResourceUtil.getMessage("cannot.connect.debug.port", debugPort), "Liberty"));
+                LOGGER.warn(LocalizedResourceUtil.getMessage("cannot.attach.debugger"), e);
+                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(e.getMessage(), LocalizedResourceUtil.getMessage("cannot.attach.debugger")));
             }
         }
     }
@@ -147,16 +156,16 @@ public class DebugModeHandler {
      * @param libertyModule Liberty module
      * @param host JVM host to connect to
      * @param debugPort JVM port to connect to
-     * @return debug port as a String
+     * @return port that the debugger actually connected to as a String
      * @throws Exception
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 120;
-        int envReadMinLimit = 30;
-        int envReadMaxLimit = 60;
+        int retryLimit = 300;
+        int envReadMinLimit = 45;
         int envReadInterval = 5;
 
+        // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
         Path serverEnvPath = getServerEnvPath(libertyModule);
 
         for (int retryCount = 0; retryCount < retryLimit; retryCount++) {
@@ -165,21 +174,28 @@ public class DebugModeHandler {
                 return null;
             }
 
+            // The server.env path may not yet exist. If it is null, retry.
             if (serverEnvPath == null) {
                 serverEnvPath = getServerEnvPath(libertyModule);
-                TimeUnit.SECONDS.sleep(1);
-                continue;
+                if (serverEnvPath == null) {
+                    continue;
+                }
             }
 
-            // Check the server.env at the default location for any updates to WLP_DEBUG_ADDRESS for any changes.
-            // There is a small window in which the allocated port could have been taken by another process.
-            // If the port is already in use, dev mode will allocate a random port and reflect that by updating the server.env file.
-            if (retryCount >= envReadMinLimit && retryCount < envReadMaxLimit && (retryCount % envReadInterval == 0)) {
-                String envPortStr = readDebugPortFromServerEnv(serverEnvPath.toFile());
-                if (envPortStr != null) {
-                    int envPort = Integer.parseInt(envPortStr);
-                    if (envPort != debugPort) {
-                        debugPort = envPort;
+            // There is a small window in which the allocated random port could have been taken by another process.
+            // Check the deployed server.env at the default deployment location (wlp/usr/servers/<serverName>) for the WLP_DEBUG_ADDRESS
+            // property. If the port is already in use, dev mode will allocate a random debug port and reflect that by updating the
+            // server.env file.
+            if ((retryCount >= envReadMinLimit) && (retryCount < retryLimit) && (retryCount % envReadInterval == 0)) {
+                // Look for the server.env.bak file before checking the server.env file.
+                Path serverEnvBakPath = (serverEnvPath != null) ? serverEnvPath.resolveSibling(WLP_SERVER_ENV_BAK_FILE_NAME) : null;
+                if (serverEnvBakPath != null && serverEnvBakPath.toFile().exists()) {
+                    String envPortStr = readDebugPortFromServerEnv(serverEnvPath.toFile());
+                    if (envPortStr != null) {
+                        int envPort = Integer.parseInt(envPortStr);
+                        if (envPort != debugPort) {
+                            debugPort = envPort;
+                        }
                     }
                 }
             }
@@ -191,8 +207,7 @@ public class DebugModeHandler {
                 TimeUnit.SECONDS.sleep(1);
             }
         }
-
-        throw new Exception(String.format("Unable to connect to JVM on host: %s and port: %s", host, debugPort));
+        throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
     }
 
     /**
@@ -224,7 +239,7 @@ public class DebugModeHandler {
 
         try (Stream<Path> matchedStream = Files.find(basePath, 2, (path, basicFileAttribute) -> {
             if (basicFileAttribute.isRegularFile()) {
-                return path.getFileName().toString().equalsIgnoreCase("server.env");
+                return path.getFileName().toString().equalsIgnoreCase(WLP_SERVER_ENV_FILE_NAME);
             }
             return false;
         });) {
@@ -244,11 +259,13 @@ public class DebugModeHandler {
     }
 
     /**
-     * Returns the last debug port entry in server.env. Null if not found.
+     * Returns the port value associated with the WLP_DEBUG_ADDRESS entry in server.env. Null if not found. If there are multiple
+     * WLP_DEBUG_ADDRESS entries, the last entry is returned.
      *
      * @param serverEnv The server.env file object.
      *
-     * @return The last debug port entry in server.env. Null if not found.]]
+     * @return Returns the port value associated with the WLP_DEBUG_ADDRESS entry in server.env. Null if not found. If there are
+     * multiple WLP_DEBUG_ADDRESS entries, the last entry is returned.
      *
      * @throws Exception
      */
