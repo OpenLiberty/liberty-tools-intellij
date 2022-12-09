@@ -1,11 +1,10 @@
-# Contributing to Liberty Tools IntelliJ
+# Contributing to Liberty Tools for IntelliJ IDEA
 
 We welcome contributions, and request you follow these guidelines.
 
  - [Raising issues](#raising-issues)
  - [Legal](#legal)
  - [Coding Standards](#coding-standards)
-
 
 ## Raising issues
 

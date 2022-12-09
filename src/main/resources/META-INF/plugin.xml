@@ -7,19 +7,9 @@
     <category>Framework Integration</category>
 
     <description><![CDATA[
-     Liberty Tools adds support in IntelliJ for your <a href="https://openliberty.io/">Open Liberty</a> projects.
-     Liberty dev mode allows you to easily develop your cloud-native Jakarta EE and Java microservices (with MicroProfile) applications with hot reload and deployment.
-     <b>This is a preview release.</b>
-     <br/>
-     The following features are available through the Liberty tool window:
-     <ul>
-     <li> View supported <a "href=https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev"><code>liberty-maven-plugin</code></a> or
-     <a "href=https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md"><code>liberty-gradle-plugin</code></a> projects in the workspace
-     <li> Start/Stop dev mode
-     <li> Start dev mode with custom parameters
-     <li> Run tests
-     <li> View unit and integration test reports
-     </ul>
+     Liberty Tools for IntelliJ IDEA offers features for developing cloud-native Java applications with <a href="https://openliberty.io/">Open Liberty</a> and <a href="https://www.ibm.com/products/websphere-liberty">WebSphere Liberty</a>. Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
+     For more information, see the <a href="https://github.com/OpenLiberty/liberty-tools-intellij#liberty-tools-for-intellij-idea">project documentation in GitHub</a>.
+     <b>Note: This is an early release.</b>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
