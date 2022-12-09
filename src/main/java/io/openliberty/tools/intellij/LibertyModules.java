@@ -39,15 +39,19 @@ public class LibertyModules {
     }
 
     /**
-     * Add tracked Liberty project to workspace, update name and validContainerVersion if
-     * Liberty project is already tracked
+     * Add tracked Liberty project to workspace, update project,
+     * projectType, name and validContainerVersion if already tracked.
      *
      * @param module LibertyModule
      */
     public LibertyModule addLibertyModule(LibertyModule module) {
         if (libertyModules.containsKey(module.getBuildFile())) {
-            // update existing Liberty module, name and validContainerVersion
+            // Update existing Liberty project, projectType module, name and validContainerVersion
+            // Do not update the build file (key), debugMode, shellWidget or customStartParams since
+            // they may modify saved run configs.
             LibertyModule existing = libertyModules.get(module.getBuildFile());
+            existing.setProject(module.getProject());
+            existing.setProjectType(module.getProjectType());
             existing.setName(module.getName());
             existing.setValidContainerVersion(module.isValidContainerVersion());
         } else {
