@@ -167,7 +167,11 @@ public class LibertyGradleUtil {
      */
     public static String getGradleSettingsCmd(Project project) throws LibertyException {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
-        if (gradleProjectSettings.getDistributionType().isWrapped()) {
+        if (gradleProjectSettings == null) {
+            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.settings.is.null");
+            throw new LibertyException("Could not execute action because there is an error with Gradle configuration. Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+        }
+        else if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
             return getLocalGradleWrapperPath(project);
         }
