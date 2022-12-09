@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '0.0.7'
+version '0.0.8-SNAPSHOT'
 
 sourceCompatibility = 17
 
@@ -83,6 +83,10 @@ intellij {
 
 patchPluginXml {
     changeNotes = """
+        <b> 0.0.8 </b>
+        <ul>
+        <li> TODO
+        </ul>
         <b> 0.0.7 </b>
         <ul>
         <li> Rename plugin to Liberty Tools for IntelliJ
