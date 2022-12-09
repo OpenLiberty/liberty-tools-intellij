@@ -1,7 +1,6 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -65,8 +64,8 @@ public class LanguageServersRegistry {
         @Override
         public StreamConnectionProvider createConnectionProvider() {
             try {
-                return (StreamConnectionProvider) extension.instantiate(extension.clazz, ApplicationManager.getApplication().getPicoContainer());
-            } catch (ClassNotFoundException e) {
+                return extension.getInstance();
+            } catch (Exception e) {
                 throw new RuntimeException(
                         "Exception occurred while creating an instance of the stream connection provider", e); //$NON-NLS-1$
             }
@@ -77,7 +76,8 @@ public class LanguageServersRegistry {
             String clientImpl = extension.clientImpl;
             if (clientImpl != null && !clientImpl.isEmpty()) {
                 try {
-                    return (LanguageClientImpl) extension.instantiate(clientImpl, project.getPicoContainer());
+                    return (LanguageClientImpl) project.instantiateClass(extension.getClientImpl(),
+                            extension.getPluginDescriptor().getPluginId());
                 } catch (ClassNotFoundException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }
@@ -91,7 +91,7 @@ public class LanguageServersRegistry {
             String serverInterface = extension.serverInterface;
             if (serverInterface != null && !serverInterface.isEmpty()) {
                     try {
-                        return (Class<? extends LanguageServer>) (Class<?>)extension.findClass(serverInterface);
+                        return (Class<? extends LanguageServer>) (Class<?>)extension.getServerInterface();
                     } catch (ClassNotFoundException exception) {
                         LOGGER.warn(exception.getLocalizedMessage(), exception);
                     }
@@ -214,9 +214,11 @@ public class LanguageServersRegistry {
 
     private Set<LanguageServerDefinition> getAvailableLSFor(Language language) {
         Set<LanguageServerDefinition> res = new HashSet<>();
-        for (ContentTypeToLanguageServerDefinition mapping : this.connections) {
-            if (language.isKindOf(mapping.getKey())) {
-                res.add(mapping.getValue());
+        if (language != null) {
+            for (ContentTypeToLanguageServerDefinition mapping : this.connections) {
+                if (language.isKindOf(mapping.getKey())) {
+                    res.add(mapping.getValue());
+                }
             }
         }
         return res;

@@ -69,8 +69,11 @@ public class LibertyGeneralAction extends AnAction {
         }
         if (buildFile == null) {
             buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+            if (buildFile != null && libertyModule == null) {
+                setLibertyModule(LibertyModules.getInstance().getLibertyModule(buildFile));
+            }
         }
-        boolean isActionFromShiftShift = "GoToAction".equalsIgnoreCase(e.getPlace());
+        boolean isActionFromShiftShift = Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace());
         // if still null, or it is from shift-shift, then prompt for the user to select
         if (isActionFromShiftShift || buildFile == null) {
             List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(project, getSupportedProjectTypes());
@@ -149,13 +152,11 @@ public class LibertyGeneralAction extends AnAction {
      * @param errMsg
      */
     protected void notifyError(String errMsg) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                LibertyPluginIcons.libertyIcon,
-                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"),
-                "",
-                errMsg,
-                NotificationType.WARNING,
-                NotificationListener.URL_OPENING_LISTENER);
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
+                                .setTitle(LocalizedResourceUtil.getMessage("liberty.action.cannot.start"))
+                                .setIcon(LibertyPluginIcons.libertyIcon)
+                                .setSubtitle("")
+                                .setListener(NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
     }
 
@@ -173,7 +174,7 @@ public class LibertyGeneralAction extends AnAction {
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, projectName);
             } else {
-                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName);
+                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, projectName, System.lineSeparator());
             }
             notifyError(msg);
             LOGGER.warn(msg);
