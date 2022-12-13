@@ -5,8 +5,9 @@ We welcome contributions, and request you follow these guidelines.
  - [Raising issues](#raising-issues)
  - [Legal](#legal)
  - [Coding Standards](#coding-standards)
+ - [Developing](DEVELOPING.md)
 
-## Raising issues
+### Raising issues
 
 Please raise any bug reports on the [issue tracker](https://github.com/OpenLiberty/liberty-tools-intellij/issues). Be sure to search the list to see if your issue has already been raised.
 
@@ -39,3 +40,7 @@ This project follows Eclipse standard Java language [coding conventions](https:/
 
 Please note:
  - all PRs must have passing builds
+
+### Developing
+
+To learn how to set up, run, and test your development environment, follow the provided [development instructions](DEVELOPING.md).
