@@ -32,7 +32,7 @@ For more information, see the [project documentation in GitHub](https://github.c
 
 Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), the Language Server for Jakarta EE, to provide editing assistance for Jakarta EE APIs in Java files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
 
-Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile, to provide editing assistance for Jakarta EE APIs in Java and microprofile-config.properties files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
+Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile, to provide editing assistance for MicroProfile APIs in Java and microprofile-config.properties files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
 
 Eclipse LSP4Jakarta Snippets            | Eclipse LSP4MP Snippets
 :-------------------------:|:-------------------------:
