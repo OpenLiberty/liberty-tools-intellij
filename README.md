@@ -58,7 +58,7 @@ Editing assistance for MicroProfile APIs in microprofile-config.properties and J
   the sidebar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
 
-For detailed instructions on how to use the Liberty actions check out the [Liberty Tools for IntelliJ IDEA User Guide](docs/user-guide.md) page.
+For minimum requirements information  and detailed instructions on how to use the Liberty actions, check out the [Liberty Tools for IntelliJ IDEA user guide](docs/user-guide.md) page.
 
 ## Actions
 
