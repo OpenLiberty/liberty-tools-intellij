@@ -4,13 +4,13 @@
 ![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-liberty-tools?style=for-the-badge&)
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?style=for-the-badge&label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 
-An IntelliJ IDEA plugin offering features for developing cloud-native Java applications with [Open Liberty](https://openliberty.io/) and [WebSphere Liberty](https://www.ibm.com/products/websphere-liberty). Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
+An IntelliJ IDEA plugin for developing cloud-native Java applications with [Open Liberty](https://openliberty.io/) and [WebSphere Liberty](https://www.ibm.com/products/websphere-liberty). Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
 
 **Note: This is an early release.**
 
 ![Liberty Tools Extension](docs/images/liberty-tool-window-view.png)
 
-This plugin allows you to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools help you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
+Use Liberty Tools to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools also help you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
 
 ## Features
 - View Liberty projects in the Liberty tool window.
@@ -20,17 +20,23 @@ This plugin allows you to run your Liberty Maven or Liberty Gradle projects thro
 - Start dev mode with the debugger attached.
 - Run tests.
 - View test reports.
-- Editing assistance for Liberty configuration files: server.xml, server.env, bootstrap.properties.
+- Code with language assistance in the following configuration and application files:
+    - server.xml, server.env, bootstrap.properties Liberty configuration files
+    - Jakarta EE 9.x APIs in Java files
+    - MicroProfile APIs in microprofile-config.properties and Java files
 - Editing assistance for Jakarta EE APIs in Java files.
 - Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files.
 
-Feature completion when editing server.xml files:
+Feature completion in server.xml files helps you quickly edit your Liberty runtime configuration.
+
 ![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
 
-Jakarta RESTful Web Services snippets when editing Java files:
+Helpful code snippets are provided for Jakarta EE APIs in Java files, such as Jakarta RESTful Web Services :
+
 ![LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
 
-Completion when editing microprofile-config.properties files:
+Code completion when editing microprofile-config.properties files helps you easily set properties for MicroProfile APIs.
+
 ![LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
 
 Editing assistance for Liberty configuration files is provided through the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server). For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
@@ -53,15 +59,15 @@ Editing assistance for MicroProfile APIs in microprofile-config.properties and J
 | Start                                | Starts dev mode.                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Start…                               | Opens the Run Configurations dialog to customize and start dev mode. Supported parameters can be found in the documentation for the [dev goal of the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#additional-parameters) and the [libertyDev task of the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md#command-line-parameters). |
 | Start in a container                 | Starts dev mode with Liberty running in a container. The `liberty-maven-plugin` must be version `3.3-M1` or higher. The `liberty-gradle-plugin` must be version `3.1-M1` or higher.                                                                                                                                                                                                                                            
-| Stop                                 | Stops dev mode. This command requires dev mode to have been started.                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Run tests                            | Runs the unit tests and integration tests that are configured for your project. This command requires dev mode to have been started.                                                                                                                                                                                                                                                                               |
+| Stop                                 | Stops dev mode. Liberty must be running in dev mode to use this command.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Run tests                            | Runs the unit tests and integration tests that are configured for your project. Liberty must be running in dev mode to use this command.                                                                                                                                                                                                                               |
 | View integration test report (Maven) | Views the integration test report file if it exists at `/target/site/failsafe-report.html`.                                                                                                                                                                                                                                                                                                                               |
 | View unit test report (Maven)        | Views the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Opens the test report file if it exists at the default location `build/reports/tests/test/index.html`. This action command is only available to Gradle projects. Gradle projects only have a single action command for test result reporting.                                                                                                                                                                             |
 
 ## Requirements
 
-**IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
 
 ## Contributing
 
