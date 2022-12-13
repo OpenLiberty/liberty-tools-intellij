@@ -8,6 +8,13 @@ An IntelliJ IDEA plugin for developing cloud-native Java applications with [Open
 
 **Note: This is an early release.**
 
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Actions](#actions)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+- [Issues](#issues)
+
 ![Liberty Tools Extension](docs/images/liberty-tool-window-view.png)
 
 Use Liberty Tools to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools also help you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
@@ -52,7 +59,9 @@ Editing assistance for MicroProfile APIs in microprofile-config.properties and J
   the sidebar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
 
-## Action Commands
+## Actions
+
+The following actions are available when you select a project in the Liberty Tool Window.
 
 | Command                              | Description                                                                                                                                                                                                                                                                                                                                                                                                               |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
