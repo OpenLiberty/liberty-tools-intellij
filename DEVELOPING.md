@@ -34,9 +34,9 @@ Liberty Tools for IntelliJ consumes the [Liberty Config Language Server](https:/
 #### Debugging LemMinX Language Server
 To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 1. Start Liberty Tools for IntelliJ by creating an IntelliJ debug configuration for the `./gradlew runIde command`.
-1. Create a new debug configuration: _Remote JVM Debug_ --> specify _localhost_, port _1054_ and command line arguments `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:1054`
-2. In `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer.LibertyXmlServer()` replace the line ` params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");` with  `params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");`.
-3. Start the debug configuration created in step 2. You can now step through the LemMinX LS code now with the IntelliJ debugger.
+2. Create a new debug configuration: _Remote JVM Debug_ --> specify _localhost_, port _1054_ and command line arguments `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:1054`
+3. In `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer.LibertyXmlServer()` replace the line ` params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");` with  `params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");`.
+4. Start the debug configuration created in step 2. You can now step through the LemMinX LS code now with the IntelliJ debugger.
 
 ### Build Eclipse LSP4Jakarta locally
 

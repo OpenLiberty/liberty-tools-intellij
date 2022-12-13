@@ -8,6 +8,7 @@ An IntelliJ IDEA plugin for developing cloud-native Java applications with [Open
 
 **Note: This is an early release.**
 
+---
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Actions](#actions)
@@ -31,8 +32,6 @@ Use Liberty Tools to run your Liberty Maven or Liberty Gradle projects through t
     - server.xml, server.env, bootstrap.properties Liberty configuration files
     - Jakarta EE 9.x APIs in Java files
     - MicroProfile APIs in microprofile-config.properties and Java files
-- Editing assistance for Jakarta EE APIs in Java files.
-- Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files.
 
 Feature completion in server.xml files helps you quickly edit your Liberty runtime configuration.
 
@@ -58,6 +57,8 @@ Editing assistance for MicroProfile APIs in microprofile-config.properties and J
 - Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on
   the sidebar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
+
+For detailed instructions on how to use the Liberty actions check out the [Liberty Tools for IntelliJ IDEA User Guide](docs/user-guide.md) page.
 
 ## Actions
 
