@@ -24,26 +24,17 @@ This plugin allows you to run your Liberty Maven or Liberty Gradle projects thro
 - Editing assistance for Jakarta EE APIs in Java files.
 - Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files.
 
-<figure>
-  <img
-  src="docs/images/LCLS-server-xml-completion.png"
-  alt="Liberty Config Language Server completion">
-  <figcaption align = "center">Feature completion when editing server.xml files</figcaption>
-</figure>
+![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
+<figcaption align = "center"> Feature completion when editing server.xml files </figcaption>
 
-<figure>
-  <img
-  src="docs/images/LSP4Jakarta-rest-completion.png"
-  alt="Eclipse LSP4Jakarta completion">
-  <figcaption align = "center">Jakarta RESTful Web Services snippets when editing Java files</figcaption>
-</figure>
 
-<figure>
-  <img
-  src="docs/images/LSP4MP-mp-properties-completion.png"
-  alt="Eclipse LSP4MP completion">
-  <figcaption align = "center">Completion when editing microprofile-config.properties files</figcaption>
-</figure>
+![LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
+<figcaption align = "center"> Jakarta RESTful Web Services snippets when editing Java files </figcaption>
+
+
+![LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
+<figcaption align = "center"> Completion when editing microprofile-config.properties files </figcaption>
+
 
 Editing assistance for Liberty configuration files is provided through the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server). For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
 
