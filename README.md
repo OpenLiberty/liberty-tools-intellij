@@ -13,7 +13,7 @@ An IntelliJ IDEA plugin offering features for developing cloud-native Java appli
 This plugin allows you to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools help you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
 
 ## Features
-- View supported Liberty projects in the Liberty tool window.
+- View Liberty projects in the Liberty tool window.
 - Start/Stop dev mode.
 - Start dev mode with custom parameters.
 - Start dev mode in a container.
@@ -32,13 +32,11 @@ For more information, see the [project documentation in GitHub](https://github.c
 
 Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), the Language Server for Jakarta EE, to provide editing assistance for Jakarta EE APIs in Java files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
 
-_insert screenshot_
-
 Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile, to provide editing assistance for Jakarta EE APIs in Java and microprofile-config.properties files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
 
 Eclipse LSP4Jakarta Snippets            | Eclipse LSP4MP Snippets
 :-------------------------:|:-------------------------:
-![LSP4Jakarta](docs/images/LSP4Jakarta-rest-completion.png) | ![LSP4MP](docs/images/LSP4MP-rest-completion.png)
+![LSP4Jakarta](docs/images/LSP4Jakarta-rest-completion.png) | ![LSP4MP](docs/images/LSP4MP-mp-completion.png)
 
 ## Quick Start
 
