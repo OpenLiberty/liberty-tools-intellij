@@ -18,7 +18,7 @@ An IntelliJ IDEA plugin for developing cloud-native Java applications with [Open
 - [Contributing](#contributing)
 - [Issues](#issues)
 
-Use Liberty Tools to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools also help you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
+Use Liberty Tools to run your Liberty Maven or Liberty Gradle projects through the Liberty tool window or the IntelliJ "Go to Action" menu. You can start, stop, or interact with [Liberty dev mode](https://openliberty.io/docs/latest/development-mode.html) on all configured [Liberty Maven](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#dev) and [Liberty Gradle](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md) projects in your workspace. Liberty Tools also helps you quickly and easily edit your application and configuration files by providing language support features for MicroProfile, Jakarta EE, and Liberty configuration and Java files.
 
 ## Features
 - View Liberty projects in the Liberty tool window.
@@ -37,13 +37,13 @@ Feature completion in server.xml files helps you quickly edit your Liberty runti
 
 ![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
 
-Helpful code snippets are provided for Jakarta EE APIs in Java files, such as Jakarta RESTful Web Services :
+Helpful code snippets are provided for Jakarta EE APIs in Java files, such as Jakarta RESTful Web Services.
 
-![LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
+![Eclipse LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
 
 Code completion when editing microprofile-config.properties files helps you easily set properties for MicroProfile APIs.
 
-![LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
+![Eclipse LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
 
 Editing assistance for configuration and application files is provided through the following language server projects, which this project consumes. For more information, see the documentation for these projects.
 
@@ -58,13 +58,13 @@ Editing assistance for configuration and application files is provided through t
   the sidebar. If not enabled by default, the tool window can be viewed by selecting **View > Tool Windows > Liberty**.
 - Select a project in the Liberty tool window to view the available commands.
 
-For minimum requirements information  and detailed instructions on how to use the Liberty actions, check out the [Liberty Tools for IntelliJ IDEA user guide](docs/user-guide.md) page.
+For minimum requirements information and detailed instructions on how to use the Liberty actions, check out the [Liberty Tools for IntelliJ IDEA user guide](docs/user-guide.md) page.
 
 ## Actions
 
 The following actions are available when you select a project in the Liberty Tool Window.
 
-| Command                              | Description                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Action                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                               |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Start                                | Starts dev mode.                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Start…                               | Opens the Run Configurations dialog to customize and start dev mode. Supported parameters can be found in the documentation for the [dev goal of the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven/blob/master/docs/dev.md#additional-parameters) and the [libertyDev task of the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle/blob/master/docs/libertyDev.md#command-line-parameters). |
