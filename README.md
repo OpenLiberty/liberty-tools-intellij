@@ -20,23 +20,24 @@ This plugin allows you to run your Liberty Maven or Liberty Gradle projects thro
 - Start dev mode with the debugger attached.
 - Run tests.
 - View test reports.
-
-Liberty Tools for IntelliJ IDEA consumes the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server) to provide editing assistance for Liberty configuration files:
-- server.xml
-- server.env
-- bootstrap.properties
-
-For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
+- Editing assistance for Liberty configuration files: server.xml, server.env, bootstrap.properties.
+- Editing assistance for Jakarta EE APIs in Java files.
+- Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files.
 
 ![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
+<figcaption align = "center"> Feature completion when editing server.xml files </figcaption>
 
-Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), the Language Server for Jakarta EE, to provide editing assistance for Jakarta EE APIs in Java files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
+![LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
+<figcaption align = "center"> Jakarta RESTful Web Services snippets when editing Java files </figcaption>
 
-Liberty Tools for IntelliJ IDEA consumes [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile, to provide editing assistance for MicroProfile APIs in Java and microprofile-config.properties files. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
+![LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
+<figcaption align = "center"> Completion when editing microprofile-config.properties files </figcaption>
 
-Eclipse LSP4Jakarta Snippets            | Eclipse LSP4MP Snippets
-:-------------------------:|:-------------------------:
-![LSP4Jakarta](docs/images/LSP4Jakarta-rest-completion.png) | ![LSP4MP](docs/images/LSP4MP-mp-completion.png)
+Editing assistance for Liberty configuration files is provided through the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server). For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
+
+Editing assistance for Jakarta EE APIs in Java files is provided through [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), the Language Server for Jakarta EE. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
+
+Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files is provided through [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
 
 ## Quick Start
 
