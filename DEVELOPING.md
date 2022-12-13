@@ -2,11 +2,12 @@
 - [Build Liberty Tools for IntelliJ IDEA](#build-liberty-tools-for-intellij-idea)
 - [Language Servers](#language-servers)
   - [Build Liberty Config Language Server locally](#build-liberty-config-language-server-locally)
+    - [Debugging LemMinX langauge server with the Liberty LemMinX extension](#debugging-lemminx-language-server-with-the-liberty-lemminx-extension)
   - [Build Eclipse LSP4Jakarta locally](#build-eclipse-lsp4jakarta-locally)
   - [Build Eclipse LSP4MP locally](#build-eclipse-lsp4mp-locally)
 - [Localization](#localization)
   - [LibertyBundles.properties](#libertybundlesproperties)
-    - [Source code](#source-code)
+  - [Source code](#source-code)
 
 ## Build Liberty Tools for IntelliJ IDEA
 
@@ -22,21 +23,30 @@ This extension is built using the [gradle-intellij-plugin](https://github.com/Je
 
 ## Language Servers
 
-Liberty Tools for IntelliJ consumes the Liberty Config Language Server, Eclipse LSP4Jakarta, and Eclipse LSP4MP projects.
+Liberty Tools for IntelliJ consumes the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server), [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), and [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp) projects.
 
 ### Build Liberty Config Language Server locally
-_TODO_
 
-#### Debugging LemMinX Language Server
+1. Follow the Liberty Config Language Server [build instructions](https://github.com/OpenLiberty/liberty-language-server/blob/main/DEVELOPING.md#projects) to build the `lemminx-liberty-x.x-SNAPSHOT.jar` and `liberty.ls-x.x-SNAPSHOT.jar`.
+2. In the [build.gradle file](build.gradle), update references to the `liberty-langserver-lemminx` and `liberty-langserver` to point to the versions built in the previous step.
+3. Until [#173](https://github.com/OpenLiberty/liberty-tools-intellij/issues/173) is fixed, update the jar versions in `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer` and `io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer`.
+
+#### Debugging LemMinX Language Server with the Liberty LemMinX extension.
 To debug the LemMinX Language Server in IntelliJ, start Liberty Tools for IntelliJ by creating an IntelliJ debug configuration for `./gradlew runIde command`, then:
 1. Create a new debug configuration: _Remote JVM Debug_ --> specify _localhost_, port _1054_ and command line arguments `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:1054`
-2. In `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer.LibertyXmlServer()` replace the line ` params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");` with  `params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");`
+2. In `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer` replace the line ` params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");` with  `params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");`
 3. Start the debug configuration created in step 1, you should be able to step through the LemMinX LS code now with the IntelliJ debugger 
 
 ### Build Eclipse LSP4Jakarta locally
-_TODO_
+
+1. Follow the Eclipse LSP4Jakarta [build instructions](https://github.com/eclipse/lsp4jakarta/blob/main/docs/BUILDING.md#building) to build the `org.eclipse.lsp4jakarta.ls-x.x.x-SNAPSHOT-jar-with-dependencies.jar`. You do not need to build the `lsp4jakarta.jdt` or `lsp4jakarta.eclipse` components.
+2. In the [build.gradle file](build.gradle), update references to the `org.eclipse.lsp4jakarta.ls` to point to the version built in the previous step.
+
 ### Build Eclipse LSP4MP locally
-_TODO_
+
+1. Follow the Eclipse LSP4MP [build instructions](https://github.com/eclipse/lsp4mp#getting-started) to build the `org.eclipse.lsp4mp.ls-x.x.x-SNAPSHOT-jar-with-dependencies.jar`. You do not need to build the `lsp4mp.jdt` component.
+2. In the [build.gradle file](build.gradle), update references to the `org.eclipse.lsp4mp.ls` to point to the version built in the previous step.
+
 ## Localization
 
 ### LibertyBundles.properties
