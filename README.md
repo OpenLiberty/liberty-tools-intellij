@@ -45,11 +45,11 @@ Code completion when editing microprofile-config.properties files helps you easi
 
 ![LSP4MP completion](docs/images/LSP4MP-mp-properties-completion.png)
 
-Editing assistance for Liberty configuration files is provided through the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server). For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
+Editing assistance for configuration and application files is provided through the following language server projects, which this project consumes. For more information, see the documentation for these projects.
 
-Editing assistance for Jakarta EE APIs in Java files is provided through [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), the Language Server for Jakarta EE. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
-
-Editing assistance for MicroProfile APIs in microprofile-config.properties and Java files is provided through [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp), the Language Server for MicroProfile. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
+- Liberty configuration files: [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server)
+- Jakarta EE APIs in Java files:  [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta), the Language Server for Jakarta EE.
+- MicroProfile APIs in microprofile-config.properties and Java files: [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile), the Language Server for MicroProfile.
 
 ## Quick Start
 
