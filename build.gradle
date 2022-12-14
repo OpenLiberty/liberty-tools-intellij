@@ -96,7 +96,7 @@ patchPluginXml {
         <li> Ability to manually add Liberty projects to the Liberty tool window.
         <li> New icons for Maven and Gradle projects in the Liberty tool window.
         </ul>
-        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/commits/0.0.8">commit log</a> for the full set of changes since the previous early release.
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/0.0.8...main">commit log</a> for the full set of changes since the previous early release.
         <br>
         <h2> 0.0.7 </h2>
         <ul>
