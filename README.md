@@ -55,8 +55,7 @@ Editing assistance for configuration and application files is provided through t
 ## Quick Start
 
 - Install [_Liberty Tools_ from the JetBrains Marketplace](https://plugins.jetbrains.com/plugin/14856-liberty-tools).
-- Select a project in the Liberty tool window to view the available commands.
-Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on the sidebar. If the tool window is not enabled by default, you can view by selecting **View > Tool Windows > Liberty**.
+- Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on the sidebar. If the tool window is not enabled by default, you can view by selecting **View > Tool Windows > Liberty**.
 
 For minimum requirements information and detailed instructions on how to use the Liberty actions, check out the [Liberty Tools for IntelliJ IDEA user guide](docs/user-guide.md) page.
 
