@@ -24,7 +24,7 @@ Detailed instructions on how to import and configure your Liberty project to mak
 ## Before you begin
 ### Software requirements
 - **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
-- [Liberty Tools for IntelliJ IDEA plugin](plugins.jetbrains.com/plugin/14856-open-liberty-tools)
+- [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
 ### Application requirements
 - Define a Liberty `server.xml` configuration file at location `src/main/liberty/config`.
@@ -81,7 +81,7 @@ If you want to start your application in dev mode with custom configuration, you
 
 ![Liberty Start... action](images/liberty-start-with-config.png)
 
-Once you are done with customizing the configuration, click `Ok`.
+Once you are done with customizing the configuration, click `Run`.
 
 A new terminal tab will open to run the application in dev mode.
 
