@@ -91,9 +91,11 @@ patchPluginXml {
         <li> Completion support when editing server.xml, server.env, bootstrap.properties via the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a>.
         <li> Completion support for Jakarta EE Web Profile 9.x APIs when editing Java files via the <a href="https://github.com/eclipse/lsp4jakarta">Eclipse LSP4Jakarta</a>, Language Server for Jakarta EE.
         <li> Completion support for MicroProfile 3 & 4 APIs when editing Java and microprofile-config.properties files via the <a href="https://github.com/eclipse/lsp4mp">Eclipse LSP4MP</a>, Language Server for MicroProfile.
+        <li> Liberty projects are now automatically detected via the presence of a “src/main/liberty/config/server.xml” file.
         <li> New Liberty Run/Debug Configuration, accessible through the “Liberty: Start…” action or the IntelliJ Run/Debug Configuration menu. When “Debug” is selected, the Liberty runtime will start and the IntelliJ debugger will automatically attach to the JVM for the running Liberty instance.
         <li> Ability to run Liberty actions through the IntelliJ “Go To Action” menu.
         <li> Ability to manually add Liberty projects to the Liberty tool window.
+        <li> Liberty start actions will honour the Maven home path and Gradle JVM set in IntelliJ IDEA preferences.
         <li> New icons for Maven and Gradle projects in the Liberty tool window.
         </ul>
         See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/0.0.8...main">commit log</a> for the full set of changes since the previous early release.
