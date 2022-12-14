@@ -1,5 +1,5 @@
 # Developing Liberty Tools for IntelliJ IDEA
-- [Build Liberty Tools for IntelliJ IDEA](#build-liberty-tools-for-intellij-idea)
+- [Building Liberty Tools for IntelliJ IDEA](#building-liberty-tools-for-intellij-idea)
 - [Language Servers](#language-servers)
   - [Build Liberty Config Language Server locally](#build-liberty-config-language-server-locally)
     - [Debugging LemMinX langauge server with the Liberty LemMinX extension](#debugging-lemminx-language-server-with-the-liberty-lemminx-extension)
@@ -9,7 +9,7 @@
   - [LibertyBundles.properties](#libertybundlesproperties)
   - [Source code](#source-code)
 
-## Build Liberty Tools for IntelliJ IDEA
+## Building Liberty Tools for IntelliJ IDEA
 
 This extension is built using the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin/).
 
