@@ -14,6 +14,7 @@ An IntelliJ IDEA plugin for developing cloud-native Java applications with [Open
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Actions](#actions)
+- [External Settings](#external-settings)
 - [Requirements](#requirements)
 - [Contributing](#contributing)
 - [Issues](#issues)
@@ -74,6 +75,12 @@ The following actions are available when you select a project in the Liberty Too
 | View integration test report (Maven) | Views the integration test report file if it exists at `/target/site/failsafe-report.html`.                                                                                                                                                                                                                                                                                                                               |
 | View unit test report (Maven)        | Views the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Opens the test report file if it exists at the default location `build/reports/tests/test/index.html`. This action command is only available to Gradle projects. Gradle projects only have a single action command for test result reporting.                                                                                                                                                                             |
+
+## External Settings
+
+Liberty Tools will honour:
+- the Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
+- the Gradle user home set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
 
 ## Requirements
 
