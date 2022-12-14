@@ -83,35 +83,46 @@ intellij {
 
 patchPluginXml {
     changeNotes = """
-        <b> 0.0.8 </b>
+        <h2> 0.0.8 </h2>
+        Version 0.0.8 of Liberty Tools for IntelliJ IDEA is an <b>early release</b> that contains new functionality and fixes. Liberty Tools for IntelliJ IDEA now requires IntelliJ IDEA version 2022.2+ and Java 17.
+        <br>
+        Notable enhancements:
         <ul>
-        <li> TODO
+        <li> Completion support when editing server.xml, server.env, bootstrap.properties via the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a>.
+        <li> Completion support for Jakarta EE Web Profile 9.x APIs when editing Java files via the <a href="https://github.com/eclipse/lsp4jakarta">Eclipse LSP4Jakarta</a>, Language Server for Jakarta EE.
+        <li> Completion support for MicroProfile 3 & 4 APIs when editing Java and microprofile-config.properties files via the <a href="https://github.com/eclipse/lsp4mp">Eclipse LSP4MP</a>, Language Server for MicroProfile.
+        <li> New Liberty Run/Debug Configuration, accessible through the “Liberty: Start…” action or the IntelliJ Run/Debug Configuration menu. When “Debug” is selected, the Liberty runtime will start and the IntelliJ debugger will automatically attach to the JVM for the running Liberty instance.
+        <li> Ability to run Liberty actions through the IntelliJ “Go To Action” menu.
+        <li> Ability to manually add Liberty projects to the Liberty tool window.
+        <li> New icons for Maven and Gradle projects in the Liberty tool window.
         </ul>
-        <b> 0.0.7 </b>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/commits/0.0.8">commit log</a> for the full set of changes since the previous early release.
+        <br>
+        <h2> 0.0.7 </h2>
         <ul>
         <li> Rename plugin to Liberty Tools for IntelliJ
         </ul>
-        <b> 0.0.6 </b>
+        <h2> 0.0.6 </h2>
         <ul>
         <li> Fix release
         </ul>
-        <b> 0.0.5 </b>
+        <h2> 0.0.5 </h2>
         <ul>
         <li> Update action wording and documentation
         </ul>
-        <b> 0.0.4 </b>
+        <h2> 0.0.4 </h2>
         <ul>
         <li> Removed tech preview wording from "start in container" action
         </ul>
-        <b> 0.0.3 </b>
+        <h2> 0.0.3 </h2>
         <ul>
         <li> Updated plugin description
         </ul>
-        <b> 0.0.2 </b>
+        <h2> 0.0.2 </h2>
         <ul>
         <li> Added start in container (tech preview) action
         </ul>
-        <b> 0.0.1 </b>
+        <h2> 0.0.1 </h2>
         <ul>
         <li> First preview release
         </ul>
