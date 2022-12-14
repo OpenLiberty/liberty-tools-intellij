@@ -80,7 +80,7 @@ The following actions are available when you select a project in the Liberty Too
 
 Liberty Tools for IntelliJ IDEA will honour the:
 - Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle user home set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
 
 ## Requirements
 

@@ -24,6 +24,7 @@ Detailed instructions on how to import and configure your Liberty project to mak
 ## Before you begin
 ### Software requirements
 - **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- Java 17 is required by Liberty Tools for IntelliJ IDEA and bundled with IntelliJ IDEA version 2022.2+. If you have changed the IntelliJ IDEA Boot Java Runtime through the "Change Boot Java Runtime for the IDE" preference, ensure that you are using Java 17.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
 ### Application requirements
@@ -40,7 +41,7 @@ Detailed instructions on how to import and configure your Liberty project to mak
 
 Liberty Tools for IntelliJ IDEA will honour the:
 - Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle user home set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
 
 ## Opening the Liberty tool window
 Select **View > Tool Windows > Liberty**.
