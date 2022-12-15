@@ -1,0 +1,195 @@
+# Liberty Tools for IntelliJ IDEA User Guide
+
+This guide provides detailed instructions on how to import and configure your Liberty project to use the Liberty Tools for IntelliJ IDEA plugin.
+
+1. [Before you begin](#before-you-begin)
+    - [Software requirements](#software-requirements)
+    - [Application requirements](#application-requirements)
+    - [Settings](#settings)
+2. [Open the Liberty tool window](#open-the-liberty-tool-window)
+3. [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
+    - [Use the Liberty tool window](#use-the-liberty-tool-window)
+    - [Use the "Go to Action" IntelliJ IDEA menu](#use-the-go-to-action-intellij-idea-menu)
+    - [Start your application in dev mode](#start-your-application-in-dev-mode)
+    - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
+    - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
+4. [Running your application's tests](#running-your-applications-tests)
+5. [View your application's test reports](#view-your-applications-test-reports)
+   - [Maven-built applications](#maven-built-applications)
+   - [Gradle-built applications](#gradle-built-applications)
+6. [Stop your application](#stop-your-application)
+7. [Debug your application](#debug-your-application)
+8. [Manually add your Liberty project to the tool window](#manually-add-your-liberty-project-to-the-tool-window)
+9. [Configure a Liberty server](#configure-a-liberty-server)
+10. [Develop with Jakarta EE and MicroProfile APIs](#develop-with-jakarta-ee-and-microprofile-apis)
+
+## Before you begin
+### Software requirements
+- **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- Java 17 is required by Liberty Tools for IntelliJ IDEA and bundled with IntelliJ IDEA version 2022.2+. If you have changed the IntelliJ IDEA Boot Java Runtime through the "Change Boot Java Runtime for the IDE" preference, ensure that you are using Java 17.
+- [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
+
+### Application requirements
+- Define a Liberty `server.xml` configuration file in the `src/main/liberty/config` location.
+- Configure the [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven#configuration) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script). We recommend using recent versions of the plugins as they include several important bug fixes.
+
+  The following versions are recommended at minimum:
+
+    - Liberty Maven Plugin -> 3.7.1
+
+    - Liberty Gradle Plugin -> 3.5.1
+
+### Settings
+
+Liberty Tools for IntelliJ IDEA honours  the following external settings:
+- Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
+- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+
+## Open the Liberty tool window
+Select **View > Tool Windows > Liberty**.
+
+Projects that are already properly configured to run on Liberty and use Liberty dev mode are automatically added to the Liberty tool window when it opens. If your Liberty project does not show up in the Liberty tool window automatically and you have the Liberty Maven or Liberty Gradle plugin configured, check out [how to manually add your project to the Liberty tool window](#manually-add-your-liberty-project-to-the-tool-window).
+
+If you add new projects or make changes, use the refresh icon in the Liberty tool window toolbar to refresh the tool window.
+
+_insert screenshot of refresh button highlighted_
+
+## Run your application on Liberty using dev mode
+
+Three menu actions are available to start your Liberty application in dev mode through the Liberty tool window view or the "Go to Action" IntelliJ IDEA menu: [Start](#start), [Start...](#start-with-configuration), or [Start in container](#start-in-container).
+
+### Use the Liberty tool window
+
+The Liberty tool window provides a context menu for Liberty projects. You can choose different actions from the menu to speed up application development.
+
+![Liberty tool window](images/liberty-tool-window-view.png)
+
+### Use the "Go to Action" IntelliJ IDEA menu
+
+The Liberty Tools plugin provides a set of actions for the "Go to Action" IntelliJ IDEA menu. You can access the **Go to Action** IntelliJ IDEA menu either by pressing **Shift** twice, then selecting the **Actions** tab, or  by pressing **Ctl/Cmd** + **Shift** + **A**. All Liberty Tools actions that are described in the following sections are also available from the **Go to Action** IntelliJ IDEA menu.
+
+![Liberty actions in "Go to Action" menu](images/liberty-go-to-action-view.png)
+
+### Start your application in dev mode
+
+To start your application in dev mode, in the Liberty tool window select the **Start** action under your application.
+
+A new terminal tab will open to the run the application in dev mode.
+
+![Liberty Start action](images/liberty-start.png)
+
+### Start your application in dev mode with configuration
+
+To start your application in dev mode with custom configuration, in the Liberty tool window select the **Start...** action under your application. The action opens a Liberty Run/Debug Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters).
+
+![Liberty Start... action](images/liberty-start-with-config.png)
+
+When you finish customizing the configuration, click **Run**.
+
+A new terminal tab will open to run the application in dev mode.
+
+![Liberty Start... action running in terminal](images/liberty-start-with-config-terminal.png)
+
+Note that the configuration shown in the Run/Debug Configurations dialog is created and displayed automatically if one is not already associated with the project. If a single configuration is already associated with the project, that configuration is displayed. If multiple configurations are already associated with the project, the highlighted/last run configuration is displayed.
+
+### Start your application in dev mode in a container
+
+To use dev mode for containers, in the Liberty tool window select the**Start in container** action under your application.
+
+![Liberty Start in container action](images/liberty-start-in-container.png)
+
+For more information on dev mode for containers, check out the [Liberty Maven devc goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#devc-container-mode) or the [Liberty Gradle libertyDevc task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#libertydevc-task-container-mode).
+
+## Running your application's tests
+
+After your application is running on Liberty using dev mode, you can easily run the tests provided by your application.
+
+To run tests, in the Liberty tool window select the **Liberty: Run tests** action under your application.
+
+The tests are run in the corresponding terminal.
+
+![Liberty run tests action](images/liberty-run-tests-action.png)
+
+## View your application's test reports
+
+After you finish running your application's tests, you can access the produced test reports. Test reports will open in your external default browser.
+
+### Maven-built applications
+
+To view the integration test report for Maven-built applications, in the Liberty tool window select the **View integration test report** action under your application.
+
+This action looks for the integration test report at the `/target/site/failsafe-report.html` default location.
+
+To view the unit test report for Maven-built applications, in the Liberty tool window select the **View unit test report** action under your application.
+
+This action looks for the unit test report at the `/target/site/surefire-report.html` default location.
+
+### Gradle-built applications
+
+To view the test report for Gradle-built applications, in the Liberty tool window select the **View test report** action under your application.
+
+This action looks for the unit test report at the `build/reports/tests/test/index.html` default location.
+
+## Stop your application
+
+To stop your application, in the Liberty tool window select the **Stop** action under your application.
+
+![Liberty stop action](images/liberty-stop-action.png)
+
+## Debug your application
+
+To debug your application, start dev mode with the debugger automatically attached to the Liberty server JVM that runs your application.
+
+To start dev mode with the debugger attached, first create or select a **Liberty Run/Debug Configuration** through the **IntelliJ Run/Debug Configuration** menu. After you select the **Liberty Run/Debug Configuration**, select the **Debug** action next to the **Run/Debug Configuration** menu.
+
+A new terminal tab opens to the run the application in dev mode and the debugger waits to attach.
+
+![Liberty debug action](images/liberty-debug.png)
+
+The debug dialog pops up to confirm your Debug Configuration. Select **Debug**.
+
+![Liberty debug confirm configuration](images/liberty-debug-confirm-config.png)
+
+Once the server starts, the IntelliJ IDEA debugger attaches and switches to the debug perspective. You can now set breakpoints and debug your code as usual.
+
+![Liberty debugger attached](images/liberty-debugger-attached.png)
+
+
+## Manually add your Liberty project to the tool window
+
+In the event that your Liberty project is not automatically detected by the Liberty tool window, you can manually add your Liberty project to the Liberty tool window. To manually add your Liberty project to the Liberty tool window, select the **Liberty: Add project** to the tool window` action in the **Go to Action** IntelliJ IDEA menu.
+
+![Liberty add project to tool window](images/liberty-add-project-to-tool-window.png)
+
+You are prompted with a list of projects that are not already displayed in the Liberty tool window.
+
+![Liberty add project to tool window selection](images/liberty-add-project-to-tool-window-selection.png)
+
+You can remove manually added Liberty projects from the Liberty tool window by selecting the **Liberty: Remove project from the tool window** action in the **Go to Action** IntelliJ IDEA menu.
+
+## Configure a Liberty server
+
+Liberty configuration assistance provides code completion in Liberty `server.xml, 'server.env`, and `bootstrap.properties` files. 
+
+1. Start the project in dev mode, using one of the previously described Liberty tool window start commands. Dev mode installs the Liberty features that are required for your application.
+2. Open any of the supported Liberty configuration files. 
+3. To use Liberty-specific code completion, press **Ctl/Cmd** + **Space** anywhere within the document. A drop-down list of completion suggestions appears.
+
+![LCLS server.xml completion](images/LCLS-server-xml-completion.png)
+
+Liberty configuration assistance is offered through the Liberty Config Language Server. For more information, see the [project documentation in GitHub](https://github.com/OpenLiberty/liberty-language-server#liberty-config-language-server).
+
+## Develop with Jakarta EE and MicroProfile APIs
+
+Liberty Tools editing assistance provides code completion in configuration and application files for Jakarta EE and MicroProfile APIs.
+
+1. Open a Java or microprofile-config.properties file.
+2. To use Jakarta EE-specific and MicroProfile-specific code completion, press **Ctl/Cmd** + **Space** anywhere within the document. A drop-down list of completion suggestions appears.
+
+![Eclipse LSP4Jakarta RESTful WS completion](images/LSP4Jakarta-rest-completion.png)
+
+![Eclipse LSP4MP microprofile-config.properties completion](images/LSP4MP-mp-properties-completion.png)
+
+Jakarta EE API configuration assistance is offered through Eclipse LSP4Jakarta, the Language Server for Jakarta EE. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
+
+MicroProfile EE API configuration assistance is offered through Eclipse LSP4MP, the Language Server for MicroProfile. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile).
