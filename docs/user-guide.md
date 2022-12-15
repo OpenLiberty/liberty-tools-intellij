@@ -52,7 +52,7 @@ Projects that are already properly configured to run on Liberty and use Liberty 
 
 If you add new projects or make changes, use the refresh icon in the Liberty tool window toolbar to refresh the tool window.
 
-_insert screenshot of refresh button highlighted_
+![Liberty tool window refresh](images/liberty-tool-window-refresh.png)
 
 ## Run your application on Liberty using dev mode
 
@@ -80,7 +80,7 @@ A new terminal tab will open to the run the application in dev mode.
 
 ### Start your application in dev mode with configuration
 
-To start your application in dev mode with custom configuration, in the Liberty tool window select the **Start...** action under your application. The action opens a Liberty Run/Debug Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters).
+To start your application in dev mode with custom configuration, in the Liberty tool window select the **Start...** action under your application. The action opens a Liberty Edit Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters).
 
 ![Liberty Start... action](images/liberty-start-with-config.png)
 
@@ -90,11 +90,11 @@ A new terminal tab will open to run the application in dev mode.
 
 ![Liberty Start... action running in terminal](images/liberty-start-with-config-terminal.png)
 
-Note that the configuration shown in the Run/Debug Configurations dialog is created and displayed automatically if one is not already associated with the project. If a single configuration is already associated with the project, that configuration is displayed. If multiple configurations are already associated with the project, the highlighted/last run configuration is displayed.
+Note that the configuration shown in the Edit Configuration dialog is created and displayed automatically if a Run/Debug configuration is not already associated with the project. If a single configuration is already associated with the project, that configuration is displayed. If multiple configurations are already associated with the project, the highlighted/last run configuration is displayed.
 
 ### Start your application in dev mode in a container
 
-To use dev mode for containers, in the Liberty tool window select the**Start in container** action under your application.
+To use dev mode for containers, in the Liberty tool window select the **Start in container** action under your application.
 
 ![Liberty Start in container action](images/liberty-start-in-container.png)
 
