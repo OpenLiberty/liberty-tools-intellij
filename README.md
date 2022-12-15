@@ -12,9 +12,9 @@ Liberty Tools for IntelliJ IDEA is an IntelliJ IDEA plugin for developing cloud-
 
 ---
 - [Features](#features)
-- [Quick Start](#quick-start)
+- [Quick start](#quick-start)
 - [Actions](#actions)
-- [External Settings](#external-settings)
+- [External settings](#external-settings)
 - [Requirements](#requirements)
 - [Contributing](#contributing)
 - [Issues](#issues)
@@ -52,7 +52,7 @@ Editing assistance for configuration and application files is provided through t
 - Jakarta EE APIs in Java files:  [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta), the Language Server for Jakarta EE.
 - MicroProfile APIs in microprofile-config.properties and Java files: [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp#eclipse-lsp4mp---language-server-for-microprofile), the Language Server for MicroProfile.
 
-## Quick Start
+## Quick start
 
 - Install [_Liberty Tools_ from the JetBrains Marketplace](https://plugins.jetbrains.com/plugin/14856-liberty-tools).
 - Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on the sidebar. If the tool window is not enabled by default, you can view by selecting **View > Tool Windows > Liberty**.
@@ -74,7 +74,7 @@ The following actions are available when you select a project in the Liberty Too
 | View unit test report (Maven)        | Views the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Opens the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
 
-## External Settings
+## External settings
 
 Liberty Tools for IntelliJ IDEA honours the following external settings:
 - Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.

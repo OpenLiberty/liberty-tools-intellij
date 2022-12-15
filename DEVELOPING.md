@@ -1,4 +1,5 @@
 # Developing Liberty Tools for IntelliJ IDEA
+
 - [Building Liberty Tools for IntelliJ IDEA](#building-liberty-tools-for-intellij-idea)
 - [Language Servers](#language-servers)
   - [Build Liberty Config Language Server locally](#build-liberty-config-language-server-locally)
@@ -13,7 +14,7 @@
 
 This extension is built using the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin/).
 
-1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
+1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git && cd liberty-tools-intellij`
 2. Import this repository as a Gradle project in IntelliJ IDEA
 3. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
 
@@ -23,7 +24,7 @@ This extension is built using the [gradle-intellij-plugin](https://github.com/Je
 
 ## Language Servers
 
-Liberty Tools for IntelliJ consumes the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server), [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), and [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp) projects.
+Liberty Tools for IntelliJ consumes the [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server), [Eclipse LSP4Jakarta](https://github.com/eclipse/lsp4jakarta), and [Eclipse LSP4MP](https://github.com/eclipse/lsp4mp) projects. The language server JARS are automatically downloaded from Maven Central and the Eclipse repository. The following instructions explain how to build these JARs locally and run them with Liberty Tools for IntelliJ IDEA.
 
 ### Build Liberty Config Language Server locally
 
