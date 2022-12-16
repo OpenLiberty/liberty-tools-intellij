@@ -13,7 +13,7 @@ This guide provides detailed instructions on how to import and configure your Li
     - [Start your application in dev mode](#start-your-application-in-dev-mode)
     - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
     - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
-4. [Running your application's tests](#running-your-applications-tests)
+4. [Run your application's tests](#run-your-applications-tests)
 5. [View your application's test reports](#view-your-applications-test-reports)
    - [Maven-built applications](#maven-built-applications)
    - [Gradle-built applications](#gradle-built-applications)
@@ -100,7 +100,7 @@ To use dev mode for containers, select the **Start in container** action for you
 
 For more information on dev mode for containers, check out the [Liberty Maven devc goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#devc-container-mode) or the [Liberty Gradle libertyDevc task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#libertydevc-task-container-mode).
 
-## Running your application tests
+## Run your application tests
 
 After your application is running on Liberty using dev mode, you can easily run the tests provided by your application.
 
