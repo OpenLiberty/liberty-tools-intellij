@@ -169,7 +169,7 @@ You can remove manually added Liberty projects from the Liberty tool window by s
 
 ## Configure a Liberty server
 
-Liberty configuration assistance provides code completion in Liberty `server.xml`, 'server.env`, and `bootstrap.properties` files. 
+Liberty configuration assistance provides code completion in Liberty `server.xml`, `server.env`, and `bootstrap.properties` files. 
 
 1. Start the project in dev mode by using one of the previously described Liberty tool window start commands. Dev mode installs the Liberty features that are required for your application.
 2. Open any of the supported Liberty configuration files. 
