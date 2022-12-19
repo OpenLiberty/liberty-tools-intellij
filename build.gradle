@@ -98,7 +98,7 @@ patchPluginXml {
         <li> Liberty start actions will honour the Maven home path and Gradle JVM set in IntelliJ IDEA preferences.
         <li> New icons for Maven and Gradle projects in the Liberty tool window.
         </ul>
-        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/0.0.8...main">commit log</a> for the full set of changes since the previous early release.
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/0.0.7...0.0.8">commit log</a> for the full set of changes since the previous early release.
         <br>
         <h2> 0.0.7 </h2>
         <ul>
