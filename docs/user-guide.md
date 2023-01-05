@@ -66,7 +66,7 @@ The Liberty tool window provides a context menu for Liberty projects. You can ch
 
 ### Use the Go to Action IntelliJ IDEA menu
 
-The Liberty Tools plugin provides a set of actions for the **Go to Action** IntelliJ IDEA menu. You can access the **Go to Action** IntelliJ IDEA menu either by pressing **Shift** twice, then selecting the **Actions** tab, or  by pressing **Ctl/Cmd** + **Shift** + **A**. All Liberty Tools actions that are described in the following sections are also available from the **Go to Action** IntelliJ IDEA menu.
+The Liberty Tools plugin provides a set of actions for the **Go to Action** IntelliJ IDEA menu. You can access the **Go to Action** IntelliJ IDEA menu either by pressing <kbd>Shift</kbd> twice, then selecting the **Actions** tab, or  by pressing <kbd>Ctl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>. All Liberty Tools actions that are described in the following sections are also available from the **Go to Action** IntelliJ IDEA menu.
 
 ![Liberty actions in "Go to Action" menu](images/liberty-go-to-action-view.png)
 
@@ -173,7 +173,7 @@ Liberty configuration assistance provides code completion in Liberty `server.xml
 
 1. Start the project in dev mode by using one of the previously described Liberty tool window start commands. Dev mode installs the Liberty features that are required for your application.
 2. Open any of the supported Liberty configuration files. 
-3. To use Liberty-specific code completion, press **Ctl/Cmd** + **Space** anywhere within the document. A drop-down list of completion suggestions appears.
+3. To use Liberty-specific code completion, press <kbd>Ctl/Cmd</kbd> + <kbd>Space</kbd> anywhere within the document. A drop-down list of completion suggestions appears.
 
 ![LCLS server.xml completion](images/LCLS-server-xml-completion.png)
 
@@ -184,7 +184,7 @@ Liberty configuration assistance is offered through the Liberty Config Language 
 Liberty Tools editing assistance provides code completion in configuration and application files for Jakarta EE and MicroProfile APIs.
 
 1. Open a Java or microprofile-config.properties file.
-2. To use Jakarta EE-specific and MicroProfile-specific code completion, press **Ctl/Cmd** + **Space** anywhere within the document. A drop-down list of completion suggestions appears.
+2. To use Jakarta EE-specific and MicroProfile-specific code completion, press <kbd>Ctl/Cmd</kbd> + <kbd>Space</kbd> anywhere within the document. A drop-down list of completion suggestions appears.
 
 ![Eclipse LSP4Jakarta RESTful WS completion](images/LSP4Jakarta-rest-completion.png)
 
