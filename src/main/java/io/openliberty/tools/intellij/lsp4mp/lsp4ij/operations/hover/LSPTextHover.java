@@ -140,9 +140,13 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
     @Nullable
     @Override
     public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
-        PsiElement elem = element;
-        Editor editor = LSPIJUtils.editorForElement(elem);
-        if (editor == null) {
+        PsiElement elem = null;
+        Editor editor = null;
+        if (element != null) {
+            elem = element;
+            editor = LSPIJUtils.editorForElement(elem);
+        }
+        if (editor == null && originalElement != null) {
             // for some files (e.g. xml) element cannot resolve the associated VirtualFile and Editor, so we try to resolve again with originalElement
             editor = LSPIJUtils.editorForElement(originalElement);
             elem = originalElement;
@@ -162,7 +166,7 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
                 }
             } catch (ExecutionException | TimeoutException e) {
                 String fileName = elem.getContainingFile().getVirtualFile() != null ? String.valueOf(elem.getContainingFile().getVirtualFile()) : String.valueOf(elem.getContainingFile());
-                LOGGER.warn(String.format("Unable to generate documentation for %s. ", fileName) +  e.getLocalizedMessage(), e);
+                LOGGER.warn(String.format("Unable to generate documentation for %s. ", fileName) + e.getLocalizedMessage(), e);
             } catch (InterruptedException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
                 Thread.currentThread().interrupt();
