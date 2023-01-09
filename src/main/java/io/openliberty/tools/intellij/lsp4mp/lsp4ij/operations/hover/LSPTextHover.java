@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -140,11 +140,22 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
     @Nullable
     @Override
     public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
-        Editor editor = LSPIJUtils.editorForElement(element);
+        PsiElement elem = null;
+        Editor editor = null;
+        if (element != null) {
+            elem = element;
+            editor = LSPIJUtils.editorForElement(elem);
+        }
+        if (editor == null && originalElement != null) {
+            // for some files (e.g. xml) element cannot resolve the associated VirtualFile and Editor, so we try to resolve again with originalElement
+            editor = LSPIJUtils.editorForElement(originalElement);
+            elem = originalElement;
+            LOGGER.info("Cannot resolve VirtualFile and Editor for element: " + element.getText() + ". Using originalElement: " + originalElement.getText() + " for hover request.");
+        }
         if (editor != null) {
-            initiateHoverRequest(element, editor);
+            initiateHoverRequest(elem, editor);
             try {
-                String result = request.get(500, TimeUnit.MILLISECONDS).stream()
+                String result = request.get(5, TimeUnit.SECONDS).stream()
                         .filter(Objects::nonNull)
                         .map(LSPTextHover::getHoverString)
                         .filter(Objects::nonNull)
@@ -154,7 +165,8 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
                     return styleHtml(editor, RENDERER.render(PARSER.parse(result)));
                 }
             } catch (ExecutionException | TimeoutException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+                String fileName = elem.getContainingFile().getVirtualFile() != null ? String.valueOf(elem.getContainingFile().getVirtualFile()) : String.valueOf(elem.getContainingFile());
+                LOGGER.warn(String.format("Unable to generate documentation for %s. ", fileName) + e.getLocalizedMessage(), e);
             } catch (InterruptedException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
                 Thread.currentThread().interrupt();
@@ -265,7 +277,10 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
     public boolean handleExternalLink(PsiManager psiManager, String link, PsiElement context) {
         VirtualFile file = getFile(link);
         if (file != null) {
-            FileEditorManager.getInstance(psiManager.getProject()).openFile(file, true, true);
+            // use invokeLater to avoid write-unsafe context error
+            ApplicationManager.getApplication().invokeLater(()->{
+                FileEditorManager.getInstance(psiManager.getProject()).openFile(file, true, true);
+                }, psiManager.getProject().getDisposed());
             return true;
         }
         return false;
