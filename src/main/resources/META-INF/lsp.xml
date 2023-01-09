@@ -67,6 +67,10 @@
         <!-- <gotoDeclarationHandler
                 implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
 
+        <!-- Hover for LemMinX + Liberty LemMinX ext -->
+        <lang.documentationProvider id="LSPTextHoverXML" language="XML"
+                                    implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    order="first"/>
         <!-- MicroProfile -->
         <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
                                     implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
