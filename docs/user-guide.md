@@ -2,26 +2,26 @@
 
 This guide provides detailed instructions on how to import and configure your Liberty project to use the Liberty Tools for IntelliJ IDEA plugin.
 
-1. [Before you begin](#before-you-begin)
+- [Before you begin](#before-you-begin)
     - [Software requirements](#software-requirements)
     - [Application requirements](#application-requirements)
     - [Settings](#settings)
-2. [Open the Liberty tool window](#open-the-liberty-tool-window)
-3. [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
+- [Open the Liberty tool window](#open-the-liberty-tool-window)
+- [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
     - [Use the Liberty tool window](#use-the-liberty-tool-window)
     - [Use the "Go to Action" IntelliJ IDEA menu](#use-the-go-to-action-intellij-idea-menu)
     - [Start your application in dev mode](#start-your-application-in-dev-mode)
     - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
     - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
-4. [Run your application's tests](#run-your-applications-tests)
-5. [View your application's test reports](#view-your-applications-test-reports)
+- [Run your application's tests](#run-your-applications-tests)
+- [View your application's test reports](#view-your-applications-test-reports)
    - [Maven-built applications](#maven-built-applications)
    - [Gradle-built applications](#gradle-built-applications)
-6. [Stop your application](#stop-your-application)
-7. [Debug your application](#debug-your-application)
-8. [Manually add your Liberty project to the tool window](#manually-add-your-liberty-project-to-the-tool-window)
-9. [Configure a Liberty server](#configure-a-liberty-server)
-10. [Develop with Jakarta EE and MicroProfile APIs](#develop-with-jakarta-ee-and-microprofile-apis)
+- [Stop your application](#stop-your-application)
+- [Debug your application](#debug-your-application)
+- [Manually add your Liberty project to the tool window](#manually-add-your-liberty-project-to-the-tool-window)
+- [Configure a Liberty server](#configure-a-liberty-server)
+- [Develop with Jakarta EE and MicroProfile APIs](#develop-with-jakarta-ee-and-microprofile-apis)
 
 ## Before you begin
 ### Software requirements
