@@ -273,7 +273,10 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
     public boolean handleExternalLink(PsiManager psiManager, String link, PsiElement context) {
         VirtualFile file = getFile(link);
         if (file != null) {
-            FileEditorManager.getInstance(psiManager.getProject()).openFile(file, true, true);
+            // use invokeLater to avoid write-unsafe context error
+            ApplicationManager.getApplication().invokeLater(()->{
+                FileEditorManager.getInstance(psiManager.getProject()).openFile(file, true, true);
+                }, psiManager.getProject().getDisposed());
             return true;
         }
         return false;
