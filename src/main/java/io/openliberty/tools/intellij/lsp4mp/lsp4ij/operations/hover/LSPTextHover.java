@@ -151,7 +151,7 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
         if (editor != null) {
             initiateHoverRequest(elem, editor);
             try {
-                String result = request.get(1, TimeUnit.SECONDS).stream()
+                String result = request.get(5, TimeUnit.SECONDS).stream()
                         .filter(Objects::nonNull)
                         .map(LSPTextHover::getHoverString)
                         .filter(Objects::nonNull)
