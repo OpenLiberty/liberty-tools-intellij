@@ -1,4 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2023 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at https://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
+
+import io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -9,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class ProcessStreamConnectionProvider implements StreamConnectionProvider{
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessStreamConnectionProvider.class);
+
     private @Nullable Process process;
     private List<String> commands;
     private @Nullable String workingDir;
@@ -36,6 +53,8 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
         this.process = p;
         if (!p.isAlive()) {
             throw new IOException("Unable to start language server: " + this.toString()); //$NON-NLS-1$
+        } else {
+            LOGGER.info("Starting language server: " + this.toString());
         }
     }
 

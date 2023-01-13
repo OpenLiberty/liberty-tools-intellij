@@ -1,3 +1,13 @@
+<!--
+  ~ Copyright (c) 2022, 2023 IBM Corporation.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v. 2.0 which is available at
+  ~ http://www.eclipse.org/legal/epl-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0
+  -->
+
 <idea-plugin>
     <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
     <extensionPoints>
@@ -11,7 +21,7 @@
         <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
-        <languageMapping language="MicroProfileConfigProperties" serverId="lsp4mp"/>
+        <languageMapping language="Properties" serverId="lsp4mp" filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
@@ -25,8 +35,8 @@
         <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
-        <languageMapping language="BootstrapProperties" serverId="libertyls"/>
-        <languageMapping language="ServerEnv" serverId="libertyls"/>
+        <languageMapping language="Properties" serverId="libertyls" filePattern="**/{src/main/liberty/config,usr/servers/**}/bootstrap.properties"/>
+<!--        <languageMapping language="TEXT" serverId="libertyls"/>-->
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
@@ -35,26 +45,11 @@
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
-        <!-- File types for language server activation -->
-        <!-- microprofile-config.properties for LSP4MP -->
-        <fileType name="microprofile-config.properties file"
-                  implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileConfigFileType"
-                  fieldName="INSTANCE"
-                  language="MicroProfileConfigProperties"
-                  patterns="microprofile-config.properties;microprofile-config-?*.properties"/>
-
-        <!-- bootstrap.properties for Liberty LS -->
-        <fileType name="bootstrap.properties file"
-                  implementationClass="io.openliberty.tools.intellij.liberty.lsp.BootstrapPropertiesFileType"
-                  fieldName="INSTANCE"
-                  language="BootstrapProperties"/>
-
         <!-- server.env for Liberty LS -->
         <fileType name="server.env file"
                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"
                   fieldName="INSTANCE"
                   language="ServerEnv"/>
-
         <!-- Generic -->
         <completion.contributor id="LSPCompletionContributor" language="any"
                                 implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
@@ -71,10 +66,11 @@
         <lang.documentationProvider id="LSPTextHoverXML" language="XML"
                                     implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
-        <!-- MicroProfile -->
+        <!-- Hover for Liberty Config LS bootstrap.properties and LSP4MP microprofile-config.properties -->
         <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
                                     implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
+        <!-- Hover for Java files, LSP4MP and LSP4Jakarta -->
         <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA"
                                     implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
