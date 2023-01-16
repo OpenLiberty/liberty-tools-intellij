@@ -36,7 +36,7 @@
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="Properties" serverId="libertyls" filePattern="**/{src/main/liberty/config,usr/servers/**}/bootstrap.properties"/>
-<!--        <languageMapping language="TEXT" serverId="libertyls"/>-->
+        <languageMapping language="ServerEnv" serverId="libertyls"/>
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
