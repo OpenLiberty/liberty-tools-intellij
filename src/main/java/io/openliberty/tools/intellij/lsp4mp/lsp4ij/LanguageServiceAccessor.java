@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- *
- *  SPDX-License-Identifier: EPL-2.0
- ******************************************************************************/
-
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
@@ -389,16 +379,19 @@ public class LanguageServiceAccessor {
                     }
                     final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
                     if (fileProject != null) {
-                        if (!serverDefinition.languageFilePatternMappings.isEmpty() && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                        boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
+                        if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
                             // check if document matches file pattern
                             Path filePath = Paths.get(file.getCanonicalPath());
                             final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
                             if (matcher.matches(filePath)) {
+                                // only start language server if the language and file pattern matches the language server definition
                                 LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
                                 startedServers.add(wrapper);
                                 res.add(wrapper);
                             }
-                        } else if (serverDefinition.languageFilePatternMappings.isEmpty()){
+                        } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                            // no file patterns to filter language servers on, or none applicable for this language
                             LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
                             startedServers.add(wrapper);
                             res.add(wrapper);

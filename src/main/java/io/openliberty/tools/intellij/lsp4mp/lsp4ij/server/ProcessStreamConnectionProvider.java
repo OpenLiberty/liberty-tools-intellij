@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat, Inc.
- * Distributed under license by Red Hat, Inc. All rights reserved.
- * This program is made available under the terms of the
- * Eclipse Public License v2.0 which accompanies this distribution,
- * and is available at https://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- * Red Hat, Inc. - initial API and implementation
- ******************************************************************************/
-
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
 import io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer;
