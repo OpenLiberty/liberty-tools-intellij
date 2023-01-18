@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.StreamConnectionProvider;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +44,8 @@ public class LanguageServiceAccessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageServiceAccessor.class);
     private final Project project;
 
-    public static LanguageServiceAccessor getInstance(Project project) {
-        return ServiceManager.getService(project, LanguageServiceAccessor.class);
+    public static LanguageServiceAccessor getInstance(@NotNull Project project) {
+        return project.getService(LanguageServiceAccessor.class);
     }
     
     private LanguageServiceAccessor(Project project) {
@@ -238,16 +239,17 @@ public class LanguageServiceAccessor {
      * language server if not already started.
      *
      * @param document the document for which the initialized LanguageServer shall be returned
-     * @param serverId the ID of the LanguageServer to be returned
-     * @param capabilitesPredicate
-     *            a predicate to check capabilities
+     * @param lsDefinition the ID of the LanguageServer to be returned
+     * @param capabilitiesPredicate
+     *            an object to check the capabilities of the language server wrapper
      * @return a LanguageServer for the given file, which is defined with provided
      *         server ID and conforms to specified request. If
      *         {@code capabilitesPredicate} does not test positive for the server's
      *         capabilities, {@code null} is returned.
      */
     public CompletableFuture<LanguageServer> getInitializedLanguageServer(Document document,
-                                                                                 LanguageServersRegistry.LanguageServerDefinition lsDefinition, Predicate<ServerCapabilities> capabilitiesPredicate)
+            LanguageServersRegistry.LanguageServerDefinition lsDefinition,
+            Predicate<ServerCapabilities> capabilitiesPredicate)
             throws IOException {
         URI initialPath = LSPIJUtils.toUri(document);
         LanguageServerWrapper wrapper = getLSWrapperForConnection(document, lsDefinition, initialPath);
@@ -348,7 +350,7 @@ public class LanguageServiceAccessor {
             res.addAll(startedServers.stream()
                     .filter(wrapper -> {
                         try {
-                           return wrapper.isConnectedTo(path) || LanguageServersRegistry.getInstance().matches(document, wrapper.serverDefinition, project);
+                            return wrapper.isConnectedTo(path) || LanguageServersRegistry.getInstance().matches(document, wrapper.serverDefinition, project);
                         } catch (Exception e) {
                             LOGGER.warn(e.getLocalizedMessage(), e);
                             return false;
