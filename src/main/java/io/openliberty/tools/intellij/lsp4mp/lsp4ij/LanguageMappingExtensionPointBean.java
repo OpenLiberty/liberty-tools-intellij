@@ -15,4 +15,10 @@ public class LanguageMappingExtensionPointBean extends AbstractExtensionPointBea
 
     @Attribute("serverId")
     public String serverId;
+
+    /**
+     * Optional list of file patterns to narrow down the scope of the language server.
+     */
+    @Attribute("filePattern")
+    public String filePattern;
 }

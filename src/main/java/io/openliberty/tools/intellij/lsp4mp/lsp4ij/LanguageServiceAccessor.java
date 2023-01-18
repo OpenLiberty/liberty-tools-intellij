@@ -18,6 +18,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -344,7 +348,7 @@ public class LanguageServiceAccessor {
             res.addAll(startedServers.stream()
                     .filter(wrapper -> {
                         try {
-                            return wrapper.isConnectedTo(path) || LanguageServersRegistry.getInstance().matches(document, wrapper.serverDefinition, project);
+                           return wrapper.isConnectedTo(path) || LanguageServersRegistry.getInstance().matches(document, wrapper.serverDefinition, project);
                         } catch (Exception e) {
                             LOGGER.warn(e.getLocalizedMessage(), e);
                             return false;
@@ -367,6 +371,7 @@ public class LanguageServiceAccessor {
                     if (serverDefinition == null) {
                         continue;
                     }
+
                     if (startedServers.stream().anyMatch(wrapper -> wrapper.serverDefinition.equals(serverDefinition)
                             && wrapper.canOperate(document))) {
                         // we already checked a compatible LS with this definition
@@ -374,9 +379,23 @@ public class LanguageServiceAccessor {
                     }
                     final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
                     if (fileProject != null) {
-                        LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
-                        startedServers.add(wrapper);
-                        res.add(wrapper);
+                        boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
+                        if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                            // check if document matches file pattern
+                            Path filePath = Paths.get(file.getCanonicalPath());
+                            final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
+                            if (matcher.matches(filePath)) {
+                                // only start language server if the language and file pattern matches the language server definition
+                                LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
+                                startedServers.add(wrapper);
+                                res.add(wrapper);
+                            }
+                        } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                            // no file patterns to filter language servers on, or none applicable for this language
+                            LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
+                            startedServers.add(wrapper);
+                            res.add(wrapper);
+                        }
                     }
                 }
                 processedContentTypes.add(contentType);
@@ -430,7 +449,6 @@ public class LanguageServiceAccessor {
     private LanguageServerWrapper getLSWrapperForConnection(Document document,
                                                                    LanguageServersRegistry.LanguageServerDefinition serverDefinition, URI initialPath) throws IOException {
         LanguageServerWrapper wrapper = null;
-
         synchronized (startedServers) {
             for (LanguageServerWrapper startedWrapper : getStartedLSWrappers(document)) {
                 if (startedWrapper.serverDefinition.equals(serverDefinition)) {
@@ -592,8 +610,6 @@ public class LanguageServiceAccessor {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
-
-
     }
 
     public boolean checkCapability(LanguageServer languageServer, Predicate<ServerCapabilities> condition) {

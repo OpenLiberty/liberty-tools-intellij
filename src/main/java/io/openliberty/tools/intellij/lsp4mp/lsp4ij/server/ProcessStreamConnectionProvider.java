@@ -1,5 +1,9 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
+import io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class ProcessStreamConnectionProvider implements StreamConnectionProvider{
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessStreamConnectionProvider.class);
+
     private @Nullable Process process;
     private List<String> commands;
     private @Nullable String workingDir;
@@ -36,6 +42,8 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
         this.process = p;
         if (!p.isAlive()) {
             throw new IOException("Unable to start language server: " + this.toString()); //$NON-NLS-1$
+        } else {
+            LOGGER.info("Starting language server: " + this.toString());
         }
     }
 

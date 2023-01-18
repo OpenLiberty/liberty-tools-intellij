@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.StreamConnectionProvider;
@@ -12,6 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,16 +34,21 @@ public class LanguageServersRegistry {
         public final @Nonnull String label;
         public final boolean isSingleton;
         public final @Nonnull Map<Language, String> languageIdMappings;
+        public final Map<Language, String> languageFilePatternMappings;
 
         public LanguageServerDefinition(@Nonnull String id, @Nonnull String label, boolean isSingleton) {
             this.id = id;
             this.label = label;
             this.isSingleton = isSingleton;
             this.languageIdMappings = new ConcurrentHashMap<>();
+            this.languageFilePatternMappings = new ConcurrentHashMap<>();
         }
 
-        public void registerAssociation(@Nonnull Language language, @Nonnull String languageId) {
+        public void registerAssociation(@Nonnull Language language, @Nonnull String languageId, String filePattern) {
             this.languageIdMappings.put(language, languageId);
+            if (filePattern != null) {
+                this.languageFilePatternMappings.put(language, filePattern);
+            }
         }
 
         public abstract StreamConnectionProvider createConnectionProvider();
@@ -115,6 +125,7 @@ public class LanguageServersRegistry {
     }
 
     private void initialize() {
+        LOGGER.info("***** Initializing Language Servers *****");
         Map<String, LanguageServerDefinition> servers = new HashMap<>();
         List<LanguageMapping> languageMappings = new ArrayList<>();
         for (ServerExtensionPointBean server : ServerExtensionPointBean.EP_NAME.getExtensions()) {
@@ -125,19 +136,21 @@ public class LanguageServersRegistry {
         for (LanguageMappingExtensionPointBean extension : LanguageMappingExtensionPointBean.EP_NAME.getExtensions()) {
             Language language = Language.findLanguageByID(extension.language);
             if (language != null) {
-                languageMappings.add(new LanguageMapping(language, extension.id, extension.serverId));
+                languageMappings.add(new LanguageMapping(language, extension.id, extension.serverId, extension.filePattern));
             }
         }
-
 
         for (LanguageMapping mapping : languageMappings) {
             LanguageServerDefinition lsDefinition = servers.get(mapping.languageId);
             if (lsDefinition != null) {
-                registerAssociation(mapping.language, lsDefinition, mapping.languageId);
+                LOGGER.info("Registering language server '" + lsDefinition.id + "' with language: " + mapping.language.getID() + " and file pattern: " + lsDefinition.languageFilePatternMappings);
+                registerAssociation(mapping.language, lsDefinition, mapping.languageId, mapping.filePattern);
             } else {
-                LOGGER.warn("server '" + mapping.id + "' not available"); //$NON-NLS-1$ //$NON-NLS-2$
+                LOGGER.warn("Language server '" + mapping.id + "' not available"); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
+
+        LOGGER.info("**********");
     }
 
     /**
@@ -153,9 +166,9 @@ public class LanguageServersRegistry {
 
 
     public void registerAssociation(@Nonnull Language language,
-                                    @Nonnull LanguageServerDefinition serverDefinition, @Nullable String languageId) {
+                                    @Nonnull LanguageServerDefinition serverDefinition, @Nullable String languageId, @Nullable String filePattern) {
         if (languageId != null) {
-            serverDefinition.registerAssociation(language, languageId);
+            serverDefinition.registerAssociation(language, languageId, filePattern);
         }
 
         connections.add(new ContentTypeToLanguageServerDefinition(language, serverDefinition));
@@ -182,11 +195,13 @@ public class LanguageServersRegistry {
         @Nonnull public final String id;
         @Nonnull public final Language language;
         @Nullable public final String languageId;
+        @Nullable public final String filePattern;
 
-        public LanguageMapping(@Nonnull Language language, @Nonnull String id, @Nullable String languageId) {
+        public LanguageMapping(@Nonnull Language language, @Nonnull String id, @Nullable String languageId, @Nullable String filePattern) {
             this.language = language;
             this.id = id;
             this.languageId = languageId;
+            this.filePattern = filePattern;
         }
 
     }
@@ -198,7 +213,7 @@ public class LanguageServersRegistry {
      */
     public boolean matches(@Nonnull VirtualFile file, @NonNull LanguageServerDefinition serverDefinition,
                            Project project) {
-        return getAvailableLSFor(LSPIJUtils.getFileLanguage(file, project)).contains(serverDefinition);
+        return getAvailableLSFor(file, project).contains(serverDefinition);
     }
 
     /**
@@ -208,24 +223,37 @@ public class LanguageServersRegistry {
      */
     public boolean matches(@Nonnull Document document, @Nonnull LanguageServerDefinition serverDefinition,
                            Project project) {
-        return getAvailableLSFor(LSPIJUtils.getDocumentLanguage(document, project)).contains(serverDefinition);
+        return getAvailableLSFor(document, project).contains(serverDefinition);
     }
 
+    private Set<LanguageServerDefinition> getAvailableLSFor(Document document, Project project) {
+        VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+        return getAvailableLSFor(file, project);
+    }
 
-    private Set<LanguageServerDefinition> getAvailableLSFor(Language language) {
+    private Set<LanguageServerDefinition> getAvailableLSFor(VirtualFile file, Project project) {
+        Language language = LSPIJUtils.getFileLanguage(file, project);
         Set<LanguageServerDefinition> res = new HashSet<>();
         if (language != null) {
             for (ContentTypeToLanguageServerDefinition mapping : this.connections) {
                 if (language.isKindOf(mapping.getKey())) {
-                    res.add(mapping.getValue());
+                    LanguageServerDefinition lsDef = mapping.getValue();
+                    if (!lsDef.languageFilePatternMappings.isEmpty() && lsDef.languageFilePatternMappings.containsKey(language)) {
+                        // check if document matches file pattern
+                        Path path = Paths.get(file.getCanonicalPath());
+                        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + lsDef.languageFilePatternMappings.get(language));
+                        if (matcher.matches(path)) {
+                            LOGGER.trace("Available language server: " + mapping.getValue().id + " for file: " + file);
+                            res.add(mapping.getValue());
+                        }
+                    } else {
+                        LOGGER.trace("Available language server: " + mapping.getValue().id + " for file: " + file);
+                        res.add(mapping.getValue());
+                    }
                 }
             }
         }
         return res;
     }
-
-
-
-
 }
 
