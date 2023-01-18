@@ -80,4 +80,9 @@ public final class Constants {
                     put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
                 }
             });
+
+    /**
+     * Constants for langauge servers
+     */
+    public static final String SERVER_ENV_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/server.env";
 }

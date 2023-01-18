@@ -44,13 +44,15 @@
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
+        <fileType name="server.env" language="TEXT" implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>
         <!-- Language substitutor for server.env files, treat server.env files as Properties files to get Liberty Config LS capabilities -->
         <lang.substitutor language="TEXT" implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvSubstitutor"/>
 
-        <!-- Generic -->
+        <!-- Completion support for all language servers -->
         <completion.contributor id="LSPCompletionContributor" language="any"
                                 implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
                                 order="first"/>
+
         <!-- TODO re-enable diagnostics -->
 <!--        <inspectionToolProvider-->
 <!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
