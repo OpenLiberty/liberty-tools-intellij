@@ -1,6 +1,6 @@
 # Developing Liberty Tools for IntelliJ IDEA
 
-> Note: Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), IntelliJ IDEA version 2022.2 and Java 17 (bundled with IntelliJ IDEA version 2022.2+) are required.
+> Note: Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), Java 17 (bundled with IntelliJ IDEA version 2022.2+) and a minimum version of IntelliJ IDEA version 2022.2 are required to run Liberty Tools for IntelliJ IDEA.
 
 - [Building Liberty Tools for IntelliJ IDEA](#building-liberty-tools-for-intellij-idea)
 - [Language Servers](#language-servers)
