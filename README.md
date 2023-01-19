@@ -1,5 +1,7 @@
 # Liberty Tools for IntelliJ IDEA
 
+> Note: Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), IntelliJ IDEA version 2022.2 and Java 17 (bundled with IntelliJ IDEA version 2022.2+) are required.
+
 ![JetBrains plugins](https://img.shields.io/jetbrains/plugin/v/14856-liberty-tools.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-liberty-tools?style=for-the-badge&)
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?style=for-the-badge&label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
@@ -86,7 +88,7 @@ Liberty Tools for IntelliJ IDEA honours the following external settings:
 
 ## Requirements
 
-Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 and Java 17 (bundled with IntelliJ IDEA version 2022.2+) are required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
 
 ## Contributing
 
