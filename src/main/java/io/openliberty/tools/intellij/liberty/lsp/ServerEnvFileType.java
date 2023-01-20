@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 
 import javax.swing.Icon;
 
+import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,15 +27,18 @@ import com.intellij.openapi.vfs.VirtualFile;
 
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 
+import static io.openliberty.tools.intellij.util.Constants.SERVER_ENV_GLOB_PATTERN;
+
 /**
  * Custom file type for server.env files
  */
 public class ServerEnvFileType extends LanguageFileType implements FileTypeIdentifiableByVirtualFile {
+
     public static final ServerEnvFileType INSTANCE = new ServerEnvFileType();
-    public static final String SERVER_ENV_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/server.env";
+
 
     private ServerEnvFileType() {
-        super(ServerEnvLanguage.INSTANCE);
+        super(PlainTextLanguage.INSTANCE);
     }
 
     @Override
@@ -46,7 +50,7 @@ public class ServerEnvFileType extends LanguageFileType implements FileTypeIdent
 
     @Override
     public @NotNull String getName() {
-        return "server.env file";
+        return "server.env";
     }
 
     @Override
