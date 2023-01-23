@@ -21,7 +21,8 @@
         <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
-        <languageMapping language="Properties" serverId="lsp4mp" filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
+        <languageMapping language="Properties" serverId="lsp4mp"
+                         filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
@@ -35,7 +36,8 @@
         <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
-        <languageMapping language="Properties" serverId="libertyls" filePattern="**/{src/main/liberty/config,usr/servers/**}/{bootstrap.properties,server.env}"/>
+        <languageMapping language="Properties" serverId="libertyls"
+                         filePattern="**/{src/main/liberty/config,usr/servers/**}/{bootstrap.properties,server.env}"/>
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
@@ -44,11 +46,14 @@
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="server.env" language="TEXT" implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>
+        <fileType name="server.env" language="TEXT"
+                  implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>
         <!-- Language substitutor for server.env files, treat server.env files as Properties files to get Liberty Config LS capabilities -->
-        <lang.substitutor language="TEXT" implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvSubstitutor" />
+        <lang.substitutor language="TEXT"
+                          implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvSubstitutor"/>
         <!-- Suppress certain Properties language inspections on server.env files -->
-        <lang.inspectionSuppressor language="Properties" implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor" />
+        <lang.inspectionSuppressor language="Properties"
+                                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
 
         <!-- Completion support for all language servers -->
         <completion.contributor id="LSPCompletionContributor" language="any"
@@ -56,8 +61,8 @@
                                 order="first"/>
 
         <!-- TODO re-enable diagnostics -->
-<!--        <inspectionToolProvider-->
-<!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
+        <!--        <inspectionToolProvider-->
+        <!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
         <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
         <!-- TODO re-enable goto handler -->
         <!-- <gotoDeclarationHandler
