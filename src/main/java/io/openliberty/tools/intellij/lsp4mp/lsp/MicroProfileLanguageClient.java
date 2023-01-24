@@ -144,9 +144,7 @@ public class MicroProfileLanguageClient extends LanguageClientImpl implements Mi
 
   @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(MicroProfileJavaDiagnosticsParams javaParams) {
-    // TODO re-enable diagnostics
-    // return runAsBackground("Computing Java diagnostics", () -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-    return CompletableFuture.completedFuture(null);
+    return runAsBackground("Computing Java diagnostics", () -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
   }
 
   @Override
