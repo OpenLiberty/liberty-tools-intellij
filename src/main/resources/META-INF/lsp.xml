@@ -60,9 +60,9 @@
                                 implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
                                 order="first"/>
 
-        <!-- TODO re-enable diagnostics -->
-        <!--        <inspectionToolProvider-->
-        <!--                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>-->
+        <!-- Diagnostic support for all language servers -->
+        <inspectionToolProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
         <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
         <!-- TODO re-enable goto handler -->
         <!-- <gotoDeclarationHandler
