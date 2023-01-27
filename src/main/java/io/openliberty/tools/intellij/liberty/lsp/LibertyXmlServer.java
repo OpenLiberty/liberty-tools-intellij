@@ -55,23 +55,34 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
         }
     }
 
+    // JSON settings object needed by the language server.
+    //        "settings": {
+    //            "xml": {
+    //                "trace": {
+    //                    "server": "verbose"
+    //                }
+    //            },
+    //        "extendedClientCapabilities": {
+    //            "completion": {},
+    //            "shouldLanguageServerExitOnShutdown": true
+    //            }
     @Override
     public Object getInitializationOptions(URI rootUri) {
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> settings = new HashMap<>();
         Map<String, Object> xml = new HashMap<>();
         Map<String, Object> trace = new HashMap<>();
+        Map<String, Object> extendedClientCapabilities = new HashMap<>();
+
         trace.put("server", "verbose");
-        Map<String, Object> codeLens = new HashMap<>();
-        codeLens.put("urlCodeLensEnabled", "true");
         xml.put("trace", trace); // TODO enable tracing so LemMinX stdout and stderr are redirected to IntelliJ log
         settings.put("xml", xml);
         root.put("settings", settings);
-        Map<String, Object> extendedClientCapabilities = new HashMap<>();
-        Map<String, Object> commandsKind = new HashMap<>();
+        // Additional configuration
         extendedClientCapabilities.put("completion", new HashMap<>());
         extendedClientCapabilities.put("shouldLanguageServerExitOnShutdown", Boolean.TRUE);
         root.put("extendedClientCapabilities", extendedClientCapabilities);
+
         return root;
     }
 }
