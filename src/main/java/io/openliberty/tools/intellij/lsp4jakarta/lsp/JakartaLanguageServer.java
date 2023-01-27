@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
     private static final String JAR_DIR = "lib/server/";
@@ -45,6 +47,10 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
 
     @Override
     public Object getInitializationOptions(URI rootUri) {
-        return super.getInitializationOptions(rootUri);
+        Map<String, Object> root = new HashMap<>();
+        Map<String, Object> extendedClientCapabilities = new HashMap<>();
+        extendedClientCapabilities.put("shouldLanguageServerExitOnShutdown", Boolean.TRUE);
+        root.put("extendedClientCapabilities", extendedClientCapabilities);
+        return root;
     }
 }
