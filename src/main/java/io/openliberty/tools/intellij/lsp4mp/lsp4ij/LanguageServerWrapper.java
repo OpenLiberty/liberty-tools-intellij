@@ -592,7 +592,6 @@ public class LanguageServerWrapper {
      * @noreference internal so far
      */
     private CompletableFuture<LanguageServer> connect(@Nonnull URI absolutePath, Document document) throws IOException {
-        LOGGER.warn("connect(), going to call start()");
         final URI thePath = absolutePath; // should be useless
 
         VirtualFile file = FileDocumentManager.getInstance().getFile(document);
