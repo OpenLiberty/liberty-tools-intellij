@@ -120,8 +120,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
             }
             if (projectName == null) {
-                projectName = project.getName();
+                if (virtualFile.getParent() != null) {
+                    projectName = virtualFile.getParent().getName();
+                } else {
+                    projectName = project.getName();
+                }
             }
+
             boolean validContainerVersion = buildFile.isValidContainerVersion();
             LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, psiFile.getVirtualFile(), projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
             node = new LibertyModuleNode(module);
@@ -161,7 +166,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
             }
             if (projectName == null) {
-                projectName = project.getName();
+                if (virtualFile.getParent() != null) {
+                    projectName = virtualFile.getParent().getName();
+                } else {
+                    projectName = project.getName();
+                }
             }
 
             boolean validContainerVersion = buildFile.isValidContainerVersion();
