@@ -209,7 +209,13 @@ public class LibertyGradleUtil {
                     "execute it. Consider giving executable permission for the Gradle wrapper file or changing the build " +
                     "preferences for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
         }
-        return gradlew;
+        String path;
+        try {
+            path = file.getCanonicalPath();
+        } catch (IOException e) {
+            throw new LibertyException("Could not get canonical path for gradle wrapper file");
+        }
+        return path;
     }
 
     /**
