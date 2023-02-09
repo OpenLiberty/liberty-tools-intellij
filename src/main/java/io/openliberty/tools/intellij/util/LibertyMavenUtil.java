@@ -63,7 +63,8 @@ public class LibertyMavenUtil {
                 }
             }
         }
-        return null;
+        VirtualFile parentFolder = file.getParent();
+        return parentFolder.getName();
     }
 
     /**
