@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,8 +40,14 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
             return;
         }
         if (libertyServerPath.exists()) {
-            setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
-                    libertyServerPath.getAbsolutePath(), "-DrunAsync=true"));
+            ArrayList<String> params = new ArrayList<>();
+            params.add(javaHome + File.separator + "bin" + File.separator + "java");
+
+            // Uncomment next line to attach debugger to LCLS at port 1064, debug params must come before -jar
+            // params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1064");
+            params.add("-jar");
+            params.add(libertyServerPath.getAbsolutePath());
+            setCommands(params);
         } else {
             LOGGER.warn(String.format("Unable to start the Liberty language server, Liberty language server path: %s does not exist", libertyServerPath));
         }
