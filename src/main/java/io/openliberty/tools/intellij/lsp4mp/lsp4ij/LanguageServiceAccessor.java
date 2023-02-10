@@ -40,6 +40,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * The entry-point to retrieve a Language Server for a given resource/project.
+ * Deals with instantiations and caching of underlying
+ * {@link LanguageServerWrapper}.
+ *
+ */
 public class LanguageServiceAccessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageServiceAccessor.class);
     private final Project project;
@@ -579,6 +585,8 @@ public class LanguageServiceAccessor {
     }
 
     /**
+     * Gets a list of language servers. Will start language servers if they are not already running on the corresponding document.
+     *
      * @param document
      * @param filter
      * @return
