@@ -54,7 +54,7 @@ public class LibertyGradleUtil {
                 LOGGER.error(String.format("Could not read project name from file %s", settingsPath), e);
             }
         }
-        return null;
+        return parentFolder.getName();
     }
 
     /**
