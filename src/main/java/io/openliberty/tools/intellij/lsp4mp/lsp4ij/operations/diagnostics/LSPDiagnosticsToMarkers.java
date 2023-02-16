@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
@@ -77,7 +78,8 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
             rangeHighlighters[index++] = rangeHighlighter;
             // forces re-highlighting/refreshes inspections for the current file to fix https://github.com/OpenLiberty/liberty-tools-intellij/issues/85
             // triggers io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPLocalInspectionTool#checkFile()
-            DaemonCodeAnalyzer.getInstance(editor.getProject()).restart(PsiManager.getInstance(editor.getProject()).findFile(FileDocumentManager.getInstance().getFile(document)));
+            Project project = editor.getProject();
+            DaemonCodeAnalyzer.getInstance(project).restart(PsiManager.getInstance(project).findFile(FileDocumentManager.getInstance().getFile(document)));
         }
         Map<String, RangeHighlighter[]> allMarkers = getAllMarkers(editor);
         allMarkers.put(languageServerId, rangeHighlighters);
