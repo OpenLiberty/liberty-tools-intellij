@@ -81,7 +81,6 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
         }
         Map<String, RangeHighlighter[]> allMarkers = getAllMarkers(editor);
         allMarkers.put(languageServerId, rangeHighlighters);
-
     }
 
     @NotNull
