@@ -1,17 +1,15 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics;
 
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.markup.EffectType;
-import com.intellij.openapi.editor.markup.HighlighterLayer;
-import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.MarkupModel;
-import com.intellij.openapi.editor.markup.RangeHighlighter;
-import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiManager;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LSPIJUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -21,8 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -74,13 +71,18 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
             int layer = getLayer(diagnostic.getSeverity());
             EffectType effectType = getEffectType(diagnostic.getSeverity());
             Color color = getColor(diagnostic.getSeverity());
-            RangeHighlighter rangeHighlighter = editor.getMarkupModel().addRangeHighlighter(startOffset, endOffset, layer, new TextAttributes(editor.getColorsScheme().getDefaultForeground(), editor.getColorsScheme().getDefaultBackground(), color, effectType, Font.PLAIN), HighlighterTargetArea.EXACT_RANGE);
+            RangeHighlighter rangeHighlighter = editor.getMarkupModel().addRangeHighlighter(startOffset, endOffset, layer,
+                    new TextAttributes(editor.getColorsScheme().getDefaultForeground(), editor.getColorsScheme().getDefaultBackground(), color, effectType, Font.PLAIN),
+                    HighlighterTargetArea.EXACT_RANGE);
             rangeHighlighter.setErrorStripeTooltip(diagnostic);
             rangeHighlighters[index++] = rangeHighlighter;
+            // forces re-highlighting/refreshes inspections for the current file to fix https://github.com/OpenLiberty/liberty-tools-intellij/issues/85
+            // triggers io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPLocalInspectionTool#checkFile()
+            Project project = editor.getProject();
+            DaemonCodeAnalyzer.getInstance(project).restart(PsiManager.getInstance(project).findFile(FileDocumentManager.getInstance().getFile(document)));
         }
         Map<String, RangeHighlighter[]> allMarkers = getAllMarkers(editor);
         allMarkers.put(languageServerId, rangeHighlighters);
-
     }
 
     @NotNull
