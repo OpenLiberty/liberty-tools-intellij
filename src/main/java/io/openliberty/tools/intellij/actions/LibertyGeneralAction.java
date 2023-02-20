@@ -49,7 +49,6 @@ public class LibertyGeneralAction extends AnAction {
     public void setLibertyModule(LibertyModule libertyModule) {
         this.libertyModule = libertyModule;
         this.project = libertyModule.getProject();
-        this.projectName = libertyModule.getName();
         this.projectType = libertyModule.getProjectType();
         this.buildFile = libertyModule.getBuildFile();
     }
@@ -85,12 +84,28 @@ public class LibertyGeneralAction extends AnAction {
                 // Multiple projects. Pop up dialog for user to select.
                 else {
                     final String[] projectNames = toProjectNames(libertyModules);
+                    final String[] projectNamesTooltips = toProjectNamesTooltips(libertyModules);
+                    /*
                     final int ret = Messages.showChooseDialog(project,
                             LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
                             LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
                             LibertyPluginIcons.libertyIcon_40,
                             projectNames,
                             projectNames[0]);
+
+                     */
+
+                    LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(
+                            project,
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
+                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                            LibertyPluginIcons.libertyIcon_40,
+                            projectNames,
+                            projectNamesTooltips,
+                            projectNames[0]);
+                    libertyChooserDiag.show();
+                    final int ret = libertyChooserDiag.getSelectedIndex();
+
                     if (ret >= 0 && ret < libertyModules.size()) {
                         setLibertyModule(libertyModules.get(ret));
                     }
@@ -138,6 +153,14 @@ public class LibertyGeneralAction extends AnAction {
         return projectNames;
     }
 
+    protected final String[] toProjectNamesTooltips(@NotNull List<LibertyModule> list) {
+        final int size = list.size();
+        final String[] projectNamesTooltips = new String[size];
+        for (int i = 0; i < size; ++i) {
+            projectNamesTooltips[i] = list.get(i).getBuildFile().getCanonicalPath();
+        }
+        return projectNamesTooltips;
+    }
     protected void setActionCmd(String actionCmd) {
         this.actionCmd = actionCmd;
     }
