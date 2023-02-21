@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2023 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.ui.ComboBox;
@@ -14,9 +23,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 
 public class LibertyProjectChooserDialog extends MessageDialog {
-    //private JPanel contentPane;
-    //private JButton buttonOK;
-    //private JButton buttonCancel;
     private ComboBox<String> myComboBox;
 
     public LibertyProjectChooserDialog(@Nullable Project project,
@@ -32,13 +38,6 @@ public class LibertyProjectChooserDialog extends MessageDialog {
         ComboboxToolTipRenderer renderer = new ComboboxToolTipRenderer();
         renderer.setTooltips(List.of(tooltips));
         myComboBox.setRenderer(renderer);
-    }
-
-    public int getSelectedIndex() {
-        if (getExitCode() == 0) {
-            return myComboBox.getSelectedIndex();
-        }
-        return -1;
     }
 
     @Override
@@ -60,14 +59,19 @@ public class LibertyProjectChooserDialog extends MessageDialog {
     @Override
     protected void doOKAction() {
         String inputString = myComboBox.getSelectedItem().toString().trim();
-        //if (myValidator == null || myValidator.checkInput(inputString) && myValidator.canClose(inputString)) {
-            super.doOKAction();
-        //}
+        super.doOKAction();
     }
 
     @Override
     public JComponent getPreferredFocusedComponent() {
         return myComboBox;
+    }
+
+    public int getSelectedIndex() {
+        if (getExitCode() == 0) {
+            return myComboBox.getSelectedIndex();
+        }
+        return -1;
     }
 }
 
