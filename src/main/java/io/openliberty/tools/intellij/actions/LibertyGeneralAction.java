@@ -17,7 +17,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
@@ -28,6 +27,7 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +49,6 @@ public class LibertyGeneralAction extends AnAction {
     public void setLibertyModule(LibertyModule libertyModule) {
         this.libertyModule = libertyModule;
         this.project = libertyModule.getProject();
-        this.projectName = libertyModule.getName();
         this.projectType = libertyModule.getProjectType();
         this.buildFile = libertyModule.getBuildFile();
     }
@@ -84,13 +83,28 @@ public class LibertyGeneralAction extends AnAction {
                 }
                 // Multiple projects. Pop up dialog for user to select.
                 else {
+                    // projectNames can contain entries that are of the same name if there are two
+                    // or more projects found using the same name but differentiated by existing in separate
+                    // project folders.
                     final String[] projectNames = toProjectNames(libertyModules);
-                    final int ret = Messages.showChooseDialog(project,
+                    // tooltip strings will appear when user hovers over one of the projects in the dialog list
+                    // they will display the fully qualified path to the build file so that users can
+                    // differntiate in the case of same named application names in the chooser list
+                    final String[] projectNamesTooltips = toProjectNamesTooltips(libertyModules);
+
+                    // Create a Chooser Dialog for multiple projects. User can select which one they
+                    // are interested in from list
+                    LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(
+                            project,
                             LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
                             LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
                             LibertyPluginIcons.libertyIcon_40,
                             projectNames,
+                            projectNamesTooltips,
                             projectNames[0]);
+                    libertyChooserDiag.show();
+                    final int ret = libertyChooserDiag.getSelectedIndex();
+
                     if (ret >= 0 && ret < libertyModules.size()) {
                         setLibertyModule(libertyModules.get(ret));
                     }
@@ -132,12 +146,29 @@ public class LibertyGeneralAction extends AnAction {
     protected final String[] toProjectNames(@NotNull List<LibertyModule> list) {
         final int size = list.size();
         final String[] projectNames = new String[size];
+        String[] differentiator = null;
+
         for (int i = 0; i < size; ++i) {
-            projectNames[i] = list.get(i).getName();
+            // We need a differentiator for the Shift-Shift Dialog Chooser in the event two projects have the
+            // same name. get the build dir name where the build file resides to be that differentiator.
+            String parentFolderName = list.get(i).getBuildFile().getParent().getName();
+
+            // Use the parent folder name as a differntiator - add it to the string entry as
+            // part of the project name
+            // Entry in list will be of the form: "<app-name> : <buildfile parent folder>"
+            projectNames[i] = list.get(i).getName() + ": " + parentFolderName;
         }
         return projectNames;
     }
 
+    protected final String[] toProjectNamesTooltips(@NotNull List<LibertyModule> list) {
+        final int size = list.size();
+        final String[] projectNamesTooltips = new String[size];
+        for (int i = 0; i < size; ++i) {
+            projectNamesTooltips[i] = String.valueOf(list.get(i).getBuildFile().toNioPath());
+        }
+        return projectNamesTooltips;
+    }
     protected void setActionCmd(String actionCmd) {
         this.actionCmd = actionCmd;
     }
