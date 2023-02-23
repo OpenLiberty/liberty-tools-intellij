@@ -1,12 +1,16 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.13.0'
+    // 1.13.0 causes UNSUPPORTED JVM ISSUE: https://github.com/JetBrains/gradle-intellij-plugin/issues/1317.
+    // Wait for fix to make it into a release.
+    id 'org.jetbrains.intellij' version '1.12.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
 }
 
 group 'io.openliberty.tools'
 version '0.0.9-SNAPSHOT'
 
 sourceCompatibility = 17
+def remoteRobotVersion = "0.11.16"
 
 repositories {
     mavenCentral()
@@ -18,6 +22,9 @@ repositories {
     }
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+    maven {
+        url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
     }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
@@ -44,12 +51,25 @@ dependencies {
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
+    
+    // Test: basics.
+    testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
+    testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
+
+    // Test: Logging Network Calls.
+    testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+
+    // Test: Video Recording.
+    implementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
         transitive = false
     }
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.22.0:uber') {
-            transitive = false
+        transitive = false
     }
     lsp('io.openliberty.tools:liberty-langserver-lemminx:1.0-M1:jar-with-dependencies') {
         transitive = false
@@ -76,9 +96,34 @@ runIde {
 }
 
 intellij {
-    version = '2022.2.3' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    version = '2022.3'
+    //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
+}
+
+downloadRobotServerPlugin {
+    version.set(remoteRobotVersion)
+}
+
+runIdeForUiTests {
+    systemProperty "robot-server.port", "8082"
+    systemProperty "ide.mac.message.dialogs.as.sheets", "false"
+    systemProperty "idea.trust.all.projects", "true"
+    systemProperty "ide.show.tips.on.startup.default.value", "false"
+    systemProperty "ide.mac.file.chooser.native", "false"
+    systemProperty "jb.consents.confirmation.enabled", "false"
+    systemProperty "jbScreenMenuBar.enabled", "false"
+    systemProperty "apple.laf.useScreenMenuBar", "false"
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
 }
 
 patchPluginXml {

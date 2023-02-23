@@ -4,34 +4,38 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [main, ls-integration]
+    branches: [ main, ls-integration ]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        runtime: [ linux, mac, windows ]
+        include:
+          - runtime: linux
+            os: ubuntu-latest
+            setupCmd: ./src/test/resources/ci/scripts/setup.sh
+            execCmd: ./src/test/resources/ci/scripts/exec.sh
 
+          - runtime: mac
+            os: macOS-latest
+            setupCmd: ./src/test/resources/ci/scripts/setup.sh
+            execCmd: ./src/test/resources/ci/scripts/exec.sh
+
+          - runtime: windows
+            os: windows-latest
+            setupCmd: bash ./src/test/resources/ci/scripts/setup.sh
+            execCmd: bash ./src/test/resources/ci/scripts/exec.sh
     steps:
       - name: Checkout liberty-tools-intellij
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Cache Gradle
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: 'Install required software'
+        run: ${{ matrix.setupCmd }}
+      - name: 'Run UI integration testes'
+        run: ${{ matrix.execCmd }}
       - name: Build Liberty-Tools-Intellij
         working-directory: ./liberty-tools-intellij
         run: ./gradlew buildPlugin
@@ -45,3 +49,4 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
+
