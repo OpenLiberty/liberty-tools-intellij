@@ -27,7 +27,6 @@ import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServerWrapper;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,9 +66,13 @@ public class LSPLocalInspectionTool extends LocalInspectionTool {
         if (virtualFile != null) {
             Editor editor = LSPIJUtils.editorForFile(virtualFile);
             if (editor != null) {
+                // initializes language servers and connects them to the given document if they haven't already started, do not wait for them to start (avoiding blocking the main thread)
+                LanguageServiceAccessor.getInstance(editor.getProject()).getLanguageServers(editor.getDocument(),
+                        capabilities -> true);
                 List<ProblemDescriptor> problemDescriptors = new ArrayList<>();
                 try {
-                    for(LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getLSWrappers(virtualFile, capabilities -> true)) {
+                    // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
+                    for(LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getLSWrappers(editor.getDocument(), true)) {
                         RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
                         if (highlighters != null) {
                             for(RangeHighlighter highlighter : highlighters) {

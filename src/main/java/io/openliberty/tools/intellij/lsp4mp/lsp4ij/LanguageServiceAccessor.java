@@ -2,7 +2,6 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.LanguageUtil;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.Module;
@@ -23,18 +22,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -336,8 +324,19 @@ public class LanguageServiceAccessor {
         return res;
     }
 
+    /**
+     * Returns language server wrappers for a given document
+     * Creates the language server wrapper if it does not already exist but does NOT
+     * start or connect language server wrapper to the given document
+     *
+     * @param document
+     * @param onlyActiveLS true if this method should return only the already running
+     *                     language servers wrappers, otherwise will create new language
+     *                     server wrappers
+     * @return Language server wrappers
+     */
     @Nonnull
-    private Collection<LanguageServerWrapper> getLSWrappers(@Nonnull Document document) {
+    public Collection<LanguageServerWrapper> getLSWrappers(@Nonnull Document document, boolean onlyActiveLS) throws IOException {
         LinkedHashSet<LanguageServerWrapper> res = new LinkedHashSet<>();
         VirtualFile file = LSPIJUtils.getFile(document);
         URI uri = LSPIJUtils.toUri(document);
@@ -364,49 +363,50 @@ public class LanguageServiceAccessor {
                     })
                     .filter(wrapper -> wrapper.canOperate(document))
                     .collect(Collectors.toList()));
+            if (!onlyActiveLS) {
+                while (!contentTypes.isEmpty()) {
+                    Language contentType = contentTypes.poll();
+                    if (contentType == null || processedContentTypes.contains(contentType)) {
+                        continue;
+                    }
+                    for (ContentTypeToLanguageServerDefinition mapping : LanguageServersRegistry.getInstance()
+                            .findProviderFor(contentType)) {
+                        if (mapping == null || !mapping.isEnabled()) {
+                            continue;
+                        }
+                        LanguageServersRegistry.LanguageServerDefinition serverDefinition = mapping.getValue();
+                        if (serverDefinition == null) {
+                            continue;
+                        }
 
-            while (!contentTypes.isEmpty()) {
-                Language contentType = contentTypes.poll();
-                if (contentType == null || processedContentTypes.contains(contentType)) {
-                    continue;
-                }
-                for (ContentTypeToLanguageServerDefinition mapping : LanguageServersRegistry.getInstance()
-                        .findProviderFor(contentType)) {
-                    if (mapping == null || !mapping.isEnabled()) {
-                        continue;
-                    }
-                    LanguageServersRegistry.LanguageServerDefinition serverDefinition = mapping.getValue();
-                    if (serverDefinition == null) {
-                        continue;
-                    }
-
-                    if (startedServers.stream().anyMatch(wrapper -> wrapper.serverDefinition.equals(serverDefinition)
-                            && wrapper.canOperate(document))) {
-                        // we already checked a compatible LS with this definition
-                        continue;
-                    }
-                    final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
-                    if (fileProject != null) {
-                        boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
-                        if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
-                            // check if document matches file pattern
-                            Path filePath = Paths.get(file.getCanonicalPath());
-                            final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
-                            if (matcher.matches(filePath)) {
-                                // only start language server if the language and file pattern matches the language server definition
+                        if (startedServers.stream().anyMatch(wrapper -> wrapper.serverDefinition.equals(serverDefinition)
+                                && wrapper.canOperate(document))) {
+                            // we already checked a compatible LS with this definition
+                            continue;
+                        }
+                        final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
+                        if (fileProject != null) {
+                            boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
+                            if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                                // check if document matches file pattern
+                                Path filePath = Paths.get(file.getCanonicalPath());
+                                final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
+                                if (matcher.matches(filePath)) {
+                                    // only start language server if the language and file pattern matches the language server definition
+                                    LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
+                                    startedServers.add(wrapper);
+                                    res.add(wrapper);
+                                }
+                            } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                                // no file patterns to filter language servers on, or none applicable for this language
                                 LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
                                 startedServers.add(wrapper);
                                 res.add(wrapper);
                             }
-                        } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
-                            // no file patterns to filter language servers on, or none applicable for this language
-                            LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
-                            startedServers.add(wrapper);
-                            res.add(wrapper);
                         }
                     }
+                    processedContentTypes.add(contentType);
                 }
-                processedContentTypes.add(contentType);
             }
             return res;
         }
@@ -569,7 +569,7 @@ public class LanguageServiceAccessor {
         URI fileUri = LSPIJUtils.toUri(document);
         List<LSPDocumentInfo> res = new ArrayList<>();
         try {
-            getLSWrappers(document).stream().filter(wrapper -> wrapper.getServerCapabilities() == null
+            getLSWrappers(document, false).stream().filter(wrapper -> wrapper.getServerCapabilities() == null
                     || capabilityRequest.test(wrapper.getServerCapabilities())).forEach(wrapper -> {
                 try {
                     wrapper.connect(document);
@@ -601,7 +601,7 @@ public class LanguageServiceAccessor {
         }
         final List<LanguageServer> res = Collections.synchronizedList(new ArrayList<>());
         try {
-            return CompletableFuture.allOf(getLSWrappers(document).stream().map(wrapper ->
+            return CompletableFuture.allOf(getLSWrappers(document, false).stream().map(wrapper ->
                     wrapper.getInitializedServer().thenComposeAsync(server -> {
                         if (server != null && (filter == null || filter.test(wrapper.getServerCapabilities()))) {
                             try {
