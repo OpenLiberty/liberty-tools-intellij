@@ -324,19 +324,8 @@ public class LanguageServiceAccessor {
         return res;
     }
 
-    /**
-     * Returns language server wrappers for a given document
-     * Creates the language server wrapper if it does not already exist but does NOT
-     * start or connect language server wrapper to the given document
-     *
-     * @param document
-     * @param onlyActiveLS true if this method should return only the already running
-     *                     language servers wrappers, otherwise will create new language
-     *                     server wrappers
-     * @return Language server wrappers
-     */
     @Nonnull
-    public Collection<LanguageServerWrapper> getLSWrappers(@Nonnull Document document, boolean onlyActiveLS) throws IOException {
+    private Collection<LanguageServerWrapper> getLSWrappers(@Nonnull Document document) {
         LinkedHashSet<LanguageServerWrapper> res = new LinkedHashSet<>();
         VirtualFile file = LSPIJUtils.getFile(document);
         URI uri = LSPIJUtils.toUri(document);
@@ -363,50 +352,48 @@ public class LanguageServiceAccessor {
                     })
                     .filter(wrapper -> wrapper.canOperate(document))
                     .collect(Collectors.toList()));
-            if (!onlyActiveLS) {
-                while (!contentTypes.isEmpty()) {
-                    Language contentType = contentTypes.poll();
-                    if (contentType == null || processedContentTypes.contains(contentType)) {
+            while (!contentTypes.isEmpty()) {
+                Language contentType = contentTypes.poll();
+                if (contentType == null || processedContentTypes.contains(contentType)) {
+                    continue;
+                }
+                for (ContentTypeToLanguageServerDefinition mapping : LanguageServersRegistry.getInstance()
+                        .findProviderFor(contentType)) {
+                    if (mapping == null || !mapping.isEnabled()) {
                         continue;
                     }
-                    for (ContentTypeToLanguageServerDefinition mapping : LanguageServersRegistry.getInstance()
-                            .findProviderFor(contentType)) {
-                        if (mapping == null || !mapping.isEnabled()) {
-                            continue;
-                        }
-                        LanguageServersRegistry.LanguageServerDefinition serverDefinition = mapping.getValue();
-                        if (serverDefinition == null) {
-                            continue;
-                        }
+                    LanguageServersRegistry.LanguageServerDefinition serverDefinition = mapping.getValue();
+                    if (serverDefinition == null) {
+                        continue;
+                    }
 
-                        if (startedServers.stream().anyMatch(wrapper -> wrapper.serverDefinition.equals(serverDefinition)
-                                && wrapper.canOperate(document))) {
-                            // we already checked a compatible LS with this definition
-                            continue;
-                        }
-                        final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
-                        if (fileProject != null) {
-                            boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
-                            if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
-                                // check if document matches file pattern
-                                Path filePath = Paths.get(file.getCanonicalPath());
-                                final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
-                                if (matcher.matches(filePath)) {
-                                    // only start language server if the language and file pattern matches the language server definition
-                                    LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
-                                    startedServers.add(wrapper);
-                                    res.add(wrapper);
-                                }
-                            } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
-                                // no file patterns to filter language servers on, or none applicable for this language
+                    if (startedServers.stream().anyMatch(wrapper -> wrapper.serverDefinition.equals(serverDefinition)
+                            && wrapper.canOperate(document))) {
+                        // we already checked a compatible LS with this definition
+                        continue;
+                    }
+                    final Module fileProject = file != null ? LSPIJUtils.getProject(file) : null;
+                    if (fileProject != null) {
+                        boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
+                        if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                            // check if document matches file pattern
+                            Path filePath = Paths.get(file.getCanonicalPath());
+                            final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
+                            if (matcher.matches(filePath)) {
+                                // only start language server if the language and file pattern matches the language server definition
                                 LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
                                 startedServers.add(wrapper);
                                 res.add(wrapper);
                             }
+                        } else if (patternMappingsEmpty || !serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
+                            // no file patterns to filter language servers on, or none applicable for this language
+                            LanguageServerWrapper wrapper = new LanguageServerWrapper(fileProject, serverDefinition);
+                            startedServers.add(wrapper);
+                            res.add(wrapper);
                         }
                     }
-                    processedContentTypes.add(contentType);
                 }
+                processedContentTypes.add(contentType);
             }
             return res;
         }
@@ -494,8 +481,14 @@ public class LanguageServiceAccessor {
     }
 
 
-
-    private Collection<LanguageServerWrapper> getMatchingStartedWrappers(@Nonnull VirtualFile file,
+    /**
+     * Gets the matching started language server wrappers given the VirtualFile
+     *
+     * @param file
+     * @param request
+     * @return started language server wrappers
+     */
+    public Collection<LanguageServerWrapper> getMatchingStartedWrappers(@Nonnull VirtualFile file,
                                                                                 @Nullable Predicate<ServerCapabilities> request) {
         synchronized (startedServers) {
             return startedServers.stream().filter(wrapper -> wrapper.isConnectedTo(LSPIJUtils.toUri(file))
@@ -569,7 +562,7 @@ public class LanguageServiceAccessor {
         URI fileUri = LSPIJUtils.toUri(document);
         List<LSPDocumentInfo> res = new ArrayList<>();
         try {
-            getLSWrappers(document, false).stream().filter(wrapper -> wrapper.getServerCapabilities() == null
+            getLSWrappers(document).stream().filter(wrapper -> wrapper.getServerCapabilities() == null
                     || capabilityRequest.test(wrapper.getServerCapabilities())).forEach(wrapper -> {
                 try {
                     wrapper.connect(document);
@@ -601,7 +594,7 @@ public class LanguageServiceAccessor {
         }
         final List<LanguageServer> res = Collections.synchronizedList(new ArrayList<>());
         try {
-            return CompletableFuture.allOf(getLSWrappers(document, false).stream().map(wrapper ->
+            return CompletableFuture.allOf(getLSWrappers(document).stream().map(wrapper ->
                     wrapper.getInitializedServer().thenComposeAsync(server -> {
                         if (server != null && (filter == null || filter.test(wrapper.getServerCapabilities()))) {
                             try {

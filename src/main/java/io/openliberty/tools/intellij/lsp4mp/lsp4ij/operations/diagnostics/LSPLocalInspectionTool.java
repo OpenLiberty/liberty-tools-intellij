@@ -70,29 +70,24 @@ public class LSPLocalInspectionTool extends LocalInspectionTool {
                 LanguageServiceAccessor.getInstance(editor.getProject()).getLanguageServers(editor.getDocument(),
                         capabilities -> true);
                 List<ProblemDescriptor> problemDescriptors = new ArrayList<>();
-                try {
-                    // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
-                    for(LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getLSWrappers(editor.getDocument(), true)) {
-                        RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
-                        if (highlighters != null) {
-                            for(RangeHighlighter highlighter : highlighters) {
-                                PsiElement element;
-                                if (highlighter.getEndOffset() - highlighter.getStartOffset() > 0) {
-                                    element = new LSPPSiElement(editor.getProject(), file, highlighter.getStartOffset(), highlighter.getEndOffset(), editor.getDocument().getText(new TextRange(highlighter.getStartOffset(), highlighter.getEndOffset())));
-                                } else {
-                                    element = PsiUtilCore.getElementAtOffset(file, highlighter.getStartOffset());
-                                }
-                                ProblemHighlightType highlightType = getHighlightType(((Diagnostic)highlighter.getErrorStripeTooltip()).getSeverity());
-                                problemDescriptors.add(manager.createProblemDescriptor(element, ((Diagnostic)highlighter.getErrorStripeTooltip()).getMessage(), true, highlightType, isOnTheFly));
+                // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
+                for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getMatchingStartedWrappers(virtualFile, serverCapabilities -> true)) {
+                    RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
+                    if (highlighters != null) {
+                        for (RangeHighlighter highlighter : highlighters) {
+                            PsiElement element;
+                            if (highlighter.getEndOffset() - highlighter.getStartOffset() > 0) {
+                                element = new LSPPSiElement(editor.getProject(), file, highlighter.getStartOffset(), highlighter.getEndOffset(), editor.getDocument().getText(new TextRange(highlighter.getStartOffset(), highlighter.getEndOffset())));
+                            } else {
+                                element = PsiUtilCore.getElementAtOffset(file, highlighter.getStartOffset());
                             }
+                            ProblemHighlightType highlightType = getHighlightType(((Diagnostic) highlighter.getErrorStripeTooltip()).getSeverity());
+                            problemDescriptors.add(manager.createProblemDescriptor(element, ((Diagnostic) highlighter.getErrorStripeTooltip()).getMessage(), true, highlightType, isOnTheFly));
                         }
                     }
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
                 return problemDescriptors.toArray(new ProblemDescriptor[problemDescriptors.size()]);
             }
-
         }
         return super.checkFile(file, manager, isOnTheFly);
     }
