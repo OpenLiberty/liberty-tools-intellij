@@ -2,7 +2,6 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.LanguageUtil;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.Module;
@@ -23,18 +22,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -364,7 +352,6 @@ public class LanguageServiceAccessor {
                     })
                     .filter(wrapper -> wrapper.canOperate(document))
                     .collect(Collectors.toList()));
-
             while (!contentTypes.isEmpty()) {
                 Language contentType = contentTypes.poll();
                 if (contentType == null || processedContentTypes.contains(contentType)) {
@@ -494,8 +481,14 @@ public class LanguageServiceAccessor {
     }
 
 
-
-    private Collection<LanguageServerWrapper> getMatchingStartedWrappers(@Nonnull VirtualFile file,
+    /**
+     * Gets the matching started language server wrappers given the VirtualFile
+     *
+     * @param file
+     * @param request
+     * @return started language server wrappers
+     */
+    public Collection<LanguageServerWrapper> getMatchingStartedWrappers(@Nonnull VirtualFile file,
                                                                                 @Nullable Predicate<ServerCapabilities> request) {
         synchronized (startedServers) {
             return startedServers.stream().filter(wrapper -> wrapper.isConnectedTo(LSPIJUtils.toUri(file))
