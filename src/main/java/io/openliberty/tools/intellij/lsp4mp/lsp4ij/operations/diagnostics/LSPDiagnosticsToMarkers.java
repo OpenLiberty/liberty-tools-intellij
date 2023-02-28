@@ -76,13 +76,13 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
                     HighlighterTargetArea.EXACT_RANGE);
             rangeHighlighter.setErrorStripeTooltip(diagnostic);
             rangeHighlighters[index++] = rangeHighlighter;
-            // forces re-highlighting/refreshes inspections for the current file to fix https://github.com/OpenLiberty/liberty-tools-intellij/issues/85
-            // triggers io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPLocalInspectionTool#checkFile()
-            Project project = editor.getProject();
-            DaemonCodeAnalyzer.getInstance(project).restart(PsiManager.getInstance(project).findFile(FileDocumentManager.getInstance().getFile(document)));
         }
         Map<String, RangeHighlighter[]> allMarkers = getAllMarkers(editor);
         allMarkers.put(languageServerId, rangeHighlighters);
+        // forces re-highlighting/refreshes inspections for the current file to fix https://github.com/OpenLiberty/liberty-tools-intellij/issues/85
+        // triggers io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPLocalInspectionTool#checkFile()
+        Project project = editor.getProject();
+        DaemonCodeAnalyzer.getInstance(project).restart(PsiManager.getInstance(project).findFile(FileDocumentManager.getInstance().getFile(document)));
     }
 
     @NotNull
@@ -103,6 +103,7 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
         return severity== DiagnosticSeverity.Error?HighlighterLayer.ERROR:HighlighterLayer.WARNING;
     }
 
+    // Controls the underline colour of the diagnostic
     private Color getColor(DiagnosticSeverity severity) {
         if (severity == null) {
             // if not set, default to Error
