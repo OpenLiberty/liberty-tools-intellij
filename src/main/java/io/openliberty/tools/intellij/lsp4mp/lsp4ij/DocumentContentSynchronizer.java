@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.concurrent.CompletableFuture;
 
 public class DocumentContentSynchronizer implements DocumentListener {
@@ -38,7 +40,7 @@ public class DocumentContentSynchronizer implements DocumentListener {
     private final TextDocumentSyncKind syncKind;
 
     private int version = 0;
-    private DidChangeTextDocumentParams changeParams;
+    private Deque<DidChangeTextDocumentParams> changeParamsQueue = new ArrayDeque<>();
     private long modificationStamp;
     final @Nonnull CompletableFuture<Void> didOpenFuture;
 
@@ -82,7 +84,7 @@ public class DocumentContentSynchronizer implements DocumentListener {
             createChangeEvent(event);
         }
 
-        if (changeParams != null) {
+        if (changeParamsQueue.peekFirst() != null) {
             if (ApplicationManager.getApplication().isUnitTestMode()) {
                 sendDidChangeEvent();
             } else {
@@ -92,11 +94,11 @@ public class DocumentContentSynchronizer implements DocumentListener {
     }
 
     private void sendDidChangeEvent() {
-        final DidChangeTextDocumentParams changeParamsToSend = changeParams;
-        changeParams = null;
+        final DidChangeTextDocumentParams changeParamsToSend = changeParamsQueue.removeFirst();
 
         if (changeParamsToSend != null) {
             changeParamsToSend.getTextDocument().setVersion(++version);
+            // TODO: LS seems to receive these events in a different order *sometimes*
             languageServerWrapper.getInitializedServer()
                     .thenAcceptAsync(ls -> ls.getTextDocumentService().didChange(changeParamsToSend));
         }
@@ -120,8 +122,8 @@ public class DocumentContentSynchronizer implements DocumentListener {
      * @return true if change event is ready to be sent
      */
     private boolean createChangeEvent(DocumentEvent event) {
-        changeParams = new DidChangeTextDocumentParams(new VersionedTextDocumentIdentifier(), Collections.singletonList(new TextDocumentContentChangeEvent()));
-        changeParams.getTextDocument().setUri(fileUri.toString());
+        changeParamsQueue.offerLast(new DidChangeTextDocumentParams(new VersionedTextDocumentIdentifier(), Collections.singletonList(new TextDocumentContentChangeEvent())));
+        changeParamsQueue.peekLast().getTextDocument().setUri(fileUri.toString());
 
         Document document = event.getDocument();
         TextDocumentContentChangeEvent changeEvent = null;
@@ -130,10 +132,10 @@ public class DocumentContentSynchronizer implements DocumentListener {
             case None:
                 return false;
             case Full:
-                changeParams.getContentChanges().get(0).setText(event.getDocument().getText());
+                changeParamsQueue.peekLast().getContentChanges().get(0).setText(event.getDocument().getText());
                 break;
             case Incremental:
-                changeEvent = changeParams.getContentChanges().get(0);
+                changeEvent = changeParamsQueue.peekLast().getContentChanges().get(0);
                 CharSequence newText = event.getNewFragment();
                 int offset = event.getOffset();
                 int length = event.getOldLength();
