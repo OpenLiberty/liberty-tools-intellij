@@ -10,21 +10,19 @@
 package io.openliberty.tools.intellij.it;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 
 import java.nio.file.Paths;
 
 /**
  * Tests Liberty Tools actions using a Maven application.
  */
-@Disabled("Until we figure out why dev mode start hangs as terminal view/tab comes into focus or is enabled.")
 public class MavenSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Application Name
      */
-    public static String PROJECT_NAME = "maven-app";
+    public static String PROJECT_NAME = "single-mod-maven-app";
 
-    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "single-mod", "maven", PROJECT_NAME).toAbsolutePath().toString();
+    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "maven", PROJECT_NAME).toAbsolutePath().toString();
     /**
      * Application resoruce URL.
      */

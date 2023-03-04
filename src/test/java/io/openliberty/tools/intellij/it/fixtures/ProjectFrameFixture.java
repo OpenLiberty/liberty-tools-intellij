@@ -15,64 +15,122 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.DefaultXpath;
 import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 
 import java.time.Duration;
 import java.util.List;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
+/**
+ * Project IDE frame.
+ */
 @DefaultXpath(by = "IdeFrameImpl type", xpath = "//div[@class='IdeFrameImpl']")
 @FixtureName(name = "Project Frame")
 public class ProjectFrameFixture extends CommonContainerFixture {
-    public enum Type {
-        ACTIONMENU, SRIPEBUTTON, ACTIONBUTTON, ACTIONMENUITEM, TREE
-    }
 
+    /**
+     * Constructor.
+     *
+     * @param remoteRobot     The RemoteRobot instance.
+     * @param remoteComponent the RemoteComponent instance.
+     */
     public ProjectFrameFixture(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
         super(remoteRobot, remoteComponent);
     }
 
-    public ComponentFixture getFixtureFromFrame(Type type, String... searchValues) {
-        ComponentFixture cf = null;
 
-        switch (type) {
-            case ACTIONMENU:
-                String amText = searchValues[0];
-                cf = find(ComponentFixture.class, byXpath("//div[@class='ActionMenu' and @text='" + amText + "']"), Duration.ofSeconds(10));
-                break;
-            case ACTIONMENUITEM:
-                String amiText = searchValues[0];
-                RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Wait for Menu items", "No Menu items found", () -> !findAll(ComponentFixture.class, byXpath("//div[@class='ActionMenuItem' and @text='" + amiText + "']")).isEmpty());
-                List<ComponentFixture> list = findAll(ComponentFixture.class, byXpath("//div[@class='ActionMenuItem' and @text='" + amiText + "']"));
-                cf = list.get(0);
-                break;
-            case ACTIONBUTTON:
-                String abName = searchValues[0];
-                String abText = searchValues[1];
-                cf = find(ComponentFixture.class, byXpath("//div[@name='" + abName + "']//div[@class='ActionButton' and contains(@myaction.key, '" + abText + "')]"), Duration.ofSeconds(10));
-                break;
-            case SRIPEBUTTON:
-                String sbText = searchValues[0];
-                cf = find(ComponentFixture.class, byXpath("//div[@class='StripeButton' and @text='" + sbText + "']"), Duration.ofSeconds(10));
-                break;
-            case TREE:
-                if (searchValues.length == 1) {
-                    String tText = searchValues[0];
-                    cf = find(ComponentFixture.class, byXpath("//div[@class='Tree' and contains(@visible_text, '" + tText + "')]"), Duration.ofMinutes(2));
-                } else if (searchValues.length == 2) {
-                    String tName = searchValues[0];
-                    String tText = searchValues[1];
-                    cf = find(ComponentFixture.class, byXpath("//div[@class='Tree' and @name='" + tName + "' and contains(@visible_text, '" + tText + "')]"), Duration.ofMinutes(6));
-                }
-                break;
-            default:
-                Assert.fail("An invalid type of fixture was specified. Project Fixture: " + type);
-                break;
-        }
+    /**
+     * Returns the ComponentFixture object fixture associated with the input locator.
+     *
+     * @param locator The custom locator.
+     * @return The ComponentFixture object associated with the input locator.
+     */
+    public ComponentFixture getActionButton(Locator locator) {
+        return find(ComponentFixture.class, locator, Duration.ofSeconds(10));
+    }
 
-        return cf;
+    /**
+     * Returns the ComponentFixture object fixture associated with the ActionMenu class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ActionMenu class.
+     */
+    public ComponentFixture getActionMenu(String... xpathVars) {
+        String text = xpathVars[0];
+        return find(ComponentFixture.class, byXpath("//div[@class='ActionMenu' and @text='" + text + "']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the ActionMenuItem class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ActionMenuItem class.
+     */
+    public ComponentFixture getActionMenuItem(String... xpathVars) {
+        String text = xpathVars[0];
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Wait for Menu items", "No Menu items found", () -> !findAll(ComponentFixture.class, byXpath("//div[@class='ActionMenuItem' and @text='" + text + "']")).isEmpty());
+        List<ComponentFixture> list = findAll(ComponentFixture.class, byXpath("//div[@class='ActionMenuItem' and @text='" + text + "']"));
+        return list.get(0);
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the BaseLabel class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the BaseLabel class.
+     */
+    public ComponentFixture getBaseLabel(String... xpathVars) {
+        String text = xpathVars[0];
+        String waitTime = xpathVars[1];
+        return find(ComponentFixture.class, byXpath("//div[@class='BaseLabel' and @text='" + text + "']"), Duration.ofSeconds(Integer.valueOf(waitTime)));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the ContentComboLabel class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ContentComboLabel class.
+     */
+    public ComponentFixture getContentComboLabel(String... xpathVars) {
+        String text = xpathVars[0];
+        String waitTime = xpathVars[1];
+        return find(ComponentFixture.class, byXpath("//div[@class='ContentComboLabel' and @text='" + text + "']"), Duration.ofSeconds(Integer.valueOf(waitTime)));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the ProjectViewTree class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     */
+    public ComponentFixture getProjectViewTree(String... xpathVars) {
+        String visibleText = xpathVars[0];
+        return find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(1));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the StripeButton class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the StripeButton class.
+     */
+    public ComponentFixture getStripeButton(String... xpathVars) {
+        String text = xpathVars[0];
+        return find(ComponentFixture.class, byXpath("//div[@class='StripeButton' and @text='" + text + "']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the Tree class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the Tree class.
+     */
+    public ComponentFixture getTree(String... xpathVars) {
+        String name = xpathVars[0];
+        String visibleText = xpathVars[1];
+        return find(ComponentFixture.class, byXpath("//div[@class='Tree' and @name='" + name + "' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(6));
     }
 }

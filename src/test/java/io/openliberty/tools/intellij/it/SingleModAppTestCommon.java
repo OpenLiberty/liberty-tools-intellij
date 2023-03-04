@@ -19,6 +19,9 @@ public abstract class SingleModAppTestCommon {
     String appExpectedOutput;
 
 
+    /**
+     * Constructor.
+     */
     public SingleModAppTestCommon(String projectName, String projectPath, String wlpInstallPath, String appBaseURL, String appExpectedOutput) {
         this.projectName = projectName;
         this.projectPath = projectPath;
@@ -27,31 +30,48 @@ public abstract class SingleModAppTestCommon {
         this.appExpectedOutput = appExpectedOutput;
     }
 
+    /**
+     * Processes actions before each test.
+     *
+     * @param info Test information.
+     */
     @BeforeEach
     public void beforeEach(TestInfo info) {
         System.out.println(
                 "INFO: Test " + this.getClass().getSimpleName() + "#" + info.getDisplayName() + " entry: " + java.time.LocalDateTime.now());
     }
 
+    /**
+     * Processes actions after each test.
+     *
+     * @param info Test information.
+     */
     @AfterEach
     public void afterEach(TestInfo info) {
         System.out.println(
                 "INFO: Test " + this.getClass().getSimpleName() + "#" + info.getDisplayName() + " exit: " + java.time.LocalDateTime.now());
     }
 
+    /**
+     * Cleanup.
+     */
     @AfterAll
     public static void cleanup() {
-        // close project window.
-        UIBotTestUtils.closeProject(remoteRobot);
+        UIBotTestUtils.closeDashboardView(remoteRobot);
+        UIBotTestUtils.closeProjectView(remoteRobot);
+        UIBotTestUtils.closeProjectFrame(remoteRobot);
     }
 
+    /**
+     * Tests Liberty Tools start action.
+     */
     @Test
     public void testDropDownStartAction() {
         String testName = "testDropDownStartAction";
         String absoluteWLPPath = projectPath + wlpInstallPath;
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start");
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "LibertyTree", "Start");
 
         try {
             // Validate that the application started.
@@ -59,7 +79,7 @@ public abstract class SingleModAppTestCommon {
             TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
         } finally {
             // Stop dev mode.
-            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop");
+            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "LibertyTree", "Stop");
 
             // Validate that the server stopped.
             TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -70,17 +90,10 @@ public abstract class SingleModAppTestCommon {
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
 
-        // Import project.
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
-
-        // Open the project and the Liberty plugin views.
-        UIBotTestUtils.openViewUsingToolWindowPaneStripe(remoteRobot, "Project");
-        UIBotTestUtils.openViewUsingToolWindowPaneStripe(remoteRobot, "Liberty");
-        UIBotTestUtils.waitForProjectToShownInDashboard(remoteRobot, "LibertyTree", projectName);
-
-        // Expand the Liberty dashboard view
-        UIBotTestUtils.clickOnActionButton(remoteRobot, "LIBERTY_ACTION_TOOLBAR", "action.ExpandAll.text");
+        UIBotTestUtils.openProjectView(remoteRobot);
+        UIBotTestUtils.openDashboardView(remoteRobot);
+        UIBotTestUtils.validateProjectIsInDashboard(remoteRobot, projectName);
+        UIBotTestUtils.expandProjectActionMenu(remoteRobot);
     }
-
-
 }

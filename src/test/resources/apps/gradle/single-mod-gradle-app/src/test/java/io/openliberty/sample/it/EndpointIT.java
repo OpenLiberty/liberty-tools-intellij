@@ -93,7 +93,6 @@ public class EndpointIT {
      * @return Response object with the response from the specified URL.
      */
     private Response getResponse(String url) {
-        System.out.println("@ed: this is the URL: " + url);
         return client.target(url).request().get();
     }
 

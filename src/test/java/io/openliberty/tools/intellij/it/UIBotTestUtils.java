@@ -14,7 +14,9 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
+import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
@@ -32,7 +34,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
 
 /**
- * Helper function.
+ * UI helper function.
  */
 public class UIBotTestUtils {
 
@@ -53,14 +55,17 @@ public class UIBotTestUtils {
             ComponentFixture cf = welcomePage.getOpenProjectComponentFixture("Open");
             cf.click();
 
-            // Specify the project's path.
+            // Specify the project's path. The text field is pre-populated by default.
             DialogFixture newProjectDialog = welcomePage.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(10));
-            JTextFieldFixture jtf = newProjectDialog.find(JTextFieldFixture.class, byXpath("//div[@class='BorderlessTextField']"), Duration.ofSeconds(10));
-            jtf.setText(projectPath);
+            JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
+            JButtonFixture okButton = newProjectDialog.getButton("OK");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for init text on text field", "Init text in text field is empty", () -> okButton.isEnabled());
 
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for text box to be populated", "Text box was not populated", () -> jtf.getText().equals(projectPath));
-            ComponentFixture treeFixture = newProjectDialog.getFixtureFromDialog(projectName, DialogFixture.Type.TREE);
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for Tree fixture to show", "Tree fixture is not showing", () -> treeFixture.isShowing());
+            textField.setText(projectPath);
+
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for open project text box to be populated with set value", "Open project text box was not populated with set value", () -> textField.getText().equals(projectPath));
+            ComponentFixture projectTree = newProjectDialog.getTree();
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for project tree to show the set project", "The project tree did not show the set project", () -> projectTree.getData().hasText(projectName));
 
             // Click OK.
             JButtonFixture jbf = newProjectDialog.button("OK");
@@ -74,15 +79,14 @@ public class UIBotTestUtils {
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void closeProject(RemoteRobot remoteRobot) {
-
+    public static void closeProjectFrame(RemoteRobot remoteRobot) {
         // Click on File on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture fileMenuEntry = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.ACTIONMENU, "File");
+        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File");
         fileMenuEntry.click();
 
         // Click on Close Project in the menu.
-        ComponentFixture closeFixture = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.ACTIONMENUITEM, "Close Project");
+        ComponentFixture closeFixture = projectFrame.getActionMenuItem("Close Project");
         closeFixture.click();
     }
 
@@ -92,9 +96,9 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param action      The action to run
      */
-    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String action) {
+    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String treeName, String action) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture treeFixture = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.TREE, action);
+        ComponentFixture treeFixture = projectFrame.getTree(treeName, action);
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(2), "Waiting for " + action + " in tree fixture to show", "Action " + action + " in tree fixture is not showing", () -> treeFixture.isShowing());
         List<RemoteText> rts = treeFixture.findAllText();
         for (RemoteText rt : rts) {
@@ -111,22 +115,81 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The project name to wait for.
      */
-    public static void waitForProjectToShownInDashboard(RemoteRobot remoteRobot, String treeName, String projectName) {
+    public static void validateProjectIsInDashboard(RemoteRobot remoteRobot, String projectName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture treeFixture = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.TREE, treeName, projectName);
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName);
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(2), "Waiting for Tree fixture to show", "Tree fixture is not showing", () -> treeFixture.isShowing());
     }
 
     /**
-     * Opens a view using the specified tool window pane stripe
+     * Opens the Liberty Tools dashboard if it is not already open.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param text        The name of the window pane stripe.
      */
-    public static void openViewUsingToolWindowPaneStripe(RemoteRobot remoteRobot, String text) {
-        // Click on File on the Menu bar.
+    public static void openDashboardView(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture wpStripe = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.SRIPEBUTTON, text);
+        try {
+            projectFrame.getBaseLabel("Liberty", "5");
+        } catch (WaitForConditionTimeoutException e) {
+            // Dashboard view is closed. Open it.
+            clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
+        }
+    }
+
+    /**
+     * Closes the Liberty tools dashboard if it is not already closed.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void closeDashboardView(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            projectFrame.getBaseLabel("Liberty", "2");
+            clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
+        } catch (WaitForConditionTimeoutException e) {
+            // Dashboard view is already closed. Nothing to do.
+        }
+    }
+
+    /**
+     * Opens the project tree view if it is not already opened.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void openProjectView(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            projectFrame.getContentComboLabel("Project", "5");
+        } catch (WaitForConditionTimeoutException e) {
+            // Dashboard view is closed. Open it.
+            clickOnWindowPaneStripeButton(remoteRobot, "Project");
+        }
+    }
+
+    /**
+     * Closes the project tree view if it is not already closed.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void closeProjectView(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            projectFrame.getContentComboLabel("Project", "2");
+            clickOnWindowPaneStripeButton(remoteRobot, "Project");
+        } catch (WaitForConditionTimeoutException e) {
+            // Project view is already closed. Nothing to do.
+        }
+    }
+
+    /**
+     * Clicks on the specified tool window pane stripe.
+     *
+     * @param remoteRobot      The RemoteRobot instance.
+     * @param StripeButtonName The name of the window pane stripe button.
+     */
+    public static void clickOnWindowPaneStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture wpStripe = projectFrame.getStripeButton(StripeButtonName);
         wpStripe.click();
     }
 
@@ -134,12 +197,11 @@ public class UIBotTestUtils {
      * Clicks on an action button with the specified name and text.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param name        The name to use in search.
-     * @param text        The text to use in search.
      */
-    public static void clickOnActionButton(RemoteRobot remoteRobot, String name, String text) {
+    public static void expandProjectActionMenu(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture actionButton = projectFrame.getFixtureFromFrame(ProjectFrameFixture.Type.ACTIONBUTTON, name, text);
+        Locator locator = byXpath("//div[@class='LibertyExplorer']//div[@class='ActionButton' and contains(@myaction.key, 'action.ExpandAll.text')]");
+        ComponentFixture actionButton = projectFrame.getActionButton(locator);
         actionButton.click();
     }
 
@@ -160,33 +222,24 @@ public class UIBotTestUtils {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            try {
-                FileWriter fw = new FileWriter("botCH.html");
-                try {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                try (FileWriter fw = new FileWriter("botCH.html")) {
                     String inputLine;
                     while ((inputLine = br.readLine()) != null) {
                         switch (printTo) {
-                            case STDOUT:
-                                System.out.println(inputLine);
-                                break;
-                            case FILE:
+                            case STDOUT -> System.out.println(inputLine);
+                            case FILE -> {
                                 fw.write(inputLine);
                                 fw.write("\n");
-                                break;
-                            default:
-                                Assert.fail("Invalid format to write : ");
+                            }
+                            default -> Assert.fail("Invalid format to write : ");
                         }
                     }
-                } finally {
-                    fw.close();
                 }
-            } finally {
-                br.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("Failed to collect UI Compponent Hierarchy information: " + e.getCause());
+            Assert.fail("Failed to collect UI Component Hierarchy information: " + e.getCause());
         }
     }
 }
