@@ -9,9 +9,9 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Application Name
      */
-    public static String PROJECT_NAME = "gradle-app";
+    public static String PROJECT_NAME = "single-mod-gradle-app";
 
-    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "single-mod", "gradle", PROJECT_NAME).toAbsolutePath().toString();
+    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "gradle", PROJECT_NAME).toAbsolutePath().toString();
     /**
      * Application resoruce URL.
      */

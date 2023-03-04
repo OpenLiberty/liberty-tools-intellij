@@ -11,18 +11,12 @@ package io.openliberty.tools.intellij.it.fixtures;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.CommonContainerFixture;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.search.locators.Locators;
-import kotlin.jvm.internal.Intrinsics;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 
 import java.time.Duration;
-import java.util.Objects;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
@@ -33,30 +27,52 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 @DefaultXpath(by = "MyDialog type", xpath = "//div[@class='MyDialog']")
 public class DialogFixture extends CommonContainerFixture {
 
-    public enum Type {
-        TREE
-    }
-
+    /**
+     * Constructor.
+     *
+     * @param remoteRobot     The RemoteRobot instance.
+     * @param remoteComponent The RemoteComponent instance.
+     */
     public DialogFixture(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
         super(remoteRobot, remoteComponent);
     }
 
+    /**
+     * Returns the Dialog locator with the specified title.
+     *
+     * @param title The dialog title.
+     * @return The Dialog locator with the specified title.
+     */
     @NotNull
     public static Locator byTitle(@NotNull String title) {
-        Intrinsics.checkNotNullParameter(title, "title");
         return Locators.byXpath("title " + title, "//div[@title='" + title + "' and @class='MyDialog']");
     }
 
-    public ComponentFixture getFixtureFromDialog(String text, DialogFixture.Type type) {
-        ComponentFixture cf = null;
-
-        if (Objects.requireNonNull(type) == Type.TREE) {
-            cf = find(ComponentFixture.class, byXpath("//div[@class='Tree' and contains(@visible_text, '" + text + "')]"), Duration.ofSeconds(10));
-        } else {
-            Assert.fail("An invalid type of fixture was specified. Dialog Fixture: " + type);
-        }
-
-        return cf;
+    /**
+     * Returns the component fixture associated with the Tree class.
+     *
+     * @return The component fixture associated with the Tree class.
+     */
+    public ComponentFixture getTree() {
+        return find(ComponentFixture.class, byXpath("//div[@class='Tree']"), Duration.ofSeconds(10));
     }
 
+    /**
+     * Returns the JTextFieldFixture object associated with the BorderlessTextField class.
+     *
+     * @return The JTextFieldFixture object associated with the BorderlessTextField class.
+     */
+    public JTextFieldFixture getBorderLessTextField() {
+        return textField(byXpath("//div[@class='BorderlessTextField']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the JButtonFixture object associated with button containing the specified text.
+     *
+     * @param text The text associated with the button.
+     * @return The JButtonFixture object associated with button containing the specified text.
+     */
+    public JButtonFixture getButton(String text) {
+        return button(byXpath("//div[@text='" + text + "']"), Duration.ofSeconds(5));
+    }
 }
