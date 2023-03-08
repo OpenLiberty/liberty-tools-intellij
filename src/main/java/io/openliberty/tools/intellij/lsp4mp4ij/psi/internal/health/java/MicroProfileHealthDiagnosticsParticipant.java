@@ -17,10 +17,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.eclipse.lsp4j.Diagnostic;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE_NAME;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.LIVENESS_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.READINESS_ANNOTATION;
@@ -67,7 +68,7 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 		// Collection of diagnostics for MicroProfile Health is done only if
 		// microprofile-health is on the classpath
 		Module javaProject = context.getJavaProject();
-		return PsiTypeUtils.findType(javaProject, HEALTH_ANNOTATION) != null;
+		return PsiTypeUtils.findType(javaProject, HEALTH_CHECK_INTERFACE) != null;
 	}
 
 	@Override
@@ -169,7 +170,8 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 		if (hasHealth) {
 			message.append(", or @Health");
 		}
-		message.append(" annotation.");		return message.toString();
+		message.append(" annotation.");
+		return message.toString();
 	}
 
 	private static PsiClass[] findImplementedInterfaces(PsiClass type) {

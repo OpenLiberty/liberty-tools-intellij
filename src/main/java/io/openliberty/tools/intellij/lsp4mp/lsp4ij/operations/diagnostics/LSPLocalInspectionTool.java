@@ -15,6 +15,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.codeInspection.ex.ExternalAnnotatorBatchInspection;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.TextRange;
@@ -37,7 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LSPLocalInspectionTool extends LocalInspectionTool {
+public class LSPLocalInspectionTool extends LocalInspectionTool implements ExternalAnnotatorBatchInspection {
     private static final Logger LOGGER = LoggerFactory.getLogger(LSPLocalInspectionTool.class);
 
     @Nls
@@ -59,53 +60,53 @@ public class LSPLocalInspectionTool extends LocalInspectionTool {
         return true;
     }
 
-    @Nullable
-    @Override
-    public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
-        VirtualFile virtualFile = file.getVirtualFile();
-        if (virtualFile != null) {
-            Editor editor = LSPIJUtils.editorForFile(virtualFile);
-            if (editor != null) {
-                // initializes language servers and connects them to the given document if they haven't already started, do not wait for them to start (avoiding blocking the main thread)
-                LanguageServiceAccessor.getInstance(editor.getProject()).getLanguageServers(editor.getDocument(),
-                        capabilities -> true);
-                List<ProblemDescriptor> problemDescriptors = new ArrayList<>();
-                // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
-                for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getMatchingStartedWrappers(virtualFile, serverCapabilities -> true)) {
-                    RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
-                    if (highlighters != null) {
-                        for (RangeHighlighter highlighter : highlighters) {
-                            PsiElement element;
-                            if (highlighter.getEndOffset() - highlighter.getStartOffset() > 0) {
-                                element = new LSPPSiElement(editor.getProject(), file, highlighter.getStartOffset(), highlighter.getEndOffset(), editor.getDocument().getText(new TextRange(highlighter.getStartOffset(), highlighter.getEndOffset())));
-                            } else {
-                                element = PsiUtilCore.getElementAtOffset(file, highlighter.getStartOffset());
-                            }
-                            ProblemHighlightType highlightType = getHighlightType(((Diagnostic) highlighter.getErrorStripeTooltip()).getSeverity());
-                            problemDescriptors.add(manager.createProblemDescriptor(element, ((Diagnostic) highlighter.getErrorStripeTooltip()).getMessage(), true, highlightType, isOnTheFly));
-                        }
-                    }
-                }
-                return problemDescriptors.toArray(new ProblemDescriptor[problemDescriptors.size()]);
-            }
-        }
-        return super.checkFile(file, manager, isOnTheFly);
-    }
+    // @Nullable
+    // @Override
+    // public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
+    //     VirtualFile virtualFile = file.getVirtualFile();
+    //     if (virtualFile != null) {
+    //         Editor editor = LSPIJUtils.editorForFile(virtualFile);
+    //         if (editor != null) {
+    //             // initializes language servers and connects them to the given document if they haven't already started, do not wait for them to start (avoiding blocking the main thread)
+    //             LanguageServiceAccessor.getInstance(editor.getProject()).getLanguageServers(editor.getDocument(),
+    //                     capabilities -> true);
+    //             List<ProblemDescriptor> problemDescriptors = new ArrayList<>();
+    //             // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
+    //             for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getMatchingStartedWrappers(virtualFile, serverCapabilities -> true)) {
+    //                 RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
+    //                 if (highlighters != null) {
+    //                     for (RangeHighlighter highlighter : highlighters) {
+    //                         PsiElement element;
+    //                         if (highlighter.getEndOffset() - highlighter.getStartOffset() > 0) {
+    //                             element = new LSPPSiElement(editor.getProject(), file, highlighter.getStartOffset(), highlighter.getEndOffset(), editor.getDocument().getText(new TextRange(highlighter.getStartOffset(), highlighter.getEndOffset())));
+    //                         } else {
+    //                             element = PsiUtilCore.getElementAtOffset(file, highlighter.getStartOffset());
+    //                         }
+    //                         ProblemHighlightType highlightType = getHighlightType(((Diagnostic) highlighter.getErrorStripeTooltip()).getSeverity());
+    //                         problemDescriptors.add(manager.createProblemDescriptor(element, ((Diagnostic) highlighter.getErrorStripeTooltip()).getMessage(), true, highlightType, isOnTheFly));
+    //                     }
+    //                 }
+    //             }
+    //             return problemDescriptors.toArray(new ProblemDescriptor[problemDescriptors.size()]);
+    //         }
+    //     }
+    //     return super.checkFile(file, manager, isOnTheFly);
+    // }
 
-    private ProblemHighlightType getHighlightType(DiagnosticSeverity severity) {
-        if (severity == null) {
-            // if severity is not set, default to Error
-            return ProblemHighlightType.ERROR;
-        }
-        switch (severity) {
-            case Error:
-                return ProblemHighlightType.ERROR;
-            case Hint:
-            case Information:
-                return ProblemHighlightType.INFORMATION;
-            case Warning:
-                return ProblemHighlightType.WARNING;
-        }
-        return ProblemHighlightType.INFORMATION;
-    }
+    // private ProblemHighlightType getHighlightType(DiagnosticSeverity severity) {
+    //     if (severity == null) {
+    //         // if severity is not set, default to Error
+    //         return ProblemHighlightType.ERROR;
+    //     }
+    //     switch (severity) {
+    //         case Error:
+    //             return ProblemHighlightType.ERROR;
+    //         case Hint:
+    //         case Information:
+    //             return ProblemHighlightType.INFORMATION;
+    //         case Warning:
+    //             return ProblemHighlightType.WARNING;
+    //     }
+    //     return ProblemHighlightType.INFORMATION;
+    // }
 }

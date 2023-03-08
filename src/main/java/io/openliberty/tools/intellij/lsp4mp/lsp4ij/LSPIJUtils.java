@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2020, 2022 Red Hat, Inc.
- * Distributed under license by Red Hat, Inc. All rights reserved.
- * This program is made available under the terms of the
- * Eclipse Public License v2.0 which accompanies this distribution,
- * and is available at https://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- * Red Hat, Inc. - initial API and implementation
- ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.lang.Language;
@@ -155,7 +145,7 @@ public class LSPIJUtils {
     public static void applyWorkspaceEdit(WorkspaceEdit edit) {
         applyWorkspaceEdit(edit, null);
     }
-    
+
     public static void applyWorkspaceEdit(WorkspaceEdit edit, String label) {
         if (edit.getDocumentChanges() != null) {
             for(Either<TextDocumentEdit, ResourceOperation> change : edit.getDocumentChanges()) {
@@ -247,6 +237,7 @@ public class LSPIJUtils {
         }
     }
 
+
     public static Language getDocumentLanguage(Document document, Project project) {
         VirtualFile file = FileDocumentManager.getInstance().getFile(document);
         return getFileLanguage(file, project);
@@ -257,7 +248,11 @@ public class LSPIJUtils {
     }
 
     public static VirtualFile findResourceFor(String uri) {
-        return LocalFileSystem.getInstance().findFileByIoFile(Paths.get(uri).toFile());
+        try {
+            return VfsUtil.findFileByURL(new URL(uri));
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     public static Editor[] editorsForFile(VirtualFile file) {

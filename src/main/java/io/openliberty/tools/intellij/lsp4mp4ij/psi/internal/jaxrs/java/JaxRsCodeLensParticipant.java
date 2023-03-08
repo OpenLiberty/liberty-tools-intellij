@@ -20,12 +20,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLensContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeLensParams;
 
@@ -90,7 +89,7 @@ public class JaxRsCodeLensParticipant implements IJavaCodeLensParticipant {
 			if (element instanceof PsiClass) {
 				PsiClass type = (PsiClass) element;
 				// Get value of JAX-RS @Path annotation from the class
-				String pathValue = JaxRsUtils.getJaxRsPathValue(type);
+				String pathValue = getJaxRsPathValue(type);
 				if (pathValue != null) {
 					// Class is annotated with @Path
 					// Display code lens only if local server is available.
@@ -110,7 +109,7 @@ public class JaxRsCodeLensParticipant implements IJavaCodeLensParticipant {
 				// ignore element if method range overlaps the type range, happens for generated
 				// bytecode, i.e. with lombok
 				PsiClass parentType = PsiTreeUtil.getParentOfType(element, PsiClass.class);
-				if (parentType != null && PsiTypeUtils.overlaps(parentType.getNameIdentifier().getTextRange(),
+				if (parentType != null && overlaps(parentType.getNameIdentifier().getTextRange(),
 						((PsiMethod) element).getNameIdentifier().getTextRange())) {
 					continue;
 				}
@@ -124,10 +123,10 @@ public class JaxRsCodeLensParticipant implements IJavaCodeLensParticipant {
 				// A JAX-RS method is a public method annotated with @GET @POST, @DELETE, @PUT
 				// JAX-RS
 				// annotation
-				if (JaxRsUtils.isJaxRsRequestMethod(method) && method.getModifierList().hasExplicitModifier(PsiModifier.PUBLIC)) {
+				if (isJaxRsRequestMethod(method) && method.getModifierList().hasExplicitModifier(PsiModifier.PUBLIC)) {
 					String baseURL = jaxRsContext.getLocalBaseURL();
 					String openURICommandId = isClickableJaxRsRequestMethod(method) ? params.getOpenURICommand() : null;
-					CodeLens lens = JaxRsUtils.createURLCodeLens(baseURL, rootPath, openURICommandId, (PsiMethod) element, utils);
+					CodeLens lens = createURLCodeLens(baseURL, rootPath, openURICommandId, (PsiMethod) element, utils);
 					if (lens != null) {
 						lenses.add(lens);
 					}

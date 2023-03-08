@@ -45,7 +45,7 @@ public class PropertiesConfigSource extends AbstractConfigSource<Properties> {
 	public PropertiesConfigSource(String configFileName, int ordinal, Module javaProject) {
 		super(configFileName, ordinal, javaProject);
 	}
-	{}
+
 	@Override
 	public String getProperty(String key) {
 		Properties properties = getConfig();
@@ -107,4 +107,5 @@ public class PropertiesConfigSource extends AbstractConfigSource<Properties> {
 		}
 		return properties.keySet().stream().map(key -> (String) key).collect(Collectors.toSet());
 	}
+
 }

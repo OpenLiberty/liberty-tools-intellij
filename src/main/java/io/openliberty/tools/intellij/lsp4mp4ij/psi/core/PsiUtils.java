@@ -21,6 +21,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLiteral;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiNameValuePair;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -53,8 +54,6 @@ public class PsiUtils {
         setPosition(range.getEnd(), endLoc);
         return range;
     }
-
-
 
     /**
      * Creates a new {@link Range} with its start and end {@link Position}s set to line=0, character=0
