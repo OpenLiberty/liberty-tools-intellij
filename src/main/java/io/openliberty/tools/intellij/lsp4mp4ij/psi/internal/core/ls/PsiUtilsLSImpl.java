@@ -19,14 +19,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PsiUtils;
@@ -82,7 +75,7 @@ public class PsiUtilsLSImpl implements IPsiUtils {
     @Override
     public Module getModule(VirtualFile file) {
         if (file != null) {
-            return ProjectFileIndex.getInstance(project).getModuleForFile(file);
+            return ProjectFileIndex.getInstance(project).getModuleForFile(file, false);
         }
         return null;
     }
@@ -149,6 +142,11 @@ public class PsiUtilsLSImpl implements IPsiUtils {
     @Override
     public Range toRange(PsiElement element, int offset, int length) {
         return PsiUtils.toRange(element, offset, length);
+    }
+
+    @Override
+    public Range toRange(Document document, int offset, int length) {
+        return PsiUtils.toRange(document, offset, length);
     }
 
     @Override

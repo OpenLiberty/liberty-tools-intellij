@@ -40,6 +40,7 @@
         <extensionPoint name="configSourceProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
         <extensionPoint name="javaASTValidator.validator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
         <extensionPoint name="javaASTValidator.annotationValidator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
+        <extensionPoint name="javaCodeActionParticipant" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
