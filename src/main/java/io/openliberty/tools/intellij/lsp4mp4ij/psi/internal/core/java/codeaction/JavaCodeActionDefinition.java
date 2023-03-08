@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeActionParticipant>
 		implements IJavaCodeActionParticipant {
 
-	public static final ExtensionPointName<JavaCodeActionDefinition> EP = ExtensionPointName.create("io.openliberty.tools.intellij.lsp4mp.javaCodeActionParticipant");
+	public static final ExtensionPointName<JavaCodeActionDefinition> EP = ExtensionPointName.create("open-liberty.intellij.javaCodeActionParticipant");
 
 	private static final Logger LOGGER = Logger.getLogger(JavaCodeActionDefinition.class.getName());
 	private static final String KIND_ATTR = "kind";
