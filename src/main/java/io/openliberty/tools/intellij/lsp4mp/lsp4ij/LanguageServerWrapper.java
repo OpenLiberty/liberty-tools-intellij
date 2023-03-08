@@ -240,13 +240,17 @@ public class LanguageServerWrapper {
                     initParams.setRootPath(rootURI.getPath());
                 }
                 UnaryOperator<MessageConsumer> wrapper =
-                        consumer -> (message -> {
+                    consumer -> (message -> { 
+                        try {
                             logMessage(message);
                             consumer.consume(message);
                             final StreamConnectionProvider currentConnectionProvider = this.lspStreamProvider;
                             if (currentConnectionProvider != null && isActive()) {
                                 currentConnectionProvider.handleMessage(message, this.languageServer, rootURI);
                             }
+                        } catch (Exception e) {
+                            LOGGER.warn(e.getLocalizedMessage(), e);
+                        }
                         });
                 Launcher<? extends LanguageServer> launcher = Launcher.createLauncher(client, serverDefinition.getServerInterface(),
                         this.lspStreamProvider.getInputStream(), this.lspStreamProvider.getOutputStream(),
