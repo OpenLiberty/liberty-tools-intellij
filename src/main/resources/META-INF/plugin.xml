@@ -100,33 +100,33 @@
 
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.config.java.NoValueAssignedToPropertyQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.NoValueAssignedToPropertyQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-health#ImplementHealthCheck"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.health.java.ImplementHealthCheckQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.ImplementHealthCheckQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-health#HealthAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.health.java.HealthAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.HealthAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-metrics#ApplicationScopedAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-restclient#InjectAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-restclient#RestClientAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.RestClientAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-restclient#InjectAndRestClientAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                 targetDiagnostic="microprofile-restclient#RegisterRestClientAnnotationMissing"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="source"
-                implementationClass="com.redhat.devtools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
 
         <configSourceProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
 
