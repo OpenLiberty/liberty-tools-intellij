@@ -35,6 +35,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.createURLCodeLens;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.getJaxRsPathValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.isClickableJaxRsRequestMethod;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.isJaxRsRequestMethod;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.overlaps;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION_BASE_URI;
 
@@ -107,7 +114,7 @@ public class MicroProfileRestClientCodeLensParticipant implements IJavaCodeLensP
 				// JAX-RS
 				// annotation
 				if (JaxRsUtils.isJaxRsRequestMethod(method)) {
-					String openURICommandId = params.getOpenURICommand();
+					String openURICommandId = isClickableJaxRsRequestMethod(method) ? params.getOpenURICommand() : null;
 					CodeLens lens = JaxRsUtils.createURLCodeLens(baseURL, rootPath, openURICommandId, (PsiMethod) element, utils);
 					if (lens != null) {
 						lenses.add(lens);

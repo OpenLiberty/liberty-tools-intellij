@@ -14,6 +14,7 @@ import com.intellij.lang.jvm.JvmParameter;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
@@ -37,6 +38,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDi
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.JavaHoverContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CompletionItem;
@@ -80,6 +82,12 @@ public class PropertiesManagerForJava {
 
     public static PropertiesManagerForJava getInstance() {
         return INSTANCE;
+    }
+
+    private final CodeActionHandler codeActionHandler;
+
+    private PropertiesManagerForJava() {
+        this.codeActionHandler = new CodeActionHandler();
     }
 
     /**
@@ -448,7 +456,29 @@ public class PropertiesManagerForJava {
         return utils.resolveCompilationUnit(uri);
     }
 
+    /**
+     * Returns the codeAction list according the given codeAction parameters.
+     *
+     * @param params  the codeAction parameters
+     * @param utils   the utilities class
+     * @return the codeAction list according the given codeAction parameters.
+     */
     public List<? extends CodeAction> codeAction(MicroProfileJavaCodeActionParams params, IPsiUtils utils) {
-        return Collections.emptyList();
+        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeAction>>) () -> {
+            return codeActionHandler.codeAction(params, utils);
+        });
+    }
+
+    /**
+     * Returns the codeAction list according the given codeAction parameters.
+     *
+     * @param unresolved the CodeAction to resolve
+     * @param utils      the utilities class
+     * @param monitor    the monitor
+     * @return the codeAction list according the given codeAction parameters.
+     */
+    public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils,
+                                        ProgressIndicator monitor) {
+        return codeActionHandler.resolveCodeAction(unresolved, utils);
     }
 }

@@ -132,6 +132,14 @@ public class PsiUtilsLSImpl implements IPsiUtils {
         return null;
     }
 
+    // @Override
+    // public String getJavadoc(PsiMember method, com.redhat.qute.commons.DocumentFormat documentFormat) {
+    //     boolean markdown = DocumentFormat.Markdown.equals(documentFormat);
+    //     Reader reader = markdown ? JavadocContentAccess.getMarkdownContentReader(method)
+    //             : JavadocContentAccess.getPlainTextContentReader(method);
+    //     return reader != null ? toString(reader) : null;
+    // }
+
     private static String toString(Reader reader) {
         try (Scanner s = new Scanner(reader)) {
             s.useDelimiter("\\A");

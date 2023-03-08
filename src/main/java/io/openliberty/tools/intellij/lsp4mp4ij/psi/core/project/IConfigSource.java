@@ -10,6 +10,7 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration file API
@@ -23,6 +24,8 @@ public interface IConfigSource {
 	/**
 	 * Returns the property from the given <code>key</code> and null otherwise.
 	 * 
+	 * Any property expressions in the property value should not be expanded.
+	 * 
 	 * @param key the key
 	 * @return the property from the given <code>key</code> and null otherwise.
 	 */
@@ -31,6 +34,8 @@ public interface IConfigSource {
 	/**
 	 * Returns the property as Integer from the given <code>key</code> and null
 	 * otherwise.
+	 * 
+	 * Any property expressions in the property value should not be expanded.
 	 * 
 	 * @param key the key
 	 * @return the property as Integer from the given <code>key</code> and null
@@ -84,4 +89,11 @@ public interface IConfigSource {
 	 * @return the profile of the config source and null otherwise.
 	 */
 	String getProfile();
+
+	/**
+	 * Returns the keys of all values defined in this config source
+	 *
+	 * @return the keys of all values defined in this config source
+	 */
+	Set<String> getAllKeys();
 }
