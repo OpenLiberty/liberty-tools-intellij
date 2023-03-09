@@ -10,10 +10,12 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp;
 
+import com.intellij.ProjectTopics;
 import com.intellij.json.JsonFileType;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.libraries.Library;
@@ -27,6 +29,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.util.ConcurrencyUtil;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -40,25 +43,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/QuarkusProjectService.java
  */
-public class MicroProfileProjectService implements LibraryTable.Listener, BulkFileListener {
+public class MicroProfileProjectService implements LibraryTable.Listener, BulkFileListener, ModuleListener, Disposable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileProjectService.class);
 
     private final Project project;
 
     private final Map<Module, MutablePair<VirtualFile, Boolean>> schemas = new ConcurrentHashMap<>();
 
+    private final ExecutorService executor;
+
+    @Override
+    public void dispose() {
+        executor.shutdown();
+    }
     public interface Listener {
         void libraryUpdated(Library library);
         void sourceUpdated(List<Pair<Module, VirtualFile>> sources);
     }
 
     public static MicroProfileProjectService getInstance(Project project) {
-        return ServiceManager.getService(project, MicroProfileProjectService.class);
+        return project.getService(MicroProfileProjectService.class);
     }
 
     public static final Topic<Listener> TOPIC = Topic.create(MicroProfileProjectService.class.getName(), Listener.class);
@@ -67,9 +80,17 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
 
     public MicroProfileProjectService(Project project) {
         this.project = project;
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            this.executor = ConcurrencyUtil.newSameThreadExecutorService();
+        } else {
+            this.executor = new ThreadPoolExecutor(0, 1,
+                    1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
+                    r -> new Thread(r, "Quarkus lib pool " + project.getName()));
+        }
         LibraryTablesRegistrar.getInstance().getLibraryTable(project).addListener(this, project);
         connection = ApplicationManager.getApplication().getMessageBus().connect(project);
         connection.subscribe(VirtualFileManager.VFS_CHANGES, this);
+        project.getMessageBus().connect().subscribe(ProjectTopics.MODULES, this);
     }
 
     private void handleLibraryUpdate(Library library) {
