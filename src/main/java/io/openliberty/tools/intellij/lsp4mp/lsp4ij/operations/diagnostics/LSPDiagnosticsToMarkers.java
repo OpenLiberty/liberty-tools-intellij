@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LSPIJUtils;
@@ -87,12 +88,18 @@ public class LSPDiagnosticsToMarkers implements Consumer<PublishDiagnosticsParam
 
     @NotNull
     private Map<String, RangeHighlighter[]> getAllMarkers(Editor editor) {
-        Map<String, RangeHighlighter[]> allMarkers = editor.getUserData(LSP_MARKER_KEY_PREFIX);
-        if (allMarkers == null) {
-            allMarkers = new HashMap<>();
-            editor.putUserData(LSP_MARKER_KEY_PREFIX, allMarkers);
+        if (editor instanceof UserDataHolderBase) {
+            return ((UserDataHolderBase) editor).putUserDataIfAbsent(LSP_MARKER_KEY_PREFIX, new HashMap<>());
+        } else {
+            synchronized (editor) {
+                Map<String, RangeHighlighter[]> allMarkers = editor.getUserData(LSP_MARKER_KEY_PREFIX);
+                if (allMarkers == null) {
+                    allMarkers = new HashMap<>();
+                    editor.putUserData(LSP_MARKER_KEY_PREFIX, allMarkers);
+                }
+                return allMarkers;
+            }
         }
-        return allMarkers;
     }
 
     private EffectType getEffectType(DiagnosticSeverity severity) {

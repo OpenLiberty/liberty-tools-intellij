@@ -23,12 +23,12 @@ import com.intellij.psi.PsiLiteral;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProject;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertyProvider;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -37,7 +37,13 @@ import org.eclipse.lsp4mp.commons.utils.AntPathMatcher;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Logger;
-//import static com.redhat.qute.services.diagnostics.QuteDiagnosticContants.DIAGNOSTIC_DATA_NAME;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValueExpression;
 
 /**
  * Collects diagnostics related to the <code>@ConfigProperty</code> annotation
@@ -78,7 +84,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	@Override
 	public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
 		Module javaProject = context.getJavaProject();
-		return PsiTypeUtils.findType(javaProject, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION) != null;
+		return PsiTypeUtils.findType(javaProject, CONFIG_PROPERTY_ANNOTATION) != null;
 	}
 
 	private static List<String> getPatternsFromContext(JavaDiagnosticsContext context) {
@@ -89,8 +95,8 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	public void visitClass(PsiClass typeDeclaration) {
 		// Get prefix from @ConfigProperties(prefix="")
 		for(PsiAnnotation annotation : typeDeclaration.getAnnotations()) {
-			if (AnnotationUtils.isMatchAnnotation(annotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION)) {
-				PsiAnnotationMemberValue prefixExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_PREFIX);
+			if (AnnotationUtils.isMatchAnnotation(annotation, CONFIG_PROPERTIES_ANNOTATION)) {
+				PsiAnnotationMemberValue prefixExpr = getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_PREFIX);
 				if (prefixExpr instanceof PsiLiteral && ((PsiLiteral) prefixExpr).getValue() instanceof String) {
 					currentPrefix = (String) ((PsiLiteral) prefixExpr).getValue();
 				}
@@ -104,8 +110,8 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	@Override
 	public void visitAnnotation(PsiAnnotation annotation) {
 		PsiField parent = PsiTreeUtil.getParentOfType(annotation, PsiField.class);
-		if (AnnotationUtils.isMatchAnnotation(annotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION) && parent != null) {
-			PsiAnnotationMemberValue defaultValueExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
+		if (AnnotationUtils.isMatchAnnotation(annotation, CONFIG_PROPERTY_ANNOTATION) && parent != null) {
+			PsiAnnotationMemberValue defaultValueExpr = getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
 			validatePropertyDefaultValue(annotation, defaultValueExpr, parent);
 			validatePropertyHasValue(annotation, defaultValueExpr);
 		}
@@ -133,7 +139,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 			PsiType fieldBinding = parent.getType();
 			if (fieldBinding != null && !isAssignable(fieldBinding, javaProject, defValue)) {
 				String message = MessageFormat.format(EXPECTED_TYPE_ERROR_MESSAGE, defValue, fieldBinding.getPresentableText());
-				super.addDiagnostic(message, MicroProfileConfigConstants.MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, defaultValueExpr,
+				super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, defaultValueExpr,
 						MicroProfileConfigErrorCode.DEFAULT_VALUE_IS_WRONG_TYPE, DiagnosticSeverity.Error);
 			}
 		}
@@ -149,8 +155,8 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	 */
 	private void validatePropertyHasValue(PsiAnnotation annotation, PsiAnnotationMemberValue defaultValueExpr) {
 			String name = null;
-			PsiAnnotationMemberValue nameExpression = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
-					MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME);
+			PsiAnnotationMemberValue nameExpression = getAnnotationMemberValueExpression(annotation,
+					CONFIG_PROPERTY_ANNOTATION_NAME);
 			boolean hasDefaultValue = defaultValueExpr != null;
 
 			if (nameExpression instanceof PsiLiteral && ((PsiLiteral) nameExpression).getValue() instanceof String) {
@@ -160,12 +166,12 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 
 		if (name != null) {
 			if (name.isEmpty()) {
-				String message = MessageFormat.format(EMPTY_KEY_ERROR_MESSAGE, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME);
-				Diagnostic d = super.addDiagnostic(message, MicroProfileConfigConstants.MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, nameExpression,
+				String message = MessageFormat.format(EMPTY_KEY_ERROR_MESSAGE, CONFIG_PROPERTY_ANNOTATION_NAME);
+				Diagnostic d = super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, nameExpression,
 						MicroProfileConfigErrorCode.EMPTY_KEY, DiagnosticSeverity.Error);
 			} else if (!hasDefaultValue && !doesPropertyHaveValue(name, getContext()) && !isPropertyIgnored(name)) {
 				String message = MessageFormat.format(NO_VALUE_ERROR_MESSAGE, name);
-				Diagnostic d = super.addDiagnostic(message, MicroProfileConfigConstants.MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, nameExpression,
+				Diagnostic d = super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, nameExpression,
 						MicroProfileConfigErrorCode.NO_VALUE_ASSIGNED_TO_PROPERTY, DiagnosticSeverity.Warning);
 				setDataForUnassigned(name, d);
 			}
@@ -213,7 +219,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 					case "java.lang.Character":
 						return Character.valueOf(defValue.charAt(0)) != null;
 					case "java.lang.Class":
-						return PsiTypeUtils.findType(javaProject, defValue) != null;
+						return  PsiTypeUtils.findType(javaProject, defValue) != null;
 					case "java.lang.String":
 						return true;
 					default:
@@ -234,7 +240,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 
 	public static void setDataForUnassigned(String name, Diagnostic diagnostic) {
 		JsonObject data = new JsonObject();
-//		data.addProperty(DIAGNOSTIC_DATA_NAME, name);
+		data.addProperty(DIAGNOSTIC_DATA_NAME, name);
 		diagnostic.setData(data);
 	}
 }

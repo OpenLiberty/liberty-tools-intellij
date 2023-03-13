@@ -15,6 +15,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.codeInspection.ex.ExternalAnnotatorBatchInspection;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.TextRange;
@@ -37,7 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LSPLocalInspectionTool extends LocalInspectionTool {
+public class LSPLocalInspectionTool extends LocalInspectionTool implements ExternalAnnotatorBatchInspection {
     private static final Logger LOGGER = LoggerFactory.getLogger(LSPLocalInspectionTool.class);
 
     @Nls

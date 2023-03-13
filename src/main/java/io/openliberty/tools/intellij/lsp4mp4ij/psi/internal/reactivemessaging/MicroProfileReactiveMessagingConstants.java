@@ -28,6 +28,8 @@ public class MicroProfileReactiveMessagingConstants {
 	// See
 	// https://github.com/eclipse/microprofile-reactive-messaging/blob/master/api/src/main/java/org/eclipse/microprofile/reactive/messaging
 
+    public static final String MICRO_PROFILE_REACTIVE_MESSAGING_DIAGNOSTIC_SOURCE = "microprofile-reactive-messaging";
+
 	// API
 	public static final String CONNECTOR_ANNOTATION = "org.eclipse.microprofile.reactive.messaging.spi.Connector";
 

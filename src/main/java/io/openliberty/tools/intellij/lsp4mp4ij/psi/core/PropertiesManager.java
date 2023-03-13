@@ -28,6 +28,7 @@ import com.intellij.util.UniqueResultsQuery;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.PropertiesCollector;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.StaticPropertyProviderExtensionPointBean;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4mp.commons.ClasspathKind;
@@ -36,12 +37,15 @@ import org.eclipse.lsp4mp.commons.MicroProfileProjectInfo;
 import org.eclipse.lsp4mp.commons.MicroProfileProjectInfoParams;
 import org.eclipse.lsp4mp.commons.MicroProfilePropertiesScope;
 import org.eclipse.lsp4mp.commons.MicroProfilePropertyDefinitionParams;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * MicroProfile properties manager used to:
@@ -88,35 +92,37 @@ public class PropertiesManager {
                                                               DocumentFormat documentFormat) {
         MicroProfileProjectInfo info = createInfo(module, classpathKind);
         long startTime = System.currentTimeMillis();
-        boolean excludeTestCode = classpathKind == ClasspathKind.SRC;
-        PropertiesCollector collector = new PropertiesCollector(info, scopes);
-        SearchScope scope = createSearchScope(module, scopes, classpathKind == ClasspathKind.TEST);
-        SearchContext context = new SearchContext(module, scope, collector, utils, documentFormat);
-        DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
-            Query<PsiModifierListOwner> query = createSearchQuery(context);
-            beginSearch(context);
-            query.forEach((Consumer<? super PsiModifierListOwner>) psiMember -> collectProperties(psiMember, context));
-            endSearch(context);
-        });
+            boolean excludeTestCode = classpathKind == ClasspathKind.SRC;
+            PropertiesCollector collector = new PropertiesCollector(info, scopes);
+        if (module != null) {
+            SearchScope scope = createSearchScope(module, scopes, classpathKind == ClasspathKind.TEST);
+            SearchContext context = new SearchContext(module, scope, collector, utils, documentFormat);
+            DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
+                Query<PsiModifierListOwner> query = createSearchQuery(context);
+                beginSearch(context);
+                query.forEach((Consumer<? super PsiModifierListOwner>) psiMember -> collectProperties(psiMember, context));
+                endSearch(context);
+            });
+        }
         LOGGER.info("End computing MicroProfile properties for '" + info.getProjectURI() + "' in "
                 + (System.currentTimeMillis() - startTime) + "ms.");
         return info;
     }
 
     private void beginSearch(SearchContext context) {
-        for(IPropertiesProvider provider : IPropertiesProvider.EP_NAME.getExtensions()) {
+        for(IPropertiesProvider provider : getPropertiesProviders()) {
             provider.beginSearch(context);
         }
     }
 
     private void endSearch(SearchContext context) {
-        for(IPropertiesProvider provider : IPropertiesProvider.EP_NAME.getExtensions()) {
+        for(IPropertiesProvider provider : getPropertiesProviders()) {
             provider.endSearch(context);
         }
     }
 
     private void collectProperties(PsiModifierListOwner psiMember, SearchContext context) {
-        for(IPropertiesProvider provider : IPropertiesProvider.EP_NAME.getExtensions()) {
+        for(IPropertiesProvider provider : getPropertiesProviders()) {
             provider.collectProperties(psiMember, context);
         }
     }
@@ -162,6 +168,15 @@ public class PropertiesManager {
           }
         }
         return new UniqueResultsQuery<>(query);
+    }
+
+    @NotNull
+    List<IPropertiesProvider> getPropertiesProviders() {
+        List<IPropertiesProvider> allProviders = new ArrayList<>();
+        allProviders.addAll(IPropertiesProvider.EP_NAME.getExtensionList());
+        allProviders.addAll(StaticPropertyProviderExtensionPointBean.EP_NAME.getExtensionList().stream()
+                .map(bean -> bean.getInstance()).collect(Collectors.toList()));
+        return allProviders;
     }
 
     // ---------------------------------- Properties definition
