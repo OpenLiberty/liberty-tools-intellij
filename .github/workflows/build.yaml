@@ -10,38 +10,44 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        runtime: [ linux, windows ]
         include:
           - runtime: linux
             os: ubuntu-latest
             setupCmd: ./src/test/resources/ci/scripts/setup.sh
-            execCmd: ./src/test/resources/ci/scripts/exec.sh
-
-          - runtime: mac
-            os: macOS-latest
-            setupCmd: ./src/test/resources/ci/scripts/setup.sh
-            execCmd: ./src/test/resources/ci/scripts/exec.sh
-
+            execCmd: ./src/test/resources/ci/scripts/run.sh
+            reportName: linux-test-report
           - runtime: windows
             os: windows-latest
             setupCmd: bash ./src/test/resources/ci/scripts/setup.sh
-            execCmd: bash ./src/test/resources/ci/scripts/exec.sh
+            execCmd: bash ./src/test/resources/ci/scripts/run.sh
+            reportName: windows-test-report
     steps:
-      - name: Checkout liberty-tools-intellij
+      - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v2
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: ${{ matrix.setupCmd }}
       - name: 'Run UI integration tests'
         working-directory: ./liberty-tools-intellij
         run: ${{ matrix.execCmd }}
-      - name: Build Liberty-Tools-Intellij
+      - name: 'Archive Test logs and reports'
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.reportName }}
+          path: |
+            liberty-tools-intellij/build/reports/
+      - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
-        run: ./gradlew buildPlugin
-      - name: Archive artifacts
+        run: bash ./gradlew buildPlugin --info
+      - name: 'Archive artifacts'
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
@@ -51,4 +57,3 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
-

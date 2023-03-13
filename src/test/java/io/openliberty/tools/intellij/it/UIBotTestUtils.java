@@ -38,7 +38,7 @@ import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
  */
 public class UIBotTestUtils {
 
-    enum PrintTo {
+    public enum PrintTo {
         STDOUT, FILE
     }
 
@@ -59,18 +59,41 @@ public class UIBotTestUtils {
             DialogFixture newProjectDialog = welcomePage.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(10));
             JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
             JButtonFixture okButton = newProjectDialog.getButton("OK");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for init text on text field", "Init text in text field is empty", () -> okButton.isEnabled());
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for init text on text field",
+                    "Init text in text field is empty",
+                    okButton::isEnabled);
 
             textField.setText(projectPath);
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for open project text box to be populated with set value",
+                    "Open project text box was not populated with set value",
+                    () -> textField.getText().equals(projectPath));
 
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for open project text box to be populated with set value", "Open project text box was not populated with set value", () -> textField.getText().equals(projectPath));
             ComponentFixture projectTree = newProjectDialog.getTree();
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for project tree to show the set project", "The project tree did not show the set project", () -> projectTree.getData().hasText(projectName));
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for project tree to show the set project",
+                    "The project tree did not show the set project",
+                    () -> projectTree.getData().hasText(projectName));
 
             // Click OK.
             JButtonFixture jbf = newProjectDialog.button("OK");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "Waiting for OK button to be enabled", "OK button was not enabled", () -> jbf.isEnabled());
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for OK button to be enabled",
+                    "OK button was not enabled",
+                    jbf::isEnabled);
             jbf.click();
+
+            // Need a buffer here.
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
@@ -91,19 +114,50 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Runs a dashboard action using the project's the drop-down menu view.
+     * Runs a dashboard action using the drop-down tree view.
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param action      The action to run
      */
-    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String treeName, String action) {
+    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String action) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture treeFixture = projectFrame.getTree(treeName, action);
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(2), "Waiting for " + action + " in tree fixture to show", "Action " + action + " in tree fixture is not showing", () -> treeFixture.isShowing());
+
+        // Click on the Liberty toolbar to give it focus.
+        ComponentFixture dashboardBar = projectFrame.getBaseLabel("Liberty", "10");
+        dashboardBar.click();
+
+        // Check if theproject tree was expanded and the action is showing.
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", action, "1");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(2),
+                "Waiting for " + action + " in tree fixture to show and come into focus",
+                "Action " + action + " in tree fixture is not showing or not in focus",
+                treeFixture::isShowing);
+
+        // Double-click on the action.
         List<RemoteText> rts = treeFixture.findAllText();
         for (RemoteText rt : rts) {
             if (action.equals(rt.getText())) {
-                rt.doubleClick();
+                Exception error = null;
+                for (int i = 0; i < 3; i++) {
+                    try {
+                        error = null;
+                        rt.doubleClick();
+                        break;
+                    } catch (Exception e) {
+                        // The content of the Liberty tool window dashboard may blink in and out of existence; therefore,
+                        // causing errors. Retry if that is the case.
+                        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Double click on dashboard drop down action failed (" + e.getMessage() + "). Retrying.");
+                        TestUtils.sleepAndIgnoreException(1);
+                        error = e;
+                    }
+                }
+
+                // Report the last error if there is one.
+                if (error != null) {
+                    error.printStackTrace();
+                }
+
                 break;
             }
         }
@@ -115,10 +169,33 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The project name to wait for.
      */
-    public static void validateProjectIsInDashboard(RemoteRobot remoteRobot, String projectName) {
+    public static void validateDashboardItemIsShowing(RemoteRobot remoteRobot, String projectName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName);
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10), Duration.ofSeconds(2), "Waiting for Tree fixture to show", "Tree fixture is not showing", () -> treeFixture.isShowing());
+
+        // There is an idexing start window between which the dashboard content may come and go. Try to handle it.
+        try {
+            projectFrame.getTree("LibertyTree", projectName, "1");
+        } catch (Exception e) {
+            // Do nothing.
+        }
+
+        // Wait a bit and re-try. Indexing is a long process right now.
+        TestUtils.sleepAndIgnoreException(60);
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName, "4");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(2),
+                "Waiting for Tree fixture to show",
+                "Tree fixture is not showing",
+                treeFixture::isShowing);
+    }
+
+    /**
+     * Waits for the Welcome page, which is shown when the project frame is closed.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void validateProjectFrameClosed(RemoteRobot remoteRobot) {
+        remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
     }
 
     /**
@@ -194,12 +271,18 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Clicks on an action button with the specified name and text.
+     * Clicks on the expand action button on the dashboard view.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void expandProjectActionMenu(RemoteRobot remoteRobot) {
+    public static void expandDashboardProjectTree(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        // Click on the Liberty toolbar to give the dashboard view focus.
+        ComponentFixture dashboardBar = projectFrame.getBaseLabel("Liberty", "10");
+        dashboardBar.click();
+
+        // Expand the project tree to show the available actions.
         Locator locator = byXpath("//div[@class='LibertyExplorer']//div[@class='ActionButton' and contains(@myaction.key, 'action.ExpandAll.text')]");
         ComponentFixture actionButton = projectFrame.getActionButton(locator);
         actionButton.click();
@@ -223,7 +306,7 @@ public class UIBotTestUtils {
             con.setRequestMethod("GET");
 
             try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-                try (FileWriter fw = new FileWriter("botCH.html")) {
+                try (FileWriter fw = new FileWriter("botCompHierarchy.html")) {
                     String inputLine;
                     while ((inputLine = br.readLine()) != null) {
                         switch (printTo) {
