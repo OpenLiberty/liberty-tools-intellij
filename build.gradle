@@ -1,15 +1,15 @@
 plugins {
     id 'java'
-    // 1.13.0 causes UNSUPPORTED JVM ISSUE: https://github.com/JetBrains/gradle-intellij-plugin/issues/1317.
-    // Wait for fix to make it into a release.
-    id 'org.jetbrains.intellij' version '1.12.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
+    id 'org.jetbrains.intellij' version '1.13.1'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
 }
 
 group 'io.openliberty.tools'
 version '0.0.9-SNAPSHOT'
 
 sourceCompatibility = 17
+targetCompatibility = 17
+
 def remoteRobotVersion = "0.11.16"
 
 repositories {
@@ -34,6 +34,16 @@ configurations {
     // needed to avoid ClassCastException org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to class javax.xml.parsers.DocumentBuilderFactory
     // xml-apis interfering with xercs
     all*.exclude group: 'xml-apis'
+
+    runtimeClasspath {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
 }
 
 dependencies {
@@ -109,6 +119,7 @@ downloadRobotServerPlugin {
 runIdeForUiTests {
     systemProperty "robot-server.port", "8082"
     systemProperty "ide.mac.message.dialogs.as.sheets", "false"
+    systemProperty "jb.privacy.policy.text", "<!--999.999-->"
     systemProperty "idea.trust.all.projects", "true"
     systemProperty "ide.show.tips.on.startup.default.value", "false"
     systemProperty "ide.mac.file.chooser.native", "false"
@@ -123,6 +134,15 @@ test {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
+    }
+}
+
+tasks {
+    // Disabling buildSearchableOptions, which runs as part of the buildPlugin task.
+    // this is to buildSearchableOptions to workaround the "Only one instance of IDEA can be run at a time" problem.
+    // Per documentation: https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#the-development-instance-sandbox-directory
+    buildSearchableOptions {
+        enabled = false
     }
 }
 

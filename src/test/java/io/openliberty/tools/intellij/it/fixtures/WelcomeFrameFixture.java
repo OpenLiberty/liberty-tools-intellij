@@ -35,12 +35,12 @@ public class WelcomeFrameFixture extends CommonContainerFixture {
         ComponentFixture cf;
 
         // The Welcome page may show two different views.
-        if (hasAnyComponent(this, byXpath("//div[@class='AnActionLink' and @text='Open existing Eclipse projects…'] "))) {
-            // Handle the view that shows recent projects.
-            cf = find(ComponentFixture.class, byXpath("//div[@class='AnActionLink' and  @text='Open existing Eclipse projects…']"));
+        if (hasAnyComponent(this, byXpath("//div[@class='JBOptionButton' and @text='Open'] "))) {
+            // Handle the view that shows the list of recently used projects
+            cf = find(ComponentFixture.class, byXpath("//div[@class='JBOptionButton' and @text='Open']"));
         } else {
-            // Handle the view that does not show recent projects.
-            cf = find(ComponentFixture.class, byXpath("//div[@class='JBOptionButton' and @text='" + text + "']"));
+            // Handle the view that does not show any recently used projects.
+            cf = find(ComponentFixture.class, byXpath("//div[@class='JButton' and @accessiblename.key='action.WelcomeScreen.OpenProject.text']"));
         }
 
         return cf;

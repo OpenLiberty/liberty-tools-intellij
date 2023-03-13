@@ -9,6 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.stepsProcessing.StepLogger;
+import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
@@ -16,6 +18,7 @@ import java.nio.file.Paths;
 /**
  * Tests Liberty Tools actions using a Maven application.
  */
+
 public class MavenSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Application Name
@@ -44,6 +47,7 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
 
     @BeforeAll
     public static void setup() {
+        StepWorker.registerProcessor(new StepLogger());
         prepareEnv(PROJECT_PATH, PROJECT_NAME);
     }
 }

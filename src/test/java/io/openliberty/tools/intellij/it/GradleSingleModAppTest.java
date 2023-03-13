@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+/**
+ * Tests Liberty Tools actions using a Gradle application.
+ */
 public class GradleSingleModAppTest extends SingleModAppTestCommon {
 
     /**
