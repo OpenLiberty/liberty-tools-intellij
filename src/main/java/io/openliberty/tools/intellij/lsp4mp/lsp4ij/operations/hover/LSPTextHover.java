@@ -220,29 +220,30 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
         final Document document = manager.getDocument(element.getContainingFile());
         this.request = getCursorOffset(editor).thenComposeAsync(offset -> {
             if (offset != -1 && (this.lspRequest == null || !element.equals(this.lastElement) || offset != this.lastOffset)) {
-                this.lastElement = element;
-                this.lastOffset = offset;
-                this.lspRequest = LanguageServiceAccessor.getInstance(element.getProject())
-                        .getLanguageServers(document, capabilities -> isHoverCapable(capabilities))
-                        .thenApplyAsync(languageServers -> // Async is very important here, otherwise the LS Client thread is in
-                                // deadlock and doesn't read bytes from LS
-                        {
-                            return languageServers.stream()
-                                    .map(languageServer -> {
-                                        try {
-                                            return languageServer.getTextDocumentService()
-                                                    .hover(LSPIJUtils.toHoverParams(offset, document)).get();
-                                        } catch (ExecutionException e) {
-                                            LOGGER.warn(e.getLocalizedMessage(), e);
-                                            return null;
-                                        } catch (InterruptedException e) {
-                                            LOGGER.warn(e.getLocalizedMessage(), e);
-                                            Thread.currentThread().interrupt();
-                                            return null;
-                                        }
-                                    }).filter(Objects::nonNull).collect(Collectors.toList());
-                        });
-
+                ApplicationManager.getApplication().runReadAction(() -> { // make sure no writes to the project are underway
+                    this.lastElement = element;
+                    this.lastOffset = offset;
+                    this.lspRequest = LanguageServiceAccessor.getInstance(element.getProject())
+                            .getLanguageServers(document, capabilities -> isHoverCapable(capabilities))
+                            .thenApplyAsync(languageServers -> // Async is very important here, otherwise the LS Client thread is in
+                                    // deadlock and doesn't read bytes from LS
+                            {
+                                return languageServers.stream()
+                                        .map(languageServer -> {
+                                            try {
+                                                return languageServer.getTextDocumentService()
+                                                        .hover(LSPIJUtils.toHoverParams(offset, document)).get();
+                                            } catch (ExecutionException e) {
+                                                LOGGER.warn(e.getLocalizedMessage(), e);
+                                                return null;
+                                            } catch (InterruptedException e) {
+                                                LOGGER.warn(e.getLocalizedMessage(), e);
+                                                Thread.currentThread().interrupt();
+                                                return null;
+                                            }
+                                        }).filter(Objects::nonNull).collect(Collectors.toList());
+                            });
+                });
             }
             return this.lspRequest;
         });
