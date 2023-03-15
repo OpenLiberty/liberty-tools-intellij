@@ -22,11 +22,13 @@ import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
 import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
 import org.eclipse.lsp4jakarta.commons.JakartaClasspathParams;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +61,15 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-    List<PublishDiagnosticsParams> diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
+    var diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
     return CompletableFuture.completedFuture(diagnostics);
+  }
+
+  // Support the message "jakarta/java/codeaction
+  public CompletableFuture<List<CodeAction>> getCodeAction(JakartaJavaCodeActionParams params) {
+    IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+    var codeActions = PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils);
+    return CompletableFuture.completedFuture(codeActions);
   }
 
   @Override

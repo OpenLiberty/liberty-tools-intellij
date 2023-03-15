@@ -25,6 +25,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.JakartaCodeActionHandler;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSClassDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodDiagnosticsCollector;
@@ -39,6 +40,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagn
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4mp.commons.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,7 @@ public class PropertiesManagerForJakarta {
     }
 
     private List<DiagnosticsCollector> diagnosticsCollectors = new ArrayList<>();
+    private JakartaCodeActionHandler codeActionHandler = new JakartaCodeActionHandler();
 
     private PropertiesManagerForJakarta() {
         diagnosticsCollectors.add(new ServletDiagnosticsCollector());
@@ -79,6 +82,7 @@ public class PropertiesManagerForJakarta {
         diagnosticsCollectors.add(new DependencyInjectionDiagnosticsCollector());
         diagnosticsCollectors.add(new JsonpDiagnosticCollector());
         diagnosticsCollectors.add(new WebSocketDiagnosticsCollector());
+        codeActionHandler = new JakartaCodeActionHandler();
     }
 
     /**
@@ -206,4 +210,9 @@ public class PropertiesManagerForJakarta {
         return utils.resolveCompilationUnit(uri);
     }
 
+    public List<CodeAction> getCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils) {
+        return ApplicationManager.getApplication().runReadAction((Computable<List<CodeAction>>) () -> {
+            return codeActionHandler.codeAction(params, utils);
+        });
+    }
 }
