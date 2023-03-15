@@ -126,7 +126,7 @@ public class UIBotTestUtils {
         ComponentFixture dashboardBar = projectFrame.getBaseLabel("Liberty", "10");
         dashboardBar.click();
 
-        // Check if theproject tree was expanded and the action is showing.
+        // Check if the project tree was expanded and the action is showing.
         ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", action, "1");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
@@ -164,24 +164,52 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Waits for the specified project to appear in the dashboard.
+     * Runs a dashboard action using the pop-up action menu.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param projectName The project name to wait for.
+     * @param projectName The name of the project.
+     * @param action      The action to run.
      */
-    public static void validateDashboardItemIsShowing(RemoteRobot remoteRobot, String projectName) {
+    public static void runDashboardActionFromMenuView(RemoteRobot remoteRobot, String projectName, String action) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName, "1");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(2),
+                "Waiting for " + projectName + " in tree fixture to show",
+                "Action " + action + " in tree fixture is not showing",
+                treeFixture::isShowing);
+
+        List<RemoteText> rts = treeFixture.findAllText();
+        for (RemoteText rt : rts) {
+            if (projectName.equals(rt.getText())) {
+                rt.rightClick();
+                ComponentFixture menuAction = projectFrame.getActionMenuItem(action);
+                menuAction.click();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Waits for the specified project tree item to appear in the dashboard.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param treeItem    The project name to wait for.
+     */
+    public static void validateDashboardProjectTreeItemIsShowing(RemoteRobot remoteRobot, String treeItem) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
-        // There is an idexing start window between which the dashboard content may come and go. Try to handle it.
+        // There is a window between which the dashboard content may come and go when intellij
+        // detects indexing starts and ends. Try to handle it.
         try {
-            projectFrame.getTree("LibertyTree", projectName, "1");
+            projectFrame.getTree("LibertyTree", treeItem, "1");
         } catch (Exception e) {
             // Do nothing.
         }
 
         // Wait a bit and re-try. Indexing is a long process right now.
-        TestUtils.sleepAndIgnoreException(60);
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName, "4");
+        TestUtils.sleepAndIgnoreException(10);
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "6");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
                 "Waiting for Tree fixture to show",
