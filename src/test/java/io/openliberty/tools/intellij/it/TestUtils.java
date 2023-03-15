@@ -135,7 +135,7 @@ public class TestUtils {
         String msg = testName + ":validateAppStarted: Timed out while waiting for application under URL: " + appUrl + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
-        String msgHeader = "TESTCASE: " + testName;
+        String msgHeader = "Message lo for failed test: " + testName + ":validateAppStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
     }
@@ -148,6 +148,8 @@ public class TestUtils {
      * @param wlpInstallPath The liberty installation relative path.
      */
     public static void validateAppStopped(String testName, String appUrl, String wlpInstallPath) {
+        printTrace(TraceSevLevel.INFO, testName + ":validateAppStopped: Entry. URL: " + appUrl);
+
         int retryCountLimit = 60;
         int retryIntervalSecs = 2;
         int retryCount = 0;
@@ -168,6 +170,7 @@ public class TestUtils {
                     continue;
                 }
 
+                printTrace(TraceSevLevel.INFO, testName + ":validateAppStopped. Exit. The application stopped successfully.");
                 return;
             } catch (Exception e) {
                 try {
@@ -179,10 +182,12 @@ public class TestUtils {
         }
 
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
+        String msg = testName + ":validateAppStopped: Timed out while waiting for application under URL: " + appUrl + " to stop.";
+        printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
-        String msgHeader = "TESTCASE: " + testName;
+        String msgHeader = "Message lo for failed test: " + testName + ":validateAppStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
-        Assertions.fail("Timed out while waiting for application under URL: " + appUrl + " to stop.");
+        Assertions.fail(msg);
     }
 
     /**
