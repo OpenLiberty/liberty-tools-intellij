@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.utils.Keyboard;
 import static java.awt.event.KeyEvent.*;
 
@@ -340,17 +341,25 @@ public class UIBotTestUtils {
      */
     public static void openServerXMLFile(RemoteRobot remoteRobot, String appName){
         // Click on File on the Menu bar.
+        System.out.println("AJM: using the newest approach to open files?");
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
-        if (!appNameEntry.hasText("server.xml")){
-            appNameEntry.findText(appName).doubleClick();
-            appNameEntry.findText("src").doubleClick();
-            appNameEntry.findText("main").doubleClick();
-            appNameEntry.findText("liberty").doubleClick();
-            appNameEntry.findText("server.xml").doubleClick();
+        //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
+        // get a JTreeFixture reference to the file project viewer entry
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
+        // use it to expand to server.xml in one operation - no mouse needed
+        //projTree.expand(appName, "src", "main", "liberty", "config").findText("server.xml").doubleClick();
+
+        if (!projTree.hasText("server.xml")){
+            projTree.expand(appName, "src", "main", "liberty", "config").findText("server.xml").doubleClick();
+            //appNameEntry.findText(appName).doubleClick();
+            //appNameEntry.findText("src").doubleClick();
+            //appNameEntry.findText("main").doubleClick();
+            //appNameEntry.findText("liberty").doubleClick();
+            //appNameEntry.findText("server.xml").doubleClick();
         }
         else {
-            appNameEntry.findText("server.xml").doubleClick();
+            projTree.findText("server.xml").doubleClick();
+            //appNameEntry.findText("server.xml").doubleClick();
         }
     }
 
