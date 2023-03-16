@@ -11,10 +11,7 @@ package io.openliberty.tools.intellij.it.fixtures;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.CommonContainerFixture;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import org.jetbrains.annotations.NotNull;
@@ -120,6 +117,20 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String visibleText = xpathVars[0];
 
         return find(ComponentFixture.class,
+                byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
+                Duration.ofMinutes(1));
+    }
+
+    /**
+     * Returns the JTreeFixture object fixture associated with the ProjectViewTree class.
+     *
+     * @param xpathVars The Locator custom variables: text
+     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     */
+    public JTreeFixture getProjectViewJTree(String... xpathVars) {
+        String visibleText = xpathVars[0];
+        //return find(JTreeFixture.class, JTreeFixture.Companion.byType(), Duration.ofSeconds(10));
+        return find(JTreeFixture.class,
                 byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
                 Duration.ofMinutes(1));
     }

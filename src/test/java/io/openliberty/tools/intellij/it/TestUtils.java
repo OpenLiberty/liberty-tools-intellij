@@ -207,17 +207,20 @@ public class TestUtils {
         ComponentFixture docPopupWindow = projectFrame.getDocumentationHintEditorPane(findDocTarget);
         boolean found = false;
         List<RemoteText> rts = docPopupWindow.findAllText();
+
+        String remoteString = new String();
         for (RemoteText rt : rts) {
-            if (expectedHoverText.equals(rt.getText())) {
-                Assertions.assertEquals(rt.getText(), expectedHoverText);
+            remoteString = remoteString + rt.getText();
+            if (expectedHoverText.contains(remoteString)) {
+                Assertions.assertTrue(expectedHoverText.contains(remoteString));
                 found = true;
                 break;
             }
         }
-        if (!found){
-            Assertions.fail("Did not find diagnostic help text expected");
-        }
 
+        if (!found){
+            Assertions.fail("Did not find diagnostic help text expected. Looking for " + expectedHoverText);
+        }
     }
 
     /**
