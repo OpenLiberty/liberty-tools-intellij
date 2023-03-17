@@ -135,7 +135,7 @@ public class TestUtils {
         String msg = testName + ":validateAppStarted: Timed out while waiting for application under URL: " + appUrl + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
-        String msgHeader = "Message lo for failed test: " + testName + ":validateAppStarted";
+        String msgHeader = "Message log for failed test: " + testName + ":validateAppStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
     }
@@ -185,7 +185,7 @@ public class TestUtils {
         String msg = testName + ":validateAppStopped: Timed out while waiting for application under URL: " + appUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
-        String msgHeader = "Message lo for failed test: " + testName + ":validateAppStopped";
+        String msgHeader = "Message log for failed test: " + testName + ":validateAppStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
     }

@@ -68,7 +68,7 @@ public abstract class SingleModAppTestCommon {
     @Test
     @Video
     public void testStartActionUsingDropDownMenu() {
-        String testName = "testDropDownStartAction";
+        String testName = "testStartActionUsingDropDownMenu";
         String absoluteWLPPath = projectPath + wlpInstallPath;
 
         // Start dev mode.
@@ -90,7 +90,7 @@ public abstract class SingleModAppTestCommon {
      */
     @Test
     public void testRunTestsActionUsingDropDownMenu() {
-        String testName = "testDropDownStartAction";
+        String testName = "testRunTestsActionUsingDropDownMenu";
         String absoluteWLPPath = projectPath + wlpInstallPath;
 
         // Delete any existing test report files.
@@ -124,7 +124,7 @@ public abstract class SingleModAppTestCommon {
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testStartActionUsingPopUpMenu() {
-        String testName = "testMenuStartAction";
+        String testName = "testStartActionUsingPopUpMenu";
         String absoluteWLPPath = projectPath + wlpInstallPath;
 
         // Start dev mode.
@@ -140,14 +140,14 @@ public abstract class SingleModAppTestCommon {
         // Validate that the server stopped.
         TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
     }
-    
+
     /**
      * Tests Liberty Tools start/runTests/stop actions run from the project's pop-up action menu.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingPopUpMenu() {
-        String testName = "testDropDownStartAction";
+        String testName = "testRunTestsActionUsingPopUpMenu";
         String absoluteWLPPath = projectPath + wlpInstallPath;
 
         // Delete any existing test report files.
