@@ -23,12 +23,12 @@ OS=$(uname -s)
 # run. Performance will be improved once issue:
 # https://github.com/OpenLiberty/ci.maven/issues/1557 is resolved.
 #
-# @parameter1: The working directory path.
+# @parameter1: The working directory.
 prefetchDependencies() {
-      local initDir="$1"
+      local workingDir="$1"
 
       # Go to the working dir.
-      cd "$initDir"
+      cd "$workingDir"
 
       # Build the product to prime for product dependencies.
       ./gradlew build -x test
@@ -40,19 +40,67 @@ prefetchDependencies() {
       ./mvnw liberty:install-feature
 
       # Run through dev mode server install/create and feature installation for the Gradle app.
-      cd "$initDir"
+      cd "$workingDir"
       cd "src/test/resources/apps/gradle/single-mod-gradle-app"
       ./gradlew installLiberty
       ./gradlew libertyCreate
       ./gradlew installFeature
 
       # Go back to the working dir.
-      cd "$initDir"
+      cd "$workingDir"
+}
+
+# Gathers logs and environmental information. The logs can be found in the <OS>-test-report.zip
+# archive under the "Artifacts" section of the GHA actions build page.
+#
+# @parameter1: The working directory.
+gatherDebugData() {
+    local workingDir="$1"
+
+    echo -e "DEBUG: Creating a build/reports directory if one does not already exist...\n"
+    if [ ! -d "$workingDir/build/reports" ]; then
+        mkdir -p "$workingDir"/build/reports
+    fi
+
+    echo -e "DEBUG: Gathering IDE remote server logs...\n"
+    if [ -f "$workingDir/remoteServer.log" ]; then
+        cp "$workingDir"/remoteServer.log "$workingDir"/build/reports/.
+    fi
+
+    echo -e "DEBUG: Gathering videos...\n"
+    if [ -d "$workingDir/video" ]; then
+        mv "$workingDir"/video "$workingDir"/build/reports/.
+    fi
+
+    echo -e "DEBUG: Gathering the IDEA log...\n"
+    if [ -f "$workingDir/build/idea-sandbox/system/log/idea.log" ]; then
+        cp "$workingDir"/build/idea-sandbox/system/log/idea.log "$workingDir"/build/reports/.
+    fi
+
+    echo -e "DEBUG: Installed Java version:\n"
+    java -version
+
+    echo -e "DEBUG: Installed Mvn version:\n"
+    mvn -version
+
+    echo -e "DEBUG: Installed Gradle version:\n"
+    ./gradlew -version
+
+    echo -e "DEBUG: Environment variables:\n"
+    env
 }
 
 # Runs UI tests and collects debug data.
 main() {
     echo -e "\n$(${currentTime[@]}): INFO: Starting integration test run."
+
+    local currentLoc=$(pwd)
+
+    # Add some env properties to .bashrc. This prevents cases (i.e. MAC) in which the IDE's
+    # terminal does not recognize the JAVA_HOME environment variable set prior to the IDE starting.
+    echo "export JAVA_HOME=$JAVA_HOME" >> $HOME/.bashrc
+    echo "export PATH=$PATH:\$PATH" >> $HOME/.bashrc
+    cat $HOME/.bashrc
 
     # Tell the terminal session to use display port 77.
     export DISPLAY=:77.0
@@ -67,14 +115,11 @@ main() {
         metacity --sm-disable --replace 2> metacity.err &
     fi
 
-    # Create a directory to store the logs.
-    currentLoc=$(pwd)
-    mkdir -p "$currentLoc"/build/reports/tests
-
     # Clean the project.
     ./gradlew clean
 
     # Prime the environment.
+    echo -e "\n$(${currentTime[@]}): INFO: Prefetching dependencies..."
     prefetchDependencies "$currentLoc"
     rc=$?
     if [ "$rc" -ne 0 ]; then
@@ -83,20 +128,20 @@ main() {
     fi
 
     # Start the IDE.
+    echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
     ./gradlew runIdeForUiTests --info  > remoteServer.log  2>&1 &
 
     # Wait for the IDE to come up.
-    echo -e "\n$(${currentTime[@]}): INFO: Waiting for the test IDE to start."
+    echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."
     callLivenessEndpoint=(curl -s http://localhost:8082)
     count=1
     while ! ${callLivenessEndpoint[@]} | grep -qF 'Welcome to IntelliJ IDEA'; do
         if [ $count -eq 24 ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE Welcome Page to start. Output:"
-            cat "$currentLoc"/remoteServer.log
             exit 12
         fi
         count=`expr $count + 1`
-        echo -e "\n$(${currentTime[@]}): INFO: Waiting for the test IDE to start..." && sleep 5
+        echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
         done
 
     # Run the tests
@@ -107,31 +152,7 @@ main() {
     rc=$?
     if [ "$rc" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${rc}."
-
-        echo -e "DEBUG: Gathering IDE remote server logs...\n"
-        if [ -f "$currentLoc/remoteServer.log" ]; then
-            cp "$currentLoc"/remoteServer.log "$currentLoc"/build/reports/.
-        fi
-
-        echo -e "DEBUG: Gathering videos...\n"
-        if [ -d "$currentLoc/video" ]; then
-            mv "$currentLoc"/video "$currentLoc"/build/reports/.
-        fi
-
-        echo -e "DEBUG: Gathering the IDEA log...\n"
-        if [ -f "$currentLoc/build/idea-sandbox/system/log/idea.log" ]; then
-            cp "$currentLoc"/build/idea-sandbox/system/log/idea.log "$currentLoc"/build/reports/.
-        fi
-
-        echo -e "DEBUG: MVN version:\n"
-        mvn -version
-
-        echo -e "DEBUG: Gradle version:\n"
-        ./gradlew -version
-
-        echo -e "DEBUG: Environment variables:\n"
-        env
-
+        gatherDebugData "$currentLoc"
         exit -1
     fi
 }
