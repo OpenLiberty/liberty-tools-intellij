@@ -4,7 +4,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main, ls-integration ]
+    branches: [ main, ls-integration, test-automation ]
 
 jobs:
   build:
@@ -46,9 +46,9 @@ jobs:
             liberty-tools-intellij/build/reports/
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
-        run: bash ./gradlew buildPlugin --info
+        run: bash ./gradlew buildPlugin
       - name: 'Archive artifacts'
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: liberty-tools-intellij-${{ github.sha }}

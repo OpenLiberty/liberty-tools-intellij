@@ -61,7 +61,7 @@ dependencies {
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
-    
+
     // Test: basics.
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
