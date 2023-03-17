@@ -19,12 +19,15 @@ OS=$(uname -s)
 
 # Primes the environment before running the tests.
 # This decreases the possibility of intermittent test issues
-# related to varying dependency download times.
-# @parameter1 The main project directory path.
+# related to varying dependency download times the first time a test is
+# run. Performance will be improved once issue:
+# https://github.com/OpenLiberty/ci.maven/issues/1557 is resolved.
+#
+# @parameter1: The working directory path.
 prefetchDependencies() {
       local initDir="$1"
 
-      # Go to the init dir.
+      # Go to the working dir.
       cd "$initDir"
 
       # Build the product to prime for product dependencies.
@@ -43,7 +46,7 @@ prefetchDependencies() {
       ./gradlew libertyCreate
       ./gradlew installFeature
 
-      # Go to the init dir.
+      # Go back to the working dir.
       cd "$initDir"
 }
 
