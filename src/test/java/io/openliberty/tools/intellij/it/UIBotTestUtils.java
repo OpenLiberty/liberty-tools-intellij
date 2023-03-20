@@ -383,12 +383,32 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Opens src file to max size or contracts it to original size within the editor pane.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param srcFileName The string file name
+     */
+    public static void expandOrContractSourceFile(RemoteRobot remoteRobot, String srcFileName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        try {
+            Locator locator = byXpath("//div[@accessiblename='" + srcFileName + "' and @class='SingleHeightLabel']");
+            ComponentFixture actionButton = projectFrame.getActionButton(locator);
+            actionButton.doubleClick();
+
+        } catch (WaitForConditionTimeoutException e) {
+            // server.xml not open, nothing to do
+        }
+    }
+
+    /**
      * Moves the mouse cursor to a specific string target in server.xml
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param hoverTarget The string to hover over in server.xml
      */
     public static void hoverInGradleAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
+
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         ComponentFixture editor = projectFrame.getEditorPane("server");
         Point p;
@@ -412,7 +432,6 @@ public class UIBotTestUtils {
         Keyboard keyboard = new Keyboard(remoteRobot);
         keyboard.hotKey(VK_CONTROL, VK_Q);
         keyboard.hotKey(VK_CONTROL, VK_Q);
-
     }
 
     /**

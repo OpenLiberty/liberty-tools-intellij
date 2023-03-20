@@ -47,9 +47,11 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
+        UIBotTestUtils.expandOrContractSourceFile(remoteRobot, "server.xml");
         UIBotTestUtils.closeSourceFile(remoteRobot, "server.xml");
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
+        UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
     }
 
     /**
@@ -103,10 +105,11 @@ public abstract class SingleModLibertyLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        //UIBotTestUtils.openDashboardView(remoteRobot);
-        //UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.openDashboardView(remoteRobot);
+        UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
         //UIBotTestUtils.expandDashboardProjectTree(remoteRobot);
         UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);
+        UIBotTestUtils.expandOrContractSourceFile(remoteRobot, "server.xml");
     }
 
     /**
