@@ -341,25 +341,17 @@ public class UIBotTestUtils {
      */
     public static void openServerXMLFile(RemoteRobot remoteRobot, String appName){
         // Click on File on the Menu bar.
-        System.out.println("AJM: using the newest approach to open files?");
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
-        // use it to expand to server.xml in one operation - no mouse needed
-        //projTree.expand(appName, "src", "main", "liberty", "config").findText("server.xml").doubleClick();
 
         if (!projTree.hasText("server.xml")){
-            projTree.expand(appName, "src", "main", "liberty", "config").findText("server.xml").doubleClick();
-            //appNameEntry.findText(appName).doubleClick();
-            //appNameEntry.findText("src").doubleClick();
-            //appNameEntry.findText("main").doubleClick();
-            //appNameEntry.findText("liberty").doubleClick();
-            //appNameEntry.findText("server.xml").doubleClick();
+            projTree.expand(appName, "src", "main", "liberty", "config");
+            projTree.findText("server.xml").doubleClick();
         }
         else {
             projTree.findText("server.xml").doubleClick();
-            //appNameEntry.findText("server.xml").doubleClick();
         }
     }
 
@@ -376,25 +368,6 @@ public class UIBotTestUtils {
             Locator locator = byXpath("//div[@accessiblename='" + srcFileName + "' and @class='SingleHeightLabel']//div[@class='InplaceButton']");
             ComponentFixture actionButton = projectFrame.getActionButton(locator);
             actionButton.click();
-
-        } catch (WaitForConditionTimeoutException e) {
-            // server.xml not open, nothing to do
-        }
-    }
-
-    /**
-     * Opens src file to max size or contracts it to original size within the editor pane.
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param srcFileName The string file name
-     */
-    public static void expandOrContractSourceFile(RemoteRobot remoteRobot, String srcFileName) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-
-        try {
-            Locator locator = byXpath("//div[@accessiblename='" + srcFileName + "' and @class='SingleHeightLabel']");
-            ComponentFixture actionButton = projectFrame.getActionButton(locator);
-            actionButton.doubleClick();
 
         } catch (WaitForConditionTimeoutException e) {
             // server.xml not open, nothing to do
