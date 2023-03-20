@@ -2,6 +2,8 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.JTreeFixture;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
@@ -47,7 +49,6 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        UIBotTestUtils.expandOrContractSourceFile(remoteRobot, "server.xml");
         UIBotTestUtils.closeSourceFile(remoteRobot, "server.xml");
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -65,9 +66,6 @@ public abstract class SingleModLibertyLSTestCommon {
         String testHoverTarget = "mpHealth-4.0";
         String testAppName = "gradle-app";
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
-
-        // open server.xml file
-        //UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);
 
         //mover cursor to hover point
         UIBotTestUtils.hoverInGradleAppServerXML(remoteRobot, testHoverTarget);
@@ -107,9 +105,14 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openDashboardView(remoteRobot);
         UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
-        //UIBotTestUtils.expandDashboardProjectTree(remoteRobot);
+        System.out.println("AJM: using the newest approach to open files?");
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+        projTree.expand(projectName, "src", "main", "liberty", "config");
+
+        // open server.xml file
         UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);
-        UIBotTestUtils.expandOrContractSourceFile(remoteRobot, "server.xml");
+
     }
 
     /**
