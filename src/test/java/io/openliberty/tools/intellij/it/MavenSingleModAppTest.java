@@ -9,10 +9,14 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,7 +49,7 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Relative location of the WLP installation.
      */
-    public static String WLP_INSTALL_PATH = "/target/liberty";
+    public static String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
 
     /**
      * The path to the integration test reports.
@@ -92,5 +96,38 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport);
         TestUtils.validateTestReportExists(pathToUTReport);
+    }
+
+    /**
+     * Tests dashboard startInContainer/stop actions run from the project's drop-down action menu.
+     * Notes:
+     * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
+     * this method should be moved to SingleModAppTestCommon.
+     * 2. This test is restricted to Linux only because, on other platforms, docker build process
+     * driven by the Liberty Maven/Gradle plugins have a timeout of 10 minutes. There is currently
+     * no way to extend this timeout through Liberty Tools (i.e. set dockerBuildTimeout).
+     */
+    @Test
+    @Video
+    @EnabledOnOs({OS.LINUX})
+    public void testStartInContainerActionUsingDropDownMenu() {
+        String testName = "testStartInContainerActionUsingDropDownMenu";
+        String absoluteWLPPath = Paths.get(PROJECT_PATH, WLP_INSTALL_PATH).toString();
+
+        // Start the start with parameters configuration dialog.
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start in container", false);
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
     }
 }

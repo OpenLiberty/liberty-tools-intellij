@@ -16,6 +16,17 @@ import java.util.List;
  */
 public class TestUtils {
 
+    /**
+     * WLP messages.log path.
+     */
+    public static final Path WLP_MSGLOG_PATH = Paths.get("wlp", "usr", "servers", "defaultServer", "logs", "messages.log");
+
+    /**
+     * Liberty server stopped message:
+     * CWWKE0036I: The server defaultServer stopped after 12.25 seconds.
+     */
+    public static final String SEVER_STOPPED_MSG = "CWWKE0036I";
+
     enum TraceSevLevel {
         INFO, ERROR
     }
@@ -28,17 +39,17 @@ public class TestUtils {
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
-        String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
         int maxAttempts = 40;
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
 
-        // Find message CWWKE0036I: The server x stopped after y seconds
+        // Find the server stopped message.
         for (int retryCount = 0; retryCount < maxAttempts; retryCount++) {
             try (BufferedReader br = new BufferedReader(new FileReader(wlpMsgLogPath))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    if (line.contains("CWWKE0036I")) {
+                    if (line.contains(SEVER_STOPPED_MSG)) {
                         foundStoppedMsg = true;
                         break;
                     }
@@ -68,7 +79,7 @@ public class TestUtils {
             // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
             String msgHeader = "TESTCASE: " + testName;
             printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
-            String msg = testName + ":validateLibertyServerStopped: Exit. Timed out waiting for message CWWKE0036I in log:" + wlpMsgLogPath;
+            String msg = testName + ":validateLibertyServerStopped: Exit. Timed out waiting for message " + SEVER_STOPPED_MSG + " in log:" + wlpMsgLogPath;
             printTrace(TraceSevLevel.ERROR, msg);
             Assertions.fail(msg);
         } else {
@@ -135,7 +146,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateAppStarted: Timed out while waiting for application under URL: " + appUrl + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateAppStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -185,7 +196,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateAppStopped: Timed out while waiting for application under URL: " + appUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = wlpInstallPath + "/wlp/usr/servers/defaultServer/logs/messages.log";
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateAppStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -195,13 +206,13 @@ public class TestUtils {
      * Validates the expected hover string message was raised in popup.
      *
      * @param expectedHoverText The full string of popup data that is expected to be found.
-     * @param hoverPopupText The string found in the popup window
+     * @param hoverPopupText    The string found in the popup window
      */
-    public static void validateHoverData(String expectedHoverText, String hoverPopupText){
+    public static void validateHoverData(String expectedHoverText, String hoverPopupText) {
 
-            if (hoverPopupText.contains(expectedHoverText)) {
-                Assertions.assertTrue(hoverPopupText.contains(expectedHoverText));
-            } else {
+        if (hoverPopupText.contains(expectedHoverText)) {
+            Assertions.assertTrue(hoverPopupText.contains(expectedHoverText));
+        } else {
             Assertions.fail("Did not find diagnostic help text expected. Looking for " + expectedHoverText);
         }
     }
@@ -289,7 +300,7 @@ public class TestUtils {
      * @param filePath The file's path.
      * @return True if the file identified by the input path exists. False, otherwise.
      */
-    private static boolean fileExists(Path filePath) {
+    public static boolean fileExists(Path filePath) {
         File f = new File(filePath.toString());
         return f.exists();
     }
@@ -356,5 +367,29 @@ public class TestUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Determines if the Liberty server should be stopped or not.
+     *
+     * @param wlpInstallPath The path to the Liberty installation.
+     * @return True if the Liberty server should be stopped. False, otherwise.
+     */
+    public static boolean isServerStopNeeded(String wlpInstallPath) {
+        boolean stopServer = false;
+        Path msgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString());
+        if (fileExists(msgLogPath)) {
+            try {
+                // The file maybe an old log. For now, check for the message indicating
+                // that the server is stopped.
+                if (!(isTextInFile(msgLogPath.toString(), SEVER_STOPPED_MSG))) {
+                    stopServer = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return stopServer;
     }
 }
