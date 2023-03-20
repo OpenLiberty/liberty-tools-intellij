@@ -12,18 +12,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, windows ]
+        runtime: [ linux, mac ]
         include:
           - runtime: linux
             os: ubuntu-latest
-            setupCmd: ./src/test/resources/ci/scripts/setup.sh
-            execCmd: ./src/test/resources/ci/scripts/run.sh
             reportName: linux-test-report
-          - runtime: windows
-            os: windows-latest
-            setupCmd: bash ./src/test/resources/ci/scripts/setup.sh
-            execCmd: bash ./src/test/resources/ci/scripts/run.sh
-            reportName: windows-test-report
+          - runtime: mac
+            os: macOS-latest
+            reportName: mac-test-report
     steps:
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
@@ -33,10 +29,10 @@ jobs:
         uses: FedericoCarboni/setup-ffmpeg@v2
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
-        run: ${{ matrix.setupCmd }}
+        run: bash ./src/test/resources/ci/scripts/setup.sh
       - name: 'Run UI integration tests'
         working-directory: ./liberty-tools-intellij
-        run: ${{ matrix.execCmd }}
+        run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
