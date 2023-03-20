@@ -5,6 +5,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
+import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -63,41 +64,76 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests Liberty Tools start/stop actions run from the project drop-down menu.
+     * Tests dashboard start/stop actions run from the project drop-down menu.
      */
     @Test
-    @Video
     public void testStartActionUsingDropDownMenu() {
         String testName = "testStartActionUsingDropDownMenu";
-        String absoluteWLPPath = projectPath + wlpInstallPath;
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start");
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", false);
 
-        // Validate that the application started.
-        String url = appBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
 
-        // Stop dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop");
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
 
-        // Validate that the server stopped.
-        TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
     }
 
     /**
-     * Tests Liberty Tools start/RunTests/stop actions run from the project's drop-down action menu.
+     * Tests dashboard start.../stop actions run from the project's drop-down action menu.
+     */
+    @Test
+    @Video
+    public void testStartWithParmsActionUsingDropDownMenu() {
+        String testName = "testStartWithParmsActionUsingDropDownMenu";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Start the start with parameters configuration dialog.
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start...", false);
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests dashboard start/RunTests/stop actions run from the project's drop-down action menu.
      */
     @Test
     public void testRunTestsActionUsingDropDownMenu() {
         String testName = "testRunTestsActionUsingDropDownMenu";
-        String absoluteWLPPath = projectPath + wlpInstallPath;
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start");
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", false);
 
         // Validate that the application started.
         String url = appBaseURL + "api/resource";
@@ -105,50 +141,93 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Run the application's tests.
-            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Run tests");
+            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Run tests", false);
 
             // Validate that the report was generated.
             validateTestReportsExist();
         } finally {
-            // Stop dev mode.
-            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop");
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
 
-            // Validate that the server stopped.
-            TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
         }
     }
 
     /**
-     * Tests Liberty Tools start/stop actions run from the project's pop-up action menu.
+     * Tests dashboard start/RunTests/stop actions selected on the project's drop-down action
+     * menu and run using the play action button on the dashboard's toolbar.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testStartActionUsingPopUpMenu() {
-        String testName = "testStartActionUsingPopUpMenu";
-        String absoluteWLPPath = projectPath + wlpInstallPath;
+    public void testRunTestsActionUsingPlayToolbarButton() {
+        String testName = "testStartActionUsingPlayToolbarButton";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
+        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", true);
 
         // Validate that the application started.
         String url = appBaseURL + "api/resource";
         TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
 
-        // Stop dev mode.
-        UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+        try {
+            // Run the application's tests.
+            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Run tests", true);
 
-        // Validate that the server stopped.
-        TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            // Validate that the report was generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", true);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
     }
 
     /**
-     * Tests Liberty Tools start/runTests/stop actions run from the project's pop-up action menu.
+     * Tests dashboard start/stop actions run from the project's pop-up action menu.
+     */
+    @Test
+    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
+    public void testStartActionUsingPopUpMenu() {
+        String testName = "testStartActionUsingPopUpMenu";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Start dev mode.
+        UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
+
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests dashboard start/runTests/stop actions run from the project's pop-up action menu.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingPopUpMenu() {
         String testName = "testRunTestsActionUsingPopUpMenu";
-        String absoluteWLPPath = projectPath + wlpInstallPath;
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -156,22 +235,24 @@ public abstract class SingleModAppTestCommon {
         // Start dev mode.
         UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
 
-        // Validate that the application started.
-        String url = appBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
-
         try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+
             // Run the application's tests.
             UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Run tests");
 
             // Validate that the reports were generated.
             validateTestReportsExist();
         } finally {
-            // Stop dev mode.
-            UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
 
-            // Validate that the server stopped.
-            TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
         }
     }
 

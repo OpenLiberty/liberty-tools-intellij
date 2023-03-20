@@ -24,9 +24,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- Liberty configuration -->
-        <liberty.var.default.http.port>9080</liberty.var.default.http.port>
-        <liberty.var.default.https.port>9443</liberty.var.default.https.port>
+        <!-- Liberty bootstrap.properties variables. -->
+        <liberty.bootstrap.default.http.port>9080</liberty.bootstrap.default.http.port>
+        <liberty.bootstrap.default.https.port>9443</liberty.bootstrap.default.https.port>
         <liberty.bootstrap.project.name>${project.artifactId}</liberty.bootstrap.project.name>
     </properties>
 
@@ -96,8 +96,8 @@
                 <version>2.22.2</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <http.port>${liberty.var.default.http.port}</http.port>
-                        <app.path>${liberty.var.app.path}</app.path>
+                        <http.port>${liberty.bootstrap.default.http.port}</http.port>
+                        <app.path>${liberty.bootstrap.app.path}</app.path>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

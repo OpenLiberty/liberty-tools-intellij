@@ -12,13 +12,16 @@
 
 set -Eexo pipefail
 
+# Current time.
+currentTime=(date +"%Y/%m/%d-%H:%M:%S:%3N")
+
 # Operating system.
 OS=$(uname -s)
 
 # Semeru JDK version control constants.
 # Example:
-# Version (SEMERU_OPEN_JDK_BUILD): 17.0.6
-# OpenJDK (SEMERU_OPEN_JDK_BUILD + SEMERU_OPEN_JDK_BUILD): 17.0.6_10
+# Version (SEMERU_OPEN_JDK_VERSION): 17.0.6
+# OpenJDK (SEMERU_OPEN_JDK_VERSION + SEMERU_OPEN_JDK_BUILD): 17.0.6_10
 # OpenJ9  (SEMERU_OPENJ9_VERSION): 0.36.0
 SEMERU_OPEN_JDK_MAJOR=17
 SEMERU_OPEN_JDK_VERSION="${SEMERU_OPEN_JDK_MAJOR}.0.6"
@@ -69,7 +72,7 @@ installBaseSoftware() {
     elif [[ $OS == "Darwin" ]]; then
         brew update
         brew install curl unzip || true
-        brew install docker
+        installDockerOnMAC
     else
         # Note: Docker is already installed on the windows VMs provisioned by GHA.
         # Location: C:\Program Files\Docker\dockerd.exe
@@ -183,7 +186,7 @@ installXDisplaySoftwareOnLinux() {
     sudo apt-get install dbus-x11 xvfb metacity at-spi2-core
 }
 
-# installDocker installs docker.
+# installDockerOnLinux installs Docker on Linux.
 installDockerOnLinux() {
     # Remove a previous installation of docker.
     sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -197,6 +200,33 @@ installDockerOnLinux() {
     # Install the docker engine.
     sudo apt-get update
     sudo apt-get install docker-ce docker-ce-cli containerd.io
+}
+
+# installDockerOnMAC installs Docker on MAC.
+installDockerOnMAC() {
+        # Download and Install Docker desktop.
+        curl -O https://desktop.docker.com/mac/main/amd64/Docker.dmg
+        sudo hdiutil attach Docker.dmg
+        sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license --user runner
+        sudo hdiutil detach /Volumes/Docker
+
+        # Start Docker desktop.
+        open -a /Applications/Docker.app --args --unattended
+
+        # Wait for start to complete.
+        dockerDaemonRunning=$(docker info &> /dev/null || true)
+        local iterations=0
+        local maxIterations=60
+        while [[ -z "$dockerDaemonRunning" && "$iterations" -lt "$maxIterations" ]]; do
+            echo -e "\n$(${currentTime[@]}): Docker daemon is not running. Waiting ..."
+            let iterations+=1
+            sleep 5
+            dockerDaemonRunning=$(docker info &> /dev/null || true)
+        done
+
+        # Sanity check. This will either show the info output of a successful start.
+        # or will fail the setup on an unsuccessful start.
+        docker info
 }
 
 main "$@"

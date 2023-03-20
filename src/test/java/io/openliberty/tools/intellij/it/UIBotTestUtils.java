@@ -9,11 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.intellij.remoterobot.fixtures.*;
-import com.intellij.remoterobot.utils.Keyboard;
-import static java.awt.event.KeyEvent.*;
-
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
@@ -22,10 +19,8 @@ import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
-
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
@@ -65,8 +60,8 @@ public class UIBotTestUtils {
             JButtonFixture okButton = newProjectDialog.getButton("OK");
             RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                     Duration.ofSeconds(1),
-                    "Waiting for init text on text field",
-                    "Init text in text field is empty",
+                    "Waiting for the OK button on the open project dialog to be enabled",
+                    "The OK button on the open project dialog to be enabled",
                     okButton::isEnabled);
 
             textField.setText(projectPath);
@@ -84,13 +79,7 @@ public class UIBotTestUtils {
                     () -> projectTree.getData().hasText(projectName));
 
             // Click OK.
-            JButtonFixture jbf = newProjectDialog.button("OK");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                    Duration.ofSeconds(1),
-                    "Waiting for OK button to be enabled",
-                    "OK button was not enabled",
-                    jbf::isEnabled);
-            jbf.click();
+            okButton.click();
 
             // Need a buffer here.
             try {
@@ -120,10 +109,11 @@ public class UIBotTestUtils {
     /**
      * Runs a dashboard action using the drop-down tree view.
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param action      The action to run
+     * @param remoteRobot   The RemoteRobot instance.
+     * @param action        The action to run
+     * @param usePlayButton The indicator that specifies if play button should be used to run the action or not.
      */
-    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String action) {
+    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String action, boolean usePlayButton) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the Liberty toolbar to give it focus.
@@ -138,7 +128,7 @@ public class UIBotTestUtils {
                 "Action " + action + " in tree fixture is not showing or not in focus",
                 treeFixture::isShowing);
 
-        // Double-click on the action.
+        // Run the action.
         List<RemoteText> rts = treeFixture.findAllText();
         for (RemoteText rt : rts) {
             if (action.equals(rt.getText())) {
@@ -146,7 +136,12 @@ public class UIBotTestUtils {
                 for (int i = 0; i < 3; i++) {
                     try {
                         error = null;
-                        rt.doubleClick();
+                        if (usePlayButton) {
+                            rt.click();
+                            clickOnDashboardToolbarPlayButton(remoteRobot);
+                        } else {
+                            rt.doubleClick();
+                        }
                         break;
                     } catch (Exception e) {
                         // The content of the Liberty tool window dashboard may blink in and out of existence; therefore,
@@ -324,7 +319,7 @@ public class UIBotTestUtils {
      * Closes the Project Tree for a given appName
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param appName The Name of the application in tree to close
+     * @param appName     The Name of the application in tree to close
      */
     public static void closeProjectViewTree(RemoteRobot remoteRobot, String appName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
@@ -336,9 +331,9 @@ public class UIBotTestUtils {
      * Opens a server.xml file for a given app
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param appName The string application name
+     * @param appName     The string application name
      */
-    public static void openServerXMLFile(RemoteRobot remoteRobot, String appName){
+    public static void openServerXMLFile(RemoteRobot remoteRobot, String appName) {
         // Click on File on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
@@ -347,11 +342,10 @@ public class UIBotTestUtils {
 
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
-        if (!projTree.hasText("server.xml")){
+        if (!projTree.hasText("server.xml")) {
             projTree.expand(appName, "src", "main", "liberty", "config");
             projTree.findText("server.xml").doubleClick();
-        }
-        else {
+        } else {
             projTree.findText("server.xml").doubleClick();
         }
     }
@@ -416,11 +410,11 @@ public class UIBotTestUtils {
         editorNew.runJs(String.format(jitterScript, p.x, p.y));
 
         // monitor the popup window for the LS Hint text - there can be a delay getting it from the LS
-        for (int i = 0; i<3; i++) {
+        for (int i = 0; i < 3; i++) {
             // first get the contents of the popup - put in a String
             ContainerFixture popup = remoteRobot.find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
             List<RemoteText> rts = popup.findAllText();
-            String remoteString = new String();
+            String remoteString = "";
             for (RemoteText rt : rts) {
                 remoteString = remoteString + rt.getText();
             }
@@ -439,9 +433,8 @@ public class UIBotTestUtils {
      * Validates the expected hover string message was raised in popup.
      *
      * @param remoteRobot the remote robot instance
-     *
      */
-    public static String getHoverStringData(RemoteRobot remoteRobot){
+    public static String getHoverStringData(RemoteRobot remoteRobot) {
 
         boolean found = false;
 
@@ -453,13 +446,63 @@ public class UIBotTestUtils {
         // print out the string data found in the popup window - for debugging
         popup.findAllText().forEach((it) -> System.out.println(it.getText()));
 
-        String popupString = new String();
+        String popupString = "";
         for (RemoteText rt : rts) {
             popupString = popupString + rt.getText();
         }
 
-       return popupString;
+        return popupString;
 
+    }
+
+    /**
+     * Runs the start parameters run configuration dialog.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param startParms  The parameters to set in the configuration dialog.
+     */
+    public static void runStartParmsConfigDialog(RemoteRobot remoteRobot, String startParms) {
+        DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(19));
+        if (startParms != null) {
+            // Update the parameter editor box.
+            // TODO: Investigate this further:
+            // Currently blocked by the dialog editor box behind the start parameter text box
+            // holding the editor's write lock.
+            // One can only write when the dialog is being closed because the write lock
+            // is released at that point.
+
+            // Save the changes made.
+            JButtonFixture applyButton = dialog.getButton("Apply");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the Apply button on the open project dialog to be enabled",
+                    "The Apply button on the open project dialog to be enabled",
+                    applyButton::isEnabled);
+            applyButton.click();
+        }
+
+        // Run the configuration.
+        JButtonFixture runButton = dialog.getButton("Run");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the Run button on the open project dialog to be enabled",
+                "The run button on the open project dialog to be enabled",
+                runButton::isEnabled);
+        runButton.click();
+    }
+
+    /**
+     * Clicks on the play action button located on the dashboard's toolbar.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void clickOnDashboardToolbarPlayButton(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        // Click on the play button.
+        Locator locator = byXpath("//div[@class='LibertyExplorer']//div[@class='ActionButton' and @tooltiptext.key='action.io.openliberty.tools.intellij.actions.RunLibertyDevTask.text']");
+        ComponentFixture actionButton = projectFrame.getActionButton(locator);
+        actionButton.click();
     }
 
     /**
