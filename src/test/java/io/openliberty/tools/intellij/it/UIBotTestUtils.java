@@ -342,6 +342,12 @@ public class UIBotTestUtils {
     public static void openServerXMLFile(RemoteRobot remoteRobot, String appName){
         // Click on File on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+
+        // close the terminal window for now
+        Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
+        ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
+        hideActionButton.click();
+
         //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
@@ -383,6 +389,7 @@ public class UIBotTestUtils {
     public static void hoverInGradleAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+
         ComponentFixture editor = projectFrame.getEditorPane("server");
         Point p;
         p = editor.findText(hoverTarget).getPoint();
