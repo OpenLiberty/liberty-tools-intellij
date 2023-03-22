@@ -11,10 +11,7 @@ package io.openliberty.tools.intellij.it.fixtures;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.CommonContainerFixture;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import org.jetbrains.annotations.NotNull;
@@ -125,6 +122,20 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
+     * Returns the JTreeFixture object fixture associated with the ProjectViewTree class.
+     *
+     * @param xpathVars The Locator custom variables: text
+     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     */
+    public JTreeFixture getProjectViewJTree(String... xpathVars) {
+        String visibleText = xpathVars[0];
+        //return find(JTreeFixture.class, JTreeFixture.Companion.byType(), Duration.ofSeconds(10));
+        return find(JTreeFixture.class,
+                byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
+                Duration.ofMinutes(1));
+    }
+
+    /**
      * Returns the ComponentFixture object fixture associated with the StripeButton class.
      *
      * @param xpathVars The Locator custom variables: text
@@ -152,5 +163,26 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         return find(ComponentFixture.class,
                 byXpath("//div[@class='Tree' and @name='" + name + "' and contains(@visible_text, '" + visibleText + "')]"),
                 Duration.ofMinutes(Integer.valueOf(waitTime)));
+    }
+
+    /**
+     * Returns the ComponentFixture object fixture associated with the Editor class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     */
+    public ComponentFixture getEditorPane(String... xpathVars) {
+        String visibleText = xpathVars[0];
+        return find(ComponentFixture.class, byXpath("//div[@class='EditorComponentImpl' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(1));
+    }
+    /**
+     * Returns the ComponentFixture object fixture associated with the hover text DocumentationHintEditorPane class.
+     *
+     * @param xpathVars The Locator custom variables.
+     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     */
+    public ComponentFixture getDocumentationHintEditorPane(String... xpathVars) {
+        String visibleText = xpathVars[0];
+        return find(ComponentFixture.class, byXpath("//div[@class='DocumentationHintEditorPane' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(1));
     }
 }

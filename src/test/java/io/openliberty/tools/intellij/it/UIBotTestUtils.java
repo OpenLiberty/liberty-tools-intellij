@@ -9,6 +9,10 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.utils.Keyboard;
+import static java.awt.event.KeyEvent.*;
+
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.JButtonFixture;
@@ -21,6 +25,7 @@ import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.Assert;
+import java.awt.*;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -314,6 +319,109 @@ public class UIBotTestUtils {
         Locator locator = byXpath("//div[@class='LibertyExplorer']//div[@class='ActionButton' and contains(@myaction.key, 'action.ExpandAll.text')]");
         ComponentFixture actionButton = projectFrame.getActionButton(locator);
         actionButton.click();
+    }
+
+    /**
+     * Closes the Project Tree for a given appName
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param appName The Name of the application in tree to close
+     */
+    public static void closeProjectViewTree(RemoteRobot remoteRobot, String appName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
+        appNameEntry.findText(appName).doubleClick();
+    }
+
+    /**
+     * Opens a server.xml file for a given app
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param appName The string application name
+     */
+    public static void openServerXMLFile(RemoteRobot remoteRobot, String appName){
+        // Click on File on the Menu bar.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+
+        // close the terminal window for now
+        try {
+            Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
+            ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
+            hideActionButton.click();
+        } catch (WaitForConditionTimeoutException e) {
+            // not open, nothing to do, so proceed
+        }
+
+        //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
+        // get a JTreeFixture reference to the file project viewer entry
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
+
+        if (!projTree.hasText("server.xml")){
+            projTree.expand(appName, "src", "main", "liberty", "config");
+            projTree.findText("server.xml").doubleClick();
+        }
+        else {
+            projTree.findText("server.xml").doubleClick();
+        }
+    }
+
+    /**
+     * Closes a source file that is open in the editor pane
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param srcFileName The string file name
+     */
+    public static void closeSourceFile(RemoteRobot remoteRobot, String srcFileName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        try {
+            Locator locator = byXpath("//div[@accessiblename='" + srcFileName + "' and @class='SingleHeightLabel']//div[@class='InplaceButton']");
+            ComponentFixture actionButton = projectFrame.getActionButton(locator);
+            actionButton.click();
+
+        } catch (WaitForConditionTimeoutException e) {
+            // server.xml not open, nothing to do
+        }
+    }
+
+    /**
+     * Moves the mouse cursor to a specific string target in server.xml
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param hoverTarget The string to hover over in server.xml
+     */
+    public static void hoverInGradleAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+
+        ComponentFixture editor = projectFrame.getEditorPane("server");
+        Point p;
+        p = editor.findText(hoverTarget).getPoint();
+
+        if (!editor.getHasFocus()){
+            System.out.println("AJM: no focus");
+        }
+
+        /* works */
+        editor.runJs("robot.moveMouse(component, new Point(" + (p.x+2) + ", " + p.y + "));" +
+                "robot.pressMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));" +
+                "robot.moveMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));" +
+                "robot.releaseMouse(MouseButton.LEFT_BUTTON);");
+
+        /* does not work
+        editor.runJs("robot.click(component, new Point(" + 0 + ", " + 0 + "));" +
+                        "robot.moveMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));");
+        */
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        if (remoteRobot.isWin() || remoteRobot.isLinux()) {
+            keyboard.hotKey(VK_CONTROL, VK_Q);
+            keyboard.hotKey(VK_CONTROL, VK_Q);
+        }
+        else { //macos
+            keyboard.hotKey(VK_F1);
+            keyboard.hotKey(VK_F1);
+        }
     }
 
     /**
