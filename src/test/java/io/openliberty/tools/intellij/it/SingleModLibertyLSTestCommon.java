@@ -105,7 +105,8 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openDashboardView(remoteRobot);
         UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
-        System.out.println("AJM: using the newest approach to open files?");
+
+        // pre-open project tree before attempting to open server.xml
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");

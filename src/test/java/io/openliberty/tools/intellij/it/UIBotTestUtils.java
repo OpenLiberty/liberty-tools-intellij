@@ -9,14 +9,11 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.Keyboard;
 import static java.awt.event.KeyEvent.*;
 
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.JButtonFixture;
-import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
@@ -344,24 +341,27 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
         // close the terminal window for now
-        try {
-            Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
-            ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
-            hideActionButton.click();
-        } catch (WaitForConditionTimeoutException e) {
-            // not open, nothing to do, so proceed
-        }
+        UIBotTestUtils.closeTerminalWindow(remoteRobot);
 
-        //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
-
         if (!projTree.hasText("server.xml")){
             projTree.expand(appName, "src", "main", "liberty", "config");
             projTree.findText("server.xml").doubleClick();
         }
         else {
             projTree.findText("server.xml").doubleClick();
+        }
+    }
+
+    private static void closeTerminalWindow(RemoteRobot remoteRobot) {
+        try {
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
+            Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
+            ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
+            hideActionButton.click();
+        } catch (WaitForConditionTimeoutException e) {
+            // not open, nothing to do, so proceed
         }
     }
 
@@ -393,35 +393,30 @@ public class UIBotTestUtils {
     public static void hoverInGradleAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
 
-        ComponentFixture editor = projectFrame.getEditorPane("server");
+        //need to click outside of the editor before attempting a hover
+        remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree']")).click();
+
+        // logging? show each line of text in the editor
+        //editorNew.findAllText().forEach((it) -> System.out.println(it.getText()));
+
+        // try to hover over target text
+        editorNew.findText(hoverTarget).moveMouse();
+
+        // jitter the cursor
         Point p;
-        p = editor.findText(hoverTarget).getPoint();
+        p = editorNew.findText(hoverTarget).getPoint();
 
-        if (!editor.getHasFocus()){
-            System.out.println("AJM: no focus");
-        }
+        String jitterScript = "const x = %d;" +
+                "const y = %d;" +
+                "java.util.List.of(5, 20, 5, 15).forEach((i)=> {" +
+                "const point = new Point(x + i, y);" +
+                "robot.moveMouse(component, point);})";
 
-        /* works */
-        editor.runJs("robot.moveMouse(component, new Point(" + (p.x+2) + ", " + p.y + "));" +
-                "robot.pressMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));" +
-                "robot.moveMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));" +
-                "robot.releaseMouse(MouseButton.LEFT_BUTTON);");
+        // run the jitter mouse script remotely in the idea
+        editorNew.runJs(String.format(jitterScript, p.x, p.y));
 
-        /* does not work
-        editor.runJs("robot.click(component, new Point(" + 0 + ", " + 0 + "));" +
-                        "robot.moveMouse(component, new Point(" + (p.x+10) + ", " + p.y + "));");
-        */
-
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        if (remoteRobot.isWin() || remoteRobot.isLinux()) {
-            keyboard.hotKey(VK_CONTROL, VK_Q);
-            keyboard.hotKey(VK_CONTROL, VK_Q);
-        }
-        else { //macos
-            keyboard.hotKey(VK_F1);
-            keyboard.hotKey(VK_F1);
-        }
     }
 
     /**
