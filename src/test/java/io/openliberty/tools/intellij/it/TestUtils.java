@@ -2,6 +2,7 @@ package io.openliberty.tools.intellij.it;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
+
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 /**
  * Test utilities.
@@ -203,11 +206,13 @@ public class TestUtils {
      * @param findDocTarget the target string to locate in the documentation popup.
      */
     public static void validateHoverAction(RemoteRobot remoteRobot, String expectedHoverText, String findDocTarget){
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture docPopupWindow = projectFrame.getDocumentationHintEditorPane(findDocTarget);
-        boolean found = false;
-        List<RemoteText> rts = docPopupWindow.findAllText();
 
+        boolean found = false;
+
+        // get the text from the LS diagnostic hint popup
+        ContainerFixture popup = remoteRobot.find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
+        List<RemoteText> rts = popup.findAllText();
+        popup.findAllText().forEach((it) -> System.out.println(it.getText()));
         String remoteString = new String();
         for (RemoteText rt : rts) {
             remoteString = remoteString + rt.getText();
@@ -221,6 +226,7 @@ public class TestUtils {
         if (!found){
             Assertions.fail("Did not find diagnostic help text expected. Looking for " + expectedHoverText);
         }
+
     }
 
     /**
