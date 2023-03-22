@@ -344,9 +344,13 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
         // close the terminal window for now
-        Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
-        ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
-        hideActionButton.click();
+        try {
+            Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
+            ComponentFixture hideActionButton = projectFrame.getActionButton(toolWindowHideButton);
+            hideActionButton.click();
+        } catch (WaitForConditionTimeoutException e) {
+            // not open, nothing to do, so proceed
+        }
 
         //ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
         // get a JTreeFixture reference to the file project viewer entry
@@ -410,8 +414,14 @@ public class UIBotTestUtils {
         */
 
         Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.hotKey(VK_CONTROL, VK_Q);
-        keyboard.hotKey(VK_CONTROL, VK_Q);
+        if (remoteRobot.isWin() || remoteRobot.isLinux()) {
+            keyboard.hotKey(VK_CONTROL, VK_Q);
+            keyboard.hotKey(VK_CONTROL, VK_Q);
+        }
+        else { //macos
+            keyboard.hotKey(VK_F1);
+            keyboard.hotKey(VK_F1);
+        }
     }
 
     /**
