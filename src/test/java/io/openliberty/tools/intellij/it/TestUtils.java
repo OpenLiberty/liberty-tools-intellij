@@ -1,10 +1,5 @@
 package io.openliberty.tools.intellij.it;
 
-import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.fixtures.ContainerFixture;
-import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
-import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.*;
@@ -13,10 +8,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.List;
 
-import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 /**
  * Test utilities.
@@ -201,32 +194,16 @@ public class TestUtils {
     /**
      * Validates the expected hover string message was raised in popup.
      *
-     * @param remoteRobot       The remote robot instance.
-     * @param expectedHoverText Trs full string of popup data that is expected to be found.
-     * @param findDocTarget the target string to locate in the documentation popup.
+     * @param expectedHoverText The full string of popup data that is expected to be found.
+     * @param hoverPopupText The string found in the popup window
      */
-    public static void validateHoverAction(RemoteRobot remoteRobot, String expectedHoverText, String findDocTarget){
+    public static void validateHoverData(String expectedHoverText, String hoverPopupText){
 
-        boolean found = false;
-
-        // get the text from the LS diagnostic hint popup
-        ContainerFixture popup = remoteRobot.find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
-        List<RemoteText> rts = popup.findAllText();
-        popup.findAllText().forEach((it) -> System.out.println(it.getText()));
-        String remoteString = new String();
-        for (RemoteText rt : rts) {
-            remoteString = remoteString + rt.getText();
-            if (expectedHoverText.contains(remoteString)) {
-                Assertions.assertTrue(expectedHoverText.contains(remoteString));
-                found = true;
-                break;
-            }
-        }
-
-        if (!found){
+            if (hoverPopupText.contains(expectedHoverText)) {
+                Assertions.assertTrue(hoverPopupText.contains(expectedHoverText));
+            } else {
             Assertions.fail("Did not find diagnostic help text expected. Looking for " + expectedHoverText);
         }
-
     }
 
     /**
