@@ -57,8 +57,8 @@ public class JakartaCodeActionHandler {
             int start = DiagnosticsHelper.getStartOffset(unit, params.getRange(), utils);
             int end = DiagnosticsHelper.getEndOffset(unit, params.getRange(), utils);
             var mpParams = new MicroProfileJavaCodeActionParams(params.getTextDocument(), params.getRange(), params.getContext());
-            JavaCodeActionContext context = new JavaCodeActionContext(unit, start, end - start, utils,
-                    mpParams);
+            JavaCodeActionContext context = new JavaCodeActionContext(unit.getViewProvider().clone().getPsi(unit.getLanguage()),
+                    start, end - start, utils, mpParams);
             context.setASTRoot(getASTRoot(unit));
 
             List<CodeAction> codeActions = new ArrayList<>();
@@ -88,7 +88,7 @@ public class JakartaCodeActionHandler {
 //            RemoveFinalModifierQuickFix RemoveFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
 //            RemoveStaticModifierQuickFix RemoveStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
 //            RemoveMethodParametersQuickFix RemoveMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
-            AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
+//            AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
             AddResourceMissingTypeQuickFix AddResourceMissingTypeQuickFix = new AddResourceMissingTypeQuickFix();
 //            RemoveAbstractModifierQuickFix RemoveAbstractModifierQuickFix = new RemoveAbstractModifierQuickFix();
 //            RemoveInjectAnnotationQuickFix RemoveInjectAnnotationQuickFix = new RemoveInjectAnnotationQuickFix();
@@ -107,9 +107,9 @@ public class JakartaCodeActionHandler {
 //                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
 //                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
-                        codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
-                    }
+//                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
+//                        codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
+//                    }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE)) {
                         codeActions.addAll(AddResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
                     }

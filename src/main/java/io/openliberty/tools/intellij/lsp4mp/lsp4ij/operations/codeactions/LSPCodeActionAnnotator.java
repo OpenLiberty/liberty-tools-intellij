@@ -132,9 +132,14 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
                     params.setContext(context);
                     params.setTextDocument(new TextDocumentIdentifier(LSPIJUtils.toUri(collectedInfo.file).toString()));
                     params.setRange(diagnostic.getRange());
-                    CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> server.getTextDocumentService().codeAction(params));
+                    LanguageServerWrapper wrap = entry.getKey();
+                    CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> {
+                        return server.getTextDocumentService().codeAction(params);
+                    });
                     futures.add(codeAction);
-                    codeAction.thenAcceptAsync(actions -> itemInfo.actions = actions);
+                    codeAction.thenAcceptAsync(actions -> {
+                        itemInfo.actions = actions;}
+                    );
                 }
             }
         }
