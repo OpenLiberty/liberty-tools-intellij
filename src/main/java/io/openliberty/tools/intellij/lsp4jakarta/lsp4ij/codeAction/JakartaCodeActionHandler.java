@@ -88,7 +88,7 @@ public class JakartaCodeActionHandler {
 //            RemoveFinalModifierQuickFix RemoveFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
 //            RemoveStaticModifierQuickFix RemoveStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
 //            RemoveMethodParametersQuickFix RemoveMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
-//            AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
+            AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
             AddResourceMissingTypeQuickFix AddResourceMissingTypeQuickFix = new AddResourceMissingTypeQuickFix();
 //            RemoveAbstractModifierQuickFix RemoveAbstractModifierQuickFix = new RemoveAbstractModifierQuickFix();
 //            RemoveInjectAnnotationQuickFix RemoveInjectAnnotationQuickFix = new RemoveInjectAnnotationQuickFix();
@@ -107,9 +107,9 @@ public class JakartaCodeActionHandler {
 //                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
 //                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
-//                        codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
+                        codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE)) {
                         codeActions.addAll(AddResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
                     }
