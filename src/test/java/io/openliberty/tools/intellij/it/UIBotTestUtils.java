@@ -22,6 +22,8 @@ import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
+
 import java.awt.*;
 
 import java.io.BufferedReader;
@@ -340,8 +342,8 @@ public class UIBotTestUtils {
         // Click on File on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
-        // close the terminal window for now
-        UIBotTestUtils.closeTerminalWindow(remoteRobot);
+        // hide the terminal window for now
+        UIBotTestUtils.hideTerminalWindow(remoteRobot);
 
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
@@ -354,7 +356,7 @@ public class UIBotTestUtils {
         }
     }
 
-    private static void closeTerminalWindow(RemoteRobot remoteRobot) {
+    public static void hideTerminalWindow(RemoteRobot remoteRobot) {
         try {
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
             Locator toolWindowHideButton = byXpath("//div[@class='ToolWindowHeader'][.//div[@myaction.key='action.NewPredefinedSession.label']]//div[@myaction.key='tool.window.hide.action.name']");
@@ -390,7 +392,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param hoverTarget The string to hover over in server.xml
      */
-    public static void hoverInGradleAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
+    public static void hoverInAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
@@ -398,15 +400,11 @@ public class UIBotTestUtils {
         //need to click outside of the editor before attempting a hover
         remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree']")).click();
 
-        // logging? show each line of text in the editor
-        //editorNew.findAllText().forEach((it) -> System.out.println(it.getText()));
-
         // try to hover over target text
         editorNew.findText(hoverTarget).moveMouse();
 
         // jitter the cursor
-        Point p;
-        p = editorNew.findText(hoverTarget).getPoint();
+        Point p = editorNew.findText(hoverTarget).getPoint();
 
         String jitterScript = "const x = %d;" +
                 "const y = %d;" +
@@ -416,6 +414,51 @@ public class UIBotTestUtils {
 
         // run the jitter mouse script remotely in the idea
         editorNew.runJs(String.format(jitterScript, p.x, p.y));
+
+        // monitor the popup window for the LS Hint text - there can be a delay getting it from the LS
+        for (int i = 0; i<3; i++) {
+            // first get the contents of the popup - put in a String
+            ContainerFixture popup = remoteRobot.find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
+            List<RemoteText> rts = popup.findAllText();
+            String remoteString = new String();
+            for (RemoteText rt : rts) {
+                remoteString = remoteString + rt.getText();
+            }
+
+            // Check for "Fetching Documentation" message indicating there is a delay in getting hint
+            // allow some time for the LS hint to appear in the popup
+            if (remoteString.contains("Fetching Documentation")) {
+                TestUtils.sleepAndIgnoreException(2);
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Validates the expected hover string message was raised in popup.
+     *
+     * @param remoteRobot the remote robot instance
+     *
+     */
+    public static String getHoverStringData(RemoteRobot remoteRobot){
+
+        boolean found = false;
+
+        // get the text from the LS diagnostic hint popup
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ContainerFixture popup = projectFrame.getDocumentationHintPopup();
+        List<RemoteText> rts = popup.findAllText();
+
+        // print out the string data found in the popup window - for debugging
+        popup.findAllText().forEach((it) -> System.out.println(it.getText()));
+
+        String popupString = new String();
+        for (RemoteText rt : rts) {
+            popupString = popupString + rt.getText();
+        }
+
+       return popupString;
 
     }
 
