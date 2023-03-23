@@ -68,10 +68,11 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInGradleAppServerXML(remoteRobot, testHoverTarget);
+        UIBotTestUtils.hoverInAppServerXML(remoteRobot, testHoverTarget);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
 
         // Validate that the hover action raised the expected hint text
-        TestUtils.validateHoverAction(remoteRobot, hoverExpectedOutcome, "Health");
+        TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
     }
 
     /**
@@ -85,10 +86,11 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "Configuration properties for an HTTP endpoint.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInGradleAppServerXML(remoteRobot, testHoverTarget);
+        UIBotTestUtils.hoverInAppServerXML(remoteRobot, testHoverTarget);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
 
         // Validate that the hover action raised the expected hint text
-        TestUtils.validateHoverAction(remoteRobot, hoverExpectedOutcome, "HTTP");
+        TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
     }
 
     /**
@@ -105,7 +107,8 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openDashboardView(remoteRobot);
         UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
-        System.out.println("AJM: using the newest approach to open files?");
+
+        // pre-open project tree before attempting to open server.xml
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");

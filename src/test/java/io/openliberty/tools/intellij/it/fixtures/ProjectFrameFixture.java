@@ -175,14 +175,12 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String visibleText = xpathVars[0];
         return find(ComponentFixture.class, byXpath("//div[@class='EditorComponentImpl' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(1));
     }
+
     /**
-     * Returns the ComponentFixture object fixture associated with the hover text DocumentationHintEditorPane class.
+     * Returns the ContainerFixture object fixture associated with the hover text DocumentationHint popup.
      *
-     * @param xpathVars The Locator custom variables.
-     * @return The ComponentFixture object fixture associated with the ProjectViewTree class.
+     * @return The ContainerFixture object fixture associated with the current popup.
      */
-    public ComponentFixture getDocumentationHintEditorPane(String... xpathVars) {
-        String visibleText = xpathVars[0];
-        return find(ComponentFixture.class, byXpath("//div[@class='DocumentationHintEditorPane' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofMinutes(1));
-    }
+    public ContainerFixture getDocumentationHintPopup() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));    }
 }
