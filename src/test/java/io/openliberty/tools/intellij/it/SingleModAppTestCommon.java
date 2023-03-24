@@ -257,6 +257,42 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
+     * Tests dashboard start/runTests/stop actions run from the search everywhere panel .
+     */
+    @Test
+    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
+    public void testRunTestsActionUsingSearch() {
+        String testName = "testRunTestsActionUsingPopUpMenu";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
+
+        // Start dev mode.
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start");
+
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+
+            // Run the application's tests.
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests");
+
+            // Validate that the reports were generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
      * Prepares the environment to run the tests.
      *
      * @param projectPath The path of the project.

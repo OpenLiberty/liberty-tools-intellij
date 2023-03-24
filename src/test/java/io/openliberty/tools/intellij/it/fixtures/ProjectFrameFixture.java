@@ -150,6 +150,19 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
+     * Returns the ComponentFixture object fixture associated with the STETabLabel class.
+     *
+     * @param xpathVars The Locator custom variables: text, waitTime(secs)
+     * @return The ComponentFixture object fixture associated with the STETabLabel class.
+     */
+    public ComponentFixture getSTELabel(String... xpathVars) {
+        String text = xpathVars[0];
+        return find(ComponentFixture.class,
+                byXpath("//div[@class='SETabLabel' and @text='" + text + "']"),
+                Duration.ofSeconds(5));
+    }
+
+    /**
      * Returns the ComponentFixture object fixture associated with the Tree class.
      *
      * @param xpathVars The Locator custom variables: name, visibleText, waitTime(mins)
