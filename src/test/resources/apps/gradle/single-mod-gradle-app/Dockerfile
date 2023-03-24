@@ -16,7 +16,10 @@ LABEL \
   summary="Test application" \
   description="This image contains the system microservice running with the Open Liberty runtime."
 
-COPY --chown=1001:0 /src/main/liberty/config /config
+COPY --chown=1001:0 build/wlp/usr/servers/defaultServer/configDropins/overrides/liberty-plugin-variable-config.xml /config/configDropins/overrides/
+COPY --chown=1001:0 src/main/liberty/config/ /config/
+
+RUN features.sh
 
 COPY --chown=1001:0 build/libs/*.war /config/apps
 

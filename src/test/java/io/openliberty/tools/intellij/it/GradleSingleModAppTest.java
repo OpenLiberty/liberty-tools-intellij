@@ -43,7 +43,7 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Relative location of the WLP installation.
      */
-    public static String WLP_INSTALL_PATH = "/build";
+    public static String WLP_INSTALL_PATH = "build";
 
     /**
      * The path to the test report.
@@ -64,7 +64,7 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     public static void setup() {
         prepareEnv(PROJECT_PATH, PROJECT_NAME);
     }
-    
+
     /**
      * Deletes test reports.
      */

@@ -14,13 +14,12 @@
         <feature>jsonp-2.0</feature>
         <feature>jsonb-2.0</feature>
         <feature>cdi-3.0</feature>
-        <feature>mpMetrics-4.0</feature>
         <feature>mpHealth-4.0</feature>
         <feature>mpConfig-3.0</feature>
     </featureManager>
 
-    <httpEndpoint host="*" httpPort="9090"
-                  httpsPort="9453" id="defaultHttpEndpoint"/>
+    <httpEndpoint host="*" httpPort="${default.http.port}"
+                  httpsPort="${default.https.port}" id="defaultHttpEndpoint"/>
 
     <webApplication contextRoot="/" location="${project.name}.war"/>
 

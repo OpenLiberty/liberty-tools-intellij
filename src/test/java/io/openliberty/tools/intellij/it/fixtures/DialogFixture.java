@@ -73,6 +73,6 @@ public class DialogFixture extends CommonContainerFixture {
      * @return The JButtonFixture object associated with button containing the specified text.
      */
     public JButtonFixture getButton(String text) {
-        return button(byXpath("//div[@text='" + text + "']"), Duration.ofSeconds(5));
+        return button(byXpath("//div[@class='JButton' and @text='" + text + "']"), Duration.ofSeconds(5));
     }
 }
