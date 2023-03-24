@@ -34,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
@@ -650,5 +651,57 @@ public class UIBotTestUtils {
             e.printStackTrace();
             Assert.fail("Failed to collect UI Component Hierarchy information: " + e.getCause());
         }
+    }
+
+    /**
+     * Opens the search everywhere dialog.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action) {
+        // Click on Navigate on the Menu bar.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ComponentFixture navigateMenuEntry = projectFrame.getActionMenu("Navigate");
+        navigateMenuEntry.click();
+
+        // Click on Search Everywhere in the menu.
+        ComponentFixture searchFixture = projectFrame.getActionMenuItem("Search Everywhere");
+        searchFixture.click();
+
+        // Click on the Actions tab
+        ComponentFixture actionsTabFixture = projectFrame.getSTELabel("Actions");
+        actionsTabFixture.click();
+
+        // Type the search string in the search dialog box.
+        JTextFieldFixture searchField = projectFrame.textField(JTextFieldFixture.Companion.byType(), Duration.ofSeconds(10));
+        searchField.click();
+        searchField.setText(action);
+
+        // Wait for the desired action to show in the search output frame and click on it.
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(20),
+                Duration.ofSeconds(1),
+                "Waiting for the search to filter and show " + action + " in search output",
+                "The search did not filter or show " + action + " in the search output",
+                () -> findTextInSearchOutputPanel(projectFrame, action) != null);
+
+        RemoteText foundAction = findTextInSearchOutputPanel(projectFrame, action);
+        foundAction.click();
+    }
+
+    public static RemoteText findTextInSearchOutputPanel(CommonContainerFixture fixture, String text) {
+        RemoteText foundText = null;
+
+        List<JListFixture> searchLists = fixture.jLists(JListFixture.Companion.byType());
+        if (!searchLists.isEmpty()) {
+            JListFixture searchList = searchLists.get(0);
+            try {
+                foundText = searchList.findText(text);
+            } catch (NoSuchElementException nsee) {
+                // The list is empty.
+                return null;
+            }
+        }
+
+        return foundText;
     }
 }
