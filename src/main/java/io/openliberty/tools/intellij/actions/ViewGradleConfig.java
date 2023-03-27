@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,25 +11,35 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ViewGradleConfig extends LibertyGeneralAction {
 
-    public ViewGradleConfig() {
-        setActionCmd(LocalizedResourceUtil.getMessage("view.gradle.config.file"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("view.gradle.config.file");
     }
 
     @Override
     protected List<String> getSupportedProjectTypes() {
-        return Arrays.asList(Constants.LIBERTY_GRADLE_PROJECT);
+        return List.of(Constants.LIBERTY_GRADLE_PROJECT);
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+
         // open build file
         FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, buildFile), true);
     }

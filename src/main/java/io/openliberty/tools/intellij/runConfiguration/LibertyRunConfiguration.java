@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,7 +14,6 @@ import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -27,7 +26,6 @@ import io.openliberty.tools.intellij.util.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.MalformedURLException;
 import java.util.Collection;
 
 /**
@@ -106,7 +104,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     /**
      * Runs when users select "Run" or "Debug" on a Liberty  run configuration
      *
-     * @param executor the execution mode selected by the user (run, debug, profile etc.)
+     * @param executor    the execution mode selected by the user (run, debug, profile etc.)
      * @param environment the environment object containing additional settings for executing the configuration.
      * @return
      * @throws ExecutionException
@@ -123,7 +121,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         // run the start dev mode action
         AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
         LibertyDevStartAction libAction = (LibertyDevStartAction) action;
-        libAction.setLibertyModule(libertyModule);
+
         // set custom start params
         if (getParams() != null) {
             libertyModule.setCustomStartParams(getParams());
@@ -136,7 +134,18 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);
         }
-        action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(null), ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0));
+
+        // Required configuration event data.
+        DataContext dataCtx = dataId -> {
+            if (CommonDataKeys.PROJECT.is(dataId)) {
+                return libertyModule.getProject();
+            }
+            return null;
+        };
+        
+        AnActionEvent event = new AnActionEvent(null, dataCtx, ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+
         // return null because we are not plugging into "Run" tool window in IntelliJ, just terminal and Debug
         return null;
     }

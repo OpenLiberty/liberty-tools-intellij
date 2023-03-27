@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,11 +11,10 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.LibertyModule;
-import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -28,25 +27,24 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
-
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);
 
-    private final RefreshLibertyToolbar refreshLibertyToolbar = new RefreshLibertyToolbar();
-
     public abstract String getChooseDialogTitle();
+
     public abstract String getChooseDialogMessage();
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        project = LibertyProjectUtil.getProject(e.getDataContext());
+        Project project = e.getProject();
+        String actionCmd = e.getPresentation().getText();
         if (project == null) {
             // TODO prompt user to select project
             String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
-            notifyError(msg);
+            notifyError(msg, project);
             LOGGER.debug(msg);
             return;
         }
-        List<BuildFile> buildFileList = getBuildFileList();
+        List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
             final String[] projectNames = buildFileToProjectNames(buildFileList);
             final int ret = Messages.showChooseDialog(project,
@@ -58,12 +56,11 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             // Execute the action if a project was selected.
             if (ret >= 0 && ret < buildFileList.size()) {
                 BuildFile selectedBuildFile = buildFileList.get(ret);
-                setLibertyModule(new LibertyModule(project, selectedBuildFile));
-                executeLibertyAction();
-                refreshLibertyToolbar.actionPerformed(e);
+                LibertyModule module = new LibertyModule(project, selectedBuildFile);
+                executeLibertyAction(module);
+                RefreshLibertyToolbar.refreshDashboard(project);
             }
-        }
-        else {
+        } else {
             // Notify the user that no projects were detected that apply to this action.
             Messages.showMessageDialog(project,
                     LocalizedResourceUtil.getMessage("liberty.project.no.projects.detected.dialog.message"),
@@ -73,13 +70,13 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
     }
 
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
-    protected final List<BuildFile> getBuildFileList() {
+    protected final List<BuildFile> getBuildFileList(Project project) {
         final List<BuildFile> buildFiles = new ArrayList<BuildFile>();
         final List<BuildFile> mavenBuildFiles;
         final List<BuildFile> gradleBuildFiles;
         try {
-            mavenBuildFiles = getMavenBuildFiles();
-            gradleBuildFiles = getGradleBuildFiles();
+            mavenBuildFiles = getMavenBuildFiles(project);
+            gradleBuildFiles = getGradleBuildFiles(project);
         } catch (IOException | SAXException | ParserConfigurationException e) {
             LOGGER.error("Could not find Maven or Gradle projects in workspace",
                     e.getMessage());
@@ -132,12 +129,11 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         return projectNames;
     }
 
-    protected ArrayList<BuildFile> getGradleBuildFiles() throws IOException, ParserConfigurationException, SAXException {
+    protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, ParserConfigurationException, SAXException {
         return LibertyProjectUtil.getGradleBuildFiles(project);
     }
 
-    protected ArrayList<BuildFile> getMavenBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+    protected ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return LibertyProjectUtil.getMavenBuildFiles(project);
     }
-
 }

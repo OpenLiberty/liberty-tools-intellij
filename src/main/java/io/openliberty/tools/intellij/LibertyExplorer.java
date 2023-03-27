@@ -78,7 +78,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     /**
      * Builds the Open Liberty Tools Dashboard tree
-     * @param project current project
+     *
+     * @param project         current project
      * @param backgroundColor
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
@@ -141,7 +142,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
             // check if Liberty Maven Plugin is 3.3-M1+
             // if version is not specified in pom, assume latest version as downloaded from maven central
-            if (validContainerVersion){
+            if (validContainerVersion) {
                 node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
             }
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
@@ -199,7 +200,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         Tree tree = new Tree(top);
         tree.setName(Constants.LIBERTY_TREE);
         tree.setRootVisible(false);
-
         TreeDataProvider newDataProvider = new TreeDataProvider();
         DataManager.registerDataProvider(tree, newDataProvider);
         TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
@@ -244,7 +244,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         }
                         AnAction startAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
                         group.add(startAction);
-                        if (libertyNode.isValidContainerVersion()){
+                        if (libertyNode.isValidContainerVersion()) {
                             AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
                             group.add(customStartAction);
                         }
@@ -274,7 +274,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         tree.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode()==KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     executeAction(tree);
                 }
             }
@@ -336,11 +336,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
             LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
             if (action != null) {
-                action.setLibertyModule(module);
-                action.actionPerformed(new AnActionEvent(null, 
-                                    DataManager.getInstance().getDataContext(tree), 
-                                    ActionPlaces.UNKNOWN, new Presentation(),
-                                    am, 0));
+                action.actionPerformed(new AnActionEvent(null,
+                        DataManager.getInstance().getDataContext(tree),
+                        ActionPlaces.UNKNOWN, new Presentation(),
+                        am, 0));
             }
         }
     }

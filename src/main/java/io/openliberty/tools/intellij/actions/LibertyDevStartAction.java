@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,13 +9,10 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.DebugModeHandler;
-import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
-import io.openliberty.tools.intellij.util.LibertyGradleUtil;
-import io.openliberty.tools.intellij.util.LibertyMavenUtil;
-import io.openliberty.tools.intellij.util.LibertyException;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.io.IOException;
@@ -25,12 +22,22 @@ import java.io.IOException;
  */
 public class LibertyDevStartAction extends LibertyGeneralAction {
 
-    public LibertyDevStartAction() {
-        setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("start.liberty.dev");
     }
-    
+
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+        String projectType = libertyModule.getProjectType();
+        String projectName = project.getName();
+
         String startCmd = null;
         int debugPort = -1;
         DebugModeHandler debugHandler = new DebugModeHandler();
@@ -38,11 +45,13 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         try {
             buildSettingsCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) : LibertyGradleUtil.getGradleSettingsCmd(project);
         } catch (LibertyException ex) {
-            // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd
-            LOGGER.warn(ex.getMessage()); // Logger.error creates an entry on "IDE Internal Errors", which we do not want
-            notifyError(ex.getTranslatedMessage());
+            // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd.
+            // Log a warning because a Logger.error creates an entry on "IDE Internal Errors", which we do not want.
+            LOGGER.warn(ex.getMessage());
+            notifyError(ex.getTranslatedMessage(), project);
             return;
         }
+
         String start = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
         String startInContainer = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
         startCmd = libertyModule.runInContainer() ? startInContainer : start;
@@ -57,13 +66,13 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
                     startCmd += " " + debugParam + debugPort;
                 }
             } catch (IOException e) {
-                String msg = LocalizedResourceUtil.getMessage("liberty.debug.port.unresolved", actionCmd, projectName);
-                notifyError(msg);
+                String msg = LocalizedResourceUtil.getMessage("liberty.debug.port.unresolved", getActionCommandName(), projectName);
+                notifyError(msg, project);
                 LOGGER.error(msg);
             }
         }
 
-        ShellTerminalWidget widget = getTerminalWidget(true);
+        ShellTerminalWidget widget = getTerminalWidget(true, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }
@@ -77,5 +86,4 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             libertyModule.setDebugMode(false);
         }
     }
-
 }

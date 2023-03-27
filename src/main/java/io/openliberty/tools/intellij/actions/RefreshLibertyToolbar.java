@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -31,11 +31,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public class RefreshLibertyToolbar extends AnAction {
-    Logger LOGGER = Logger.getInstance(RefreshLibertyToolbar.class);
+    private static final Logger LOGGER = Logger.getInstance(RefreshLibertyToolbar.class);
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
+        refreshDashboard(project);
+    }
+
+    public static void refreshDashboard(Project project) {
         if (project == null) {
             LOGGER.debug("Unable to refresh Liberty toolbar, could not resolve project");
             return;
@@ -55,7 +59,7 @@ public class RefreshLibertyToolbar extends AnAction {
 
         Component existingTree = null;
         Component existingActionToolbar = null;
-        for (Component comp: components) {
+        for (Component comp : components) {
             if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
                 existingTree = comp;
             }
