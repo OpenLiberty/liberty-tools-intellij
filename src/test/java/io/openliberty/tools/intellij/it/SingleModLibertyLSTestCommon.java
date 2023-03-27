@@ -52,7 +52,7 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        UIBotTestUtils.closeSourceFile(remoteRobot, "server.xml");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml", "5");
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
@@ -147,8 +147,8 @@ public abstract class SingleModLibertyLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        UIBotTestUtils.openDashboardView(remoteRobot);
-        UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
+        UIBotTestUtils.validateLibertyTWProjectTreeItemIsShowing(remoteRobot, projectName);
 
         // pre-open project tree before attempting to open server.xml
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));

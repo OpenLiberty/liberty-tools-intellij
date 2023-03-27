@@ -57,37 +57,31 @@ public abstract class SingleModAppTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        UIBotTestUtils.closeDashboardView(remoteRobot);
+        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
     }
 
     /**
-     * Tests dashboard start/stop actions run from the project drop-down menu.
+     * Tests the liberty: View <project build file> action run from the project's pop-up action menu.
      */
     @Test
-    public void testStartActionUsingDropDownMenu() {
-        String testName = "testStartActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+    public void testOpenBuildFileActionUsingPopUpMenu() {
+        String editorTabName = getBuildFileName() + " (" + projectName + ")";
 
-        // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", false);
+        // Close the editor tab if it was previously opened.
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "5");
 
-        try {
-            // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        // Open the build file.
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, getBuildFileOpenCommand());
 
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+        // Verify that build file tab is opened.
+        Assertions.assertNotNull(UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabName, "10"),
+                "Editor tab with the name of " + editorTabName + " could not be found.");
 
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
+        // Close the editor tab.
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "10");
     }
 
     /**
@@ -95,12 +89,12 @@ public abstract class SingleModAppTestCommon {
      */
     @Test
     @Video
-    public void testStartWithParmsActionUsingDropDownMenu() {
-        String testName = "testStartWithParmsActionUsingDropDownMenu";
+    public void testStartWithParamsActionUsingDropDownMenu() {
+        String testName = "testStartWithParamsActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
-        // Start the start with parameters configuration dialog.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start...", false);
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", false);
 
         // Run the configuration dialog.
         UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
@@ -113,7 +107,7 @@ public abstract class SingleModAppTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", false);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -133,7 +127,7 @@ public abstract class SingleModAppTestCommon {
         deleteTestReports();
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", false);
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", false);
 
         // Validate that the application started.
         String url = appBaseURL + "api/resource";
@@ -141,14 +135,14 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Run the application's tests.
-            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Run tests", false);
+            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", false);
 
             // Validate that the report was generated.
             validateTestReportsExist();
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", false);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -157,53 +151,19 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests dashboard start/RunTests/stop actions selected on the project's drop-down action
-     * menu and run using the play action button on the dashboard's toolbar.
+     * Tests Liberty tool window start.../stop actions run from the project drop-down menu.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testRunTestsActionUsingPlayToolbarButton() {
-        String testName = "testStartActionUsingPlayToolbarButton";
+    public void testStartWithParamsActionUsingPlayToolbarButton() {
+        String testName = "testStartWithParamsActionUsingPlayToolbarButton";
         String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
-        // Delete any existing test report files.
-        deleteTestReports();
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
 
-        // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start", true);
-
-        // Validate that the application started.
-        String url = appBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
-
-        try {
-            // Run the application's tests.
-            UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Run tests", true);
-
-            // Validate that the report was generated.
-            validateTestReportsExist();
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", true);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests dashboard start/stop actions run from the project's pop-up action menu.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testStartActionUsingPopUpMenu() {
-        String testName = "testStartActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
-
-        // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
@@ -212,7 +172,7 @@ public abstract class SingleModAppTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -221,7 +181,74 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests dashboard start/runTests/stop actions run from the project's pop-up action menu.
+     * Tests Liberty tool window start/RunTests/stop actions selected on the project's drop-down action
+     * menu and run using the play action button on the Liberty tool window's toolbar.
+     */
+    @Test
+    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
+    public void testRunTestsActionUsingPlayToolbarButton() {
+        String testName = "testRunTestsActionUsingPlayToolbarButton";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", true);
+
+        // Validate that the application started.
+        String url = appBaseURL + "api/resource";
+        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+
+        try {
+            // Run the application's tests.
+            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", true);
+
+            // Validate that the report was generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start.../stop actions run from the project's pop-up action menu.
+     */
+    @Test
+    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
+    public void testStartWithParamsActionUsingPopUpMenu() {
+        String testName = "testStartWithParamsActionUsingPopUpMenu";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Start...");
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start/runTests/stop actions run from the project's pop-up action menu.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
@@ -233,7 +260,7 @@ public abstract class SingleModAppTestCommon {
         deleteTestReports();
 
         // Start dev mode.
-        UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
 
         try {
             // Validate that the application started.
@@ -241,14 +268,14 @@ public abstract class SingleModAppTestCommon {
             TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
 
             // Run the application's tests.
-            UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Run tests");
+            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Run tests");
 
             // Validate that the reports were generated.
             validateTestReportsExist();
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -257,12 +284,42 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests dashboard start/runTests/stop actions run from the search everywhere panel .
+     * Tests Liberty tool window start.../stop actions run from the search everywhere panel.
+     */
+    @Test
+    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
+    public void testStartWithParamsActionUsingSearch() {
+        String testName = "testStartWithParamsActionUsingSearch";
+        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            String url = appBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start/runTests/stop actions run from the search everywhere panel .
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingSearch() {
-        String testName = "testRunTestsActionUsingPopUpMenu";
+        String testName = "testRunTestsActionUsingSearch";
         String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
 
         // Delete any existing test report files.
@@ -304,10 +361,33 @@ public abstract class SingleModAppTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        UIBotTestUtils.openDashboardView(remoteRobot);
-        UIBotTestUtils.validateDashboardProjectTreeItemIsShowing(remoteRobot, projectName);
-        UIBotTestUtils.expandDashboardProjectTree(remoteRobot);
+        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
+        UIBotTestUtils.validateLibertyTWProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, projectName);
+
+        // Close all open editors.
+        // The expansion of the project tree in the Liberty tool window causes the editor tab for
+        // the project's build file to open. That is the result of clicking on the project to give it
+        // focus. The action of clicking on the project causes the build file to be opened automatically.
+        // Closing the build file editor here prevents it from opening automatically when the project
+        // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
+        // prevent false positive tests related to the build file editor tab.
+        UIBotTestUtils.closeAllEditorTabs(remoteRobot);
     }
+
+    /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    public abstract String getBuildFileName();
+
+    /**
+     * Returns the name of the custom action command used to open the build file.
+     *
+     * @return The name of the custom action command used to open the build file.
+     */
+    public abstract String getBuildFileOpenCommand();
 
     /**
      * Deletes test reports.
