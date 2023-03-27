@@ -57,8 +57,10 @@ public class JakartaCodeActionHandler {
             int start = DiagnosticsHelper.getStartOffset(unit, params.getRange(), utils);
             int end = DiagnosticsHelper.getEndOffset(unit, params.getRange(), utils);
             var mpParams = new MicroProfileJavaCodeActionParams(params.getTextDocument(), params.getRange(), params.getContext());
-            JavaCodeActionContext context = new JavaCodeActionContext(unit, start, end - start, utils,
-                    mpParams);
+            // We need to clone the contents of the editor and rebuild the PSI so that we can modify it in our quick fixes.
+            // If we do not then we receive a write access exception because we are in a runReadAction() context.
+            JavaCodeActionContext context = new JavaCodeActionContext(unit.getViewProvider().clone().getPsi(unit.getLanguage()),
+                    start, end - start, utils, mpParams);
             context.setASTRoot(getASTRoot(unit));
 
             List<CodeAction> codeActions = new ArrayList<>();
