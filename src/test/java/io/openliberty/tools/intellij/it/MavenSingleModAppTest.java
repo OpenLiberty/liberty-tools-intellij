@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 /**
  * Tests Liberty Tools actions using a Maven application.
  */
-
 public class MavenSingleModAppTest extends SingleModAppTestCommon {
     /**
      * Application Name
@@ -52,14 +51,25 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     public static String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
 
     /**
+     * Build file name.
+     */
+    public final String BUILD_FILE_NAME = "pom.xml";
+
+    /**
+     * Action command to open the build file.
+     */
+    public final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
+
+    /**
      * The path to the integration test reports.
      */
-    private final Path pathToITReport = Paths.get(projectPath, "target", "site", "failsafe-report.html");
+    public final Path pathToITReport = Paths.get(PROJECT_PATH, "target", "site", "failsafe-report.html");
 
     /**
      * The path to the unit test reports.
      */
-    private final Path pathToUTReport = Paths.get(projectPath, "target", "site", "surefire-report.html");
+    public final Path pathToUTReport = Paths.get(PROJECT_PATH, "target", "site", "surefire-report.html");
+
 
     /**
      * Tests Liberty Tool actions with a single module application that uses Maven as its build tool.
@@ -75,6 +85,26 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     public static void setup() {
         StepWorker.registerProcessor(new StepLogger());
         prepareEnv(PROJECT_PATH, PROJECT_NAME);
+    }
+
+    /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    @Override
+    public String getBuildFileName() {
+        return BUILD_FILE_NAME;
+    }
+
+    /**
+     * Returns the name of the custom action command used to open the build file.
+     *
+     * @return The name of the custom action command used to open the build file.
+     */
+    @Override
+    public String getBuildFileOpenCommand() {
+        return BUILD_FILE_OPEN_CMD;
     }
 
     /**
@@ -103,9 +133,10 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
      * Notes:
      * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
      * this method should be moved to SingleModAppTestCommon.
-     * 2. This test is restricted to Linux only because, on other platforms, docker build process
-     * driven by the Liberty Maven/Gradle plugins have a timeout of 10 minutes. There is currently
-     * no way to extend this timeout through Liberty Tools (i.e. set dockerBuildTimeout).
+     * 2. This test is restricted to Linux only because, on other platforms, the docker build process
+     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
+     * timeout set by the plugins and there is currently no way to extend this timeout through the
+     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
      */
     @Test
     @Video
@@ -115,7 +146,7 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
         String absoluteWLPPath = Paths.get(PROJECT_PATH, WLP_INSTALL_PATH).toString();
 
         // Start the start with parameters configuration dialog.
-        UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Start in container", false);
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start in container", false);
         try {
             // Validate that the application started.
             String url = appBaseURL + "api/resource";
@@ -123,7 +154,7 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runDashboardActionFromDropDownView(remoteRobot, "Stop", false);
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", false);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);

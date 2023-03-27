@@ -48,7 +48,17 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     /**
      * The path to the test report.
      */
-    private final Path pathToTestReport = Paths.get(projectPath, "build", "reports", "tests", "test", "index.html");
+    private final Path TEST_REPORT_PATH = Paths.get(projectPath, "build", "reports", "tests", "test", "index.html");
+
+    /**
+     * Buidl file name.
+     */
+    private final String BUILD_FILE_NAME = "build.gradle";
+
+    /**
+     * Action command to open the build file.
+     */
+    private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
 
     /**
      * Tests Liberty Tool actions with a single module application that uses Gradle as its build tool.
@@ -66,12 +76,32 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     }
 
     /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    @Override
+    public String getBuildFileName() {
+        return BUILD_FILE_NAME;
+    }
+
+    /**
+     * Returns the name of the custom action command used to open the build file.
+     *
+     * @return The name of the custom action command used to open the build file.
+     */
+    @Override
+    public String getBuildFileOpenCommand() {
+        return BUILD_FILE_OPEN_CMD;
+    }
+
+    /**
      * Deletes test reports.
      */
     @Override
     public void deleteTestReports() {
-        boolean testReportDeleted = TestUtils.deleteFile(pathToTestReport.toFile());
-        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + pathToTestReport + " was not be deleted.");
+        boolean testReportDeleted = TestUtils.deleteFile(TEST_REPORT_PATH.toFile());
+        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + TEST_REPORT_PATH + " was not be deleted.");
     }
 
     /**
@@ -79,6 +109,6 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(pathToTestReport);
+        TestUtils.validateTestReportExists(TEST_REPORT_PATH);
     }
 }
