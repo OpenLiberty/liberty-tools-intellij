@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -88,9 +88,6 @@ public class InsertAnnotationQuickFix {
      */
     private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, PsiClass parentType,
                               List<CodeAction> codeActions, PsiAnnotation annotation, String... attributes) {
-        // Remove the modifier and the proper import by using JDT Core Manipulation
-        // API
-        PsiElement coveredNode = context.getCoveredNode().getParent();
         String name = getLabel(annotation, attributes);
         ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getCompilationUnit(),
                 context.getASTRoot(), (PsiModifierListOwner) parentType, 0, annotation, Arrays.asList(attributes));
