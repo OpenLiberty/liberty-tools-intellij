@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Red Hat, Inc.
+ * Copyright (c) 2019, 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -13,6 +13,8 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction;
 
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -79,7 +81,7 @@ public class JakartaCodeActionHandler {
 //            PersistenceEntityQuickFix PersistenceEntityQuickFix = new PersistenceEntityQuickFix();
 //            ConflictProducesInjectQuickFix ConflictProducesInjectQuickFix = new ConflictProducesInjectQuickFix();
 //            BeanValidationQuickFix BeanValidationQuickFix = new BeanValidationQuickFix();
-//            ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
+            ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
 //            ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
 //            JsonbAnnotationQuickFix JsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
 //            JsonbTransientAnnotationQuickFix JsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
@@ -177,10 +179,10 @@ public class JakartaCodeActionHandler {
 //                            .equals(BeanValidationConstants.DIAGNOSTIC_CODE_INVALID_TYPE)) {
 //                        codeActions.addAll(BeanValidationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.CONSTRUCTOR_DIAGNOSTIC_CODE)) {
-//                        codeActions.addAll(ManagedBeanConstructorQuickFix.getCodeActions(context, diagnostic, monitor));
+                    if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.CONSTRUCTOR_DIAGNOSTIC_CODE)) {
+                        codeActions.addAll(ManagedBeanConstructorQuickFix.getCodeActions(context, diagnostic));
 //                        codeActions.addAll(ManagedBeanNoArgConstructorQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    }
 //                    if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION)) {
 //                        codeActions.addAll(JsonbAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
