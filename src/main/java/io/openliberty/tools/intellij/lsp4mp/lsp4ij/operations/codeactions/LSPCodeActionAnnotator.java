@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Red Hat, Inc.
+ * Copyright (c) 2022, 2023 Red Hat, Inc., IBM Corporation
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -7,6 +7,7 @@
  *
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
+ * IBM Corporation - changes to ensure information used is not out-of-date
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions;
 
