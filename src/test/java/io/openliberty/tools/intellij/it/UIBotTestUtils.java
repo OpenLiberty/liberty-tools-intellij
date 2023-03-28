@@ -9,8 +9,12 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.utils.Keyboard;
+
+import static java.awt.event.KeyEvent.*;
+
+import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
@@ -21,6 +25,8 @@ import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.Assert;
 
 import java.awt.*;
+
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
@@ -39,6 +45,10 @@ public class UIBotTestUtils {
 
     public enum PrintTo {
         STDOUT, FILE
+    }
+
+    public enum InsertionType {
+        FEATURE, CONFIG
     }
 
     /**
@@ -344,6 +354,7 @@ public class UIBotTestUtils {
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
         if (!projTree.hasText("server.xml")) {
             projTree.expand(appName, "src", "main", "liberty", "config");
+            //projTree.expand(appName, "build", "wlp", "usr", "servers", "defaultServer");
             projTree.findText("server.xml").doubleClick();
         } else {
             projTree.findText("server.xml").doubleClick();
@@ -390,9 +401,10 @@ public class UIBotTestUtils {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        editorNew.click();
 
         //need to click outside of the editor before attempting a hover
-        remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree']")).click();
+        //remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree']")).click();
 
         // try to hover over target text
         editorNew.findText(hoverTarget).moveMouse();
@@ -427,6 +439,107 @@ public class UIBotTestUtils {
                 break;
             }
         }
+    }
+
+    /**
+     * Moves the mouse cursor to a specific string target in server.xml
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String projName, String stanzaSnippet, int line, int col, InsertionType type) {
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        editorNew.click();
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+            // find the location in the file to begin the stanza insertion
+            goToLineAndColumn(remoteRobot, keyboard, line, col);
+            // if this is a feature stanza, hit enter to place it on the next line
+            // in the featureManager Block
+            if (type.name().equals("FEATURE")) {
+                keyboard.hotKey(VK_ENTER);
+            }
+
+        if (type.name().equals("FEATURE")) {
+            // add the feature stanza using completion
+            goToLineAndColumn(remoteRobot, keyboard,  line + 1, col);
+            keyboard.hotKey(VK_CONTROL, VK_SPACE);
+
+            ContainerFixture popup = projectFrame.getDocumentationHintPopup();
+            popup.findText("feature").doubleClick();
+
+
+            // add a feature from the list of features using completion
+            // col = 18 to take into account spacing + "<feature>"
+            goToLineAndColumn(remoteRobot, keyboard, line + 1, 18);
+        }
+
+        // for either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
+        keyboard.enterText(stanzaSnippet);
+        // trigger type ahead popup
+        keyboard.hotKey(VK_CONTROL, VK_SPACE);
+        // select the completion suggestion in the popup
+        keyboard.enter();
+
+        // let the auto-save function of intellij save the file before testing it
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        }
+        else{
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+
+        TestUtils.sleepAndIgnoreException(5);
+    }
+
+    /**
+     * Places the cursor at an exact location for text entry in file
+     *
+     * @param remoteRobot the remote robot instance
+     * @param stanza target stanza (fully formed) to remove
+     */
+    public static void deleteStanzaInAppServerXML(RemoteRobot remoteRobot , String stanza) {
+
+        // remove the stanza that was added - keeps server.xml a known layout for any additional tests yet to come
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        editorNew.click();
+
+        // select the target stanza text
+        editorNew.selectText(stanza);
+        TestUtils.sleepAndIgnoreException(5);
+
+        // backspace/delete to remove it
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_DELETE);
+            keyboard.hotKey(VK_DELETE);
+        }
+        else {
+            //win or linux
+            keyboard.hotKey(VK_BACK_SPACE);
+            keyboard.hotKey(VK_BACK_SPACE);
+        }
+    }
+
+    /**
+     * Places the cursor at an exact location for text entry in file
+     *
+     * @param remoteRobot the remote robot instance
+     * @param keyboard keyboard to interact with
+     * @param line target line number
+     * @param column target column number
+     */
+    public static void goToLineAndColumn(RemoteRobot remoteRobot, Keyboard keyboard, int line, int column) {
+
+        // trigger the line:col popup window to place cursor at exact location in file
+        if (remoteRobot.isMac())
+            keyboard.hotKey(KeyEvent.VK_META, KeyEvent.VK_L);
+        else
+            keyboard.hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_G);
+        keyboard.enterText(line + ":" + column);
+        keyboard.enter();
     }
 
     /**
