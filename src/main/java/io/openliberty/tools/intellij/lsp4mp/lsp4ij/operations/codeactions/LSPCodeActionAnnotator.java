@@ -187,6 +187,10 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
     }
 
     private HighlightSeverity getHighlightType(DiagnosticSeverity severity) {
+        if (severity == null) {
+            // if not set, default to Error
+            return HighlightSeverity.ERROR;
+        }
         switch (severity) {
             case Error:
                 return HighlightSeverity.ERROR;
