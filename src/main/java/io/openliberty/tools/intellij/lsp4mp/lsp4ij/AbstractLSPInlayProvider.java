@@ -91,7 +91,7 @@ public abstract class AbstractLSPInlayProvider implements InlayHintsProvider<NoS
         if (command != null) {
             AnAction action = ActionManager.getInstance().getAction(command.getCommand());
             if (action != null) {
-                DataContext context = SimpleDataContext.getSimpleContext(LSP_COMMAND.getName(), command, DataManager.getInstance().getDataContext(source));
+                DataContext context = SimpleDataContext.getSimpleContext(LSP_COMMAND, command, DataManager.getInstance().getDataContext(source));
                 action.actionPerformed(new AnActionEvent(null, context,
                         ActionPlaces.UNKNOWN, new Presentation(),
                         ActionManager.getInstance(), 0));
