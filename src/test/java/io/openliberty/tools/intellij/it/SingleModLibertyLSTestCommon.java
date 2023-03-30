@@ -7,6 +7,9 @@ import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -62,9 +65,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testServerXMLFeatureHover() {
-        String testName = "testServerXMLFeatureHover";
         String testHoverTarget = "mpHealth-4.0";
-        String testAppName = "gradle-app";
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
 
         //mover cursor to hover point
@@ -94,6 +95,47 @@ public abstract class SingleModLibertyLSTestCommon {
     }
 
     /**
+     * Tests Liberty Lemminx Extension type ahead support in server.xml for a
+     * Liberty Server Feature
+     */
+    @Test
+    @Video
+    public void testInsertFeatureIntoServerXML() {
+        String stanzaSnippet = "el-3";
+        String insertedFeature = "<feature>el-3.0</feature>";
+
+        Path pathToServerXML = null;
+        pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
+
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet,18, 40, UIBotTestUtils.InsertionType.FEATURE);
+
+        // give the IDEA time to save the server.xml file
+        TestUtils.sleepAndIgnoreException(5);
+
+        TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
+        UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedFeature);
+    }
+
+    /**
+     * Tests Liberty Lemminx Extension type ahead support in server.xml for a
+     * Liberty Server Configuration Stanza
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoServerXML() {
+        String stanzaSnippet = "use";
+        String insertedConfig = "<userInfo></userInfo>";
+
+        Path pathToServerXML = null;
+        pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
+
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.CONFIG);
+        TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
+        UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedConfig);
+
+    }
+
+    /**
      * Prepares the environment to run the tests.
      *
      * @param projectPath The path of the project.
@@ -112,6 +154,7 @@ public abstract class SingleModLibertyLSTestCommon {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");
+        //projTree.expand(projectName, "build", "wlp", "usr", "servers", "defaultServer");
 
         // open server.xml file
         UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);

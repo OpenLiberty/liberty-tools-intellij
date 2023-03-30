@@ -217,6 +217,14 @@ public class TestUtils {
         }
     }
 
+    public static void validateStanzaInServerXML(String pathToServerXml, String insertedStanza) {
+
+        try {
+            Assertions.assertTrue(isTextInFile(pathToServerXml, insertedStanza));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     /**
      * Prints the Liberty server's messages.log identified by the input path.
      *
