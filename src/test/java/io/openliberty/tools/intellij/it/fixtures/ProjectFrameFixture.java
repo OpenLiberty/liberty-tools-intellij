@@ -77,7 +77,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         List<ComponentFixture> list = findAll(ComponentFixture.class, byXpath("//div[@class='ActionMenuItem' and @text='" + text + "']"));
         return list.get(0);
     }
-    
+
     /**
      * Returns the ComponentFixture object associated with the ActionMenu class.
      *
@@ -181,12 +181,12 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ComponentFixture object associated with the STETabLabel class.
+     * Returns the ComponentFixture object associated with the SETabLabel class.
      *
      * @param xpathVars The Locator custom variables: text, waitTime(secs)
-     * @return The ComponentFixture object associated with the STETabLabel class.
+     * @return The ComponentFixture object associated with the SETabLabel class.
      */
-    public ComponentFixture getSTELabel(String... xpathVars) {
+    public ComponentFixture getSETabLabel(String... xpathVars) {
         String text = xpathVars[0];
         return find(ComponentFixture.class,
                 byXpath("//div[@class='SETabLabel' and @text='" + text + "']"),
