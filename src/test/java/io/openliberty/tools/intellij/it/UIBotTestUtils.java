@@ -9,12 +9,12 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.Keyboard;
 
 import static java.awt.event.KeyEvent.*;
 
-import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
@@ -354,7 +354,6 @@ public class UIBotTestUtils {
         JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
         if (!projTree.hasText("server.xml")) {
             projTree.expand(appName, "src", "main", "liberty", "config");
-            //projTree.expand(appName, "build", "wlp", "usr", "servers", "defaultServer");
             projTree.findText("server.xml").doubleClick();
         } else {
             projTree.findText("server.xml").doubleClick();
@@ -401,10 +400,9 @@ public class UIBotTestUtils {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        // click on editor pane to regain focus
         editorNew.click();
 
-        //need to click outside of the editor before attempting a hover
-        //remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='ProjectViewTree']")).click();
 
         // try to hover over target text
         editorNew.findText(hoverTarget).moveMouse();
@@ -453,15 +451,13 @@ public class UIBotTestUtils {
         editorNew.click();
 
         Keyboard keyboard = new Keyboard(remoteRobot);
-            // find the location in the file to begin the stanza insertion
-            goToLineAndColumn(remoteRobot, keyboard, line, col);
-            // if this is a feature stanza, hit enter to place it on the next line
-            // in the featureManager Block
-            if (type.name().equals("FEATURE")) {
-                keyboard.hotKey(VK_ENTER);
-            }
+        // find the location in the file to begin the stanza insertion
+        goToLineAndColumn(remoteRobot, keyboard, line, col);
 
         if (type.name().equals("FEATURE")) {
+            // if this is a feature stanza, hit enter to place it on the next line
+            // in the featureManager Block
+            keyboard.hotKey(VK_ENTER);
             // add the feature stanza using completion
             goToLineAndColumn(remoteRobot, keyboard,  line + 1, col);
             keyboard.hotKey(VK_CONTROL, VK_SPACE);

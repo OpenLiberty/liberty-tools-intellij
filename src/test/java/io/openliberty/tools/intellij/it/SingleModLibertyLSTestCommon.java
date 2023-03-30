@@ -101,13 +101,17 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testInsertFeatureIntoServerXML() {
-        String stanzasnippet = "el-3";
+        String stanzaSnippet = "el-3";
         String insertedFeature = "<feature>el-3.0</feature>";
 
         Path pathToServerXML = null;
         pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzasnippet,18, 40, UIBotTestUtils.InsertionType.FEATURE);
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet,18, 40, UIBotTestUtils.InsertionType.FEATURE);
+
+        // give the IDEA time to save the server.xml file
+        TestUtils.sleepAndIgnoreException(5);
+
         TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
         UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedFeature);
     }
@@ -119,13 +123,13 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testInsertLibertyConfigIntoServerXML() {
-        String stanzasnippet = "use";
+        String stanzaSnippet = "use";
         String insertedConfig = "<userInfo></userInfo>";
 
         Path pathToServerXML = null;
         pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzasnippet, 20, 0, UIBotTestUtils.InsertionType.CONFIG);
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.CONFIG);
         TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
         UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedConfig);
 
