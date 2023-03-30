@@ -160,7 +160,7 @@ public class UIBotTestUtils {
                         // The content of the Liberty tool window may blink in and out of existence; therefore,
                         // causing errors. Retry if that is the case.
                         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
-                                "Double click on Liberty tool window drop down action failed (" + e.getMessage() + "). Retrying...");
+                                "Double click or play button click on Liberty tool window drop down action failed (" + e.getMessage() + "). Retrying...");
                         TestUtils.sleepAndIgnoreException(1);
                         error = e;
                     }
@@ -642,11 +642,11 @@ public class UIBotTestUtils {
      * Runs the start parameters run configuration dialog.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param startParms  The parameters to set in the configuration dialog.
+     * @param startParams The parameters to set in the configuration dialog.
      */
-    public static void runStartParmsConfigDialog(RemoteRobot remoteRobot, String startParms) {
+    public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(19));
-        if (startParms != null) {
+        if (startParams != null) {
             // Update the parameter editor box.
             // TODO: Investigate this further:
             // Currently blocked by the dialog editor box behind the start parameter text box
@@ -742,7 +742,7 @@ public class UIBotTestUtils {
         searchFixture.click();
 
         // Click on the Actions tab
-        ComponentFixture actionsTabFixture = projectFrame.getSTELabel("Actions");
+        ComponentFixture actionsTabFixture = projectFrame.getSETabLabel("Actions");
         actionsTabFixture.click();
 
         // Type the search string in the search dialog box.

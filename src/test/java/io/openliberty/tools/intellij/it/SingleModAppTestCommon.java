@@ -97,7 +97,7 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", false);
 
         // Run the configuration dialog.
-        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
@@ -151,7 +151,8 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests Liberty tool window start.../stop actions run from the project drop-down menu.
+     * Tests Liberty tool window start.../stop actions selected on the project's drop-down action
+     * menu and run using the play action button on the Liberty tool window's toolbar.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
@@ -163,7 +164,7 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
 
         // Run the configuration dialog.
-        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
@@ -230,7 +231,7 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Start...");
 
         // Run the configuration dialog.
-        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
@@ -284,7 +285,7 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests Liberty tool window start.../stop actions run from the search everywhere panel.
+     * Tests start.../stop actions run from the search everywhere panel.
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
@@ -296,7 +297,7 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
 
         // Run the configuration dialog.
-        UIBotTestUtils.runStartParmsConfigDialog(remoteRobot, null);
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
@@ -314,7 +315,7 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
-     * Tests Liberty tool window start/runTests/stop actions run from the search everywhere panel .
+     * Tests start/runTests/stop actions run from the search everywhere panel .
      */
     @Test
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
