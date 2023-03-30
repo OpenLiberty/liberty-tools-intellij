@@ -15,6 +15,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -27,14 +28,16 @@ public class NewAnnotationProposal extends ChangeCorrectionProposal {
 
     private final PsiFile fInvocationNode;
     private final PsiModifierListOwner fBinding;
+    private PsiAnnotation fAnnotation;
 
-    protected final PsiAnnotation[] annotations;
+    protected final String[] annotations;
 
-    public NewAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
-                                 PsiModifierListOwner binding, int relevance, PsiAnnotation... annotations) {
+    public NewAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode, PsiModifierListOwner binding,
+                                 PsiAnnotation annotation, int relevance, String... annotations) {
         super(label, CodeActionKind.QuickFix, relevance);
         fInvocationNode = invocationNode;
         fBinding = binding;
+        fAnnotation = annotation;
         this.annotations = annotations;
     }
 
@@ -43,6 +46,21 @@ public class NewAnnotationProposal extends ChangeCorrectionProposal {
         return null;
     }
 
+    public void performUpdate() {
+        for(String annotation : annotations) {
+            PsiClass annotationClass = JavaPsiFacade.getInstance(fBinding.getProject()).
+                    findClass(annotation, GlobalSearchScope.allScope(fBinding.getProject()));
+            if (annotationClass != null) {
+                // Need to update this if 'annotations' is ever longer than 1.
+                fAnnotation = fBinding.getModifierList().addAnnotation(annotationClass.getName());
+                if (fBinding.getContainingFile() instanceof PsiJavaFile) {
+                    ((PsiJavaFile) fBinding.getContainingFile()).getImportList().
+                            add(PsiElementFactory.getInstance(fBinding.getProject()).
+                                    createImportStatement(annotationClass));
+                }
+            }
+        }
+    }
     /**
      * Returns the Compilation Unit node
      *
@@ -62,11 +80,20 @@ public class NewAnnotationProposal extends ChangeCorrectionProposal {
     }
 
     /**
+     * Returns the Annotation object associated with the new annotation change
+     *
+     * @return the model object representing the annotation (existing or to be created)
+     */
+    protected PsiAnnotation getAnnotation() {
+        return this.fAnnotation;
+    }
+
+    /**
      * Returns the annotations list
      *
      * @return the list of new annotations to add
      */
-    protected PsiAnnotation[] getAnnotations() {
+    protected String[] getAnnotations() {
         return this.annotations;
     }
 }

@@ -60,23 +60,24 @@ public class InsertAnnotationQuickFix {
     }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        PsiElement atNode = context.getCoveredNode();
-        PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(atNode, PsiAnnotation.class);
-        PsiClass parentType = getBinding(atNode);
+        PsiElement node = context.getCoveredNode();
+        PsiModifierListOwner binding = getBinding(node);
+        // annotationNode is null when adding an annotation and non-null when adding attributes.
+        PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
 
         List<CodeAction> codeActions = new ArrayList<>();
-        addAttributes(diagnostic, context, parentType, codeActions, annotationNode);
+        addAttributes(diagnostic, context, binding, annotationNode, codeActions, this.annotation);
 
         return codeActions;
     }
 
-    protected void addAttributes(Diagnostic diagnostic, JavaCodeActionContext context, PsiClass parentType,
-                                 List<CodeAction> codeActions, PsiAnnotation annotation) {
+    protected void addAttributes(Diagnostic diagnostic, JavaCodeActionContext context, PsiModifierListOwner binding,
+                                 PsiAnnotation annotation, List<CodeAction> codeActions, String name) {
         if (generateOnlyOneCodeAction) {
-            addAttribute(diagnostic, context, parentType, codeActions, annotation, attributes);
+            addAttribute(diagnostic, context, binding, annotation, codeActions, name, attributes);
         } else {
             for (String attribute : attributes) {
-                addAttribute(diagnostic, context, parentType, codeActions, annotation, attribute);
+                addAttribute(diagnostic, context, binding, annotation, codeActions, name, attribute);
             }
         }
     }
@@ -86,11 +87,11 @@ public class InsertAnnotationQuickFix {
      * collector class.
      *
      */
-    private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, PsiClass parentType,
-                              List<CodeAction> codeActions, PsiAnnotation annotation, String... attributes) {
-        String name = getLabel(annotation, attributes);
-        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getCompilationUnit(),
-                context.getASTRoot(), (PsiModifierListOwner) parentType, 0, annotation, Arrays.asList(attributes));
+    private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, PsiModifierListOwner binding,
+                              PsiAnnotation annotation, List<CodeAction> codeActions, String name, String... attributes) {
+        String label = getLabel(name, attributes);
+        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getCompilationUnit(),
+                context.getASTRoot(), binding, annotation, 0, name, Arrays.asList(attributes));
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
 
         if (codeAction != null) {
@@ -98,12 +99,13 @@ public class InsertAnnotationQuickFix {
         }
     }
 
-    protected PsiClass getBinding(PsiElement node) {
-        // handle annotation insertions for a single variable declaration
-        // TODO: FOLLOWING TWO CHECKS
-//        if (node.getParent() instanceof SingleVariableDeclaration) {
-//            return ((PsiLocalVariable) node.getParent());
-//        }
+    protected PsiModifierListOwner getBinding(PsiElement node) {
+        // handle annotation insertions for a variable declaration or a class
+        PsiModifierListOwner element = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
+        if (element != null) {
+            return element;
+        }
+        // TODO: FOLLOWING ONE CHECK
         // handle annotation insertions for a variable declaration
 //        if (node.getParent() instanceof VariableDeclarationFragment) {
 //            return ((PsiElement) node.getParent());
@@ -111,10 +113,10 @@ public class InsertAnnotationQuickFix {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 
-    protected String getLabel(PsiAnnotation annotation, String... attributes) {
-        StringBuilder name = new StringBuilder("Insert ");
-        name.append("@");
-        name.append(annotation.getQualifiedName());
-        return name.toString();
+    protected String getLabel(String annotationName, String... attributes) {
+        StringBuilder label = new StringBuilder("Insert ");
+        label.append("@");
+        label.append(annotationName);
+        return label.toString();
     }
 }

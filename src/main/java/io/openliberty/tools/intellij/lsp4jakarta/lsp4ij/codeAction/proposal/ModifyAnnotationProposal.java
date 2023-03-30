@@ -12,6 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
+import com.intellij.openapi.editor.Document;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 
@@ -37,21 +38,24 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
     private final List<String> attributesToRemove;
 
     public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
-                                    PsiModifierListOwner binding, int relevance, PsiAnnotation annotation, List<String> attributesToAdd,
+                                    PsiModifierListOwner binding, PsiAnnotation annotationNode,
+                                    int relevance, String annotation, List<String> attributesToAdd,
                                     List<String> attributesToRemove) {
-        super(label, targetCU, invocationNode, binding, relevance, annotation);
+        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotation);
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = attributesToRemove;
     }
     public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
-                                    PsiModifierListOwner binding, int relevance, PsiAnnotation annotation, List<String> attributesToAdd) {
-        super(label, targetCU, invocationNode, binding, relevance, annotation);
+                                    PsiModifierListOwner binding, PsiAnnotation annotationNode,
+                                    int relevance, String annotation, List<String> attributesToAdd) {
+        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotation);
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = new ArrayList<>();
     }
     public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
-                                    PsiModifierListOwner binding, int relevance, List<String> attributesToAdd, PsiAnnotation... annotations) {
-        super(label, targetCU, invocationNode, binding, relevance, annotations);
+                                    PsiModifierListOwner binding, PsiAnnotation annotationNode,
+                                    int relevance, List<String> attributesToAdd, String... annotations) {
+        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotations);
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = new ArrayList<>();
     }
@@ -60,18 +64,13 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
     @Override
     public Change getChange() {
         PsiFile fInvocationNode = getInvocationNode();
-        PsiModifierListOwner fBinding = getBinding();
-        PsiAnnotation[] annotations = getAnnotations();
-
-        // get short name of annotations
-        String[] annotationShortNames = new String[annotations.length];
-        for (int i = 0; i < annotations.length; i++) {
-            String qName = annotations[i].getQualifiedName();
-            String shortName = qName.substring(qName.lastIndexOf(".") + 1, qName.length());
-            annotationShortNames[i] = shortName;
+        PsiAnnotation annotation = getAnnotation();
+        if (annotation == null) {
+            super.performUpdate();
+            annotation = getAnnotation();
         }
 
-        for (PsiAnnotation annotation : annotations) {
+        if (annotation != null) {
             var parameters = annotation.getParameterList();
             var values = parameters.getAttributes();
             // add new attributes
@@ -83,7 +82,8 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
             }
         }
 
-        return  new Change(fInvocationNode.getViewProvider().getDocument(), fInvocationNode.getViewProvider().getDocument());
+        final Document changed = fInvocationNode.getViewProvider().getDocument();
+        return  new Change(changed, changed);
     }
 
     private PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation) {
