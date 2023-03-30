@@ -23,6 +23,7 @@ import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
 
@@ -34,9 +35,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * UI helper function.
@@ -117,18 +120,18 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Runs a dashboard action using the drop-down tree view.
+     * Runs a Liberty tool window action using the drop-down tree view.
      *
      * @param remoteRobot   The RemoteRobot instance.
      * @param action        The action to run
      * @param usePlayButton The indicator that specifies if play button should be used to run the action or not.
      */
-    public static void runDashboardActionFromDropDownView(RemoteRobot remoteRobot, String action, boolean usePlayButton) {
+    public static void runLibertyTWActionFromDropDownView(RemoteRobot remoteRobot, String action, boolean usePlayButton) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the Liberty toolbar to give it focus.
-        ComponentFixture dashboardBar = projectFrame.getBaseLabel("Liberty", "10");
-        dashboardBar.click();
+        ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
+        libertyTWBar.click();
 
         // Check if the project tree was expanded and the action is showing.
         ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", action, "1");
@@ -148,15 +151,16 @@ public class UIBotTestUtils {
                         error = null;
                         if (usePlayButton) {
                             rt.click();
-                            clickOnDashboardToolbarPlayButton(remoteRobot);
+                            clickOnLibertyTWToolbarPlayButton(remoteRobot);
                         } else {
                             rt.doubleClick();
                         }
                         break;
                     } catch (Exception e) {
-                        // The content of the Liberty tool window dashboard may blink in and out of existence; therefore,
+                        // The content of the Liberty tool window may blink in and out of existence; therefore,
                         // causing errors. Retry if that is the case.
-                        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Double click on dashboard drop down action failed (" + e.getMessage() + "). Retrying.");
+                        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                                "Double click or play button click on Liberty tool window drop down action failed (" + e.getMessage() + "). Retrying...");
                         TestUtils.sleepAndIgnoreException(1);
                         error = e;
                     }
@@ -173,43 +177,63 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Runs a dashboard action using the pop-up action menu.
+     * Runs a Liberty tool window action using the pop-up action menu.
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The name of the project.
      * @param action      The action to run.
      */
-    public static void runDashboardActionFromMenuView(RemoteRobot remoteRobot, String projectName, String action) {
+    public static void runLibertyTWActionFromMenuView(RemoteRobot remoteRobot, String projectName, String action) {
+        RemoteText project = findProjectInLibertyToolWindow(remoteRobot, projectName);
+        project.rightClick();
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture menuAction = projectFrame.getActionMenuItem(action);
+        menuAction.click();
+    }
+
+    /**
+     * Returns the RemoteText object representing the project in the Liberty tool window.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param projectName The name of the project.
+     * @return The RemoteText object representing the project in the Liberty tools window.
+     */
+    public static RemoteText findProjectInLibertyToolWindow(RemoteRobot remoteRobot, String projectName) {
+        RemoteText projectRootNode = null;
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", projectName, "1");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
-                "Waiting for " + projectName + " in tree fixture to show",
-                "Action " + action + " in tree fixture is not showing",
+                "Waiting for project " + projectName + " to appear in the Liberty tool window",
+                "Project " + projectName + " was not found in the Liberty tool window",
                 treeFixture::isShowing);
 
         List<RemoteText> rts = treeFixture.findAllText();
         for (RemoteText rt : rts) {
             if (projectName.equals(rt.getText())) {
-                rt.rightClick();
-                ComponentFixture menuAction = projectFrame.getActionMenuItem(action);
-                menuAction.click();
+                projectRootNode = rt;
                 break;
             }
         }
+
+        if (projectRootNode == null) {
+            fail("Project " + projectName + " was not found in Liberty tool window.");
+        }
+
+        return projectRootNode;
     }
 
     /**
-     * Waits for the specified project tree item to appear in the dashboard.
+     * Waits for the specified project tree item to appear in the Liberty tool window.
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param treeItem    The project name to wait for.
      */
-    public static void validateDashboardProjectTreeItemIsShowing(RemoteRobot remoteRobot, String treeItem) {
+    public static void validateLibertyTWProjectTreeItemIsShowing(RemoteRobot remoteRobot, String treeItem) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
-        // There is a window between which the dashboard content may come and go when intellij
-        // detects indexing starts and ends. Try to handle it.
+        // There is a window between which the Liberty tool window content may come and
+        // go when intellij detects indexing starts and ends. Try to handle it.
         try {
             projectFrame.getTree("LibertyTree", treeItem, "1");
         } catch (Exception e) {
@@ -236,32 +260,32 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Opens the Liberty Tools dashboard if it is not already open.
+     * Opens the Liberty tool window if it is not already open.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void openDashboardView(RemoteRobot remoteRobot) {
+    public static void openLibertyToolWindow(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         try {
             projectFrame.getBaseLabel("Liberty", "5");
         } catch (WaitForConditionTimeoutException e) {
-            // Dashboard view is closed. Open it.
+            // The Liberty tool window is closed. Open it.
             clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
         }
     }
 
     /**
-     * Closes the Liberty tools dashboard if it is not already closed.
+     * Closes the Liberty tool window if it is not already closed.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void closeDashboardView(RemoteRobot remoteRobot) {
+    public static void closeLibertyToolWindow(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         try {
             projectFrame.getBaseLabel("Liberty", "2");
             clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
         } catch (WaitForConditionTimeoutException e) {
-            // Dashboard view is already closed. Nothing to do.
+            // The Liberty tool window is already closed. Nothing to do.
         }
     }
 
@@ -275,7 +299,7 @@ public class UIBotTestUtils {
         try {
             projectFrame.getContentComboLabel("Project", "5");
         } catch (WaitForConditionTimeoutException e) {
-            // Dashboard view is closed. Open it.
+            // The project view is closed. Open it.
             clickOnWindowPaneStripeButton(remoteRobot, "Project");
         }
     }
@@ -308,21 +332,26 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Clicks on the expand action button on the dashboard view.
+     * Clicks on the expand action button on the Liberty tool window.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void expandDashboardProjectTree(RemoteRobot remoteRobot) {
+    public static void expandLibertyToolWindowProjectTree(RemoteRobot remoteRobot, String projectName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
-        // Click on the Liberty toolbar to give the dashboard view focus.
-        ComponentFixture dashboardBar = projectFrame.getBaseLabel("Liberty", "10");
-        dashboardBar.click();
+        // Click on the Liberty tool window toolbar to give it focus.
+        ComponentFixture LibertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
+        LibertyTWBar.click();
 
         // Expand the project tree to show the available actions.
         Locator locator = byXpath("//div[@class='LibertyExplorer']//div[@class='ActionButton' and contains(@myaction.key, 'action.ExpandAll.text')]");
         ComponentFixture actionButton = projectFrame.getActionButton(locator);
         actionButton.click();
+
+        // Click on the project node to give it focus. This action opens the editor tab showing
+        // the build file.
+        RemoteText projectRootNode = findProjectInLibertyToolWindow(remoteRobot, projectName);
+        projectRootNode.click();
     }
 
     /**
@@ -372,21 +401,66 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Closes a source file that is open in the editor pane
+     * Returns the editor tab close button for the specified editor tab name or null if one is not found within the
+     * specified wait time.
+     *
+     * @param remoteRobot   The RemoteRobot instance.
+     * @param editorTabName The name of the editor tab to close.
+     * @param timeToWait    The time to wait for the editior tab close button.
+     * @return Returns the editor tab close button for the specified editor tab name or null if one is not found within the
+     * * specified wait time.
+     */
+    public static ComponentFixture getEditorTabCloseButton(RemoteRobot remoteRobot, String editorTabName, String timeToWait) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture editorTabCloseButton = null;
+        try {
+            editorTabCloseButton = projectFrame.getInplaceButton(editorTabName, timeToWait);
+        } catch (WaitForConditionTimeoutException e) {
+            // The editor is most likely closed.
+        }
+
+        return editorTabCloseButton;
+    }
+
+    /**
+     * Closes a file that is open in the editor pane.
+     *
+     * @param remoteRobot   The RemoteRobot instance.
+     * @param editorTabName The name of the editor tab to close.
+     * @param timeToWait    The time to wait for the editior tab close button.
+     */
+    public static void closeFileEditorTab(RemoteRobot remoteRobot, String editorTabName, String timeToWait) {
+        ComponentFixture editorTabCloseButton = getEditorTabCloseButton(remoteRobot, editorTabName, timeToWait);
+        if (editorTabCloseButton != null) {
+            editorTabCloseButton.click();
+
+            // Wait until the tab closes.
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting Editor tab " + editorTabName + " to close.",
+                    "Editor tab " + editorTabName + " did not close.",
+                    () -> getEditorTabCloseButton(remoteRobot, editorTabName, "1") == null);
+        }
+    }
+
+    /**
+     * Closes all opened editor tabs.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param srcFileName The string file name
      */
-    public static void closeSourceFile(RemoteRobot remoteRobot, String srcFileName) {
+    public static void closeAllEditorTabs(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture windowMenuEntry = projectFrame.getActionMenu("Window");
+        windowMenuEntry.click();
 
-        try {
-            Locator locator = byXpath("//div[@accessiblename='" + srcFileName + "' and @class='SingleHeightLabel']//div[@class='InplaceButton']");
-            ComponentFixture actionButton = projectFrame.getActionButton(locator);
-            actionButton.click();
+        // Click on Editor Tabs in the menu.
+        ComponentFixture editorTabsFixture = projectFrame.getChildActionMenu("Window", "Editor Tabs");
+        editorTabsFixture.click();
 
-        } catch (WaitForConditionTimeoutException e) {
-            // server.xml not open, nothing to do
+        // Click on Close Project in the menu.
+        ComponentFixture closeAllTabsFixture = projectFrame.getChildActionMenuItem("Window", "Close All Tabs");
+        if (closeAllTabsFixture.callJs("component.isEnabled();", false)) {
+            closeAllTabsFixture.click();
         }
     }
 
@@ -568,11 +642,11 @@ public class UIBotTestUtils {
      * Runs the start parameters run configuration dialog.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param startParms  The parameters to set in the configuration dialog.
+     * @param startParams The parameters to set in the configuration dialog.
      */
-    public static void runStartParmsConfigDialog(RemoteRobot remoteRobot, String startParms) {
+    public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(19));
-        if (startParms != null) {
+        if (startParams != null) {
             // Update the parameter editor box.
             // TODO: Investigate this further:
             // Currently blocked by the dialog editor box behind the start parameter text box
@@ -601,11 +675,11 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Clicks on the play action button located on the dashboard's toolbar.
+     * Clicks on the play action button located on the Liberty tool window toolbar.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void clickOnDashboardToolbarPlayButton(RemoteRobot remoteRobot) {
+    public static void clickOnLibertyTWToolbarPlayButton(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the play button.
@@ -648,7 +722,72 @@ public class UIBotTestUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("Failed to collect UI Component Hierarchy information: " + e.getCause());
+            Assertions.fail("Failed to collect UI Component Hierarchy information: " + e.getCause());
         }
+    }
+
+    /**
+     * Opens the search everywhere dialog.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action) {
+        // Click on Navigate on the Menu bar.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ComponentFixture navigateMenuEntry = projectFrame.getActionMenu("Navigate");
+        navigateMenuEntry.click();
+
+        // Click on Search Everywhere in the menu.
+        ComponentFixture searchFixture = projectFrame.getActionMenuItem("Search Everywhere");
+        searchFixture.click();
+
+        // Click on the Actions tab
+        ComponentFixture actionsTabFixture = projectFrame.getSETabLabel("Actions");
+        actionsTabFixture.click();
+
+        // Type the search string in the search dialog box.
+        JTextFieldFixture searchField = projectFrame.textField(JTextFieldFixture.Companion.byType(), Duration.ofSeconds(10));
+        searchField.click();
+        searchField.setText(action);
+
+        // Wait for the desired action to show in the search output frame and click on it.
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(20),
+                Duration.ofSeconds(1),
+                "Waiting for the search to filter and show " + action + " in search output",
+                "The search did not filter or show " + action + " in the search output",
+                () -> findTextInSearchOutputPanel(projectFrame, action) != null);
+
+        RemoteText foundAction = findTextInSearchOutputPanel(projectFrame, action);
+        if (foundAction != null) {
+            foundAction.click();
+        } else {
+            fail("Search everywhere found " + action + ", but it can no longer be found after a subsequent attempt to find it.");
+        }
+    }
+
+    /**
+     * Returns the RemoteText object representing the text found in the search everywhere output panel, or
+     * null if the text was not found.
+     *
+     * @param fixture The CommonContainerFixture under which the search is taking place.
+     * @param text    The text to search.
+     * @return The RemoteText object representing the text found in the search everywhere output panel, or
+     * * null if the text was not found.
+     */
+    public static RemoteText findTextInSearchOutputPanel(CommonContainerFixture fixture, String text) {
+        RemoteText foundText = null;
+
+        List<JListFixture> searchLists = fixture.jLists(JListFixture.Companion.byType());
+        if (!searchLists.isEmpty()) {
+            JListFixture searchList = searchLists.get(0);
+            try {
+                foundText = searchList.findText(text);
+            } catch (NoSuchElementException nsee) {
+                // The list is empty.
+                return null;
+            }
+        }
+
+        return foundText;
     }
 }
