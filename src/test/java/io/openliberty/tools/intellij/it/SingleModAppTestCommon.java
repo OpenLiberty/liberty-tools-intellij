@@ -9,27 +9,60 @@ import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
+import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Common component for running both Maven and Gradle tests.
+ */
 public abstract class SingleModAppTestCommon {
 
+    /**
+     * URL to display the UI Component hierarchy. This is used to obtain xPath related
+     * information to find UI components.
+     */
     public static final String REMOTEBOT_URL = "http://localhost:8082";
+
+    /**
+     * The remote robot object.
+     */
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
 
-    String projectName;
-    String projectPath;
-    String wlpInstallPath;
-    String appBaseURL;
-    String appExpectedOutput;
+    /**
+     * The path to the directory holding all projects.
+     */
+    String projectsPath;
+
+    /**
+     * Single module MicroProfile application.
+     */
+    String smMPProjectName;
+
+    /**
+     * Single module REST application that does not meet the requirements needed to automatically
+     * show in the Liberty tool window. Liberty config file is not the expected and the build
+     * file does not have any Liberty plugin related entries.
+     */
+    String smNLTRestProjectName;
+
+    /**
+     * The base URL to call the single module MicroProfile application.
+     */
+    String smMPAppBaseURL;
+
+    /**
+     * Single module MicroProfile application expected output.
+     */
+    String smMPAppOutput;
 
     /**
      * Constructor.
      */
-    public SingleModAppTestCommon(String projectName, String projectPath, String wlpInstallPath, String appBaseURL, String appExpectedOutput) {
-        this.projectName = projectName;
-        this.projectPath = projectPath;
-        this.wlpInstallPath = wlpInstallPath;
-        this.appBaseURL = appBaseURL;
-        this.appExpectedOutput = appExpectedOutput;
+    public SingleModAppTestCommon(String projectsPath, String smMPProjectName, String smNLTRestProjectName, String smMPAppBaseURL, String smMPAppOutput) {
+        this.projectsPath = projectsPath;
+        this.smMPProjectName = smMPProjectName;
+        this.smNLTRestProjectName = smNLTRestProjectName;
+        this.smMPAppBaseURL = smMPAppBaseURL;
+        this.smMPAppOutput = smMPAppOutput;
     }
 
     /**
@@ -67,14 +100,15 @@ public abstract class SingleModAppTestCommon {
      * Tests the liberty: View <project build file> action run from the project's pop-up action menu.
      */
     @Test
+    @Video
     public void testOpenBuildFileActionUsingPopUpMenu() {
-        String editorTabName = getBuildFileName() + " (" + projectName + ")";
+        String editorTabName = getBuildFileName() + " (" + smMPProjectName + ")";
 
         // Close the editor tab if it was previously opened.
         UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "5");
 
         // Open the build file.
-        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, getBuildFileOpenCommand());
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, getBuildFileOpenCommand());
 
         // Verify that build file tab is opened.
         Assertions.assertNotNull(UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabName, "10"),
@@ -88,10 +122,9 @@ public abstract class SingleModAppTestCommon {
      * Tests dashboard start.../stop actions run from the project's drop-down action menu.
      */
     @Test
-    @Video
     public void testStartWithParamsActionUsingDropDownMenu() {
         String testName = "testStartWithParamsActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Trigger the start with parameters configuration dialog.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", false);
@@ -101,8 +134,8 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
 
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
@@ -121,7 +154,7 @@ public abstract class SingleModAppTestCommon {
     @Test
     public void testRunTestsActionUsingDropDownMenu() {
         String testName = "testRunTestsActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -130,8 +163,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", false);
 
         // Validate that the application started.
-        String url = appBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        String url = smMPAppBaseURL + "api/resource";
+        TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
 
         try {
             // Run the application's tests.
@@ -158,7 +191,7 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testStartWithParamsActionUsingPlayToolbarButton() {
         String testName = "testStartWithParamsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Trigger the start with parameters configuration dialog.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
@@ -168,8 +201,8 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -189,7 +222,7 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingPlayToolbarButton() {
         String testName = "testRunTestsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -198,8 +231,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", true);
 
         // Validate that the application started.
-        String url = appBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+        String url = smMPAppBaseURL + "api/resource";
+        TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
 
         try {
             // Run the application's tests.
@@ -225,22 +258,22 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testStartWithParamsActionUsingPopUpMenu() {
         String testName = "testStartWithParamsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Trigger the start with parameters configuration dialog.
-        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Start...");
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start...");
 
         // Run the configuration dialog.
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -255,28 +288,28 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingPopUpMenu() {
         String testName = "testRunTestsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
 
         // Start dev mode.
-        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Start");
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start");
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
 
             // Run the application's tests.
-            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Run tests");
+            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Run tests");
 
             // Validate that the reports were generated.
             validateTestReportsExist();
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, projectName, "Liberty: Stop");
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -291,7 +324,7 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testStartWithParamsActionUsingSearch() {
         String testName = "testStartWithParamsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Trigger the start with parameters configuration dialog.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
@@ -301,8 +334,8 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -321,7 +354,7 @@ public abstract class SingleModAppTestCommon {
     @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
     public void testRunTestsActionUsingSearch() {
         String testName = "testRunTestsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(projectPath, wlpInstallPath).toString();
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -331,8 +364,8 @@ public abstract class SingleModAppTestCommon {
 
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
 
             // Run the application's tests.
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests");
@@ -351,15 +384,93 @@ public abstract class SingleModAppTestCommon {
     }
 
     /**
+     * Tests the Add/Remove project from the tool window actions run from the search everywhere panel .
+     */
+    @Test
+    @Video
+    public void testManualAppAddRemoveActionUsingSearch() {
+        // Import the project that is not automatically detected by Liberty Tools.
+        UIBotTestUtils.importProject(remoteRobot, projectsPath, smNLTRestProjectName);
+
+        // Open the dashboard and wait for the project to complete indexing.
+        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
+
+        // Validate that the project tree is showing. Note that indexing may start at any time
+        // and automatically remove the existing content from the window (project/message/etc.).
+        TestUtils.sleepAndIgnoreException(10);
+        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "300");
+
+        try {
+            // Add the project to the Liberty tool window.
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window");
+
+            // Select project from the 'Add Liberty project' dialog.
+            UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, smNLTRestProjectName);
+
+            try {
+                // Validate that the project is displayed in the Liberty tool window.
+                UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, smNLTRestProjectName, "10");
+            } finally {
+                // Remove the application from the Liberty tool window.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window");
+
+                // Select project from the 'Remote Liberty project' dialog.
+                UIBotTestUtils.selectProjectFromRemoveLibertyProjectDialog(remoteRobot, smNLTRestProjectName);
+
+                // Answer the 'Remove Liberty project' dialog in the affirmative.
+                UIBotTestUtils.respondToRemoveProjectQueryDialog(remoteRobot);
+
+                // Validate that the project was removed. An exception is expected.
+                try {
+                    for (int i = 0; i < 5; i++) {
+                        UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, smNLTRestProjectName, "2");
+                        try {
+                            Thread.sleep(2000);
+                        } catch (Exception ee) {
+                            // Nothing to do. Continue to the next iteration.
+                        }
+                    }
+
+                    fail("Project " + smNLTRestProjectName + " is still present in the Liberty tool window despite it being removed.");
+                } catch (Exception e) {
+                    // The project was not found. Success.
+                }
+            }
+        } finally {
+            // Import the original project.
+            Exception error = null;
+            int maxRetries = 3;
+            for (int i = 0; i < maxRetries; i++) {
+                error = null;
+                try {
+                    UIBotTestUtils.importProject(remoteRobot, projectsPath, smMPProjectName);
+                    UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, smMPProjectName);
+                    break;
+                } catch (Exception e) {
+                    // There are instances in which the import actions are successful, but the
+                    // project view never comes up. Instead, the welcome view is shown. If that is the
+                    // case retry.
+                    error = e;
+                }
+            }
+
+            if (error != null) {
+                fail("Unable to open project " + smMPProjectName, error);
+            }
+        }
+    }
+
+    /**
      * Prepares the environment to run the tests.
      *
      * @param projectPath The path of the project.
      * @param projectName The name of the project being used.
      */
     public static void prepareEnv(String projectPath, String projectName) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
-
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
@@ -372,9 +483,19 @@ public abstract class SingleModAppTestCommon {
         // focus. The action of clicking on the project causes the build file to be opened automatically.
         // Closing the build file editor here prevents it from opening automatically when the project
         // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
-        // prevent false positive tests related to the build file editor tab.
+        // prevent false negative tests related to the build file editor tab.
         UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                "prepareEnv. Exit. ProjectName: " + projectName);
     }
+
+    /**
+     * Returns the path where the Liberty server was installed.
+     *
+     * @return The path where the Liberty server was installed.
+     */
+    public abstract String getWLPInstallPath();
 
     /**
      * Returns the name of the build file used by the project.

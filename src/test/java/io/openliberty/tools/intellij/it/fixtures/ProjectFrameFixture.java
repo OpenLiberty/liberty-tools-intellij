@@ -190,7 +190,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String text = xpathVars[0];
         return find(ComponentFixture.class,
                 byXpath("//div[@class='SETabLabel' and @text='" + text + "']"),
-                Duration.ofSeconds(5));
+                Duration.ofSeconds(10));
     }
 
     /**
@@ -206,7 +206,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
 
         return find(ComponentFixture.class,
                 byXpath("//div[@class='Tree' and @name='" + name + "' and contains(@visible_text, '" + visibleText + "')]"),
-                Duration.ofMinutes(Integer.valueOf(waitTime)));
+                Duration.ofSeconds(Integer.valueOf(waitTime)));
     }
 
     /**
@@ -240,5 +240,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public ContainerFixture getDocumentationHintPopup() {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the JBTextArea class.
+     *
+     * @return The ContainerFixture object associated with the JBTextArea class.
+     */
+    public ContainerFixture getTextArea(String... xpathVars) {
+        String waitTime = xpathVars[0];
+        return find(ContainerFixture.class, byXpath("//div[@class='JBTextArea']"), Duration.ofSeconds(Integer.valueOf(waitTime)));
     }
 }

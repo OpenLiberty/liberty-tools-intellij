@@ -7,7 +7,6 @@ import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -105,9 +104,9 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedFeature = "<feature>el-3.0</feature>";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
+        pathToServerXML = Paths.get(projectPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet,18, 40, UIBotTestUtils.InsertionType.FEATURE);
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE);
 
         // give the IDEA time to save the server.xml file
         TestUtils.sleepAndIgnoreException(5);
@@ -127,9 +126,9 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedConfig = "<userInfo></userInfo>";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectPath, "src", "main", "liberty", "config", "server.xml");
+        pathToServerXML = Paths.get(projectPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.CONFIG);
+        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT);
         TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
         UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedConfig);
 

@@ -20,12 +20,13 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     /**
      * Application Name
      */
-    public static String PROJECT_NAME = "single-mod-gradle-app";
+    public static String PROJECT_NAME = "singleModGradleMP";
 
     /**
-     * The project path.
+     * The path to the folder containing the test projects.
      */
-    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "gradle", PROJECT_NAME).toAbsolutePath().toString();
+    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "apps", "gradle").toAbsolutePath().toString();
+
     /**
      * Application resoruce URL.
      */
@@ -47,7 +48,7 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     private final Path pathToTestReport = Paths.get(projectPath, "build", "reports", "tests", "test", "index.html");
 
     public GradleSingleModLSTest() {
-        super(PROJECT_NAME, PROJECT_PATH);
+        super(PROJECT_NAME, PROJECTS_PATH);
     }
 
     /**
@@ -55,9 +56,9 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        prepareEnv(PROJECT_PATH, PROJECT_NAME);
+        prepareEnv(PROJECTS_PATH, PROJECT_NAME);
     }
-    
+
     /**
      * Deletes test reports.
      */
