@@ -40,53 +40,46 @@ import java.util.List;
 
 public class ListenerImplementationQuickFix {
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        PsiElement node = context.getCoveredNode();
-        PsiClass parentType = getBinding(node);
-        if (parentType != null) {
-            List<CodeAction> codeActions = new ArrayList<>();
-            // Create code action
-            // interface
+        List<CodeAction> codeActions = new ArrayList<>();
+        // Create code action
+        // interface
 
-            CodeAction ca0 = setUpCodeAction(parentType, diagnostic, context, ServletConstants.SERVLET_CONTEXT_LISTENER,
-                    "jakarta.servlet.ServletContextListener");
-            CodeAction ca1 = setUpCodeAction(parentType, diagnostic, context,
-                    ServletConstants.SERVLET_CONTEXT_ATTRIBUTE_LISTENER,
-                    "jakarta.servlet.ServletContextAttributeListener");
-            CodeAction ca2 = setUpCodeAction(parentType, diagnostic, context, ServletConstants.SERVLET_REQUEST_LISTENER,
-                    "jakarta.servlet.ServletRequestListener");
-            CodeAction ca3 = setUpCodeAction(parentType, diagnostic, context,
-                    ServletConstants.SERVLET_REQUEST_ATTRIBUTE_LISTENER,
-                    "jakarta.servlet.ServletRequestAttributeListener");
-            CodeAction ca4 = setUpCodeAction(parentType, diagnostic, context, ServletConstants.HTTP_SESSION_LISTENER,
-                    "jakarta.servlet.http.HttpSessionListener");
-            CodeAction ca5 = setUpCodeAction(parentType, diagnostic, context,
-                    ServletConstants.HTTP_SESSION_ATTRIBUTE_LISTENER,
-                    "jakarta.servlet.http.HttpSessionAttributeListener");
-            CodeAction ca6 = setUpCodeAction(parentType, diagnostic, context, ServletConstants.HTTP_SESSION_ID_LISTENER,
-                    "jakarta.servlet.http.HttpSessionIdListener");
+        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.SERVLET_CONTEXT_LISTENER,
+                "jakarta.servlet.ServletContextListener");
+        setUpCodeAction(codeActions, diagnostic, context,
+                ServletConstants.SERVLET_CONTEXT_ATTRIBUTE_LISTENER,
+                "jakarta.servlet.ServletContextAttributeListener");
+        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.SERVLET_REQUEST_LISTENER,
+                "jakarta.servlet.ServletRequestListener");
+        setUpCodeAction(codeActions, diagnostic, context,
+                ServletConstants.SERVLET_REQUEST_ATTRIBUTE_LISTENER,
+                "jakarta.servlet.ServletRequestAttributeListener");
+        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.HTTP_SESSION_LISTENER,
+                "jakarta.servlet.http.HttpSessionListener");
+        setUpCodeAction(codeActions, diagnostic, context,
+                ServletConstants.HTTP_SESSION_ATTRIBUTE_LISTENER,
+                "jakarta.servlet.http.HttpSessionAttributeListener");
+        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.HTTP_SESSION_ID_LISTENER,
+                "jakarta.servlet.http.HttpSessionIdListener");
 
-            codeActions.add(ca0);
-            codeActions.add(ca1);
-            codeActions.add(ca2);
-            codeActions.add(ca3);
-            codeActions.add(ca4);
-            codeActions.add(ca5);
-            codeActions.add(ca6);
-            return codeActions;
-        }
-        return null;
+        return codeActions;
     }
 
     private PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 
-    private CodeAction setUpCodeAction(PsiClass parentType, Diagnostic diagnostic, JavaCodeActionContext context,
+    private void setUpCodeAction(List<CodeAction> codeActions, Diagnostic diagnostic, JavaCodeActionContext sourceContext,
                                        String interfaceName, String interfaceType) {
-        JavaCodeActionContext newContext = context.copy();
-        ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                newContext.getCompilationUnit(), parentType, newContext.getASTRoot(), interfaceType, 0, newContext.getCompilationUnit());
-        CodeAction codeAction = newContext.convertToCodeAction(proposal, diagnostic);
-        return codeAction;
+        JavaCodeActionContext targetContext = sourceContext.copy();
+        PsiElement node = targetContext.getCoveredNode(); // find covered node in the new context
+        PsiClass targetType = getBinding(node);
+        if (targetType != null) {
+            ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
+                    targetContext.getCompilationUnit(), targetType, targetContext.getASTRoot(), interfaceType, 0,
+                    sourceContext.getCompilationUnit());
+            CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
+            codeActions.add(codeAction);
+        }
     }
 }
