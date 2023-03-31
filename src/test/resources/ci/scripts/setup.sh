@@ -72,7 +72,7 @@ installBaseSoftware() {
     elif [[ $OS == "Darwin" ]]; then
         brew update
         brew install curl unzip || true
-        installDockerOnMAC
+        # installDockerOnMAC
     else
         # Note: Docker is already installed on the windows VMs provisioned by GHA.
         # Location: C:\Program Files\Docker\dockerd.exe

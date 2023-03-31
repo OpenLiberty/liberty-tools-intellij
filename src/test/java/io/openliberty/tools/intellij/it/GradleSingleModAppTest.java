@@ -21,14 +21,19 @@ import java.nio.file.Paths;
 public class GradleSingleModAppTest extends SingleModAppTestCommon {
 
     /**
-     * Application Name
+     * Single module Microprofile application name.
      */
-    public static String PROJECT_NAME = "single-mod-gradle-app";
+    public static String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
-     * The project path.
+     * Single module REST application that lacks the configuration to be recognized by Liberty tools.
      */
-    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "gradle", PROJECT_NAME).toAbsolutePath().toString();
+    public static String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "apps", "gradle").toAbsolutePath().toString();
 
     /**
      * Application resource URL.
@@ -48,7 +53,7 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     /**
      * The path to the test report.
      */
-    private final Path TEST_REPORT_PATH = Paths.get(projectPath, "build", "reports", "tests", "test", "index.html");
+    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
 
     /**
      * Buidl file name.
@@ -64,7 +69,7 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
      * Tests Liberty Tool actions with a single module application that uses Gradle as its build tool.
      */
     public GradleSingleModAppTest() {
-        super(PROJECT_NAME, PROJECT_PATH, WLP_INSTALL_PATH, BASE_URL, APP_EXPECTED_OUTPUT);
+        super(PROJECTS_PATH, SM_MP_PROJECT_NAME, SM_NLT_REST_PROJECT_NAME, BASE_URL, APP_EXPECTED_OUTPUT);
     }
 
     /**
@@ -72,7 +77,18 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        prepareEnv(PROJECT_PATH, PROJECT_NAME);
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+    }
+
+
+    /**
+     * Returns the path where the Liberty server was installed.
+     *
+     * @return The path where the Liberty server was installed.
+     */
+    @Override
+    public String getWLPInstallPath() {
+        return WLP_INSTALL_PATH;
     }
 
     /**
