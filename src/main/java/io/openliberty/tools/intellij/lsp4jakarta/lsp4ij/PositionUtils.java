@@ -13,8 +13,10 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PsiUtils;
 import org.eclipse.lsp4j.Range;
 
@@ -39,5 +41,15 @@ public class PositionUtils {
             sourceRange = element.getTextRange();
         }
         return PsiUtils.toRange(openable, sourceRange.getStartOffset(), sourceRange.getLength());
+    }
+
+    /**
+     * Given an element in a Java file, reformat the code in the style currently active.
+     * @param e an element in a Java compilation unit
+     */
+    public static void formatDocument(PsiElement e) {
+        Document document = e.getContainingFile().getViewProvider().getDocument();
+        CodeStyleManager.getInstance(e.getProject()).reformatText(e.getContainingFile(),
+                0, document.getTextLength());
     }
 }

@@ -15,8 +15,10 @@ import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanNoArgConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix;
@@ -85,11 +87,11 @@ public class JakartaCodeActionHandler {
 //            ResourceMethodMultipleEntityParamsQuickFix ResourceMethodMultipleEntityParamsQuickFix = new ResourceMethodMultipleEntityParamsQuickFix();
 //            NoResourcePublicConstructorQuickFix NoResourcePublicConstructorQuickFix = new NoResourcePublicConstructorQuickFix();
 //            ManagedBeanQuickFix ManagedBeanQuickFix = new ManagedBeanQuickFix();
-//            PersistenceEntityQuickFix PersistenceEntityQuickFix = new PersistenceEntityQuickFix();
+            PersistenceEntityQuickFix PersistenceEntityQuickFix = new PersistenceEntityQuickFix();
 //            ConflictProducesInjectQuickFix ConflictProducesInjectQuickFix = new ConflictProducesInjectQuickFix();
 //            BeanValidationQuickFix BeanValidationQuickFix = new BeanValidationQuickFix();
             ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
-//            ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
+            ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
 //            JsonbAnnotationQuickFix JsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
 //            JsonbTransientAnnotationQuickFix JsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
 //            ScopeDeclarationQuickFix ScopeDeclarationQuickFix = new ScopeDeclarationQuickFix();
@@ -159,9 +161,9 @@ public class JakartaCodeActionHandler {
 //                            .equals(PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION)) {
 //                        codeActions.addAll(DeleteConflictMapKeyQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR)) {
-//                        codeActions.addAll(PersistenceEntityQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR)) {
+                        codeActions.addAll(PersistenceEntityQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS)
                             || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES)
                             || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS)) {
@@ -188,7 +190,7 @@ public class JakartaCodeActionHandler {
 //                    }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.CONSTRUCTOR_DIAGNOSTIC_CODE)) {
                         codeActions.addAll(ManagedBeanConstructorQuickFix.getCodeActions(context, diagnostic));
-//                        codeActions.addAll(ManagedBeanNoArgConstructorQuickFix.getCodeActions(context, diagnostic, monitor));
+                        codeActions.addAll(ManagedBeanNoArgConstructorQuickFix.getCodeActions(context, diagnostic));
                     }
 //                    if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION)) {
 //                        codeActions.addAll(JsonbAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
