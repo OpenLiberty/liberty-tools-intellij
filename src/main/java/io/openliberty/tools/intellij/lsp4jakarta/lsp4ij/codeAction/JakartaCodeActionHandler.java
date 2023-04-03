@@ -17,6 +17,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix;
@@ -74,7 +76,7 @@ public class JakartaCodeActionHandler {
 
             List<CodeAction> codeActions = new ArrayList<>();
 
-//            HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
+            HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
 //            FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
 //            ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
 //            CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
@@ -109,9 +111,9 @@ public class JakartaCodeActionHandler {
 
             for (Diagnostic diagnostic : params.getContext().getDiagnostics()) {
                 try {
-//                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
-//                        codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
+                        codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic));
+                    }
 //                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER)) {
 //                        codeActions.addAll(FilterImplementationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
