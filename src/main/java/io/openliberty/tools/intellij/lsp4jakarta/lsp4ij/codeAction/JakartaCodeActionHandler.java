@@ -21,6 +21,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.A
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix;
@@ -30,7 +31,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionCo
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterImplementationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.corrections.DiagnosticsHelper;
@@ -85,7 +85,7 @@ public class JakartaCodeActionHandler {
             FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
             ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
 //            CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
-//            CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
+            CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
 //            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
 //            DeleteConflictMapKeyQuickFix DeleteConflictMapKeyQuickFix = new DeleteConflictMapKeyQuickFix();
 //            NonPublicResourceMethodQuickFix NonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
@@ -140,12 +140,12 @@ public class JakartaCodeActionHandler {
 //                        codeActions
 //                                .addAll(CompleteServletAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE)
-//                            || diagnostic.getCode().getLeft()
-//                            .equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_DUPLICATE_ATTRIBUTES)) {
-//                        codeActions
-//                                .addAll(CompleteFilterAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE)
+                            || diagnostic.getCode().getLeft()
+                            .equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_DUPLICATE_ATTRIBUTES)) {
+                        codeActions
+                                .addAll(CompleteFilterAnnotationQuickFix.getCodeActions(context, diagnostic));
+                    }
 //                    if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_NON_PUBLIC)) {
 //                        codeActions
 //                                .addAll(NonPublicResourceMethodQuickFix.getCodeActions(context, diagnostic, monitor));

@@ -72,7 +72,7 @@ public class InsertAnnotationMissingQuickFix {
         return codeActions;
     }
 
-    protected PsiModifierListOwner getBinding(PsiElement node) {
+    protected static PsiModifierListOwner getBinding(PsiElement node) {
         PsiModifierListOwner binding = PsiTreeUtil.getParentOfType(node, PsiVariable.class);
         if (binding != null) {
             return binding;
