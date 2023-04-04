@@ -14,9 +14,11 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
+import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -74,6 +76,7 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
         // if missing an attribute, do value insertion
         PsiElement node = null;
         PsiModifierListOwner parentType = null;
+        PsiAnnotation annotationNode = null;
         if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE)) {
             ArrayList<String> attributes = new ArrayList<>();
             attributes.add("value"); attributes.add("urlPatterns");attributes.add("servletNames");
@@ -84,12 +87,13 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
                 JavaCodeActionContext targetContext = context.copy();
                 node = targetContext.getCoveringNode();
                 parentType = getBinding(node);
+                annotationNode = getAnnotation(node);
 
                 ArrayList<String> attributesToAdd = new ArrayList<>();
                 attributesToAdd.add(attribute);
                 String name = getLabel(annotation, attribute, "Add");
                 ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
-                        targetContext.getASTRoot(), parentType, null,  0, annotation, attributesToAdd);
+                        targetContext.getASTRoot(), parentType, annotationNode,  0, annotation, attributesToAdd);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
                 codeAction.setTitle(name);
@@ -109,12 +113,13 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
                 JavaCodeActionContext targetContext = context.copy();
                 node = targetContext.getCoveringNode();
                 parentType = getBinding(node);
+                annotationNode = getAnnotation(node);
 
                 ArrayList<String> attributesToRemove = new ArrayList<>();
                 attributesToRemove.add(attribute);
                 String name = getLabel(annotation, attribute, "Remove");
                 ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
-                        targetContext.getASTRoot(), parentType, null, 0, annotation, new ArrayList<String>(), attributesToRemove);
+                        targetContext.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
                 codeAction.setTitle(name);
@@ -134,4 +139,12 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
         name.append("@");
         name.append(annotationName);
         return name.toString();
-    }}
+    }
+
+    private static PsiAnnotation getAnnotation(PsiElement e) {
+        if (e instanceof PsiAnnotation) {
+            return (PsiAnnotation) e;
+        }
+        return PsiTreeUtil.getParentOfType(e, PsiAnnotation.class);
+    }
+}
