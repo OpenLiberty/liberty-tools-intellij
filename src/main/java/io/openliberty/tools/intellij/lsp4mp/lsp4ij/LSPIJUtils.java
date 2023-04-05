@@ -221,7 +221,7 @@ public class LSPIJUtils {
                 try {
                     end = toOffset(edit.getRange().getEnd(), document); // get endoffset of new edit from current document, out of bounds if new text doc has more lines
                 } catch (IndexOutOfBoundsException e) { // likely trying to get end of document
-                    end = document.getTextLength();
+                    end = -1;
                 }
                 if (StringUtils.isEmpty(text)) {
                     document.deleteString(start, end);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 Red Hat, Inc.
+ * Copyright (c) 2019, 2023 Red Hat, Inc. and others
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -19,6 +19,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanNoArgCons
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix;
@@ -26,6 +28,9 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveStaticModifierQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterImplementationQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.corrections.DiagnosticsHelper;
@@ -76,9 +81,9 @@ public class JakartaCodeActionHandler {
 
             List<CodeAction> codeActions = new ArrayList<>();
 
-//            HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
-//            FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
-//            ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
+            HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
+            FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
+            ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
 //            CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
 //            CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
 //            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
@@ -111,15 +116,15 @@ public class JakartaCodeActionHandler {
 
             for (Diagnostic diagnostic : params.getContext().getDiagnostics()) {
                 try {
-//                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
-//                        codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
-//                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER)) {
-//                        codeActions.addAll(FilterImplementationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
-//                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
-//                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
+                        codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER)) {
+                        codeActions.addAll(FilterImplementationQuickFix.getCodeActions(context, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
+                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
                         codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
                     }
