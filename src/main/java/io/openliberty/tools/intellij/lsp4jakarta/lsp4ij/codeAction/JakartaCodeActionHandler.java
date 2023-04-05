@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceAnnotationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
@@ -83,7 +84,7 @@ public class JakartaCodeActionHandler {
             ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
             CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
             CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
-//            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
+            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
 //            DeleteConflictMapKeyQuickFix DeleteConflictMapKeyQuickFix = new DeleteConflictMapKeyQuickFix();
 //            NonPublicResourceMethodQuickFix NonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
 //            ResourceMethodMultipleEntityParamsQuickFix ResourceMethodMultipleEntityParamsQuickFix = new ResourceMethodMultipleEntityParamsQuickFix();
@@ -155,10 +156,10 @@ public class JakartaCodeActionHandler {
 //                        codeActions.addAll(NoResourcePublicConstructorQuickFix.getCodeActions(context,
 //                                diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft()
-//                            .equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES)) {
-//                        codeActions.addAll(PersistenceAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft()
+                            .equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES)) {
+                        codeActions.addAll(PersistenceAnnotationQuickFix.getCodeActions(context, diagnostic));
+                    }
 //                    if (diagnostic.getCode().getLeft()
 //                            .equals(PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION)) {
 //                        codeActions.addAll(DeleteConflictMapKeyQuickFix.getCodeActions(context, diagnostic, monitor));
