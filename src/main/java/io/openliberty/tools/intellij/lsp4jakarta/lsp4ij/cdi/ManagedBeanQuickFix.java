@@ -42,7 +42,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
                                      List<CodeAction> codeActions) {
         String[] annotations = getAnnotations();
         for (String annotation : annotations) {
-            insertAndReplaceAnnotation(diagnostic, context, codeActions, annotation);
+            insertAndReplaceAnnotation(diagnostic, context.copy(), codeActions, annotation);
         }
     }
 
