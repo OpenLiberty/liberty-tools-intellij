@@ -42,6 +42,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
                                      List<CodeAction> codeActions) {
         String[] annotations = getAnnotations();
         for (String annotation : annotations) {
+            // Pass a copy of the context so each annotation gets a separate code action.
             insertAndReplaceAnnotation(diagnostic, context.copy(), codeActions, annotation);
         }
     }
