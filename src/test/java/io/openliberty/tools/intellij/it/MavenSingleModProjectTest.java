@@ -69,23 +69,22 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
     /**
      * Build file name.
      */
-    public final String BUILD_FILE_NAME = "pom.xml";
+    public static final String BUILD_FILE_NAME = "pom.xml";
 
     /**
      * Action command to open the build file.
      */
-    public final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
+    public static final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
 
     /**
      * The path to the integration test reports.
      */
-    public final Path pathToITReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
+    public static final Path pathToITReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
 
     /**
      * The path to the unit test reports.
      */
-    public final Path pathToUTReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
-
+    public static final Path pathToUTReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
 
     /**
      * Constructor.
@@ -175,9 +174,255 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
     }
 
     /**
+     * Tests Liberty tool window start.../stop actions selected on the project's drop-down action
+     * menu and run using the play action button on the Liberty tool window's toolbar.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testStartWithParamsActionUsingPlayToolbarButton() {
+        String testName = "testStartWithParamsActionUsingPlayToolbarButton";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+
+        // Validate that the start with params action brings up the configuration previously used.
+        try {
+
+            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
+            String activeCfgName = UIBotTestUtils.getLibertyConfigName(remoteRobot);
+            Assertions.assertEquals(smMPProjectName, activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + smMPProjectName);
+        } finally {
+            // Cleanup configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start/RunTests/stop actions selected on the project's drop-down action
+     * menu and run using the play action button on the Liberty tool window's toolbar.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testRunTestsActionUsingPlayToolbarButton() {
+        String testName = "testRunTestsActionUsingPlayToolbarButton";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", true);
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+
+            // Run the application's tests.
+            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", true);
+
+            // Validate that the report was generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start.../stop actions run from the project's pop-up action menu.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testStartWithParamsActionUsingPopUpMenu() {
+        String testName = "testStartWithParamsActionUsingPopUpMenu";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start...");
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+
+        // Validate that the start with params action brings up the configuration previously used.
+        try {
+            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start...");
+            String activeCfgName = UIBotTestUtils.getLibertyConfigName(remoteRobot);
+            Assertions.assertEquals(smMPProjectName, activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + smMPProjectName);
+        } finally {
+            // Cleanup configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests Liberty tool window start/runTests/stop actions run from the project's pop-up action menu.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testRunTestsActionUsingPopUpMenu() {
+        String testName = "testRunTestsActionUsingPopUpMenu";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start");
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+
+            // Run the application's tests.
+            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Run tests");
+
+            // Validate that the reports were generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
+     * Tests start.../stop actions run from the search everywhere panel.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testStartWithParamsActionUsingSearch() {
+        String testName = "testStartWithParamsActionUsingSearch";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+
+        // Validate that the start with params action brings up the configuration previously used.
+        try {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
+            String activeCfgName = UIBotTestUtils.getLibertyConfigName(remoteRobot);
+            Assertions.assertEquals(smMPProjectName, activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + smMPProjectName);
+        } finally {
+            // Cleanup configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests start/runTests/stop actions run from the search everywhere panel.
+     * Note: SingleModAppTestCommon when <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/272">...</a>
+     * is fixed.
+     */
+    @Test
+    @Video
+    public void testRunTestsActionUsingSearch() {
+        String testName = "testRunTestsActionUsingSearch";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Delete any existing test report files.
+        deleteTestReports();
+
+        // Start dev mode.
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start");
+
+        try {
+            // Validate that the application started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+
+            // Run the application's tests.
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests");
+
+            // Validate that the reports were generated.
+            validateTestReportsExist();
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+    }
+
+    /**
      * Tests dashboard startInContainer/stop actions run from the project's drop-down action menu.
      * Notes:
-     * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
+     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
      * this method should be moved to SingleModProjectTestCommon.
      * 2. This test is restricted to Linux only because, on other platforms, the docker build process
      * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
@@ -185,6 +430,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
      * Liberty Tools plugin(i.e. set dockerBuildTimeout).
      */
     @Test
+    @Video
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
@@ -210,7 +456,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
      * Tests dashboard startInContainer/stop actions run from the project's drop-down action menu
      * and the Liberty tool window toolbar play button.
      * Notes:
-     * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
+     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
      * this method should be moved to SingleModProjectTestCommon.
      * 2. This test is restricted to Linux only because, on other platforms, the docker build process
      * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
@@ -218,6 +464,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
      * Liberty Tools plugin(i.e. set dockerBuildTimeout).
      */
     @Test
+    @Video
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingPlayToolbarButton() {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
@@ -242,7 +489,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
     /**
      * Tests dashboard startInContainer/stop actions run from the project's pop-up action menu.
      * Notes:
-     * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
+     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
      * this method should be moved to SingleModProjectTestCommon.
      * 2. This test is restricted to Linux only because, on other platforms, the docker build process
      * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
@@ -250,6 +497,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
      * Liberty Tools plugin(i.e. set dockerBuildTimeout).
      */
     @Test
+    @Video
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
@@ -275,7 +523,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
     /**
      * Tests dashboard startInContainer/stop actions run from the search everywhere panel.
      * Notes:
-     * 1, Once issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/299 is resolved,
+     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
      * this method should be moved to SingleModProjectTestCommon.
      * 2. This test is restricted to Linux only because, on other platforms, the docker build process
      * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the

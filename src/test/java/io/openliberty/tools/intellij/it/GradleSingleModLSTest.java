@@ -11,8 +11,8 @@ package io.openliberty.tools.intellij.it;
 
 import org.junit.jupiter.api.BeforeAll;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
+
 public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
 
     /**

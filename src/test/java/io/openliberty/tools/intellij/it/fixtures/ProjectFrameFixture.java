@@ -258,11 +258,29 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the LookupList class in a HeavyWeightWindow (pop-up windows.
+     * Returns the ContainerFixture object associated with the LookupList class in a HeavyWeightWindow (pop-up window).
      *
      * @return The ContainerFixture object associated with the LookupList class in a HeavyWeightWindow (pop-up window).
      */
     public ContainerFixture getLookupList() {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='LookupList']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the MyList class in a HeavyWeightWindow (List window).
+     *
+     * @return The ContainerFixture object associated with the MyList class in a HeavyWeightWindow (List window).
+     */
+    public ContainerFixture getMyList() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='MyList']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     *
+     * @return The ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     */
+    public ComponentFixture getRunConfigurationsComboBoxButton() {
+        return find(ContainerFixture.class, byXpath("//div[@class='RunConfigurationsComboBoxButton']"), Duration.ofSeconds(5));
     }
 }

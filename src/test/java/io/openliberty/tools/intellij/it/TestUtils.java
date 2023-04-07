@@ -34,18 +34,33 @@ public class TestUtils {
     /**
      * Validates that the Liberty server is no longer running.
      *
+     * @param testName       The name of the test calling this method.
      * @param wlpInstallPath The liberty installation relative path.
      */
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath) {
+        validateLibertyServerStopped(testName, wlpInstallPath, 40, true);
+    }
+
+    /**
+     * Validates that the Liberty server is no longer running.
+     *
+     * @param testName       The name of the test calling this method.
+     * @param wlpInstallPath The liberty installation relative path.
+     * @param maxAttempts    The number of retries to validate the server has stopped.
+     * @param failOnError    The indicator to fail the test on error.
+     */
+    public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnError) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
         String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
-        int maxAttempts = 40;
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
+        Exception error = null;
+
 
         // Find the server stopped message.
         for (int retryCount = 0; retryCount < maxAttempts; retryCount++) {
+            error = null;
             try (BufferedReader br = new BufferedReader(new FileReader(wlpMsgLogPath))) {
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -58,30 +73,28 @@ public class TestUtils {
                 if (foundStoppedMsg) {
                     break;
                 } else {
-                    Thread.sleep(retryIntervalSecs * 1000);
+                    sleepAndIgnoreException(retryIntervalSecs);
                 }
             } catch (FileNotFoundException fnfe) {
-                fnfe.printStackTrace();
-                Assertions.fail("File: " + wlpMsgLogPath + ", could not be found.");
-
+                Assertions.fail("File: " + wlpMsgLogPath + ", could not be found.", fnfe);
             } catch (Exception e) {
-                e.printStackTrace();
-
-                try {
-                    Thread.sleep(retryIntervalSecs * 1000);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
+                error = e;
+                sleepAndIgnoreException(retryIntervalSecs);
             }
         }
 
         if (!foundStoppedMsg) {
-            // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
+            // If instructed not to fail the test on error, report the last error back to the caller.
+            if (!failOnError) {
+                throw new RuntimeException("Unabled to verify that the Liberty server stopped.", error);
+            }
+
+            // Print the Liberty server's messages.log and fail.
             String msgHeader = "TESTCASE: " + testName;
             printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
             String msg = testName + ":validateLibertyServerStopped: Exit. Timed out waiting for message " + SEVER_STOPPED_MSG + " in log:" + wlpMsgLogPath;
             printTrace(TraceSevLevel.ERROR, msg);
-            Assertions.fail(msg);
+            Assertions.fail(msg, error);
         } else {
             printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Exit. The server stopped Successfully.");
         }
