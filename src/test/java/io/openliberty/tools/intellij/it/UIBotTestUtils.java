@@ -517,7 +517,7 @@ public class UIBotTestUtils {
      *
      * @param remoteRobot   The RemoteRobot instance.
      * @param editorTabName The name of the editor tab to close.
-     * @param timeToWait    The time to wait for the editior tab close button.
+     * @param timeToWait    The time to wait for the editor tab close button.
      * @return Returns the editor tab close button for the specified editor tab name or null if one is not found within the
      * * specified wait time.
      */
@@ -538,7 +538,7 @@ public class UIBotTestUtils {
      *
      * @param remoteRobot   The RemoteRobot instance.
      * @param editorTabName The name of the editor tab to close.
-     * @param timeToWait    The time to wait for the editior tab close button.
+     * @param timeToWait    The time to wait for the editor tab close button.
      */
     public static void closeFileEditorTab(RemoteRobot remoteRobot, String editorTabName, String timeToWait) {
         ComponentFixture editorTabCloseButton = getEditorTabCloseButton(remoteRobot, editorTabName, timeToWait);
@@ -582,9 +582,9 @@ public class UIBotTestUtils {
      * @param hoverTarget The string to hover over in server.xml
      */
     public static void hoverInAppServerXML(RemoteRobot remoteRobot, String hoverTarget) {
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
 
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
         // click on editor pane to regain focus
         editorNew.click();
 
@@ -632,7 +632,8 @@ public class UIBotTestUtils {
     public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String projName, String stanzaSnippet, int line, int col, InsertionType type) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         editorNew.click();
 
         Keyboard keyboard = new Keyboard(remoteRobot);
@@ -640,6 +641,7 @@ public class UIBotTestUtils {
         goToLineAndColumn(remoteRobot, keyboard, line, col);
 
         if (type.name().equals("FEATURE")) {
+            String textToFind = "feature";
             // if this is a feature stanza, hit enter to place it on the next line
             // in the featureManager Block
             keyboard.hotKey(VK_ENTER);
@@ -648,8 +650,13 @@ public class UIBotTestUtils {
             keyboard.hotKey(VK_CONTROL, VK_SPACE);
 
             ContainerFixture popup = projectFrame.getDocumentationHintPopup();
-            popup.findText("feature").doubleClick();
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for text " + textToFind + " to appear in popup window",
+                    "Text " + textToFind + " did not appear in popup window",
+                    () -> popup.hasText(textToFind));
 
+            popup.findText(textToFind).doubleClick();
 
             // add a feature from the list of features using completion
             // col = 18 to take into account spacing + "<feature>"
@@ -681,9 +688,9 @@ public class UIBotTestUtils {
      * @param stanza      target stanza (fully formed) to remove
      */
     public static void deleteStanzaInAppServerXML(RemoteRobot remoteRobot, String stanza) {
-
         // remove the stanza that was added - keeps server.xml a known layout for any additional tests yet to come
-        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         Keyboard keyboard = new Keyboard(remoteRobot);
         editorNew.click();
 
@@ -711,7 +718,6 @@ public class UIBotTestUtils {
      * @param column      target column number
      */
     public static void goToLineAndColumn(RemoteRobot remoteRobot, Keyboard keyboard, int line, int column) {
-
         // trigger the line:col popup window to place cursor at exact location in file
         if (remoteRobot.isMac())
             keyboard.hotKey(KeyEvent.VK_META, KeyEvent.VK_L);
@@ -727,9 +733,6 @@ public class UIBotTestUtils {
      * @param remoteRobot the remote robot instance
      */
     public static String getHoverStringData(RemoteRobot remoteRobot) {
-
-        boolean found = false;
-
         // get the text from the LS diagnostic hint popup
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         ContainerFixture popup = projectFrame.getDocumentationHintPopup();
@@ -810,7 +813,7 @@ public class UIBotTestUtils {
                 Thread.sleep(secondsToWait * 1000L);
             }
 
-            URL url = new URL(MavenSingleModAppTest.REMOTEBOT_URL);
+            URL url = new URL(MavenSingleModProjectTest.REMOTEBOT_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
@@ -890,7 +893,12 @@ public class UIBotTestUtils {
         jbf.click();
 
         RemoteText remoteProject = findTextInListOutputPanel(addProjectDialog, projectName);
-        remoteProject.click();
+        if (remoteProject != null) {
+            remoteProject.click();
+        } else {
+            fail("Unable to find " + projectName + " in the output list of the Add Liberty project dialog.");
+        }
+
         JButtonFixture okButton = addProjectDialog.getButton("OK");
         okButton.click();
     }
@@ -910,7 +918,11 @@ public class UIBotTestUtils {
         removeProjectDialog.getBasicArrowButton().click();
 
         RemoteText remoteProject = findTextInListOutputPanel(removeProjectDialog, projectName);
-        remoteProject.click();
+        if (remoteProject != null) {
+            remoteProject.click();
+        } else {
+            fail("Unable to find " + projectName + " in the output list of the Remove Liberty project dialog.");
+        }
 
         JButtonFixture okButton = removeProjectDialog.getButton("OK");
         okButton.click();
@@ -938,7 +950,7 @@ public class UIBotTestUtils {
     /**
      * Returns a concatenated string of all text found in a ComponentFixture object.
      *
-     * @param componentFixture The ComponentFixture onject.
+     * @param componentFixture The ComponentFixture object.
      * @return A concatenated string of all text found in a ComponentFixture object.
      */
     public static String readAllText(ComponentFixture componentFixture) {
@@ -1026,6 +1038,7 @@ public class UIBotTestUtils {
             remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(2));
             inWelcomeFrame = true;
         } catch (Exception e) {
+            // Not in welcome frame.
         }
 
         return inWelcomeFrame;
@@ -1043,6 +1056,7 @@ public class UIBotTestUtils {
             remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
             inProjectFrame = true;
         } catch (Exception e) {
+            // Not in project frame.
         }
 
         return inProjectFrame;
