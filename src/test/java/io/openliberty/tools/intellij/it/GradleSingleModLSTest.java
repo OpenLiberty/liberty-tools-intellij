@@ -45,7 +45,7 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     /**
      * The path to the test report.
      */
-    private final Path pathToTestReport = Paths.get(projectPath, "build", "reports", "tests", "test", "index.html");
+    private final Path pathToTestReport = Paths.get(PROJECTS_PATH, "build", "reports", "tests", "test", "index.html");
 
     public GradleSingleModLSTest() {
         super(PROJECT_NAME, PROJECTS_PATH);
