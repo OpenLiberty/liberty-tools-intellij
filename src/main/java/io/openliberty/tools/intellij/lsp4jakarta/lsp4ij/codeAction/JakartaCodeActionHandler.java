@@ -132,7 +132,7 @@ public class JakartaCodeActionHandler {
                         codeActions.addAll(AddResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE)) {
-                        codeActions.addAll(PostConstructReturnTypeQuickFix.getCodeActions(context, diagnostic, monitor));
+                        codeActions.addAll(PostConstructReturnTypeQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTE)
                             || diagnostic.getCode().getLeft()
