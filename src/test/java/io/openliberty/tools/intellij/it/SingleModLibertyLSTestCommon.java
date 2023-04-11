@@ -18,12 +18,12 @@ public abstract class SingleModLibertyLSTestCommon {
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
 
     String projectName;
-    String projectPath;
+    String projectsPath;
 
 
-    public SingleModLibertyLSTestCommon(String projectName, String projectPath) {
+    public SingleModLibertyLSTestCommon(String projectName, String projectsPath) {
         this.projectName = projectName;
-        this.projectPath = projectPath;
+        this.projectsPath = projectsPath;
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedFeature = "<feature>el-3.0</feature>";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectPath, projectName, "src", "main", "liberty", "config", "server.xml");
+        pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
         UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE);
 
@@ -126,7 +126,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedConfig = "<userInfo></userInfo>";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectPath, projectName, "src", "main", "liberty", "config", "server.xml");
+        pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
         UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT);
         TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
