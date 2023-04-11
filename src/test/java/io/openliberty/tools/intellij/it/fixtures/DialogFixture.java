@@ -75,4 +75,13 @@ public class DialogFixture extends CommonContainerFixture {
     public JButtonFixture getButton(String text) {
         return button(byXpath("//div[@class='JButton' and @text='" + text + "']"), Duration.ofSeconds(5));
     }
+
+    /**
+     * Returns the JButtonFixture object associated with the BasicArrowButton class.
+     *
+     * @return The JButtonFixture object associated with the BasicArrowButton class.
+     */
+    public JButtonFixture getBasicArrowButton() {
+        return button(byXpath("//div[@class='BasicArrowButton']"), Duration.ofSeconds(5));
+    }
 }

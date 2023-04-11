@@ -25,15 +25,21 @@ import java.nio.file.Paths;
  * Tests Liberty Tools actions using a Maven application.
  */
 public class MavenSingleModAppTest extends SingleModAppTestCommon {
-    /**
-     * Application Name
-     */
-    public static String PROJECT_NAME = "single-mod-maven-app";
 
     /**
-     * The project path.
+     * Single module Microprofile application name.
      */
-    public static String PROJECT_PATH = Paths.get("src", "test", "resources", "apps", "maven", PROJECT_NAME).toAbsolutePath().toString();
+    public static String SM_MP_PROJECT_NAME = "singleModMavenMP";
+
+    /**
+     * Single module REST application that lacks the configuration to be recognized by Liberty tools.
+     */
+    public static String SM_NLT_REST_PROJECT_NAME = "singleModMavenRESTNoLTXmlCfg";
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "apps", "maven").toAbsolutePath().toString();
 
     /**
      * Application resource URL.
@@ -63,19 +69,19 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     /**
      * The path to the integration test reports.
      */
-    public final Path pathToITReport = Paths.get(PROJECT_PATH, "target", "site", "failsafe-report.html");
+    public final Path pathToITReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
 
     /**
      * The path to the unit test reports.
      */
-    public final Path pathToUTReport = Paths.get(PROJECT_PATH, "target", "site", "surefire-report.html");
+    public final Path pathToUTReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
 
 
     /**
      * Tests Liberty Tool actions with a single module application that uses Maven as its build tool.
      */
     public MavenSingleModAppTest() {
-        super(PROJECT_NAME, PROJECT_PATH, WLP_INSTALL_PATH, BASE_URL, APP_EXPECTED_OUTPUT);
+        super(PROJECTS_PATH, SM_MP_PROJECT_NAME, SM_NLT_REST_PROJECT_NAME, BASE_URL, APP_EXPECTED_OUTPUT);
     }
 
     /**
@@ -84,7 +90,17 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     @BeforeAll
     public static void setup() {
         StepWorker.registerProcessor(new StepLogger());
-        prepareEnv(PROJECT_PATH, PROJECT_NAME);
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+    }
+
+    /**
+     * Returns the path where the Liberty server was installed.
+     *
+     * @return The path where the Liberty server was installed.
+     */
+    @Override
+    public String getWLPInstallPath() {
+        return WLP_INSTALL_PATH;
     }
 
     /**
@@ -143,14 +159,14 @@ public class MavenSingleModAppTest extends SingleModAppTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(PROJECT_PATH, WLP_INSTALL_PATH).toString();
+        String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
 
         // Start the start with parameters configuration dialog.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start in container", false);
         try {
             // Validate that the application started.
-            String url = appBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, appExpectedOutput, absoluteWLPPath);
+            String url = smMPAppBaseURL + "api/resource";
+            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
