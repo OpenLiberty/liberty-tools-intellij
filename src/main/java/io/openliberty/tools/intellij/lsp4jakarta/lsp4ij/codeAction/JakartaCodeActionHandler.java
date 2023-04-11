@@ -13,6 +13,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction;
 
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanNoArgConstructorQuickFix;
@@ -101,7 +102,7 @@ public class JakartaCodeActionHandler {
 //            ScopeDeclarationQuickFix ScopeDeclarationQuickFix = new ScopeDeclarationQuickFix();
 //            RemovePreDestroyAnnotationQuickFix RemovePreDestroyAnnotationQuickFix = new RemovePreDestroyAnnotationQuickFix();
 //            RemovePostConstructAnnotationQuickFix RemovePostConstructAnnotationQuickFix = new RemovePostConstructAnnotationQuickFix();
-//            PostConstructReturnTypeQuickFix PostConstructReturnTypeQuickFix = new PostConstructReturnTypeQuickFix();
+            PostConstructReturnTypeQuickFix PostConstructReturnTypeQuickFix = new PostConstructReturnTypeQuickFix();
             RemoveFinalModifierQuickFix RemoveFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
             RemoveStaticModifierQuickFix RemoveStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
 //            RemoveMethodParametersQuickFix RemoveMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
@@ -130,9 +131,9 @@ public class JakartaCodeActionHandler {
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE)) {
                         codeActions.addAll(AddResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
                     }
-//                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE)) {
-//                        codeActions.addAll(PostConstructReturnTypeQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE)) {
+                        codeActions.addAll(PostConstructReturnTypeQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTE)
                             || diagnostic.getCode().getLeft()
                             .equals(ServletConstants.DIAGNOSTIC_CODE_DUPLICATE_ATTRIBUTES)) {
