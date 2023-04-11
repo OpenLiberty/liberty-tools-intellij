@@ -32,7 +32,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicatesKt.contains;
@@ -78,6 +80,20 @@ public class UIBotTestUtils {
      */
     public enum ExecMode {
         DEBUG, RUN
+    }
+
+    /**
+     * Action processing type.
+     */
+    public enum ActionExecType {
+        SEARCH, LTWDROPDOWN, LTWPLAY, LTWPOPUP
+    }
+
+    /**
+     * Liberty configuration entries.
+     */
+    public enum ConfigEntries {
+        NAME, PARAMS
     }
 
     /**
@@ -198,7 +214,7 @@ public class UIBotTestUtils {
      * @param action        The action to run
      * @param usePlayButton The indicator that specifies if play button should be used to run the action or not.
      */
-    public static void runLibertyTWActionFromDropDownView(RemoteRobot remoteRobot, String action, boolean usePlayButton) {
+    public static void runLibertyActionFromLTWDropDownMenu(RemoteRobot remoteRobot, String action, boolean usePlayButton) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the Liberty toolbar to give it focus.
@@ -255,7 +271,7 @@ public class UIBotTestUtils {
      * @param projectName The name of the project.
      * @param action      The action to run.
      */
-    public static void runLibertyTWActionFromMenuView(RemoteRobot remoteRobot, String projectName, String action) {
+    public static void runActionLTWPopupMenu(RemoteRobot remoteRobot, String projectName, String action) {
         RemoteText project = findProjectInLibertyToolWindow(remoteRobot, projectName, "60");
         project.rightClick();
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -515,9 +531,6 @@ public class UIBotTestUtils {
         // hide the terminal window for now
         UIBotTestUtils.hideTerminalWindow(remoteRobot);
 
-        // get a keyboard - should maybe make this class wide
-        Keyboard keyboard = new Keyboard(remoteRobot);
-
         // get a JTreeFixture reference to the file project viewer entry
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");
@@ -602,7 +615,7 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Click on a editor file tab for a file that is open in the editor pane to gain focus to that file
+     * Click on the editor file tab for a file that is open in the editor pane to gain focus to that file
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param fileName    The string file name
@@ -1007,33 +1020,40 @@ public class UIBotTestUtils {
         fileMenuEntry.click();
         ComponentFixture saveAllEntry = projectFrame.getActionMenuItem("Save All");
         saveAllEntry.click();
-
     }
 
     /**
-     * Runs the start parameters run configuration dialog.
+     * Runs The Liberty configuration with custom configuration.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param startParams The parameters to set in the configuration dialog.
+     * @param startParams The parameters to set in the configuration dialog if it is not null.
      */
     public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(10));
         if (startParams != null) {
-            // Update the parameter editor box.
-            // TODO: Investigate this further:
-            // Currently blocked by the dialog editor box behind the start parameter text box
-            // holding the editor's write lock.
-            // One can only write when the dialog is being closed because the write lock
-            // is released at that point.
+            ComponentFixture startParmTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            startParmTextField.click();
+            startParmTextField.runJs(
+                    "component.setText(\"" + startParams + "\")", true);
 
-            // Save the changes made.
-            JButtonFixture applyButton = dialog.getButton("Apply");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                     Duration.ofSeconds(1),
-                    "Waiting for the Apply button on the open project dialog to be enabled",
-                    "The Apply button on the open project dialog to be enabled",
-                    applyButton::isEnabled);
-            applyButton.click();
+                    "Waiting for the start parameters text field on the Liberty config dialog to contain " + startParams,
+                    "The start parameters text field on the Liberty config dialog did not contain " + startParams,
+                    () -> startParmTextField.hasText(startParams));
+
+            // Save the changes made if necessary. If the config is reused, there will be no changes.
+            JButtonFixture applyButton = dialog.getButton("Apply");
+            try {
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for the Apply button on the open project dialog to be enabled",
+                        "The Apply button on the open project dialog to be enabled",
+                        applyButton::isEnabled);
+                applyButton.click();
+            } catch (WaitForConditionTimeoutException wfcte) {
+                // Config being re-used
+            }
         }
 
         // Run the configuration.
@@ -1047,36 +1067,48 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Returns the name of the opened Liberty configuration.
+     * Returns the opened Liberty configuration entries.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @return The name of the opened Liberty configuration.
+     * @return The opened Liberty configuration entries.
      */
-    public static final String getLibertyConfigName(RemoteRobot remoteRobot) {
+    public static Map<String, String> getLibertyConfigEntries(RemoteRobot remoteRobot) {
+        HashMap<String, String> map = new HashMap<String, String>();
+
         // Get a hold of the Liberty Edit Configurations window.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        DialogFixture startParmsDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
-        Locator locator = byXpath("//div[@class='JTextField']");
+        DialogFixture libertyCfgDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
 
-        // Get the name of the configuration.
-        JTextFieldFixture nameTextField = startParmsDialog.textField(locator, Duration.ofSeconds(10));
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for the name text field on the Liberty config dialog to be enabled or populated by default",
-                "The name text field on the Liberty config dialog was not enabled or populated by default",
-                () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
-        String configName = nameTextField.getText();
+        try {
+            // Get the name of the configuration.
+            Locator locator = byXpath("//div[@class='JTextField']");
+            JTextFieldFixture nameTextField = libertyCfgDialog.textField(locator, Duration.ofSeconds(10));
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for the name text field on the Liberty config dialog to be enabled or populated by default",
+                    "The name text field on the Liberty config dialog was not enabled or populated by default",
+                    () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
+            String configName = nameTextField.getText();
+            map.put(ConfigEntries.NAME.toString(), configName);
 
-        // Close the configuration.
-        JButtonFixture cancelButton = startParmsDialog.getButton("Cancel");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the cancel button on the Liberty config dialog to be enabled",
-                "The cancel button on the Liberty config dialog was not enabled",
-                cancelButton::isEnabled);
-        cancelButton.click();
+            // Get the dev mode parameters
+            ComponentFixture startParmTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            startParmTextField.click();
+            String params = startParmTextField.callJs(
+                    "component.getText()", true);
+            map.put(ConfigEntries.PARAMS.toString(), params);
+        } finally {
+            // Close the configuration.
+            JButtonFixture cancelButton = libertyCfgDialog.getButton("Cancel");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the cancel button on the Liberty config dialog to be enabled",
+                    "The cancel button on the Liberty config dialog was not enabled",
+                    cancelButton::isEnabled);
+            cancelButton.click();
+        }
 
-        return configName;
+        return map;
     }
 
     /**
@@ -1498,7 +1530,7 @@ public class UIBotTestUtils {
     /**
      * Stops the debugger if it is running.
      *
-     * @param remoteRobot
+     * @param remoteRobot The RemoteRobot instance.
      */
     public static void stopDebugger(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -1554,18 +1586,35 @@ public class UIBotTestUtils {
      * @param absoluteWLPPath The absolute path of the Liberty installation.
      * @param maxRetries      The maximum amount of attempts to try to stop the server.
      */
-    public static void stopLibertyServerUsingLTWDropdownActions(RemoteRobot remoteRobot, String testName, String absoluteWLPPath, int maxRetries) {
+    public static void runStopAction(RemoteRobot remoteRobot, String testName, ActionExecType execType, String absoluteWLPPath, String smMPProjName, int maxRetries) {
         for (int i = 0; i < maxRetries; i++) {
             try {
                 // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", false);
-
+                switch (execType) {
+                    case LTWPLAY:
+                        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true);
+                        break;
+                    case LTWDROPDOWN:
+                        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false);
+                        break;
+                    case LTWPOPUP:
+                        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, smMPProjName, "Liberty: Stop");
+                        break;
+                    case SEARCH:
+                        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+                        break;
+                    default:
+                        fail("An invalid execution type of " + execType + " was requested.");
+                }
+                
                 // Validate that the server stopped. Fail the test if the last iteration fails.
                 boolean failOnError = (i == (maxRetries - 1));
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 12, failOnError);
 
                 break;
             } catch (Exception e) {
+                // The Liberty tool window may flicker due to sudden indexing, which may cause an error.
+                // Retry immediately. The logic in this method has inherent waits.
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Retrying server stop. Cause: " + e.getMessage());
             }
         }

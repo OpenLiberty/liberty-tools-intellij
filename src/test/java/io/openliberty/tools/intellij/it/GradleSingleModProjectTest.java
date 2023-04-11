@@ -23,64 +23,57 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
     /**
      * Single module Microprofile project name.
      */
-    public static String SM_MP_PROJECT_NAME = "singleModGradleMP";
+    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
      * Single module REST project that lacks the configuration to be recognized by Liberty tools.
      */
-    public static String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
+    private final String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
 
     /**
      * The path to the folder containing the test projects.
      */
-    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
      * Project port.
      */
-    public static int SM_MP_PROJECT_PORT = 9090;
+    private final int SM_MP_PROJECT_PORT = 9090;
 
     /**
      * Project resource URI.
      */
-    public static String SM_MP_PROJECT_RES_URI = "api/resource";
-
-    /**
-     * Project resource URL.
-     */
-    public static String SM_MP_PROJECT_BASE_URL = "http://localhost:" + SM_MP_PROJECT_PORT + "/";
+    private final String SM_MP_PROJECT_RES_URI = "api/resource";
 
     /**
      * Project response.
      */
-    public static String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
+    private final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
 
     /**
      * Relative location of the WLP installation.
      */
-    public static String WLP_INSTALL_PATH = "build";
+    private final String WLP_INSTALL_PATH = "build";
 
     /**
      * The path to the test report.
      */
-    public static final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
+    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
 
     /**
      * Build file name.
      */
-    public static final String BUILD_FILE_NAME = "build.gradle";
+    private final String BUILD_FILE_NAME = "build.gradle";
 
     /**
      * Action command to open the build file.
      */
-    public static final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
+    private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
 
     /**
-     * Constructor.
+     * Dev mode configuration start parameters.
      */
-    public GradleSingleModProjectTest() {
-        super(PROJECTS_PATH, SM_MP_PROJECT_NAME, SM_NLT_REST_PROJECT_NAME, SM_MP_PROJECT_BASE_URL, SM_MP_PROJECT_OUTPUT);
-    }
+    private final String DEV_MODE_START_PARAMS = "--hotTests";
 
     /**
      * Prepares the environment for test execution.
@@ -90,7 +83,6 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
         prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
-
     /**
      * Returns the path where the Liberty server was installed.
      *
@@ -99,6 +91,52 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
     @Override
     public String getWLPInstallPath() {
         return WLP_INSTALL_PATH;
+    }
+
+    /**
+     * Returns the projects directory path.
+     *
+     * @return The projects directory path.
+     */
+    @Override
+    public String getProjectsDirPath() {
+        return PROJECTS_PATH;
+    }
+
+    /**
+     * Returns the name of the single module MicroProfile project.
+     *
+     * @return The name of the single module MicroProfile project.
+     */
+    @Override
+    public String getSmMPProjectName() {
+        return SM_MP_PROJECT_NAME;
+    }
+
+    /**
+     * Returns the name of the single module REST project that does not meet
+     * the requirements needed to automatically show in the Liberty tool window.
+     * This project's Liberty config file does not the expected name and the
+     * build file does not have any Liberty plugin related entries.
+     *
+     * @return The name of the single module REST project that does not meet the
+     * requirements needed to automatically show in the Liberty tool window.
+     */
+    @Override
+    public String getSmNLTRestProjectName() {
+        return SM_NLT_REST_PROJECT_NAME;
+    }
+
+    /**
+     * Returns the expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     *
+     * @return The expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     */
+    @Override
+    public String getSmMPProjOutput() {
+        return SM_MP_PROJECT_OUTPUT;
     }
 
     /**
@@ -139,6 +177,16 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
     @Override
     public String getBuildFileOpenCommand() {
         return BUILD_FILE_OPEN_CMD;
+    }
+
+    /**
+     * Returns the custom start parameters to be used to start dev mode.
+     *
+     * @return The custom start parameters to be used to start dev mode.
+     */
+    @Override
+    public String getStartParams() {
+        return DEV_MODE_START_PARAMS;
     }
 
     /**
