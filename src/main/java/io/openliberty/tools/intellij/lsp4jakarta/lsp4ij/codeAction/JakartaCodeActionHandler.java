@@ -19,6 +19,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanNoArgCons
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NonPublicResourceMethodQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
@@ -89,7 +91,7 @@ public class JakartaCodeActionHandler {
 //            CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
 //            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
 //            DeleteConflictMapKeyQuickFix DeleteConflictMapKeyQuickFix = new DeleteConflictMapKeyQuickFix();
-//            NonPublicResourceMethodQuickFix NonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
+            NonPublicResourceMethodQuickFix NonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
 //            ResourceMethodMultipleEntityParamsQuickFix ResourceMethodMultipleEntityParamsQuickFix = new ResourceMethodMultipleEntityParamsQuickFix();
 //            NoResourcePublicConstructorQuickFix NoResourcePublicConstructorQuickFix = new NoResourcePublicConstructorQuickFix();
 //            ManagedBeanQuickFix ManagedBeanQuickFix = new ManagedBeanQuickFix();
@@ -147,10 +149,9 @@ public class JakartaCodeActionHandler {
 //                        codeActions
 //                                .addAll(CompleteFilterAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_NON_PUBLIC)) {
-//                        codeActions
-//                                .addAll(NonPublicResourceMethodQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_NON_PUBLIC)) {
+                        codeActions.addAll(NonPublicResourceMethodQuickFix.getCodeActions(context, diagnostic));
+                    }
 //                    if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_MULTIPLE_ENTITY_PARAMS)) {
 //                        codeActions.addAll(ResourceMethodMultipleEntityParamsQuickFix.getCodeActions(context,
 //                                diagnostic, monitor));

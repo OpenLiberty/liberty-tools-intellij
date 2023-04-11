@@ -20,6 +20,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiModifierListOwner;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -97,6 +98,7 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
                 modifiers.setModifierProperty(modifier, true);
             }
         });
+        PositionUtils.formatDocument(binding); // add the necessary new lines, must use 'binding,' it's already in the document
         final Document document = invocationNode.getViewProvider().getDocument();
         return new Change(document, document);
     }
