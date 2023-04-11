@@ -26,6 +26,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.A
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NoResourcePublicConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NonPublicResourceMethodQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceAnnotationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.*;
@@ -103,7 +105,7 @@ public class JakartaCodeActionHandler {
             ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
             ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
 //            JsonbAnnotationQuickFix JsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
-//            JsonbTransientAnnotationQuickFix JsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
+            JsonbTransientAnnotationQuickFix JsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
 //            ScopeDeclarationQuickFix ScopeDeclarationQuickFix = new ScopeDeclarationQuickFix();
 //            RemovePreDestroyAnnotationQuickFix RemovePreDestroyAnnotationQuickFix = new RemovePreDestroyAnnotationQuickFix();
 //            RemovePostConstructAnnotationQuickFix RemovePostConstructAnnotationQuickFix = new RemovePostConstructAnnotationQuickFix();
@@ -202,9 +204,9 @@ public class JakartaCodeActionHandler {
 //                    if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION)) {
 //                        codeActions.addAll(JsonbAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
-//                    if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_FIELD)) {
-//                        codeActions.addAll(JsonbTransientAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_FIELD)) {
+                        codeActions.addAll(JsonbTransientAnnotationQuickFix.getCodeActions(context, diagnostic));
+                    }
 //                    if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_SCOPEDECL)) {
 //                        codeActions.addAll(ScopeDeclarationQuickFix.getCodeActions(context, diagnostic, monitor));
 //                    }
