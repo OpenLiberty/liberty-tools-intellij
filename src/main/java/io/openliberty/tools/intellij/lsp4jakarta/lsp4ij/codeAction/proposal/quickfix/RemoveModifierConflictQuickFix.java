@@ -66,22 +66,19 @@ public class RemoveModifierConflictQuickFix {
     
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        PsiElement node = context.getCoveredNode();
-        PsiClass parentType = getBinding(node);
-
         List<CodeAction> codeActions = new ArrayList<>();
-        removeModifiers(diagnostic, context, parentType, codeActions);
-
+        removeModifiers(diagnostic, context, codeActions);
         return codeActions;
     }
     
-    protected void removeModifiers(Diagnostic diagnostic, JavaCodeActionContext context, PsiClass parentType,
+    protected void removeModifiers(Diagnostic diagnostic, JavaCodeActionContext context,
             List<CodeAction> codeActions) {
-        if (generateOnlyOneCodeAction) {
-            removeModifier(diagnostic, context, parentType, codeActions, modifiers);
+        if (generateOnlyOneCodeAction || modifiers.length == 1) {
+            removeModifier(diagnostic, context, codeActions, modifiers);
         } else {
+            // Clone the psi.FileViewProvider for each CodeAction.
             for (String modifier : modifiers) {
-                removeModifier(diagnostic, context, parentType, codeActions, modifier);
+                removeModifier(diagnostic, context.copy(), codeActions, modifier);
             }
         }
     }
@@ -90,9 +87,10 @@ public class RemoveModifierConflictQuickFix {
      * use setData() API with diagnostic to pass in ElementType in diagnostic collector class.
      *
      */
-    private void removeModifier(Diagnostic diagnostic, JavaCodeActionContext context, PsiClass parentType,
+    private void removeModifier(Diagnostic diagnostic, JavaCodeActionContext context,
             List<CodeAction> codeActions, String... modifier) {
         PsiElement node = context.getCoveredNode();
+        PsiClass parentType = getBinding(node);
         PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
         String type = "";

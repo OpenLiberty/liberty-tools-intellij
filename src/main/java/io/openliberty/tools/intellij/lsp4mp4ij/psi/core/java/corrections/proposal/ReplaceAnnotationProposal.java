@@ -47,7 +47,7 @@ public class ReplaceAnnotationProposal extends InsertAnnotationProposal {
 
 	@Override
 	public void performUpdate() {
-		super.performUpdate();
+		// First delete unneeded annotation(s) then add the new one.
 		PsiModifierList list = getBinding().getModifierList();
 		for(String annotationFQCN : removeAnnotations) {
 			PsiAnnotation annotation = list.findAnnotation(annotationFQCN);
@@ -62,5 +62,6 @@ public class ReplaceAnnotationProposal extends InsertAnnotationProposal {
 				annotation.delete();
 			}
 		}
+		super.performUpdate();
 	}
 }

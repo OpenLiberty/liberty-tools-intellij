@@ -80,6 +80,14 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
                     annotation.setDeclaredAttributeValue(newAttr, newDefaultExpression(annotation));
                 }
             }
+            // remove attributes
+            for (String oldAttr : this.attributesToRemove) {
+                // remove existing attribute
+                PsiAnnotationMemberValue value = annotation.findDeclaredAttributeValue(oldAttr);
+                if (value != null) {
+                    value.getParent().delete(); // remove member/value pair from the AST
+                }
+            }
         }
 
         final Document changed = fInvocationNode.getViewProvider().getDocument();
