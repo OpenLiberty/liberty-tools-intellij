@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiVariable;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.DeleteAnnotationProposal;
@@ -104,7 +105,7 @@ public class RemoveAnnotationConflictQuickFix {
     }
 
     protected static PsiElement getBinding(PsiElement node) {
-        PsiElement parent = PsiTreeUtil.getParentOfType(node, PsiVariable.class);
+        PsiElement parent = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         if (parent != null) {
             return parent;
         }

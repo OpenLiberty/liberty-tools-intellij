@@ -43,6 +43,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);
 
+        // Obtain the list of annotations from the diagnostic.
         JsonArray diagnosticData = (JsonArray) diagnostic.getData();
 
         List<String> annotations = IntStream.range(0, diagnosticData.size())
@@ -53,8 +54,11 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
 
             List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
+                // For each list we will create one code action in its own context
+                JavaCodeActionContext newContext = context.copy();
+                PsiElement owningNode = getBinding(newContext.getCoveredNode());
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
-                removeAnnotation(diagnostic, context, parentType, codeActions, annotationsToRemove);
+                removeAnnotation(diagnostic, newContext, owningNode, codeActions, annotationsToRemove);
             }
             return codeActions;
         }
@@ -66,7 +70,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
      * will be removed at one go. For example, to provide the user with the option to remove
      * "@A, @B" and "@C". The return should be [[A, B], [C]]
      *
-     * @param All the annotations present on the member.
+     * @param annotations All the annotations present on the member.
      * @return A List of Lists, with each list containing the annotations that must be
      * removed at the same time.
      * @author Adit Rada

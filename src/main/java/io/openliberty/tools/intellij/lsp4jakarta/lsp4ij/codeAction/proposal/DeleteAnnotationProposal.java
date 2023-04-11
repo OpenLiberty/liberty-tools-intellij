@@ -14,10 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
 import com.intellij.openapi.editor.Document;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -62,11 +59,12 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
 
     @Override
     public Change getChange() {
-        if (declaringNode instanceof PsiVariable) {
-            PsiVariable targetNode = ((PsiVariable) declaringNode);
+        if (declaringNode instanceof PsiModifierListOwner) {
+            PsiModifierListOwner targetNode = ((PsiModifierListOwner) declaringNode);
             PsiAnnotation[] targetAnnotations = targetNode.getAnnotations();
             for (var annotation : targetAnnotations) {
-                if (Arrays.stream(annotations).anyMatch(a -> a.equals(annotation.getQualifiedName()))) {
+                // Allow the names in targetAnnotations to be fully qualified or short (no package name).
+                if (Arrays.stream(annotations).anyMatch(a -> annotation.getQualifiedName().endsWith(a))) {
                     annotation.delete();
                 }
             }
