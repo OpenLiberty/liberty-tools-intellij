@@ -84,7 +84,9 @@ public class RemoveAnnotationConflictQuickFix {
             removeAnnotation(diagnostic, context, parentType, codeActions, annotations);
         } else {
             for (String annotation : annotations) {
-                removeAnnotation(diagnostic, context, parentType, codeActions, annotation);
+                JavaCodeActionContext newContext = context.copy(); // each code action needs its own context
+                PsiElement selectedNode = getBinding(newContext.getCoveredNode());
+                removeAnnotation(diagnostic, newContext, selectedNode, codeActions, annotation);
             }
         }
     }
