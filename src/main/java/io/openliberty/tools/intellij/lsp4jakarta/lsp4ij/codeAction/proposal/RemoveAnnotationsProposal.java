@@ -17,6 +17,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiModifierListOwner;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -25,14 +26,16 @@ import java.util.List;
 
 public class RemoveAnnotationsProposal extends ChangeCorrectionProposal {
 
+    private final PsiFile sourceCU;
     private final PsiFile invocationNode;
     private final PsiModifierListOwner binding;
     private final List<PsiAnnotation> annotationsToRemove;
 
-    public RemoveAnnotationsProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public RemoveAnnotationsProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                      PsiModifierListOwner binding, int relevance,
                                      List<PsiAnnotation> annotationsToRemove) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
         this.invocationNode = invocationNode;
         this.binding = binding;
         this.annotationsToRemove = annotationsToRemove;
@@ -43,7 +46,8 @@ public class RemoveAnnotationsProposal extends ChangeCorrectionProposal {
         annotationsToRemove.forEach(a -> {
             a.delete();
         });
+        PositionUtils.formatDocument(binding); // fix up whitespace
         final Document document = invocationNode.getViewProvider().getDocument();
-        return new Change(document, document);
+        return new Change(sourceCU.getViewProvider().getDocument(), document);
     }
 }

@@ -13,6 +13,8 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction;
 
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanNoArgConstructorQuickFix;
@@ -98,7 +100,7 @@ public class JakartaCodeActionHandler {
 //            ManagedBeanQuickFix ManagedBeanQuickFix = new ManagedBeanQuickFix();
             PersistenceEntityQuickFix PersistenceEntityQuickFix = new PersistenceEntityQuickFix();
 //            ConflictProducesInjectQuickFix ConflictProducesInjectQuickFix = new ConflictProducesInjectQuickFix();
-//            BeanValidationQuickFix BeanValidationQuickFix = new BeanValidationQuickFix();
+            BeanValidationQuickFix BeanValidationQuickFix = new BeanValidationQuickFix();
             ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
             ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
 //            JsonbAnnotationQuickFix JsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
@@ -190,11 +192,10 @@ public class JakartaCodeActionHandler {
 //                        codeActions.addAll(RemoveProduceAnnotationQuickFix.getCodeActions(context, diagnostic, monitor));
                         codeActions.addAll(RemoveInvalidInjectParamAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
-//                    if (diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_STATIC)
-//                            || diagnostic.getCode().getLeft()
-//                            .equals(BeanValidationConstants.DIAGNOSTIC_CODE_INVALID_TYPE)) {
-//                        codeActions.addAll(BeanValidationQuickFix.getCodeActions(context, diagnostic, monitor));
-//                    }
+                    if (diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_STATIC)
+                            || diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_INVALID_TYPE)) {
+                        codeActions.addAll(BeanValidationQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.CONSTRUCTOR_DIAGNOSTIC_CODE)) {
                         codeActions.addAll(ManagedBeanConstructorQuickFix.getCodeActions(context, diagnostic));
                         codeActions.addAll(ManagedBeanNoArgConstructorQuickFix.getCodeActions(context, diagnostic));
