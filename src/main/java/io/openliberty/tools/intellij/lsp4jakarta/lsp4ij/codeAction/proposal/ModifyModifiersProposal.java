@@ -35,6 +35,7 @@ import java.util.List;
  */
 public class ModifyModifiersProposal extends ChangeCorrectionProposal {
 
+    private final PsiFile sourceCU;
     private final PsiFile invocationNode;
     private final PsiModifierListOwner binding;
     private final PsiModifierList modifiers;
@@ -51,9 +52,10 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
      * @param modifiersToAdd        list of valid modifiers as strings to be added
      * @param modifiersToRemove     list of modifiers as strings to be removed
      */
-    public ModifyModifiersProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyModifiersProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                 PsiModifierListOwner binding, int relevance, PsiModifierList modifiers, List<String> modifiersToAdd, List<String> modifiersToRemove) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
         this.invocationNode = invocationNode;
         this.binding = binding;
         this.modifiers = modifiers;
@@ -67,9 +69,9 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
      *
      * @param modifiersToAdd        list of valid modifiers as strings to be added
      */
-    public ModifyModifiersProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyModifiersProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                    PsiModifierListOwner binding, int relevance, PsiModifierList modifiers, List<String> modifiersToAdd) {
-        this(label, targetCU, invocationNode, binding, relevance, modifiers, modifiersToAdd, Collections.emptyList());
+        this(label, sourceCU, invocationNode, binding, relevance, modifiers, modifiersToAdd, Collections.emptyList());
     }
 
     @Override
@@ -100,6 +102,6 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
         });
         PositionUtils.formatDocument(binding); // add the necessary new lines, must use 'binding,' it's already in the document
         final Document document = invocationNode.getViewProvider().getDocument();
-        return new Change(document, document);
+        return new Change(sourceCU.getViewProvider().getDocument(), document);
     }
 }

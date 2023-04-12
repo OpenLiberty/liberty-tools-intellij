@@ -66,7 +66,7 @@ public class ManagedBeanNoArgConstructorQuickFix {
         parentType = getBinding(node);
         String name = "Add a no-arg protected constructor to this class";
         ChangeCorrectionProposal proposal = new AddConstructorProposal(name,
-                targetContext.getCompilationUnit(), targetContext.getASTRoot(), parentType, 0);
+                targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0);
         CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
 
         if (codeAction != null) {
@@ -79,7 +79,7 @@ public class ManagedBeanNoArgConstructorQuickFix {
         parentType = getBinding(node);
         name = "Add a no-arg public constructor to this class";
         proposal = new AddConstructorProposal(name,
-                targetContext.getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
+                targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
         codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
 
         if (codeAction != null) {

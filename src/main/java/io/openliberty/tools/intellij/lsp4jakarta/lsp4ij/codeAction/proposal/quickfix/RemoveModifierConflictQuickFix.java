@@ -106,7 +106,7 @@ public class RemoveModifierConflictQuickFix {
 
         String name = "Remove the \'" + modifier[0] + "\' modifier from this ";
         name = name.concat(type);
-        ModifyModifiersProposal proposal = new ModifyModifiersProposal(name, context.getCompilationUnit(),
+        ModifyModifiersProposal proposal = new ModifyModifiersProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifier));
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
 

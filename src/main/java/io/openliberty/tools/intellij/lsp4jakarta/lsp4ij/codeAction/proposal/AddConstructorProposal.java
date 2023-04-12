@@ -28,6 +28,7 @@ import org.eclipse.lsp4j.CodeActionKind;
  */
 public class AddConstructorProposal extends ChangeCorrectionProposal {
 
+    private final PsiFile sourceCU;
     private final PsiFile invocationNode;
     private final PsiClass binding;
     private final String visibility;
@@ -36,9 +37,10 @@ public class AddConstructorProposal extends ChangeCorrectionProposal {
      * Constructor for AddMethodProposal
      *
      */
-    public AddConstructorProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public AddConstructorProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                   PsiClass binding, int relevance) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
         this.invocationNode = invocationNode;
         this.binding = binding;
         this.visibility = "protected";
@@ -49,9 +51,10 @@ public class AddConstructorProposal extends ChangeCorrectionProposal {
      *
      * @param visibility    a valid visibility modifier for the constructor, defaults to protected
      */
-    public AddConstructorProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public AddConstructorProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                   PsiClass binding, int relevance, String visibility) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
         this.invocationNode = invocationNode;
         this.binding = binding;
         this.visibility = visibility;
@@ -78,6 +81,6 @@ public class AddConstructorProposal extends ChangeCorrectionProposal {
         binding.addBefore(newConstructor, bestSpot);
         PositionUtils.formatDocument(binding); // add the necessary new lines, must use 'binding,' it's already in the document
         final Document document = invocationNode.getViewProvider().getDocument();
-        return new Change(document, document);
+        return new Change(sourceCU.getViewProvider().getDocument(), document);
     }
 }

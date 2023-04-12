@@ -44,7 +44,7 @@ public class NonPublicResourceMethodQuickFix {
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
         if (parentMethod != null) {
-            ChangeCorrectionProposal proposal = new ModifyModifiersProposal(TITLE_MESSAGE, context.getCompilationUnit(),
+            ChangeCorrectionProposal proposal = new ModifyModifiersProposal(TITLE_MESSAGE, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
 
             // Convert the proposal to LSP4J CodeAction
