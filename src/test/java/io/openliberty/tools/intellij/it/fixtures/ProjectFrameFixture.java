@@ -42,11 +42,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the input locator.
      *
-     * @param locator The custom locator.
+     * @param vars The custom variables to use: xPath and waitTime(seconds)
      * @return The ComponentFixture object associated with the input locator.
      */
-    public ComponentFixture getActionButton(Locator locator) {
-        return find(ComponentFixture.class, locator, Duration.ofSeconds(10));
+    public ComponentFixture getActionButton(String... vars) {
+        String xPath = vars[0];
+        int waitTime = Integer.parseInt(vars[1]);
+
+        Locator locator = byXpath(xPath);
+        return find(ComponentFixture.class, locator, Duration.ofSeconds(waitTime));
     }
 
     /**
@@ -112,7 +116,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the BaseLabel class.
      *
-     * @param xpathVars The Locator custom variables: text, waitTime(secs)
+     * @param xpathVars The Locator custom variables: text, waitTime(seconds)
      * @return The ComponentFixture object associated with the BaseLabel class.
      */
     public ComponentFixture getBaseLabel(String... xpathVars) {
@@ -120,13 +124,13 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String waitTime = xpathVars[1];
         return find(ComponentFixture.class,
                 byXpath("//div[@class='BaseLabel' and @text='" + text + "']"),
-                Duration.ofSeconds(Integer.valueOf(waitTime)));
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
      * Returns the ComponentFixture object associated with the ContentComboLabel class.
      *
-     * @param xpathVars The Locator custom variables: text, waitTime(secs)
+     * @param xpathVars The Locator custom variables: text, waitTime(seconds)
      * @return The ComponentFixture object associated with the ContentComboLabel class.
      */
     public ComponentFixture getContentComboLabel(String... xpathVars) {
@@ -135,7 +139,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
 
         return find(ComponentFixture.class,
                 byXpath("//div[@class='ContentComboLabel' and @text='" + text + "']"),
-                Duration.ofSeconds(Integer.valueOf(waitTime)));
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
@@ -183,7 +187,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the SETabLabel class.
      *
-     * @param xpathVars The Locator custom variables: text, waitTime(secs)
+     * @param xpathVars The Locator custom variables: text
      * @return The ComponentFixture object associated with the SETabLabel class.
      */
     public ComponentFixture getSETabLabel(String... xpathVars) {
@@ -196,7 +200,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the Tree class.
      *
-     * @param xpathVars The Locator custom variables: name, visibleText, waitTime(mins)
+     * @param xpathVars The Locator custom variables: name, visibleText, waitTime(seconds)
      * @return The ComponentFixture object associated with the Tree class.
      */
     public ComponentFixture getTree(String... xpathVars) {
@@ -206,20 +210,20 @@ public class ProjectFrameFixture extends CommonContainerFixture {
 
         return find(ComponentFixture.class,
                 byXpath("//div[@class='Tree' and @name='" + name + "' and contains(@visible_text, '" + visibleText + "')]"),
-                Duration.ofSeconds(Integer.valueOf(waitTime)));
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
      * Return the ComponentFixture object associated with the InplaceButton class.
      *
-     * @param xpathVars The Locator custom variables: name, waitTime(mins)
+     * @param xpathVars The Locator custom variables: name, waitTime(seconds)
      * @return The ComponentFixture object associated with the InplaceButton class.
      */
     public ComponentFixture getInplaceButton(String... xpathVars) {
         String name = xpathVars[0];
         String waitTime = xpathVars[1];
         Locator locator = byXpath("//div[@accessiblename='" + name + "' and @class='SingleHeightLabel']//div[@class='InplaceButton']");
-        return find(ComponentFixture.class, locator, Duration.ofSeconds(Integer.valueOf(waitTime)));
+        return find(ComponentFixture.class, locator, Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
@@ -234,21 +238,31 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the hover text DocumentationHint popup.
+     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
      *
-     * @return The ContainerFixture object associated with the current popup.
+     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
      */
-    public ContainerFixture getDocumentationHintPopup() {
-        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"), Duration.ofSeconds(20));
+    public ContainerFixture getDocumentationHintEditorPane() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='DocumentationHintEditorPane']"), Duration.ofSeconds(20));
     }
 
     /**
      * Returns the ContainerFixture object associated with the JBTextArea class.
      *
+     * @param xpathVars The Locator custom variables: waitTime(seconds)
      * @return The ContainerFixture object associated with the JBTextArea class.
      */
     public ContainerFixture getTextArea(String... xpathVars) {
         String waitTime = xpathVars[0];
-        return find(ContainerFixture.class, byXpath("//div[@class='JBTextArea']"), Duration.ofSeconds(Integer.valueOf(waitTime)));
+        return find(ContainerFixture.class, byXpath("//div[@class='JBTextArea']"), Duration.ofSeconds(Integer.parseInt(waitTime)));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the LookupList class in a HeavyWeightWindow (pop-up windows.
+     *
+     * @return The ContainerFixture object associated with the LookupList class in a HeavyWeightWindow (pop-up window).
+     */
+    public ContainerFixture getLookupList() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='LookupList']"), Duration.ofSeconds(10));
     }
 }

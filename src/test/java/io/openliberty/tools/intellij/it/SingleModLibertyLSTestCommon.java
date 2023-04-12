@@ -103,16 +103,20 @@ public abstract class SingleModLibertyLSTestCommon {
         String stanzaSnippet = "el-3";
         String insertedFeature = "<feature>el-3.0</feature>";
 
-        Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
+        // Save the current server.xml content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE);
+        // Insert a new element in server.xml.
+        try {
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE);
+            Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
+            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
 
-        // give the IDEA time to save the server.xml file
-        TestUtils.sleepAndIgnoreException(5);
 
-        TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
-        UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedFeature);
     }
 
     /**
@@ -121,17 +125,22 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @Test
     @Video
-    public void testInsertLibertyConfigIntoServerXML() {
+    public void testInsertLibertyConfigElementIntoServerXML() {
         String stanzaSnippet = "use";
         String insertedConfig = "<userInfo></userInfo>";
 
-        Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
+        // Save the current server.xml content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
 
-        UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, projectName, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT);
-        TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
-        UIBotTestUtils.deleteStanzaInAppServerXML(remoteRobot, insertedConfig);
-
+        // Insert a new element in server.xml.
+        try {
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT);
+            Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
+            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
     }
 
     /**
@@ -153,20 +162,11 @@ public abstract class SingleModLibertyLSTestCommon {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");
-        //projTree.expand(projectName, "build", "wlp", "usr", "servers", "defaultServer");
 
         // open server.xml file
         UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);
 
+        // Removes the build tool window if it is opened. This prevents text to be hidden by it.
+        UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
     }
-
-    /**
-     * Deletes test reports.
-     */
-    public abstract void deleteTestReports();
-
-    /**
-     * Validates that test reports were generated.
-     */
-    public abstract void validateTestReportsExist();
 }

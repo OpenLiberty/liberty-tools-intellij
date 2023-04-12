@@ -108,6 +108,7 @@ public abstract class SingleModProjectTestCommon {
         UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "5");
 
         // Open the build file.
+        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
         UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, getBuildFileOpenCommand());
 
         // Verify that build file tab is opened.
@@ -435,6 +436,7 @@ public abstract class SingleModProjectTestCommon {
                 error = null;
                 try {
                     UIBotTestUtils.importProject(remoteRobot, projectsPath, smMPProjectName);
+                    UIBotTestUtils.openLibertyToolWindow(remoteRobot);
                     UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, smMPProjectName);
                     break;
                 } catch (Exception e) {

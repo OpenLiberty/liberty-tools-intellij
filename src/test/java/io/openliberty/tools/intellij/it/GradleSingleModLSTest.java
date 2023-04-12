@@ -9,10 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
@@ -25,28 +23,11 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     /**
      * The path to the folder containing the test projects.
      */
-    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "apps", "gradle").toAbsolutePath().toString();
+    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
-     * Application resoruce URL.
+     * Constructor.
      */
-    public static String BASE_URL = "http://localhost:9090/";
-
-    /**
-     * Application response payload.
-     */
-    public static String APP_EXPECTED_OUTPUT = "Hello! Welcome to Open Liberty";
-
-    /**
-     * Relative location of the WLP installation.
-     */
-    public static String WLP_INSTALL_PATH = "/build";
-
-    /**
-     * The path to the test report.
-     */
-    private final Path pathToTestReport = Paths.get(PROJECTS_PATH, "build", "reports", "tests", "test", "index.html");
-
     public GradleSingleModLSTest() {
         super(PROJECT_NAME, PROJECTS_PATH);
     }
@@ -57,22 +38,5 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     @BeforeAll
     public static void setup() {
         prepareEnv(PROJECTS_PATH, PROJECT_NAME);
-    }
-
-    /**
-     * Deletes test reports.
-     */
-    @Override
-    public void deleteTestReports() {
-        boolean testReportDeleted = TestUtils.deleteFile(pathToTestReport.toFile());
-        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + pathToTestReport + " was not be deleted.");
-    }
-
-    /**
-     * Validates that test reports were generated.
-     */
-    @Override
-    public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(pathToTestReport);
     }
 }
