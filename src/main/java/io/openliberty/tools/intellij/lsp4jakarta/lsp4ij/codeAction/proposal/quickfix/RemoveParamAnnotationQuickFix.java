@@ -90,7 +90,7 @@ public class RemoveParamAnnotationQuickFix {
             }
         });
 
-        RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getCompilationUnit(),
+        RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, psiAnnotationsToRemove);
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
         if (codeAction != null) {
