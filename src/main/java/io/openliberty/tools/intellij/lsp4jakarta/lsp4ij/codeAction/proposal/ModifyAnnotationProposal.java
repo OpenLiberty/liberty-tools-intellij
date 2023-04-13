@@ -31,31 +31,37 @@ import java.util.List;
  */
 public class ModifyAnnotationProposal extends NewAnnotationProposal {
 
+    // The original file or compilation unit
+    private final PsiFile sourceCU;
+
     // list of attributes to add to the annotations
     private final List<String> attributesToAdd;
 
     // list of attributes (if they exist) to remove from the annotations
     private final List<String> attributesToRemove;
 
-    public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyAnnotationProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                     PsiModifierListOwner binding, PsiAnnotation annotationNode,
                                     int relevance, String annotation, List<String> attributesToAdd,
                                     List<String> attributesToRemove) {
-        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotation);
+        super(label, null, invocationNode, binding, annotationNode, relevance, annotation);
+        this.sourceCU = sourceCU;
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = attributesToRemove;
     }
-    public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyAnnotationProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                     PsiModifierListOwner binding, PsiAnnotation annotationNode,
                                     int relevance, String annotation, List<String> attributesToAdd) {
-        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotation);
+        super(label, null, invocationNode, binding, annotationNode, relevance, annotation);
+        this.sourceCU = sourceCU;
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = new ArrayList<>();
     }
-    public ModifyAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyAnnotationProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                     PsiModifierListOwner binding, PsiAnnotation annotationNode,
                                     int relevance, List<String> attributesToAdd, String... annotations) {
-        super(label, targetCU, invocationNode, binding, annotationNode, relevance, annotations);
+        super(label, null, invocationNode, binding, annotationNode, relevance, annotations);
+        this.sourceCU = sourceCU;
         this.attributesToAdd = attributesToAdd;
         this.attributesToRemove = new ArrayList<>();
     }
@@ -91,7 +97,7 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
         }
 
         final Document changed = fInvocationNode.getViewProvider().getDocument();
-        return  new Change(changed, changed);
+        return  new Change(sourceCU.getViewProvider().getDocument(), changed);
     }
 
     private PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation) {
