@@ -40,7 +40,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
     protected void executeLibertyAction() {
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
-        File surefireReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
+        File surefireReportFile = Paths.get(parentFile.getPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
         VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
