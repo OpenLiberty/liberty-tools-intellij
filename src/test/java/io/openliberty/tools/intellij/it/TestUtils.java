@@ -88,15 +88,16 @@ public class TestUtils {
     }
 
     /**
-     * Validates the application is started.
+     * Validates that the project is started.
      *
      * @param testName         The name of the test calling this method.
-     * @param appUrl           The application URL..
-     * @param expectedResponse The expected application response payload.
+     * @param resourceURI      The project resource URI.
+     * @param port             The port number to reach the project
+     * @param expectedResponse The expected resource response payload.
      * @param wlpInstallPath   The liberty installation relative path.
      */
-    public static void validateAppStarted(String testName, String appUrl, String expectedResponse, String wlpInstallPath) {
-        printTrace(TraceSevLevel.INFO, testName + ":validateAppStarted: Entry. URL: " + appUrl);
+    public static void validateProjectStarted(String testName, String resourceURI, int port, String expectedResponse, String wlpInstallPath, boolean findConn) {
+        printTrace(TraceSevLevel.INFO, testName + ":validateProjectStarted: Entry. Port: " + port + ", resourceURI: " + resourceURI);
 
         int retryCountLimit = 75;
         int retryIntervalSecs = 5;
@@ -104,21 +105,21 @@ public class TestUtils {
 
         while (retryCount < retryCountLimit) {
             retryCount++;
-            int status;
+
+            HttpURLConnection conn;
+            if (findConn) {
+                conn = findHttpConnection(port, resourceURI);
+            } else {
+                conn = getHttpConnection(port, resourceURI);
+            }
+
+            if (conn == null) {
+                TestUtils.sleepAndIgnoreException(retryIntervalSecs);
+                continue;
+            }
+
             try {
-                URL url = new URL(appUrl);
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                con.connect();
-                status = con.getResponseCode();
-
-                if (status != HttpURLConnection.HTTP_OK) {
-                    Thread.sleep(retryIntervalSecs * 1000);
-                    con.disconnect();
-                    continue;
-                }
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String responseLine;
                 StringBuilder content = new StringBuilder();
                 while ((responseLine = br.readLine()) != null) {
@@ -127,40 +128,92 @@ public class TestUtils {
 
                 if (!(content.toString().contains(expectedResponse))) {
                     Thread.sleep(retryIntervalSecs * 1000);
-                    con.disconnect();
+                    conn.disconnect();
                     continue;
 
                 }
-                printTrace(TraceSevLevel.INFO, testName + ":validateAppStarted. Exit. The application started successfully.");
+                printTrace(TraceSevLevel.INFO, testName + ":validateProjectStarted. Exit. The project started successfully.");
 
                 return;
             } catch (Exception e) {
-                try {
-                    Thread.sleep(retryIntervalSecs * 1000);
-                } catch (Exception ee) {
-                    ee.printStackTrace(System.out);
-                }
+                TestUtils.sleepAndIgnoreException(retryIntervalSecs);
             }
         }
 
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
-        String msg = testName + ":validateAppStarted: Timed out while waiting for application under URL: " + appUrl + " to become available.";
+        String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
-        String msgHeader = "Message log for failed test: " + testName + ":validateAppStarted";
+        String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
     }
 
     /**
-     * Validates the application is stopped.
+     * Finds an active connection object.
+     * This is done based on how the LMP/LGP finds a usable port when starting dev mode in a container.
+     * If the specified port is not usable, the LMP/LGP increases the specified port number
+     * by one until it finds a usable port, which, in turn, it is used to start dev mode in a container.
+     * A port may not be usable if the socket associated with the specified port
+     * can not yet be bound to between tests.
+     *
+     * @param port        The initial port number.
+     * @param resourceURI The resource URI.
+     * @return An active connection object..
+     */
+    public static HttpURLConnection findHttpConnection(int port, String resourceURI) {
+        int testPort = port;
+        int maxPortIncrement = 4;
+        HttpURLConnection connection = null;
+        for (int i = 0; i < maxPortIncrement; i++) {
+            connection = getHttpConnection(testPort, resourceURI);
+            if (connection != null) {
+                break;
+            }
+            testPort += 1;
+        }
+
+        return connection;
+    }
+
+    /**
+     * Returns an active connection object.
+     *
+     * @param port        The initial port number.
+     * @param resourceURI The resource URI.
+     * @return An active connection object.
+     */
+    public static HttpURLConnection getHttpConnection(int port, String resourceURI) {
+        String resourceURL = "http://localhost:" + port + "/" + resourceURI;
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(resourceURL);
+            HttpURLConnection tmpConn = (HttpURLConnection) url.openConnection();
+            tmpConn.setRequestMethod("GET");
+            tmpConn.connect();
+            int status = tmpConn.getResponseCode();
+
+            if (status == HttpURLConnection.HTTP_OK) {
+                conn = tmpConn;
+            } else {
+                tmpConn.disconnect();
+            }
+        } catch (Exception e) {
+            // Ignore.
+        }
+
+        return conn;
+    }
+
+    /**
+     * Validates the project stopped.
      *
      * @param testName       The name of the test calling this method.
-     * @param appUrl         The application URL.
+     * @param projUrl        The project's URL.
      * @param wlpInstallPath The liberty installation relative path.
      */
-    public static void validateAppStopped(String testName, String appUrl, String wlpInstallPath) {
-        printTrace(TraceSevLevel.INFO, testName + ":validateAppStopped: Entry. URL: " + appUrl);
+    public static void validateProjectStopped(String testName, String projUrl, String wlpInstallPath) {
+        printTrace(TraceSevLevel.INFO, testName + ":validateProjectStopped: Entry. URL: " + projUrl);
 
         int retryCountLimit = 60;
         int retryIntervalSecs = 2;
@@ -170,7 +223,7 @@ public class TestUtils {
             retryCount++;
             int status;
             try {
-                URL url = new URL(appUrl);
+                URL url = new URL(projUrl);
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.connect();
@@ -182,7 +235,7 @@ public class TestUtils {
                     continue;
                 }
 
-                printTrace(TraceSevLevel.INFO, testName + ":validateAppStopped. Exit. The application stopped successfully.");
+                printTrace(TraceSevLevel.INFO, testName + ":validateProjectStopped. Exit. The project stopped successfully.");
                 return;
             } catch (Exception e) {
                 try {
@@ -194,10 +247,10 @@ public class TestUtils {
         }
 
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
-        String msg = testName + ":validateAppStopped: Timed out while waiting for application under URL: " + appUrl + " to stop.";
+        String msg = testName + ":validateProjectStopped: Timed out while waiting for project under URL: " + projUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
         String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
-        String msgHeader = "Message log for failed test: " + testName + ":validateAppStopped";
+        String msgHeader = "Message log for failed test: " + testName + ":validateProjectStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
     }
@@ -225,6 +278,7 @@ public class TestUtils {
             throw new RuntimeException(e);
         }
     }
+
     /**
      * Prints the Liberty server's messages.log identified by the input path.
      *

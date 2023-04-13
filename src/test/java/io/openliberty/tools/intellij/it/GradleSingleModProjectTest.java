@@ -16,34 +16,44 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a Gradle application.
+ * Tests Liberty Tools actions using a Gradle project.
  */
-public class GradleSingleModAppTest extends SingleModAppTestCommon {
+public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
 
     /**
-     * Single module Microprofile application name.
+     * Single module Microprofile project name.
      */
     public static String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
-     * Single module REST application that lacks the configuration to be recognized by Liberty tools.
+     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
      */
     public static String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
 
     /**
      * The path to the folder containing the test projects.
      */
-    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "apps", "gradle").toAbsolutePath().toString();
+    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
-     * Application resource URL.
+     * Project port.
      */
-    public static String BASE_URL = "http://localhost:9090/";
+    public static int SM_MP_PROJECT_PORT = 9090;
 
     /**
-     * Application response payload.
+     * Project resource URI.
      */
-    public static String APP_EXPECTED_OUTPUT = "Hello! Welcome to Open Liberty";
+    public static String SM_MP_PROJECT_RES_URI = "api/resource";
+
+    /**
+     * Project resource URL.
+     */
+    public static String SM_MP_PROJECT_BASE_URL = "http://localhost:" + SM_MP_PROJECT_PORT + "/";
+
+    /**
+     * Project response.
+     */
+    public static String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
 
     /**
      * Relative location of the WLP installation.
@@ -56,7 +66,7 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
 
     /**
-     * Buidl file name.
+     * Build file name.
      */
     private final String BUILD_FILE_NAME = "build.gradle";
 
@@ -66,10 +76,10 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
 
     /**
-     * Tests Liberty Tool actions with a single module application that uses Gradle as its build tool.
+     * Constructor.
      */
-    public GradleSingleModAppTest() {
-        super(PROJECTS_PATH, SM_MP_PROJECT_NAME, SM_NLT_REST_PROJECT_NAME, BASE_URL, APP_EXPECTED_OUTPUT);
+    public GradleSingleModProjectTest() {
+        super(PROJECTS_PATH, SM_MP_PROJECT_NAME, SM_NLT_REST_PROJECT_NAME, SM_MP_PROJECT_BASE_URL, SM_MP_PROJECT_OUTPUT);
     }
 
     /**
@@ -89,6 +99,26 @@ public class GradleSingleModAppTest extends SingleModAppTestCommon {
     @Override
     public String getWLPInstallPath() {
         return WLP_INSTALL_PATH;
+    }
+
+    /**
+     * Returns the port number associated with the single module MicroProfile project.
+     *
+     * @return The port number associated with the single module MicroProfile project.
+     */
+    @Override
+    public int getSmMpProjPort() {
+        return SM_MP_PROJECT_PORT;
+    }
+
+    /**
+     * Return the Resource URI associated with the single module MicroProfile project.
+     *
+     * @return The Resource URI associated with the single module MicroProfile project.
+     */
+    @Override
+    public String getSmMpProjResURI() {
+        return SM_MP_PROJECT_RES_URI;
     }
 
     /**

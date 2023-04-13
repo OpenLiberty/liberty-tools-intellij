@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Common component for running both Maven and Gradle tests.
  */
-public abstract class SingleModAppTestCommon {
+public abstract class SingleModProjectTestCommon {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -33,36 +33,36 @@ public abstract class SingleModAppTestCommon {
     String projectsPath;
 
     /**
-     * Single module MicroProfile application.
+     * Single module MicroProfile project.
      */
     String smMPProjectName;
 
     /**
-     * Single module REST application that does not meet the requirements needed to automatically
+     * Single module REST project that does not meet the requirements needed to automatically
      * show in the Liberty tool window. Liberty config file is not the expected and the build
      * file does not have any Liberty plugin related entries.
      */
     String smNLTRestProjectName;
 
     /**
-     * The base URL to call the single module MicroProfile application.
+     * The base URL to call the single module MicroProfile project.
      */
-    String smMPAppBaseURL;
+    String smMPProjBaseURL;
 
     /**
-     * Single module MicroProfile application expected output.
+     * Single module MicroProfile project expected output.
      */
-    String smMPAppOutput;
+    String smMPProjOutput;
 
     /**
      * Constructor.
      */
-    public SingleModAppTestCommon(String projectsPath, String smMPProjectName, String smNLTRestProjectName, String smMPAppBaseURL, String smMPAppOutput) {
+    public SingleModProjectTestCommon(String projectsPath, String smMPProjectName, String smNLTRestProjectName, String smMPProjBaseURL, String smMPProjOutput) {
         this.projectsPath = projectsPath;
         this.smMPProjectName = smMPProjectName;
         this.smNLTRestProjectName = smNLTRestProjectName;
-        this.smMPAppBaseURL = smMPAppBaseURL;
-        this.smMPAppOutput = smMPAppOutput;
+        this.smMPProjBaseURL = smMPProjBaseURL;
+        this.smMPProjOutput = smMPProjOutput;
     }
 
     /**
@@ -108,6 +108,7 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "5");
 
         // Open the build file.
+        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
         UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, getBuildFileOpenCommand());
 
         // Verify that build file tab is opened.
@@ -133,10 +134,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
-
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -162,12 +161,11 @@ public abstract class SingleModAppTestCommon {
         // Start dev mode.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", false);
 
-        // Validate that the application started.
-        String url = smMPAppBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+        // Validate that the project started.
+        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
 
         try {
-            // Run the application's tests.
+            // Run the project's tests.
             UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", false);
 
             // Validate that the report was generated.
@@ -200,9 +198,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -230,12 +227,11 @@ public abstract class SingleModAppTestCommon {
         // Start dev mode.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", true);
 
-        // Validate that the application started.
-        String url = smMPAppBaseURL + "api/resource";
-        TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+        // Validate that the project started.
+        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
 
         try {
-            // Run the application's tests.
+            // Run the project's tests.
             UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", true);
 
             // Validate that the report was generated.
@@ -267,9 +263,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -297,11 +292,10 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start");
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
 
-            // Run the application's tests.
+            // Run the project's tests.
             UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Run tests");
 
             // Validate that the reports were generated.
@@ -333,9 +327,8 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
@@ -363,11 +356,10 @@ public abstract class SingleModAppTestCommon {
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start");
 
         try {
-            // Validate that the application started.
-            String url = smMPAppBaseURL + "api/resource";
-            TestUtils.validateAppStarted(testName, url, smMPAppOutput, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
 
-            // Run the application's tests.
+            // Run the project's tests.
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests");
 
             // Validate that the reports were generated.
@@ -388,7 +380,7 @@ public abstract class SingleModAppTestCommon {
      */
     @Test
     @Video
-    public void testManualAppAddRemoveActionUsingSearch() {
+    public void testManualProjectAddRemoveActionUsingSearch() {
         // Import the project that is not automatically detected by Liberty Tools.
         UIBotTestUtils.importProject(remoteRobot, projectsPath, smNLTRestProjectName);
 
@@ -411,7 +403,7 @@ public abstract class SingleModAppTestCommon {
                 // Validate that the project is displayed in the Liberty tool window.
                 UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, smNLTRestProjectName, "10");
             } finally {
-                // Remove the application from the Liberty tool window.
+                // Remove the project from the Liberty tool window.
                 UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window");
 
                 // Select project from the 'Remote Liberty project' dialog.
@@ -444,6 +436,7 @@ public abstract class SingleModAppTestCommon {
                 error = null;
                 try {
                     UIBotTestUtils.importProject(remoteRobot, projectsPath, smMPProjectName);
+                    UIBotTestUtils.openLibertyToolWindow(remoteRobot);
                     UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, smMPProjectName);
                     break;
                 } catch (Exception e) {
@@ -489,6 +482,20 @@ public abstract class SingleModAppTestCommon {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Exit. ProjectName: " + projectName);
     }
+
+    /**
+     * Returns the port number associated with the single module MicroProfile project.
+     *
+     * @return The port number associated with the single module MicroProfile project.
+     */
+    public abstract int getSmMpProjPort();
+
+    /**
+     * Return the Resource URI associated with the single module MicroProfile project.
+     *
+     * @return The Resource URI associated with the single module MicroProfile project.
+     */
+    public abstract String getSmMpProjResURI();
 
     /**
      * Returns the path where the Liberty server was installed.
