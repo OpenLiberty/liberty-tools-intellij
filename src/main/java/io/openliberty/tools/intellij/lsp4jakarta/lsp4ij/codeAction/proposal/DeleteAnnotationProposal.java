@@ -64,7 +64,7 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
             PsiAnnotation[] targetAnnotations = targetNode.getAnnotations();
             for (var annotation : targetAnnotations) {
                 // Allow the names in targetAnnotations to be fully qualified or short (no package name).
-                if (Arrays.stream(annotations).anyMatch(a -> annotation.getQualifiedName().endsWith(a))) {
+                if (Arrays.stream(annotations).anyMatch(a -> annotation.getQualifiedName().equals(a))) {
                     annotation.delete();
                 }
             }

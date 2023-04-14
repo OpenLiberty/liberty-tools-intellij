@@ -13,6 +13,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
 import com.google.gson.JsonArray;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import org.eclipse.lsp4j.CodeAction;
@@ -52,7 +53,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
         if (parentType != null) {
             List<CodeAction> codeActions = new ArrayList<>();
 
-            List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(annotations);
+            List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(parentType.getProject(), annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
                 // For each list we will create one code action in its own context
                 JavaCodeActionContext newContext = context.copy();
@@ -70,11 +71,12 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
      * will be removed at one go. For example, to provide the user with the option to remove
      * "@A, @B" and "@C". The return should be [[A, B], [C]]
      *
+     * @param project  The project is the context in which the annotation short names will be resolved to FQnames
      * @param annotations All the annotations present on the member.
      * @return A List of Lists, with each list containing the annotations that must be
      * removed at the same time.
      * @author Adit Rada
      *
      */
-    protected abstract List<List<String>> getMultipleRemoveAnnotations(List<String> annotations);
+    protected abstract List<List<String>> getMultipleRemoveAnnotations(Project project, List<String> annotations);
 }

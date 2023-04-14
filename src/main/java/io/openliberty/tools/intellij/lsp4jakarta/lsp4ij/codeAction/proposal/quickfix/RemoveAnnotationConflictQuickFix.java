@@ -14,10 +14,12 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.DeleteAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -26,7 +28,9 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * QuickFix for removing annotations. Modified from
@@ -116,6 +120,13 @@ public class RemoveAnnotationConflictQuickFix {
 
     protected String[] getAnnotations() {
         return this.annotations;
+    }
+
+    protected List<String> getFQAnnotationNames(Project p, String annotationName) {
+        // Look up short names on the classpath to find FQnames. Multiple classes differ in package names.
+        PsiShortNamesCache cache = PsiShortNamesCache.getInstance(p);
+        PsiClass[] classes = cache.getClassesByName(annotationName, GlobalSearchScope.allScope(p));
+        return Arrays.stream(classes).map(PsiClass::getQualifiedName).collect(Collectors.toList());
     }
 
     private static String getLabel(String[] annotations) {

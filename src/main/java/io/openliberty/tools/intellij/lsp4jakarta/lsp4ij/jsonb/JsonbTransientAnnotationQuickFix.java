@@ -12,6 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
 
+import com.intellij.openapi.project.Project;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMultipleAnnotations;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations {
     @Override
-    protected List<List<String>> getMultipleRemoveAnnotations(List<String> annotations) {
+    protected List<List<String>> getMultipleRemoveAnnotations(Project project, List<String> annotations) {
         List<List<String>> annotationsListsToRemove = new ArrayList<List<String>>();
 
         if (annotations.contains(JsonbConstants.JSONB_TRANSIENT)) {
@@ -42,7 +43,12 @@ public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations 
         // Provide as another option: Remove all other JsonbAnnotations
         annotations.remove(JsonbConstants.JSONB_TRANSIENT);
         if (annotations.size() > 0) {
-            annotationsListsToRemove.add(annotations);
+            // Convert the short annotation names to their fully qualified equivalents.
+            List<String> fqAnnotations = new ArrayList<>();
+            for (String annotation : annotations) {
+                fqAnnotations.addAll(getFQAnnotationNames(project, annotation));
+            }
+            annotationsListsToRemove.add(fqAnnotations);
         }
 
         return annotationsListsToRemove;
