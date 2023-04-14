@@ -11,8 +11,8 @@ package io.openliberty.tools.intellij.it;
 
 import org.junit.jupiter.api.BeforeAll;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
-
 public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
 
     /**
@@ -26,7 +26,7 @@ public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
     public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
-     * Constructor.
+     * Application resoruce URL.
      */
     public GradleSingleModLSTest() {
         super(PROJECT_NAME, PROJECTS_PATH);

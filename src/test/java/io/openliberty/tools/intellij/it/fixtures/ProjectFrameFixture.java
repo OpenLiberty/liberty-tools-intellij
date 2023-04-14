@@ -187,7 +187,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the SETabLabel class.
      *
-     * @param xpathVars The Locator custom variables: text
+     * @param xpathVars The Locator custom variables: text, waitTime(secs)
      * @return The ComponentFixture object associated with the SETabLabel class.
      */
     public ComponentFixture getSETabLabel(String... xpathVars) {
