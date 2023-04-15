@@ -127,29 +127,31 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
 
     private Info doAnnotateStep(Info collectedInfo) {
         Collection<CompletableFuture<?>> futures = new ArrayList<>();
-        for(Map.Entry<LanguageServerWrapper, Collection<ItemInfo>> entry : collectedInfo.itemInfos.entrySet()) {
-            if (supportsCodeAction(entry.getKey())) {
-                for(ItemInfo itemInfo : entry.getValue()) {
-                    Diagnostic diagnostic = (Diagnostic) itemInfo.highlighter.getErrorStripeTooltip();
-                    CodeActionContext context = new CodeActionContext(Collections.singletonList(diagnostic));
-                    CodeActionParams params = new CodeActionParams();
-                    params.setContext(context);
-                    params.setTextDocument(new TextDocumentIdentifier(LSPIJUtils.toUri(collectedInfo.file).toString()));
-                    params.setRange(diagnostic.getRange());
-                    CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> {
-                        return server.getTextDocumentService().codeAction(params);
-                    });
-                    futures.add(codeAction);
-                    codeAction.thenAcceptAsync(actions -> {
-                        itemInfo.actions = actions;}
-                    );
+        if (collectedInfo != null) {
+            for(Map.Entry<LanguageServerWrapper, Collection<ItemInfo>> entry : collectedInfo.itemInfos.entrySet()) {
+                if (supportsCodeAction(entry.getKey())) {
+                    for(ItemInfo itemInfo : entry.getValue()) {
+                        Diagnostic diagnostic = (Diagnostic) itemInfo.highlighter.getErrorStripeTooltip();
+                        CodeActionContext context = new CodeActionContext(Collections.singletonList(diagnostic));
+                        CodeActionParams params = new CodeActionParams();
+                        params.setContext(context);
+                        params.setTextDocument(new TextDocumentIdentifier(LSPIJUtils.toUri(collectedInfo.file).toString()));
+                        params.setRange(diagnostic.getRange());
+                        CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> {
+                            return server.getTextDocumentService().codeAction(params);
+                        });
+                        futures.add(codeAction);
+                        codeAction.thenAcceptAsync(actions -> {
+                            itemInfo.actions = actions;}
+                        );
+                    }
                 }
             }
-        }
-        try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.log(Level.WARNING, e, e::getLocalizedMessage);
+            try {
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                LOGGER.log(Level.WARNING, e, e::getLocalizedMessage);
+            }
         }
         return collectedInfo;
     }
@@ -171,8 +173,10 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
         // doAnnotate
         info = doAnnotateStep(info);
 
-        // apply annotations
-        doApplyStep(file, info, holder);
+        if (info != null) {
+            // apply annotations
+            doApplyStep(file, info, holder);
+        }
     }
 
     private void doApplyStep(@NotNull PsiFile file, Info info, @NotNull AnnotationHolder holder) {
