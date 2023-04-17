@@ -96,7 +96,7 @@ public abstract class SingleModLibertyLSTestCommon {
     }
 
     /**
-     * Tests liberty-ls type ahead support in server.xml for a
+     * Tests Liberty Lemminx Extension type ahead support in server.xml for a
      * Liberty Server Feature
      */
     @Test
@@ -123,7 +123,7 @@ public abstract class SingleModLibertyLSTestCommon {
     }
 
     /**
-     * Tests liberty-ls type ahead support in server.xml for a
+     * Tests Liberty Lemminx Extension type ahead support in server.xml for a
      * Liberty Server Configuration Stanza
      */
     @Test
@@ -168,7 +168,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertEnvCfgInAppCfgFile(remoteRobot, projectName, "server.env", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet);
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "server.env", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet);
             Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
             TestUtils.validateConfigStringInConfigFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
@@ -196,7 +196,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertEnvCfgInAppCfgFile(remoteRobot, projectName, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, configValueSnippet);
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, configValueSnippet);
             Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
             TestUtils.validateConfigStringInConfigFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
@@ -231,7 +231,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Video
     public void testBootstrapPropsCfgHover() {
 
-        String testHoverTarget = "logging.console";
+        String testHoverTarget = "log.level";
         String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
 
         //mover cursor to hover point
@@ -265,10 +265,10 @@ public abstract class SingleModLibertyLSTestCommon {
         // open server.xml file
         UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.xml");
 
-        // open (or create if need be) server.env file
+        // open server.env file
         UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.env");
 
-        // open (or create if need be) bootstrap.properties file
+        // open bootstrap.properties file
         UIBotTestUtils.openConfigFile(remoteRobot, projectName, "bootstrap.properties");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.

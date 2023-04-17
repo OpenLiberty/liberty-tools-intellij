@@ -279,9 +279,9 @@ public class TestUtils {
         }
     }
 
-    public static void validateConfigStringInConfigFile(String pathToConfigFile, String expectedServerEnvString) {
+    public static void validateConfigStringInConfigFile(String pathToConfigFile, String expectedConfigString) {
         try {
-            Assertions.assertTrue(isTextInFile(pathToConfigFile, expectedServerEnvString));
+            Assertions.assertTrue(isTextInFile(pathToConfigFile, expectedConfigString));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

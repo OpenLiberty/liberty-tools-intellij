@@ -502,30 +502,6 @@ public class UIBotTestUtils {
 
     }
 
-    /**
-     * Opens a server.xml file for a given app
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     */
-    /*
-    public static void openServerXMLFile(RemoteRobot remoteRobot, String appName, String fileName) {
-        // Click on File on the Menu bar.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-
-        // hide the terminal window for now
-        UIBotTestUtils.hideTerminalWindow(remoteRobot);
-
-        // get a JTreeFixture reference to the file project viewer entry
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(appName);
-        if (!projTree.hasText(fileName)) {
-            projTree.expand(appName, "src", "main", "liberty", "config");
-            projTree.findText(fileName).doubleClick();
-        } else {
-            projTree.findText("fileName").doubleClick();
-        }
-    }
-*/
-
     public static void hideTerminalWindow(RemoteRobot remoteRobot) {
         try {
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
@@ -602,7 +578,7 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Closes a source file that is open in the editor pane
+     * Click on a editor file tab for a file that is open in the editor pane to gain focus to that file
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param fileName The string file name
@@ -617,7 +593,7 @@ public class UIBotTestUtils {
             actionButton.click();
 
         } catch (WaitForConditionTimeoutException e) {
-            // server.xml not open, nothing to do
+            // file not open, nothing to do
         }
     }
 
@@ -640,19 +616,19 @@ public class UIBotTestUtils {
         for (int i = 0; i < 3; i++) {
             error = null;
             try {
-                // Click on editor pane to regain focus.
-                editorNew.click();
+                // move the cursor to the origin of the editor
+                goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
                 // Find the target text on the editor and move the move to it.
-        editorNew.findText(contains(hoverTarget)).moveMouse();
-        // clear and "lightbulb" icons?
-        keyboard.hotKey(VK_ESCAPE);
+                editorNew.findText(contains(hoverTarget)).moveMouse();
+                // clear and "lightbulb" icons?
+                keyboard.hotKey(VK_ESCAPE);
 
-        // jitter the cursor
-        Point p = editorNew.findText(contains(hoverTarget)).getPoint();
+                // jitter the cursor
+                Point p = editorNew.findText(contains(hoverTarget)).getPoint();
 
-        // provoke the hint popup with a cursor jitter
-        jitterCursor(editorNew, p.x, p.y);
+                // provoke the hint popup with a cursor jitter
+                jitterCursor(editorNew, p.x, p.y);
 
                 // first get the contents of the popup - put in a String
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -694,7 +670,7 @@ public class UIBotTestUtils {
         editor.runJs(String.format(jitterScript, pointX, pointY));
     }
 
-    public static void insertEnvCfgInAppCfgFile(RemoteRobot remoteRobot, String projectName, String fileName, String envCfgNameSnippet, String envCfgNameChooserSnippet, String envCfgValueSnippet) {
+    public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String projectName, String fileName, String envCfgNameSnippet, String envCfgNameChooserSnippet, String envCfgValueSnippet) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
@@ -703,9 +679,9 @@ public class UIBotTestUtils {
         Keyboard keyboard = new Keyboard(remoteRobot);
         // find the location in the file to begin the stanza insertion
         // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
-        keyboard.hotKey(VK_END);
+        goToLineAndColumn(remoteRobot, keyboard, 1,1);
         keyboard.enter();
+        goToLineAndColumn(remoteRobot, keyboard, 1,1);
 
         keyboard.enterText(envCfgNameSnippet);
 
