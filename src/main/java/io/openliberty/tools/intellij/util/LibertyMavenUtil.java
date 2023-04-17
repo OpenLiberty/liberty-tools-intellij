@@ -48,7 +48,7 @@ public class LibertyMavenUtil {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getCanonicalPath());
+        File inputFile = new File(file.getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();
@@ -82,7 +82,7 @@ public class LibertyMavenUtil {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getVirtualFile().getCanonicalPath());
+        File inputFile = new File(file.getVirtualFile().getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();

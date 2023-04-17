@@ -240,7 +240,7 @@ public class LanguageServersRegistry {
                     LanguageServerDefinition lsDef = mapping.getValue();
                     if (!lsDef.languageFilePatternMappings.isEmpty() && lsDef.languageFilePatternMappings.containsKey(language)) {
                         // check if document matches file pattern
-                        Path path = Paths.get(file.getCanonicalPath());
+                        Path path = Paths.get(file.getPath());
                         final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + lsDef.languageFilePatternMappings.get(language));
                         if (matcher.matches(path)) {
                             LOGGER.trace("Available language server: " + mapping.getValue().id + " for file: " + file);

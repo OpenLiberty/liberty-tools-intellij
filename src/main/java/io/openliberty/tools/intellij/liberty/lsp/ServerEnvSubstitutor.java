@@ -39,7 +39,7 @@ public class ServerEnvSubstitutor extends LanguageSubstitutor {
     @Override
     public @Nullable Language getLanguage(@NotNull VirtualFile file, @NotNull Project project) {
         if (isLibertyServerEnvFile(file)) {
-            LOGGER.trace("Substituting Properties language for Liberty server.env file: " + file.getCanonicalPath());
+            LOGGER.trace("Substituting Properties language for Liberty server.env file: " + file.getPath());
             // treat Liberty server.env files as Properties files
             return PropertiesLanguage.INSTANCE;
         }
@@ -47,7 +47,7 @@ public class ServerEnvSubstitutor extends LanguageSubstitutor {
     }
 
     private boolean isLibertyServerEnvFile(VirtualFile file) {
-        Path path = Paths.get(file.getCanonicalPath());
+        Path path = Paths.get(file.getPath());
         final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + SERVER_ENV_GLOB_PATTERN);
         return matcher.matches(path);
     }

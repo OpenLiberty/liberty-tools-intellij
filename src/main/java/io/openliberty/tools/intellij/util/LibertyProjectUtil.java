@@ -64,7 +64,7 @@ public class LibertyProjectUtil {
     }
 
     public static void addCustomLibertyProject(LibertyModule libertyModule) {
-        final String path = libertyModule.getBuildFile().getCanonicalPath();
+        final String path = libertyModule.getBuildFile().getPath();
         if (path != null) {
             final LibertyProjectSettings state = LibertyProjectSettings.getInstance(libertyModule.getProject());
             state.getCustomLibertyProjects().add(path);
@@ -74,13 +74,13 @@ public class LibertyProjectUtil {
 
     public static void removeCustomLibertyProject(LibertyModule libertyModule) {
         final LibertyProjectSettings state = LibertyProjectSettings.getInstance(libertyModule.getProject());
-        state.getCustomLibertyProjects().remove(libertyModule.getBuildFile().getCanonicalPath());
+        state.getCustomLibertyProjects().remove(libertyModule.getBuildFile().getPath());
         LibertyModules.getInstance().removeLibertyModule(libertyModule);
     }
 
     public static boolean isCustomLibertyProject(Project project, PsiFile buildFile) {
         final LibertyProjectSettings state = LibertyProjectSettings.getInstance(project);
-        return state.getCustomLibertyProjects().contains(buildFile.getVirtualFile().getCanonicalPath());
+        return state.getCustomLibertyProjects().contains(buildFile.getVirtualFile().getPath());
     }
 
     /**
@@ -196,7 +196,7 @@ public class LibertyProjectUtil {
      * @return <code>true</code> if the project contains src/main/liberty/config/server.xml relative to the build file; <code>false</code> otherwise
      */
     private static boolean isLibertyProject(PsiFile buildFile) {
-        String rootDir = buildFile.getVirtualFile().getParent().getCanonicalPath();
+        String rootDir = buildFile.getVirtualFile().getParent().getPath();
         return new File(rootDir, "src/main/liberty/config/server.xml").exists();
     }
 

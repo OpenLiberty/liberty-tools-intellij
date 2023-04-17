@@ -40,7 +40,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
     protected void executeLibertyAction() {
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
-        File failsafeReportFile = Paths.get(parentFile.getCanonicalPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();
+        File failsafeReportFile = Paths.get(parentFile.getPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();
         VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
 
 
