@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Red Hat, Inc.
+ * Copyright (c) 2022, 2023 Red Hat, Inc., IBM Corporation
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -7,6 +7,7 @@
  *
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
+ * IBM Corporation - changes to ensure information used is not out-of-date
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions;
 
@@ -52,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnotator.Info, LSPCodeActionAnnotator.Info> {
     private static final Logger LOGGER = Logger.getLogger(LSPCodeActionAnnotator.class.getName());
@@ -74,15 +74,15 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
 
     @Override
     public @Nullable Info collectInformation(@NotNull PsiFile file) {
-        return doCollectInformation(file, null);
+        return new Info();
     }
 
     @Override
     public @Nullable Info collectInformation(@NotNull PsiFile file, @NotNull Editor editor, boolean hasErrors) {
-        return doCollectInformation(file, editor);
+        return new Info();
     }
 
-    protected Info doCollectInformation(PsiFile file, Editor editor) {
+    protected Info doCollectInformationStep(PsiFile file, Editor editor) {
         Info info = null;
         VirtualFile virtualFile = file.getVirtualFile();
         if (virtualFile != null) {
@@ -122,6 +122,10 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
 
     @Override
     public @Nullable Info doAnnotate(Info collectedInfo) {
+        return collectedInfo;
+    }
+
+    private Info doAnnotateStep(Info collectedInfo) {
         Collection<CompletableFuture<?>> futures = new ArrayList<>();
         for(Map.Entry<LanguageServerWrapper, Collection<ItemInfo>> entry : collectedInfo.itemInfos.entrySet()) {
             if (supportsCodeAction(entry.getKey())) {
@@ -132,9 +136,13 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
                     params.setContext(context);
                     params.setTextDocument(new TextDocumentIdentifier(LSPIJUtils.toUri(collectedInfo.file).toString()));
                     params.setRange(diagnostic.getRange());
-                    CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> server.getTextDocumentService().codeAction(params));
+                    CompletableFuture<List<Either<Command, CodeAction>>> codeAction = entry.getKey().getInitializedServer().thenComposeAsync(server -> {
+                        return server.getTextDocumentService().codeAction(params);
+                    });
                     futures.add(codeAction);
-                    codeAction.thenAcceptAsync(actions -> itemInfo.actions = actions);
+                    codeAction.thenAcceptAsync(actions -> {
+                        itemInfo.actions = actions;}
+                    );
                 }
             }
         }
@@ -155,10 +163,23 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
 
     @Override
     public void apply(@NotNull PsiFile file, Info annotationResult, @NotNull AnnotationHolder holder) {
-        for(Map.Entry<LanguageServerWrapper, Collection<ItemInfo>> entry : annotationResult.itemInfos.entrySet()) {
+        VirtualFile virtualFile = file.getVirtualFile();
+        Editor editor = LSPIJUtils.editorForFile(virtualFile);
+        // collectInformation
+        Info info = doCollectInformationStep(file, editor);
+
+        // doAnnotate
+        info = doAnnotateStep(info);
+
+        // apply annotations
+        doApplyStep(file, info, holder);
+    }
+
+    private void doApplyStep(@NotNull PsiFile file, Info info, @NotNull AnnotationHolder holder) {
+        for(Map.Entry<LanguageServerWrapper, Collection<ItemInfo>> entry : info.itemInfos.entrySet()) {
             for(ItemInfo itemInfo : entry.getValue()) {
                 Diagnostic diagnostic = (Diagnostic) itemInfo.highlighter.getErrorStripeTooltip();
-                AnnotationBuilder builder = holder.newAnnotation(getHighlighType(diagnostic.getSeverity()),
+                AnnotationBuilder builder = holder.newAnnotation(getHighlightType(diagnostic.getSeverity()),
                         diagnostic.getMessage()).range(itemInfo.element).tooltip(diagnostic.getMessage());
                 if (itemInfo.actions != null) {
                     for(Either<Command, CodeAction> action : itemInfo.actions) {
@@ -170,7 +191,11 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
         }
     }
 
-    private HighlightSeverity getHighlighType(DiagnosticSeverity severity) {
+    private HighlightSeverity getHighlightType(DiagnosticSeverity severity) {
+        if (severity == null) {
+            // if not set, default to Error
+            return HighlightSeverity.ERROR;
+        }
         switch (severity) {
             case Error:
                 return HighlightSeverity.ERROR;

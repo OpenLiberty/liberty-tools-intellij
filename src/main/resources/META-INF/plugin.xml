@@ -51,33 +51,18 @@
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.properties.MicroProfileRegisterRestClientProvider"/>
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-context-propagation-metadata.json" type="org.eclipse.microprofile.context.ThreadContext"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.lra.properties.MicroProfileLRAProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-lra-metadata.json" type="org.eclipse.microprofile.lra.annotation.ws.rs.LRA"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.properties.MicroProfileMetricsProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-metrics-metadata.json" type="org.eclipse.microprofile.metrics.MetricID"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.properties.MicroProfileOpenAPIProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-openapi-metadata.json" type="org.eclipse.microprofile.openapi.OASConfig"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.opentracing.properties.MicroProfileOpenTracingProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-opentracing-metadata.json" type="org.eclipse.microprofile.opentracing.Traced"/>
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.properties.MicroProfileGraphQLProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-graphql-metadata.json" type="org.eclipse.microprofile.graphql.Name"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.properties.MicroProfileHealthProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-health-metadata.json" type="org.eclipse.microprofile.health.Liveness"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jwt.properties.MicroProfileJWTProvider"/>
         <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json" type="org.eclipse.microprofile.jwt.Claim"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jul.properties.JULPropertyProvider"/>
         <staticPropertyProvider resource="/static-properties/jul-metadata.json"/>
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.lra.properties.MicroProfileLRAProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.properties.MicroProfileMetricsProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.properties.MicroProfileOpenAPIProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.opentracing.properties.MicroProfileOpenTracingProvider"/>
         <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.properties.MicroProfileGraphQLProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.properties.MicroProfileHealthProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jwt.properties.MicroProfileJWTProvider"/>
 
         <javaHoverParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
 

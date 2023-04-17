@@ -215,12 +215,18 @@ public class LSPIJUtils {
         for(TextEdit edit : edits) {
             if (edit.getRange() != null) {
                 String text = edit.getNewText();
+                // compute start and end char offsets of the new Edit text
                 int start = toOffset(edit.getRange().getStart(), document);
-                int end = toOffset(edit.getRange().getEnd(), document);
+                int end;
+                try {
+                    end = toOffset(edit.getRange().getEnd(), document); // get endoffset of new edit from current document, out of bounds if new text doc has more lines
+                } catch (IndexOutOfBoundsException e) { // likely trying to get end of document
+                    end = -1;
+                }
                 if (StringUtils.isEmpty(text)) {
                     document.deleteString(start, end);
                 } else {
-                    text = text.replaceAll("\r", "");
+                    text = text.replaceAll("\r", ""); // removes carriage return
                     if (end >= 0) {
                         if (end - start <= 0) {
                             document.insertString(start, text);

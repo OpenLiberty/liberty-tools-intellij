@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class StaticPropertyProviderExtensionPointBean extends BaseKeyedLazyInstance<StaticPropertyProvider> {
     public static final ExtensionPointName<StaticPropertyProviderExtensionPointBean> EP_NAME =
-            ExtensionPointName.create("io.openliberty.tools.intellij.quarkus.staticPropertyProvider");
+            ExtensionPointName.create("open-liberty.intellij.staticPropertyProvider");
 
     @Attribute("resource")
     public String resource;
