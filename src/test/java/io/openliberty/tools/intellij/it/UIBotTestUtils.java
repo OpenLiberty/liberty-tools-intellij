@@ -950,6 +950,35 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Opens the quickfix menu popup and chooses the
+     * approriate fix according to the quickfix substring
+     *
+     * @param remoteRobot the remote robot instance
+     * @param quickfixChooserString the text to find in the quick fix menu
+     */
+    public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
+
+        // first trigger the quickfix popup by using the keyboard
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        keyboard.hotKey(VK_ALT, VK_ENTER);
+
+        // get the text from the quickfix popup
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ContainerFixture popup = projectFrame.getQuickFixPane();
+
+        popup.findText(contains(quickfixChooserString)).click();
+
+        // Save the file.
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+
+    }
+
+    /**
      * Copies the contents from the currently active window.
      *
      * @param remoteRobot The RemoteRobot instance.
