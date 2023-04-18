@@ -168,11 +168,13 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
         // collectInformation
         Info info = doCollectInformationStep(file, editor);
 
-        // doAnnotate
-        info = doAnnotateStep(info);
+        if (info != null) {
+            // doAnnotate
+            info = doAnnotateStep(info);
 
-        // apply annotations
-        doApplyStep(file, info, holder);
+            // apply annotations
+            doApplyStep(file, info, holder);
+        }
     }
 
     private void doApplyStep(@NotNull PsiFile file, Info info, @NotNull AnnotationHolder holder) {
