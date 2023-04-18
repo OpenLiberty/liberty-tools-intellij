@@ -15,7 +15,6 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
 import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -92,7 +91,7 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
                 ArrayList<String> attributesToAdd = new ArrayList<>();
                 attributesToAdd.add(attribute);
                 String name = getLabel(annotation, attribute, "Add");
-                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
+                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, annotationNode,  0, annotation, attributesToAdd);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
@@ -118,7 +117,7 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
                 ArrayList<String> attributesToRemove = new ArrayList<>();
                 attributesToRemove.add(attribute);
                 String name = getLabel(annotation, attribute, "Remove");
-                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
+                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
