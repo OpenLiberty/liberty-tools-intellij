@@ -70,8 +70,8 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml");
-        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml", UIBotTestUtils.PopupType.DOCUMENTATION);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
         TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
@@ -88,8 +88,8 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "Configuration properties for an HTTP endpoint.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml");
-        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml", UIBotTestUtils.PopupType.DOCUMENTATION);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
         TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
@@ -113,7 +113,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         // Insert a new element in server.xml.
         try {
-            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE);
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE, true);
             Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
             TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
         } finally {
@@ -140,7 +140,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         // Insert a new element in server.xml.
         try {
-            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT);
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, true);
             Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
             TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
         } finally {
@@ -216,8 +216,8 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.env");
-        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.env", UIBotTestUtils.PopupType.DOCUMENTATION);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
         TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
@@ -235,11 +235,49 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "bootstrap.properties");
-        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "bootstrap.properties", UIBotTestUtils.PopupType.DOCUMENTATION);
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
         TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
+    }
+
+    /**
+     * Tests liberty-ls support in server.xml for
+     * diagnostic and quickfix
+     */
+    @Test
+    @Video
+    public void testDiagnosticAndQuickFixInServerXML() {
+        String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
+        String correctedStanza = "<mpMetrics authentication=\"true\" />";
+        String quickfixChooserString = "true";
+        String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
+
+        Path pathToServerXML = null;
+        pathToServerXML = Paths.get(projectsPath, projectName,"src", "main", "liberty", "config", "server.xml");
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet,20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
+
+            //move cursor to hover point
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "wrong", "server.xml", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+            TestUtils.validateHoverData(expectedHoverData, foundHoverData);
+            UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
+            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), correctedStanza);
+
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
     }
 
     /**

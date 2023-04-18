@@ -247,6 +247,24 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
+     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     *
+     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     */
+    public ContainerFixture getDiagnosticPane() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(20));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     *
+     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     */
+    public ContainerFixture getQuickFixPane() {
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JBViewport'][.//div[@class='MyList']]"), Duration.ofSeconds(20));
+    }
+
+    /**
      * Returns the ContainerFixture object associated with the JBTextArea class.
      *
      * @param xpathVars The Locator custom variables: waitTime(seconds)

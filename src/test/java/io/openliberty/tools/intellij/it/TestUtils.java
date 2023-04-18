@@ -283,6 +283,12 @@ public class TestUtils {
         }
     }
 
+    /**
+     * Validates the expected server.xml stanza entry is found
+     *
+     * @param pathToServerXml The path to the server.xml file to be examined
+     * @param insertedStanza the full stanza that is to be found
+     */
     public static void validateStanzaInServerXML(String pathToServerXml, String insertedStanza) {
 
         try {
@@ -292,7 +298,13 @@ public class TestUtils {
         }
     }
 
-    public static void validateConfigStringInConfigFile(String pathToConfigFile, String expectedConfigString) {
+    /**
+     * Validates the expected configuration name vale pair entry is found in config file
+     *
+     * @param pathToConfigFile The path to the config file to be examined
+     * @param expectedConfigString the full setting string that is to be found
+     */
+        public static void validateConfigStringInConfigFile(String pathToConfigFile, String expectedConfigString) {
         try {
             Assertions.assertTrue(isTextInFile(pathToConfigFile, expectedConfigString));
         } catch (IOException e) {
