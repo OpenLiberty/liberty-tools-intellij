@@ -217,12 +217,7 @@ public class LSPIJUtils {
                 String text = edit.getNewText();
                 // compute start and end char offsets of the new Edit text
                 int start = toOffset(edit.getRange().getStart(), document);
-                int end;
-                try {
-                    end = toOffset(edit.getRange().getEnd(), document); // get endoffset of new edit from current document, out of bounds if new text doc has more lines
-                } catch (IndexOutOfBoundsException e) { // likely trying to get end of document
-                    end = -1;
-                }
+                int end = toOffset(edit.getRange().getEnd(), document); // get endoffset of new edit from current document, out of bounds if new text doc has more lines
                 if (StringUtils.isEmpty(text)) {
                     document.deleteString(start, end);
                 } else {
