@@ -222,7 +222,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     public ComponentFixture getInplaceButton(String... xpathVars) {
         String name = xpathVars[0];
         String waitTime = xpathVars[1];
-        Locator locator = byXpath("//div[@accessiblename='" + name + "' and @class='SingleHeightLabel']//div[@class='InplaceButton']");
+        Locator locator = byXpath("//div[@accessiblename='" + name + "' and @class='EditorTabLabel']//div[@class='InplaceButton']");
         return find(ComponentFixture.class, locator, Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
