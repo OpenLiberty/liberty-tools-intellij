@@ -30,6 +30,7 @@ import java.util.Arrays;
  *
  */
 public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
+    private final PsiFile fSourceCU;
     private final PsiFile fInvocationNode;
     private final PsiElement fBinding;
 
@@ -40,7 +41,7 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
      * Constructor for DeleteAnnotationProposal
      *
      * @param label          - annotation label
-     * @param targetCU       - the entire Java compilation unit
+     * @param sourceCU       - the entire Java compilation unit
      * @param invocationNode
      * @param binding
      * @param relevance
@@ -48,9 +49,10 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
      * @param annotations
      *
      */
-    public DeleteAnnotationProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public DeleteAnnotationProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                     PsiElement binding, int relevance, PsiElement declaringNode, String... annotations) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.fSourceCU = sourceCU;
         this.fInvocationNode = invocationNode;
         this.fBinding = binding;
         this.declaringNode = declaringNode;
@@ -70,6 +72,6 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
             }
         }
         final Document document = fInvocationNode.getViewProvider().getDocument();
-        return new Change(document, document);
+        return new Change(fSourceCU.getViewProvider().getDocument(), document);
     }
 }

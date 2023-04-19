@@ -588,7 +588,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         try {
-            String xPath = "//div[@accessiblename='" + fileName + "' and @class='SingleHeightLabel']";
+            String xPath = "//div[@accessiblename='" + fileName + "' and @class='SimpleColoredComponent']";
             ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
             actionButton.click();
 

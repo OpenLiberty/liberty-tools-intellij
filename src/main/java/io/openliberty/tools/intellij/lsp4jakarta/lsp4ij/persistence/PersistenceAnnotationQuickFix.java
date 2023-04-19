@@ -66,7 +66,7 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
         CodeAction codeAction = null;
 
         for (PsiAnnotation annotationNode : annotationNodes) {
-            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getCompilationUnit(),
+            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), binding, annotationNode, 0, attributes, annotations);
 
             // Convert the proposal to LSP4J CodeAction

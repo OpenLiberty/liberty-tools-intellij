@@ -43,7 +43,7 @@ public class ServerEnvFileType extends LanguageFileType implements FileTypeIdent
 
     @Override
     public boolean isMyFileType(@NotNull VirtualFile file) {
-        Path path = Paths.get(file.getCanonicalPath());
+        Path path = Paths.get(file.getPath());
         final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + SERVER_ENV_GLOB_PATTERN);
         return matcher.matches(path);
     }

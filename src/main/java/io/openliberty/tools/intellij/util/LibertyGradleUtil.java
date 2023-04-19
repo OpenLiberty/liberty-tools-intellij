@@ -38,7 +38,7 @@ public class LibertyGradleUtil {
      */
     public static String getProjectName(VirtualFile file) {
         VirtualFile parentFolder = file.getParent();
-        Path settingsPath = Paths.get(parentFolder.getCanonicalPath(), "settings.gradle");
+        Path settingsPath = Paths.get(parentFolder.getPath(), "settings.gradle");
         File settingsFile = settingsPath.toFile();
         if (settingsFile.exists()) {
             try {
@@ -91,7 +91,7 @@ public class LibertyGradleUtil {
      * @throws IOException
      */
     public static BuildFile validBuildGradle(PsiFile file) throws IOException {
-            String buildFile = fileToString(file.getVirtualFile().getCanonicalPath());
+            String buildFile = fileToString(file.getVirtualFile().getPath());
             if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
 
             // check if "apply plugin: 'liberty'" is specified in the build.gradle
