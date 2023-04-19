@@ -279,6 +279,14 @@ public class TestUtils {
         }
     }
 
+    public static void validateConfigStringInConfigFile(String pathToConfigFile, String expectedConfigString) {
+        try {
+            Assertions.assertTrue(isTextInFile(pathToConfigFile, expectedConfigString));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Prints the Liberty server's messages.log identified by the input path.
      *

@@ -52,6 +52,8 @@ public abstract class SingleModLibertyLSTestCommon {
     @AfterAll
     public static void cleanup() {
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.env", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "bootstrap.properties", "5");
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
@@ -68,7 +70,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerXML(remoteRobot, testHoverTarget);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml");
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
 
         // Validate that the hover action raised the expected hint text
@@ -86,7 +88,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "Configuration properties for an HTTP endpoint.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerXML(remoteRobot, testHoverTarget);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml");
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
 
         // Validate that the hover action raised the expected hint text
@@ -103,6 +105,9 @@ public abstract class SingleModLibertyLSTestCommon {
         String stanzaSnippet = "el-3";
         String insertedFeature = "<feature>el-3.0</feature>";
 
+        // get focus on server.xml tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
+
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
@@ -115,8 +120,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
-
     }
 
     /**
@@ -128,6 +131,9 @@ public abstract class SingleModLibertyLSTestCommon {
     public void testInsertLibertyConfigElementIntoServerXML() {
         String stanzaSnippet = "use";
         String insertedConfig = "<userInfo></userInfo>";
+
+        // get focus on server.xml tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -141,6 +147,99 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
+    }
+
+    /**
+     * Tests liberty-ls type ahead support in server.env for a
+     * Liberty Server Configuration Stanza
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoServerEnv() {
+        String envCfgSnippet = "WLP_LOGGING_CON";
+        String envCfgNameChooserSnippet = "FORMAT";
+        String envCfgValueSnippet = "SIM";
+        String expectedServerEnvString = "WLP_LOGGING_CONSOLE_FORMAT=SIMPLE";
+
+        // get focus on server.env tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Save the current server.env content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "server.env", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet);
+            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
+            TestUtils.validateConfigStringInConfigFile(pathToServerEnv.toString(), expectedServerEnvString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests liberty-ls type ahead support in bootstrap.properties for a
+     * Liberty Server Configuration booststrap.properties entry
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoBootstrapProps() {
+        String configNameSnippet = "com.ibm.ws.logging.con";
+        String configNameChooserSnippet = "format";
+        String configValueSnippet = "TBA";
+        String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, configValueSnippet);
+            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
+            TestUtils.validateConfigStringInConfigFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests liberty-ls Hover support in server.env for a
+     * Liberty Server Config setting
+     */
+    @Test
+    @Video
+    public void testServerEnvCfgHover() {
+        String testHoverTarget = "LOGLEVEL";
+        String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
+
+        //mover cursor to hover point
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.env");
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+
+        // Validate that the hover action raised the expected hint text
+        TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
+    }
+
+    /**
+     * Tests liberty-ls Hover support in bootstrap.properties for a
+     * Liberty Server properties setting
+     */
+    @Test
+    @Video
+    public void testBootstrapPropsCfgHover() {
+
+        String testHoverTarget = "log.level";
+        String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
+
+        //mover cursor to hover point
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "bootstrap.properties");
+        String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot);
+
+        // Validate that the hover action raised the expected hint text
+        TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
     }
 
     /**
@@ -164,7 +263,13 @@ public abstract class SingleModLibertyLSTestCommon {
         projTree.expand(projectName, "src", "main", "liberty", "config");
 
         // open server.xml file
-        UIBotTestUtils.openServerXMLFile(remoteRobot, projectName);
+        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.xml");
+
+        // open server.env file
+        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.env");
+
+        // open bootstrap.properties file
+        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "bootstrap.properties");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
