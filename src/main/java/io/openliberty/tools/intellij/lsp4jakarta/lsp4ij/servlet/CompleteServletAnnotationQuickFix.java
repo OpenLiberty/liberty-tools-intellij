@@ -92,7 +92,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
                 ArrayList<String> attributesToAdd = new ArrayList<>();
                 attributesToAdd.add(attribute);
                 String name = getLabel(annotation, attribute, "Add");
-                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
+                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, annotationNode, 0, annotation, attributesToAdd);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
@@ -120,7 +120,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
                 ArrayList<String> attributesToRemove = new ArrayList<>();
                 attributesToRemove.add(attribute);
                 String name = getLabel(annotation, attribute, "Remove");
-                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getCompilationUnit(),
+                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);

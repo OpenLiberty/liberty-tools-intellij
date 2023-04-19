@@ -377,7 +377,7 @@ public class LanguageServiceAccessor {
                         boolean patternMappingsEmpty = serverDefinition.languageFilePatternMappings.isEmpty();
                         if (!patternMappingsEmpty && serverDefinition.languageFilePatternMappings.containsKey(contentType)) {
                             // check if document matches file pattern
-                            Path filePath = Paths.get(file.getCanonicalPath());
+                            Path filePath = Paths.get(file.getPath());
                             final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + serverDefinition.languageFilePatternMappings.get(contentType));
                             if (matcher.matches(filePath)) {
                                 // only start language server if the language and file pattern matches the language server definition

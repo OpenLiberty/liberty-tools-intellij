@@ -1,7 +1,8 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.13.1'
+    id 'org.jetbrains.intellij' version '1.13.3'
     id 'org.jetbrains.kotlin.jvm' version '1.7.22'
+>>>>>>> origin/main
 }
 
 group 'io.openliberty.tools'
@@ -106,8 +107,7 @@ runIde {
 }
 
 intellij {
-    version = '2022.3'
-    //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    version = '2023.1' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
 }

@@ -101,7 +101,7 @@ public class RemoveAnnotationConflictQuickFix {
         // API
         String name = getLabel(annotations);
         PsiElement declaringNode = getBinding(context.getCoveredNode());
-        ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getCompilationUnit(),
+        ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, declaringNode, annotations);
         // Convert the proposal to LSP4J CodeAction
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);

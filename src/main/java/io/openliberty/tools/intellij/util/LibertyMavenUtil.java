@@ -48,7 +48,7 @@ public class LibertyMavenUtil {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getCanonicalPath());
+        File inputFile = new File(file.getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();
@@ -82,7 +82,7 @@ public class LibertyMavenUtil {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getVirtualFile().getCanonicalPath());
+        File inputFile = new File(file.getVirtualFile().getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();
@@ -244,7 +244,7 @@ public class LibertyMavenUtil {
      * @throws LibertyException
      */
     private static String getCustomMavenPath(Project project, String customMavenHome) throws LibertyException {
-        File mavenHomeFile = MavenServerManager.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
+        File mavenHomeFile = MavenUtil.resolveMavenHomeDirectory(customMavenHome); // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
             throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);

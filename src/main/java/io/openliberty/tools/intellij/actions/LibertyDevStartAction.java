@@ -68,7 +68,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
-        String cdToProjectCmd = "cd \"" + buildFile.getParent().getCanonicalPath() + "\"";
+        String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
         LibertyActionUtil.executeCommand(widget, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {

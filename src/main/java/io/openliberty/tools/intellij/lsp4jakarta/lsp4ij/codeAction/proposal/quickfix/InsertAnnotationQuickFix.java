@@ -90,7 +90,7 @@ public class InsertAnnotationQuickFix {
     private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, PsiModifierListOwner binding,
                               PsiAnnotation annotation, List<CodeAction> codeActions, String name, String... attributes) {
         String label = getLabel(name, attributes);
-        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getCompilationUnit(),
+        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), binding, annotation, 0, name, Arrays.asList(attributes));
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
 
@@ -105,11 +105,6 @@ public class InsertAnnotationQuickFix {
         if (element != null) {
             return element;
         }
-        // TODO: FOLLOWING ONE CHECK
-        // handle annotation insertions for a variable declaration
-//        if (node.getParent() instanceof VariableDeclarationFragment) {
-//            return ((PsiElement) node.getParent());
-//        }
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 

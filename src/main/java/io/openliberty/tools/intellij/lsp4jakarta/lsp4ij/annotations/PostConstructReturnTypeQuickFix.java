@@ -38,7 +38,7 @@ public class PostConstructReturnTypeQuickFix {
         PsiElement node = context.getCoveredNode();
         PsiMethod parentType = getBinding(node);
         String name = "Change return type to void";
-        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(name, context.getCompilationUnit(),
+        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
         codeActions.add(codeAction);

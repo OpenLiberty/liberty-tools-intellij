@@ -30,6 +30,7 @@ import org.eclipse.lsp4j.CodeActionKind;
  */
 public class ModifyReturnTypeProposal extends ChangeCorrectionProposal {
 
+    private final PsiFile sourceCU;
     private final PsiFile invocationNode;
     private final PsiElement binding;
     private final PsiType newReturnType;
@@ -39,9 +40,10 @@ public class ModifyReturnTypeProposal extends ChangeCorrectionProposal {
      *
      * @param newReturnType the new return type to change to
      */
-    public ModifyReturnTypeProposal(String label, PsiFile targetCU, PsiFile invocationNode,
+    public ModifyReturnTypeProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                     PsiElement binding, int relevance, PsiType newReturnType) {
         super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
         this.invocationNode = invocationNode;
         this.binding = binding;
         this.newReturnType = newReturnType;
@@ -60,6 +62,6 @@ public class ModifyReturnTypeProposal extends ChangeCorrectionProposal {
             }
         }
         final Document changed = invocationNode.getViewProvider().getDocument();
-        return new Change(changed, changed);
+        return new Change(sourceCU.getViewProvider().getDocument(), changed);
     }
 }

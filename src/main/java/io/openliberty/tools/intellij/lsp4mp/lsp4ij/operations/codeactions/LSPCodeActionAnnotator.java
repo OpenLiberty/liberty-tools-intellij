@@ -92,6 +92,9 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
             if (editor != null) {
                 info = new Info();
                 info.file = virtualFile;
+                // initializes language servers and connects them to the given document if they haven't already started, do not wait for them to start (avoiding blocking the main thread)
+                LanguageServiceAccessor.getInstance(file.getProject()).getLanguageServers(editor.getDocument(), capabilities -> true);
+                // get the started language servers and check if there are any valid markers (diagnostics) to create problemDescriptors for
                 try {
                     for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getInstance(file.getProject()).getLSWrappers(virtualFile, capabilities -> true)) {
                         RangeHighlighter[] highlighters = LSPDiagnosticsToMarkers.getMarkers(editor, wrapper.serverDefinition.id);
@@ -168,11 +171,13 @@ public class LSPCodeActionAnnotator extends ExternalAnnotator<LSPCodeActionAnnot
         // collectInformation
         Info info = doCollectInformationStep(file, editor);
 
-        // doAnnotate
-        info = doAnnotateStep(info);
+        if (info != null) {
+            // doAnnotate
+            info = doAnnotateStep(info);
 
-        // apply annotations
-        doApplyStep(file, info, holder);
+            // apply annotations
+            doApplyStep(file, info, holder);
+        }
     }
 
     private void doApplyStep(@NotNull PsiFile file, Info info, @NotNull AnnotationHolder holder) {

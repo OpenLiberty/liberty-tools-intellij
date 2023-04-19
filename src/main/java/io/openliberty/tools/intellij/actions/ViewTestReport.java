@@ -72,7 +72,7 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         if (testReportFile == null || !testReportFile.exists()) {
             // if does not exist look in default location: "build", "reports", "tests", "test", "index.html"
-            testReportFile = Paths.get(parentFile.getCanonicalPath(), "build", "reports", "tests", "test", "index.html").normalize().toAbsolutePath().toFile();
+            testReportFile = Paths.get(parentFile.getPath(), "build", "reports", "tests", "test", "index.html").normalize().toAbsolutePath().toFile();
         }
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
@@ -94,7 +94,7 @@ public class ViewTestReport extends LibertyGeneralAction {
     }
 
     private String getTestReportDestination(VirtualFile file) throws IOException {
-        String buildFile = LibertyGradleUtil.fileToString(file.getCanonicalPath());
+        String buildFile = LibertyGradleUtil.fileToString(file.getPath());
         String testReportRegex = "(?<=reports.html.destination[\\s\\=|\\=]).*([\"|'])(.*)([\"|'])";
 
         Pattern pattern = Pattern.compile(testReportRegex);
@@ -112,7 +112,7 @@ public class ViewTestReport extends LibertyGeneralAction {
     private File findCustomTestReport(VirtualFile parentFile) throws IOException {
         // look for the most recently modified index.html files in the workspace
         ArrayList<File> customTestReports = new ArrayList<File>();
-        try (Stream<Path> walk = Files.walk(Paths.get(parentFile.getCanonicalPath()))
+        try (Stream<Path> walk = Files.walk(Paths.get(parentFile.getPath()))
                 .filter(Files::isRegularFile)) {
             List<String> result = walk.map(x -> x.toString())
                     // exclude files from {bin, classes, target} dirs
