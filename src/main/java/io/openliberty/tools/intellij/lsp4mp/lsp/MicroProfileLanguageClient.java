@@ -33,20 +33,8 @@ import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4mp.commons.JavaFileInfo;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeActionParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeLensParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCompletionParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaHoverParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
-import org.eclipse.lsp4mp.commons.MicroProfileProjectInfo;
-import org.eclipse.lsp4mp.commons.MicroProfileProjectInfoParams;
-import org.eclipse.lsp4mp.commons.MicroProfilePropertiesChangeEvent;
-import org.eclipse.lsp4mp.commons.MicroProfilePropertiesScope;
-import org.eclipse.lsp4mp.commons.MicroProfilePropertyDefinitionParams;
-import org.eclipse.lsp4mp.commons.ProjectLabelInfoEntry;
+import org.eclipse.lsp4mp.commons.*;
+import org.eclipse.lsp4mp.commons.utils.JSONUtility;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageClientAPI;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
 import org.slf4j.Logger;
@@ -157,5 +145,14 @@ public class MicroProfileLanguageClient extends LanguageClientImpl implements Mi
   @Override
   public CompletableFuture<List<CodeAction>> getJavaCodeAction(MicroProfileJavaCodeActionParams javaParams) {
     return runAsBackground("Computing Java code actions", () -> (List<CodeAction>) PropertiesManagerForJava.getInstance().codeAction(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
+  }
+
+  @Override
+  public CompletableFuture<CodeAction> resolveCodeAction(CodeAction unresolved) {
+    return runAsBackground("Computing Java resolve code actions", () -> {
+      CodeActionResolveData data = JSONUtility.toModel(unresolved.getData(), CodeActionResolveData.class);
+      unresolved.setData(data);
+      return (CodeAction) PropertiesManagerForJava.getInstance().resolveCodeAction(unresolved, PsiUtilsLSImpl.getInstance(getProject()));
+    });
   }
 }
