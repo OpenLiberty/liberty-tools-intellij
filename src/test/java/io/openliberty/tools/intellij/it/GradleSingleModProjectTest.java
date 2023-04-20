@@ -63,17 +63,17 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
     /**
      * The path to the test report.
      */
-    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
+    public static final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
 
     /**
      * Build file name.
      */
-    private final String BUILD_FILE_NAME = "build.gradle";
+    public static final String BUILD_FILE_NAME = "build.gradle";
 
     /**
      * Action command to open the build file.
      */
-    private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
+    public static final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
 
     /**
      * Constructor.

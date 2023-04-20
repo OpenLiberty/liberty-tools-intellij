@@ -58,6 +58,15 @@ public class DialogFixture extends CommonContainerFixture {
     }
 
     /**
+     * Returns the component fixture associated with the Tree class.
+     *
+     * @return The component fixture associated with the Tree class.
+     */
+    public ComponentFixture getMyTree() {
+        return find(ComponentFixture.class, byXpath("//div[@class='MyTree']"), Duration.ofSeconds(10));
+    }
+
+    /**
      * Returns the JTextFieldFixture object associated with the BorderlessTextField class.
      *
      * @return The JTextFieldFixture object associated with the BorderlessTextField class.

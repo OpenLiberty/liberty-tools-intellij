@@ -11,11 +11,6 @@ package io.openliberty.tools.intellij.it;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.*;
-import com.intellij.remoterobot.utils.Keyboard;
-
-import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicatesKt.contains;
-import static java.awt.event.KeyEvent.*;
-
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.Keyboard;
@@ -28,7 +23,6 @@ import org.assertj.swing.core.MouseButton;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -41,6 +35,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicatesKt.contains;
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static java.awt.event.KeyEvent.*;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -69,6 +64,13 @@ public class UIBotTestUtils {
      */
     public enum Frame {
         WELCOME, PROJECT
+    }
+
+    /**
+     * Execution mode.
+     */
+    public enum ExecMode {
+        DEBUG, RUN
     }
 
     /**
@@ -419,6 +421,21 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Opens the terminal window if it is not already open.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void openTerminalWindow(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(5));
+        try {
+            projectFrame.getBaseLabel("Terminal", "5");
+        } catch (WaitForConditionTimeoutException e) {
+            // The Liberty tool window is closed. Open it.
+            clickOnWindowPaneStripeButton(remoteRobot, "Terminal");
+        }
+    }
+
+    /**
      * Clicks on the specified tool window pane stripe.
      *
      * @param remoteRobot      The RemoteRobot instance.
@@ -498,7 +515,7 @@ public class UIBotTestUtils {
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
         projTree.expand(projectName, "src", "main", "liberty", "config");
 
-            projTree.findText(fileName).doubleClick();
+        projTree.findText(fileName).doubleClick();
 
     }
 
@@ -581,7 +598,7 @@ public class UIBotTestUtils {
      * Click on a editor file tab for a file that is open in the editor pane to gain focus to that file
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param fileName The string file name
+     * @param fileName    The string file name
      */
 
     public static void clickOnFileTab(RemoteRobot remoteRobot, String fileName) {
@@ -606,7 +623,7 @@ public class UIBotTestUtils {
      */
     public static void hoverInAppServerCfgFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile) {
 
-         Keyboard keyboard = new Keyboard(remoteRobot);
+        Keyboard keyboard = new Keyboard(remoteRobot);
 
         Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
         clickOnFileTab(remoteRobot, hoverFile);
@@ -679,9 +696,9 @@ public class UIBotTestUtils {
         Keyboard keyboard = new Keyboard(remoteRobot);
         // find the location in the file to begin the stanza insertion
         // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1,1);
+        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
         keyboard.enter();
-        goToLineAndColumn(remoteRobot, keyboard, 1,1);
+        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
         keyboard.enterText(envCfgNameSnippet);
 
@@ -697,11 +714,11 @@ public class UIBotTestUtils {
 
         namePopupWindow.findText(envCfgNameSnippet).doubleClick();
 
-            keyboard.hotKey(VK_END);
-            keyboard.enterText("=");
-            keyboard.hotKey(VK_END);
+        keyboard.hotKey(VK_END);
+        keyboard.enterText("=");
+        keyboard.hotKey(VK_END);
 
-            keyboard.enterText(envCfgValueSnippet);
+        keyboard.enterText(envCfgValueSnippet);
 
         // Select the appropriate completion suggestion in the pop-up window that is automatically
         // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
@@ -718,8 +735,7 @@ public class UIBotTestUtils {
         // let the auto-save function of intellij save the file before testing it
         if (remoteRobot.isMac()) {
             keyboard.hotKey(VK_META, VK_S);
-        }
-        else{
+        } else {
             // linux + windows
             keyboard.hotKey(VK_CONTROL, VK_S);
         }
@@ -767,23 +783,23 @@ public class UIBotTestUtils {
 
                     popupWindow.findText(textToFind).doubleClick();
 
-            // get the full text of the editor contents
-            String editorText = editorNew.getText();
+                    // get the full text of the editor contents
+                    String editorText = editorNew.getText();
 
-            // find the location to click on for feature name entry
-            // this should put the entry cursor directly between <feature> and <feature/>
-            int offset = editorText.indexOf("<feature></feature>") + "<feature>".length();
+                    // find the location to click on for feature name entry
+                    // this should put the entry cursor directly between <feature> and <feature/>
+                    int offset = editorText.indexOf("<feature></feature>") + "<feature>".length();
 
-            editorNew.clickOnOffset(offset, MouseButton.LEFT_BUTTON, 1);
+                    editorNew.clickOnOffset(offset, MouseButton.LEFT_BUTTON, 1);
 
-            // small delay to allow the button to be fully clicked before typing
-            TestUtils.sleepAndIgnoreException(1);
+                    // small delay to allow the button to be fully clicked before typing
+                    TestUtils.sleepAndIgnoreException(1);
                 }
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
                 keyboard.enterText(stanzaSnippet);
                 TestUtils.sleepAndIgnoreException(2);
-        
+
                 // Select the appropriate completion suggestion in the pop-up window that is automatically
                 // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
                 // and entry automatically if the completion suggestion windows has one entry only.
@@ -860,7 +876,7 @@ public class UIBotTestUtils {
         }
 
         return popupString.toString();
-        }
+    }
 
     /**
      * Copies the contents from the currently active window.
@@ -917,7 +933,7 @@ public class UIBotTestUtils {
      * @param startParams The parameters to set in the configuration dialog.
      */
     public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
-        DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(19));
+        DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(10));
         if (startParams != null) {
             // Update the parameter editor box.
             // TODO: Investigate this further:
@@ -947,6 +963,39 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Returns the name of the opened Liberty configuration.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @return The name of the opened Liberty configuration.
+     */
+    public static final String getLibertyConfigName(RemoteRobot remoteRobot) {
+        // Get a hold of the Liberty Edit Configurations window.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        DialogFixture startParmsDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
+        Locator locator = byXpath("//div[@class='JTextField']");
+
+        // Get the name of the configuration.
+        JTextFieldFixture nameTextField = startParmsDialog.textField(locator, Duration.ofSeconds(10));
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                Duration.ofSeconds(1),
+                "Waiting for the name text field on the Liberty config dialog to be enabled or populated by default",
+                "The name text field on the Liberty config dialog was not enabled or populated by default",
+                () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
+        String configName = nameTextField.getText();
+
+        // Close the configuration.
+        JButtonFixture cancelButton = startParmsDialog.getButton("Cancel");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the cancel button on the Liberty config dialog to be enabled",
+                "The cancel button on the Liberty config dialog was not enabled",
+                cancelButton::isEnabled);
+        cancelButton.click();
+
+        return configName;
+    }
+
+    /**
      * Clicks on the play action button located on the Liberty tool window toolbar.
      *
      * @param remoteRobot The RemoteRobot instance.
@@ -973,7 +1022,7 @@ public class UIBotTestUtils {
                 Thread.sleep(secondsToWait * 1000L);
             }
 
-            URL url = new URL(MavenSingleModProjectTest.REMOTEBOT_URL);
+            URL url = new URL(MavenSingleModProjectTest.REMOTE_BOT_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
@@ -1125,7 +1174,7 @@ public class UIBotTestUtils {
 
     /**
      * Responds to the `Remove Liberty project` dialog query asking if the project should be deleted.
-     * The response is the affirmative.
+     * The response is in the affirmative.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
@@ -1136,6 +1185,250 @@ public class UIBotTestUtils {
                 Duration.ofSeconds(10));
         JButtonFixture okButton = removeProjectDialog.getButton("Yes");
         okButton.click();
+    }
+
+    /**
+     * Creates a new Liberty configuration.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param cfgName     The name of the new configuration.
+     */
+    public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture runMenu = projectFrame.getActionMenu("Run");
+        runMenu.click();
+        ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations...");
+        editCfgsMenuEntry.click();
+
+        // Find the Run/Debug Configurations dialog.
+        DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
+                DialogFixture.byTitle("Run/Debug Configurations"),
+                Duration.ofSeconds(10));
+
+        // Click on the Add Configuration action button (+) to open the Add New Configuration window.
+        Locator addButtonLocator = byXpath("//div[@tooltiptext.key='add.new.run.configuration.action2.name']");
+        ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
+        addCfgButton.click();
+
+        // Look for the Liberty entry in the Add New configuration window and  create a new configuration.
+        ComponentFixture pluginCfgTree = addProjectDialog.getMyTree();
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(2),
+                "Waiting for plugin config tree to show on the screen",
+                "Plugin config tree is not showing on the screen",
+                () -> pluginCfgTree.isShowing());
+
+        List<RemoteText> rts = pluginCfgTree.findAllText();
+        for (RemoteText rt : rts) {
+            if (rt.getText().equals("Liberty")) {
+                rt.click();
+                break;
+            }
+        }
+
+        // The Run/Debug Configurations dialog should now contain the Liberty configuration that was
+        // just created. Refresh it.
+        addProjectDialog = projectFrame.find(DialogFixture.class,
+                DialogFixture.byTitle("Run/Debug Configurations"),
+                Duration.ofSeconds(10));
+
+        // Find the new configuration's name text field and give it a name.
+        Locator locator = byXpath("//div[@class='JTextField']");
+        JTextFieldFixture nameTextField = addProjectDialog.textField(locator, Duration.ofSeconds(10));
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                Duration.ofSeconds(1),
+                "Waiting for the name text field to be enabled or populated by default",
+                "The name text field was not enabled or populated by default",
+                () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
+
+        nameTextField.click();
+        nameTextField.setText(cfgName);
+
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                Duration.ofSeconds(1),
+                "Waiting for the name of the config to appear in the text box",
+                "The name of the config did not appear in the text box ",
+                () -> nameTextField.getText().equals(cfgName));
+
+        // Save the new configuration by clicking on the Apply button.
+        JButtonFixture applyButton = addProjectDialog.getButton("Apply");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the Apply button on the add config project dialog to be enabled",
+                "The Apply button on the add config dialog was not enabled",
+                applyButton::isEnabled);
+        applyButton.click();
+
+        // Exit the Run/Debug Configurations dialog.
+        JButtonFixture okButton = addProjectDialog.getButton("OK");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the OK button on the config dialog to be enabled",
+                "The OK button on the config dialog was not enabled",
+                okButton::isEnabled);
+        okButton.click();
+    }
+
+    /**
+     * Selects the liberty configuration using the Run/Debug configuration selection box on
+     * the project frame toolbar.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param cfgName     The configuration name to select.
+     */
+    public static void selectConfigUsingToolbar(RemoteRobot remoteRobot, String cfgName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture cfgSelectBox = projectFrame.getRunConfigurationsComboBoxButton();
+        cfgSelectBox.click();
+        ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
+        List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
+        for (RemoteText cfg : configs) {
+            if (cfg.getText().equals(cfgName)) {
+                cfg.click();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Selects the specified configuration using the Run->Run.../Debug... menu options.
+     * The configuration is chosen from panel that lists the available configurations.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param cfgName     The configuration name
+     * @param execMode    The execution mode (RUN/DEBUG).
+     */
+    public static void selectConfigUsingMenu(RemoteRobot remoteRobot, String cfgName, ExecMode execMode) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture menuOption = projectFrame.getActionMenu("Run");
+        menuOption.click();
+        ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem("Run...");
+        if (execMode == ExecMode.DEBUG) {
+            menuCfgExecOption = projectFrame.getActionMenuItem("Debug...");
+        }
+
+        menuCfgExecOption.click();
+
+        // Retrieve the list of configs from the config list window.
+        ComponentFixture cfgSelectWindow = projectFrame.getMyList();
+        List<RemoteText> configs = cfgSelectWindow.getData().getAll();
+
+        // Open the specified configuration.
+        for (RemoteText cfg : configs) {
+            if (cfg.getText().equals(cfgName)) {
+                cfg.click();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Executes the configurations using the icon on the project frame toolbar.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param execMode    The execution mode (RUN/DEBUG).
+     */
+    public static void runConfigUsingIconOnToolbar(RemoteRobot remoteRobot, ExecMode execMode) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        Locator locator = byXpath("//div[contains(@myaction.key, 'group.RunMenu.text')]");
+        if (execMode == ExecMode.DEBUG) {
+            locator = byXpath("//div[@myicon='startDebugger.svg']");
+        }
+
+        ActionButtonFixture iconButton = projectFrame.actionButton(locator, Duration.ofSeconds(10));
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the start debugger button on the project frame toolbar to be enabled",
+                "The start debugger button on the project frame toolbar was not enabled",
+                iconButton::isEnabled);
+
+        iconButton.click();
+    }
+
+    /**
+     * Deletes all Liberty tool plugin configurations using the Run->EditConfigurations... dialog.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void deleteLibertyRunConfigurations(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture runMenu = projectFrame.getActionMenu("Run");
+        runMenu.click();
+        ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations...");
+        editCfgsMenuEntry.click();
+
+        // Find the Run/Debug Configurations dialog.
+        DialogFixture rdConfigDialog = projectFrame.find(DialogFixture.class,
+                DialogFixture.byTitle("Run/Debug Configurations"),
+                Duration.ofSeconds(10));
+
+        // Expand and retrieve configuration tree content.
+        JTreeFixture configTree = rdConfigDialog.jTree();
+        configTree.expandAll();
+        List<RemoteText> treeEntries = configTree.findAllText();
+
+        // Find the Liberty tree node and delete all child configurations.
+        boolean processEntries = false;
+        boolean firstEntryClicked = false;
+        Locator locator = byXpath("//div[@tooltiptext.key='remove.run.configuration.action.name']");
+        ActionButtonFixture removeCfgButton = rdConfigDialog.actionButton(locator);
+
+        for (RemoteText treeEntry : treeEntries) {
+            if (treeEntry.getText().equals("Liberty")) {
+                processEntries = true;
+                continue;
+            }
+            if (processEntries) {
+                // Click on the first configuration in the tree only.
+                if (!firstEntryClicked) {
+                    treeEntry.click();
+                    firstEntryClicked = true;
+                }
+
+                // Delete the configuration.
+                try {
+                    RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                            Duration.ofSeconds(1),
+                            "Waiting for the remove config button on the config dialog to be enabled",
+                            "The remove config button on the config dialog was not enabled",
+                            removeCfgButton::isEnabled);
+                    removeCfgButton.click();
+                } catch (WaitForConditionTimeoutException wfcte) {
+                    // We have reached the end of the Liberty entries.
+                    break;
+                }
+            }
+        }
+
+        // Press Save the changes.
+        JButtonFixture okButton = rdConfigDialog.getButton("OK");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(1),
+                "Waiting for the OK button on the config dialog to be enabled",
+                "The OK button on the config dialog was not enabled",
+                okButton::isEnabled);
+        okButton.click();
+    }
+
+    /**
+     * Stops the debugger if it is running.
+     *
+     * @param remoteRobot
+     */
+    public static void stopDebugger(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            projectFrame.getBaseLabel("Debug:", "5");
+        } catch (WaitForConditionTimeoutException wfcte) {
+            // The debug tab is not opened for some reason. Open it.
+            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug");
+            debugStripe.click();
+        }
+
+        Locator locator = byXpath("//div[contains(@myvisibleactions, 'Get')]//div[contains(@myaction.key, 'action.Stop.text')]");
+        ActionButtonFixture stopButton = projectFrame.actionButton(locator, Duration.ofSeconds(5));
+        stopButton.click();
     }
 
     /**
@@ -1154,7 +1447,12 @@ public class UIBotTestUtils {
         if (!searchLists.isEmpty()) {
             JListFixture searchList = searchLists.get(0);
             try {
-                foundText = searchList.findText(text);
+                List<RemoteText> entries = searchList.findAllText();
+                for (RemoteText entry : entries) {
+                    if (entry.getText().equals(text)) {
+                        foundText = entry;
+                    }
+                }
             } catch (NoSuchElementException nsee) {
                 // The list is empty.
                 return null;
@@ -1162,6 +1460,31 @@ public class UIBotTestUtils {
         }
 
         return foundText;
+    }
+
+    /**
+     * Stops the Liberty server by running the action from the Liberty tool window dropdown action list.
+     *
+     * @param remoteRobot     The RemoteRobot instance.
+     * @param testName        The name of the test calling this method.
+     * @param absoluteWLPPath The absolute path of the Liberty installation.
+     * @param maxRetries      The maximum amount of attempts to try to stop the server.
+     */
+    public static void stopLibertyServerUsingLTWDropdownActions(RemoteRobot remoteRobot, String testName, String absoluteWLPPath, int maxRetries) {
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", false);
+
+                // Validate that the server stopped. Fail the test if the last iteration fails.
+                boolean failOnError = (i == (maxRetries - 1));
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 12, failOnError);
+
+                break;
+            } catch (Exception e) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Retrying server stop. Cause: " + e.getMessage());
+            }
+        }
     }
 
     /**

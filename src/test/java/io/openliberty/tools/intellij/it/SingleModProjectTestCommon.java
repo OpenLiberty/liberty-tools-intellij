@@ -1,5 +1,15 @@
 package io.openliberty.tools.intellij.it;
 
+/*******************************************************************************
+ * Copyright (c) 2023 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
+
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
@@ -20,12 +30,12 @@ public abstract class SingleModProjectTestCommon {
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
      * information to find UI components.
      */
-    public static final String REMOTEBOT_URL = "http://localhost:8082";
+    public static final String REMOTE_BOT_URL = "http://localhost:8082";
 
     /**
      * The remote robot object.
      */
-    public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
+    public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
 
     /**
      * The path to the directory holding all projects.
@@ -123,9 +133,13 @@ public abstract class SingleModProjectTestCommon {
      * Tests dashboard start.../stop actions run from the project's drop-down action menu.
      */
     @Test
+    @Video
     public void testStartWithParamsActionUsingDropDownMenu() {
         String testName = "testStartWithParamsActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Trigger the start with parameters configuration dialog.
         UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", false);
@@ -145,12 +159,23 @@ public abstract class SingleModProjectTestCommon {
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
             }
         }
+
+        // Validate that the start with params action brings up the configuration previously used.
+        try {
+            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", false);
+            String activeCfgName = UIBotTestUtils.getLibertyConfigName(remoteRobot);
+            Assertions.assertEquals(smMPProjectName, activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + smMPProjectName);
+        } finally {
+            // Cleanup configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        }
     }
 
     /**
      * Tests dashboard start/RunTests/stop actions run from the project's drop-down action menu.
      */
     @Test
+    @Video
     public void testRunTestsActionUsingDropDownMenu() {
         String testName = "testRunTestsActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
@@ -182,201 +207,7 @@ public abstract class SingleModProjectTestCommon {
     }
 
     /**
-     * Tests Liberty tool window start.../stop actions selected on the project's drop-down action
-     * menu and run using the play action button on the Liberty tool window's toolbar.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testStartWithParamsActionUsingPlayToolbarButton() {
-        String testName = "testStartWithParamsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Trigger the start with parameters configuration dialog.
-        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start...", true);
-
-        // Run the configuration dialog.
-        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests Liberty tool window start/RunTests/stop actions selected on the project's drop-down action
-     * menu and run using the play action button on the Liberty tool window's toolbar.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testRunTestsActionUsingPlayToolbarButton() {
-        String testName = "testRunTestsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Delete any existing test report files.
-        deleteTestReports();
-
-        // Start dev mode.
-        UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Start", true);
-
-        // Validate that the project started.
-        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-
-        try {
-            // Run the project's tests.
-            UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Run tests", true);
-
-            // Validate that the report was generated.
-            validateTestReportsExist();
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromDropDownView(remoteRobot, "Stop", true);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests Liberty tool window start.../stop actions run from the project's pop-up action menu.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testStartWithParamsActionUsingPopUpMenu() {
-        String testName = "testStartWithParamsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Trigger the start with parameters configuration dialog.
-        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start...");
-
-        // Run the configuration dialog.
-        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests Liberty tool window start/runTests/stop actions run from the project's pop-up action menu.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testRunTestsActionUsingPopUpMenu() {
-        String testName = "testRunTestsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Delete any existing test report files.
-        deleteTestReports();
-
-        // Start dev mode.
-        UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Start");
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-
-            // Run the project's tests.
-            UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Run tests");
-
-            // Validate that the reports were generated.
-            validateTestReportsExist();
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyTWActionFromMenuView(remoteRobot, smMPProjectName, "Liberty: Stop");
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests start.../stop actions run from the search everywhere panel.
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testStartWithParamsActionUsingSearch() {
-        String testName = "testStartWithParamsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Trigger the start with parameters configuration dialog.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
-
-        // Run the configuration dialog.
-        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null);
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests start/runTests/stop actions run from the search everywhere panel .
-     */
-    @Test
-    @Disabled("Until https://github.com/OpenLiberty/liberty-tools-intellij/issues/272 is fixed.")
-    public void testRunTestsActionUsingSearch() {
-        String testName = "testRunTestsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
-
-        // Delete any existing test report files.
-        deleteTestReports();
-
-        // Start dev mode.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start");
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
-
-            // Run the project's tests.
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests");
-
-            // Validate that the reports were generated.
-            validateTestReportsExist();
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests the Add/Remove project from the tool window actions run from the search everywhere panel .
+     * Tests the Add/Remove project from the tool window actions run from the search everywhere panel.
      */
     @Test
     @Video
@@ -452,6 +283,178 @@ public abstract class SingleModProjectTestCommon {
             }
         }
     }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using project frame toolbar's config selection box and Debug icon to select a Liberty configuration and start dev mode.
+     * - Automatic server JVM attachment to the debugger.
+     */
+    @Test
+    @Video
+    @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/348")
+    public void testStartWithConfigInDebugModeUsingToolbar() {
+        String testName = "testStartWithConfigInDebugModeUsingToolbar";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "toolBarDebug-" + smMPProjectName;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+
+            // Open the terminal window.
+            UIBotTestUtils.openTerminalWindow(remoteRobot);
+        } finally {
+            try {
+                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                    UIBotTestUtils.stopLibertyServerUsingLTWDropdownActions(remoteRobot, testName, absoluteWLPPath, 3);
+                }
+            } finally {
+                // Cleanup configurations.
+                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+            }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
+     */
+    @Test
+    @Video
+    @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/348")
+    public void testStartWithConfigInDebugModeUsingMenu() {
+        String testName = "testStartWithConfigInDebugModeUsingMenu";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "menuDebug-" + smMPProjectName;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+
+            // Open the terminal window.
+            UIBotTestUtils.openTerminalWindow(remoteRobot);
+        } finally {
+            try {
+                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                    UIBotTestUtils.stopLibertyServerUsingLTWDropdownActions(remoteRobot, testName, absoluteWLPPath, 3);
+                }
+            } finally {
+                // Cleanup configurations.
+                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+            }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using project frame toolbar's config selection box and Run icon to select a Liberty configuration and start dev mode.
+     */
+    @Test
+    @Video
+    public void testStartWithConfigInRunModeUsingToolbar() {
+        String testName = "testStartWithConfigInRunModeUsingToolbar";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "toolBarRun-" + smMPProjectName;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.RUN);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+        } finally {
+            try {
+                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                    UIBotTestUtils.stopLibertyServerUsingLTWDropdownActions(remoteRobot, testName, absoluteWLPPath, 3);
+                }
+            } finally {
+                // Cleanup configurations.
+                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+            }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using Run->Run... menu options to select the configuration and run in the project in dev mode.
+     */
+    @Test
+    @Video
+    public void testStartWithConfigInRunModeUsingMenu() {
+        String testName = "testStartWithConfigInRunModeUsingMenu";
+        String absoluteWLPPath = Paths.get(projectsPath, smMPProjectName, getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "menuRun-" + smMPProjectName;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.RUN);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), smMPProjOutput, absoluteWLPPath, false);
+        } finally {
+            try {
+                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                    UIBotTestUtils.stopLibertyServerUsingLTWDropdownActions(remoteRobot, testName, absoluteWLPPath, 3);
+                }
+            } finally {
+                // Cleanup configurations.
+                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+            }
+        }
+    }
+
 
     /**
      * Prepares the environment to run the tests.
