@@ -168,7 +168,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "server.env", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet);
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet, true);
             Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
             TestUtils.validateConfigStringInConfigFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
@@ -196,7 +196,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, projectName, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, configValueSnippet);
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, configValueSnippet, true);
             Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
             TestUtils.validateConfigStringInConfigFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
@@ -281,6 +281,68 @@ public abstract class SingleModLibertyLSTestCommon {
     }
 
     /**
+     * Tests liberty-ls diagnostic support in server.env
+     */
+    @Test
+    @Video
+    public void testDiagnosticInServerEnv() {
+        String envCfgSnippet = "WLP_LOGGING_CON";
+        String envCfgNameChooserSnippet = "FORMAT";
+        String incorrectValue = "NONE";
+        String expectedHoverData = "The value `NONE` is not valid for the variable `WLP_LOGGING_CONSOLE_FORMAT`.";
+
+        // get focus on server.env tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Save the current server.env content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippet, envCfgNameChooserSnippet, incorrectValue, false);
+            //move cursor to hover point
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "NONE", "server.env", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+            TestUtils.validateHoverData(expectedHoverData, foundHoverData);
+
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
+    }
+
+    /**
+     * Tests liberty-ls diagnostic support in boostrap.properties
+     */
+    @Test
+    @Video
+    public void testDiagnosticInBootstrapProperties() {
+        String configNameSnippet = "com.ibm.ws.logging.con";
+        String configNameChooserSnippet = "format";
+        String incorrectValue = "none";
+        String expectedHoverData = "The value `none` is not valid for the property `com.ibm.ws.logging.console.format`.";
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, incorrectValue, false);
+
+            //move cursor to hover point
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "none", "bootstrap.properties", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+            TestUtils.validateHoverData(expectedHoverData, foundHoverData);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
+    }
+
+    /**
      * Prepares the environment to run the tests.
      *
      * @param projectPath The path of the project.
@@ -294,6 +356,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
         UIBotTestUtils.validateLibertyTWProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
 
         // pre-open project tree before attempting to open server.xml
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));

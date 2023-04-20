@@ -708,7 +708,18 @@ public class UIBotTestUtils {
         editor.runJs(String.format(jitterScript, pointX, pointY));
     }
 
-    public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String projectName, String fileName, String envCfgNameSnippet, String envCfgNameChooserSnippet, String envCfgValueSnippet) {
+    /**
+     * Inserts a configuration name value pair into a config file via text typing
+     * and popup menu completion (if required)
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param fileName The string path to the config file
+     * @param configNameSnippet the portion of the name to type
+     * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
+     * @param configValueSnippet the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup use popup to complete value selection or type in an entire provided value string
+     */
+    public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
@@ -716,12 +727,12 @@ public class UIBotTestUtils {
 
         Keyboard keyboard = new Keyboard(remoteRobot);
         // find the location in the file to begin the stanza insertion
-        // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+        // we will put new config at the end of the config file
+        // (after the last line already in the file)
+        keyboard.hotKey(VK_CONTROL, VK_END);
         keyboard.enter();
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
-        keyboard.enterText(envCfgNameSnippet);
+        keyboard.enterText(configNameSnippet);
 
         // Select the appropriate completion suggestion in the pop-up window that is automatically
         // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
@@ -729,30 +740,31 @@ public class UIBotTestUtils {
         ComponentFixture namePopupWindow = projectFrame.getLookupList();
         RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                 Duration.ofSeconds(1),
-                "Waiting for text " + envCfgNameSnippet + " to appear in the completion suggestion pop-up window",
-                "Text " + envCfgNameSnippet + " did not appear in the completion suggestion pop-up window",
-                () -> namePopupWindow.hasText(envCfgNameSnippet));
+                "Waiting for text " + configNameSnippet + " to appear in the completion suggestion pop-up window",
+                "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
+                () -> namePopupWindow.hasText(configNameSnippet));
 
-        namePopupWindow.findText(envCfgNameSnippet).doubleClick();
+        namePopupWindow.findText(configNameSnippet).doubleClick();
 
         keyboard.hotKey(VK_END);
         keyboard.enterText("=");
         keyboard.hotKey(VK_END);
 
-        keyboard.enterText(envCfgValueSnippet);
+            keyboard.enterText(configValueSnippet);
 
-        // Select the appropriate completion suggestion in the pop-up window that is automatically
-        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-        // and entry automatically if the completion suggestion windows has one entry only.
-        ComponentFixture valuePopupWindow = projectFrame.getLookupList();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for text " + envCfgNameChooserSnippet + " to appear in the completion suggestion pop-up window",
-                "Text " + envCfgNameSnippet + " did not appear in the completion suggestion pop-up window",
-                () -> valuePopupWindow.hasText(envCfgValueSnippet));
+            if (completeWithPopup) {
+                // Select the appropriate completion suggestion in the pop-up window that is automatically
+                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                // and entry automatically if the completion suggestion windows has one entry only.
+                ComponentFixture valuePopupWindow = projectFrame.getLookupList();
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for text " + configNameChooserSnippet + " to appear in the completion suggestion pop-up window",
+                        "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
+                        () -> valuePopupWindow.hasText(configValueSnippet));
 
-        valuePopupWindow.findText(envCfgValueSnippet).doubleClick();
-
+                valuePopupWindow.findText(configValueSnippet).doubleClick();
+            }
         // let the auto-save function of intellij save the file before testing it
         if (remoteRobot.isMac()) {
             keyboard.hotKey(VK_META, VK_S);
@@ -935,35 +947,6 @@ public class UIBotTestUtils {
 
         // get the text from the quickfix popup
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        ContainerFixture popup = projectFrame.getQuickFixPane();
-
-        popup.findText(contains(quickfixChooserString)).click();
-
-        // Save the file.
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_S);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_S);
-        }
-
-    }
-
-    /**
-     * Opens the quickfix menu popup and chooses the
-     * approriate fix according to the quickfix substring
-     *
-     * @param remoteRobot the remote robot instance
-     * @param quickfixChooserString the text to find in the quick fix menu
-     */
-    public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
-
-        // first trigger the quickfix popup by using the keyboard
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.hotKey(VK_ALT, VK_ENTER);
-
-        // get the text from the quickfix popup
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         ContainerFixture popup = projectFrame.getQuickFixPane();
 
         popup.findText(contains(quickfixChooserString)).click();
