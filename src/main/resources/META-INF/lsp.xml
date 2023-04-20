@@ -82,10 +82,10 @@
                                     order="first"/>
         <codeInsight.inlayProvider language="JAVA"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codelens.LSPInlayProvider"/>
-        <externalAnnotator language="XML" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions.LSPCodeActionAnnotator"/>
-        <externalAnnotator language="TEXT" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions.LSPCodeActionAnnotator"/>
-        <externalAnnotator language="Properties" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions.LSPCodeActionAnnotator"/>
-        <externalAnnotator language="JAVA" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions.LSPCodeActionAnnotator"/>
+        <externalAnnotator language="XML" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="TEXT" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="Properties" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="JAVA" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
     </extensions>
 
 </idea-plugin>
