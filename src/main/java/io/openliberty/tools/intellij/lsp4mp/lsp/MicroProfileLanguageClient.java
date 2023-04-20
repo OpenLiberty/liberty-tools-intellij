@@ -114,26 +114,6 @@ public class MicroProfileLanguageClient extends LanguageClientImpl implements Mi
     return PsiMicroProfileProjectManager.getInstance(project.getProject()).isConfigSource(file);
   }
 
-
-  <R> CompletableFuture<R> runAsBackground(String title, Supplier<R> supplier) {
-    CompletableFuture<R> future = new CompletableFuture<>();
-    CompletableFuture.runAsync(() -> {
-      Runnable task = () -> ProgressManager.getInstance().runProcess(() -> {
-        try {
-          future.complete(supplier.get());
-        } catch (Throwable t) {
-          future.completeExceptionally(t);
-        }
-      }, new EmptyProgressIndicator());
-      if (DumbService.getInstance(getProject()).isDumb()) {
-        DumbService.getInstance(getProject()).runWhenSmart(task);
-      } else {
-        task.run();
-      }
-    });
-    return future;
-  }
-
   @Override
   public CompletableFuture<MicroProfileProjectInfo> getProjectInfo(MicroProfileProjectInfoParams params) {
     return runAsBackground("Computing project information", () -> PropertiesManager.getInstance().getMicroProfileProjectInfo(params, PsiUtilsLSImpl.getInstance(getProject())));
