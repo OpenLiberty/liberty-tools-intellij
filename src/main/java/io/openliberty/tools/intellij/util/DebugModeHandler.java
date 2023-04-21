@@ -150,7 +150,11 @@ public class DebugModeHandler {
     }
 
     /**
-     * Waits for the JDWP socket on the JVM to start listening for connections
+     * Waits for the Liberty runtime JVM to start listening for connections on the JDWP socket.
+     * Server.env is created by the Liberty Maven/Gradle Tool several seconds after it starts up
+     * but note well that there may exist such a file from a previous start-up. Also note that
+     * if the tool determines the first port is taken by another process a new port number will
+     * be used for debugging and will be written into the file.
      *
      * @param monitor progress monitor
      * @param libertyModule Liberty module
@@ -161,9 +165,9 @@ public class DebugModeHandler {
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 300;
-        int envReadMinLimit = 45;
-        int envReadInterval = 5;
+        int retryLimit = 120; // wait up to 60s for dev mode to start (polling rate 2 per second, 500ms)
+        int envReadMinLimit = 8; // don't check server.env for first 4s
+        int envReadInterval = 4; // recheck server.env every 2s
 
         // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
         Path serverEnvPath = getServerEnvPath(libertyModule);
@@ -177,9 +181,6 @@ public class DebugModeHandler {
             // The server.env path may not yet exist. If it is null, retry.
             if (serverEnvPath == null) {
                 serverEnvPath = getServerEnvPath(libertyModule);
-                if (serverEnvPath == null) {
-                    continue;
-                }
             }
 
             // There is a small window in which the allocated random port could have been taken by another process.
@@ -204,7 +205,7 @@ public class DebugModeHandler {
                 socket.getOutputStream().write(handshakeString);
                 return String.valueOf(debugPort);
             } catch (ConnectException e) {
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.MILLISECONDS.sleep(500);
             }
         }
         throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
