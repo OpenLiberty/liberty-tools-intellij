@@ -257,10 +257,10 @@ public abstract class SingleModLibertyLSTestCommon {
         Path pathToServerXML = null;
         pathToServerXML = Paths.get(projectsPath, projectName,"src", "main", "liberty", "config", "server.xml");
 
-        // get focus on bootstrap.properties tab prior to copy
+        // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
-        // Save the current bootstrap.properties content.
+        // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {

@@ -63,7 +63,7 @@ public class UIBotTestUtils {
      * UI Popup window types.
      */
     public enum PopupType {
-        DOCUMENTATION, QUICKFIX, DIAGNOSTIC
+        DOCUMENTATION, DIAGNOSTIC
     }
 
     /**
@@ -892,7 +892,7 @@ public class UIBotTestUtils {
      */
     public static String getHoverStringData(RemoteRobot remoteRobot, PopupType popupType) {
         // get the text from the LS diagnostic hint popup
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
 
         ContainerFixture popup;
         switch (popupType.name()) {
@@ -904,7 +904,7 @@ public class UIBotTestUtils {
                 break;
             default:
                 // no known pane type specified, return
-                return null;
+                return "";
         }
 
         List<RemoteText> rts = popup.findAllText();
@@ -934,7 +934,7 @@ public class UIBotTestUtils {
         keyboard.hotKey(VK_ALT, VK_ENTER);
 
         // get the text from the quickfix popup
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         ContainerFixture popup = projectFrame.getQuickFixPane();
 
         popup.findText(contains(quickfixChooserString)).click();
