@@ -60,6 +60,13 @@ public class UIBotTestUtils {
     }
 
     /**
+     * UI Popup window types.
+     */
+    public enum PopupType {
+        DOCUMENTATION, DIAGNOSTIC
+    }
+
+    /**
      * UI Frames.
      */
     public enum Frame {
@@ -616,12 +623,14 @@ public class UIBotTestUtils {
 
 
     /**
-     * Moves the mouse cursor to a specific string target in server.xml
+     * Moves the mouse cursor to a specific string target in a liberty config file
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param hoverTarget The string to hover over in server.xml
+     * @param hoverTarget The string to hover over in the config file
+     * @param hoverFile The string path to the config file
+     * @param popupType the type of popup window that is expected from the hover action
      */
-    public static void hoverInAppServerCfgFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile) {
+    public static void hoverInAppServerCfgFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile, PopupType popupType) {
 
         Keyboard keyboard = new Keyboard(remoteRobot);
 
@@ -649,7 +658,19 @@ public class UIBotTestUtils {
 
                 // first get the contents of the popup - put in a String
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-                ContainerFixture popup = projectFrame.getDocumentationHintEditorPane();
+                ContainerFixture popup;
+                switch (popupType.name()) {
+                    case "DOCUMENTATION":
+                        popup = projectFrame.getDocumentationHintEditorPane();
+                        break;
+                    case "DIAGNOSTIC":
+                        popup = projectFrame.getDiagnosticPane();
+                        break;
+                    default:
+                        // no known popup type provided, return
+                        return;
+                }
+
                 List<RemoteText> rts = popup.findAllText();
                 StringBuilder remoteString = new StringBuilder();
                 for (RemoteText rt : rts) {
@@ -746,8 +767,13 @@ public class UIBotTestUtils {
      * content prior to calling this method.
      *
      * @param remoteRobot The RemoteRobot instance.
+     * @param stanzaSnippet truncated feature name to be used to select full name from popup
+     * @param line line number (in editor) to place cursor for text insertion in server.xml
+     * @param col column number (in editor) to place cursor for text insertion in server.xml
+     * @param type the type of stanza being inserted - FEATURE or CONFIG
+     * @param completeWithPopup use the popup to complete the insertion (or the full text will be typed in)
      */
-    public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String stanzaSnippet, int line, int col, InsertionType type) {
+    public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String stanzaSnippet, int line, int col, InsertionType type, boolean completeWithPopup) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, "server.xml");
@@ -800,17 +826,19 @@ public class UIBotTestUtils {
                 keyboard.enterText(stanzaSnippet);
                 TestUtils.sleepAndIgnoreException(2);
 
-                // Select the appropriate completion suggestion in the pop-up window that is automatically
-                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-                // and entry automatically if the completion suggestion windows has one entry only.
-                ComponentFixture completionPopupWindow = projectFrame.getLookupList();
-                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                        Duration.ofSeconds(1),
-                        "Waiting for text " + stanzaSnippet + " to appear in the completion suggestion pop-up window",
-                        "Text " + stanzaSnippet + " did not appear in the completion suggestion pop-up window",
-                        () -> completionPopupWindow.hasText(stanzaSnippet));
+                if (completeWithPopup) {
+                    // Select the appropriate completion suggestion in the pop-up window that is automatically
+                    // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                    // and entry automatically if the completion suggestion windows has one entry only.
+                    ComponentFixture completionPopupWindow = projectFrame.getLookupList();
+                    RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                            Duration.ofSeconds(1),
+                            "Waiting for text " + stanzaSnippet + " to appear in the completion suggestion pop-up window",
+                            "Text " + stanzaSnippet + " did not appear in the completion suggestion pop-up window",
+                            () -> completionPopupWindow.hasText(stanzaSnippet));
 
-                completionPopupWindow.findText(stanzaSnippet).doubleClick();
+                    completionPopupWindow.findText(stanzaSnippet).doubleClick();
+                }
 
                 // Save the file.
                 if (remoteRobot.isMac()) {
@@ -857,14 +885,28 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Validates the expected hover string message was raised in popup.
+     * Gathers the hover string data from the popup
      *
      * @param remoteRobot the remote robot instance
+     * @param popupType the type of popup window expected
      */
-    public static String getHoverStringData(RemoteRobot remoteRobot) {
+    public static String getHoverStringData(RemoteRobot remoteRobot, PopupType popupType) {
         // get the text from the LS diagnostic hint popup
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ContainerFixture popup = projectFrame.getDocumentationHintEditorPane();
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+
+        ContainerFixture popup;
+        switch (popupType.name()) {
+            case "DOCUMENTATION":
+                popup = projectFrame.getDocumentationHintEditorPane();
+                break;
+            case "DIAGNOSTIC":
+                popup = projectFrame.getDiagnosticPane();
+                break;
+            default:
+                // no known pane type specified, return
+                return "";
+        }
+
         List<RemoteText> rts = popup.findAllText();
 
         // print out the string data found in the popup window - for debugging
@@ -876,6 +918,35 @@ public class UIBotTestUtils {
         }
 
         return popupString.toString();
+    }
+
+    /**
+     * Opens the quickfix menu popup and chooses the
+     * approriate fix according to the quickfix substring
+     *
+     * @param remoteRobot the remote robot instance
+     * @param quickfixChooserString the text to find in the quick fix menu
+     */
+    public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
+
+        // first trigger the quickfix popup by using the keyboard
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        keyboard.hotKey(VK_ALT, VK_ENTER);
+
+        // get the text from the quickfix popup
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        ContainerFixture popup = projectFrame.getQuickFixPane();
+
+        popup.findText(contains(quickfixChooserString)).click();
+
+        // Save the file.
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+
     }
 
     /**
