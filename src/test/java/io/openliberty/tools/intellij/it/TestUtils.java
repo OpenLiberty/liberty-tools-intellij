@@ -407,11 +407,12 @@ public class TestUtils {
     /**
      * Deletes file identified by the input path. If the file is a directory, it must be empty.
      *
-     * @param file The file.
+     * @param path The path of the file to delete.
      * @return Returns true if the file identified by the input path was deleted. False, otherwise.
      */
-    public static boolean deleteFile(File file) {
+    public static boolean deleteFile(Path path) {
         boolean deleted = true;
+        File file = path.toFile();
 
         if (file.exists()) {
             if (!file.isDirectory()) {

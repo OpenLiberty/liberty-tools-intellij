@@ -23,19 +23,14 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 /**
- * Tests Liberty Tools actions using a Maven project.
+ * Tests Liberty Tools actions using a single module MicroProfile Maven project.
  */
-public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
+public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
     /**
      * Single module Microprofile project name.
      */
     private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
-
-    /**
-     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
-     */
-    private final String SM_NLT_REST_PROJECT_NAME = "singleModMavenRESTNoLTXmlCfg";
 
     /**
      * The path to the folder containing the test projects.
@@ -125,21 +120,7 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
     public String getSmMPProjectName() {
         return SM_MP_PROJECT_NAME;
     }
-
-    /**
-     * Returns the name of the single module REST project that does not meet
-     * the requirements needed to automatically show in the Liberty tool window.
-     * This project's Liberty config file does not the expected name and the
-     * build file does not have any Liberty plugin related entries.
-     *
-     * @return The name of the single module REST project that does not meet the
-     * requirements needed to automatically show in the Liberty tool window.
-     */
-    @Override
-    public String getSmNLTRestProjectName() {
-        return SM_NLT_REST_PROJECT_NAME;
-    }
-
+    
     /**
      * Returns the expected HTTP response payload associated with the single module
      * MicroProfile project.
@@ -207,10 +188,10 @@ public class MavenSingleModProjectTest extends SingleModProjectTestCommon {
      */
     @Override
     public void deleteTestReports() {
-        boolean itReportDeleted = TestUtils.deleteFile(pathToITReport.toFile());
+        boolean itReportDeleted = TestUtils.deleteFile(pathToITReport);
         Assertions.assertTrue(itReportDeleted, () -> "Test report file: " + pathToITReport + " was not be deleted.");
 
-        boolean utReportDeleted = TestUtils.deleteFile(pathToUTReport.toFile());
+        boolean utReportDeleted = TestUtils.deleteFile(pathToUTReport);
         Assertions.assertTrue(utReportDeleted, () -> "Test report file: " + pathToUTReport + " was not be deleted.");
     }
 

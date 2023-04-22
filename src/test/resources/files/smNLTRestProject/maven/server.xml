@@ -14,8 +14,8 @@
         <feature>jsonb-2.0</feature>
     </featureManager>
 
-    <httpEndpoint host="*" httpPort="9091"
-                  httpsPort="9454" id="defaultHttpEndpoint"/>
+    <httpEndpoint host="*" httpPort="9081"
+                  httpsPort="9044" id="defaultHttpEndpoint"/>
 
     <webApplication contextRoot="/" location="singleModGradleRESTNoLTXmlCfg.war"/>
 

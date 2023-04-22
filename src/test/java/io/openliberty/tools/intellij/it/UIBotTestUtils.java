@@ -640,8 +640,8 @@ public class UIBotTestUtils {
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param hoverTarget The string to hover over in the config file
-     * @param hoverFile The string path to the config file
-     * @param popupType the type of popup window that is expected from the hover action
+     * @param hoverFile   The string path to the config file
+     * @param popupType   the type of popup window that is expected from the hover action
      */
     public static void hoverInAppServerCfgFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile, PopupType popupType) {
 
@@ -792,11 +792,11 @@ public class UIBotTestUtils {
      * Inserts content to server.xml. Callers are required to have done a UI copy of the server.xml
      * content prior to calling this method.
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param stanzaSnippet truncated feature name to be used to select full name from popup
-     * @param line line number (in editor) to place cursor for text insertion in server.xml
-     * @param col column number (in editor) to place cursor for text insertion in server.xml
-     * @param type the type of stanza being inserted - FEATURE or CONFIG
+     * @param remoteRobot       The RemoteRobot instance.
+     * @param stanzaSnippet     truncated feature name to be used to select full name from popup
+     * @param line              line number (in editor) to place cursor for text insertion in server.xml
+     * @param col               column number (in editor) to place cursor for text insertion in server.xml
+     * @param type              the type of stanza being inserted - FEATURE or CONFIG
      * @param completeWithPopup use the popup to complete the insertion (or the full text will be typed in)
      */
     public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String stanzaSnippet, int line, int col, InsertionType type, boolean completeWithPopup) {
@@ -914,7 +914,7 @@ public class UIBotTestUtils {
      * Gathers the hover string data from the popup
      *
      * @param remoteRobot the remote robot instance
-     * @param popupType the type of popup window expected
+     * @param popupType   the type of popup window expected
      */
     public static String getHoverStringData(RemoteRobot remoteRobot, PopupType popupType) {
         // get the text from the LS diagnostic hint popup
@@ -950,7 +950,7 @@ public class UIBotTestUtils {
      * Opens the quickfix menu popup and chooses the
      * approriate fix according to the quickfix substring
      *
-     * @param remoteRobot the remote robot instance
+     * @param remoteRobot           the remote robot instance
      * @param quickfixChooserString the text to find in the quick fix menu
      */
     public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
@@ -1138,7 +1138,7 @@ public class UIBotTestUtils {
                 Thread.sleep(secondsToWait * 1000L);
             }
 
-            URL url = new URL(MavenSingleModProjectTest.REMOTE_BOT_URL);
+            URL url = new URL(MavenSingleModMPProjectTest.REMOTE_BOT_URL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
@@ -1618,6 +1618,23 @@ public class UIBotTestUtils {
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Retrying server stop. Cause: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Refreshed the Liberty tool window using the refresh icon.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void refreshLibertyToolWindow(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        // Click on the Liberty toolbar to give it focus.
+        ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
+        libertyTWBar.click();
+
+        String xPath = "//div[@class='LibertyExplorer']//div[@tooltiptext.key='action.io.openliberty.tools.intellij.actions.RefreshLibertyToolbar.text']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
     }
 
     /**

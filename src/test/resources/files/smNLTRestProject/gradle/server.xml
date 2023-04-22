@@ -15,7 +15,7 @@
     </featureManager>
 
     <httpEndpoint host="*" httpPort="9091"
-                  httpsPort="9454" id="defaultHttpEndpoint"/>
+                  httpsPort="9054" id="defaultHttpEndpoint"/>
 
     <webApplication contextRoot="/" location="singleModGradleRESTNoLTXmlCfg.war"/>
 

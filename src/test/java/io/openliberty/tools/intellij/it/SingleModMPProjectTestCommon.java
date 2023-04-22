@@ -19,12 +19,11 @@ import java.time.Duration;
 import java.util.Map;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Common component for running both Maven and Gradle tests.
+ * Holds common tests that use a single module MicroProfile project.
  */
-public abstract class SingleModProjectTestCommon {
+public abstract class SingleModMPProjectTestCommon {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -176,84 +175,6 @@ public abstract class SingleModProjectTestCommon {
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests the Add/Remove project from the tool window actions run from the search everywhere panel .
-     */
-    @Test
-    @Video
-    public void testManualProjectAddRemoveActionUsingSearch() {
-        // Import the project that is not automatically detected by Liberty Tools.
-        UIBotTestUtils.importProject(remoteRobot, getProjectsDirPath(), getSmNLTRestProjectName());
-
-        // Open the dashboard and wait for the project to complete indexing.
-        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-
-        // Validate that the project tree is showing. Note that indexing may start at any time
-        // and automatically remove the existing content from the window (project/message/etc.).
-        TestUtils.sleepAndIgnoreException(10);
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "300");
-
-        try {
-            // Add the project to the Liberty tool window.
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window");
-
-            // Select project from the 'Add Liberty project' dialog.
-            UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
-
-            try {
-                // Validate that the project is displayed in the Liberty tool window.
-                UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "10");
-            } finally {
-                // Remove the project from the Liberty tool window.
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window");
-
-                // Select project from the 'Remote Liberty project' dialog.
-                UIBotTestUtils.selectProjectFromRemoveLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
-
-                // Answer the 'Remove Liberty project' dialog in the affirmative.
-                UIBotTestUtils.respondToRemoveProjectQueryDialog(remoteRobot);
-
-                // Validate that the project was removed. An exception is expected.
-                try {
-                    for (int i = 0; i < 5; i++) {
-                        UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "2");
-                        try {
-                            Thread.sleep(2000);
-                        } catch (Exception ee) {
-                            // Nothing to do. Continue to the next iteration.
-                        }
-                    }
-
-                    fail("Project " + getSmNLTRestProjectName() + " is still present in the Liberty tool window despite it being removed.");
-                } catch (Exception e) {
-                    // The project was not found. Success.
-                }
-            }
-        } finally {
-            // Import the original project.
-            Exception error = null;
-            int maxRetries = 3;
-            for (int i = 0; i < maxRetries; i++) {
-                error = null;
-                try {
-                    UIBotTestUtils.importProject(remoteRobot, getProjectsDirPath(), getSmMPProjectName());
-                    UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-                    UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
-                    break;
-                } catch (Exception e) {
-                    // There are instances in which the import actions are successful, but the
-                    // project view never comes up. Instead, the welcome view is shown. If that is the
-                    // case retry.
-                    error = e;
-                }
-            }
-
-            if (error != null) {
-                fail("Unable to open project " + getSmMPProjectName(), error);
             }
         }
     }
@@ -472,18 +393,6 @@ public abstract class SingleModProjectTestCommon {
      * @return The name of the single module MicroProfile project.
      */
     public abstract String getSmMPProjectName();
-
-
-    /**
-     * Returns the name of the single module REST project that does not meet
-     * the requirements needed to automatically show in the Liberty tool window.
-     * This project's Liberty config file does not have the expected default name,
-     * and the build file does not have any Liberty plugin related entries.
-     *
-     * @return The name of the single module REST project that does not meet the
-     * requirements needed to automatically show in the Liberty tool window.
-     */
-    public abstract String getSmNLTRestProjectName();
 
     /**
      * Returns the expected HTTP response payload associated with the single module
