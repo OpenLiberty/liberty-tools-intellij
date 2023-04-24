@@ -734,8 +734,8 @@ public class UIBotTestUtils {
 
         keyboard.enterText(configNameSnippet);
 
-        // Select the appropriate completion suggestion in the pop-up window that is automatically
-        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+        // Narrow down the config name completion suggestions in the pop-up window that is automatically
+        // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
         // and entry automatically if the completion suggestion windows has one entry only.
         ComponentFixture namePopupWindow = projectFrame.getLookupList();
         RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
@@ -744,7 +744,8 @@ public class UIBotTestUtils {
                 "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
                 () -> namePopupWindow.hasText(configNameSnippet));
 
-        namePopupWindow.findText(configNameSnippet).doubleClick();
+        // now choose the specific item based on the chooser string
+        namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
 
         keyboard.hotKey(VK_END);
         keyboard.enterText("=");
@@ -753,17 +754,17 @@ public class UIBotTestUtils {
             keyboard.enterText(configValueSnippet);
 
             if (completeWithPopup) {
-                // Select the appropriate completion suggestion in the pop-up window that is automatically
+                // Select the appropriate value completion suggestion in the pop-up window that is automatically
                 // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
                 // and entry automatically if the completion suggestion windows has one entry only.
                 ComponentFixture valuePopupWindow = projectFrame.getLookupList();
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                         Duration.ofSeconds(1),
-                        "Waiting for text " + configNameChooserSnippet + " to appear in the completion suggestion pop-up window",
-                        "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
+                        "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
+                        "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
                         () -> valuePopupWindow.hasText(configValueSnippet));
 
-                valuePopupWindow.findText(configValueSnippet).doubleClick();
+                valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
             }
         // let the auto-save function of intellij save the file before testing it
         if (remoteRobot.isMac()) {
