@@ -165,12 +165,13 @@ public class DebugModeHandler {
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 120; // wait up to 60s for dev mode to start (polling rate 2 per second, 500ms)
-        int envReadMinLimit = 8; // don't check server.env for first 4s
-        int envReadInterval = 4; // recheck server.env every 2s
+        int retryLimit = 360; // wait up to 3 minutes for dev mode to start (polling rate 2 per second, 500ms)
 
         // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
         Path serverEnvPath = getServerEnvPath(libertyModule);
+        // If the server.env has not been created yet then someone did a 'clean' before starting
+        boolean cleanStart = serverEnvPath == null;
+        Path serverEnvBakPath = null;
 
         for (int retryCount = 0; retryCount < retryLimit; retryCount++) {
             // check if cancelled
@@ -178,35 +179,38 @@ public class DebugModeHandler {
                 return null;
             }
 
-            // The server.env path may not yet exist. If it is null, retry.
+            // Detect if dev mode has started
             if (serverEnvPath == null) {
                 serverEnvPath = getServerEnvPath(libertyModule);
+            } else if (serverEnvBakPath == null) {
+                serverEnvBakPath = serverEnvPath.resolveSibling(WLP_SERVER_ENV_BAK_FILE_NAME);
             }
 
             // There is a small window in which the allocated random port could have been taken by another process.
             // Check the deployed server.env at the default deployment location (wlp/usr/servers/<serverName>) for the WLP_DEBUG_ADDRESS
             // property. If the port is already in use, dev mode will allocate a random debug port and reflect that by updating the
-            // server.env file.
-            if ((retryCount >= envReadMinLimit) && (retryCount < retryLimit) && (retryCount % envReadInterval == 0)) {
-                // Look for the server.env.bak file before checking the server.env file.
-                Path serverEnvBakPath = (serverEnvPath != null) ? serverEnvPath.resolveSibling(WLP_SERVER_ENV_BAK_FILE_NAME) : null;
-                if (serverEnvBakPath != null && serverEnvBakPath.toFile().exists()) {
-                    String envPortStr = readDebugPortFromServerEnv(serverEnvPath.toFile());
-                    if (envPortStr != null) {
-                        int envPort = Integer.parseInt(envPortStr);
-                        if (envPort != debugPort) {
-                            debugPort = envPort;
-                        }
+            // server.env file. Therefore, first we detect if dev mode has started.
+            if ((cleanStart && serverEnvPath != null) ||
+                    (serverEnvBakPath != null && serverEnvBakPath.toFile().exists())) {
+                // Dev mode has started and updated server.env. server.env.bak only exists when dev mode is running assuming
+                // dev mode did not crash. If it did crash we will be trying the old port number until dev mode really
+                // updates the server.env. This is the risk we assume in the case of catastrophic failure.
+                String envPortStr = readDebugPortFromServerEnv(serverEnvPath.toFile());
+                if (envPortStr != null) {
+                    int envPort = Integer.parseInt(envPortStr);
+                    if (envPort != debugPort) {
+                        debugPort = envPort;
                     }
                 }
+                try (Socket socket = new Socket(host, debugPort)) {
+                    socket.getOutputStream().write(handshakeString);
+                    return String.valueOf(debugPort);
+                } catch (ConnectException e) {
+                    // After dev mode starts it still takes a few seconds for the runtime to start.
+                    LOGGER.trace(String.format("ConnectException waiting for runtime to start on port %d", debugPort));
+                }
             }
-
-            try (Socket socket = new Socket(host, debugPort)) {
-                socket.getOutputStream().write(handshakeString);
-                return String.valueOf(debugPort);
-            } catch (ConnectException e) {
-                TimeUnit.MILLISECONDS.sleep(500);
-            }
+            TimeUnit.MILLISECONDS.sleep(500);
         }
         throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
     }
