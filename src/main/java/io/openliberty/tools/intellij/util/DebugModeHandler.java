@@ -165,7 +165,7 @@ public class DebugModeHandler {
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 360; // wait up to 3 minutes for dev mode to start (polling rate 2 per second, 500ms)
+        int retryLimit = 60; // wait up to 3 minutes for dev mode to start (polling rate 20 per minute, 3s)
 
         // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
         Path serverEnvPath = getServerEnvPath(libertyModule);
@@ -210,7 +210,7 @@ public class DebugModeHandler {
                     LOGGER.trace(String.format("ConnectException waiting for runtime to start on port %d", debugPort));
                 }
             }
-            TimeUnit.MILLISECONDS.sleep(500);
+            TimeUnit.SECONDS.sleep(3);
         }
         throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
     }
