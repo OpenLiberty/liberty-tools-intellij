@@ -47,16 +47,15 @@ public class TestUtils {
      * @param testName       The name of the test calling this method.
      * @param wlpInstallPath The liberty installation relative path.
      * @param maxAttempts    The number of retries to validate the server has stopped.
-     * @param failOnError    The indicator to fail the test on error.
+     * @param failOnNoStop   The indicator to fail if the server did not stop.
      */
-    public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnError) {
+    public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnNoStop) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
         String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
         Exception error = null;
-
 
         // Find the server stopped message.
         for (int retryCount = 0; retryCount < maxAttempts; retryCount++) {
@@ -85,8 +84,9 @@ public class TestUtils {
 
         if (!foundStoppedMsg) {
             // If instructed not to fail the test on error, report the last error back to the caller.
-            if (!failOnError) {
-                throw new RuntimeException("Unabled to verify that the Liberty server stopped.", error);
+            if (!failOnNoStop) {
+                String cause = (error != null) ? "Cause: " + error.getMessage() : "Cause: " + SEVER_STOPPED_MSG + " not found in server log.";
+                throw new RuntimeException("Unable to verify that the Liberty server stopped. " + cause);
             }
 
             // Print the Liberty server's messages.log and fail.
@@ -94,9 +94,13 @@ public class TestUtils {
             printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
             String msg = testName + ":validateLibertyServerStopped: Exit. Timed out waiting for message " + SEVER_STOPPED_MSG + " in log:" + wlpMsgLogPath;
             printTrace(TraceSevLevel.ERROR, msg);
-            Assertions.fail(msg, error);
+            if (error == null) {
+                Assertions.fail(msg);
+            } else {
+                Assertions.fail(msg, error);
+            }
         } else {
-            printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Exit. The server stopped Successfully.");
+            printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Exit. The server stopped successfully.");
         }
     }
 
