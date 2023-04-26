@@ -204,7 +204,7 @@ public class LanguageServerWrapper {
                         } catch (Exception e) {
                             LOGGER.warn(e.getLocalizedMessage(), e);
                         }
-                        });
+                    });
                 Launcher<? extends LanguageServer> launcher = Launcher.createLauncher(client, serverDefinition.getServerInterface(),
                         this.lspStreamProvider.getInputStream(), this.lspStreamProvider.getOutputStream(),
                         executorService, wrapper);
