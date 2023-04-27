@@ -147,7 +147,8 @@ main() {
     # Run the tests
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
     ./gradlew test
-
+    #./gradlew test --tests *LSTest*
+    
     # If there were any errors, gather some debug data before exiting.
     rc=$?
     if [ "$rc" -ne 0 ]; then
