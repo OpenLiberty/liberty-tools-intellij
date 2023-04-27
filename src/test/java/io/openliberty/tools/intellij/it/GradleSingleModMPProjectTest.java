@@ -16,20 +16,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a Gradle project.
+ * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
  */
-public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
+public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
     /**
      * Single module Microprofile project name.
      */
     private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
-
-    /**
-     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
-     */
-    private final String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
-
+    
     /**
      * The path to the folder containing the test projects.
      */
@@ -114,20 +109,6 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
     }
 
     /**
-     * Returns the name of the single module REST project that does not meet
-     * the requirements needed to automatically show in the Liberty tool window.
-     * This project's Liberty config file does not the expected name and the
-     * build file does not have any Liberty plugin related entries.
-     *
-     * @return The name of the single module REST project that does not meet the
-     * requirements needed to automatically show in the Liberty tool window.
-     */
-    @Override
-    public String getSmNLTRestProjectName() {
-        return SM_NLT_REST_PROJECT_NAME;
-    }
-
-    /**
      * Returns the expected HTTP response payload associated with the single module
      * MicroProfile project.
      *
@@ -194,7 +175,7 @@ public class GradleSingleModProjectTest extends SingleModProjectTestCommon {
      */
     @Override
     public void deleteTestReports() {
-        boolean testReportDeleted = TestUtils.deleteFile(TEST_REPORT_PATH.toFile());
+        boolean testReportDeleted = TestUtils.deleteFile(TEST_REPORT_PATH);
         Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + TEST_REPORT_PATH + " was not be deleted.");
     }
 
