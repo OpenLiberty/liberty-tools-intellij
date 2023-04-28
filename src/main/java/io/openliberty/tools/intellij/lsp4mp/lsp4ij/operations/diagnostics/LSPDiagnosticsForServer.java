@@ -26,7 +26,6 @@ import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LSPIJUtils;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServerWrapper;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions.LSPCodeActionIntentionAction;
 import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.net.URI;
 import java.util.*;
@@ -49,7 +48,7 @@ public class LSPDiagnosticsForServer {
 
     private final LanguageServerWrapper languageServerWrapper;
 
-    private final boolean codeActionsSupported;
+    private final boolean codeActionSupported;
 
     private final VirtualFile file;
 
@@ -61,9 +60,14 @@ public class LSPDiagnosticsForServer {
 
     public LSPDiagnosticsForServer(LanguageServerWrapper languageServerWrapper, VirtualFile file) {
         this.languageServerWrapper = languageServerWrapper;
-        this.codeActionsSupported = isCodeActionResolveSupported();
+        this.codeActionSupported = isCodeActionSupported(languageServerWrapper);
         this.file = file;
         this.diagnostics = Collections.emptyMap();
+    }
+
+    private static boolean isCodeActionSupported(LanguageServerWrapper languageServerWrapper) {
+        ServerCapabilities serverCapabilities = languageServerWrapper.getServerCapabilities();
+        return serverCapabilities != null && LSPIJUtils.hasCapability(serverCapabilities.getCodeActionProvider());
     }
 
     /**
@@ -168,24 +172,6 @@ public class LSPDiagnosticsForServer {
         return diagnostics.keySet();
     }
 
-    private boolean isCodeActionResolveSupported() {
-        ServerCapabilities capabilities = this.languageServerWrapper.getServerCapabilities();
-        if (capabilities != null) {
-            Either<Boolean, CodeActionOptions> caProvider = capabilities.getCodeActionProvider();
-            if (caProvider == null) {
-                return false;
-            }
-            if (caProvider.isLeft()) {
-                // It is wrong, but we need to parse the registerCapability
-                return caProvider.getLeft();
-            } else if (caProvider.isRight()) {
-                CodeActionOptions options = caProvider.getRight();
-                return options.getResolveProvider().booleanValue();
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns Intellij quickfixes for the given diagnostic if there available.
      *
@@ -193,7 +179,7 @@ public class LSPDiagnosticsForServer {
      * @return Intellij quickfixes for the given diagnostic if there available.
      */
     public List<IntentionAction> getQuickFixesFor(Diagnostic diagnostic) {
-        if (!codeActionsSupported || diagnostics.isEmpty()) {
+        if (!codeActionSupported || diagnostics.isEmpty()) {
             return Collections.emptyList();
         }
         // Get future which load QuickFix for the given diagnostic
