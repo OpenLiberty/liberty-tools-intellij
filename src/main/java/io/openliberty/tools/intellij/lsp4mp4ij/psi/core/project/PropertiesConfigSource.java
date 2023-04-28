@@ -14,6 +14,7 @@ import org.eclipse.lsp4mp.commons.utils.PropertyValueExpander;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class PropertiesConfigSource extends AbstractConfigSource<Properties> {
 	}
 
 	@Override
-	protected Properties loadConfig(InputStream input) throws IOException {
+	protected Properties loadConfig(Reader input) throws IOException {
 		propertyValueExpander = null;
 		Properties properties = new Properties();
 		properties.load(input);
