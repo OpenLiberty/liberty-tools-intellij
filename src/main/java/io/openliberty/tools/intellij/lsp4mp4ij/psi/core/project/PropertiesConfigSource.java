@@ -13,7 +13,6 @@ import com.intellij.openapi.module.Module;
 import org.eclipse.lsp4mp.commons.utils.PropertyValueExpander;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
