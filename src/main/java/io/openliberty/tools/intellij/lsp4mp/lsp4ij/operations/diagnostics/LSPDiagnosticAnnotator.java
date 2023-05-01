@@ -43,8 +43,6 @@ public class LSPDiagnosticAnnotator extends ExternalAnnotator<LSPVirtualFileWrap
     @Nullable
     @Override
     public LSPVirtualFileWrapper collectInformation(@NotNull PsiFile file, @NotNull Editor editor, boolean hasErrors) {
-        // make sure LS is initialized for this document TODO: probably should find a way to do this on file open?
-        LanguageServiceAccessor.getInstance(file.getProject()).getLanguageServers(editor.getDocument(), (capabilities) -> { return true; });
         try {
             return LSPVirtualFileWrapper.getLSPVirtualFileWrapper(file.getVirtualFile());
         } catch (Exception e) {

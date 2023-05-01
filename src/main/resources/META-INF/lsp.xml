@@ -88,4 +88,9 @@
         <externalAnnotator language="JAVA" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
     </extensions>
 
+    <project-components>
+        <component>
+            <implementation-class>io.openliberty.tools.intellij.lsp4mp.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
+        </component>
+    </project-components>
 </idea-plugin>
