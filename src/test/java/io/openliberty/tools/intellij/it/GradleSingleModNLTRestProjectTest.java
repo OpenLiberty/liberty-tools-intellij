@@ -14,12 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests that use a single module non Liberty Tools compliant REST Gradle project.
@@ -107,49 +102,6 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
     @Video
     @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/299")
     public void testsRefreshProjectWithLTBuildCfgOnly() {
-        // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
-
-        // Replace the current build file with the file containing Liberty plugin config.
-        Path newCfg = Paths.get(getHelperFilesDirPath(), "pluginsDSLOnlyDepDef.build.gradle");
-        Path originalCfg = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), getBuildFileName());
-        Path backupCfg = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), getBuildFileName() + ".bak");
-        try {
-            Files.copy(originalCfg, backupCfg, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            fail("Unable to backup " + originalCfg + " to " + backupCfg + ".", e);
-        }
-
-        try {
-            Files.copy(newCfg, originalCfg, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            fail("Unable to copy " + newCfg + " to " + originalCfg + ".", e);
-        }
-
-        // User the refresh icon on the Liberty tool window.
-        UIBotTestUtils.refreshLibertyToolWindow(remoteRobot);
-
-        try {
-            // Validate that the project is displayed in the Liberty tool window.
-            UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "10");
-        } finally {
-            // Replace the current build file with the backup file.
-            try {
-                Files.copy(backupCfg, originalCfg, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-            } catch (Exception e) {
-                fail("Unable to copy " + backupCfg + " to " + originalCfg + ".", e);
-            }
-
-            // Delete the backup file.
-            if (!TestUtils.deleteFile(backupCfg)) {
-                fail("Unable to delete " + backupCfg);
-            }
-
-            // Refresh the Liberty tool window using the refresh icon on the toolbar.
-            UIBotTestUtils.refreshLibertyToolWindow(remoteRobot);
-
-            // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
-        }
+        testsRefreshProjectWithLTBuildCfgOnly("pluginsDSLOnlyDepDef.build.gradle");
     }
 }
