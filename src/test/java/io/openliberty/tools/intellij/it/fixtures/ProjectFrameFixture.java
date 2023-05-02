@@ -56,12 +56,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the ActionMenu class.
      *
-     * @param xpathVars The Locator custom variables: text
+     * @param xpathVars The Locator custom variables: text, waitTime(secs)
      * @return The ComponentFixture object associated with the ActionMenu class.
      */
     public ComponentFixture getActionMenu(String... xpathVars) {
         String text = xpathVars[0];
-        return find(ComponentFixture.class, byXpath("//div[@class='ActionMenu' and @text='" + text + "']"), Duration.ofSeconds(10));
+        String waitTime = xpathVars[1];
+        return find(ComponentFixture.class,
+                byXpath("//div[@class='ActionMenu' and @text='" + text + "']"),
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
@@ -145,15 +148,16 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the ProjectViewTree class.
      *
-     * @param xpathVars The Locator custom variables: text
+     * @param xpathVars The Locator custom variables: text, waitTime(seconds)
      * @return The ComponentFixture object associated with the ProjectViewTree class.
      */
     public ComponentFixture getProjectViewTree(String... xpathVars) {
         String visibleText = xpathVars[0];
+        String waitTime = xpathVars[0];
 
         return find(ComponentFixture.class,
                 byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
-                Duration.ofMinutes(1));
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
@@ -173,15 +177,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     /**
      * Returns the ComponentFixture object associated with the StripeButton class.
      *
-     * @param xpathVars The Locator custom variables: text
+     * @param xpathVars The Locator custom variables: text, waitTime(secs)
      * @return The ComponentFixture object associated with the StripeButton class.
      */
     public ComponentFixture getStripeButton(String... xpathVars) {
         String text = xpathVars[0];
-
+        String waitTime = xpathVars[1];
         return find(ComponentFixture.class,
                 byXpath("//div[@class='StripeButton' and @text='" + text + "']"),
-                Duration.ofSeconds(10));
+                Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
@@ -300,5 +304,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
         return find(ContainerFixture.class, byXpath("//div[@class='RunConfigurationsComboBoxButton']"), Duration.ofSeconds(5));
+    }
+
+    /**
+     * Returns true if the associated input component is enabled. False, otherwise.
+     *
+     * @param component The component fixture to query.
+     * @return True if the associated input component is enabled. False, otherwise.
+     */
+    public boolean isComponentEnabled(ComponentFixture component) {
+        return component.callJs("component.isEnabled();", false);
     }
 }
