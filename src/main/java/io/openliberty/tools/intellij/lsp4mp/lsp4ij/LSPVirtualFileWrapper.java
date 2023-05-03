@@ -103,4 +103,11 @@ public class LSPVirtualFileWrapper {
         return wrapper;
     }
 
+    public static void dispose(VirtualFile file) {
+        LSPVirtualFileWrapper wrapper = file.getUserData(KEY);
+        if (wrapper != null) {
+            wrapper.diagnosticsPerServer.clear();
+            file.putUserData(KEY, null);
+        }
+    }
 }
