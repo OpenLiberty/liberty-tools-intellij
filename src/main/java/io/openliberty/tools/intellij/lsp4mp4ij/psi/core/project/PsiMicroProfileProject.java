@@ -37,10 +37,10 @@ public class PsiMicroProfileProject {
 
 	private final Module javaProject;
 
-	private List<IConfigSource> configSources;
+	private volatile List<IConfigSource> configSources;
 
-	private transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
-	private transient PropertyValueExpander propertyValueExpander = null;
+	private volatile transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
+	private volatile transient PropertyValueExpander propertyValueExpander = null;
 
 	public PsiMicroProfileProject(Module javaProject) {
 		this.javaProject = javaProject;
@@ -62,16 +62,20 @@ public class PsiMicroProfileProject {
 	 */
 	public String getProperty(String propertyKey, String defaultValue) {
 
+		IConfigSourcePropertiesProvider aggregatedPropertiesProvider = this.aggregatedPropertiesProvider;
 		if (aggregatedPropertiesProvider == null) {
 			aggregatedPropertiesProvider = getAggregatedPropertiesProvider();
+			this.aggregatedPropertiesProvider = aggregatedPropertiesProvider;
 		}
 
 		String unresolved = aggregatedPropertiesProvider.getValue(propertyKey);
 		if (unresolved == null) {
 			return defaultValue;
 		} else if (unresolved.contains("${")) {
+			PropertyValueExpander propertyValueExpander = this.propertyValueExpander;
 			if (propertyValueExpander == null) {
 				propertyValueExpander = new PropertyValueExpander(aggregatedPropertiesProvider);
+				this.propertyValueExpander = propertyValueExpander;
 			}
 			String expandedValue = propertyValueExpander.getValue(propertyKey);
 			if (expandedValue == null) {
@@ -181,8 +185,10 @@ public class PsiMicroProfileProject {
 	}
 
 	public List<IConfigSource> getConfigSources() {
+		List<IConfigSource> configSources = this.configSources;
 		if (configSources == null) {
 			configSources = loadConfigSources(javaProject);
+			this.configSources = configSources;
 		}
 		return configSources;
 	}
@@ -205,10 +211,11 @@ public class PsiMicroProfileProject {
 	 * @return the loaded config sources.
 	 */
 	private synchronized List<IConfigSource> loadConfigSources(Module javaProject) {
-		if (configSources != null) {
+		final List<IConfigSource> sources = configSources;
+		if (sources != null) {
 			// Case when there are several Threads which load config sources, the second
 			// Thread should not reload the config sources again.
-			return configSources;
+			return sources;
 		}
 		List<IConfigSource> configSources = new ArrayList<>();
 		VirtualFile outputFile = CompilerPaths.getModuleOutputDirectory(javaProject, false);
