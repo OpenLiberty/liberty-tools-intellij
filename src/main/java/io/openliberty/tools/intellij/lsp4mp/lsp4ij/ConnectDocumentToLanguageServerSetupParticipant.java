@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -21,10 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 
+/**
+ * Track file opened / closed to start language servers / disconnect file from language servers.
+ */
 public class ConnectDocumentToLanguageServerSetupParticipant implements ProjectComponent, FileEditorManagerListener {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectDocumentToLanguageServerSetupParticipant.class);
 
     private Project project;
@@ -42,21 +45,29 @@ public class ConnectDocumentToLanguageServerSetupParticipant implements ProjectC
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document != null) {
-            LanguageServiceAccessor.getInstance(source.getProject()).getLanguageServers(document, capabilities -> true);
+            // Force the start of all languages servers mapped with the given file
+            LanguageServiceAccessor.getInstance(source.getProject())
+                    .getLanguageServers(document, capabilities -> true);
         }
     }
 
     @Override
     public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
         URI uri = LSPIJUtils.toUri(file);
-        if (file != null) {
+        if (uri != null) {
             try {
-                LanguageServiceAccessor.getInstance(source.getProject()).getLSWrappers(file, capabilities -> true).forEach(wrapper -> wrapper.disconnect(uri));
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+                // Remove the cached file wrapper if needed
+                LSPVirtualFileWrapper.dispose(file);
+                // Disconnect the given file from all language servers
+                LanguageServiceAccessor.getInstance(source.getProject())
+                        .getLSWrappers(file, capabilities -> true)
+                        .forEach(
+                                wrapper -> wrapper.disconnect(uri)
+                        );
+            } catch (Exception e) {
+                LOGGER.warn("Error while disconnecting the file '" + uri + "' from all language servers", e);
             }
         }
-
     }
 
 }
