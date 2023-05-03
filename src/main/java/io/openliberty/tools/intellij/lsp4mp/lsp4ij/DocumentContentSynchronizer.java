@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -27,10 +28,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class DocumentContentSynchronizer implements DocumentListener {
+
+    public final static Key<Set<DocumentContentSynchronizer>> KEY = Key.create(DocumentContentSynchronizer.class.getName());
     private final static Logger LOGGER = LoggerFactory.getLogger(DocumentContentSynchronizer.class);
 
     private final @Nonnull
@@ -103,13 +108,33 @@ public class DocumentContentSynchronizer implements DocumentListener {
         }
     }
 
+    public void documentFullRefresh(Document document) {
+        if (syncKind == TextDocumentSyncKind.None) {
+            return;
+        }
+        checkDocument(document);
+
+        final TextDocumentContentChangeEvent changeEvent = new TextDocumentContentChangeEvent();
+        changeEvent.setText(document.getText());
+        final List<TextDocumentContentChangeEvent> events = Collections.singletonList(changeEvent);
+
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            sendDidChangeEvents(events);
+        } else {
+            PsiDocumentManager.getInstance(languageServerWrapper.getProject()).performForCommittedDocument(document, () -> sendDidChangeEvents(events));
+        }
+    }
+
     private void sendDidChangeEvents() {
         List<TextDocumentContentChangeEvent> events = null;
         synchronized (changeEvents) {
             events = new ArrayList<>(changeEvents);
             changeEvents.clear();
         }
+        sendDidChangeEvents(events);
+    }
 
+    private void sendDidChangeEvents(List<TextDocumentContentChangeEvent> events) {
         DidChangeTextDocumentParams changeParamsToSend = new DidChangeTextDocumentParams(new VersionedTextDocumentIdentifier(), events);
         changeParamsToSend.getTextDocument().setUri(fileUri.toString());
         changeParamsToSend.getTextDocument().setVersion(++version);
@@ -215,9 +240,13 @@ public class DocumentContentSynchronizer implements DocumentListener {
     }
 
     private void checkEvent(DocumentEvent event) {
-        if (this.document != event.getDocument()) {
+        checkDocument(event.getDocument());
+    }
+
+    private void checkDocument(Document document) {
+        if (this.document != document) {
             logDocument("Listener document", this.document);
-            logDocument("Event document", event.getDocument());
+            logDocument("Event document", document);
             throw new IllegalStateException("Synchronizer should apply to only a single document, which is the one it was instantiated for"); //$NON-NLS-1$
         }
     }
