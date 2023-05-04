@@ -243,10 +243,10 @@ public class DocumentContentSynchronizer implements DocumentListener {
         checkDocument(event.getDocument());
     }
 
-    private void checkDocument(Document document) {
-        if (this.document != document) {
+    private void checkDocument(Document eventDocument) {
+        if (this.document != eventDocument) {
             logDocument("Listener document", this.document);
-            logDocument("Event document", document);
+            logDocument("Event document", eventDocument);
             throw new IllegalStateException("Synchronizer should apply to only a single document, which is the one it was instantiated for"); //$NON-NLS-1$
         }
     }
