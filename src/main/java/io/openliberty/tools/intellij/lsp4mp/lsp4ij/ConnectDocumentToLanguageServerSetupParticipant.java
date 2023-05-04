@@ -55,7 +55,10 @@ public class ConnectDocumentToLanguageServerSetupParticipant implements ProjectC
     public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
         URI uri = LSPIJUtils.toUri(file);
         if (uri != null) {
-            try {
+            try {                
+                // TODO: revisit this code, because it can restart language servers
+                // when a diagnostics is published after the file is closed and the project is closed
+                // See https://github.com/redhat-developer/intellij-quarkus/issues/840
                 // Remove the cached file wrapper if needed
                 LSPVirtualFileWrapper.dispose(file);
                 // Disconnect the given file from all language servers
