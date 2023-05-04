@@ -44,7 +44,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             // find all Liberty run configs associated with this build file
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
                 VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
-                if (vBuildFile.equals(libertyModule.getBuildFile())) {
+                if (vBuildFile != null && vBuildFile.equals(libertyModule.getBuildFile())) {
                     libertyModuleSettings.add(setting);
                 }
         });
