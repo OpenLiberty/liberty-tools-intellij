@@ -210,6 +210,9 @@ public class PsiMicroProfileProject {
 			docsToNotify = documentsToNotify;
 			documentsToNotify = new WeakHashMap<>();
 		}
+		// Each document in the map contains an annotation or other structure that depends on a config source.
+		// The change that caused the cache to be evicted may have affected the validity of those structures.
+		// Fire events to the language servers to force diagnostics to be recomputed for each of those documents.
 		docsToNotify.forEach((k,v) -> {
 			final Document document = v.get();
 			if (document != null) {
