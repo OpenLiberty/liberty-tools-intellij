@@ -255,7 +255,7 @@ public class PsiTypeUtils {
         Module module = ProjectFileIndex.getInstance(project).getModuleForFile(directory);
         if (module != null) {
             VirtualFile[] roots = ModuleRootManager.getInstance(module).getContentRoots();
-            if (roots != null) {
+            if (roots.length > 0) {
                 VirtualFile moduleRoot = roots[0]; // choose any
                 String path = VfsUtilCore.getRelativePath(directory, moduleRoot);
                 if (path != null) {
