@@ -93,7 +93,7 @@ public class UIBotTestUtils {
      * Liberty configuration entries.
      */
     public enum ConfigEntries {
-        NAME, PARAMS
+        NAME, LIBERTYPROJ, PARAMS
     }
 
     /**
@@ -1455,6 +1455,19 @@ public class UIBotTestUtils {
                     () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
             String configName = nameTextField.getText();
             map.put(ConfigEntries.NAME.toString(), configName);
+
+            // Get the project path
+            locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
+            ComboBoxFixture projBldFileBox = libertyCfgDialog.comboBox(locator, Duration.ofSeconds(10));
+
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the combo box labeled Liberty project on the Liberty edit config dialog to be populated",
+                    "The combo box labeled Liberty project on the Liberty edit config dialog was not populated",
+                    () -> projBldFileBox.listValues().size() != 0);
+            List<String> entries = projBldFileBox.listValues();
+            String projBldFilePath = entries.get(0);
+            map.put(ConfigEntries.LIBERTYPROJ.toString(), projBldFilePath);
 
             // Get the dev mode parameters
             ComponentFixture startParamsTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
