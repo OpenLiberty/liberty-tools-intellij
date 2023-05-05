@@ -53,7 +53,7 @@ public class LSPVirtualFileWrapper {
     /**
      * Update the new published diagnostics for the given language server id.
      *
-     * @param diagnostics      the new diagnostics list
+     * @param diagnostics           the new diagnostics list
      * @param languageServerWrapper the language server id which has published those diagnostics.
      */
     public void updateDiagnostics(List<Diagnostic> diagnostics, LanguageServerWrapper languageServerWrapper) {
@@ -75,6 +75,10 @@ public class LSPVirtualFileWrapper {
             return Collections.emptyList();
         }
         return diagnosticsPerServer.values();
+    }
+
+    public void dispose() {
+        this.diagnosticsPerServer.clear();
     }
 
     // ------------------------ Static accessor
@@ -106,7 +110,7 @@ public class LSPVirtualFileWrapper {
     public static void dispose(VirtualFile file) {
         LSPVirtualFileWrapper wrapper = file.getUserData(KEY);
         if (wrapper != null) {
-            wrapper.diagnosticsPerServer.clear();
+            wrapper.dispose();
             file.putUserData(KEY, null);
         }
     }
