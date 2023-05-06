@@ -120,7 +120,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public String getSmMPProjectName() {
         return SM_MP_PROJECT_NAME;
     }
-    
+
     /**
      * Returns the expected HTTP response payload associated with the single module
      * MicroProfile project.
@@ -250,7 +250,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         // Validate that the start with params action brings up the configuration previously used.
         try {
             UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true);
-            Map<String, String> cfgEntries = UIBotTestUtils.getLibertyConfigEntries(remoteRobot);
+            Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(getSmMPProjectName(), activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + getSmMPProjectName());
             String activeCfgParams = cfgEntries.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
@@ -344,7 +344,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         // Validate that the start with params action brings up the configuration previously used.
         try {
             UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start...");
-            Map<String, String> cfgEntries = UIBotTestUtils.getLibertyConfigEntries(remoteRobot);
+            Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(getSmMPProjectName(), activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + getSmMPProjectName());
             String activeCfgParams = cfgEntries.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
@@ -437,7 +437,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         // Validate that the start with params action brings up the configuration previously used.
         try {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...");
-            Map<String, String> cfgEntries = UIBotTestUtils.getLibertyConfigEntries(remoteRobot);
+            Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(getSmMPProjectName(), activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + getSmMPProjectName());
             String activeCfgParams = cfgEntries.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());

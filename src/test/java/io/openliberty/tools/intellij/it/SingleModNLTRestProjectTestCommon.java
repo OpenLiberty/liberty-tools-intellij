@@ -158,11 +158,20 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @Test
     @Video
     public void testsRefreshProjectWithLTBuildCfgOnlyWithBldScriptBlock() {
+        testsRefreshProjectWithLTBuildCfgOnly(getBuildFileName());
+    }
+
+    /**
+     * Tests:
+     * - Refresh button on Liberty tool window toolbar.
+     * - Detecting a project with a valid Liberty M/G plugin configuration in build file only.
+     */
+    public void testsRefreshProjectWithLTBuildCfgOnly(String buildFile) {
         // Validate that the Liberty tool window project tree is not showing. No projects are expected.
         UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
 
         // Replace the current build file with the file containing Liberty plugin config.
-        Path newCfg = Paths.get(getHelperFilesDirPath(), getBuildFileName());
+        Path newCfg = Paths.get(getHelperFilesDirPath(), buildFile);
         Path originalCfg = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), getBuildFileName());
         Path backupCfg = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), getBuildFileName() + ".bak");
         try {

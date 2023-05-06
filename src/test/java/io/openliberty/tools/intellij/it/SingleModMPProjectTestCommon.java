@@ -133,7 +133,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Validate that the start with params action brings up the configuration previously used.
         try {
             UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
-            Map<String, String> cfgEntries = UIBotTestUtils.getLibertyConfigEntries(remoteRobot);
+            Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(getSmMPProjectName(), activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + getSmMPProjectName());
             String activeCfgParams = cfgEntries.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
@@ -347,6 +347,113 @@ public abstract class SingleModMPProjectTestCommon {
                 // Cleanup configurations.
                 UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
             }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Customized configuration history preservation across multiple configs.
+     * - Customized configuration change preservation across multiple configs.
+     */
+    @Test
+    @Video
+    public void testMultipleConfigEditHistory() {
+        String testName = "testMultipleConfigEditHistory";
+
+        // The path of the project build file expected in the configuration. This path constant for this test.
+        String projectBldFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add two a new Liberty configurations.
+        String cfgUID1 = "mCfgHist1";
+        String configName1 = cfgUID1 + "-" + getSmMPProjectName();
+        String cfgPrjBldPath1 = projectBldFilePath;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName1);
+        String cfgUID2 = "mCfgHist2";
+        String configName2 = cfgUID2 + "-" + getSmMPProjectName();
+        String cfgPrjBldPath2 = projectBldFilePath;
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName2);
+
+        try {
+            // Find newly created config 1 in the config selection box on the toolbar of the project frame.
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName1);
+
+            // Validate that selected configuration 1 shows the expected data. The dialog is opened using the start... action.
+            // Note that depending on the size of the dialog, the project config file path shown in the Liberty project
+            // combo box, may be truncated. Therefore, this check is just a best effort approach to make sure that
+            // there is a value in the box, and that it approximates the expected value.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
+            Map<String, String> cfgEntries1 = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+            String activeCfgName1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.NAME.toString());
+            Assertions.assertEquals(configName1, activeCfgName1, "The active config name " + activeCfgName1 + " does not match expected name of " + configName1);
+            String activeCfgProjBldPath1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
+            activeCfgProjBldPath1 = (activeCfgProjBldPath1.endsWith("...")) ? activeCfgProjBldPath1.replace("...", "") : activeCfgProjBldPath1;
+            Assertions.assertTrue(cfgPrjBldPath1.contains(activeCfgProjBldPath1), "The active config project build file path " + activeCfgProjBldPath1 + " is not contained in expected path of " + cfgPrjBldPath1);
+            String activeCfgParams1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
+            Assertions.assertEquals("", activeCfgParams1, "The active config params " + activeCfgParams1 + " does not match expected params of blank");
+
+            // Find newly created config 2 in the config selection box on the toolbar of the project frame.
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName2);
+
+            // Validate that selected configuration 2 shows the expected data. The dialog is opened using the start... action.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
+            Map<String, String> cfgEntries2 = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+            String activeCfgName2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.NAME.toString());
+            Assertions.assertEquals(configName2, activeCfgName2, "The active config name " + activeCfgName2 + " does not match expected name of " + configName2);
+            String activeCfgProjBldPath2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
+            activeCfgProjBldPath2 = (activeCfgProjBldPath2.endsWith("...")) ? activeCfgProjBldPath2.replace("...", "") : activeCfgProjBldPath2;
+            Assertions.assertTrue(cfgPrjBldPath2.contains(activeCfgProjBldPath2), "The active config project build file path " + activeCfgProjBldPath2 + " is not contained expected path of " + cfgPrjBldPath2);
+            String activeCfgParams2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
+            Assertions.assertEquals("", activeCfgParams2, "The active config params " + activeCfgParams2 + " does not match expected params of blank");
+
+            // Edit configuration 1
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName1);
+            String cfgUID11 = "mCfgHist11";
+            String newCfgName1 = cfgUID11 + "-" + getSmMPProjectName();
+            String newCfgStartParams1 = getStartParams() + " " + cfgUID11;
+            String newCfgProjBldPath1 = projectBldFilePath;
+            UIBotTestUtils.editLibertyConfigUsingEditConfigDialog(remoteRobot, newCfgName1, newCfgStartParams1);
+
+            // Edit configuration 2
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName2);
+            String cfgUID22 = "mCfgHist22";
+            String newCfgName2 = cfgUID22 + "-" + getSmMPProjectName();
+            String newCfgProjBldPath2 = projectBldFilePath;
+            String newCfgStartParams2 = getStartParams() + " " + cfgUID22;
+            UIBotTestUtils.editLibertyConfigUsingEditConfigDialog(remoteRobot, newCfgName2, newCfgStartParams2);
+
+            // Find newly created config 1 in the config selection box on the toolbar of the project frame.
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, newCfgName1);
+
+            // Validate that selected configuration 1 shows the expected data. The dialog is opened using the start... action.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
+            Map<String, String> newCfgEntries1 = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+            String newActiveCfgName1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.NAME.toString());
+            Assertions.assertEquals(newCfgName1, newActiveCfgName1, "The active config name " + newActiveCfgName1 + " does not match expected name of " + newCfgName1);
+            String newActiveCfgProjBldPath1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
+            newActiveCfgProjBldPath1 = (newActiveCfgProjBldPath1.endsWith("...")) ? newActiveCfgProjBldPath1.replace("...", "") : newActiveCfgProjBldPath1;
+            Assertions.assertTrue(newCfgProjBldPath1.contains(newActiveCfgProjBldPath1), "The active config project build file path " + newActiveCfgProjBldPath1 + " is not contained in expected path of " + newCfgProjBldPath1);
+            String newActiveCfgParams1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
+            Assertions.assertEquals(newCfgStartParams1, newActiveCfgParams1, "The active config params " + newActiveCfgParams1 + " does not match expected params of " + newCfgStartParams1);
+
+            // Find newly created config 2 in the config selection box on the toolbar of the project frame.
+            UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, newCfgName2);
+
+            // Validate that selected configuration 2 shows the expected data. The dialog is opened using the start... action.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
+            Map<String, String> newCfgEntries2 = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+            String newActiveCfgName2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.NAME.toString());
+            Assertions.assertEquals(newCfgName2, newActiveCfgName2, "The active config name " + newActiveCfgName2 + " does not match expected name of " + newCfgName2);
+            String newActiveCfgProjBldPath2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
+            newActiveCfgProjBldPath2 = (newActiveCfgProjBldPath2.endsWith("...")) ? newActiveCfgProjBldPath2.replace("...", "") : newActiveCfgProjBldPath2;
+            Assertions.assertTrue(newCfgProjBldPath2.contains(newActiveCfgProjBldPath2), "The active config project build file path " + newActiveCfgProjBldPath2 + " does not contained in expected path of " + newCfgProjBldPath2);
+            String newActiveCfgParams2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
+            Assertions.assertEquals(newCfgStartParams2, newActiveCfgParams2, "The active config params " + newActiveCfgParams2 + " does not match expected params of " + newCfgStartParams2);
+        } finally {
+            // clean up the created configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
         }
     }
 

@@ -93,7 +93,7 @@ public class UIBotTestUtils {
      * Liberty configuration entries.
      */
     public enum ConfigEntries {
-        NAME, PARAMS
+        NAME, LIBERTYPROJ, PARAMS
     }
 
     /**
@@ -725,12 +725,12 @@ public class UIBotTestUtils {
      * Inserts a configuration name value pair into a config file via text typing
      * and popup menu completion (if required)
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param fileName The string path to the config file
-     * @param configNameSnippet the portion of the name to type
+     * @param remoteRobot              The RemoteRobot instance.
+     * @param fileName                 The string path to the config file
+     * @param configNameSnippet        the portion of the name to type
      * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
-     * @param configValueSnippet the value to type into keyboard - could be a snippet or a whole word
-     * @param completeWithPopup use popup to complete value selection or type in an entire provided value string
+     * @param configValueSnippet       the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup        use popup to complete value selection or type in an entire provided value string
      */
     public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
@@ -764,21 +764,21 @@ public class UIBotTestUtils {
         keyboard.enterText("=");
         keyboard.hotKey(VK_END);
 
-            keyboard.enterText(configValueSnippet);
+        keyboard.enterText(configValueSnippet);
 
-            if (completeWithPopup) {
-                // Select the appropriate value completion suggestion in the pop-up window that is automatically
-                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-                // and entry automatically if the completion suggestion windows has one entry only.
-                ComponentFixture valuePopupWindow = projectFrame.getLookupList();
-                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                        Duration.ofSeconds(1),
-                        "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
-                        "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
-                        () -> valuePopupWindow.hasText(configValueSnippet));
+        if (completeWithPopup) {
+            // Select the appropriate value completion suggestion in the pop-up window that is automatically
+            // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+            // and entry automatically if the completion suggestion windows has one entry only.
+            ComponentFixture valuePopupWindow = projectFrame.getLookupList();
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
+                    "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
+                    () -> valuePopupWindow.hasText(configValueSnippet));
 
-                valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
-            }
+            valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
+        }
         // let the auto-save function of intellij save the file before testing it
         if (remoteRobot.isMac()) {
             keyboard.hotKey(VK_META, VK_S);
@@ -948,7 +948,7 @@ public class UIBotTestUtils {
 
     /**
      * Opens the quickfix menu popup and chooses the
-     * approriate fix according to the quickfix substring
+     * appropriate fix according to the quickfix substring
      *
      * @param remoteRobot           the remote robot instance
      * @param quickfixChooserString the text to find in the quick fix menu
@@ -1031,16 +1031,16 @@ public class UIBotTestUtils {
     public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(10));
         if (startParams != null) {
-            ComponentFixture startParmTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
-            startParmTextField.click();
-            startParmTextField.runJs(
+            ComponentFixture startParamsTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            startParamsTextField.click();
+            startParamsTextField.runJs(
                     "component.setText(\"" + startParams + "\")", true);
 
             RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                     Duration.ofSeconds(1),
                     "Waiting for the start parameters text field on the Liberty config dialog to contain " + startParams,
                     "The start parameters text field on the Liberty config dialog did not contain " + startParams,
-                    () -> startParmTextField.hasText(startParams));
+                    () -> startParamsTextField.hasText(startParams));
 
             // Save the changes made if necessary. If the config is reused, there will be no changes.
             JButtonFixture applyButton = dialog.getButton("Apply");
@@ -1064,51 +1064,6 @@ public class UIBotTestUtils {
                 "The run button on the open project dialog to be enabled",
                 runButton::isEnabled);
         runButton.click();
-    }
-
-    /**
-     * Returns the opened Liberty configuration entries.
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @return The opened Liberty configuration entries.
-     */
-    public static Map<String, String> getLibertyConfigEntries(RemoteRobot remoteRobot) {
-        HashMap<String, String> map = new HashMap<String, String>();
-
-        // Get a hold of the Liberty Edit Configurations window.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        DialogFixture libertyCfgDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
-
-        try {
-            // Get the name of the configuration.
-            Locator locator = byXpath("//div[@class='JTextField']");
-            JTextFieldFixture nameTextField = libertyCfgDialog.textField(locator, Duration.ofSeconds(10));
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                    Duration.ofSeconds(1),
-                    "Waiting for the name text field on the Liberty config dialog to be enabled or populated by default",
-                    "The name text field on the Liberty config dialog was not enabled or populated by default",
-                    () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
-            String configName = nameTextField.getText();
-            map.put(ConfigEntries.NAME.toString(), configName);
-
-            // Get the dev mode parameters
-            ComponentFixture startParmTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
-            startParmTextField.click();
-            String params = startParmTextField.callJs(
-                    "component.getText()", true);
-            map.put(ConfigEntries.PARAMS.toString(), params);
-        } finally {
-            // Close the configuration.
-            JButtonFixture cancelButton = libertyCfgDialog.getButton("Cancel");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                    Duration.ofSeconds(1),
-                    "Waiting for the cancel button on the Liberty config dialog to be enabled",
-                    "The cancel button on the Liberty config dialog was not enabled",
-                    cancelButton::isEnabled);
-            cancelButton.click();
-        }
-
-        return map;
     }
 
     /**
@@ -1321,68 +1276,217 @@ public class UIBotTestUtils {
                 DialogFixture.byTitle("Run/Debug Configurations"),
                 Duration.ofSeconds(10));
 
-        // Click on the Add Configuration action button (+) to open the Add New Configuration window.
-        Locator addButtonLocator = byXpath("//div[@tooltiptext.key='add.new.run.configuration.action2.name']");
-        ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
-        addCfgButton.click();
+        String exitButtonText = "Cancel";
+        try {
+            // Click on the Add Configuration action button (+) to open the Add New Configuration window.
+            Locator addButtonLocator = byXpath("//div[@tooltiptext.key='add.new.run.configuration.action2.name']");
+            ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
+            addCfgButton.click();
 
-        // Look for the Liberty entry in the Add New configuration window and  create a new configuration.
-        ComponentFixture pluginCfgTree = addProjectDialog.getMyTree();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(2),
-                "Waiting for plugin config tree to show on the screen",
-                "Plugin config tree is not showing on the screen",
-                () -> pluginCfgTree.isShowing());
+            // Look for the Liberty entry in the Add New configuration window and  create a new configuration.
+            ComponentFixture pluginCfgTree = addProjectDialog.getMyTree();
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(2),
+                    "Waiting for plugin config tree to show on the screen",
+                    "Plugin config tree is not showing on the screen",
+                    () -> pluginCfgTree.isShowing());
 
-        List<RemoteText> rts = pluginCfgTree.findAllText();
-        for (RemoteText rt : rts) {
-            if (rt.getText().equals("Liberty")) {
-                rt.click();
-                break;
+            List<RemoteText> rts = pluginCfgTree.findAllText();
+            for (RemoteText rt : rts) {
+                if (rt.getText().equals("Liberty")) {
+                    rt.click();
+                    break;
+                }
             }
+
+            // The Run/Debug Configurations dialog should now contain the Liberty configuration that was
+            // just created. Refresh it.
+            addProjectDialog = projectFrame.find(DialogFixture.class,
+                    DialogFixture.byTitle("Run/Debug Configurations"),
+                    Duration.ofSeconds(10));
+
+            // Find the new configuration's name text field and give it a name.
+            Locator locator = byXpath("//div[@class='JTextField']");
+
+            for (int i = 0; i < 3; i++) {
+                try {
+                    JTextFieldFixture nameTextField = addProjectDialog.textField(locator, Duration.ofSeconds(10));
+                    RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                            Duration.ofSeconds(1),
+                            "Waiting for the name text field to be enabled or populated by default",
+                            "The name text field was not enabled or populated by default",
+                            () -> nameTextField.isEnabled() && !(nameTextField.getText().isEmpty()) && nameTextField.getText().equals("Unnamed"));
+
+                    nameTextField.click();
+                } catch (Exception e) {
+                    // Retry.
+                    // The new config default name may take a bit to show up causing us to capture the previous config
+                    // component before it is completely replaced with the new configuration. this may cause either a
+                    // WaitForConditionTimeoutException or an IllegalComponentStateException because the right component
+                    // or field was not captured.
+                }
+            }
+
+            JTextFieldFixture newNameTextField = addProjectDialog.textField(locator, Duration.ofSeconds(10));
+            newNameTextField.setText(cfgName);
+
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for the name of the config to appear in the text box",
+                    "The name of the config did not appear in the text box ",
+                    () -> newNameTextField.getText().equals(cfgName));
+
+            // Save the new configuration by clicking on the Apply button.
+            JButtonFixture applyButton = addProjectDialog.getButton("Apply");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the Apply button on the add config project dialog to be enabled",
+                    "The Apply button on the add config dialog was not enabled",
+                    applyButton::isEnabled);
+            applyButton.click();
+            exitButtonText = "OK";
+        } finally {
+            // Exit the Run/Debug Configurations dialog.
+            JButtonFixture exitButton = addProjectDialog.getButton(exitButtonText);
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the " + exitButtonText + " button on the config dialog to be enabled",
+                    "The " + exitButtonText + " button on the config dialog was not enabled",
+                    exitButton::isEnabled);
+            exitButton.click();
+        }
+    }
+
+    /**
+     * Edits a Liberty configuration using the Liberty Edit Configuration dialog. The dialog is displayed
+     * using the start... action on the Liberty tool window's drop down menu.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param cfgName     The name of the new configuration.
+     * @param startParams The dev mode start parameters.
+     */
+    public static void editLibertyConfigUsingEditConfigDialog(RemoteRobot remoteRobot, String cfgName, String startParams) {
+        // Display the Liberty Edit Configuration dialog.
+        runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false);
+
+        // Get a hold of the Liberty Edit Configurations dialog.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        DialogFixture dialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
+        String exitButtonText = "Cancel";
+
+        try {
+            // Update the configuration name.
+            if (cfgName != null) {
+                // Find the new configuration's name text field and give it a name.
+                Locator locator = byXpath("//div[@class='JTextField']");
+                JTextFieldFixture nameTextField = dialog.textField(locator, Duration.ofSeconds(10));
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                        Duration.ofSeconds(1),
+                        "Waiting for the name text field on the Liberty edit config dialog to be enabled or populated by default",
+                        "The name text field on the Liberty edit config dialog was not enabled or populated by default",
+                        () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
+
+                nameTextField.click();
+                nameTextField.setText(cfgName);
+            }
+
+            // Update the start parameters field.
+            if (startParams != null) {
+                ComponentFixture startParmTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+                startParmTextField.click();
+                startParmTextField.runJs(
+                        "component.setText(\"" + startParams + "\")", true);
+
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for the start parameters text field on the Liberty edit config dialog to contain " + startParams,
+                        "The start parameters text field on the Liberty edit config dialog did not contain " + startParams,
+                        () -> startParmTextField.hasText(startParams));
+            }
+
+            // Save the changes.
+            JButtonFixture applyButton = dialog.getButton("Apply");
+            try {
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for the Apply button on the Liberty edit config dialog to be enabled",
+                        "The Apply button on the Liberty edit config dialog to be enabled",
+                        applyButton::isEnabled);
+                applyButton.click();
+                exitButtonText = "Close";
+            } catch (WaitForConditionTimeoutException wfcte) {
+                // Config did not change.
+            }
+        } finally {
+            // Exit the Edit Configuration dialog.
+            JButtonFixture exitButton = dialog.getButton(exitButtonText);
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the " + exitButtonText + " button on the Liberty edit config dialog to be enabled",
+                    "The " + exitButtonText + " button on the Liberty edit config dialog was not enabled",
+                    exitButton::isEnabled);
+            exitButton.click();
+        }
+    }
+
+    /**
+     * Returns the configuration entries displayed on an opened Liberty Edit Configuration dialog.
+     * The opened dialog is expected to have been displayed using a start... action.
+     * The configuration is closed on exit.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @return The opened Liberty configuration entries.
+     */
+    public static Map<String, String> getOpenedLibertyConfigDataAndCloseOnExit(RemoteRobot remoteRobot) {
+        HashMap<String, String> map = new HashMap<String, String>();
+
+        // Get a hold of the Liberty Edit Configuration dialog.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        DialogFixture libertyCfgDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
+
+        try {
+            // Get the name of the configuration.
+            Locator locator = byXpath("//div[@class='JTextField']");
+            JTextFieldFixture nameTextField = libertyCfgDialog.textField(locator, Duration.ofSeconds(10));
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for the name text field on the Liberty edit config dialog to be enabled or populated by default",
+                    "The name text field on the Liberty edit config dialog was not enabled or populated by default",
+                    () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
+            String configName = nameTextField.getText();
+            map.put(ConfigEntries.NAME.toString(), configName);
+
+            // Get the project path
+            locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
+            ComboBoxFixture projBldFileBox = libertyCfgDialog.comboBox(locator, Duration.ofSeconds(10));
+
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the combo box labeled Liberty project on the Liberty edit config dialog to be populated",
+                    "The combo box labeled Liberty project on the Liberty edit config dialog was not populated",
+                    () -> projBldFileBox.listValues().size() != 0);
+            List<String> entries = projBldFileBox.listValues();
+            String projBldFilePath = entries.get(0);
+            map.put(ConfigEntries.LIBERTYPROJ.toString(), projBldFilePath);
+
+            // Get the dev mode parameters
+            ComponentFixture startParamsTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            startParamsTextField.click();
+            String params = startParamsTextField.callJs(
+                    "component.getText()", true);
+            map.put(ConfigEntries.PARAMS.toString(), params);
+        } finally {
+            // Close the configuration by clicking on the Cancel button.
+            JButtonFixture cancelButton = libertyCfgDialog.getButton("Cancel");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                    Duration.ofSeconds(1),
+                    "Waiting for the cancel button on the Liberty edit config dialog to be enabled",
+                    "The cancel button on the Liberty edit config dialog was not enabled",
+                    cancelButton::isEnabled);
+            cancelButton.click();
         }
 
-        // The Run/Debug Configurations dialog should now contain the Liberty configuration that was
-        // just created. Refresh it.
-        addProjectDialog = projectFrame.find(DialogFixture.class,
-                DialogFixture.byTitle("Run/Debug Configurations"),
-                Duration.ofSeconds(10));
-
-        // Find the new configuration's name text field and give it a name.
-        Locator locator = byXpath("//div[@class='JTextField']");
-        JTextFieldFixture nameTextField = addProjectDialog.textField(locator, Duration.ofSeconds(10));
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
-                Duration.ofSeconds(1),
-                "Waiting for the name text field to be enabled or populated by default",
-                "The name text field was not enabled or populated by default",
-                () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
-
-        nameTextField.click();
-        nameTextField.setText(cfgName);
-
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for the name of the config to appear in the text box",
-                "The name of the config did not appear in the text box ",
-                () -> nameTextField.getText().equals(cfgName));
-
-        // Save the new configuration by clicking on the Apply button.
-        JButtonFixture applyButton = addProjectDialog.getButton("Apply");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the Apply button on the add config project dialog to be enabled",
-                "The Apply button on the add config dialog was not enabled",
-                applyButton::isEnabled);
-        applyButton.click();
-
-        // Exit the Run/Debug Configurations dialog.
-        JButtonFixture okButton = addProjectDialog.getButton("OK");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the OK button on the config dialog to be enabled",
-                "The OK button on the config dialog was not enabled",
-                okButton::isEnabled);
-        okButton.click();
+        return map;
     }
 
     /**
@@ -1606,7 +1710,7 @@ public class UIBotTestUtils {
                     default:
                         fail("An invalid execution type of " + execType + " was requested.");
                 }
-                
+
                 // Validate that the server stopped. Fail the test if the last iteration fails.
                 boolean failOnError = (i == (maxRetries - 1));
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 12, failOnError);
