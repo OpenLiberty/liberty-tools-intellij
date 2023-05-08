@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,13 +14,11 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
 import com.google.gson.JsonObject;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiAnnotationMemberValue;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiLiteral;
-import com.intellij.psi.PsiType;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
@@ -38,11 +36,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.*;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValueExpression;
 
 /**
@@ -114,8 +108,19 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 			PsiAnnotationMemberValue defaultValueExpr = getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
 			validatePropertyDefaultValue(annotation, defaultValueExpr, parent);
 			validatePropertyHasValue(annotation, defaultValueExpr);
+			PsiFile psiFile = PsiTreeUtil.getParentOfType(parent, PsiFile.class);
+			if (psiFile != null) {
+				VirtualFile virtualFile = psiFile.getVirtualFile();
+				if (virtualFile != null) {
+					final Document doc = FileDocumentManager.getInstance().getDocument(virtualFile);
+					final PsiMicroProfileProject mpProject = getMicroProfileProject(getContext());
+					// Register the document with the MP Project so that it will be notified
+					// if the config source cache gets evicted. This enables diagnostics to be
+					// recomputed for this document upon eviction of the config source cache.
+					mpProject.notifyIfCacheEvicted(doc);
+				}
+			}
 		}
-
 	}
 
 	/**
@@ -232,10 +237,14 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	}
 
 	private static boolean doesPropertyHaveValue(String property, JavaDiagnosticsContext context) {
-		Module javaProject = context.getJavaProject();
-		PsiMicroProfileProject mpProject = PsiMicroProfileProjectManager.getInstance(javaProject.getProject())
-				.getJDTMicroProfileProject(javaProject);
+		PsiMicroProfileProject mpProject = getMicroProfileProject(context);
 		return mpProject.hasProperty(property);
+	}
+
+	private static PsiMicroProfileProject getMicroProfileProject(JavaDiagnosticsContext context) {
+		Module javaProject = context.getJavaProject();
+		return PsiMicroProfileProjectManager.getInstance(javaProject.getProject())
+				.getJDTMicroProfileProject(javaProject);
 	}
 
 	public static void setDataForUnassigned(String name, Diagnostic diagnostic) {

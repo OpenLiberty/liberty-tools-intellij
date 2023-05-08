@@ -48,14 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -594,6 +587,12 @@ public class LanguageServerWrapper {
                 }
                 DocumentContentSynchronizer listener = new DocumentContentSynchronizer(this, theDocument, syncKind);
                 theDocument.addDocumentListener(listener);
+                Set<DocumentContentSynchronizer> synchronizers = theDocument.getUserData(DocumentContentSynchronizer.KEY);
+                if (synchronizers == null) {
+                    synchronizers = Collections.synchronizedSet(new LinkedHashSet<>());
+                    theDocument.putUserData(DocumentContentSynchronizer.KEY, synchronizers);
+                }
+                synchronizers.add(listener);
                 LanguageServerWrapper.this.connectedDocuments.put(thePath, listener);
                 return listener.didOpenFuture;
             }
@@ -603,7 +602,15 @@ public class LanguageServerWrapper {
     public void disconnect(URI path) {
         DocumentContentSynchronizer documentListener = this.connectedDocuments.remove(path);
         if (documentListener != null) {
-            documentListener.getDocument().removeDocumentListener(documentListener);
+            final Document document = documentListener.getDocument();
+            document.removeDocumentListener(documentListener);
+            Set<DocumentContentSynchronizer> synchronizers = document.getUserData(DocumentContentSynchronizer.KEY);
+            if (synchronizers != null) {
+                synchronizers.remove(documentListener);
+                if (synchronizers.isEmpty()) {
+                    document.putUserData(DocumentContentSynchronizer.KEY, null);
+                }
+            }
             documentListener.documentClosed();
         }
         if (this.connectedDocuments.isEmpty()) {
