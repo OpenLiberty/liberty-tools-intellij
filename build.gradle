@@ -34,9 +34,9 @@ dependencies {
     implementation 'org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0'
     implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
     implementation 'org.eclipse.lemminx:org.eclipse.lemminx:0.22.0'
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:1.0-M2-SNAPSHOT'
-    implementation 'io.openliberty.tools:liberty-langserver:1.0-M1'
-    implementation 'org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.0'
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.0-SNAPSHOT'
+    implementation 'io.openliberty.tools:liberty-langserver:2.0-SNAPSHOT'
+    implementation 'org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1-SNAPSHOT'
     //required by lsp4j as the version from IJ is incompatible
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.vladsch.flexmark:flexmark:0.50.50'
@@ -51,13 +51,13 @@ dependencies {
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.22.0:uber') {
             transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:1.0-M2-SNAPSHOT:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.0-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:1.0-M1:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver:2.0-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.0:jar-with-dependencies') {
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {
