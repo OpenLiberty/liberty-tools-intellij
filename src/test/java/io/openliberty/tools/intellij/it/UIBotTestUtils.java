@@ -531,18 +531,6 @@ public class UIBotTestUtils {
         }
     }
 
-    /**
-     * Closes the Project Tree for a given appName
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param appName     The Name of the application in tree to close
-     */
-    public static void closeProjectViewTree(RemoteRobot remoteRobot, String appName) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
-        appNameEntry.findText(appName).doubleClick();
-    }
-
     public static void openConfigFile(RemoteRobot remoteRobot, String projectName, String fileName) {
         // Click on File on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
@@ -1077,51 +1065,6 @@ public class UIBotTestUtils {
                 "The run button on the open project dialog to be enabled",
                 runButton::isEnabled);
         runButton.click();
-    }
-
-    /**
-     * Returns the opened Liberty configuration entries.
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @return The opened Liberty configuration entries.
-     */
-    public static Map<String, String> getLibertyConfigEntries(RemoteRobot remoteRobot) {
-        HashMap<String, String> map = new HashMap<String, String>();
-
-        // Get a hold of the Liberty Edit Configurations window.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        DialogFixture libertyCfgDialog = projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(10));
-
-        try {
-            // Get the name of the configuration.
-            Locator locator = byXpath("//div[@class='JTextField']");
-            JTextFieldFixture nameTextField = libertyCfgDialog.textField(locator, Duration.ofSeconds(10));
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                    Duration.ofSeconds(1),
-                    "Waiting for the name text field on the Liberty config dialog to be enabled or populated by default",
-                    "The name text field on the Liberty config dialog was not enabled or populated by default",
-                    () -> nameTextField.isEnabled() && (nameTextField.getText().length() != 0));
-            String configName = nameTextField.getText();
-            map.put(ConfigEntries.NAME.toString(), configName);
-
-            // Get the dev mode parameters
-            ComponentFixture startParamsTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
-            startParamsTextField.click();
-            String params = startParamsTextField.callJs(
-                    "component.getText()", true);
-            map.put(ConfigEntries.PARAMS.toString(), params);
-        } finally {
-            // Close the configuration.
-            JButtonFixture cancelButton = libertyCfgDialog.getButton("Cancel");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                    Duration.ofSeconds(1),
-                    "Waiting for the cancel button on the Liberty config dialog to be enabled",
-                    "The cancel button on the Liberty config dialog was not enabled",
-                    cancelButton::isEnabled);
-            cancelButton.click();
-        }
-
-        return map;
     }
 
     /**

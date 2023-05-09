@@ -146,21 +146,6 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ComponentFixture object associated with the ProjectViewTree class.
-     *
-     * @param xpathVars The Locator custom variables: text, waitTime(seconds)
-     * @return The ComponentFixture object associated with the ProjectViewTree class.
-     */
-    public ComponentFixture getProjectViewTree(String... xpathVars) {
-        String visibleText = xpathVars[0];
-        String waitTime = xpathVars[0];
-
-        return find(ComponentFixture.class,
-                byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
-                Duration.ofSeconds(Integer.parseInt(waitTime)));
-    }
-
-    /**
      * Returns the JTreeFixture object associated with the ProjectViewTree class.
      *
      * @param xpathVars The Locator custom variables: text
