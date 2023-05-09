@@ -13,12 +13,10 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VfsUtil;
-import com.intellij.openapi.vfs.VfsUtilCore;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.*;
 import com.intellij.psi.PsiElement;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.lsp4j.CompletionParams;
@@ -138,8 +136,13 @@ public class LSPIJUtils {
     }
 
     public static URI toUri(Module project) {
-        File file = new File(project.getModuleFilePath()).getParentFile();
-        return file.toURI();
+        // Module.getModuleFilePath() is an internal only API
+        // File file = new File(project.getModuleFilePath()).getParentFile();
+        VirtualFile[] roots = ModuleRootManager.getInstance(project).getContentRoots();
+        if (roots.length > 0) {
+            return roots[0].toNioPath().toUri(); // choose one of the context roots
+        }
+        return URI.create("file:///"); // error return value //$NON-NLS-1$
     }
 
     public static void applyWorkspaceEdit(WorkspaceEdit edit) {
