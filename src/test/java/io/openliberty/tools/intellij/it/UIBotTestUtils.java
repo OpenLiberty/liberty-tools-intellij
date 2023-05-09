@@ -661,7 +661,9 @@ public class UIBotTestUtils {
                 // Find the target text on the editor and move the move to it.
                 editorNew.findText(contains(hoverTarget)).moveMouse();
                 // clear and "lightbulb" icons?
-                keyboard.hotKey(VK_ESCAPE);
+                if (!hoverFile.equals("server.xml")) {
+                    keyboard.hotKey(VK_ESCAPE);
+                }
 
                 // jitter the cursor
                 Point p = editorNew.findText(contains(hoverTarget)).getPoint();
@@ -689,17 +691,12 @@ public class UIBotTestUtils {
                 for (RemoteText rt : rts) {
                     remoteString.append(rt.getText());
                 }
-
-                // Check for "Fetching Documentation" message indicating there is a delay in getting hint
-                // allow some time for the LS hint to appear in the popup
-                if (remoteString.toString().contains("Fetching Documentation")) {
-                    TestUtils.sleepAndIgnoreException(2);
-                }
-
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
                 TestUtils.sleepAndIgnoreException(2);
+                // click on center of editor pane - allow hover to work on next attempt
+                editorNew.click();
             }
         }
 
@@ -850,7 +847,6 @@ public class UIBotTestUtils {
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
                 keyboard.enterText(stanzaSnippet);
-                TestUtils.sleepAndIgnoreException(2);
 
                 if (completeWithPopup) {
                     // Select the appropriate completion suggestion in the pop-up window that is automatically
@@ -888,8 +884,6 @@ public class UIBotTestUtils {
         if (error != null) {
             throw new RuntimeException("Unable to insert entry in server.xml using text: " + stanzaSnippet, error);
         }
-
-        TestUtils.sleepAndIgnoreException(5);
     }
 
     /**
