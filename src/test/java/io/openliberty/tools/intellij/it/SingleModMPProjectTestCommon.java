@@ -471,7 +471,7 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-        UIBotTestUtils.validateLibertyTWProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, projectName);
         UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, projectName);
 
         // Close all open editors.

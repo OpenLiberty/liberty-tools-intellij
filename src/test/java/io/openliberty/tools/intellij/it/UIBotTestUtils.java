@@ -120,7 +120,7 @@ public class UIBotTestUtils {
             // From the project frame.
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
             commonFixture = projectFrame;
-            ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File");
+            ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
             fileMenuEntry.click();
             ComponentFixture openFixture = projectFrame.getActionMenuItem("Open...");
             openFixture.click(new Point());
@@ -167,12 +167,23 @@ public class UIBotTestUtils {
             thisWinButton.click();
         }
 
-        // Need a buffer here.
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        // Wait for the project frame to open, and make sure a few basic UI items are showing.
+        // Note that at specific points in time, the window pane items will re-arrange themselves
+        // as content is displayed. This, has an effect on the location of the items on the frame.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "60");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                Duration.ofSeconds(1),
+                "Waiting for the File action menu on the main window pane to be enabled",
+                "The file action menu on then main window pane is not enabled",
+                () -> projectFrame.isComponentEnabled(fileMenuEntry));
+
+        ComponentFixture wpStripeButton = projectFrame.getStripeButton("Liberty", "60");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                Duration.ofSeconds(1),
+                "Waiting for the Liberty button on the main window pane stripe to be enabled",
+                "The Liberty button on then main window pane stripe is not enabled",
+                () -> projectFrame.isComponentEnabled(wpStripeButton));
     }
 
     /**
@@ -198,8 +209,8 @@ public class UIBotTestUtils {
      */
     public static void closeProjectFrame(RemoteRobot remoteRobot) {
         // Click on File on the Menu bar.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File");
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
         fileMenuEntry.click();
 
         // Click on Close Project in the menu.
@@ -221,23 +232,22 @@ public class UIBotTestUtils {
         ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
         libertyTWBar.click();
 
-        // Check if the project tree was expanded and the action is showing.
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", action, "60");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(2),
-                "Waiting for " + action + " in tree fixture to show and come into focus",
-                "Action " + action + " in tree fixture is not showing or not in focus",
-                treeFixture::isShowing);
+        // Process the action.
+        int maxRetries = 3;
+        Exception error = null;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                error = null;
+                ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", action, "60");
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                        Duration.ofSeconds(2),
+                        "Waiting for " + action + " in tree fixture to show and come into focus",
+                        "Action " + action + " in tree fixture is not showing or not in focus",
+                        treeFixture::isShowing);
 
-        // Run the action.
-        List<RemoteText> rts = treeFixture.findAllText();
-        for (RemoteText rt : rts) {
-            if (action.equals(rt.getText())) {
-                int maxRetries = 3;
-                Exception error = null;
-                for (int i = 0; i < maxRetries; i++) {
-                    try {
-                        error = null;
+                List<RemoteText> rts = treeFixture.findAllText();
+                for (RemoteText rt : rts) {
+                    if (action.equals(rt.getText())) {
                         if (usePlayButton) {
                             rt.click();
                             clickOnLibertyTWToolbarPlayButton(remoteRobot);
@@ -245,22 +255,25 @@ public class UIBotTestUtils {
                             rt.doubleClick();
                         }
                         break;
-                    } catch (Exception e) {
-                        // The content of the Liberty tool window may blink in and out of existence. Retry.
-                        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
-                                "Double click or play button click on Liberty tool window drop down action failed (" + e.getMessage() + "). Retrying...");
-                        TestUtils.sleepAndIgnoreException(1);
-                        error = e;
                     }
                 }
 
-                // Report the last error if there is one.
-                if (error != null) {
-                    throw new RuntimeException("Unable to run action from dropdown view.", error);
-                }
-
                 break;
+            } catch (Exception e) {
+                // Catch indexing related issues that make the Liberty tool window content disappear,
+                // or invalidate the tree fixture that was previously obtained.
+                // For example, this may cause errors stating:
+                // "component must be showing on the screen to determine its location"
+                error = e;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                        "Failed to process the " + action + " action using Liberty tool window drop down (" + e.getMessage() + "). Retrying...");
+                TestUtils.sleepAndIgnoreException(5);
             }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Unable to run the " + action + " action from Liberty Tool window project dropdown.", error);
         }
     }
 
@@ -315,26 +328,27 @@ public class UIBotTestUtils {
      * Waits for the specified project tree item to appear in the Liberty tool window.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param treeItem    The project name to wait for.
+     * @param treeItem    The name of tree item to look for.
      */
-    public static void validateLibertyTWProjectTreeItemIsShowing(RemoteRobot remoteRobot, String treeItem) {
+    public static void validateImportedProjectShowsInLTW(RemoteRobot remoteRobot, String treeItem) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
-        // There is a window between which the Liberty tool window content may come and
-        // go when intellij detects indexing starts and ends. Try to handle it.
+        // There is a window between which the Liberty tool window content may show
+        // and suddenly disappear when indexing starts. It is not known when indexing may start.
+        // It can be immediate or take a few seconds (10+). Wait a bit for it to start.
         try {
-            projectFrame.getTree("LibertyTree", treeItem, "60");
-        } catch (Exception e) {
-            // Do nothing.
+            UIBotTestUtils.waitForLTWIndexingMsg(remoteRobot, 20);
+        } catch (WaitForConditionTimeoutException wfcte) {
+            // Indexing never started, or it completed. Proceed to validate
+            // that the project is displayed in the Liberty tool window.
         }
 
-        // Wait a bit and re-try. Indexing is a long process right now.
-        TestUtils.sleepAndIgnoreException(10);
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "360");
+        // Wait for the project to appear in the Liberty tool window. Indexing is a long process right now.
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "600");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
-                "Waiting for Tree fixture to show",
-                "Tree fixture is not showing",
+                "Waiting for tree item" + treeItem + " to show in the Liberty tool window.",
+                "Tree item " + treeItem + " did not show in Liberty tool window.",
                 treeFixture::isShowing);
     }
 
@@ -466,8 +480,13 @@ public class UIBotTestUtils {
      */
     public static void clickOnWindowPaneStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture wpStripe = projectFrame.getStripeButton(StripeButtonName);
-        wpStripe.click();
+        ComponentFixture wpStripeButton = projectFrame.getStripeButton(StripeButtonName, "10");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                Duration.ofSeconds(1),
+                "Waiting for the " + StripeButtonName + " button on the main window pane stripe to be enabled",
+                "The " + StripeButtonName + " button on then main window pane stripe is not enabled",
+                () -> projectFrame.isComponentEnabled(wpStripeButton));
+        wpStripeButton.click();
     }
 
     /**
@@ -510,18 +529,6 @@ public class UIBotTestUtils {
         if (error != null) {
             throw new RuntimeException("Unable to expand the Liberty tool window project tree.", error);
         }
-    }
-
-    /**
-     * Closes the Project Tree for a given appName
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param appName     The Name of the application in tree to close
-     */
-    public static void closeProjectViewTree(RemoteRobot remoteRobot, String appName) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture appNameEntry = projectFrame.getProjectViewTree(appName);
-        appNameEntry.findText(appName).doubleClick();
     }
 
     public static void openConfigFile(RemoteRobot remoteRobot, String projectName, String fileName) {
@@ -600,7 +607,7 @@ public class UIBotTestUtils {
      */
     public static void closeAllEditorTabs(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture windowMenuEntry = projectFrame.getActionMenu("Window");
+        ComponentFixture windowMenuEntry = projectFrame.getActionMenu("Window", "10");
         windowMenuEntry.click();
 
         // Click on Editor Tabs in the menu.
@@ -977,7 +984,7 @@ public class UIBotTestUtils {
     public static void copyWindowContent(RemoteRobot remoteRobot) {
         // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit");
+        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit", "10");
         editMenuEntry.click();
         ComponentFixture slectAllEntry = projectFrame.getActionMenuItem("Select All");
         slectAllEntry.click();
@@ -996,13 +1003,13 @@ public class UIBotTestUtils {
     public static void pasteOnActiveWindow(RemoteRobot remoteRobot) {
         // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit");
+        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit", "10");
         editMenuEntry.click();
         ComponentFixture selectAllEntry = projectFrame.getActionMenuItem("Select All");
         selectAllEntry.click();
 
         // Paste the content.
-        editMenuEntry = projectFrame.getActionMenu("Edit");
+        editMenuEntry = projectFrame.getActionMenu("Edit", "10");
         editMenuEntry.click();
         ComponentFixture pasteFixture = projectFrame.getChildActionMenu("Edit", "Paste");
         pasteFixture.click();
@@ -1010,7 +1017,7 @@ public class UIBotTestUtils {
         pasteChildEntry.click();
 
         // Save.
-        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File");
+        ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
         fileMenuEntry.click();
         ComponentFixture saveAllEntry = projectFrame.getActionMenuItem("Save All");
         saveAllEntry.click();
@@ -1120,7 +1127,7 @@ public class UIBotTestUtils {
     public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action) {
         // Click on Navigate on the Menu bar.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        ComponentFixture navigateMenuEntry = projectFrame.getActionMenu("Navigate");
+        ComponentFixture navigateMenuEntry = projectFrame.getActionMenu("Navigate", "10");
         navigateMenuEntry.click();
 
         // Click on Search Everywhere in the menu.
@@ -1203,22 +1210,44 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Waits the "No Liberty Maven or Liberty Gradle projects detected in this workspace" text
-     * in the Liberty tool window. This text comes from Liberty Tools.
+     * Waits for the Liberty tool window message indicating that Liberty Tools could not
+     * detect any projects.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param waitTime    The time to wait for the required message. In seconds.
+     * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
      */
-    public static void waitForLTWNoProjectDetectedMsg(RemoteRobot remoteRobot, String waitTime) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+    public static void waitForLTWNoProjectDetectedMsg(RemoteRobot remoteRobot, int waitTime) {
         String text = "No Liberty Maven or Liberty Gradle projects detected in this workspace.";
-        ComponentFixture textArea = projectFrame.getTextArea(waitTime);
+        waitForLTWTextAreaMessage(remoteRobot, text, waitTime);
+    }
 
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(60),
+    /**
+     * Waits for the Liberty tool window message indicating that indexing is taking place.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
+     */
+    public static void waitForLTWIndexingMsg(RemoteRobot remoteRobot, int waitTime) {
+        String text = "This view is not available until indexes are built";
+        waitForLTWTextAreaMessage(remoteRobot, text, waitTime);
+    }
+
+    /**
+     * Waits for the input message to appear in the Liberty Tool window message text area.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param message     The message to search for.
+     * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
+     */
+    public static void waitForLTWTextAreaMessage(RemoteRobot remoteRobot, String message, int waitTime) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture textArea = projectFrame.getTextArea("30");
+
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(waitTime),
                 Duration.ofSeconds(1),
-                "Waiting for text " + text + " to appear in Liberty tool window",
-                "Text " + text + " did not appear in Liberty tool window",
-                () -> readAllText(textArea).equals(text));
+                "Waiting for message " + message + " to appear in the Liberty tool window",
+                "Message " + message + " did not appear in the Liberty tool window",
+                () -> readAllText(textArea).equals(message));
     }
 
     /**
@@ -1260,7 +1289,7 @@ public class UIBotTestUtils {
      */
     public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture runMenu = projectFrame.getActionMenu("Run");
+        ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
         runMenu.click();
         ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations...");
         editCfgsMenuEntry.click();
@@ -1283,7 +1312,7 @@ public class UIBotTestUtils {
                     Duration.ofSeconds(2),
                     "Waiting for plugin config tree to show on the screen",
                     "Plugin config tree is not showing on the screen",
-                    () -> pluginCfgTree.isShowing());
+                    pluginCfgTree::isShowing);
 
             List<RemoteText> rts = pluginCfgTree.findAllText();
             for (RemoteText rt : rts) {
@@ -1514,7 +1543,7 @@ public class UIBotTestUtils {
      */
     public static void selectConfigUsingMenu(RemoteRobot remoteRobot, String cfgName, ExecMode execMode) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture menuOption = projectFrame.getActionMenu("Run");
+        ComponentFixture menuOption = projectFrame.getActionMenu("Run", "10");
         menuOption.click();
         ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem("Run...");
         if (execMode == ExecMode.DEBUG) {
@@ -1567,7 +1596,7 @@ public class UIBotTestUtils {
      */
     public static void deleteLibertyRunConfigurations(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture runMenu = projectFrame.getActionMenu("Run");
+        ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
         runMenu.click();
         ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations...");
         editCfgsMenuEntry.click();
@@ -1636,7 +1665,7 @@ public class UIBotTestUtils {
             projectFrame.getBaseLabel("Debug:", "5");
         } catch (WaitForConditionTimeoutException wfcte) {
             // The debug tab is not opened for some reason. Open it.
-            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug");
+            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug", "10");
             debugStripe.click();
         }
 

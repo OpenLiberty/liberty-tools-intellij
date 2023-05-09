@@ -78,7 +78,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @Video
     public void testManualProjectAddRemoveActionUsingSearch() {
         // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Add the project to the Liberty tool window.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window");
@@ -103,7 +103,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.refreshLibertyToolWindow(remoteRobot);
 
             // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
         }
     }
 
@@ -116,7 +116,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @Video
     public void testsRefreshProjectWithServerXmlOnly() {
         // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Copy a valid server.xml file to this project's src/main/liberty/config directory.
         Path validServerXml = Paths.get(getHelperFilesDirPath(), "server.xml");
@@ -144,7 +144,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.refreshLibertyToolWindow(remoteRobot);
 
             // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
      */
     public void testsRefreshProjectWithLTBuildCfgOnly(String buildFile) {
         // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Replace the current build file with the file containing Liberty plugin config.
         Path newCfg = Paths.get(getHelperFilesDirPath(), buildFile);
@@ -209,7 +209,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.refreshLibertyToolWindow(remoteRobot);
 
             // Validate that the Liberty tool window project tree is not showing. No projects are expected.
-            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "10");
+            UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
         }
     }
 
@@ -228,10 +228,10 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
 
-        // Validate that the project tree is showing. Note that indexing may start at any time
-        // and automatically remove the existing content from the window (project/message/etc.).
-        TestUtils.sleepAndIgnoreException(10);
-        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, "300");
+        // Wait for indexing to complete. Once indexing completes and Liberty Tools to take control
+        // of the window, it will display the project it detected, or a message stating that no
+        // projects were detected. A message stating that no projects were detected is what is expected here.
+        UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 300);
 
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Exit. ProjectName: " + projectName);

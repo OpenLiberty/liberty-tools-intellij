@@ -255,7 +255,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, projectName,"src", "main", "liberty", "config", "server.xml");
+        pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
@@ -264,7 +264,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet,20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
+            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
 
             //move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "wrong", "server.xml", UIBotTestUtils.PopupType.DIAGNOSTIC);
@@ -355,7 +355,7 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-        UIBotTestUtils.validateLibertyTWProjectTreeItemIsShowing(remoteRobot, projectName);
+        UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, projectName);
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
 
         // pre-open project tree before attempting to open server.xml
