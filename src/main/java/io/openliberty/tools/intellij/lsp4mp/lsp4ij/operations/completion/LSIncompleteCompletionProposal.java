@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2023 Red Hat, Inc. and others
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -7,6 +7,7 @@
  *
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
+ * IBM Corporation - add variable handling
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion;
 
@@ -256,15 +257,26 @@ public class LSIncompleteCompletionProposal extends LookupElement {
                 while ((currentSnippetOffsetInInsertText = insertText.indexOf('$', currentSnippetOffsetInInsertText)) != -1) {
                     StringBuilder keyBuilder = new StringBuilder();
                     boolean isChoice = false;
+                    boolean isVariable = false;
                     List<String> snippetProposals = new ArrayList<>();
                     int offsetInSnippet = 1;
                     while (currentSnippetOffsetInInsertText + offsetInSnippet < insertText.length() && Character.isDigit(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet))) {
+                        // handle numbered substitutions like '$3'
                         keyBuilder.append(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet));
                         offsetInSnippet++;
                     }
                     if (keyBuilder.length() == 0 && insertText.substring(currentSnippetOffsetInInsertText).startsWith("${")) { //$NON-NLS-1$
                         offsetInSnippet = 2;
                         while (currentSnippetOffsetInInsertText + offsetInSnippet < insertText.length() && Character.isDigit(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet))) {
+                            // handle numbered substitutions with defaults or choices e.g. ${3:def}
+                            keyBuilder.append(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet));
+                            offsetInSnippet++;
+                        }
+                        while (currentSnippetOffsetInInsertText + offsetInSnippet < insertText.length() &&
+                                (Character.isLetter(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet)) ||
+                                insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet) == '_')) { //$NON-NLS-1$
+                            // Allow variables of the form ${Abc_Def} as recognized by getVariableValue()
+                            isVariable = true;
                             keyBuilder.append(insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet));
                             offsetInSnippet++;
                         }
@@ -295,6 +307,12 @@ public class LSIncompleteCompletionProposal extends LookupElement {
                             }
                             close = currentChar == '}';
                             offsetInSnippet++;
+                        }
+                        if (isVariable) { // the variable's closing '}' is handled in the previous step
+                            String value = getVariableValue(keyBuilder.toString());
+                            if (value != null) {
+                                snippetProposals.add(value);
+                            }
                         }
                     }
                     String defaultProposal = snippetProposals.isEmpty() ? "" : snippetProposals.get(0); //$NON-NLS-1$
