@@ -32,6 +32,7 @@ import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
@@ -191,7 +192,13 @@ public class PsiUtilsLSImpl implements IPsiUtils {
     }
 
     public static String getProjectURI(Module module) {
-        return module.getModuleFilePath();
+        // Module.getModuleFilePath() is an internal only API
+        // return module.getModuleFilePath();
+        VirtualFile[] roots = ModuleRootManager.getInstance(module).getContentRoots();
+        if (roots.length > 0) {
+            return roots[0].toNioPath().toString().replace(File.separatorChar, '/'); // choose one of the context roots
+        }
+        return "/"; // error return value //$NON-NLS-1$
     }
 
     @Override

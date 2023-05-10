@@ -10,6 +10,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import com.intellij.openapi.compiler.CompilerPaths;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -18,7 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
@@ -163,12 +166,13 @@ public abstract class AbstractConfigSource<T> implements IConfigSource {
 			return null;
 		}
 		try {
-			long currentLastModified = configFile.getModificationStamp();
+			final Document doc = FileDocumentManager.getInstance().getDocument(configFile);
+			long currentLastModified = doc.getModificationStamp();
 			if (currentLastModified != lastModified) {
 				reset();
-				try (InputStream input = configFile.getInputStream()) {
+				try (Reader input = new StringReader(doc.getText())) {
 					config = loadConfig(input);
-					lastModified = configFile.getModificationStamp();
+					lastModified = doc.getModificationStamp();
 				} catch (IOException e) {
 					reset();
 					LOGGER.error("Error while loading properties from '" + configFile + "'.", e);
@@ -206,13 +210,13 @@ public abstract class AbstractConfigSource<T> implements IConfigSource {
 	}
 
 	/**
-	 * Load the config model from the given input stream <code>input</code>.
+	 * Load the config model from the given reader <code>input</code>.
 	 * 
-	 * @param input the input stream
-	 * @return he config model from the given input stream <code>input</code>.
+	 * @param input the reader
+	 * @return he config model from the given reader <code>input</code>.
 	 * @throws IOException
 	 */
-	protected abstract T loadConfig(InputStream input) throws IOException;
+	protected abstract T loadConfig(Reader input) throws IOException;
 
 	/**
 	 * Load the property informations.

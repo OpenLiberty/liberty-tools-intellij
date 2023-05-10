@@ -29,54 +29,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.StreamConnectionProvider;
-import org.eclipse.lsp4j.ClientCapabilities;
-import org.eclipse.lsp4j.ClientInfo;
-import org.eclipse.lsp4j.CodeActionCapabilities;
-import org.eclipse.lsp4j.CodeActionKind;
-import org.eclipse.lsp4j.CodeActionKindCapabilities;
-import org.eclipse.lsp4j.CodeActionLiteralSupportCapabilities;
-import org.eclipse.lsp4j.CodeActionOptions;
-import org.eclipse.lsp4j.CodeLensCapabilities;
-import org.eclipse.lsp4j.ColorProviderCapabilities;
-import org.eclipse.lsp4j.CompletionCapabilities;
-import org.eclipse.lsp4j.CompletionItemCapabilities;
-import org.eclipse.lsp4j.DefinitionCapabilities;
-import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
-import org.eclipse.lsp4j.DocumentFormattingOptions;
-import org.eclipse.lsp4j.DocumentHighlightCapabilities;
-import org.eclipse.lsp4j.DocumentLinkCapabilities;
-import org.eclipse.lsp4j.DocumentRangeFormattingOptions;
-import org.eclipse.lsp4j.DocumentSymbolCapabilities;
-import org.eclipse.lsp4j.ExecuteCommandCapabilities;
-import org.eclipse.lsp4j.ExecuteCommandOptions;
-import org.eclipse.lsp4j.FailureHandlingKind;
-import org.eclipse.lsp4j.FormattingCapabilities;
-import org.eclipse.lsp4j.HoverCapabilities;
-import org.eclipse.lsp4j.InitializeParams;
-import org.eclipse.lsp4j.InitializedParams;
-import org.eclipse.lsp4j.MarkupKind;
-import org.eclipse.lsp4j.RangeFormattingCapabilities;
-import org.eclipse.lsp4j.ReferencesCapabilities;
-import org.eclipse.lsp4j.Registration;
-import org.eclipse.lsp4j.RegistrationParams;
-import org.eclipse.lsp4j.RenameCapabilities;
-import org.eclipse.lsp4j.ResourceOperationKind;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.SignatureHelpCapabilities;
-import org.eclipse.lsp4j.SymbolCapabilities;
-import org.eclipse.lsp4j.SymbolKind;
-import org.eclipse.lsp4j.SymbolKindCapabilities;
-import org.eclipse.lsp4j.SynchronizationCapabilities;
-import org.eclipse.lsp4j.TextDocumentClientCapabilities;
-import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.TextDocumentSyncOptions;
-import org.eclipse.lsp4j.TypeDefinitionCapabilities;
-import org.eclipse.lsp4j.UnregistrationParams;
-import org.eclipse.lsp4j.WorkspaceClientCapabilities;
-import org.eclipse.lsp4j.WorkspaceEditCapabilities;
-import org.eclipse.lsp4j.WorkspaceFoldersChangeEvent;
-import org.eclipse.lsp4j.WorkspaceFoldersOptions;
-import org.eclipse.lsp4j.WorkspaceServerCapabilities;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
 import org.eclipse.lsp4j.jsonrpc.ResponseErrorException;
@@ -95,14 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -251,7 +197,7 @@ public class LanguageServerWrapper {
                         } catch (Exception e) {
                             LOGGER.warn(e.getLocalizedMessage(), e);
                         }
-                        });
+                    });
                 Launcher<? extends LanguageServer> launcher = Launcher.createLauncher(client, serverDefinition.getServerInterface(),
                         this.lspStreamProvider.getInputStream(), this.lspStreamProvider.getOutputStream(),
                         executorService, wrapper);
@@ -273,16 +219,18 @@ public class LanguageServerWrapper {
                         ResourceOperationKind.Delete, ResourceOperationKind.Rename));
                 editCapabilities.setFailureHandling(FailureHandlingKind.Undo);
                 workspaceClientCapabilities.setWorkspaceEdit(editCapabilities);
+
                 TextDocumentClientCapabilities textDocumentClientCapabilities = new TextDocumentClientCapabilities();
-                textDocumentClientCapabilities
-                        .setCodeAction(
-                                new CodeActionCapabilities(
-                                        new CodeActionLiteralSupportCapabilities(
-                                                new CodeActionKindCapabilities(Arrays.asList(CodeActionKind.QuickFix,
-                                                        CodeActionKind.Refactor, CodeActionKind.RefactorExtract,
-                                                        CodeActionKind.RefactorInline, CodeActionKind.RefactorRewrite,
-                                                        CodeActionKind.Source, CodeActionKind.SourceOrganizeImports))),
-                                        true));
+                CodeActionCapabilities codeAction = new CodeActionCapabilities(new CodeActionLiteralSupportCapabilities(
+                        new CodeActionKindCapabilities(Arrays.asList(CodeActionKind.QuickFix, CodeActionKind.Refactor,
+                                CodeActionKind.RefactorExtract, CodeActionKind.RefactorInline,
+                                CodeActionKind.RefactorRewrite, CodeActionKind.Source,
+                                CodeActionKind.SourceOrganizeImports))),
+                        true);
+                codeAction.setDataSupport(true);
+                codeAction.setResolveSupport(new CodeActionResolveSupportCapabilities(List.of("edit"))); //$NON-NLS-1$
+                textDocumentClientCapabilities.setCodeAction(codeAction);
+
                 textDocumentClientCapabilities.setCodeLens(new CodeLensCapabilities());
                 textDocumentClientCapabilities.setColorProvider(new ColorProviderCapabilities());
                 CompletionItemCapabilities completionItemCapabilities = new CompletionItemCapabilities(Boolean.TRUE);
@@ -400,6 +348,9 @@ public class LanguageServerWrapper {
         } else if (LOGGER.isDebugEnabled()) {
             LOGGER.info(message.getClass().getSimpleName() + '\n' + message.toString());
         }
+//        else {
+//            LOGGER.warn(message.getClass().getSimpleName() + '\n' + message.toString());
+//        }
     }
 
     /**
@@ -636,6 +587,12 @@ public class LanguageServerWrapper {
                 }
                 DocumentContentSynchronizer listener = new DocumentContentSynchronizer(this, theDocument, syncKind);
                 theDocument.addDocumentListener(listener);
+                Set<DocumentContentSynchronizer> synchronizers = theDocument.getUserData(DocumentContentSynchronizer.KEY);
+                if (synchronizers == null) {
+                    synchronizers = Collections.synchronizedSet(new LinkedHashSet<>());
+                    theDocument.putUserData(DocumentContentSynchronizer.KEY, synchronizers);
+                }
+                synchronizers.add(listener);
                 LanguageServerWrapper.this.connectedDocuments.put(thePath, listener);
                 return listener.didOpenFuture;
             }
@@ -645,7 +602,15 @@ public class LanguageServerWrapper {
     public void disconnect(URI path) {
         DocumentContentSynchronizer documentListener = this.connectedDocuments.remove(path);
         if (documentListener != null) {
-            documentListener.getDocument().removeDocumentListener(documentListener);
+            final Document document = documentListener.getDocument();
+            document.removeDocumentListener(documentListener);
+            Set<DocumentContentSynchronizer> synchronizers = document.getUserData(DocumentContentSynchronizer.KEY);
+            if (synchronizers != null) {
+                synchronizers.remove(documentListener);
+                if (synchronizers.isEmpty()) {
+                    document.putUserData(DocumentContentSynchronizer.KEY, null);
+                }
+            }
             documentListener.documentClosed();
         }
         if (this.connectedDocuments.isEmpty()) {

@@ -13,34 +13,36 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codeactions;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.DocumentUtil;
 import com.intellij.util.IncorrectOperationException;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LSPIJUtils;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServerWrapper;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionOptions;
-import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.ExecuteCommandOptions;
-import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.ServerCapabilities;
+import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * LSP code action for Intellij.
+ */
 public class LSPCodeActionIntentionAction implements IntentionAction {
     private final String title;
-    private final LanguageServerWrapper finfo;
-    private CodeAction fcodeAction;
-    private Command fcommand;
+    private final LanguageServerWrapper languageServerWrapper;
+    private CodeAction codeAction;
+    private Command command;
 
-    public LSPCodeActionIntentionAction(Either<Command, CodeAction> action, LanguageServerWrapper finfo) {
-        this.finfo = finfo;
+    public LSPCodeActionIntentionAction(Either<Command, CodeAction> action, LanguageServerWrapper languageServerWrapper) {
+        this.languageServerWrapper = languageServerWrapper;
         if (action.isRight()) {
-            fcodeAction = action.getRight();
+            codeAction = action.getRight();
             title = action.getRight().getTitle();
         } else {
-            fcommand = action.getLeft();
+            command = action.getLeft();
             title = action.getRight().getTitle();
         }
     }
@@ -63,10 +65,13 @@ public class LSPCodeActionIntentionAction implements IntentionAction {
     }
 
     private boolean isCodeActionResolveSupported() {
-        ServerCapabilities capabilities = this.finfo.getServerCapabilities();
+        ServerCapabilities capabilities = this.languageServerWrapper.getServerCapabilities();
         if (capabilities != null) {
             Either<Boolean, CodeActionOptions> caProvider = capabilities.getCodeActionProvider();
-            if (caProvider.isRight()) {
+            if (caProvider.isLeft()) {
+                // It is wrong, but we need to parse the registerCapability
+                return caProvider.getLeft();
+            } else if (caProvider.isRight()) {
                 CodeActionOptions options = caProvider.getRight();
                 return options.getResolveProvider().booleanValue();
             }
@@ -76,43 +81,61 @@ public class LSPCodeActionIntentionAction implements IntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-        if (fcodeAction != null) {
-            if (isCodeActionResolveSupported() && fcodeAction.getEdit() == null) {
+        if (codeAction != null) {
+            if (codeAction.getEdit() == null && codeAction.getCommand() == null && isCodeActionResolveSupported()) {
                 // Unresolved code action "edit" property. Resolve it.
-                finfo.getInitializedServer().thenComposeAsync(ls -> ls.getTextDocumentService().resolveCodeAction(fcodeAction)).thenAccept(this::apply);
+                languageServerWrapper.getInitializedServer()
+                        .thenApply(ls ->
+                                ls.getTextDocumentService().resolveCodeAction(codeAction)
+                                        .thenAccept(resolved -> {
+                                            ApplicationManager.getApplication().invokeLater(() -> {
+                                                DocumentUtil.writeInRunUndoTransparentAction(() -> {
+                                                    apply(resolved != null ? resolved : codeAction, project);
+                                                });
+                                            });
+                                        })
+                        );
             } else {
-                apply(fcodeAction);
+                apply(codeAction, project);
             }
-        } else if (fcommand != null) {
-            executeCommand(fcommand);
+        } else if (command != null) {
+            executeCommand(command, project);
         } else {
             // Should never get here
         }
     }
 
-    private void apply(CodeAction codeaction) {
+    private void apply(CodeAction codeaction, @NotNull Project project) {
         if (codeaction != null) {
             if (codeaction.getEdit() != null) {
                 LSPIJUtils.applyWorkspaceEdit(codeaction.getEdit(), codeaction.getTitle());
             }
             if (codeaction.getCommand() != null) {
-                executeCommand(codeaction.getCommand());
+                executeCommand(codeaction.getCommand(), project);
             }
         }
     }
 
-    private void executeCommand(Command command) {
-        ServerCapabilities capabilities = this.finfo.getServerCapabilities();
+    private void executeCommand(Command command, @NotNull Project project) {
+        if (!canSupportCommand(command)) {
+            return;
+        }
+        ExecuteCommandParams params = new ExecuteCommandParams();
+        params.setCommand(command.getCommand());
+        params.setArguments(command.getArguments());
+        languageServerWrapper
+                .getInitializedServer()
+                .thenApply(ls -> ls.getWorkspaceService().executeCommand(params)
+        );
+    }
+
+    private boolean canSupportCommand(Command command) {
+        ServerCapabilities capabilities = this.languageServerWrapper.getServerCapabilities();
         if (capabilities != null) {
             ExecuteCommandOptions provider = capabilities.getExecuteCommandProvider();
-            if (provider != null && provider.getCommands().contains(command.getCommand())) {
-                ExecuteCommandParams params = new ExecuteCommandParams();
-                params.setCommand(command.getCommand());
-                params.setArguments(command.getArguments());
-                this.finfo.getInitializedServer()
-                        .thenAcceptAsync(ls -> ls.getWorkspaceService().executeCommand(params));
-            }
+            return (provider != null && provider.getCommands().contains(command.getCommand()));
         }
+        return false;
     }
 
     @Override

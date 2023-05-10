@@ -10,9 +10,14 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import com.intellij.ProjectTopics;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.event.BulkAwareDocumentListener;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
@@ -50,21 +55,22 @@ public final class PsiMicroProfileProjectManager {
 	private final Map<Module, PsiMicroProfileProject> projects;
 	private MicroProfileProjectListener microprofileProjectListener;
 
-	private class MicroProfileProjectListener implements ModuleListener, BulkFileListener {
+	private class MicroProfileProjectListener implements ModuleListener, BulkFileListener, BulkAwareDocumentListener.Simple, Disposable {
 		@Override
 		public void after(@NotNull List<? extends VFileEvent> events) {
 			for(VFileEvent event : events) {
 				if ((event instanceof VFileDeleteEvent || event instanceof VFileContentChangeEvent ||
 						event instanceof VFileCreateEvent) && isConfigSource(event.getFile())) {
-					Module javaProject = PsiUtilsLSImpl.getInstance(project).getModule(event.getFile());
-					if (javaProject != null) {
-						PsiMicroProfileProject mpProject = getJDTMicroProfileProject(javaProject);
-						if (mpProject != null) {
-							mpProject.evictConfigSourcesCache();
-						}
-					}
-
+					processChangedConfigSource(event.getFile());
 				}
+			}
+		}
+
+		@Override
+		public void afterDocumentChange(@NotNull Document document) {
+			final VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+			if (file != null && isConfigSource(file)) {
+				processChangedConfigSource(file);
 			}
 		}
 
@@ -73,12 +79,25 @@ public final class PsiMicroProfileProjectManager {
 			evict(module);
 		}
 
+		private void processChangedConfigSource(VirtualFile file) {
+			Module javaProject = PsiUtilsLSImpl.getInstance(project).getModule(file);
+			if (javaProject != null) {
+				PsiMicroProfileProject mpProject = getJDTMicroProfileProject(javaProject);
+				if (mpProject != null) {
+					mpProject.evictConfigSourcesCache();
+				}
+			}
+		}
+
 		private void evict(Module javaProject) {
 			if (javaProject != null) {
 				// Remove the JDTMicroProfile project instance from the cache.
 				projects.remove(javaProject);
 			}
 		}
+
+		@Override
+		public void dispose() {}
 	}
 
 	private PsiMicroProfileProjectManager(Project project) {
@@ -122,5 +141,6 @@ public final class PsiMicroProfileProjectManager {
 		MessageBusConnection connection = ApplicationManager.getApplication().getMessageBus().connect(project);
 		connection.subscribe(VirtualFileManager.VFS_CHANGES, microprofileProjectListener);
 		project.getMessageBus().connect(project).subscribe(ProjectTopics.MODULES, microprofileProjectListener);
+		EditorFactory.getInstance().getEventMulticaster().addDocumentListener(microprofileProjectListener, microprofileProjectListener);
 	}
 }
