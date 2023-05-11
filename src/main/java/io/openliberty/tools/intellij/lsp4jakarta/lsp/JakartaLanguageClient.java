@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Red Hat, Inc.
+ * Copyright (c) 2019, 2023 Red Hat, Inc. and others
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -24,7 +24,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
 import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
 import org.eclipse.lsp4jakarta.commons.JakartaClasspathParams;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
@@ -52,24 +51,23 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
     String uri = classpathParams.getUri();
     List<String> snippetContexts = classpathParams.getSnippetCtx();
     Project project = getProject();
-    return CompletableFutures.computeAsync((cancelChecker) -> {
-              return PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project);
-            });
+    return runAsBackground("Computing Jakarta context",
+            () -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project));
   }
 
   // Support the message "jakarta/java/diagnostics"
   @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-    var diagnostics = PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils);
-    return CompletableFuture.completedFuture(diagnostics);
+    return runAsBackground("Computing Jakarta Java diagnostics",
+            () -> PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils));
   }
 
   // Support the message "jakarta/java/codeaction
   public CompletableFuture<List<CodeAction>> getCodeAction(JakartaJavaCodeActionParams params) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-    var codeActions = PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils);
-    return CompletableFuture.completedFuture(codeActions);
+    return runAsBackground("Computing Jakarta code actions",
+            () -> PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils));
   }
 
   @Override

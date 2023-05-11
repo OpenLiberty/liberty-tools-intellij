@@ -12,9 +12,9 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
@@ -43,7 +43,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -255,10 +254,13 @@ public class PsiTypeUtils {
         String location = null;
         Module module = ProjectFileIndex.getInstance(project).getModuleForFile(directory);
         if (module != null) {
-            VirtualFile moduleRoot = LocalFileSystem.getInstance().findFileByIoFile(new File(module.getModuleFilePath()).getParentFile());
-            String path = VfsUtilCore.getRelativePath(directory, moduleRoot);
-            if (path != null) {
-                location = '/' + module.getName() + '/' + path;
+            VirtualFile[] roots = ModuleRootManager.getInstance(module).getContentRoots();
+            if (roots.length > 0) {
+                VirtualFile moduleRoot = roots[0]; // choose any
+                String path = VfsUtilCore.getRelativePath(directory, moduleRoot);
+                if (path != null) {
+                    location = '/' + module.getName() + '/' + path;
+                }
             }
         }
         if (location == null) {

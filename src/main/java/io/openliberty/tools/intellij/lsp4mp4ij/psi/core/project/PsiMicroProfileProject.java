@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2023 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -10,19 +10,17 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import com.intellij.openapi.compiler.CompilerPaths;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.lsp4mp.lsp4ij.DocumentContentSynchronizer;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.project.ConfigSourcePropertiesProvider;
 import org.eclipse.lsp4mp.commons.utils.ConfigSourcePropertiesProviderUtils;
 import org.eclipse.lsp4mp.commons.utils.IConfigSourcePropertiesProvider;
 import org.eclipse.lsp4mp.commons.utils.PropertyValueExpander;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.ref.WeakReference;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,13 +32,15 @@ import java.util.stream.Collectors;
  */
 public class PsiMicroProfileProject {
 
-
 	private final Module javaProject;
 
-	private List<IConfigSource> configSources;
+	private volatile List<IConfigSource> configSources;
 
-	private transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
-	private transient PropertyValueExpander propertyValueExpander = null;
+	private volatile transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
+	private volatile transient PropertyValueExpander propertyValueExpander = null;
+
+	private final Object NOTIFY_MAP_LOCK = new Object();
+	private volatile transient Map<Document, WeakReference<Document>> documentsToNotify = new WeakHashMap<>();
 
 	public PsiMicroProfileProject(Module javaProject) {
 		this.javaProject = javaProject;
@@ -62,16 +62,20 @@ public class PsiMicroProfileProject {
 	 */
 	public String getProperty(String propertyKey, String defaultValue) {
 
+		IConfigSourcePropertiesProvider aggregatedPropertiesProvider = this.aggregatedPropertiesProvider;
 		if (aggregatedPropertiesProvider == null) {
 			aggregatedPropertiesProvider = getAggregatedPropertiesProvider();
+			this.aggregatedPropertiesProvider = aggregatedPropertiesProvider;
 		}
 
 		String unresolved = aggregatedPropertiesProvider.getValue(propertyKey);
 		if (unresolved == null) {
 			return defaultValue;
 		} else if (unresolved.contains("${")) {
+			PropertyValueExpander propertyValueExpander = this.propertyValueExpander;
 			if (propertyValueExpander == null) {
 				propertyValueExpander = new PropertyValueExpander(aggregatedPropertiesProvider);
+				this.propertyValueExpander = propertyValueExpander;
 			}
 			String expandedValue = propertyValueExpander.getValue(propertyKey);
 			if (expandedValue == null) {
@@ -181,8 +185,10 @@ public class PsiMicroProfileProject {
 	}
 
 	public List<IConfigSource> getConfigSources() {
+		List<IConfigSource> configSources = this.configSources;
 		if (configSources == null) {
 			configSources = loadConfigSources(javaProject);
+			this.configSources = configSources;
 		}
 		return configSources;
 	}
@@ -195,6 +201,38 @@ public class PsiMicroProfileProject {
 		configSources = null;
 		propertyValueExpander = null;
 		aggregatedPropertiesProvider = null;
+		refreshDocuments();
+	}
+
+	private void refreshDocuments() {
+		Map<Document, WeakReference<Document>> docsToNotify = null;
+		synchronized (NOTIFY_MAP_LOCK) {
+			docsToNotify = documentsToNotify;
+			documentsToNotify = new WeakHashMap<>();
+		}
+		// Each document in the map contains an annotation or other structure that depends on a config source.
+		// The change that caused the cache to be evicted may have affected the validity of those structures.
+		// Fire events to the language servers to force diagnostics to be recomputed for each of those documents.
+		docsToNotify.forEach((k,v) -> {
+			final Document document = v.get();
+			if (document != null) {
+				final Set<DocumentContentSynchronizer> synchronizers = document.getUserData(DocumentContentSynchronizer.KEY);
+				if (synchronizers != null) {
+					synchronizers.forEach(synchronizer -> {
+						synchronizer.documentFullRefresh(document);
+					});
+				}
+			}
+		});
+	}
+
+	/**
+	 * Register a document to be notified if the config source cache is cleared.
+	 */
+	public void notifyIfCacheEvicted(Document document) {
+		synchronized (NOTIFY_MAP_LOCK) {
+			documentsToNotify.putIfAbsent(document, new WeakReference<>(document));
+		}
 	}
 
 	/**
@@ -205,10 +243,11 @@ public class PsiMicroProfileProject {
 	 * @return the loaded config sources.
 	 */
 	private synchronized List<IConfigSource> loadConfigSources(Module javaProject) {
-		if (configSources != null) {
+		final List<IConfigSource> sources = configSources;
+		if (sources != null) {
 			// Case when there are several Threads which load config sources, the second
 			// Thread should not reload the config sources again.
-			return configSources;
+			return sources;
 		}
 		List<IConfigSource> configSources = new ArrayList<>();
 		VirtualFile outputFile = CompilerPaths.getModuleOutputDirectory(javaProject, false);

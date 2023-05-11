@@ -2,8 +2,11 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticsToMarkers;
+import io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticHandler;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -19,10 +22,12 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class LanguageClientImpl implements LanguageClient {
     private final Project project;
-    private LSPDiagnosticsToMarkers diagnosticHandler;
+    private Consumer<PublishDiagnosticsParams> diagnosticHandler;
 
     private LanguageServer server;
     private LanguageServerWrapper wrapper;
@@ -38,7 +43,7 @@ public class LanguageClientImpl implements LanguageClient {
     public final void connect(LanguageServer server, LanguageServerWrapper wrapper) {
         this.server = server;
         this.wrapper = wrapper;
-        this.diagnosticHandler = new LSPDiagnosticsToMarkers(wrapper.serverDefinition.id);
+        this.diagnosticHandler = new LSPDiagnosticHandler(wrapper);
     }
 
     protected final LanguageServer getLanguageServer() {
@@ -99,6 +104,25 @@ public class LanguageClientImpl implements LanguageClient {
             res.add(LSPIJUtils.toWorkspaceFolder(project));
         }
         return CompletableFuture.completedFuture(res);
+    }
+
+    protected <R> CompletableFuture<R> runAsBackground(String title, Supplier<R> supplier) {
+        CompletableFuture<R> future = new CompletableFuture<>();
+        CompletableFuture.runAsync(() -> {
+            Runnable task = () -> ProgressManager.getInstance().runProcess(() -> {
+                try {
+                    future.complete(supplier.get());
+                } catch (Throwable t) {
+                    future.completeExceptionally(t);
+                }
+            }, new EmptyProgressIndicator());
+            if (DumbService.getInstance(getProject()).isDumb()) {
+                DumbService.getInstance(getProject()).runWhenSmart(task);
+            } else {
+                task.run();
+            }
+        });
+        return future;
     }
 
 }

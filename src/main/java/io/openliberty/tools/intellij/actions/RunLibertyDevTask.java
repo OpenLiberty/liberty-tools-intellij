@@ -32,6 +32,10 @@ import java.util.Arrays;
 public class RunLibertyDevTask extends AnAction {
     Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
 
+    /**
+     * Enables/disables the play/action button for the Liberty projects and action options in the Liberty Tool Window tree
+     * @param e - AnActionEvent passed in by IntelliJ
+     */
     @Override
     public void update(@NotNull AnActionEvent e) {
         if (e.getPlace().equalsIgnoreCase(Constants.GO_TO_ACTION_TRIGGERED)) {
@@ -42,6 +46,10 @@ public class RunLibertyDevTask extends AnAction {
             e.getPresentation().setEnabled(false);
         }
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
+        if (project == null) {
+            //if the action event data context returns a null project, just return and let successive update calls modify the presentation
+            return;
+        }
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
             Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
