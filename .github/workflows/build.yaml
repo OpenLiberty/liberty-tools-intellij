@@ -4,39 +4,47 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [main, ls-integration]
+    branches: [ main, ls-integration, test-automation ]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-
+        runtime: [ linux, mac ]
+        include:
+          - runtime: linux
+            os: ubuntu-latest
+            reportName: linux-test-report
+          - runtime: mac
+            os: macOS-latest
+            reportName: mac-test-report
     steps:
-      - name: Checkout liberty-tools-intellij
+      - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Cache Gradle
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Build Liberty-Tools-Intellij
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v2
+      - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
-        run: ./gradlew buildPlugin
-      - name: Archive artifacts
-        if: runner.os == 'Linux'
+        run: bash ./src/test/resources/ci/scripts/setup.sh
+      - name: 'Run UI integration tests'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/run.sh
+      - name: 'Archive Test logs and reports'
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.reportName }}
+          path: |
+            liberty-tools-intellij/build/reports/
+      - name: 'Build Liberty-Tools-Intellij'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./gradlew buildPlugin
+      - name: 'Archive artifacts'
+        if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: liberty-tools-intellij-${{ github.sha }}
