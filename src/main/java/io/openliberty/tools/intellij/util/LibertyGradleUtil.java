@@ -27,7 +27,8 @@ import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
 public class LibertyGradleUtil {
-    private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);
+
     /**
      * Given the gradle build file get the project name
      * This method looks for a settings.gradle file in the same parent dir
@@ -94,6 +95,23 @@ public class LibertyGradleUtil {
             String buildFile = fileToString(file.getVirtualFile().getPath());
             if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
 
+            // instead of iterating over capture groups in a plugin{}, search directly
+            // look for our plugin not defined in a line comment. if defined, grab version # from Group 2
+            String negativeLineCommentLookBehind = "(?<!//)\\s*";
+            String gradleLibertyPluginId = "id\\s*[\'\"]io\\.openliberty\\.tools\\.gradle\\.Liberty[\'\"]";
+            String optionalVersion = "(\\s+version\\s+[\'\"](.*)[\'\"])?";
+            Pattern gradleLibertyPluginIdPattern = Pattern.compile(negativeLineCommentLookBehind + gradleLibertyPluginId + optionalVersion);
+            Matcher gradleLibertyPluginIdMatcher = gradleLibertyPluginIdPattern.matcher(buildFile);
+            if (gradleLibertyPluginIdMatcher.find()) {
+                if (gradleLibertyPluginIdMatcher.groupCount() < 2) {
+                    // if version is not defined, assumes latest is pulled
+                    return (new BuildFile(true, true));
+                }
+                ComparableVersion pluginVersion = new ComparableVersion(gradleLibertyPluginIdMatcher.group(2));
+                ComparableVersion containerVersion = new ComparableVersion(Constants.LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION);
+                return (new BuildFile(true, pluginVersion.compareTo(containerVersion) >= 0));
+            }
+
             // check if "apply plugin: 'liberty'" is specified in the build.gradle
             boolean libertyPlugin = false;
 
@@ -105,7 +123,6 @@ public class LibertyGradleUtil {
             while (applyPluginMatcher.find()) {
                 libertyPlugin = true;
             }
-            // TODO: check if liberty is in the plugins block
 
             if (libertyPlugin) {
                 // check if group matches io.openliberty.tools and name matches liberty-gradle-plugin
@@ -121,9 +138,7 @@ public class LibertyGradleUtil {
                     Matcher matcher2 = pattern2.matcher(sub);
                     while (matcher2.find()) {
                         String plugin = sub.substring(matcher2.start(), matcher2.end());
-                        boolean vaildContainerVersion = containerVersion(plugin);
-
-                        return (new BuildFile(true, vaildContainerVersion));
+                        return (new BuildFile(true, containerVersion(plugin)));
                     }
                 }
             }
