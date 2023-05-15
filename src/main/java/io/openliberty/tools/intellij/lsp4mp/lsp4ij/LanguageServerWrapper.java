@@ -733,6 +733,14 @@ public class LanguageServerWrapper {
     }
 
     void registerCapability(RegistrationParams params) {
+        if (initializeFuture == null) { // language server is shutting down but registration messages are still arriving
+            if (LOGGER.isDebugEnabled()) {
+                StringBuffer buffer = new StringBuffer();
+                params.getRegistrations().forEach(reg -> { buffer.append(reg.getMethod()).append(","); });
+                LOGGER.info("registerCapability, initializeFuture==null, ignore capabilities " + buffer);
+            }
+            return;
+        }
         initializeFuture.thenRun(() -> {
             params.getRegistrations().forEach(reg -> {
                 if ("workspace/didChangeWorkspaceFolders".equals(reg.getMethod())) { //$NON-NLS-1$
