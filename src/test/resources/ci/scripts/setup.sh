@@ -44,7 +44,13 @@ GRADLE_ARCHIVE_SHA256=6147605a23b4eff6c334927a86ff3508cb5d6722cd624c97ded4c2e864
 SOFTWARE_INSTALL_DIR="${PWD}/test-tools/liberty-dev-tools"
 
 # main.
+# If accepts a single argument representing the custom installation function to call.
+# The argument can be one of these options:
+# installJDK, installMaven, installGradle, or installBaseSoftware.
+# If no argument is specified all software is installed.
 main() {
+  local funcToCall="$1"
+
     # If we are not on a supported OS, exit.
     if [[ $OS != "Linux" && $OS != "Darwin" && $OS != "MINGW64_NT"* ]]; then
         echo "ERROR: OS $OS is not supported."
@@ -54,9 +60,25 @@ main() {
     # Create install directory.
     mkdir -p "$SOFTWARE_INSTALL_DIR"
 
-    # Install all required software.
-    installBaseSoftware
-    installCustomSoftware
+    # Install software.
+    case "$funcToCall" in
+        installJDK)
+            installJDK
+        ;;
+        installMaven)
+            installMaven
+        ;;
+        installGradle)
+            installGradle
+        ;;
+        installBaseSoftware)
+            installBaseSoftware
+        ;;
+        *)
+            installBaseSoftware
+            installCustomSoftware
+        ;;
+    esac
 }
 
 # installSoftware installs base software.
@@ -66,7 +88,7 @@ main() {
 installBaseSoftware() {
     if [[ $OS == "Linux" ]]; then
         sudo apt-get update
-        sudo apt-get install curl unzip
+        sudo apt-get -y install curl unzip
         installXDisplaySoftwareOnLinux
         installDockerOnLinux
     elif [[ $OS == "Darwin" ]]; then
@@ -116,11 +138,13 @@ installJDK() {
         unzip /tmp/liberty-dev-tool-semeru-jdk.zip -d "$SOFTWARE_INSTALL_DIR"
     fi
 
-	# Set the JAVA_HOME environment variable and make it available to other steps within the executing job.
-	echo "JAVA_HOME=${javaHome}" >> $GITHUB_ENV
-
-	# Prepend the JDK installation's bin dir location to PATH and make it available to other steps within the executing job.
-	echo "${javaHome}/bin" >> $GITHUB_PATH
+    # Handle Java home.
+    if [[ $GITHUB_ENV ]]; then
+        echo "JAVA_HOME=${javaHome}" >> $GITHUB_ENV
+        echo "${javaHome}/bin" >> $GITHUB_PATH
+    else
+        echo "${javaHome}"
+    fi
 }
 
 # installMaven installs the set version of Maven.
@@ -148,8 +172,12 @@ installMaven() {
     # Expand the archive.
     unzip -d "$SOFTWARE_INSTALL_DIR" /tmp/liberty-dev-tool-apache-maven.zip
 
-    # Prepend the Maven installation's bin dir location to PATH and make it available to other steps within the executing job.
-    echo "${mavenHome}/bin" >> $GITHUB_PATH
+    # Handle Maven home.
+    if [[ $GITHUB_PATH ]]; then
+        echo "${mavenHome}/bin" >> $GITHUB_PATH
+    else
+        echo "${mavenHome}"
+    fi
 }
 
 # installGradle installs the set version of Gradle.
@@ -177,29 +205,37 @@ installGradle() {
     # Expand the archive.
     unzip -d "$SOFTWARE_INSTALL_DIR" /tmp/liberty-dev-tool-gradle.zip
 
-    # Prepend the Gradle installation's bin dir location to PATH and make it available to other steps within the executing job.
-    echo "${gradleHome}/bin" >> $GITHUB_PATH
+    # Handle Gradle home.
+    if [[ $GITHUB_PATH ]]; then
+        echo "${gradleHome}/bin" >> $GITHUB_PATH
+    else
+        echo "${gradleHome}"
+    fi
 }
 
 # installXDisplaySoftwareOnLinux Installs a X display, a windows manager, and other pre-req software.
 installXDisplaySoftwareOnLinux() {
-    sudo apt-get install dbus-x11 xvfb metacity at-spi2-core
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install dbus-x11 xvfb metacity at-spi2-core
 }
 
 # installDockerOnLinux installs Docker on Linux.
 installDockerOnLinux() {
     # Remove a previous installation of docker.
-    sudo apt-get remove docker docker-engine docker.io containerd runc
+    for i in docker docker-engine docker.io containerd runc; do
+        if isPkgInstalled $i; then
+            sudo apt-get -y remove $i
+        fi
+    done
 
     # Setup the docker repository before installation.
-    sudo apt-get install ca-certificates gnupg lsb-release
+    sudo apt-get -y install ca-certificates gnupg lsb-release
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     # Install the docker engine.
     sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 }
 
 # installDockerOnMAC installs Docker on MAC.
@@ -227,6 +263,11 @@ installDockerOnMAC() {
         # Sanity check. This will either show the info output of a successful start.
         # or will fail the setup on an unsuccessful start.
         docker info
+}
+
+# Returns 0 if the package is installed.
+isPkgInstalled() {
+  dpkg --status "$1" &> /dev/null
 }
 
 main "$@"

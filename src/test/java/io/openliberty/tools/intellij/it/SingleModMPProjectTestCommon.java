@@ -123,7 +123,7 @@ public abstract class SingleModMPProjectTestCommon {
                 // for those times when the tests are run twice. Not waiting, opens up a window
                 // that leads to false negative results, and the Liberty server being left active.
                 // If the Liberty server is left active, subsequent tests will fail.
-                TestUtils.sleepAndIgnoreException(30);
+                TestUtils.sleepAndIgnoreException(40);
 
                 // Stop Liberty dev mode and validates that the Liberty server is down.
                 UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);

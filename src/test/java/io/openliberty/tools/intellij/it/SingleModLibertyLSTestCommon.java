@@ -2,8 +2,6 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.JTreeFixture;
-import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
@@ -357,11 +355,6 @@ public abstract class SingleModLibertyLSTestCommon {
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
         UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, projectName);
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
-
-        // pre-open project tree before attempting to open server.xml
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-        projTree.expand(projectName, "src", "main", "liberty", "config");
 
         // open server.xml file
         UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.xml");
