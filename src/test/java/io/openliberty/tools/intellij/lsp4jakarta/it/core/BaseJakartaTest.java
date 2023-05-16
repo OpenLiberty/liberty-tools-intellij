@@ -13,6 +13,7 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.it.core;
 
+import com.intellij.maven.testFramework.MavenImportingTestCase;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -24,7 +25,6 @@ import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
 import com.intellij.testFramework.builders.ModuleFixtureBuilder;
 import com.intellij.testFramework.fixtures.*;
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.idea.maven.MavenImportingTestCase;
 
 import java.io.File;
 import java.util.ArrayList;

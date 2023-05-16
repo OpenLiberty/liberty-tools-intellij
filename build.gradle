@@ -26,6 +26,9 @@ repositories {
     maven {
         url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
     }
+    maven {
+        url = "https://www.jetbrains.com/intellij-repository/releases"
+    }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -66,6 +69,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testImplementation 'com.jetbrains.intellij.maven:maven-test-framework:231.9011.34'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
 
