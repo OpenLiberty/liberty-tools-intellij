@@ -518,10 +518,10 @@ public class UIBotTestUtils {
                 break;
             } catch (Exception e) {
                 // The Liberty tool window content may blink in and out or hang. Retry.
+                error = e;
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                         "Unable to expand the Liberty tool window project tree (" + e.getMessage() + "). Retrying...");
                 TestUtils.sleepAndIgnoreException(10);
-                error = e;
             }
         }
 
@@ -531,19 +531,43 @@ public class UIBotTestUtils {
         }
     }
 
+    /**
+     * Opens the specified file located in directory <project>/src/main/liberty/config.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param projectName The name of the project that contains the file to open.
+     * @param fileName    The name of the file to open.
+     */
     public static void openConfigFile(RemoteRobot remoteRobot, String projectName, String fileName) {
-        // Click on File on the Menu bar.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        int maxRetries = 3;
+        Exception error = null;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                error = null;
 
-        // hide the terminal window for now
-        UIBotTestUtils.hideTerminalWindow(remoteRobot);
+                // Click on File on the Menu bar.
+                ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
-        // get a JTreeFixture reference to the file project viewer entry
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-        projTree.expand(projectName, "src", "main", "liberty", "config");
+                // hide the terminal window for now
+                hideTerminalWindow(remoteRobot);
 
-        projTree.findText(fileName).doubleClick();
+                // get a JTreeFixture reference to the file project viewer entry
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                projTree.expand(projectName, "src", "main", "liberty", "config");
 
+                projTree.findText(fileName).doubleClick();
+                break;
+            } catch (Exception e) {
+                error = e;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Unable to open file " + fileName + " (" + e.getMessage() + "). Retrying...");
+                TestUtils.sleepAndIgnoreException(5);
+            }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Unable to open file " + fileName, error);
+        }
     }
 
     public static void hideTerminalWindow(RemoteRobot remoteRobot) {
