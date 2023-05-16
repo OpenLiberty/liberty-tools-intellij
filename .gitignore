@@ -4,4 +4,4 @@ video
 .gradle
 .idea
 .DS_Store
-bin/main/
+bin/

@@ -100,7 +100,6 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
      */
     @Test
     @Video
-    @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/299")
     public void testsRefreshProjectWithLTBuildCfgOnly() {
         testsRefreshProjectWithLTBuildCfgOnly("pluginsDSLOnlyDepDef.build.gradle");
     }
