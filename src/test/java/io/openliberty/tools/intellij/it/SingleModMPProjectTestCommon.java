@@ -187,7 +187,6 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @Test
     @Video
-    @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/348")
     public void testStartWithConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithConfigInDebugModeUsingToolbar";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -236,7 +235,6 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @Test
     @Video
-    @Disabled("Until this issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/348")
     public void testStartWithConfigInDebugModeUsingMenu() {
         String testName = "testStartWithConfigInDebugModeUsingMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
