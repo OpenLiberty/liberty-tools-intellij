@@ -29,6 +29,7 @@ import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +79,7 @@ public class RemoveAnnotationConflictQuickFix {
             removeAnnotations(diagnostic, context, parentType, codeActions);
             return codeActions;
         }
-        return null;
+        return Collections.emptyList();
 
     }
 

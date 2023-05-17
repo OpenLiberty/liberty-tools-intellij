@@ -24,6 +24,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class ManagedBeanNoArgConstructorQuickFix {
 
             return codeActions;
         }
-        return null;
+        return Collections.emptyList();
     }
 
     protected PsiClass getBinding(PsiElement node) {

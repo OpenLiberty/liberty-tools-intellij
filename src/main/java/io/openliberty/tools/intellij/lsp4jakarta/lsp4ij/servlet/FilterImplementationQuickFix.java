@@ -40,10 +40,10 @@ import java.util.List;
 public class FilterImplementationQuickFix {
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
+        List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
         if (parentType != null) {
-            List<CodeAction> codeActions = new ArrayList<>();
             // Create code action
             // interface
             ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
@@ -54,9 +54,8 @@ public class FilterImplementationQuickFix {
             if (codeAction != null) {
                 codeActions.add(codeAction);
             }
-            return codeActions;
         }
-        return null;
+        return codeActions;
     }
 
     private PsiClass getBinding(PsiElement node) {

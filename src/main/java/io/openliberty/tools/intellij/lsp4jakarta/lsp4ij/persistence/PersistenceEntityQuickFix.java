@@ -55,19 +55,18 @@ import java.util.List;
  */
 public class PersistenceEntityQuickFix {
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
+        List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
         if (parentType != null) {
-            List<CodeAction> codeActions = new ArrayList<>();
 
             // add constructor
             if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR)) {
                 codeActions.addAll(addConstructor(diagnostic, context, parentType));
             }
 
-            return codeActions;
         }
-        return null;
+        return codeActions;
     }
 
     protected PsiClass getBinding(PsiElement node) {
