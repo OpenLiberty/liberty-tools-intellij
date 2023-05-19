@@ -140,9 +140,12 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             if (CommonDataKeys.PROJECT.is(dataId)) {
                 return libertyModule.getProject();
             }
+            if (Constants.LIBERTY_BUILD_FILE.equals(dataId)) {
+                return libertyModule.getBuildFile();
+            }
             return null;
         };
-        
+
         AnActionEvent event = new AnActionEvent(null, dataCtx, ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0);
         action.actionPerformed(event);
 
