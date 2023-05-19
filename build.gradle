@@ -106,7 +106,7 @@ runIde {
 }
 
 intellij {
-    version = '2023.1' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    version = '2023.1.2' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
 }
