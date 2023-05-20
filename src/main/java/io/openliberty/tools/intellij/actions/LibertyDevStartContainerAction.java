@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,29 +9,40 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartContainerAction extends LibertyGeneralAction {
 
-    public LibertyDevStartContainerAction() {
-        setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev.container"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("start.liberty.dev.container");
     }
 
     @Override
-    protected void executeLibertyAction() {
-        String startCmd;
-        ShellTerminalWidget widget = getTerminalWidget(true);
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+        ShellTerminalWidget widget = getTerminalWidget(true, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }
+
+        String projectType = libertyModule.getProjectType();
+        String startCmd;
         try {
             startCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
-        }
-        catch (LibertyException ex) {
+        } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd
             LOGGER.warn(ex.getMessage()); // Logger.error creates an entry on "IDE Internal Errors", which we do not want
-            notifyError(ex.getTranslatedMessage());
+            notifyError(ex.getTranslatedMessage(), project);
             return;
         }
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";

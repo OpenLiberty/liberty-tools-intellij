@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,6 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
+import com.intellij.openapi.project.Project;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
@@ -20,22 +22,27 @@ import java.util.ArrayList;
 
 public class AddLibertyProjectAction extends LibertyProjectAction {
 
-    public AddLibertyProjectAction() {
-        setActionCmd(LocalizedResourceUtil.getMessage("liberty.project.add"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("liberty.project.add");
     }
 
     @Override
-    protected ArrayList<BuildFile> getMavenBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+    protected ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return LibertyProjectUtil.getAddableMavenBuildFiles(project);
     }
 
     @Override
-    protected ArrayList<BuildFile> getGradleBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+    protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return LibertyProjectUtil.getAddableGradleBuildFiles(project);
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
         LibertyProjectUtil.addCustomLibertyProject(libertyModule);
     }
 

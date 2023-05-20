@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,8 +14,10 @@ import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
@@ -29,12 +31,20 @@ import java.util.List;
  */
 public class LibertyDevCustomStartAction extends LibertyGeneralAction {
 
-    public LibertyDevCustomStartAction() {
-        setActionCmd(LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params");
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+
         // open run config
         RunManager runManager = RunManager.getInstance(project);
         List<RunnerAndConfigurationSettings> libertySettings = runManager.getConfigurationSettingsList(LibertyRunConfigurationType.getInstance());
@@ -43,15 +53,15 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         libertySettings.forEach(setting -> {
             // find all Liberty run configs associated with this build file
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
-                VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
-                if (vBuildFile != null && vBuildFile.equals(libertyModule.getBuildFile())) {
-                    libertyModuleSettings.add(setting);
-                }
+            VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
+            if (vBuildFile != null && vBuildFile.equals(libertyModule.getBuildFile())) {
+                libertyModuleSettings.add(setting);
+            }
         });
         RunnerAndConfigurationSettings selectedLibertyConfig;
         if (libertyModuleSettings.isEmpty()) {
             // create new run config
-            selectedLibertyConfig = createNewLibertyRunConfig(runManager);
+            selectedLibertyConfig = createNewLibertyRunConfig(runManager, libertyModule);
         } else {
             // TODO if 1+ run configs, prompt user to select the one they want see https://github.com/OpenLiberty/liberty-tools-intellij/issues/167
             // 1+ run configs found for the given project
@@ -78,7 +88,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
      * @param runManager
      * @return RunnerAndConfigurationSettings newly created run config settings
      */
-    protected RunnerAndConfigurationSettings createNewLibertyRunConfig(RunManager runManager) {
+    protected RunnerAndConfigurationSettings createNewLibertyRunConfig(RunManager runManager, LibertyModule libertyModule) {
         RunnerAndConfigurationSettings runConfigSettings = runManager.createConfiguration(runManager.suggestUniqueName(libertyModule.getName(), LibertyRunConfigurationType.getInstance()), LibertyRunConfigurationType.class);
         LibertyRunConfiguration libertyRunConfiguration = (LibertyRunConfiguration) runConfigSettings.getConfiguration();
         // pre-populate build file and name, need to convert build file to NioPath for OS specific paths

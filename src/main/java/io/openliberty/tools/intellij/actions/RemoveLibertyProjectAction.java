@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
@@ -22,22 +24,29 @@ import java.util.ArrayList;
 
 public class RemoveLibertyProjectAction extends LibertyProjectAction {
 
-    public RemoveLibertyProjectAction() {
-        setActionCmd(LocalizedResourceUtil.getMessage("liberty.project.remove"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("liberty.project.remove");
     }
 
     @Override
-    protected ArrayList<BuildFile> getMavenBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+    protected ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return LibertyProjectUtil.getRemovableMavenBuildFiles(project);
     }
 
     @Override
-    protected ArrayList<BuildFile> getGradleBuildFiles() throws IOException, SAXException, ParserConfigurationException {
+    protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
         return LibertyProjectUtil.getRemovableGradleBuildFiles(project);
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        String projectName = project.getName();
         final int result = Messages.showYesNoDialog(
                 LocalizedResourceUtil.getMessage("liberty.project.remove.confirmation.dialog.message", projectName),
                 getChooseDialogTitle(),

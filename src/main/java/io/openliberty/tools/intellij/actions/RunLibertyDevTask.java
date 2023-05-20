@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,7 +10,9 @@
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -27,10 +29,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.Arrays;
 
 public class RunLibertyDevTask extends AnAction {
-    Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
+    private static final Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
 
     /**
      * Enables/disables the play/action button for the Liberty projects and action options in the Liberty Tool Window tree
@@ -119,8 +120,5 @@ public class RunLibertyDevTask extends AnAction {
                 }
             }
         }
-
-
     }
-
 }

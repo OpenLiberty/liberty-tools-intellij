@@ -14,30 +14,39 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 public class ViewUnitTestReport extends LibertyGeneralAction {
 
-    public ViewUnitTestReport() {
-        setActionCmd(LocalizedResourceUtil.getMessage("view.unit.test.report"));
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("view.unit.test.report");
     }
 
     @Override
     protected List<String> getSupportedProjectTypes() {
-        return Arrays.asList(Constants.LIBERTY_MAVEN_PROJECT);
+        return List.of(Constants.LIBERTY_MAVEN_PROJECT);
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
         File surefireReportFile = Paths.get(parentFile.getPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
