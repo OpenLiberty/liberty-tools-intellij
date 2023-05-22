@@ -23,6 +23,8 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
@@ -64,7 +66,7 @@ public class LanguageServerWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageServerWrapper.class);//$NON-NLS-1$
     private static final String CLIENT_NAME = "IntelliJ";
 
-    class Listener implements DocumentListener, FileDocumentManagerListener {
+    class Listener implements DocumentListener, FileDocumentManagerListener, FileEditorManagerListener {
         @Override
         public void documentChanged(@NotNull DocumentEvent event) {
             URI uri = LSPIJUtils.toUri(event.getDocument());
@@ -83,6 +85,21 @@ public class LanguageServerWrapper {
             if (uri != null) {
                 disconnect(uri);
             }*/
+        }
+
+        @Override
+        public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+            URI uri = LSPIJUtils.toUri(file);
+            if (uri != null) {
+                try {
+                    // Remove the cached file wrapper if needed
+                    LSPVirtualFileWrapper.dispose(file);
+                    // Disconnect the given file from all language servers
+                    disconnect(uri);
+                } catch (Exception e) {
+                    LOGGER.warn("Error while disconnecting the file '" + uri + "' from all language servers", e);
+                }
+            }
         }
     }
 

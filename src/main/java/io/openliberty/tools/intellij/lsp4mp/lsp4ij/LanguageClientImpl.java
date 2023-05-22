@@ -125,4 +125,8 @@ public class LanguageClientImpl implements LanguageClient {
         return future;
     }
 
+    // public void dispose() {
+
+    // }
+
 }
