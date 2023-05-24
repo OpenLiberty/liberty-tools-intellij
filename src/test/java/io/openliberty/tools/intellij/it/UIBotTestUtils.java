@@ -645,12 +645,10 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Click on the editor file tab for a file that is open in the editor pane to gain focus to that file
+     * Click on the Problems tab to open the Problems View
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param fileName    The string file name
      */
-
     public static void clickOnProblemsTab(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
@@ -660,7 +658,7 @@ public class UIBotTestUtils {
             actionButton.click();
 
         } catch (WaitForConditionTimeoutException e) {
-            // file not open, nothing to do
+            // Problems tab open, nothing to do
         }
     }
 
@@ -723,7 +721,6 @@ public class UIBotTestUtils {
 
                 // first get the contents of the popup - put in a String
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-                ContainerFixture popup;
                 switch (popupType.name()) {
                     case "DOCUMENTATION":
                         projectFrame.getDocumentationHintEditorPane();
@@ -752,7 +749,7 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Moves the mouse cursor to a specific string target in a liberty config file
+     * Moves the mouse cursor to a specific string target in an application file
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param hoverTarget The string to hover over in the config file
@@ -1109,9 +1106,9 @@ public class UIBotTestUtils {
      * @param remoteRobot      The RemoteRobot instance.
      * @param textToDelete     The string to delete
      */
-    public static void selectAndDeleteTextInJavaPart(RemoteRobot remoteRobot, String textToDelete){
+    public static void selectAndDeleteTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToDelete){
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        clickOnFileTab(remoteRobot, "server.xml");
+        clickOnFileTab(remoteRobot, fileName);
         Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         editorNew.click();
@@ -1261,8 +1258,8 @@ public class UIBotTestUtils {
 
         // Delete/Clear the content.
         editMenuEntry.click();
-        ComponentFixture copyEntry = projectFrame.getActionMenuItem("Delete");
-        copyEntry.click();
+        ComponentFixture deleteEntry = projectFrame.getActionMenuItem("Delete");
+        deleteEntry.click();
     }
 
     /**

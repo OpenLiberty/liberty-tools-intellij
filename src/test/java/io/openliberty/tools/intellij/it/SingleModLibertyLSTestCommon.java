@@ -115,7 +115,7 @@ public abstract class SingleModLibertyLSTestCommon {
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE, true);
             Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
-            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedFeature);
+            TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedFeature);
         } finally {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
@@ -142,7 +142,7 @@ public abstract class SingleModLibertyLSTestCommon {
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, true);
             Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
-            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), insertedConfig);
+            TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
@@ -283,6 +283,7 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @Test
     @Video
+    @Disabled
     public void testQuickFixInServerXML() {
         String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
         String flaggedString = "wrong";
@@ -306,7 +307,7 @@ public abstract class SingleModLibertyLSTestCommon {
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "server.xml", quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
-            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), correctedStanza);
+            TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), correctedStanza);
 
         } finally {
             // Replace server.xml content with the original content

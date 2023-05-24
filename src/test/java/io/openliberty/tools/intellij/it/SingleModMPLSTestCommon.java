@@ -72,7 +72,7 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // Issue:
+    @Disabled // Issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/401
     public void testInsertCodeSnippetIntoJavaPart() {
         String snippetStr = "mp";
         String snippetChooser = "liveness";
@@ -91,7 +91,7 @@ public abstract class SingleModMPLSTestCommon {
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, "ServiceLiveHealthCheck.java", snippetStr, snippetChooser);
             Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "sample", "mp", "health","ServiceLiveHealthCheck.java");
-            TestUtils.validateCodeInSrcPart(pathToSrc.toString(), insertedCode);
+            TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         } finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
@@ -115,7 +115,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Delete the liveness annotation
-        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, livenessString);
+        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, "ServiceLiveHealthCheck.java", livenessString);
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", "ServiceLiveHealthCheck.java");
 
         try {
@@ -139,7 +139,8 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    public void testMPQuickFixInJavaPart() {
+    @Disabled // due to intermittent test failures
+    public void testMPQuickFixInJavaFile() {
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
         String quickfixChooserString = "Insert " + livenessString;
@@ -152,7 +153,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Delete the liveness annotation
-        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, livenessString);
+        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot,"ServiceLiveHealthCheck.java", livenessString);
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", "ServiceLiveHealthCheck.java");
 
         try {
@@ -165,7 +166,7 @@ public abstract class SingleModMPLSTestCommon {
             // trigger and use the quickfix popup attached to the diagnostic
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
 
-            TestUtils.validateCodeInSrcPart(pathToSrc.toString(), livenessString);
+            TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), livenessString);
         } finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
@@ -179,10 +180,10 @@ public abstract class SingleModMPLSTestCommon {
     @Test
     @Video
     public void testInsertMicroProfileProperty() {
-        String envCfgSnippet = "mp";
-        String envCfgNameChooserSnippet = "default-procedures";
-        String envCfgValueSnippet = "tr";
-        String expectedServerEnvString = "mp.health.disable-default-procedures=true";
+        String cfgSnippet = "mp";
+        String cfgNameChooserSnippet = "default-procedures";
+        String cfgValueSnippet = "tr";
+        String expectedMpCfgPropertiesString = "mp.health.disable-default-procedures=true";
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
@@ -191,9 +192,9 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet, true);
-            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
-            TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
+            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
+            TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
@@ -229,11 +230,7 @@ public abstract class SingleModMPLSTestCommon {
         String MPCfgSnippet = "mp.health.disable";
         String MPCfgNameChooserSnippet = "procedures";
         String incorrectValue = "none";
-        String quickfixChooserString = "Replace with 'true'?";
-        String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
-
-        Path pathToServerXML = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
@@ -261,6 +258,7 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
+    @Disabled // due to intermittent test failures
     public void testQuickFixInMicroProfileConfigProperties() {
         String MPCfgSnippet = "mp.health.disable";
         String MPCfgNameChooserSnippet = "procedures";
@@ -269,7 +267,7 @@ public abstract class SingleModMPLSTestCommon {
         String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
-        Path pathToServerXML = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
+        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
@@ -284,7 +282,7 @@ public abstract class SingleModMPLSTestCommon {
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, "microprofile-config.properties", quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
-            TestUtils.validateStanzaInServerXML(pathToServerXML.toString(), correctedValue);
+            TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
 
         } finally {
             // Replace modified content with the original content

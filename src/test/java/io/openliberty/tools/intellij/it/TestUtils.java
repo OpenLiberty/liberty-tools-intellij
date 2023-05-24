@@ -293,7 +293,7 @@ public class TestUtils {
      * @param pathToServerXml The path to the server.xml file to be examined
      * @param insertedStanza the full stanza that is to be found
      */
-    public static void validateStanzaInServerXML(String pathToServerXml, String insertedStanza) {
+    public static void validateStanzaInConfigFile(String pathToServerXml, String insertedStanza) {
 
         try {
             Assertions.assertTrue(isTextInFile(pathToServerXml, insertedStanza));
@@ -303,12 +303,12 @@ public class TestUtils {
     }
 
     /**
-     * Validates the expected server.xml stanza entry is found
+     * Validates the expected line of code has been inserted and is found
      *
-     * @param pathToServerXml The path to the server.xml file to be examined
-     * @param insertedStanza the full stanza that is to be found
+     * @param pathToJavaSrc The path to the server.xml file to be examined
+     * @param insertedCodeLine the code string to verify
      */
-    public static void validateCodeInSrcPart(String pathToJavaSrc, String insertedCodeLine) {
+    public static void validateCodeInJavaSrc(String pathToJavaSrc, String insertedCodeLine) {
 
         try {
             Assertions.assertTrue(isTextInFile(pathToJavaSrc, insertedCodeLine));
@@ -320,26 +320,26 @@ public class TestUtils {
     /**
      * Validates the expected configuration name vale pair entry is found in config file
      *
-     * @param pathToConfigFile The path to the config file to be examined
-     * @param expectedConfigString the full setting string that is to be found
+     * @param pathToFile The path to the config file to be examined
+     * @param expectedString the full setting string that is to be found
      */
-        public static void validateStringInFile(String pathToConfigFile, String expectedConfigString) {
+        public static void validateStringInFile(String pathToFile, String expectedString) {
         try {
-            Assertions.assertTrue(isTextInFile(pathToConfigFile, expectedConfigString));
+            Assertions.assertTrue(isTextInFile(pathToFile, expectedString));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Validates the expected configuration name vale pair entry is found in config file
+     * Validates the expected string is not found in the given file
      *
-     * @param pathToConfigFile The path to the config file to be examined
-     * @param expectedConfigString the full setting string that is to be found
+     * @param pathToFile The path to the config file to be examined
+     * @param expectedString the string that is expected not to be found
      */
-    public static void validateStringNotInFile(String pathToConfigFile, String expectedConfigString) {
+    public static void validateStringNotInFile(String pathToFile, String expectedString) {
         try {
-            Assertions.assertFalse(isTextInFile(pathToConfigFile, expectedConfigString));
+            Assertions.assertFalse(isTextInFile(pathToFile, expectedString));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

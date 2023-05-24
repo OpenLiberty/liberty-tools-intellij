@@ -161,20 +161,6 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ComponentFixture object associated with the ProjectViewTree class.
-     *
-     * @param xpathVars The Locator custom variables: text, waitTime(seconds)
-     * @return The ComponentFixture object associated with the ProjectViewTree class.
-     */
-    public ComponentFixture getProjectViewTree2(String... xpathVars) {
-        String waitTime = xpathVars[0];
-
-        return find(ComponentFixture.class,
-                byXpath("//div[@class='ProjectViewTree']"),
-                Duration.ofSeconds(Integer.parseInt(waitTime)));
-    }
-
-    /**
      * Returns the JTreeFixture object associated with the ProjectViewTree class.
      *
      * @param xpathVars The Locator custom variables: text
@@ -274,22 +260,30 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * Returns the ContainerFixture object associated with the QuickFix "More Actions..." hyperlink for a QuickFix/Code Action
+     * section of a diagnostic pop-up window.
      *
-     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * @return The ContainerFixture object associated with the QuickFix hyperlink of a pop-up window.
      */
     public ContainerFixture getQuickFixMoreActionsLink() {
         return find(ContainerFixture.class, byXpath("//div[@class='JPanel']//div[@class='HyperlinkLabel' and @mytext.key='daemon.tooltip.more.actions.link.label']"), Duration.ofSeconds(20));
     }
 
+    /**
+     * Returns the ContainerFixture object associated with the hyperlink for the main action for a QuickFix/Code Action
+     * section of a diagnostic pop-up window.
+     *
+     * @return The ContainerFixture object associated with the QuickFix hyperlink of a pop-up window.
+     */
     public ContainerFixture getQuickFixMainActionLink(String visibleText) {
         return find(ContainerFixture.class, byXpath("//div[@class='JPanel']//div[@class='HyperlinkLabel' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofSeconds(20));
     }
 
     /**
-     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * Returns the ContainerFixture object associated with the QuickFix/Code Action
+     * section of a diagnostic pop-up window.
      *
-     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * @return The ContainerFixture object associated with the QuickFix portion of a pop-up window.
      */
     public ContainerFixture getQuickFixPane() {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JBViewport'][.//div[@class='MyList']]"), Duration.ofSeconds(5));
