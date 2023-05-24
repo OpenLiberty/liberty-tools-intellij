@@ -33,7 +33,7 @@ public class ImplementInterfaceProposal extends ASTRewriteCorrectionProposal {
 
 	public ImplementInterfaceProposal(PsiFile targetCU, PsiClass binding, PsiFile astRoot,
 									  String interfaceType, int relevance, PsiFile sourceCU) {
-		super("", CodeActionKind.QuickFix, binding, relevance, sourceCU); //$NON-NLS-1$
+		super("", CodeActionKind.QuickFix, targetCU, relevance, sourceCU); //$NON-NLS-1$
 
 		//Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
 
