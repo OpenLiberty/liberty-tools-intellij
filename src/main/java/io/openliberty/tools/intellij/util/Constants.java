@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.util;
 import java.util.*;
 
 public final class Constants {
+    public static final int REQUIRED_JAVA_VERSION = 17;
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
     public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
     public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";

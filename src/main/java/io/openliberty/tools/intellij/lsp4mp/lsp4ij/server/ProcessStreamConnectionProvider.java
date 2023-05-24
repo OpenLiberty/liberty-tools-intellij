@@ -1,16 +1,14 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
-import io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class ProcessStreamConnectionProvider implements StreamConnectionProvider{
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessStreamConnectionProvider.class);
@@ -96,6 +94,47 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
 
     public void setWorkingDirectory(String workingDir) {
         this.workingDir = workingDir;
+    }
+
+    protected boolean checkJavaVersion(String javaHome, int expectedVersion) {
+        final ProcessBuilder builder = new ProcessBuilder(javaHome +
+                File.separator + "bin" + File.separator + "java", "-version");
+        try {
+            final Process p = builder.start();
+            final Reader r = new InputStreamReader(p.getErrorStream());
+            final StringBuilder sb = new StringBuilder();
+            int i;
+            while ((i = r.read()) != -1) {
+                sb.append((char) i);
+            }
+            return parseMajorJavaVersion(sb.toString()) >= expectedVersion;
+        }
+        catch (IOException ioe) {}
+        return false;
+    }
+
+    private int parseMajorJavaVersion(String content) {
+        final String versionRegex = "version \"(.*)\"";
+        Pattern p = Pattern.compile(versionRegex);
+        Matcher m = p.matcher(content);
+        if (!m.find()) {
+            return 0;
+        }
+        String version = m.group(1);
+
+        // Ignore '1.' prefix for legacy Java versions
+        if (version.startsWith("1.")) {
+            version = version.substring(2);
+        }
+
+        // Extract the major version number.
+        final String numberRegex = "\\d+";
+        p = Pattern.compile(numberRegex);
+        m = p.matcher(version);
+        if (!m.find()) {
+            return 0;
+        }
+        return Integer.parseInt(m.group());
     }
 
     @Override
