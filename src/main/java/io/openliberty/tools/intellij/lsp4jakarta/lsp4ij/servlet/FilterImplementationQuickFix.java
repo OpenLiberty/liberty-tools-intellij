@@ -47,8 +47,8 @@ public class FilterImplementationQuickFix {
             // Create code action
             // interface
             ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                    context.getCompilationUnit(), parentType,
-                    context.getASTRoot(), "jakarta.servlet.Filter", 0, context.getCompilationUnit());
+                    null, parentType, context.getASTRoot(),
+                    "jakarta.servlet.Filter", 0, context.getSource().getCompilationUnit());
             CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
 
             if (codeAction != null) {

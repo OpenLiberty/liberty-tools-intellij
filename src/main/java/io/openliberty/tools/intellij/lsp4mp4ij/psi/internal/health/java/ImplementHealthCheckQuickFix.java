@@ -79,7 +79,7 @@ public class ImplementHealthCheckQuickFix implements IJavaCodeActionParticipant 
 		if (parentType != null) {
 			// Create code action to implement 'org.eclipse.microprofile.health.HealthCheck'
 			// interface
-			ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(context.getCompilationUnit(), parentType,
+			ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(null, parentType,
 					context.getASTRoot(), MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE, 0,
 					context.getSource().getCompilationUnit());
 			WorkspaceEdit workspaceEdit;
