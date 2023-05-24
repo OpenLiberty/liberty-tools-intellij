@@ -645,8 +645,7 @@ public class UIBotTestUtils {
             throw new RuntimeException("Unable to open file " + fileName, error);
         }
     }
-
-
+    
     public static void hideTerminalWindow(RemoteRobot remoteRobot) {
         try {
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
@@ -917,6 +916,11 @@ public class UIBotTestUtils {
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
         editorNew.click();
 
+        Exception error = null;
+
+        for (int i = 0; i < 10; i++) {
+            error = null;
+            try {
         Keyboard keyboard = new Keyboard(remoteRobot);
         // find the location in the file to begin the stanza insertion
         // since we know this is a new empty file, go to position 1,1
@@ -942,6 +946,20 @@ public class UIBotTestUtils {
         } else {
             // linux + windows
             keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+        break;
+            } catch (WaitForConditionTimeoutException wftoe) {
+                error = wftoe;
+
+                // The source content may have been corrupted in the process. Replace it before re-trying it.
+                UIBotTestUtils.clearWindowContent(remoteRobot);
+                TestUtils.sleepAndIgnoreException(2);
+            }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + snippetSubString, error);
         }
     }
 
@@ -1252,6 +1270,42 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Deletes a string of text from the currently focused editor
+     *
+     * @param remoteRobot      The RemoteRobot instance.
+     * @param fileName         The fileName to modify
+     * @param textToModify     The string to modify
+     * @param modificationText The string to use for modification
+     */
+    public static void selectAndModifyTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToModify, String modificationText){
+        clickOnFileTab(remoteRobot, "server.xml");
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
+        editorNew.click();
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        // find the location to click on for feature name entry
+        // this should put the entry cursor directly between <feature> and <feature/>
+        //int offset = editorText.indexOf(textToDelete);
+        editorNew.click();
+        editorNew.selectText(textToModify);
+        keyboard.hotKey(VK_DELETE);
+        keyboard.enterText(modificationText);
+
+        // save the new content
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+
+        // slight delay to allow the diagnotic/quick fix data to arrive?
+        TestUtils.sleepAndIgnoreException(2);
+    }
+
+    /**
      * Places the cursor at an exact location for text entry in file
      *
      * @param remoteRobot the remote robot instance
@@ -1367,10 +1421,10 @@ public class UIBotTestUtils {
     public static void clearWindowContent(RemoteRobot remoteRobot) {
         // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit");
+        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit", "10");
         editMenuEntry.click();
-        ComponentFixture slectAllEntry = projectFrame.getActionMenuItem("Select All");
-        slectAllEntry.click();
+        ComponentFixture selectAllEntry = projectFrame.getActionMenuItem("Select All");
+        selectAllEntry.click();
 
         // Delete/Clear the content.
         editMenuEntry.click();
