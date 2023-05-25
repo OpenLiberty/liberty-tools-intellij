@@ -41,6 +41,7 @@ repositories {
     maven {
         url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
     }
+
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -81,9 +82,13 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'com.jetbrains.intellij.maven:maven-test-framework:231.8109.175'
+    testImplementation 'com.jetbrains.intellij.maven:maven-test-framework:231.9011.34'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
+
+    // JUnit 4
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.9.3'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.3'
 
     // Test: Logging Network Calls.
     testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
@@ -145,6 +150,17 @@ runIdeForUiTests {
 
 test {
     useJUnitPlatform()
+    systemProperty "java.awt.headless", "true"
+    systemProperty 'idea.log.leaked.projects.in.tests', 'false'
+
+    // Tell the tests to use the correct maven installation.
+    systemProperty 'idea.maven.test.home', '/your/maven/installation/path/apache-maven-x.x.x'
+
+    // java.nio.file.NoSuchFileException: /.../liberty-tools-intellij/build/idea-sandbox/system/log/open-telemetry-metrics.2023-05-22-21-05-16.csv
+    systemProperty 'com.redhat.devtools.intellij.telemetry.mode', 'disabled'
+
+    // idea home so that the tests can start it.
+    systemProperty 'idea.home.path', '/your/intellij/installation/home/path'
 
     testLogging {
         showStandardStreams = true

@@ -26,15 +26,18 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
 
+@RunWith(JUnit4.class)
 public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     @Test
     public void MultipleConstructorsWithEqualParams() throws Exception {
-        Module module = createMavenModule(new File("projects/jakarta-sample"));
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
@@ -59,7 +62,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     @Test
     public void MultipleConstructorsWithDifferentLength() throws Exception {
-        Module module = createMavenModule(new File("projects/jakarta-sample"));
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
@@ -79,7 +82,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     @Test
     public void NoPublicConstructor() throws Exception {
-        Module module = createMavenModule(new File("projects/jakarta-sample"));
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
@@ -104,7 +107,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
     
     @Test
     public void NoPublicConstructorProviderClass() throws Exception {
-        Module module = createMavenModule(new File("projects/jakarta-sample"));
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
