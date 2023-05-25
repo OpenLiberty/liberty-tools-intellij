@@ -75,7 +75,7 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public Module getModule(VirtualFile file) {
-        if (file != null) {
+        if (file != null && !project.isDisposed()) {
             return ProjectFileIndex.getInstance(project).getModuleForFile(file, false);
         }
         return null;
@@ -174,7 +174,11 @@ public class PsiUtilsLSImpl implements IPsiUtils {
         try {
             VirtualFile file = findFile(uri);
             if (file != null) {
-                return PsiManager.getInstance(getModule(file).getProject()).findFile(file);
+                Module module = getModule(file);
+                if (module == null) {
+                    return null;
+                }
+                return PsiManager.getInstance(module.getProject()).findFile(file);
             }
         } catch (IOException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
