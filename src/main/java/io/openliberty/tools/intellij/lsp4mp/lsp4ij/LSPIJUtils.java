@@ -119,11 +119,6 @@ public class LSPIJUtils {
         return lineStartOffset + start.getCharacter();
     }
 
-    public static int toEndOffset(Position end, Document document) {
-        int lineEndOffset = document.getLineEndOffset(end.getLine());
-        return lineEndOffset + end.getCharacter();
-    }
-
     public static Position toPosition(int offset, Document document) {
         int line = document.getLineNumber(offset);
         int lineStart = document.getLineStartOffset(line);
@@ -225,7 +220,7 @@ public class LSPIJUtils {
                 String text = edit.getNewText();
                 // compute start and end char offsets of the new Edit text
                 int start = toOffset(edit.getRange().getStart(), document);
-                int end = toEndOffset(edit.getRange().getEnd(), document);
+                int end = toOffset(edit.getRange().getEnd(), document);
                 if (StringUtils.isEmpty(text)) {
                     document.deleteString(start, end);
                 } else {

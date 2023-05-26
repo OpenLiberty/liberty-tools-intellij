@@ -50,7 +50,7 @@ public class HttpServletQuickFix {
             String args[] = { parentType.getName(),
                     ServletConstants.HTTP_SERVLET };
             ChangeCorrectionProposal proposal = new ExtendClassProposal(MessageFormat.format(TITLE_MESSAGE, args),
-                    context.getCompilationUnit(), parentType, context.getASTRoot(), "jakarta.servlet.http.HttpServlet",
+                    context.getSource().getCompilationUnit(), parentType, context.getASTRoot(), "jakarta.servlet.http.HttpServlet",
                     0);
             CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
             if (codeAction != null) {

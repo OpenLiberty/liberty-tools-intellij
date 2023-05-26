@@ -20,9 +20,9 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 
 public class ExtendClassProposal extends ImplementInterfaceProposal {
 
-    public ExtendClassProposal(String name, PsiFile targetCU, PsiClass binding, PsiFile astRoot,
+    public ExtendClassProposal(String name, PsiFile sourceCU, PsiClass binding, PsiFile astRoot,
                                String interfaceType, int relevance) {
-        super(targetCU, binding, astRoot, interfaceType, relevance, targetCU);
+        super(null, binding, astRoot, interfaceType, relevance, sourceCU);
     }
 
 }

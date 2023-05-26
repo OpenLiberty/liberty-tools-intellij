@@ -76,7 +76,7 @@ public class ListenerImplementationQuickFix {
         PsiClass targetType = getBinding(node);
         if (targetType != null) {
             ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                    targetContext.getCompilationUnit(), targetType, targetContext.getASTRoot(), interfaceType, 0,
+                    null, targetType, targetContext.getASTRoot(), interfaceType, 0,
                     sourceContext.getCompilationUnit());
             CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
             codeActions.add(codeAction);
