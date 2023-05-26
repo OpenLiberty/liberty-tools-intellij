@@ -14,6 +14,7 @@ import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
+import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,13 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             LOGGER.error("Unable to launch the LemMinX language server. Could not resolve the java home system property");
+            return;
+        }
+        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
+            LOGGER.error("Unable to launch the LemMinX language server." +
+                    " Java " + Constants.REQUIRED_JAVA_VERSION + " or more recent is required to run 'Liberty Tools for IntelliJ'." +
+                    " Change the boot Java runtime of the IDE as documented here:" +
+                    " https://www.jetbrains.com/help/idea/switching-boot-jdk.html");
             return;
         }
         if (lemminxServerPath.exists() && libertyServerPath.exists()) {
