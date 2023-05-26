@@ -45,7 +45,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "src/main/java/io/openliberty/sample/jakarta/servlet/DontExtendHttpServlet.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DontExtendHttpServlet.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
@@ -71,7 +71,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "src/main/java/io/openliberty/sample/jakarta/servlet/InvalidWebServlet.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/InvalidWebServlet.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();

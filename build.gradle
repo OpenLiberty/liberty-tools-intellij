@@ -82,7 +82,9 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'com.jetbrains.intellij.maven:maven-test-framework:231.9011.34'
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:231.9011.34') {
+        transitive = false
+    }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
 
@@ -154,13 +156,13 @@ test {
     systemProperty 'idea.log.leaked.projects.in.tests', 'false'
 
     // Tell the tests to use the correct maven installation.
-    systemProperty 'idea.maven.test.home', '/your/maven/installation/path/apache-maven-x.x.x'
+    systemProperty 'idea.maven.test.homer', 'C:\\apache-maven-3.8.6'
 
     // java.nio.file.NoSuchFileException: /.../liberty-tools-intellij/build/idea-sandbox/system/log/open-telemetry-metrics.2023-05-22-21-05-16.csv
-    systemProperty 'com.redhat.devtools.intellij.telemetry.mode', 'disabled'
+    systemProperty 'com.redhat.devtools.intellij.telemetry.moder', 'disabled'
 
     // idea home so that the tests can start it.
-    systemProperty 'idea.home.path', '/your/intellij/installation/home/path'
+    systemProperty 'idea.home.pathr', 'C:\\Users\\MichaelGlavassevich\\.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2023.1\\79ab2d2970b44e4c36be667e173da87c982a9814\\ideaIC-2023.1'
 
     testLogging {
         showStandardStreams = true

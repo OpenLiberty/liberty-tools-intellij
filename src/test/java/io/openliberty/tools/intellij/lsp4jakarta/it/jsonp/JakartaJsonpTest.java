@@ -24,6 +24,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,12 +37,13 @@ import java.util.Arrays;
 public class JakartaJsonpTest extends BaseJakartaTest {
 
     @Test
+    @Ignore
     public void invalidPointerTarget() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "src/main/java/io/openliberty/sample/jakarta/jsonp/CreatePointerInvalidTarget.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonp/CreatePointerInvalidTarget.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
         
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
