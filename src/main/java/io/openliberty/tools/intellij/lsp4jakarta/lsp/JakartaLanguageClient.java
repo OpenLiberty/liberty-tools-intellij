@@ -16,6 +16,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
@@ -24,10 +25,9 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.jsonrpc.CompletableFutures;
 import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
-import org.eclipse.lsp4jakarta.commons.JakartaClasspathParams;
-import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
-import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
+import org.eclipse.lsp4jakarta.commons.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +53,16 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
     Project project = getProject();
     return runAsBackground("Computing Jakarta context",
             () -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project));
+  }
+
+  // Support the message "jakarta/java/cursorcontext"
+  @Override
+  public CompletableFuture<JavaCursorContextResult> getJavaCursorContext(JakartaJavaCompletionParams params) {
+    return runAsBackground("Computing Java cursor context",
+            () -> {
+              IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+              return PropertiesManagerForJakarta.getInstance().javaCursorContext(params, utils);
+            });
   }
 
   // Support the message "jakarta/java/diagnostics"

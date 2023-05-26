@@ -12,7 +12,9 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.lang.jvm.JvmTypeDeclaration;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -22,6 +24,7 @@ import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector;
@@ -40,7 +43,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagn
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
+import org.eclipse.lsp4jakarta.commons.*;
 import org.eclipse.lsp4mp.commons.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +54,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 
 public class PropertiesManagerForJakarta {
 
@@ -194,8 +195,95 @@ public class PropertiesManagerForJakarta {
     }
 
     /**
-     * Given the uri returns a {@link PsiFile}. May return null if it can not
-     * associate the uri with a Java file ot class file.
+     * Returns the cursor context for the given file and cursor position.
+     *
+     * @param params  the completion params that provide the file and cursor
+     *                position to get the context for
+     * @param utils   the jdt utils
+     * @return the cursor context for the given file and cursor position
+     */
+    public JavaCursorContextResult javaCursorContext(JakartaJavaCompletionParams params, IPsiUtils utils) {
+        JavaCursorContextResult result = ApplicationManager.getApplication().runReadAction((Computable<JavaCursorContextResult>) () -> {
+            String uri = params.getUri();
+            PsiFile typeRoot = resolveTypeRoot(uri, utils);
+            if (!(typeRoot instanceof PsiJavaFile)) {
+                return new JavaCursorContextResult(JavaCursorContextKind.IN_EMPTY_FILE, "");
+            }
+            Document document = PsiDocumentManager.getInstance(typeRoot.getProject()).getDocument(typeRoot);
+            if (document == null) {
+                return new JavaCursorContextResult(JavaCursorContextKind.IN_EMPTY_FILE, "");
+            }
+            Position completionPosition = params.getPosition();
+            int completionOffset = utils.toOffset(document, completionPosition.getLine(), completionPosition.getCharacter());
+
+            //CompilationUnit ast = ASTResolving.createQuickFixAST((ICompilationUnit) typeRoot);
+
+            JavaCursorContextKind kind = getJavaCursorContextKind((PsiJavaFile) typeRoot, completionOffset);
+            String prefix = getJavaCursorPrefix(document, completionOffset);
+            return new JavaCursorContextResult(kind, prefix);
+        });
+
+        return result;
+    }
+
+    private static JavaCursorContextKind getJavaCursorContextKind(PsiJavaFile javaFile, int completionOffset) {
+        if (javaFile.getClasses().length == 0) {
+            return JavaCursorContextKind.IN_EMPTY_FILE;
+        }
+
+        PsiElement element = javaFile.findElementAt(completionOffset);
+        PsiElement parent = PsiTreeUtil.getParentOfType(element, PsiModifierListOwner.class);
+
+        if (parent == null) {
+            // We are likely before or after the class declaration
+            PsiElement firstClass = javaFile.getClasses()[0];
+
+            if (completionOffset <= firstClass.getTextOffset()) {
+                return JavaCursorContextKind.BEFORE_CLASS;
+            }
+
+            return JavaCursorContextKind.NONE;
+        }
+
+        if (parent instanceof PsiClass) {
+            PsiClass psiClass = (PsiClass) parent;
+            if (psiClass.isAnnotationType()) {
+                return JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
+            }
+            return JavaCursorContextKind.IN_CLASS;
+        }
+
+        if (parent instanceof PsiMethod) {
+            PsiMethod psiMethod = (PsiMethod) parent;
+            if (psiMethod.getReturnType() != null &&  psiMethod.getReturnTypeElement() != null && completionOffset <= psiMethod.getReturnTypeElement().getTextOffset()) {
+                return JavaCursorContextKind.BEFORE_METHOD;
+            }
+            return JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
+        }
+
+        if (parent instanceof PsiField) {
+            PsiField psiField = (PsiField) parent;
+            PsiTypeElement fieldType = psiField.getTypeElement();
+            if (fieldType != null && completionOffset <= fieldType.getTextOffset()) {
+                return JavaCursorContextKind.BEFORE_FIELD;
+            }
+            return JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
+        }
+
+        return JavaCursorContextKind.NONE;
+    }
+
+    private static String getJavaCursorPrefix(Document document, int completionOffset) {
+        String fileContents = document.getText();
+        int i;
+        for (i = completionOffset; i > 0 && !Character.isWhitespace(fileContents.charAt(i - 1)); i--) {
+        }
+        return fileContents.substring(i, completionOffset);
+    }
+
+    /**
+     * Given the uri return a {@link PsiFile}. May return null if it can not
+     * associate the uri with a Java file or class file.
      *
      * @param uri
      * @param utils   JDT LS utilities
@@ -207,7 +295,7 @@ public class PropertiesManagerForJakarta {
 
     private static PsiFile resolveTypeRoot(String uri, Project project) {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(project);
-        return utils.resolveCompilationUnit(uri);
+        return resolveTypeRoot(uri, utils);
     }
 
     public List<CodeAction> getCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils) {
