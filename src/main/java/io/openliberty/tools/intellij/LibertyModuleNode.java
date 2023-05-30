@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,10 +9,11 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.util.Constants;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import io.openliberty.tools.intellij.util.Constants;
 
 public class LibertyModuleNode extends DefaultMutableTreeNode {
     private final LibertyModule libertyModule;
@@ -28,6 +29,10 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
 
     public VirtualFile getFilePath() {
         return libertyModule.getBuildFile();
+    }
+
+    public Project getProject() {
+        return libertyModule.getProject();
     }
 
     public String getProjectType() {

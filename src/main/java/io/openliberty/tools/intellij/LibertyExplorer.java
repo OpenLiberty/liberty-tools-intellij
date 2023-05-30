@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -256,6 +257,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         group.add(runTestsAction);
 
                         ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
+
+                        menu.setDataContext(() -> SimpleDataContext.builder()
+                                .add(CommonDataKeys.PROJECT, libertyNode.getProject())
+                                .add(DataKey.create(Constants.LIBERTY_BUILD_FILE), libertyNode.getFilePath()).build());
+
                         menu.getComponent().show(comp, x, y);
                     }
                 }
@@ -327,8 +333,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
-            LibertyModule module = ((LibertyActionNode) node).getLibertyModule();
             LOGGER.debug("Selected: " + actionNodeName);
+
             // calls action on double click
             String actionId = Constants.FULL_ACTIONS_MAP.get(actionNodeName);
             if (actionId == null) {
@@ -343,5 +349,4 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
         }
     }
-
 }

@@ -20,129 +20,175 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="222" until-build="231.*"/>
+    <idea-version since-build="223.7571.*" until-build="231.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
-        <projectService serviceImplementation="io.openliberty.tools.intellij.LibertyProjectSettings" />
+        <projectService serviceImplementation="io.openliberty.tools.intellij.LibertyProjectSettings"/>
         <configurationType implementation="io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType"/>
     </extensions>
 
     <extensionPoints>
-        <extensionPoint name="propertiesProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesProvider"/>
-        <extensionPoint name="staticPropertyProvider" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.StaticPropertyProviderExtensionPointBean"/>
-        <extensionPoint name="javaHoverParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
-        <extensionPoint name="javaDiagnosticsParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant"/>
-        <extensionPoint name="projectLabelProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
-        <extensionPoint name="javaDefinitionParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
-        <extensionPoint name="javaCompletionParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
-        <extensionPoint name="javaCodeLensParticipant" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
-        <extensionPoint name="configSourceProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
-        <extensionPoint name="javaASTValidator.validator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
-        <extensionPoint name="javaASTValidator.annotationValidator" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
-        <extensionPoint name="javaCodeActionParticipant" beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
+        <extensionPoint name="propertiesProvider"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesProvider"/>
+        <extensionPoint name="staticPropertyProvider"
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.StaticPropertyProviderExtensionPointBean"/>
+        <extensionPoint name="javaHoverParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
+        <extensionPoint name="javaDiagnosticsParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant"/>
+        <extensionPoint name="projectLabelProvider"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
+        <extensionPoint name="javaDefinitionParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
+        <extensionPoint name="javaCompletionParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
+        <extensionPoint name="javaCodeLensParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
+        <extensionPoint name="configSourceProvider"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
+        <extensionPoint name="javaASTValidator.validator"
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
+        <extensionPoint name="javaASTValidator.annotationValidator"
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
+        <extensionPoint name="javaCodeActionParticipant"
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!--LSP4MP-->
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertyProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertiesProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.properties.MicroProfileRegisterRestClientProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider"/>
-        <staticPropertyProvider resource="/static-properties/mp-context-propagation-metadata.json" type="org.eclipse.microprofile.context.ThreadContext"/>
-        <staticPropertyProvider resource="/static-properties/mp-lra-metadata.json" type="org.eclipse.microprofile.lra.annotation.ws.rs.LRA"/>
-        <staticPropertyProvider resource="/static-properties/mp-metrics-metadata.json" type="org.eclipse.microprofile.metrics.MetricID"/>
-        <staticPropertyProvider resource="/static-properties/mp-openapi-metadata.json" type="org.eclipse.microprofile.openapi.OASConfig"/>
-        <staticPropertyProvider resource="/static-properties/mp-opentracing-metadata.json" type="org.eclipse.microprofile.opentracing.Traced"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
-        <staticPropertyProvider resource="/static-properties/mp-graphql-metadata.json" type="org.eclipse.microprofile.graphql.Name"/>
-        <staticPropertyProvider resource="/static-properties/mp-health-metadata.json" type="org.eclipse.microprofile.health.Liveness"/>
-        <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json" type="org.eclipse.microprofile.jwt.Claim"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertyProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties.MicroProfileConfigPropertiesProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.properties.MicroProfileRegisterRestClientProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider"/>
+        <staticPropertyProvider resource="/static-properties/mp-context-propagation-metadata.json"
+                                type="org.eclipse.microprofile.context.ThreadContext"/>
+        <staticPropertyProvider resource="/static-properties/mp-lra-metadata.json"
+                                type="org.eclipse.microprofile.lra.annotation.ws.rs.LRA"/>
+        <staticPropertyProvider resource="/static-properties/mp-metrics-metadata.json"
+                                type="org.eclipse.microprofile.metrics.MetricID"/>
+        <staticPropertyProvider resource="/static-properties/mp-openapi-metadata.json"
+                                type="org.eclipse.microprofile.openapi.OASConfig"/>
+        <staticPropertyProvider resource="/static-properties/mp-opentracing-metadata.json"
+                                type="org.eclipse.microprofile.opentracing.Traced"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
+        <staticPropertyProvider resource="/static-properties/mp-graphql-metadata.json"
+                                type="org.eclipse.microprofile.graphql.Name"/>
+        <staticPropertyProvider resource="/static-properties/mp-health-metadata.json"
+                                type="org.eclipse.microprofile.health.Liveness"/>
+        <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json"
+                                type="org.eclipse.microprofile.jwt.Claim"/>
         <staticPropertyProvider resource="/static-properties/jul-metadata.json"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
-        <propertiesProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
+        <propertiesProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
 
-        <javaHoverParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
+        <javaHoverParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
 
-        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
-        <javaDiagnosticsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
 
-        <projectLabelProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
-        <projectLabelProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MavenProjectLabelProvider"/>
-        <projectLabelProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.GradleProjectLabelProvider"/>
-    
-        <javaDefinitionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigDefinitionParticipant"/>
-        <javaDefinitionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
+        <projectLabelProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
+        <projectLabelProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MavenProjectLabelProvider"/>
+        <projectLabelProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.GradleProjectLabelProvider"/>
 
-        <javaCompletionParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
+        <javaDefinitionParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigDefinitionParticipant"/>
+        <javaDefinitionParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
 
-        <javaCodeLensParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
-        <javaCodeLensParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
+        <javaCompletionParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
+
+        <javaCodeLensParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
+        <javaCodeLensParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
 
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.NoValueAssignedToPropertyQuickFix"/>
+                                   targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.NoValueAssignedToPropertyQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix"/>
+                                   targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-health#ImplementHealthCheck"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.ImplementHealthCheckQuickFix"/>
+                                   targetDiagnostic="microprofile-health#ImplementHealthCheck"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.ImplementHealthCheckQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-health#HealthAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.HealthAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-health#HealthAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.HealthAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-metrics#ApplicationScopedAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-metrics#ApplicationScopedAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-restclient#InjectAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-restclient#InjectAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-restclient#RestClientAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RestClientAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-restclient#RestClientAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-restclient#InjectAndRestClientAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-restclient#InjectAndRestClientAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
-                targetDiagnostic="microprofile-restclient#RegisterRestClientAnnotationMissing"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix"/>
+                                   targetDiagnostic="microprofile-restclient#RegisterRestClientAnnotationMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="source"
-                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
 
-        <configSourceProvider implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
+        <configSourceProvider
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
 
-        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTValidator"/>
-        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator"/>
-        <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.CircuitBreaker" source="microprofile-faulttolerance">
+        <javaASTValidator.validator
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTValidator"/>
+        <javaASTValidator.validator
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator"/>
+        <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.CircuitBreaker"
+                                              source="microprofile-faulttolerance">
             <attribute name="delay" range="0"/>
             <attribute name="requestVolumeThreshold" range="1"/>
             <attribute name="failureRatio" range="[0,1]"/>
             <attribute name="successThreshold" range="1"/>
         </javaASTValidator.annotationValidator>
         <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Bulkhead"
-                                              source="microprofile-faulttolerance" >
-            <attribute name="value" range="0" /> <!-- x >=0 -->
-            <attribute name="waitingTaskQueue" range="0" /> <!-- x >=0 -->
+                                              source="microprofile-faulttolerance">
+            <attribute name="value" range="0"/> <!-- x >=0 -->
+            <attribute name="waitingTaskQueue" range="0"/> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
         <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Timeout"
-                                              source="microprofile-faulttolerance" >
-            <attribute name="value" range="0" /> <!-- x >=0 -->
+                                              source="microprofile-faulttolerance">
+            <attribute name="value" range="0"/> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
         <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Retry"
-                                              source="microprofile-faulttolerance" >
-            <attribute name="delay" range="0" /> <!-- x >=0 -->
-            <attribute name="maxDuration" range="0" /> <!-- x >=0 -->
-            <attribute name="jitter" range="0" /> <!-- x >=0 -->
-            <attribute name="maxRetries" range="-1" /> <!-- x >=0 -->
+                                              source="microprofile-faulttolerance">
+            <attribute name="delay" range="0"/> <!-- x >=0 -->
+            <attribute name="maxDuration" range="0"/> <!-- x >=0 -->
+            <attribute name="jitter" range="0"/> <!-- x >=0 -->
+            <attribute name="maxRetries" range="-1"/> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
     </extensions>
 
     <projectListeners>
-        <listener class="io.openliberty.tools.intellij.runConfiguration.LibertyRunManagerListener" topic="com.intellij.execution.RunManagerListener"/>
+        <listener class="io.openliberty.tools.intellij.runConfiguration.LibertyRunManagerListener"
+                  topic="com.intellij.execution.RunManagerListener"/>
     </projectListeners>
 
     <!-- Default resource location for localizing Liberty actions strings -->
@@ -151,43 +197,44 @@
     <actions resource-bundle="messages.LibertyBundles">
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevStartAction"
-                icon="AllIcons.General.GearPlain" />
+                icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction"
-                class="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction" text="Start Liberty dev mode..."
-                description="Custom Start Liberty dev mode on current build file" icon="AllIcons.General.GearPlain" />
+                class="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction"
+                text="Start Liberty dev mode..."
+                description="Custom Start Liberty dev mode on current build file" icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
-                icon="AllIcons.General.GearPlain" />
+                icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStopAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevStopAction"
-                icon="AllIcons.General.GearPlain" />
+                icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevRunTestsAction"
-                icon="AllIcons.General.GearPlain" />
+                icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport"
                 class="io.openliberty.tools.intellij.actions.ViewIntegrationTestReport"
-                icon="AllIcons.General.Web" />
+                icon="AllIcons.General.Web"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewUnitTestReport"
                 class="io.openliberty.tools.intellij.actions.ViewUnitTestReport"
-                icon="AllIcons.General.Web" />
+                icon="AllIcons.General.Web"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewTestReport"
                 class="io.openliberty.tools.intellij.actions.ViewTestReport"
-                icon="AllIcons.General.Web" />
+                icon="AllIcons.General.Web"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewEffectivePom"
                 class="io.openliberty.tools.intellij.actions.ViewEffectivePom"
-                icon="AllIcons.FileTypes.Config" />
+                icon="AllIcons.FileTypes.Config"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewGradleConfig"
                 class="io.openliberty.tools.intellij.actions.ViewGradleConfig"
-                icon="AllIcons.FileTypes.Config" />
+                icon="AllIcons.FileTypes.Config"/>
 
         <action id="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"
                 class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty tool window"
@@ -207,5 +254,6 @@
 
     </actions>
     <!-- Point to LSP4IJ xml -->
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml"
+                xpointer="xpointer(/idea-plugin/*)"/>
 </idea-plugin>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -49,10 +49,10 @@ public abstract class LibertyGeneralAction extends AnAction {
         LibertyModule libertyModule = null;
         VirtualFile buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile != null) {
-            // The action is being driven from the project drop-down tree menu.
+            // The action is being driven from the project drop-down tree menu or from the project context menu.
             libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         } else {
-            // The action is being driven either from the project context menu or from the shift-shift dialog.
+            // The action is being driven from the shift-shift dialog.
             List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(project, getSupportedProjectTypes());
             if (!libertyModules.isEmpty()) {
                 if (libertyModules.size() == 1) {
@@ -99,18 +99,9 @@ public abstract class LibertyGeneralAction extends AnAction {
             return;
         }
 
-        String projectName = libertyModule.getProject().getName();
-        if (projectName == null) {
-            projectName = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_NAME);
-        }
-
         String projectType = libertyModule.getProjectType();
-        if (projectType == null) {
-            projectType = (String) e.getDataContext().getData(Constants.LIBERTY_PROJECT_TYPE);
-        }
-
         if (projectType == null || (!projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) && !projectType.equals(Constants.LIBERTY_GRADLE_PROJECT))) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.project.type.invalid", actionCmd, projectName);
+            String msg = LocalizedResourceUtil.getMessage("liberty.project.type.invalid", actionCmd, libertyModule.getName());
             notifyError(msg, project);
             LOGGER.warn(msg);
             return;
