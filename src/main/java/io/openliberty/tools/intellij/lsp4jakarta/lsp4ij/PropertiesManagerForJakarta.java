@@ -247,30 +247,135 @@ public class PropertiesManagerForJakarta {
 
         if (parent instanceof PsiClass) {
             PsiClass psiClass = (PsiClass) parent;
-            if (psiClass.isAnnotationType()) {
-                return JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
+            return getContextKindFromClass(completionOffset, psiClass, element);
+        }
+
+        if (parent instanceof PsiAnnotation) {
+            PsiAnnotation psiAnnotation = (PsiAnnotation) parent;
+            PsiAnnotationOwner annotationOwner = psiAnnotation.getOwner();
+            if (annotationOwner instanceof PsiClass) {
+                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_CLASS:JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
             }
-            return JavaCursorContextKind.IN_CLASS;
+            if (annotationOwner instanceof PsiMethod){
+                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_METHOD:JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
+            }
+            if (annotationOwner instanceof PsiField) {
+                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_FIELD:JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
+            }
         }
 
         if (parent instanceof PsiMethod) {
             PsiMethod psiMethod = (PsiMethod) parent;
-            if (psiMethod.getReturnType() != null &&  psiMethod.getReturnTypeElement() != null && completionOffset <= psiMethod.getReturnTypeElement().getTextOffset()) {
+            if (completionOffset == psiMethod.getTextRange().getStartOffset()) {
                 return JavaCursorContextKind.BEFORE_METHOD;
             }
-            return JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
+            int methodStartOffset = getMethodStartOffset(psiMethod);
+            if (completionOffset <= methodStartOffset) {
+                if (psiMethod.getAnnotations().length > 0) {
+                    return JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
+                }
+                return JavaCursorContextKind.BEFORE_METHOD;
+            }
         }
 
         if (parent instanceof PsiField) {
             PsiField psiField = (PsiField) parent;
-            PsiTypeElement fieldType = psiField.getTypeElement();
-            if (fieldType != null && completionOffset <= fieldType.getTextOffset()) {
+            if (completionOffset == psiField.getTextRange().getStartOffset()) {
                 return JavaCursorContextKind.BEFORE_FIELD;
             }
-            return JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
+            int fieldStartOffset = getFieldStartOffset(psiField);
+            if (completionOffset <= fieldStartOffset) {
+                if (psiField.getAnnotations().length > 0) {
+                    return JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
+                }
+                return JavaCursorContextKind.BEFORE_FIELD;
+            }
         }
 
         return JavaCursorContextKind.NONE;
+    }
+
+    private static JavaCursorContextKind getContextKindFromClass(int completionOffset, PsiClass psiClass, PsiElement element) {
+        if (completionOffset <= psiClass.getTextRange().getStartOffset()) {
+            return JavaCursorContextKind.BEFORE_CLASS;
+        }
+        int classStartOffset = getClassStartOffset(psiClass);
+        if (completionOffset <= classStartOffset) {
+            if (psiClass.getAnnotations().length > 0) {
+                return JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
+            }
+            return JavaCursorContextKind.BEFORE_CLASS;
+        }
+
+        PsiElement nextElement = element.getNextSibling();
+
+        if (nextElement instanceof  PsiField) {
+            return JavaCursorContextKind.BEFORE_FIELD;
+        }
+        if (nextElement instanceof  PsiMethod) {
+            return JavaCursorContextKind.BEFORE_METHOD;
+        }
+        if (nextElement instanceof  PsiClass) {
+            return JavaCursorContextKind.BEFORE_CLASS;
+        }
+
+        return JavaCursorContextKind.IN_CLASS;
+    }
+    private static int getClassStartOffset(PsiClass psiClass) {
+        int startOffset = psiClass.getTextOffset();
+
+        int modifierStartOffset = getFirstKeywordOffset(psiClass);
+        if (modifierStartOffset > -1) {
+            return Math.min(startOffset, modifierStartOffset);
+        }
+        return startOffset;
+    }
+
+    private static int getMethodStartOffset(PsiMethod psiMethod) {
+        int startOffset = psiMethod.getTextOffset();
+
+        int modifierStartOffset = getFirstKeywordOffset(psiMethod);
+        if (modifierStartOffset > -1) {
+            return Math.min(startOffset, modifierStartOffset);
+        }
+
+        PsiTypeElement returnTypeElement = psiMethod.getReturnTypeElement();
+        if (returnTypeElement != null) {
+            int returnTypeEndOffset = returnTypeElement.getTextRange().getStartOffset();
+            startOffset = Math.min(startOffset, returnTypeEndOffset);
+        }
+
+        return startOffset;
+    }
+
+    private static int getFieldStartOffset(PsiField psiField) {
+        int startOffset = psiField.getTextOffset();
+
+        int modifierStartOffset = getFirstKeywordOffset(psiField);
+        if (modifierStartOffset > -1) {
+            return Math.min(startOffset, modifierStartOffset);
+        }
+
+        PsiTypeElement typeElement = psiField.getTypeElement();
+        if (typeElement != null) {
+            int typeElementOffset = typeElement.getTextRange().getStartOffset();
+            startOffset = Math.min(startOffset, typeElementOffset);
+        }
+
+        return startOffset;
+    }
+
+    private static int getFirstKeywordOffset(PsiModifierListOwner modifierOwner) {
+        PsiModifierList modifierList = modifierOwner.getModifierList();
+        if (modifierList != null) {
+            PsiElement[] modifiers = modifierList.getChildren();
+            for (PsiElement modifier : modifiers) {
+                if (modifier instanceof PsiKeyword) {
+                    return modifier.getTextRange().getStartOffset();
+                }
+            }
+        }
+        return -1;
     }
 
     private static String getJavaCursorPrefix(Document document, int completionOffset) {
