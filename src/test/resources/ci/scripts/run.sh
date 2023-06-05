@@ -25,29 +25,44 @@ OS=$(uname -s)
 #
 # @parameter1: The working directory.
 prefetchDependencies() {
-      local workingDir="$1"
+    local workingDir="$1"
 
-      # Go to the working dir.
-      cd "$workingDir"
+    # Go to the working dir.
+    cd "$workingDir"
 
-      # Build the product to prime for product dependencies.
-      ./gradlew build -x test
+    # Build the product to prime for product dependencies.
+    ./gradlew build -x test
 
-      # Run through dev mode server install/create and feature installation for the Maven app.
-      cd "src/test/resources/projects/maven/singleModMavenMP"
-      ./mvnw liberty:install-server
-      ./mvnw liberty:create
-      ./mvnw liberty:install-feature
+    # Run through dev mode server install/create and feature installation for the Maven app.
+    cd "src/test/resources/projects/maven/singleModMavenMP"
+    ./mvnw liberty:install-server
+    ./mvnw liberty:create
+    ./mvnw liberty:install-feature
 
-      # Run through dev mode server install/create and feature installation for the Gradle app.
-      cd "$workingDir"
-      cd "src/test/resources/projects/gradle/singleModGradleMP"
-      ./gradlew installLiberty
-      ./gradlew libertyCreate
-      ./gradlew installFeature
+    # Run through dev mode server install/create and feature installation for the Gradle app.
+    cd "$workingDir"
+    cd "src/test/resources/projects/gradle/singleModGradleMP"
+    ./gradlew installLiberty
+    ./gradlew libertyCreate
+    ./gradlew installFeature
 
-      # Go back to the working dir.
-      cd "$workingDir"
+    # Go back to the working dir.
+    cd "$workingDir"
+}
+
+# Gathers resource usage information.
+gatherResourceUsageData() {
+    df -h
+    if [[ "$OS" == MINGW* ]]; then
+        systeminfo
+        ps -ef
+    elif [[ "$OS" == Linux* ]]; then
+        free
+        ps -efv
+    elif [[ "$OS" == Darwin* ]]; then
+        memory_pressure
+        ps -efv
+    fi
 }
 
 # Gathers logs and environmental information. The logs can be found in the <OS>-test-report.zip
@@ -95,34 +110,14 @@ gatherDebugData() {
     env
 
     echo -e "DEBUG: Resource usage and process information:\n"
-      df -h
-      if [[ "$OS" == MINGW* ]]; then
-          systeminfo
-          ps -ef
-      elif [[ "$OS" == Linux* ]]; then
-          free
-          ps -efv
-      elif [[ "$OS" == Darwin* ]]; then
-          memory_pressure
-          ps -efv
-      fi
+    gatherResourceUsageData
 }
 
 # Runs UI tests and collects debug data.
 main() {
-      echo -e "\n$(${currentTime[@]}): INFO: Gathering environment data prior to test run..."
-      id
-      df -h
-      if [[ "$OS" == MINGW* ]]; then
-          systeminfo
-          ps -ef
-      elif [[ "$OS" == Linux* ]]; then
-          free
-          ps -efv
-      elif [[ "$OS" == Darwin* ]]; then
-          memory_pressure
-          ps -efv
-      fi
+    echo -e "\n$(${currentTime[@]}): INFO: Gathering environment and resource usage data prior to test run..."
+    id
+    gatherResourceUsageData
 
     echo -e "\n$(${currentTime[@]}): INFO: Starting integration test run..."
     local currentLoc=$(pwd)
