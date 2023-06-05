@@ -283,7 +283,8 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @Test
     @Video
-    @Disabled
+    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
+              // appear on diagnostic popup panel - framework related
     public void testQuickFixInServerXML() {
         String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
         String flaggedString = "wrong";
