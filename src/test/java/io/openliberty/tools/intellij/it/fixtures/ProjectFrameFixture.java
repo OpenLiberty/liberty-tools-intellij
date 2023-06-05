@@ -14,6 +14,7 @@ import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
+import com.intellij.ui.HyperlinkLabel;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -146,6 +147,20 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
+     * Returns the ComponentFixture object associated with the ProjectViewTree class.
+     *
+     * @param xpathVars The Locator custom variables: text
+     * @return The ComponentFixture object associated with the ProjectViewTree class.
+     */
+    public ComponentFixture getProjectViewTree(String... xpathVars) {
+        String visibleText = xpathVars[0];
+
+        return find(ComponentFixture.class,
+                byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
+                Duration.ofMinutes(1));
+    }
+
+    /**
      * Returns the JTreeFixture object associated with the ProjectViewTree class.
      *
      * @param xpathVars The Locator custom variables: text
@@ -241,16 +256,37 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
      */
     public ContainerFixture getDiagnosticPane() {
-        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(20));
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(5));
     }
 
     /**
-     * Returns the ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * Returns the ContainerFixture object associated with the QuickFix "More Actions..." hyperlink for a QuickFix/Code Action
+     * section of a diagnostic pop-up window.
      *
-     * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
+     * @return The ContainerFixture object associated with the QuickFix hyperlink of a pop-up window.
+     */
+    public ContainerFixture getQuickFixMoreActionsLink() {
+        return find(ContainerFixture.class, byXpath("//div[@class='JPanel']//div[@class='HyperlinkLabel' and @mytext.key='daemon.tooltip.more.actions.link.label']"), Duration.ofSeconds(20));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the hyperlink for the main action for a QuickFix/Code Action
+     * section of a diagnostic pop-up window.
+     *
+     * @return The ContainerFixture object associated with the QuickFix hyperlink of a pop-up window.
+     */
+    public ContainerFixture getQuickFixMainActionLink(String visibleText) {
+        return find(ContainerFixture.class, byXpath("//div[@class='JPanel']//div[@class='HyperlinkLabel' and contains(@visible_text, '" + visibleText + "')]"), Duration.ofSeconds(20));
+    }
+
+    /**
+     * Returns the ContainerFixture object associated with the QuickFix/Code Action
+     * section of a diagnostic pop-up window.
+     *
+     * @return The ContainerFixture object associated with the QuickFix portion of a pop-up window.
      */
     public ContainerFixture getQuickFixPane() {
-        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JBViewport'][.//div[@class='MyList']]"), Duration.ofSeconds(20));
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JBViewport'][.//div[@class='MyList']]"), Duration.ofSeconds(5));
     }
 
     /**

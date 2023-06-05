@@ -553,7 +553,6 @@ public class UIBotTestUtils {
 
                 // get a JTreeFixture reference to the file project viewer entry
                 JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-                projTree.expand(projectName, "src", "main", "liberty", "config");
 
                 projTree.findText(fileName).doubleClick();
                 break;
@@ -646,6 +645,24 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Click on the Problems tab to open the Problems View
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void clickOnProblemsTab(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        try {
+            String xPath = "//div[@text.key='toolwindow.stripe.Problems_View']";
+            ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+            actionButton.click();
+
+        } catch (WaitForConditionTimeoutException e) {
+            // Problems tab open, nothing to do
+        }
+    }
+
+    /**
      * Click on the editor file tab for a file that is open in the editor pane to gain focus to that file
      *
      * @param remoteRobot The RemoteRobot instance.
@@ -683,7 +700,7 @@ public class UIBotTestUtils {
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
 
         Exception error = null;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 10; i++) {
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -704,24 +721,18 @@ public class UIBotTestUtils {
 
                 // first get the contents of the popup - put in a String
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-                ContainerFixture popup;
                 switch (popupType.name()) {
                     case "DOCUMENTATION":
-                        popup = projectFrame.getDocumentationHintEditorPane();
+                        projectFrame.getDocumentationHintEditorPane();
                         break;
                     case "DIAGNOSTIC":
-                        popup = projectFrame.getDiagnosticPane();
+                        projectFrame.getDiagnosticPane();
                         break;
                     default:
                         // no known popup type provided, return
                         return;
                 }
 
-                List<RemoteText> rts = popup.findAllText();
-                StringBuilder remoteString = new StringBuilder();
-                for (RemoteText rt : rts) {
-                    remoteString.append(rt.getText());
-                }
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
@@ -737,6 +748,70 @@ public class UIBotTestUtils {
         }
     }
 
+    /**
+     * Moves the mouse cursor to a specific string target in an application file
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param hoverTarget The string to hover over in the config file
+     * @param hoverFile   The string path to the config file
+     * @param quickfixChooserString   the string to use when choosing a quickfix action
+     */
+    public static void hoverForQuickFixInAppFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile, String quickfixChooserString) {
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        clickOnFileTab(remoteRobot, hoverFile);
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
+        Point originPt = new Point(1,1);
+
+        Exception error = null;
+        for (int i = 0; i < 10; i++) {
+            error = null;
+            try {
+                // move the cursor to the origin of the editor
+                goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+                editorNew.click(originPt);
+
+                // Find the target text on the editor and move the move to it.
+                editorNew.findText(contains(hoverTarget)).moveMouse();
+
+                // jitter the cursor
+                Point p = editorNew.findText(contains(hoverTarget)).getPoint();
+
+                // provoke the hint popup with a cursor jitter
+                jitterCursor(editorNew, p.x, p.y);
+
+                // first get the contents of the popup - put in a String
+                ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+                projectFrame.getDiagnosticPane();
+                ContainerFixture quickFixPopupLink = projectFrame.getQuickFixMoreActionsLink();
+                quickFixPopupLink.click();
+
+                ContainerFixture quickFixPopup = projectFrame.getQuickFixPane();
+
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                        Duration.ofSeconds(2),
+                        "Waiting for the The quickfix popup to contain " + quickfixChooserString,
+                        "The quickfix popup did not contain " + quickfixChooserString,
+                        () -> quickFixPopup.hasText(quickfixChooserString));
+
+                break;
+            } catch (WaitForConditionTimeoutException wftoe) {
+                error = wftoe;
+                TestUtils.sleepAndIgnoreException(2);
+                // click on upper left corner of editor pane - allow hover to work on next attempt
+                editorNew.click(originPt);
+            }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Hover on text: '" + hoverTarget + "' did not trigger a pop-up window to open", error);
+        }
+    }
+
     public static void jitterCursor(EditorFixture editor, int pointX, int pointY) {
 
         String jitterScript = "const x = %d;" +
@@ -747,6 +822,114 @@ public class UIBotTestUtils {
 
         // run the jitter mouse script remotely in the idea
         editor.runJs(String.format(jitterScript, pointX, pointY));
+    }
+
+    /**
+     * insert a snippet into a source part using a completion
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param fileName The string to hover over in the config file
+     * @param snippetSubString   The string path to the config file
+     * @param snippetChooserString   the string to use when choosing a quickfix action
+     */
+    public static void insertCodeSnippetIntoSourceFile(RemoteRobot remoteRobot, String fileName, String snippetSubString, String snippetChooserString) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        clickOnFileTab(remoteRobot, fileName);
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        editorNew.click();
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        // find the location in the file to begin the stanza insertion
+        // since we know this is a new empty file, go to position 1,1
+        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+
+        keyboard.enterText(snippetSubString);
+
+        // Select the appropriate completion suggestion in the pop-up window that is automatically
+        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+        // and entry automatically if the completion suggestion windows has one entry only.
+        ComponentFixture namePopupWindow = projectFrame.getLookupList();
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                Duration.ofSeconds(1),
+                "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
+                "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
+                () -> namePopupWindow.hasText(snippetSubString));
+
+        namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
+
+        // let the auto-save function of intellij save the file before testing it
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+    }
+
+    /**
+     * Inserts a configuration name value pair into a config file via text typing
+     * and popup menu completion (if required)
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param fileName The string path to the config file
+     * @param configNameSnippet the portion of the name to type
+     * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
+     * @param configValueSnippet the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup use popup to complete value selection or type in an entire provided value string
+     */
+    public static void insertConfigIntoMPConfigPropertiesFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        clickOnFileTab(remoteRobot, fileName);
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        editorNew.click();
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        // find the location in the file to begin the stanza insertion
+        // we will put new config at the end of the config file
+        // (after the last line already in the file)
+        keyboard.hotKey(VK_CONTROL, VK_END);
+        keyboard.enter();
+
+        keyboard.enterText(configNameSnippet);
+
+        // Narrow down the config name completion suggestions in the pop-up window that is automatically
+        // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
+        // and entry automatically if the completion suggestion windows has one entry only.
+        ComponentFixture namePopupWindow = projectFrame.getLookupList();
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                Duration.ofSeconds(1),
+                "Waiting for text " + configNameSnippet + " to appear in the completion suggestion pop-up window",
+                "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
+                () -> namePopupWindow.hasText(configNameSnippet));
+
+        // now choose the specific item based on the chooser string
+        namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
+
+        editorNew.findText("false").doubleClick();
+        keyboard.hotKey(VK_DELETE);
+
+        keyboard.enterText(configValueSnippet);
+
+        if (completeWithPopup) {
+            // Select the appropriate value completion suggestion in the pop-up window that is automatically
+            // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+            // and entry automatically if the completion suggestion windows has one entry only.
+            ComponentFixture valuePopupWindow = projectFrame.getLookupList();
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
+                    "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
+                    () -> valuePopupWindow.hasText(configValueSnippet));
+
+            valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
+        }
+        // let the auto-save function of intellij save the file before testing it
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
     }
 
     /**
@@ -918,6 +1101,41 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Deletes a string of text from the currently focused editor
+     *
+     * @param remoteRobot      The RemoteRobot instance.
+     * @param textToDelete     The string to delete
+     */
+    public static void selectAndDeleteTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToDelete){
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        clickOnFileTab(remoteRobot, fileName);
+        Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
+        editorNew.click();
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        // find the location to click on for feature name entry
+        // this should put the entry cursor directly between <feature> and <feature/>
+        //int offset = editorText.indexOf(textToDelete);
+        editorNew.click();
+        editorNew.selectText(textToDelete);
+       keyboard.hotKey(VK_DELETE);
+
+
+        // save the new content
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_S);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_S);
+        }
+
+        // slight delay to allow the diagnotic/quick fix data to arrive?
+        TestUtils.sleepAndIgnoreException(2);
+    }
+
+    /**
      * Places the cursor at an exact location for text entry in file
      *
      * @param remoteRobot the remote robot instance
@@ -979,16 +1197,21 @@ public class UIBotTestUtils {
      * @param quickfixChooserString the text to find in the quick fix menu
      */
     public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
-
         // first trigger the quickfix popup by using the keyboard
         Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.hotKey(VK_ALT, VK_ENTER);
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+
+        ContainerFixture quickFixPopup = projectFrame.getQuickFixPane();
+
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                Duration.ofSeconds(2),
+                "Waiting for the The quickfix popup to contain " + quickfixChooserString,
+                "The quickfix popup did not contain " + quickfixChooserString,
+                () -> quickFixPopup.hasText(quickfixChooserString));
 
         // get the text from the quickfix popup
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        ContainerFixture popup = projectFrame.getQuickFixPane();
-
-        popup.findText(contains(quickfixChooserString)).click();
+        quickFixPopup.findText(contains(quickfixChooserString)).click();
 
         // Save the file.
         if (remoteRobot.isMac()) {
@@ -1017,6 +1240,26 @@ public class UIBotTestUtils {
         editMenuEntry.click();
         ComponentFixture copyEntry = projectFrame.getActionMenuItem("Copy");
         copyEntry.click();
+        projectFrame.click();
+    }
+
+    /**
+     * Deletes the contents from the currently active window.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void clearWindowContent(RemoteRobot remoteRobot) {
+        // Select the content.
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+        ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit");
+        editMenuEntry.click();
+        ComponentFixture slectAllEntry = projectFrame.getActionMenuItem("Select All");
+        slectAllEntry.click();
+
+        // Delete/Clear the content.
+        editMenuEntry.click();
+        ComponentFixture deleteEntry = projectFrame.getActionMenuItem("Delete");
+        deleteEntry.click();
     }
 
     /**
