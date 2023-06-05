@@ -751,10 +751,10 @@ public class UIBotTestUtils {
     /**
      * Moves the mouse cursor to a specific string target in an application file
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param hoverTarget The string to hover over in the config file
-     * @param hoverFile   The string path to the config file
-     * @param quickfixChooserString   the string to use when choosing a quickfix action
+     * @param remoteRobot           The RemoteRobot instance.
+     * @param hoverTarget           The string to hover over in the config file
+     * @param hoverFile             The string path to the config file
+     * @param quickfixChooserString the string to use when choosing a quickfix action
      */
     public static void hoverForQuickFixInAppFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile, String quickfixChooserString) {
 
@@ -763,7 +763,7 @@ public class UIBotTestUtils {
         Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
         clickOnFileTab(remoteRobot, hoverFile);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
-        Point originPt = new Point(1,1);
+        Point originPt = new Point(1, 1);
 
         Exception error = null;
         for (int i = 0; i < 10; i++) {
@@ -827,10 +827,10 @@ public class UIBotTestUtils {
     /**
      * insert a snippet into a source part using a completion
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param fileName The string to hover over in the config file
-     * @param snippetSubString   The string path to the config file
-     * @param snippetChooserString   the string to use when choosing a quickfix action
+     * @param remoteRobot          The RemoteRobot instance.
+     * @param fileName             The string to hover over in the config file
+     * @param snippetSubString     The string path to the config file
+     * @param snippetChooserString the string to use when choosing a quickfix action
      */
     public static void insertCodeSnippetIntoSourceFile(RemoteRobot remoteRobot, String fileName, String snippetSubString, String snippetChooserString) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
@@ -870,12 +870,12 @@ public class UIBotTestUtils {
      * Inserts a configuration name value pair into a config file via text typing
      * and popup menu completion (if required)
      *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param fileName The string path to the config file
-     * @param configNameSnippet the portion of the name to type
+     * @param remoteRobot              The RemoteRobot instance.
+     * @param fileName                 The string path to the config file
+     * @param configNameSnippet        the portion of the name to type
      * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
-     * @param configValueSnippet the value to type into keyboard - could be a snippet or a whole word
-     * @param completeWithPopup use popup to complete value selection or type in an entire provided value string
+     * @param configValueSnippet       the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup        use popup to complete value selection or type in an entire provided value string
      */
     public static void insertConfigIntoMPConfigPropertiesFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
@@ -1103,10 +1103,10 @@ public class UIBotTestUtils {
     /**
      * Deletes a string of text from the currently focused editor
      *
-     * @param remoteRobot      The RemoteRobot instance.
-     * @param textToDelete     The string to delete
+     * @param remoteRobot  The RemoteRobot instance.
+     * @param textToDelete The string to delete
      */
-    public static void selectAndDeleteTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToDelete){
+    public static void selectAndDeleteTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToDelete) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
@@ -1120,7 +1120,7 @@ public class UIBotTestUtils {
         //int offset = editorText.indexOf(textToDelete);
         editorNew.click();
         editorNew.selectText(textToDelete);
-       keyboard.hotKey(VK_DELETE);
+        keyboard.hotKey(VK_DELETE);
 
 
         // save the new content
@@ -2104,6 +2104,40 @@ public class UIBotTestUtils {
             removeSideBardAction.click();
         } catch (WaitForConditionTimeoutException e) {
             // The tool window is not active.
+        }
+    }
+
+    /**
+     * Closes an error dialog if it exists. The error dialog is identified by the error dialog icon.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void closeErrorDialog(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        DialogFixture errorDialog = null;
+        ComponentFixture errorLabel = null;
+
+        try {
+            // Look for a dialog.
+            Locator locator = byXpath("//div[@class='MyDialog']");
+            errorDialog = projectFrame.find(DialogFixture.class, locator, Duration.ofSeconds(5));
+
+            // Look for the error dialog label containing the error icon.
+            Locator errorLabelLocator = byXpath("//div[@class='JLabel' and @defaulticon='errorDialog.svg']");
+            errorLabel = errorDialog.find(ComponentFixture.class, errorLabelLocator, Duration.ofSeconds(5));
+        } catch (WaitForConditionTimeoutException wftoe) {
+            // A dialog was not found or it was not an error dialog.
+        }
+
+        // Close the error dialog if it was found.
+        if (errorDialog != null && errorLabel != null) {
+            JButtonFixture okButton = errorDialog.getButton("OK");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for the OK button on the error dialog to be enabled",
+                    "The OK button on the error dialog was not enabled",
+                    okButton::isEnabled);
+            okButton.click();
         }
     }
 }

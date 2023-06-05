@@ -499,12 +499,22 @@ public abstract class SingleModMPProjectTestCommon {
             UIBotTestUtils.openTerminalWindow(remoteRobot);
         } finally {
             try {
-                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                    UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                // If the debugger did not attach, there might be an error dialog. Close it.
+                try {
+                    UIBotTestUtils.closeErrorDialog(remoteRobot);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } finally {
-                // Cleanup configurations.
-                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                try {
+                    // Stop the server.
+                    if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                        UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                    }
+                } finally {
+                    // Cleanup configurations.
+                    UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                }
             }
         }
     }
@@ -544,12 +554,22 @@ public abstract class SingleModMPProjectTestCommon {
             UIBotTestUtils.openTerminalWindow(remoteRobot);
         } finally {
             try {
-                if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                    UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                // If the debugger did not attach, there might be an error dialog. Close it.
+                try {
+                    UIBotTestUtils.closeErrorDialog(remoteRobot);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } finally {
-                // Cleanup configurations.
-                UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                try {
+                    // Stop the server.
+                    if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                        UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                    }
+                } finally {
+                    // Cleanup configurations.
+                    UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                }
             }
         }
     }
