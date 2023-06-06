@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac ]
+        runtime: [ linux, mac, windows ]
         include:
           - runtime: linux
             os: ubuntu-latest
@@ -20,7 +20,17 @@ jobs:
           - runtime: mac
             os: macOS-latest
             reportName: mac-test-report
+          - runtime: windows
+            os: windows-latest
+            reportName: windows-test-report
     steps:
+      - name: Configure pagefile
+        if: contains(matrix.os, 'windows')
+        uses: al-cheb/configure-pagefile-action@v1.2
+        with:
+          minimum-size: 8GB
+          maximum-size: 10GB
+          disk-root: "C:"
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:

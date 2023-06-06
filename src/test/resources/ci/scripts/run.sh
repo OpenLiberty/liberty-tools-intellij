@@ -25,29 +25,44 @@ OS=$(uname -s)
 #
 # @parameter1: The working directory.
 prefetchDependencies() {
-      local workingDir="$1"
+    local workingDir="$1"
 
-      # Go to the working dir.
-      cd "$workingDir"
+    # Go to the working dir.
+    cd "$workingDir"
 
-      # Build the product to prime for product dependencies.
-      ./gradlew build -x test
+    # Build the product to prime for product dependencies.
+    ./gradlew build -x test
 
-      # Run through dev mode server install/create and feature installation for the Maven app.
-      cd "src/test/resources/projects/maven/singleModMavenMP"
-      ./mvnw liberty:install-server
-      ./mvnw liberty:create
-      ./mvnw liberty:install-feature
+    # Run through dev mode server install/create and feature installation for the Maven app.
+    cd "src/test/resources/projects/maven/singleModMavenMP"
+    ./mvnw liberty:install-server
+    ./mvnw liberty:create
+    ./mvnw liberty:install-feature
 
-      # Run through dev mode server install/create and feature installation for the Gradle app.
-      cd "$workingDir"
-      cd "src/test/resources/projects/gradle/singleModGradleMP"
-      ./gradlew installLiberty
-      ./gradlew libertyCreate
-      ./gradlew installFeature
+    # Run through dev mode server install/create and feature installation for the Gradle app.
+    cd "$workingDir"
+    cd "src/test/resources/projects/gradle/singleModGradleMP"
+    ./gradlew installLiberty
+    ./gradlew libertyCreate
+    ./gradlew installFeature
 
-      # Go back to the working dir.
-      cd "$workingDir"
+    # Go back to the working dir.
+    cd "$workingDir"
+}
+
+# Gathers resource usage information.
+gatherResourceUsageData() {
+    df -h
+    if [[ "$OS" == MINGW* ]]; then
+        systeminfo
+        ps -ef
+    elif [[ "$OS" == Linux* ]]; then
+        free
+        ps -efv
+    elif [[ "$OS" == Darwin* ]]; then
+        memory_pressure
+        ps -efv
+    fi
 }
 
 # Gathers logs and environmental information. The logs can be found in the <OS>-test-report.zip
@@ -77,6 +92,11 @@ gatherDebugData() {
         cp "$workingDir"/build/idea-sandbox/system/log/idea.log "$workingDir"/build/reports/.
     fi
 
+    echo -e "DEBUG: Gathering JVM crash log...\n"
+    if [ $(ls "$workingDir"/hs_err_*.log* 2> /dev/null) ]; then
+        cp "$workingDir"/hs_err_*.log "$workingDir"/build/reports/.
+    fi
+
     echo -e "DEBUG: Installed Java version:\n"
     java -version
 
@@ -88,12 +108,18 @@ gatherDebugData() {
 
     echo -e "DEBUG: Environment variables:\n"
     env
+
+    echo -e "DEBUG: Resource usage and process information:\n"
+    gatherResourceUsageData
 }
 
 # Runs UI tests and collects debug data.
 main() {
-    echo -e "\n$(${currentTime[@]}): INFO: Starting integration test run."
+    echo -e "\n$(${currentTime[@]}): INFO: Gathering environment and resource usage data prior to test run..."
+    id
+    gatherResourceUsageData
 
+    echo -e "\n$(${currentTime[@]}): INFO: Starting integration test run..."
     local currentLoc=$(pwd)
 
     # Add some env properties to .bashrc. This prevents cases (i.e. MAC) in which the IDE's
@@ -106,7 +132,7 @@ main() {
     export DISPLAY=:77.0
 
     # Manage the display on Linux.
-    if [ $OS = "Linux" ]; then
+    if [ "$OS" = "Linux" ]; then
         # Start the X display server on port 77.
         Xvfb -ac :77 -screen 0 1920x1080x24 > /dev/null 2>&1 &
         sleep 10
@@ -142,7 +168,7 @@ main() {
         fi
         count=`expr $count + 1`
         echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
-        done
+    done
 
     # Run the tests
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
