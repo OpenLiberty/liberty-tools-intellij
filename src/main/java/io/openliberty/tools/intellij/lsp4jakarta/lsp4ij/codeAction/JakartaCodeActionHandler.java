@@ -256,7 +256,7 @@ public class JakartaCodeActionHandler {
                     LOGGER.warn("Exception scanning diagnostics", e); // TODO do we need this? Remove if possible
                 }
             }
-            return codeActions;
+            return Collections.emptyList();//codeActions;
         } catch (IOException x) {
             return Collections.emptyList();
         }
