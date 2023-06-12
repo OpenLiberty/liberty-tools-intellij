@@ -1868,57 +1868,90 @@ public class UIBotTestUtils {
         ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations...");
         editCfgsMenuEntry.click();
 
-        // Find the Run/Debug Configurations dialog.
-        DialogFixture rdConfigDialog = projectFrame.find(DialogFixture.class,
-                DialogFixture.byTitle("Run/Debug Configurations"),
-                Duration.ofSeconds(10));
+        // The Run/Debug configurations dialog could resize and reposition icons. Retry in case of a failure.
+        int maxRetries = 3;
+        Exception error = null;
+        DialogFixture rdConfigDialog = null;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                error = null;
 
-        // Expand and retrieve configuration tree content.
-        JTreeFixture configTree = rdConfigDialog.jTree();
-        configTree.expandAll();
-        List<RemoteText> treeEntries = configTree.findAllText();
+                // Find the run/debug configurations dialog.
+                rdConfigDialog = projectFrame.find(DialogFixture.class,
+                        DialogFixture.byTitle("Run/Debug Configurations"),
+                        Duration.ofSeconds(10));
 
-        // Find the Liberty tree node and delete all child configurations.
-        boolean processEntries = false;
-        boolean firstEntryClicked = false;
-        Locator locator = byXpath("//div[@tooltiptext.key='remove.run.configuration.action.name']");
-        ActionButtonFixture removeCfgButton = rdConfigDialog.actionButton(locator);
+                // Expand and retrieve configuration tree content.
+                JTreeFixture configTree = rdConfigDialog.jTree();
+                configTree.expandAll();
+                List<RemoteText> treeEntries = configTree.findAllText();
 
-        for (RemoteText treeEntry : treeEntries) {
-            if (treeEntry.getText().equals("Liberty")) {
-                processEntries = true;
-                continue;
-            }
-            if (processEntries) {
-                // Click on the first configuration in the tree only.
-                if (!firstEntryClicked) {
-                    treeEntry.click();
-                    firstEntryClicked = true;
+                // Find the Liberty tree node and delete all child configurations.
+                boolean processEntries = false;
+                boolean firstEntryClicked = false;
+                Locator locator = byXpath("//div[@tooltiptext.key='remove.run.configuration.action.name']");
+                ActionButtonFixture removeCfgButton = rdConfigDialog.actionButton(locator);
+
+                for (RemoteText treeEntry : treeEntries) {
+                    if (treeEntry.getText().equals("Liberty")) {
+                        processEntries = true;
+                        continue;
+                    }
+                    if (processEntries) {
+                        // Click on the first configuration in the tree only.
+                        if (!firstEntryClicked) {
+                            treeEntry.click();
+                            firstEntryClicked = true;
+                        }
+
+                        // Delete the configuration.
+                        try {
+                            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                                    Duration.ofSeconds(1),
+                                    "Waiting for the remove config button on the run/debug configurations dialog to be enabled",
+                                    "The remove config button on the config run/debug configurations was not enabled",
+                                    removeCfgButton::isEnabled);
+                            removeCfgButton.click();
+                        } catch (WaitForConditionTimeoutException wfcte) {
+                            // We have reached the end of the Liberty entries.
+                            break;
+                        }
+                    }
                 }
 
-                // Delete the configuration.
-                try {
-                    RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                            Duration.ofSeconds(1),
-                            "Waiting for the remove config button on the config dialog to be enabled",
-                            "The remove config button on the config dialog was not enabled",
-                            removeCfgButton::isEnabled);
-                    removeCfgButton.click();
-                } catch (WaitForConditionTimeoutException wfcte) {
-                    // We have reached the end of the Liberty entries.
-                    break;
-                }
+                // Press the OK button to persist the changes.
+                JButtonFixture okButton = rdConfigDialog.getButton("OK");
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+                        Duration.ofSeconds(1),
+                        "Waiting for the OK button on the run/debug configurations dialog to be enabled",
+                        "The OK button on the run/debug configurations dialog was not enabled",
+                        okButton::isEnabled);
+                okButton.click();
+                break;
+            } catch (Exception e) {
+                error = e;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                        "Failed to delete run configurations shown in the run/debug configurations dialog (" + e.getMessage() + "). Retrying...");
+                TestUtils.sleepAndIgnoreException(5);
             }
         }
 
-        // Press Save the changes.
-        JButtonFixture okButton = rdConfigDialog.getButton("OK");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the OK button on the config dialog to be enabled",
-                "The OK button on the config dialog was not enabled",
-                okButton::isEnabled);
-        okButton.click();
+        // Report the last error if there is one.
+        if (error != null) {
+            // If the dialog was opened, close it.
+            if (rdConfigDialog != null) {
+                JButtonFixture cancelButton = rdConfigDialog.getButton("Cancel");
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for the cancel button on the run/debug configurations dialog to be enabled",
+                        "The cancel button on the run/debug configurations dialog was not enabled",
+                        cancelButton::isEnabled);
+                cancelButton.click();
+            }
+
+            // Report the error.
+            throw new RuntimeException("Failed to delete configurations shown in the run/debug configurations dialog", error);
+        }
     }
 
     /**
