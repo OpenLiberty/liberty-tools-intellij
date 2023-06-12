@@ -73,7 +73,7 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
     // Test: Video Recording.
-    implementation 'com.automation-remarks:video-recorder-junit5:2.0'
+    testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
         transitive = false
@@ -106,7 +106,9 @@ runIde {
 }
 
 intellij {
-    version = '2023.1.2' //for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    version = '2023.1.2'
+
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
 }
