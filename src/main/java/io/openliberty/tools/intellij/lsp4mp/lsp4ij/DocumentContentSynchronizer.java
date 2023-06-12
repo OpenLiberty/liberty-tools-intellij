@@ -112,6 +112,9 @@ public class DocumentContentSynchronizer implements DocumentListener {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             sendDidChangeEvents();
         } else {
+            if(languageServerWrapper.getProject().isDisposed()) {
+                return;
+            }
             PsiDocumentManager.getInstance(languageServerWrapper.getProject()).performForCommittedDocument(event.getDocument(), this::sendDidChangeEvents);
         }
     }
@@ -130,6 +133,9 @@ public class DocumentContentSynchronizer implements DocumentListener {
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             sendDidChangeEvents(events);
         } else {
+            if(languageServerWrapper.getProject().isDisposed()) {
+                return;
+            }
             PsiDocumentManager.getInstance(languageServerWrapper.getProject()).performForCommittedDocument(document, () -> sendDidChangeEvents(events));
         }
     }
