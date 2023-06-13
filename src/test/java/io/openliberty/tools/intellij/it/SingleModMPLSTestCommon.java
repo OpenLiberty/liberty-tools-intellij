@@ -16,7 +16,9 @@ import java.time.Duration;
 import java.util.List;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
+import org.junit.jupiter.api.TestMethodOrder;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModMPLSTestCommon {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
@@ -104,6 +106,7 @@ public abstract class SingleModMPLSTestCommon {
     @Test
     @Video
     public void testMPDiagnosticsInJavaPart() {
+
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
         String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness, or @Health annotation.";
@@ -217,6 +220,16 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "microprofile-config.properties", UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
+        // if the LS has not yet poulated the popup, re-get the popup data
+        for (int i = 0; i<=5; i++){
+            if (hoverFoundOutcome.contains("Fetching Documentation...")) {
+                hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
+            }
+            else {
+                break;
+            }
+        }
+
         // Validate that the hover action raised the expected hint text
         TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
     }
@@ -300,7 +313,15 @@ public abstract class SingleModMPLSTestCommon {
      * @param projectName The name of the project being used.
      */
 
+    //public static void prepareEnv(String projectPath, String projectName) {
+    //@Test
+    //@Video
+    //@Order(1)
     public static void prepareEnv(String projectPath, String projectName) {
+
+        //String projectName = "sampleGradleMPLSApp";
+        //String projectPath = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
 
@@ -316,11 +337,11 @@ public abstract class SingleModMPLSTestCommon {
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
-        projTree.expand(projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
-        projTree.expand(projectName, "src", "main", "resources", "META-INF");
+        //projTree.expand(projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
+        //projTree.expand(projectName, "src", "main", "resources", "META-INF");
 
-        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "ServiceLiveHealthCheck");
-        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "microprofile-config.properties");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "microprofile-config.properties", projectName, "src", "main", "resources", "META-INF");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
