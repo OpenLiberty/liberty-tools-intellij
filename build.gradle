@@ -26,6 +26,22 @@ repositories {
     maven {
         url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
     }
+    maven {
+        url = "https://www.jetbrains.com/intellij-repository/releases"
+    }
+    maven {
+        url = "https://packages.jetbrains.team/maven/p/kpm/public"
+    }
+    maven {
+        url = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/grazi/grazie-platform-public"
+    }
+    maven {
+        url = "https://download.jetbrains.com/teamcity-repository"
+    }
+    maven {
+        url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
+    }
+
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -66,8 +82,15 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:231.9011.34') {
+        transitive = false
+    }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
+
+    // JUnit 4
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.9.3'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.3'
 
     // Test: Logging Network Calls.
     testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
@@ -131,6 +154,17 @@ runIdeForUiTests {
 
 test {
     useJUnitPlatform()
+    systemProperty "java.awt.headless", "true"
+    systemProperty 'idea.log.leaked.projects.in.tests', 'false'
+
+    // Tell the tests to use the correct maven installation.
+    systemProperty 'idea.maven.test.homer', 'C:\\apache-maven-3.8.6'
+
+    // java.nio.file.NoSuchFileException: /.../liberty-tools-intellij/build/idea-sandbox/system/log/open-telemetry-metrics.2023-05-22-21-05-16.csv
+    systemProperty 'com.redhat.devtools.intellij.telemetry.moder', 'disabled'
+
+    // idea home so that the tests can start it.
+    systemProperty 'idea.home.pathr', 'C:\\Users\\MichaelGlavassevich\\.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2023.1\\79ab2d2970b44e4c36be667e173da87c982a9814\\ideaIC-2023.1'
 
     testLogging {
         showStandardStreams = true
