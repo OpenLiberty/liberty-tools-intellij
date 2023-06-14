@@ -41,9 +41,14 @@ This guide provides detailed instructions on how to import and configure your Li
 
 ### Settings
 
-Liberty Tools for IntelliJ IDEA honours  the following external settings:
-- Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+Liberty Tools for IntelliJ IDEA honors the following settings:
+
+#### IntelliJ settings:
+- Maven home path set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
+- Gradle JVM set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+
+#### Environment Variables:
+- **JAVA_HOME** in the current terminal for running Liberty.
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.
