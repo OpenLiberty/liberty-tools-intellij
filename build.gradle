@@ -157,15 +157,6 @@ test {
     systemProperty "java.awt.headless", "true"
     systemProperty 'idea.log.leaked.projects.in.tests', 'false'
 
-    // Tell the tests to use the correct maven installation.
-    systemProperty 'idea.maven.test.homer', 'C:\\apache-maven-3.8.6'
-
-    // java.nio.file.NoSuchFileException: /.../liberty-tools-intellij/build/idea-sandbox/system/log/open-telemetry-metrics.2023-05-22-21-05-16.csv
-    systemProperty 'com.redhat.devtools.intellij.telemetry.moder', 'disabled'
-
-    // idea home so that the tests can start it.
-    systemProperty 'idea.home.pathr', 'C:\\Users\\MichaelGlavassevich\\.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2023.1\\79ab2d2970b44e4c36be667e173da87c982a9814\\ideaIC-2023.1'
-
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
