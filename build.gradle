@@ -26,6 +26,9 @@ repositories {
     maven {
         url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
     }
+    maven {
+        url = file('src/test/resources/deps')
+    }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -73,7 +76,8 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
     // Test: Video Recording.
-    testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
+    testImplementation 'com.automation-remarks:video-recorder-junit5:2.1'
+    testImplementation 'com.automation-remarks:video-recorder-core:2.1'
 
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
         transitive = false
