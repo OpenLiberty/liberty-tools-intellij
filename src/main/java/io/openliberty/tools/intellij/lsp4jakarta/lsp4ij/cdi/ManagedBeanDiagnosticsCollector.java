@@ -131,7 +131,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
                     // A single field cannot have the same
                     diagnostics.add(createDiagnostic(field, unit,
-                            "The annotations @Produces and @Inject must not be used on the same field or property.",
+                            "The @Produces and @Inject annotations must not be used on the same field or property.",
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
 
@@ -190,7 +190,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
                     // A single method cannot have the same
                     diagnostics.add(createDiagnostic(method, unit,
-                            "The annotations @Produces and @Inject must not be used on the same field or property.",
+                            "The @Produces and @Inject annotations must not be used on the same field or property.",
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
 
@@ -374,6 +374,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     }
 
     private String createAnnotationDiagnostic(String annotation, String message) {
-        return "The annotation @" + annotation + " must " + message;
+        return "The @" + annotation + " annotation must " + message;
     }
 }
