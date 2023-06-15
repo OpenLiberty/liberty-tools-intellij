@@ -177,10 +177,9 @@ main() {
 
     if [[ "$OS" == MINGW* ]]; then
       echo "on windows, not running LS tests"
-      gradle test -PexcludeTests=**/*LSTest*
+      ./gradlew test -PexcludeTests=**/*LSTest*
     else
-      echo "on mac or linux, temporarily not running any tests"
-        #./gradlew test
+     ./gradlew test
     fi
 
     # If there were any errors, gather some debug data before exiting.

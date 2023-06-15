@@ -582,28 +582,28 @@ public class UIBotTestUtils {
         for (int i = 0; i < maxRetries; i++) {
             try {
                 error = null;
-                System.out.println("AJM: iteration = " + i);
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openFile: iteration = " + i);
 
                 // find the Project Frame
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-                System.out.println("AJM: found the proj frame");
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: found the proj frame");
 
                 // hide the terminal window for now
                 hideTerminalWindow(remoteRobot);
-                System.out.println("AJM: hid terminal");
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: hid terminal");
 
                 // get a JTreeFixture reference to the file project viewer entry
                 JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-                System.out.println("AJM: got the proj tree");
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: got the proj tree");
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
 
                 projTree.expand(filePath);
-                System.out.println("AJM: expanded the full path");
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: expanded the full path");
 
                 projTree.findText(fileName).doubleClick();
-                System.out.println("AJM: double clicked on file name");
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: double clicked on file name");
                 break;
 
             } catch (Exception e) {
