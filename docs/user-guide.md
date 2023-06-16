@@ -37,18 +37,18 @@ This guide provides detailed instructions on how to import and configure your Li
 
     - Liberty Maven Plugin -> 3.7.1
 
-    - Liberty Gradle Plugin -> 3.5.1
+    - Liberty Gradle Plugin -> 3.6.1
 
 ### Settings
 
 Liberty Tools for IntelliJ IDEA honors the following settings:
 
 #### IntelliJ settings:
-- Maven home path set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle JVM set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+- The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
+- The Gradle Distribution that is set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when you run Liberty dev mode on Gradle projects.
 
 #### Environment Variables:
-- **JAVA_HOME** in the current terminal for running Liberty.
+- The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.
