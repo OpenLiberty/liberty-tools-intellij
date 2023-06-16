@@ -26,7 +26,7 @@ This guide provides detailed instructions on how to import and configure your Li
 ## Before you begin
 ### Software requirements
 - **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
-- Java 17 is required by Liberty Tools for IntelliJ IDEA and bundled with IntelliJ IDEA version 2022.2+. If you have changed the IntelliJ IDEA Boot Java Runtime through the "Change Boot Java Runtime for the IDE" preference, ensure that you are using Java 17.
+- Liberty Tools for IntelliJ IDEA requires a minimum of Java 17, which is bundled with IntelliJ IDEA version 2022.2+. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
 ### Application requirements
@@ -37,13 +37,18 @@ This guide provides detailed instructions on how to import and configure your Li
 
     - Liberty Maven Plugin -> 3.7.1
 
-    - Liberty Gradle Plugin -> 3.5.1
+    - Liberty Gradle Plugin -> 3.6.1
 
 ### Settings
 
-Liberty Tools for IntelliJ IDEA honours  the following external settings:
-- Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+Liberty Tools for IntelliJ IDEA honors the following settings:
+
+#### IntelliJ settings:
+- The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
+- The Gradle Distribution that is set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when you run Liberty dev mode on Gradle projects.
+
+#### Environment Variables:
+- The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.

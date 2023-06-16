@@ -16,7 +16,7 @@ Liberty Tools for IntelliJ IDEA is an IntelliJ IDEA plugin for developing cloud-
 - [Features](#features)
 - [Quick start](#quick-start)
 - [Actions](#actions)
-- [External settings](#external-settings)
+- [Settings](#settings)
 - [Requirements](#requirements)
 - [Contributing](#contributing)
 - [Issues](#issues)
@@ -80,11 +80,14 @@ The following actions are available when you select a project in the Liberty Too
 | View unit test report (Maven)        | View the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Open the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
 
-## External settings
+## Settings
 
-Liberty Tools for IntelliJ IDEA honours the following external settings:
-- Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+#### IntelliJ settings:
+- The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
+- The Gradle Distribution that is set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when you run Liberty dev mode on Gradle projects.
+
+#### Environment Variables:
+- The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Requirements
 
