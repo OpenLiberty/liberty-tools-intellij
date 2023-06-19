@@ -402,13 +402,13 @@ public abstract class SingleModLibertyLSTestCommon {
         projTree.expand(projectName, "src", "main", "liberty", "config");
 
         // open server.xml file
-        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.xml");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "server.xml", projectName, "src", "main", "liberty", "config");
 
         // open server.env file
-        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "server.env");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "server.env", projectName, "src", "main", "liberty", "config");
 
         // open bootstrap.properties file
-        UIBotTestUtils.openConfigFile(remoteRobot, projectName, "bootstrap.properties");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "bootstrap.properties", projectName, "src", "main", "liberty", "config");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
