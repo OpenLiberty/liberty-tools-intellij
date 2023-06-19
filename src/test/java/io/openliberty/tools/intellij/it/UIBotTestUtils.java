@@ -849,6 +849,7 @@ public class UIBotTestUtils {
             try {
                 // move the cursor to the origin of the editor
                 goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+
                 editorNew.click(originPt);
 
                 // Find the target text on the editor and move the move to it.

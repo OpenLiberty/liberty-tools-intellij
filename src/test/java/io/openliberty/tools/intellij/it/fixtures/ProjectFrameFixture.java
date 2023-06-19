@@ -259,6 +259,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(5));
     }
 
+
     /**
      * Returns the ContainerFixture object associated with the QuickFix "More Actions..." hyperlink for a QuickFix/Code Action
      * section of a diagnostic pop-up window.

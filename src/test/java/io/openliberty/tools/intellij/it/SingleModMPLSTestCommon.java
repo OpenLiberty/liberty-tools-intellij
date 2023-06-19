@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
+import org.junit.jupiter.api.TestMethodOrder;
 
 
 public abstract class SingleModMPLSTestCommon {
@@ -308,6 +309,10 @@ public abstract class SingleModMPLSTestCommon {
      * @param projectName The name of the project being used.
      */
 
+    //public static void prepareEnv(String projectPath, String projectName) {
+    //@Test
+    //@Video
+    //@Order(1)
     public static void prepareEnv(String projectPath, String projectName) {
 
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
@@ -322,7 +327,7 @@ public abstract class SingleModMPLSTestCommon {
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-
+        
         UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
         UIBotTestUtils.openFile(remoteRobot, projectName, "microprofile-config.properties", projectName, "src", "main", "resources", "META-INF");
 
