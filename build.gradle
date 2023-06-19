@@ -150,7 +150,7 @@ tasks {
 patchPluginXml {
     changeNotes = """
         <h2> 0.0.8 </h2>
-        Version 0.0.8 of Liberty Tools for IntelliJ IDEA is an <b>early release</b> that contains new functionality and fixes. Liberty Tools for IntelliJ IDEA now requires IntelliJ IDEA version 2022.2+.
+        Version 0.0.8 of Liberty Tools for IntelliJ IDEA is an <b>early release</b> that contains new functionality and fixes. Liberty Tools for IntelliJ IDEA now requires IntelliJ IDEA version 2022.2+ and Java 17+.
         <br>
         Notable enhancements:
         <ul>

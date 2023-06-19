@@ -1,14 +1,15 @@
 # Liberty Tools for IntelliJ IDEA
 
-> Note: Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), Java 17 (bundled with IntelliJ IDEA version 2022.2+) and a minimum version of IntelliJ IDEA version 2022.2 are required to run Liberty Tools for IntelliJ IDEA.
+<!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
+> Note: Requires **IntelliJ IDEA 2023.1** or later, and **Java 17** or later. 
+>
+> For more details, check the [user-guide](docs/user-guide.md).
 
 ![JetBrains plugins](https://img.shields.io/jetbrains/plugin/v/14856-liberty-tools.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/jetbrains/plugin/d/14856-liberty-tools?style=for-the-badge&)
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?style=for-the-badge&label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 
 Liberty Tools for IntelliJ IDEA is an IntelliJ IDEA plugin for developing cloud-native Java applications with [Open Liberty](https://openliberty.io/) and [WebSphere Liberty](https://www.ibm.com/products/websphere-liberty). Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
-
-**Note: This is an early release.**
 
 ![Liberty Tools Extension](docs/images/liberty-tool-window-view.png)
 
@@ -81,6 +82,7 @@ The following actions are available when you select a project in the Liberty Too
 | View test report (Gradle)            | Open the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
 
 ## Settings
+<!-- Make sure this info is also updated in docs/user-guide.md#settings -->
 
 #### IntelliJ settings:
 - The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
@@ -90,8 +92,10 @@ The following actions are available when you select a project in the Liberty Too
 - The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Requirements
+<!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
+**IntelliJ IDEA 2023.1** or later, using **Java 17** or later.
 
-Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), Java 17 (bundled with IntelliJ IDEA version 2022.2+) and a minimum version of IntelliJ IDEA version 2022.2 are required to run Liberty Tools for IntelliJ IDEA. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+For more details, check the [user guide](docs/user-guide.md#software-requirements).
 
 ## Contributing
 

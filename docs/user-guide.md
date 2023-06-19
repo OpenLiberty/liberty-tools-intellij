@@ -25,22 +25,21 @@ This guide provides detailed instructions on how to import and configure your Li
 
 ## Before you begin
 ### Software requirements
-- **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
-- Liberty Tools for IntelliJ IDEA requires a minimum of Java 17, which is bundled with IntelliJ IDEA version 2022.2+. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
+<!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
+- **IntelliJ IDEA 2023.1** or later. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
 ### Application requirements
 - Define a Liberty `server.xml` configuration file in the `src/main/liberty/config` location.
-- Configure the [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven#configuration) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script). We recommend using recent versions of the plugins as they include several important bug fixes.
+- [Configure the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven#configuration) or [configure the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script). We recommend using the most recent versions of the plugins as they include several important bug fixes.
 
-  The following versions are recommended at minimum:
+    - [Liberty Maven Plugin latest release](https://github.com/OpenLiberty/ci.maven/releases/latest)
 
-    - Liberty Maven Plugin -> 3.7.1
-
-    - Liberty Gradle Plugin -> 3.6.1
+    - [Liberty Gradle Plugin latest release](https://github.com/OpenLiberty/ci.gradle/releases/latest)
 
 ### Settings
-
+<!-- Make sure this info is also updated in README.md#settings -->
 Liberty Tools for IntelliJ IDEA honors the following settings:
 
 #### IntelliJ settings:
