@@ -136,10 +136,6 @@ test {
         showStandardStreams = true
         exceptionFormat = 'full'
     }
-
-    if (project.hasProperty('excludeTests')) {
-        exclude project.property('excludeTests')
-    }
 }
 
 tasks {

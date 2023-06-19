@@ -577,7 +577,7 @@ public class UIBotTestUtils {
      * @param fileName    The name of the file to open.
      */
     public static void openFile(RemoteRobot remoteRobot, String projectName, String fileName, String... filePath) {
-        int maxRetries = 5;
+        int maxRetries = 15;
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
@@ -586,21 +586,17 @@ public class UIBotTestUtils {
 
                 // find the Project Frame
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: found the proj frame");
 
                 // hide the terminal window for now
                 hideTerminalWindow(remoteRobot);
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: hid terminal");
 
                 // get a JTreeFixture reference to the file project viewer entry
                 JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: got the proj tree");
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
 
                 projTree.expand(filePath);
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: expanded the full path");
 
                 projTree.findText(fileName).doubleClick();
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: double clicked on file name");
@@ -609,7 +605,7 @@ public class UIBotTestUtils {
             } catch (Exception e) {
                 error = e;
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Unable to open file " + fileName + " (" + e.getMessage() + "). Retrying...");
-                TestUtils.sleepAndIgnoreException(20);
+                TestUtils.sleepAndIgnoreException(2);
             }
         }
 

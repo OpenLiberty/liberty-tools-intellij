@@ -172,15 +172,7 @@ main() {
 
     # Run the tests
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
-    #./gradlew test
-    #./gradlew test --tests *LSTest*
-
-    if [[ "$OS" == MINGW* ]]; then
-      echo "on windows, not running LS tests"
-      ./gradlew test -PexcludeTests=**/*LSTest*
-    else
-     ./gradlew test
-    fi
+    ./gradlew test
 
     # If there were any errors, gather some debug data before exiting.
     rc=$?
