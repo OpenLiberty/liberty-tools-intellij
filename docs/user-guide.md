@@ -39,7 +39,6 @@ This guide provides detailed instructions on how to import and configure your Li
     - [Liberty Gradle Plugin latest release](https://github.com/OpenLiberty/ci.gradle/releases/latest)
 
 ### Settings
-<!-- Make sure this info is also updated in README.md#settings -->
 Liberty Tools for IntelliJ IDEA honors the following settings:
 
 #### IntelliJ settings:

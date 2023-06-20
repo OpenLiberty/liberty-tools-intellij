@@ -64,6 +64,8 @@ Editing assistance for configuration and application files is provided through t
 
 Projects with the Liberty Maven Plugin or Liberty Gradle Plugin configured will appear in the Liberty tool window on the sidebar. If the tool window is not enabled by default, you can view it by selecting **View > Tool Windows > Liberty**.
 
+> Note: Make sure the **JAVA_HOME** system environment variable is set to define the JDK for running Liberty dev mode.
+
 For minimum requirements information and detailed instructions on how to use the Liberty actions, check out the [Liberty Tools for IntelliJ IDEA user guide](docs/user-guide.md) page.
 
 ## Actions
@@ -80,16 +82,6 @@ The following actions are available when you select a project in the Liberty Too
 | View integration test report (Maven) | View the integration test report file if it exists at `/target/site/failsafe-report.html`.                                                                                                                                                                                                                                                                                                                               |
 | View unit test report (Maven)        | View the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Open the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
-
-## Settings
-<!-- Make sure this info is also updated in docs/user-guide.md#settings -->
-
-#### IntelliJ settings:
-- The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
-- The Gradle Distribution that is set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when you run Liberty dev mode on Gradle projects.
-
-#### Environment Variables:
-- The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
