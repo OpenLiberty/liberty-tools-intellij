@@ -3,6 +3,7 @@
 <!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
 > Note: Requires **IntelliJ IDEA 2023.1** or later, and **Java 17** or later. 
 >
+> This page provides an overview of Liberty Tools for IntelliJ.
 > For more details, check the [user-guide](docs/user-guide.md).
 
 ![JetBrains plugins](https://img.shields.io/jetbrains/plugin/v/14856-liberty-tools.svg?style=for-the-badge)
