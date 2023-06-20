@@ -159,7 +159,7 @@ patchPluginXml {
         <li> Completion support for MicroProfile 3 & 4 APIs when editing Java and microprofile-config.properties files via the <a href="https://github.com/eclipse/lsp4mp">Eclipse LSP4MP</a>, Language Server for MicroProfile.
         <li> Liberty projects are now automatically detected via the presence of a “src/main/liberty/config/server.xml” file.
         <li> New Liberty Run/Debug Configuration, accessible through the “Liberty: Start…” action or the IntelliJ Run/Debug Configuration menu. When “Debug” is selected, the Liberty runtime will start and the IntelliJ debugger will automatically attach to the JVM for the running Liberty instance.
-        <li> Ability to run Liberty actions through the IntelliJ “Go To Action” menu.
+        <li> Ability to run Liberty actions through the IntelliJ “Search Everywhere” window.
         <li> Ability to manually add Liberty projects to the Liberty tool window.
         <li> Liberty start actions will honour the Maven home path and Gradle JVM set in IntelliJ IDEA preferences.
         <li> New icons for Maven and Gradle projects in the Liberty tool window.
