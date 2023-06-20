@@ -19,7 +19,7 @@ This guide provides detailed instructions on how to import and configure your Li
    - [Gradle-built applications](#gradle-built-applications)
 - [Stop your application](#stop-your-application)
 - [Debug your application](#debug-your-application)
-- [Create a new Liberty Run/Debug Configuration](#create-a-new-liberty-rundebug-configuration)
+- [Create a Liberty Run/Debug Configuration](#create-a-liberty-rundebug-configuration)
 - [Manually add your Liberty project to the tool window](#manually-add-your-liberty-project-to-the-tool-window)
 - [Configure a Liberty server](#configure-a-liberty-server)
 - [Develop with Jakarta EE and MicroProfile APIs](#develop-with-jakarta-ee-and-microprofile-apis)
@@ -160,13 +160,13 @@ After the server starts, the IntelliJ IDEA debugger attaches and switches to the
 
 ![Liberty debugger attached](images/liberty-debugger-attached.png)
 
-## Create a new Liberty Run/Debug Configuration
+## Create a Liberty Run/Debug Configuration
 
-The Liberty Tools plugin contributes a new type of Run/Debug configuration. Select the **Run -> Edit Configurations** menu to open the **Edit Run/Debug configurations** dialog. Click **+** and select Liberty from the menu. 
+The Liberty Tools plugin contributes its own Run/Debug configuration. You can maintain several configurations to run Liberty with different parameters. Select the **Run -> Edit Configurations** menu to open the **Edit Run/Debug configurations** dialog. Click **+** and select Liberty from the menu. 
 
 ![Liberty new configuration](images/liberty-new-config.png)
 
-For more information see the [IDE documentation](https://www.jetbrains.com/help/idea/run-debug-configuration.html).
+For more information, see [Run/debug configurations](https://www.jetbrains.com/help/idea/run-debug-configuration.html) in the Intellij IDEA documentation.
 
 ## Manually add your Liberty project to the tool window
 
