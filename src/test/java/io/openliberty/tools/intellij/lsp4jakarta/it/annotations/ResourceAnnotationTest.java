@@ -41,7 +41,7 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
 
     @Test
     @Ignore
-    public void GeneratedAnnotation() throws Exception {
+    public void ResourceAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 

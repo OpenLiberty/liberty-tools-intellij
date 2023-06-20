@@ -11,7 +11,7 @@
  *     IBM Corporation, Matthew Shocrylas - initial API and implementation
  *******************************************************************************/
 
-package io.openliberty.tools.intellij.lsp4jakarta.it.jax_rs;
+package io.openliberty.tools.intellij.lsp4jakarta.it.jaxrs;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -25,7 +25,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,13 +36,12 @@ import java.util.Arrays;
 public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void MultipleConstructorsWithEqualParams() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/RootResourceClassConstructorsEqualLen.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/RootResourceClassConstructorsEqualLen.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
@@ -51,11 +49,11 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
         // test expected diagnostics
         Diagnostic d1 = JakartaForJavaAssert.d(7, 8, 45,
-                "Multiple constructors have the same number of parameters, it might be ambiguous which constructor is used.",
+                "Multiple constructors have the same number of parameters, it may be ambiguous which constructor is used.",
                 DiagnosticSeverity.Warning, "jakarta-jax_rs", "AmbiguousConstructors");
 
         Diagnostic d2 = JakartaForJavaAssert.d(11, 8, 45,
-                "Multiple constructors have the same number of parameters, it might be ambiguous which constructor is used.",
+                "Multiple constructors have the same number of parameters, it may be ambiguous which constructor is used.",
                 DiagnosticSeverity.Warning, "jakarta-jax_rs", "AmbiguousConstructors");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
@@ -63,13 +61,12 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void MultipleConstructorsWithDifferentLength() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/RootResourceClassConstructorsDiffLen.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/RootResourceClassConstructorsDiffLen.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
@@ -84,13 +81,12 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void NoPublicConstructor() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/NoPublicConstructorClass.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/NoPublicConstructorClass.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
@@ -110,13 +106,12 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     
     @Test
-    @Ignore
     public void NoPublicConstructorProviderClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/NoPublicConstructorProviderClass.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/NoPublicConstructorProviderClass.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();

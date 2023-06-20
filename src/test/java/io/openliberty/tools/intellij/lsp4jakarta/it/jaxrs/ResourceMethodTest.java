@@ -11,7 +11,7 @@
  *     IBM Corporation, Matthew Shocrylas - initial API and implementation, Bera Sogut
  *******************************************************************************/
 
-package io.openliberty.tools.intellij.lsp4jakarta.it.jax_rs;
+package io.openliberty.tools.intellij.lsp4jakarta.it.jaxrs;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -46,7 +46,7 @@ public class ResourceMethodTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/NotPublicResourceMethod.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/NotPublicResourceMethod.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
         
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
@@ -72,7 +72,7 @@ public class ResourceMethodTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/jax_rs/MultipleEntityParamsResourceMethod.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/MultipleEntityParamsResourceMethod.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();

@@ -81,7 +81,6 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void changeInvalidParamType() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -95,12 +94,12 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
 
         // OnOpen Invalid Param Types
         Diagnostic d1 = JakartaForJavaAssert.d(19, 47, 59,
-        "Invalid parameter type. When using @OnOpen, parameter must be of type: \n- jakarta.websocket.EndpointConfig\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof",
+        "Invalid parameter type. When using @jakarta.websocket.OnOpen, parameter must be of type: \n- jakarta.websocket.EndpointConfig\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof",
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnOpenChangeInvalidParam");
 
         // OnClose Invalid Param Type
         Diagnostic d2 = JakartaForJavaAssert.d(24, 73, 85,
-                "Invalid parameter type. When using @OnClose, parameter must be of type: \n- jakarta.websocket.CloseReason\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof",
+                "Invalid parameter type. When using @jakarta.websocket.OnClose, parameter must be of type: \n- jakarta.websocket.CloseReason\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof",
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnCloseChangeInvalidParam");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
@@ -196,7 +195,6 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void testDuplicateOnMessage() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -207,10 +205,10 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-        Diagnostic d1 = JakartaForJavaAssert.d(11, 4, 14,
+        Diagnostic d1 = JakartaForJavaAssert.d(12, 4, 14,
                 "Classes annotated with @ServerEndpoint or @ClientEndpoint may only have one @OnMessage annotated method for each of the native WebSocket message formats: text, binary and pong.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnMessageDuplicateMethod");
-        Diagnostic d2 = JakartaForJavaAssert.d(16, 4, 14,
+        Diagnostic d2 = JakartaForJavaAssert.d(17, 4, 14,
                 "Classes annotated with @ServerEndpoint or @ClientEndpoint may only have one @OnMessage annotated method for each of the native WebSocket message formats: text, binary and pong.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnMessageDuplicateMethod");
 

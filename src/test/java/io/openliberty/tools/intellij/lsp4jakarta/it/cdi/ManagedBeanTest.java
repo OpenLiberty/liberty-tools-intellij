@@ -442,7 +442,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
     
     @Test
-    @Ignore
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -455,7 +454,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         Diagnostic d = d(9, 18, 23,
-                "The @Disposes annotation must not be defined on more than one parameter of a method.",
+                "The annotation @Disposes must not be defined on more than one parameter of a method.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveExtraDisposes");
         
         assertJavaDiagnostics(diagnosticsParams, utils, d);
