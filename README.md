@@ -44,7 +44,7 @@ Feature completion in `server.xml` files helps you quickly edit your Liberty run
 
 ![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
 
-Hover in `bootstrap.properties` files provides more detailed descriptions
+Hover in `bootstrap.properties` files provides more detailed descriptions.
 
 ![Liberty Config Language Server hover](docs/images/LCLS-bootstrap-hover.png)
 
