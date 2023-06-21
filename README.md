@@ -44,6 +44,14 @@ Feature completion in `server.xml` files helps you quickly edit your Liberty run
 
 ![Liberty Config Language Server completion](docs/images/LCLS-server-xml-completion.png)
 
+Hover in `bootstrap.properties` files provides more detailed descriptions.
+
+![Liberty Config Language Server hover](docs/images/LCLS-bootstrap-hover.png)
+
+Diagnostics in `server.env` files helps you quickly spot errors in your Liberty runtime configuration.
+
+![Liberty Config Language Server diagnostic](docs/images/LCLS-server-env-diagnostic.png)
+
 Helpful code snippets are provided in Java files for Jakarta EE APIs such as Jakarta RESTful Web Services.
 
 ![Eclipse LSP4Jakarta completion](docs/images/LSP4Jakarta-rest-completion.png)
