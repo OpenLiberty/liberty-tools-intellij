@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,6 +10,7 @@
 * Contributors:
 *     IBM Corporation - initial API and implementation
 *******************************************************************************/
+
 package io.openliberty.tools.intellij.lsp4jakarta.it.websocket;
 
 import com.intellij.openapi.module.Module;
