@@ -66,7 +66,7 @@ public final class Constants {
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
     public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
 
-    // action triggered from shift-shift "Search Everywhere" IntelliJ menu or "cmd/ctl + shift + A" Actions menu
+    // action triggered from shift-shift "Search Everywhere" IntelliJ window or "cmd/ctl + shift + A" Actions menu
     public static final String GO_TO_ACTION_TRIGGERED = "GoToAction";
 
     public static final Map<String, String> FULL_ACTIONS_MAP = Collections.unmodifiableMap(new LinkedHashMap<String, String>() {
