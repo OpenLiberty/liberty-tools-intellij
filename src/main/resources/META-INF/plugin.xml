@@ -9,8 +9,6 @@
     <description><![CDATA[
     Liberty Tools for IntelliJ IDEA offers features for developing cloud-native Java applications with <a href="https://openliberty.io/">Open Liberty</a> and <a href="https://www.ibm.com/products/websphere-liberty">WebSphere Liberty</a>. Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
     For more information, see the <a href="https://github.com/OpenLiberty/liberty-tools-intellij#liberty-tools-for-intellij-idea">project documentation in GitHub</a>.
-    <b>Note: This is an early release.</b>
-    Starting with the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8">0.0.8 early release</a>, Java 17 (bundled with IntelliJ IDEA version 2022.2+) and a minimum version of IntelliJ IDEA version 2022.2 are required to run Liberty Tools for IntelliJ IDEA.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
