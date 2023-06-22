@@ -34,7 +34,7 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
 
     public LibertyConfigLanguageServer() {
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-SNAPSHOT-jar-with-dependencies.jar");
+        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             LOGGER.error("Unable to launch the Liberty language server. Could not resolve the java home system property");

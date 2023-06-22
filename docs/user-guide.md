@@ -9,7 +9,7 @@ This guide provides detailed instructions on how to import and configure your Li
 - [Open the Liberty tool window](#open-the-liberty-tool-window)
 - [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
     - [Use the Liberty tool window](#use-the-liberty-tool-window)
-    - [Use the "Go to Action" IntelliJ IDEA menu](#use-the-go-to-action-intellij-idea-menu)
+    - [Use the "Search Everywhere" IntelliJ IDEA window](#use-the-search-everywhere-intellij-idea-window)
     - [Start your application in dev mode](#start-your-application-in-dev-mode)
     - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
     - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
@@ -19,31 +19,35 @@ This guide provides detailed instructions on how to import and configure your Li
    - [Gradle-built applications](#gradle-built-applications)
 - [Stop your application](#stop-your-application)
 - [Debug your application](#debug-your-application)
+- [Create a Liberty Run/Debug Configuration](#create-a-liberty-rundebug-configuration)
 - [Manually add your Liberty project to the tool window](#manually-add-your-liberty-project-to-the-tool-window)
 - [Configure a Liberty server](#configure-a-liberty-server)
 - [Develop with Jakarta EE and MicroProfile APIs](#develop-with-jakarta-ee-and-microprofile-apis)
 
 ## Before you begin
 ### Software requirements
-- **IntelliJ IDEA**: Starting with the Liberty Tools for IntelliJ IDEA 0.0.8 release, IntelliJ IDEA version 2022.2 is required. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
-- Java 17 is required by Liberty Tools for IntelliJ IDEA and bundled with IntelliJ IDEA version 2022.2+. If you have changed the IntelliJ IDEA Boot Java Runtime through the "Change Boot Java Runtime for the IDE" preference, ensure that you are using Java 17.
+<!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
+- **IntelliJ IDEA 2023.1** or later. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
 ### Application requirements
 - Define a Liberty `server.xml` configuration file in the `src/main/liberty/config` location.
-- Configure the [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven#configuration) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script). We recommend using recent versions of the plugins as they include several important bug fixes.
+- [Configure the Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven#configuration) or [configure the Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script). We recommend using the most recent versions of the plugins as they include several important bug fixes.
 
-  The following versions are recommended at minimum:
+    - [Liberty Maven Plugin latest release](https://github.com/OpenLiberty/ci.maven/releases/latest)
 
-    - Liberty Maven Plugin -> 3.7.1
-
-    - Liberty Gradle Plugin -> 3.5.1
+    - [Liberty Gradle Plugin latest release](https://github.com/OpenLiberty/ci.gradle/releases/latest)
 
 ### Settings
+Liberty Tools for IntelliJ IDEA honors the following settings:
 
-Liberty Tools for IntelliJ IDEA honours  the following external settings:
-- Maven home path set in the **Preferences > Build, Execution, Deployment > Build Tools > Maven** window when running Liberty dev mode on Maven projects.
-- Gradle JVM set in the **Preferences > Build, Execution, Deployment > Build Tools > Gradle** window when running Liberty dev mode on Gradle projects.
+#### IntelliJ settings:
+- The Maven home path that is set in the **Settings > Build, Execution, Deployment > Build Tools > Maven** window when you run Liberty dev mode on Maven projects.
+- The Gradle Distribution that is set in the **Settings > Build, Execution, Deployment > Build Tools > Gradle** window when you run Liberty dev mode on Gradle projects.
+
+#### Environment Variables:
+- The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.
@@ -56,7 +60,7 @@ If you add new projects or make changes, use the refresh icon in the Liberty too
 
 ## Run your application on Liberty using dev mode
 
-Three menu actions are available to start your Liberty application in dev mode through the Liberty tool window view or the "Go to Action" IntelliJ IDEA menu: [Start](#start), [Start...](#start-with-configuration), or [Start in container](#start-in-container).
+Three menu actions are available to start your Liberty application in dev mode through the Liberty tool window view or the "Search Everywhere" IntelliJ IDEA window: [Start](#start), [Start...](#start-with-configuration), or [Start in container](#start-in-container).
 
 ### Use the Liberty tool window
 
@@ -64,11 +68,11 @@ The Liberty tool window provides a context menu for Liberty projects. You can ch
 
 ![Liberty tool window](images/liberty-tool-window-view.png)
 
-### Use the Go to Action IntelliJ IDEA menu
+### Use the Search Everywhere IntelliJ IDEA window
 
-The Liberty Tools plugin provides a set of actions for the **Go to Action** IntelliJ IDEA menu. You can access the **Go to Action** IntelliJ IDEA menu either by pressing <kbd>Shift</kbd> twice, then selecting the **Actions** tab, or  by pressing <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> / <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>. All Liberty Tools actions that are described in the following sections are also available from the **Go to Action** IntelliJ IDEA menu.
+The Liberty Tools plugin provides a set of actions for the **Search Everywhere** IntelliJ IDEA window. You can access the **Search Everywhere** window either by pressing <kbd>Shift</kbd> twice, then selecting the **Actions** tab, or  by pressing <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> / <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>. All Liberty Tools actions that are described in the following sections are also available from the **Search Everywhere** window.
 
-![Liberty actions in "Go to Action" menu](images/liberty-go-to-action-view.png)
+![Liberty actions in "Search Everywhere" window](images/liberty-search-everywhere-view.png)
 
 ### Start your application in dev mode
 
@@ -154,10 +158,17 @@ After the server starts, the IntelliJ IDEA debugger attaches and switches to the
 
 ![Liberty debugger attached](images/liberty-debugger-attached.png)
 
+## Create a Liberty Run/Debug Configuration
+
+The Liberty Tools plugin contributes its own Run/Debug configuration. You can maintain several configurations to run Liberty with different parameters. Select the **Run -> Edit Configurations** menu to open the **Edit Run/Debug configurations** dialog. Click **+** and select Liberty from the menu. 
+
+![Liberty new configuration](images/liberty-new-config.png)
+
+For more information, see [Run/debug configurations](https://www.jetbrains.com/help/idea/run-debug-configuration.html) in the Intellij IDEA documentation.
 
 ## Manually add your Liberty project to the tool window
 
-In the event that your Liberty project is not automatically detected by the Liberty tool window, you can manually add your Liberty project to the Liberty tool window. To manually add your Liberty project to the Liberty tool window, select the **Liberty: Add project to the tool window** action in the **Go to Action** IntelliJ IDEA menu.
+In the event that your Liberty project is not automatically detected by the Liberty tool window, you can manually add your Liberty project to the Liberty tool window. To manually add your Liberty project to the Liberty tool window, select the **Liberty: Add project to the tool window** action in the **Search Everywhere** IntelliJ IDEA window.
 
 ![Liberty add project to tool window](images/liberty-add-project-to-tool-window.png)
 
@@ -165,7 +176,7 @@ You are prompted with a list of projects that are not already displayed in the L
 
 ![Liberty add project to tool window selection](images/liberty-add-project-to-tool-window-selection.png)
 
-You can remove manually added Liberty projects from the Liberty tool window by selecting the **Liberty: Remove project from the tool window** action in the **Go to Action** IntelliJ IDEA menu.
+You can remove manually added Liberty projects from the Liberty tool window by selecting the **Liberty: Remove project from the tool window** action in the **Search Everywhere** IntelliJ IDEA window.
 
 ## Configure a Liberty server
 

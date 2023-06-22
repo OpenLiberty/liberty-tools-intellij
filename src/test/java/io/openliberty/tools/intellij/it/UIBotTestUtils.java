@@ -569,6 +569,54 @@ public class UIBotTestUtils {
         }
     }
 
+    /**
+     * Opens the specified file located in directory <project>/src/main/liberty/config.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param projectName The name of the project that contains the file to open.
+     * @param fileName    The name of the file to open.
+     */
+    public static void openFile(RemoteRobot remoteRobot, String projectName, String fileName, String... filePath) {
+        int maxRetries = 15;
+        Exception error = null;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                error = null;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openFile: iteration = " + i);
+
+                // find the Project Frame
+                ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+
+                // hide the terminal window for now
+                hideTerminalWindow(remoteRobot);
+
+                // get a JTreeFixture reference to the file project viewer entry
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+
+                // expand project directories that are specific to this test app being used by these testcases
+                // must be expanded here before trying to open specific
+
+                projTree.expand(filePath);
+
+                projTree.findText(fileName).doubleClick();
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,"openFile: double clicked on file name");
+                break;
+
+            } catch (Exception e) {
+                error = e;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Unable to open file " + fileName + " (" + e.getMessage() + "). Retrying...");
+                TestUtils.sleepAndIgnoreException(2);
+            }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Unable to open file " + fileName, error);
+        }
+    }
+
+
+
     public static void hideTerminalWindow(RemoteRobot remoteRobot) {
         try {
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
@@ -736,7 +784,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(2);
+                TestUtils.sleepAndIgnoreException(20);
                 // click on center of editor pane - allow hover to work on next attempt
                 editorNew.click();
             }
@@ -881,8 +929,13 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        Exception error = null;
+
         editorNew.click();
 
+        for (int i = 0; i < 10; i++) {
+            error = null;
+            try {
         Keyboard keyboard = new Keyboard(remoteRobot);
         // find the location in the file to begin the stanza insertion
         // we will put new config at the end of the config file
@@ -930,6 +983,20 @@ public class UIBotTestUtils {
             // linux + windows
             keyboard.hotKey(VK_CONTROL, VK_S);
         }
+                break;
+            } catch (WaitForConditionTimeoutException wftoe) {
+                error = wftoe;
+
+                // The server.xml content may have been corrupted in the process. Replace it before re-trying it.
+                UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+                TestUtils.sleepAndIgnoreException(2);
+            }
+        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+            throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + configNameSnippet, error);
+        }
     }
 
     /**
@@ -947,56 +1014,74 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
-        editorNew.click();
+        Exception error = null;
 
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        // find the location in the file to begin the stanza insertion
-        // we will put new config at the end of the config file
-        // (after the last line already in the file)
-        keyboard.hotKey(VK_CONTROL, VK_END);
-        keyboard.enter();
+        for (int i = 0; i < 10; i++) {
+            error = null;
+            try {
+                editorNew.click();
+                Keyboard keyboard = new Keyboard(remoteRobot);
+                // find the location in the file to begin the stanza insertion
+                // we will put new config at the end of the config file
+                // (after the last line already in the file)
+                keyboard.hotKey(VK_CONTROL, VK_END);
+                keyboard.enter();
 
-        keyboard.enterText(configNameSnippet);
+                keyboard.enterText(configNameSnippet);
 
-        // Narrow down the config name completion suggestions in the pop-up window that is automatically
-        // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
-        // and entry automatically if the completion suggestion windows has one entry only.
-        ComponentFixture namePopupWindow = projectFrame.getLookupList();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for text " + configNameSnippet + " to appear in the completion suggestion pop-up window",
-                "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
-                () -> namePopupWindow.hasText(configNameSnippet));
+                // Narrow down the config name completion suggestions in the pop-up window that is automatically
+                // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
+                // and entry automatically if the completion suggestion windows has one entry only.
+                ComponentFixture namePopupWindow = projectFrame.getLookupList();
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for text " + configNameSnippet + " to appear in the completion suggestion pop-up window",
+                        "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
+                        () -> namePopupWindow.hasText(configNameSnippet));
 
-        // now choose the specific item based on the chooser string
-        namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
+                // now choose the specific item based on the chooser string
+                namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
 
-        keyboard.hotKey(VK_END);
-        keyboard.enterText("=");
-        keyboard.hotKey(VK_END);
+                keyboard.hotKey(VK_END);
+                keyboard.enterText("=");
+                keyboard.hotKey(VK_END);
 
-        keyboard.enterText(configValueSnippet);
+                keyboard.enterText(configValueSnippet);
 
-        if (completeWithPopup) {
-            // Select the appropriate value completion suggestion in the pop-up window that is automatically
-            // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-            // and entry automatically if the completion suggestion windows has one entry only.
-            ComponentFixture valuePopupWindow = projectFrame.getLookupList();
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                    Duration.ofSeconds(1),
-                    "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
-                    "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
-                    () -> valuePopupWindow.hasText(configValueSnippet));
+                if (completeWithPopup) {
+                    // Select the appropriate value completion suggestion in the pop-up window that is automatically
+                    // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                    // and entry automatically if the completion suggestion windows has one entry only.
+                    ComponentFixture valuePopupWindow = projectFrame.getLookupList();
+                    RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                            Duration.ofSeconds(1),
+                            "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
+                            "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
+                            () -> valuePopupWindow.hasText(configValueSnippet));
 
-            valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
+                    valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
+                }
+                // let the auto-save function of intellij save the file before testing it
+                if (remoteRobot.isMac()) {
+                    keyboard.hotKey(VK_META, VK_S);
+                } else {
+                    // linux + windows
+                    keyboard.hotKey(VK_CONTROL, VK_S);
+                }
+                break;
+            } catch (WaitForConditionTimeoutException wftoe) {
+                error = wftoe;
+
+                // The server.xml content may have been corrupted in the process. Replace it before re-trying it.
+                UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+                TestUtils.sleepAndIgnoreException(2);
+            }
         }
-        // let the auto-save function of intellij save the file before testing it
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_S);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_S);
-        }
+
+        // Report the last error if there is one.
+        if (error != null) {
+                throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + configNameSnippet, error);
+                }
     }
 
     /**

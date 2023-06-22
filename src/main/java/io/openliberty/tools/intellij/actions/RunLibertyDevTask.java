@@ -40,7 +40,7 @@ public class RunLibertyDevTask extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         if (e.getPlace().equalsIgnoreCase(Constants.GO_TO_ACTION_TRIGGERED)) {
-            // always enable through shift+shift/go to action menu
+            // always enable through shift+shift/Search Everywhere window
             e.getPresentation().setEnabled(true);
             return;
         } else {
@@ -81,7 +81,7 @@ public class RunLibertyDevTask extends AnAction {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
         if (project == null) return;
 
-        // triggered through shift+shift/go to action menu
+        // triggered through shift+shift/Search Everywhere window
         if (Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace())) {
             // prompt user to select action to run
             final String[] libertyActions = Constants.FULL_ACTIONS_MAP.keySet().toArray(new String[0]);
