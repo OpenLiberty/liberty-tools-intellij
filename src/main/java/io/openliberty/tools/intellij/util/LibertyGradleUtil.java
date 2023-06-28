@@ -97,7 +97,7 @@ public class LibertyGradleUtil {
 
             // instead of iterating over capture groups in a plugin{}, search directly
             // look for our plugin not defined in a line comment. if defined, grab version # from Group 2
-            String negativeLineCommentLookBehind = "(?<!//)\\s*";
+            String negativeLineCommentLookBehind = "(?<!//\\s*)";
             String gradleLibertyPluginId = "id\\s*[\'\"]io\\.openliberty\\.tools\\.gradle\\.Liberty[\'\"]";
             String optionalVersion = "(\\s+version\\s+[\'\"](.*)[\'\"])?";
             Pattern gradleLibertyPluginIdPattern = Pattern.compile(negativeLineCommentLookBehind + gradleLibertyPluginId + optionalVersion);
