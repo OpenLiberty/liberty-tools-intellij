@@ -81,7 +81,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Add the project to the Liberty tool window.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window");
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window", 3);
 
         // Select project from the 'Add Liberty project' dialog.
         UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
@@ -91,7 +91,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "10");
         } finally {
             // Remove the project from the Liberty tool window.
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window");
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window", 3);
 
             // Select project from the 'Remote Liberty project' dialog.
             UIBotTestUtils.selectProjectFromRemoveLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
@@ -136,7 +136,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "10");
         } finally {
             // Remove the previously added server.xml file.
-            if (!TestUtils.deleteFile(Paths.get(destination.toString()))) {
+            if (!TestUtils.deleteFile(destination)) {
                 fail("Unable to delete " + destination);
             }
 

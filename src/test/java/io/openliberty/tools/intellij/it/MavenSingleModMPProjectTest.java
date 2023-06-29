@@ -221,14 +221,14 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
 
         // Start dev mode in a container.
-        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", false);
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", false, 3);
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false);
+                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false, 3);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -255,14 +255,14 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
 
         // Start dev mode in a container.
-        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true);
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true, 3);
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true);
+                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -288,7 +288,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
 
         // Start dev mode in a container.
-        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Start in container");
+        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Start in container", 3);
 
         try {
             // Validate that the project started.
@@ -296,7 +296,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Stop");
+                UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Stop", 3);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
@@ -322,7 +322,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
 
         // Start dev mode in a container.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container");
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3);
 
         try {
             // Validate that the project started.
@@ -330,7 +330,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop");
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3);
 
                 // Validate that the server stopped.
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
