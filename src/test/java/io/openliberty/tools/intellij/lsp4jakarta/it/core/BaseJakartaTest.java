@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * With certain methods modified or deleted to fit the purposes of LSP4Jakarta
  *
  */
-public class BaseJakartaTest extends MavenImportingTestCase {
+public abstract class BaseJakartaTest extends MavenImportingTestCase {
 
     protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
 
