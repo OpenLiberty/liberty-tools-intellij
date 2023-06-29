@@ -154,7 +154,6 @@ runIdeForUiTests {
 
 test {
     useJUnitPlatform()
-    systemProperty 'idea.log.leaked.projects.in.tests', 'false'
 
     testLogging {
         showStandardStreams = true
