@@ -62,7 +62,7 @@ public abstract class SingleModJakartaLSTestCommon {
     }
 
     /**
-     * Tests MicroProfile Language Server code snippet support in a Java source file
+     * Tests Jakarta Language Server code snippet support in a Java source file
      */
     @Test
     @Video

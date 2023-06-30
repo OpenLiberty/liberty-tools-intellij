@@ -1278,7 +1278,7 @@ public class UIBotTestUtils {
      * @param modificationText The string to use for modification
      */
     public static void selectAndModifyTextInJavaPart(RemoteRobot remoteRobot, String fileName, String textToModify, String modificationText){
-        clickOnFileTab(remoteRobot, "server.xml");
+        clickOnFileTab(remoteRobot, fileName);
         Locator locator = byXpath("//div[@class='EditorWindowTopComponent']//div[@class='EditorComponentImpl']");
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         editorNew.click();
