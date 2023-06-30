@@ -1,6 +1,7 @@
 # Liberty Tools for IntelliJ IDEA User Guide
 
 This guide provides detailed instructions on how to import and configure your Liberty project to use the Liberty Tools for IntelliJ IDEA plugin.
+For information regarding known issues and limitations, refer to our [Common Issues](https://github.com/OpenLiberty/liberty-tools-intellij/wiki/Common-Issues) wiki page or our [Known Problems and Limitations](https://github.com/OpenLiberty/liberty-tools-intellij/wiki/Known-Problems-and-Limitations) wiki page.
 
 - [Before you begin](#before-you-begin)
     - [Software requirements](#software-requirements)
