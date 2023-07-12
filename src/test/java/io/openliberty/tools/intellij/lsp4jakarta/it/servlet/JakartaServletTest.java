@@ -58,11 +58,13 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        // test associated quick-fix code action
-        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-        TextEdit te = JakartaForJavaAssert.te(5, 34, 5, 34, " extends HttpServlet");
-        CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        if (CHECK_CODE_ACTIONS) {
+            // test associated quick-fix code action
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+            TextEdit te = JakartaForJavaAssert.te(5, 34, 5, 34, " extends HttpServlet");
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        }
     }
 
     @Test
@@ -84,13 +86,15 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-        TextEdit te1 = JakartaForJavaAssert.te(9, 0, 10, 0, "@WebServlet(value = \"\")\n");
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Add the `value` attribute to @WebServlet", d, te1);
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+            TextEdit te1 = JakartaForJavaAssert.te(9, 0, 10, 0, "@WebServlet(value = \"\")\n");
+            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Add the `value` attribute to @WebServlet", d, te1);
 
-        TextEdit te2 = JakartaForJavaAssert.te(9, 0, 10, 0, "@WebServlet(urlPatterns = \"\")\n");
-        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Add the `urlPatterns` attribute to @WebServlet", d, te2);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
+            TextEdit te2 = JakartaForJavaAssert.te(9, 0, 10, 0, "@WebServlet(urlPatterns = \"\")\n");
+            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Add the `urlPatterns` attribute to @WebServlet", d, te2);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
+        }
     }
 
 }

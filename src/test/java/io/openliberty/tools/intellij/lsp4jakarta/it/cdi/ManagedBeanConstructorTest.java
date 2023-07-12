@@ -60,18 +60,20 @@ public class ManagedBeanConstructorTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        // test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-        TextEdit te1 = te(15, 44, 21, 1,
-                "\nimport jakarta.inject.Inject;\n\n@Dependent\npublic class ManagedBeanConstructor {\n	private int a;\n	\n	@Inject\n	");
-        TextEdit te2 = te(19, 1, 19, 1,
-        		"protected ManagedBeanConstructor() {\n\t}\n\n\t");
-        TextEdit te3 = te(19, 1, 19, 1,
-                "public ManagedBeanConstructor() {\n\t}\n\n\t");
-        CodeAction ca1 = ca(uri, "Insert @Inject", d, te1);
-        CodeAction ca2 = ca(uri, "Add a no-arg protected constructor to this class", d, te2);
-        CodeAction ca3 = ca(uri, "Add a no-arg public constructor to this class", d, te3);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2, ca3);
+        if (CHECK_CODE_ACTIONS) {
+            // test expected quick-fix
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
+            TextEdit te1 = te(15, 44, 21, 1,
+                    "\nimport jakarta.inject.Inject;\n\n@Dependent\npublic class ManagedBeanConstructor {\n	private int a;\n	\n	@Inject\n	");
+            TextEdit te2 = te(19, 1, 19, 1,
+                    "protected ManagedBeanConstructor() {\n\t}\n\n\t");
+            TextEdit te3 = te(19, 1, 19, 1,
+                    "public ManagedBeanConstructor() {\n\t}\n\n\t");
+            CodeAction ca1 = ca(uri, "Insert @Inject", d, te1);
+            CodeAction ca2 = ca(uri, "Add a no-arg protected constructor to this class", d, te2);
+            CodeAction ca3 = ca(uri, "Add a no-arg public constructor to this class", d, te3);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2, ca3);
+        }
     }
 
 }

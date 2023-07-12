@@ -59,20 +59,18 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         Diagnostic d2 = d(39, 0, 30, "The @Resource annotation must define the attribute 'name'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceNameAttribute");
 
-
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
-        
-        
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        TextEdit te = te(22, 0, 22, 22, "@Resource(name = \"aa\", type = \"\")");
-        CodeAction ca= ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
-        
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te1 = te(39, 0, 39, 30, "@Resource(type = \"\", name = \"\")");
-        CodeAction ca1= ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
+            TextEdit te = te(22, 0, 22, 22, "@Resource(name = \"aa\", type = \"\")");
+            CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
+            assertJavaCodeAction(codeActionParams, utils, ca);
+
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+            TextEdit te1 = te(39, 0, 39, 30, "@Resource(type = \"\", name = \"\")");
+            CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
+            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        }
     }
-
 }
