@@ -48,11 +48,11 @@ public class GeneratedAnnotationTest extends BaseJakartaTest {
 
         // expected annotations
         Diagnostic d1 = JakartaForJavaAssert.d(7, 4, 63,
-                "The annotation @Generated must define the attribute 'date' following the ISO 8601 standard.",
+                "The @Generated annotation must define the attribute 'date' following the ISO 8601 standard.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "InvalidDateFormat");
         
         Diagnostic d2 = JakartaForJavaAssert.d(13, 4, 70,
-                "The annotation @Generated must define the attribute 'date' following the ISO 8601 standard.",
+                "The @Generated annotation must define the attribute 'date' following the ISO 8601 standard.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "InvalidDateFormat");
         
 

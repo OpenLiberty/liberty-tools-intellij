@@ -467,7 +467,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         Diagnostic d = d(9, 18, 23,
-                "The annotation @Disposes must not be defined on more than one parameter of a method.",
+                "The @Disposes annotation must not be defined on more than one parameter of a method.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveExtraDisposes");
         
         assertJavaDiagnostics(diagnosticsParams, utils, d);

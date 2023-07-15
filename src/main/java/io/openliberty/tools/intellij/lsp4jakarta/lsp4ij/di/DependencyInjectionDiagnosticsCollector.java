@@ -120,7 +120,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
     }
 
     private String createAnnotationDiagnostic(String annotation, String attributeType) {
-        return "The annotation @" + annotation + " must not define " + attributeType;
+        return "The @" + annotation + " annotation must not define " + attributeType;
     }
 
     private boolean containsAnnotation(PsiClass type, PsiAnnotation[] annotations, String annotationFQName) {
