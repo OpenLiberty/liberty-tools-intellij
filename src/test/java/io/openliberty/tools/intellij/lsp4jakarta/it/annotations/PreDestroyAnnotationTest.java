@@ -40,7 +40,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class PreDestroyAnnotationTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void GeneratedAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -59,7 +58,7 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
         
         Diagnostic d2 = d(26, 20, 31, "A method with the @PreDestroy annotation must not be static.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyStatic");
-        d2.setData(9);
+        d2.setData("makeUnhappy");
         
         Diagnostic d3 = d(31, 13, 25, "A method with the @PreDestroy annotation must not throw checked exceptions.",
                 DiagnosticSeverity.Warning, "jakarta-annotations", "PreDestroyException");

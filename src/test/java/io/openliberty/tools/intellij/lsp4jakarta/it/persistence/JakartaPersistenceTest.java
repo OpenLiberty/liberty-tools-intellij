@@ -40,7 +40,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class JakartaPersistenceTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void deleteMapKeyOrMapKeyClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -83,9 +82,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         }
     }
 
-    
     @Test
-    @Ignore
     public void completeMapKeyJoinColumnAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -116,30 +113,31 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "A field with multiple @MapKeyJoinColumn annotations must specify both the name and referencedColumnName attributes in the corresponding @MapKeyJoinColumn annotations.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "SupplyAttributesToAnnotations");
         
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5); 
-        
-        // test quick fixes
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        TextEdit te1 = te(10, 4, 11, 23,  "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")");
-        CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
-        
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
-        TextEdit te2 = te(14, 4, 15, 52,  "@MapKeyJoinColumn(referencedColumnName = \"rcn2\", name = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"\")");
-        CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
+        if (CHECK_CODE_ACTIONS) {
+            // test quick fixes
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+            TextEdit te1 = te(10, 4, 11, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")");
+            CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
-        
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
-        TextEdit te3 = te(18, 4, 19, 23,  "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")");
-        CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
+            assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-        assertJavaCodeAction(codeActionParams3, utils, ca3);
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
+            TextEdit te2 = te(14, 4, 15, 52, "@MapKeyJoinColumn(referencedColumnName = \"rcn2\", name = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"\")");
+            CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
+
+            assertJavaCodeAction(codeActionParams2, utils, ca2);
+
+            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
+            TextEdit te3 = te(18, 4, 19, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")");
+            CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
+
+            assertJavaCodeAction(codeActionParams3, utils, ca3);
+        }
     }
 
     @Test
-    @Ignore
     public void addEmptyConstructor() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -158,18 +156,19 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        // test quick fixes
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-        TextEdit te1 = te(7, 4, 7, 4,  "protected EntityMissingConstructor() {\n\t}\n\n\t");
-        CodeAction ca1 = ca(uri, "Add a no-arg protected constructor to this class", d, te1);
-        TextEdit te2 = te(7, 4, 7, 4,  "public EntityMissingConstructor() {\n\t}\n\n\t");
-        CodeAction ca2 = ca(uri, "Add a no-arg public constructor to this class", d, te2);
+        if (CHECK_CODE_ACTIONS) {
+            // test quick fixes
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
+            TextEdit te1 = te(7, 4, 7, 4, "protected EntityMissingConstructor() {\n\t}\n\n\t");
+            CodeAction ca1 = ca(uri, "Add a no-arg protected constructor to this class", d, te1);
+            TextEdit te2 = te(7, 4, 7, 4, "public EntityMissingConstructor() {\n\t}\n\n\t");
+            CodeAction ca2 = ca(uri, "Add a no-arg public constructor to this class", d, te2);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        }
     }
 
     @Test
-    @Ignore
     public void removeFinalModifiers() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -185,59 +184,61 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         Diagnostic d1 = d(10, 21, 28,
                 "A class using the @Entity annotation cannot contain any methods that are declared final",
                 DiagnosticSeverity.Error, "jakarta-persistence", "RemoveFinalMethods");
-        d1.setData("method");
+        d1.setData("int");
 
         Diagnostic d2 = d(7, 14, 15,
                 "A class using the @Entity annotation cannot contain any persistent instance variables that are declared final",
                 DiagnosticSeverity.Error, "jakarta-persistence", "RemoveFinalVariables");
-        d2.setData("field");
+        d2.setData("int");
 
         Diagnostic d3 = d(8, 17, 18,
                 "A class using the @Entity annotation cannot contain any persistent instance variables that are declared final",
                 DiagnosticSeverity.Error, "jakarta-persistence", "RemoveFinalVariables");
-        d3.setData("field");
+        d3.setData("java.lang.String");
 
         Diagnostic d4 = d(8, 30, 31,
                 "A class using the @Entity annotation cannot contain any persistent instance variables that are declared final",
                 DiagnosticSeverity.Error, "jakarta-persistence", "RemoveFinalVariables");
-        d4.setData("field");
+        d4.setData("java.lang.String");
 
         Diagnostic d5 = d(5, 19, 33,
                 "A class using the @Entity annotation must not be final.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidClass");
-        d5.setData("type");
+        d5.setData("io.openliberty.sample.jakarta.persistence.FinalModifiers");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
-        // test quick fixes
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        TextEdit te1 = te(10, 10, 10, 16, "");
-        CodeAction ca1 = ca(uri,  "Remove the 'final' modifier from this method", d1, te1);
+        if (CHECK_CODE_ACTIONS) {
+            // test quick fixes
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+            TextEdit te1 = te(10, 10, 10, 16, "");
+            CodeAction ca1 = ca(uri, "Remove the 'final' modifier from this method", d1, te1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+            assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-        TextEdit te2 = te(7, 4, 7, 10, "");
-        CodeAction ca2 = ca(uri,  "Remove the 'final' modifier from this field", d2, te2);
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            TextEdit te2 = te(7, 4, 7, 10, "");
+            CodeAction ca2 = ca(uri, "Remove the 'final' modifier from this field", d2, te2);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
+            assertJavaCodeAction(codeActionParams2, utils, ca2);
 
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
-        TextEdit te3 = te(8, 4, 8, 10, "");
-        CodeAction ca3 = ca(uri,  "Remove the 'final' modifier from this field", d3, te3);
+            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+            TextEdit te3 = te(8, 4, 8, 10, "");
+            CodeAction ca3 = ca(uri, "Remove the 'final' modifier from this field", d3, te3);
 
-        assertJavaCodeAction(codeActionParams3, utils, ca3);
+            assertJavaCodeAction(codeActionParams3, utils, ca3);
 
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
-        TextEdit te4 = te(8, 4, 8, 10, "");
-        CodeAction ca4 = ca(uri,  "Remove the 'final' modifier from this field", d4, te4);
+            JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+            TextEdit te4 = te(8, 4, 8, 10, "");
+            CodeAction ca4 = ca(uri, "Remove the 'final' modifier from this field", d4, te4);
 
-        assertJavaCodeAction(codeActionParams4, utils, ca4);
+            assertJavaCodeAction(codeActionParams4, utils, ca4);
 
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
-        TextEdit te5 = te(5, 6, 5, 12, "");
-        CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
+            JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+            TextEdit te5 = te(5, 6, 5, 12, "");
+            CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
 
-        assertJavaCodeAction(codeActionParams5, utils, ca5);
+            assertJavaCodeAction(codeActionParams5, utils, ca5);
+        }
     }
 }

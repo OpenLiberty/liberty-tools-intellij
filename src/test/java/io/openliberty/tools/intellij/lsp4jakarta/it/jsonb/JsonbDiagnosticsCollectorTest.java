@@ -41,7 +41,6 @@ import java.util.Arrays;
 public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void deleteExtraJsonbCreatorAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -80,13 +79,12 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
     }
     
     @Test
-    @Ignore
     public void JsonbTransientNotMutuallyExclusive() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbTransientDiagnostic.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbTransientDiagnostic.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();

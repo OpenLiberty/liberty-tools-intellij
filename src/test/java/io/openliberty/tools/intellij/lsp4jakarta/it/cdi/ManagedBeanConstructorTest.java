@@ -41,7 +41,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class ManagedBeanConstructorTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void managedBeanAnnotations() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);

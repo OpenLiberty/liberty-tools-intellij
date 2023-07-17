@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class JakartaWebSocketTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void addPathParamsAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);

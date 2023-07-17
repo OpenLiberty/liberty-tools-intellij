@@ -42,7 +42,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class ManagedBeanTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void managedBeanAnnotations() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -81,7 +80,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
     
     @Test
-    @Ignore
     public void scopeDeclaration() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -140,7 +138,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void producesAndInject() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -182,7 +179,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void injectAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -314,7 +310,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void producesAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -359,19 +354,19 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
         
         Diagnostic d9 = d(30, 18, 39,
-                "A disposer method cannot have parameter(s) annotated with @Observes",
+                "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         
         Diagnostic d10 = d(42, 18, 44,
-                "A disposer method cannot have parameter(s) annotated with @ObservesAsync",
+                "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.ObservesAsync",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         
         Diagnostic d11 = d(48, 18, 52,
-                "A disposer method cannot have parameter(s) annotated with @Observes, @ObservesAsync",
+                "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         
         Diagnostic d12 = d(54, 18, 53,
-                "A disposer method cannot have parameter(s) annotated with @Observes, @ObservesAsync",
+                "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12);

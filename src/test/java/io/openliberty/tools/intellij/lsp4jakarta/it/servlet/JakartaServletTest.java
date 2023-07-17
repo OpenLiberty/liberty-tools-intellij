@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class JakartaServletTest extends BaseJakartaTest {
 
     @Test
-    @Ignore // getAllSuperTypes() returns nothing for tests. See #232
     public void ExtendWebServlet() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -54,7 +53,7 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         // expected
         Diagnostic d = JakartaForJavaAssert.d(5, 13, 34, "Annotated classes with @WebServlet must extend the HttpServlet class.",
-                DiagnosticSeverity.Warning, "jakarta-servlet", "ExtendHttpServlet");
+                DiagnosticSeverity.Error, "jakarta-servlet", "ExtendHttpServlet");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
@@ -68,7 +67,6 @@ public class JakartaServletTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore // getAllSuperTypes() returns nothing for tests. See #232
     public void CompleteWebServletAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -81,7 +79,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d = JakartaForJavaAssert.d(9, 0, 13,
-                "The annotation @WebServlet must define the attribute urlPatterns or the attribute value.",
+                "The @WebServlet annotation must define the attribute 'urlPatterns' or 'value'.",
                 DiagnosticSeverity.Error, "jakarta-servlet", "CompleteHttpServletAttributes");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);

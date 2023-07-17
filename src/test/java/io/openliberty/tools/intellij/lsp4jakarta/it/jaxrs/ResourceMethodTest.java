@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class ResourceMethodTest extends BaseJakartaTest {
     
     @Test
-    @Ignore
     public void NonPublicMethod() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -68,7 +67,6 @@ public class ResourceMethodTest extends BaseJakartaTest {
     }
 
     @Test
-    @Ignore
     public void multipleEntityParamsMethod() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);

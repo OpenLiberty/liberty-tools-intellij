@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class DependencyInjectionTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void DependencyInjectionDiagnostics() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -57,23 +56,23 @@ public class DependencyInjectionTest extends BaseJakartaTest {
          */
         Diagnostic d1 = JakartaForJavaAssert.d(17, 27, 35, "The @Inject annotation must not define a final field.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrFinal");
-        d1.setData("field");
+        d1.setData("io.openliberty.sample.jakarta.di.Greeting");
 
         Diagnostic d2 = JakartaForJavaAssert.d(33, 25, 39, "The @Inject annotation must not define an abstract method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrAbstract");
-        d2.setData("method");
+        d2.setData("void");
         
         Diagnostic d3 = JakartaForJavaAssert.d(26, 22, 33, "The @Inject annotation must not define a final method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrFinal");
-        d3.setData("method");
+        d3.setData("void");
  
         Diagnostic d4 = JakartaForJavaAssert.d(43, 23, 36, "The @Inject annotation must not define a generic method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectForGeneric");
-        d4.setData("method");
+        d4.setData("java.util.List<T>");
         
         Diagnostic d5 = JakartaForJavaAssert.d(37, 23, 35, "The @Inject annotation must not define a static method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrStatic");
-        d5.setData("method");
+        d5.setData("void");
         
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
