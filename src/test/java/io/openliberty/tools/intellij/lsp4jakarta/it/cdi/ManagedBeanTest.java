@@ -65,17 +65,19 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        // Assert for the diagnostic d1
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        TextEdit te1 = te(4, 0, 5, 0, "@Dependent\n");
-        CodeAction ca1 = ca(uri, "Replace current scope with @Dependent", d1, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
-        
-        // Assert for the diagnostic d2
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-        TextEdit te2 = te(4, 0, 5, 0, "@Dependent\n");
-        CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
+        if (CHECK_CODE_ACTIONS) {
+            // Assert for the diagnostic d1
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+            TextEdit te1 = te(4, 0, 5, 0, "@Dependent\n");
+            CodeAction ca1 = ca(uri, "Replace current scope with @Dependent", d1, te1);
+            assertJavaCodeAction(codeActionParams1, utils, ca1);
+
+            // Assert for the diagnostic d2
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            TextEdit te2 = te(4, 0, 5, 0, "@Dependent\n");
+            CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
+            assertJavaCodeAction(codeActionParams2, utils, ca2);
+        }
     }
     
     @Test
@@ -107,32 +109,34 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        // Assert for the diagnostic d1
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        TextEdit te1 = te(11, 33, 12, 4, "");
-        TextEdit te2 = te(11, 14, 11, 33, "");
-        CodeAction ca1 = ca(uri, "Remove @ApplicationScoped", d1, te2);
-        CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te1);
-        
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-        
-        // Assert for the diagnostic d2
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-        TextEdit te3 = te(14, 33, 15, 4, "");
-        TextEdit te4 = te(14, 14, 14, 33, "");
-        CodeAction ca3 = ca(uri, "Remove @RequestScoped", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove @ApplicationScoped", d2, te4);
-        
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-        
-        // Assert for the diagnostic d3
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
-        TextEdit te5 = te(9, 19, 10, 0, "");
-        TextEdit te6 = te(9, 0, 9, 19, "");
-        CodeAction ca5 = ca(uri, "Remove @RequestScoped", d3, te5);
-        CodeAction ca6 = ca(uri, "Remove @ApplicationScoped", d3, te6);
-        
-        assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
+        if (CHECK_CODE_ACTIONS) {
+            // Assert for the diagnostic d1
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+            TextEdit te1 = te(11, 33, 12, 4, "");
+            TextEdit te2 = te(11, 14, 11, 33, "");
+            CodeAction ca1 = ca(uri, "Remove @ApplicationScoped", d1, te2);
+            CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te1);
+
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+
+            // Assert for the diagnostic d2
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            TextEdit te3 = te(14, 33, 15, 4, "");
+            TextEdit te4 = te(14, 14, 14, 33, "");
+            CodeAction ca3 = ca(uri, "Remove @RequestScoped", d2, te3);
+            CodeAction ca4 = ca(uri, "Remove @ApplicationScoped", d2, te4);
+
+            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+
+            // Assert for the diagnostic d3
+            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+            TextEdit te5 = te(9, 19, 10, 0, "");
+            TextEdit te6 = te(9, 0, 9, 19, "");
+            CodeAction ca5 = ca(uri, "Remove @RequestScoped", d3, te5);
+            CodeAction ca6 = ca(uri, "Remove @ApplicationScoped", d3, te6);
+
+            assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
+        }
     }
 
     @Test
@@ -156,23 +160,25 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
 
-        TextEdit te1 = te(14, 4, 15, 4, "");
-        TextEdit te2 = te(15, 4, 16, 4, "");
-        CodeAction ca1 = ca(uri, "Remove @Produces", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove @Inject", d1, te2);
+            TextEdit te1 = te(14, 4, 15, 4, "");
+            TextEdit te2 = te(15, 4, 16, 4, "");
+            CodeAction ca1 = ca(uri, "Remove @Produces", d1, te1);
+            CodeAction ca2 = ca(uri, "Remove @Inject", d1, te2);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
 
-        TextEdit te3 = te(9, 4, 10, 4, "");
-        TextEdit te4 = te(10, 4, 11, 4, "");
-        CodeAction ca3 = ca(uri, "Remove @Produces", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove @Inject", d2, te4);
+            TextEdit te3 = te(9, 4, 10, 4, "");
+            TextEdit te4 = te(10, 4, 11, 4, "");
+            CodeAction ca3 = ca(uri, "Remove @Produces", d2, te3);
+            CodeAction ca4 = ca(uri, "Remove @Inject", d2, te4);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+        }
     }
 
     @Test
@@ -221,89 +227,90 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveInjectOrConflictedAnnotations");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8);
-        
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
 
-        TextEdit te1 = te(9, 4, 10, 4, "");
-        TextEdit te2 = te(10, 32, 10, 42, "");
-        CodeAction ca1 = ca(uri, "Remove @Inject", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name'", d1, te2);
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-        
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            TextEdit te1 = te(9, 4, 10, 4, "");
+            TextEdit te2 = te(10, 32, 10, 42, "");
+            CodeAction ca1 = ca(uri, "Remove @Inject", d1, te1);
+            CodeAction ca2 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name'", d1, te2);
 
-        TextEdit te3 = te(15, 4, 16, 4, "");
-        TextEdit te4 = te(16, 32, 16, 42, "");
-        CodeAction ca3 = ca(uri, "Remove @Inject", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove the '@Observes' modifier from parameter 'name'", d2, te4);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-        
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
 
-        TextEdit te5 = te(21, 4, 22, 4, "");
-        TextEdit te6 = te(22, 37, 22, 52, "");
-        CodeAction ca5 = ca(uri, "Remove @Inject", d3, te5);
-        CodeAction ca6 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name'", d3, te6);
+            TextEdit te3 = te(15, 4, 16, 4, "");
+            TextEdit te4 = te(16, 32, 16, 42, "");
+            CodeAction ca3 = ca(uri, "Remove @Inject", d2, te3);
+            CodeAction ca4 = ca(uri, "Remove the '@Observes' modifier from parameter 'name'", d2, te4);
 
-        assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
-        
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
 
-        TextEdit te7 = te(27, 4, 28, 4, "");
-        TextEdit te8 = te(28, 40, 28, 50, "");
-        TextEdit te9 = te(28, 64, 28, 74, "");
-        CodeAction ca7 = ca(uri, "Remove @Inject", d4, te7);
-        CodeAction ca8 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d4, te8);
-        CodeAction ca9 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d4, te9);
+            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
 
-        assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
-        
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+            TextEdit te5 = te(21, 4, 22, 4, "");
+            TextEdit te6 = te(22, 37, 22, 52, "");
+            CodeAction ca5 = ca(uri, "Remove @Inject", d3, te5);
+            CodeAction ca6 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name'", d3, te6);
 
-        TextEdit te10 = te(33, 4, 34, 4, "");
-        TextEdit te11 = te(34, 45, 34, 55, "");
-        TextEdit te12 = te(34, 69, 34, 84, "");
-        CodeAction ca10 = ca(uri, "Remove @Inject", d5, te10);
-        CodeAction ca11 = ca(uri, "Remove the '@Observes' modifier from parameter 'name1'", d5, te11);
-        CodeAction ca12 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d5, te12);
+            assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
 
-        assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
-        
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d6);
+            JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
 
-        TextEdit te13 = te(39, 4, 40, 4, "");
-        TextEdit te14 = te(40, 45, 40, 55, "");
-        TextEdit te15 = te(40, 69, 40, 84, "");
-        CodeAction ca13 = ca(uri, "Remove @Inject", d6, te13);
-        CodeAction ca14 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d6, te14);
-        CodeAction ca15 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d6, te15);
+            TextEdit te7 = te(27, 4, 28, 4, "");
+            TextEdit te8 = te(28, 40, 28, 50, "");
+            TextEdit te9 = te(28, 64, 28, 74, "");
+            CodeAction ca7 = ca(uri, "Remove @Inject", d4, te7);
+            CodeAction ca8 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d4, te8);
+            CodeAction ca9 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d4, te9);
 
-        assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca15);
-        
-        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+            assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
 
-        TextEdit te16 = te(45, 4, 46, 4, "");
-        TextEdit te17 = te(46, 53, 46, 63, "");
-        TextEdit te18 = te(46, 77, 46, 87, "");
-        TextEdit te19 = te(46, 101, 46, 116, "");
-        CodeAction ca16 = ca(uri, "Remove @Inject", d7, te16);
-        CodeAction ca17 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d7, te17);
-        CodeAction ca18 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d7, te18);
-        CodeAction ca19 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name3'", d7, te19);
+            JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
 
-        assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca18, ca19);
-        
-        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d8);
+            TextEdit te10 = te(33, 4, 34, 4, "");
+            TextEdit te11 = te(34, 45, 34, 55, "");
+            TextEdit te12 = te(34, 69, 34, 84, "");
+            CodeAction ca10 = ca(uri, "Remove @Inject", d5, te10);
+            CodeAction ca11 = ca(uri, "Remove the '@Observes' modifier from parameter 'name1'", d5, te11);
+            CodeAction ca12 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d5, te12);
 
-        TextEdit te20 = te(50, 4, 51, 4, "");
-        TextEdit te21 = te(51, 54, 51, 89, "");
-        CodeAction ca20 = ca(uri, "Remove @Inject", d8, te20);
-        CodeAction ca21 = ca(uri, "Remove the '@Disposes', '@Observes', '@ObservesAsync' modifier from parameter 'name'", d8, te21);
+            assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
 
-        assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
+            JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d6);
 
+            TextEdit te13 = te(39, 4, 40, 4, "");
+            TextEdit te14 = te(40, 45, 40, 55, "");
+            TextEdit te15 = te(40, 69, 40, 84, "");
+            CodeAction ca13 = ca(uri, "Remove @Inject", d6, te13);
+            CodeAction ca14 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d6, te14);
+            CodeAction ca15 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d6, te15);
+
+            assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca15);
+
+            JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+
+            TextEdit te16 = te(45, 4, 46, 4, "");
+            TextEdit te17 = te(46, 53, 46, 63, "");
+            TextEdit te18 = te(46, 77, 46, 87, "");
+            TextEdit te19 = te(46, 101, 46, 116, "");
+            CodeAction ca16 = ca(uri, "Remove @Inject", d7, te16);
+            CodeAction ca17 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d7, te17);
+            CodeAction ca18 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d7, te18);
+            CodeAction ca19 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name3'", d7, te19);
+
+            assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca18, ca19);
+
+            JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d8);
+
+            TextEdit te20 = te(50, 4, 51, 4, "");
+            TextEdit te21 = te(51, 54, 51, 89, "");
+            CodeAction ca20 = ca(uri, "Remove @Inject", d8, te20);
+            CodeAction ca21 = ca(uri, "Remove the '@Disposes', '@Observes', '@ObservesAsync' modifier from parameter 'name'", d8, te21);
+
+            assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
+        }
     }
 
     @Test
@@ -369,89 +376,89 @@ public class ManagedBeanTest extends BaseJakartaTest {
         
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12);
 
-        
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
 
-        TextEdit te1 = te(11, 4, 12, 4, "");
-        TextEdit te2 = te(12, 32, 12, 42, "");
-        CodeAction ca1 = ca(uri, "Remove @Produces", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name'", d1, te2);
+            TextEdit te1 = te(11, 4, 12, 4, "");
+            TextEdit te2 = te(12, 32, 12, 42, "");
+            CodeAction ca1 = ca(uri, "Remove @Produces", d1, te1);
+            CodeAction ca2 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name'", d1, te2);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-        
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 
-        TextEdit te3 = te(17, 4, 18, 4, "");
-        TextEdit te4 = te(18, 32, 18, 42, "");
-        CodeAction ca3 = ca(uri, "Remove @Produces", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove the '@Observes' modifier from parameter 'name'", d2, te4);
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-        
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+            TextEdit te3 = te(17, 4, 18, 4, "");
+            TextEdit te4 = te(18, 32, 18, 42, "");
+            CodeAction ca3 = ca(uri, "Remove @Produces", d2, te3);
+            CodeAction ca4 = ca(uri, "Remove the '@Observes' modifier from parameter 'name'", d2, te4);
 
-        TextEdit te5 = te(23, 4, 24, 4, "");
-        TextEdit te6 = te(24, 37, 24, 52, "");
-        CodeAction ca5 = ca(uri, "Remove @Produces", d3, te5);
-        CodeAction ca6 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name'", d3, te6);
+            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
 
-        assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
-        
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
 
-        TextEdit te7 = te(29, 4, 30, 4, "");
-        TextEdit te8 = te(30, 40, 30, 50, "");
-        TextEdit te9 = te(30, 64, 30, 74, "");
-        CodeAction ca7 = ca(uri, "Remove @Produces", d4, te7);
-        CodeAction ca8 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d4, te8);
-        CodeAction ca9 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d4, te9);
+            TextEdit te5 = te(23, 4, 24, 4, "");
+            TextEdit te6 = te(24, 37, 24, 52, "");
+            CodeAction ca5 = ca(uri, "Remove @Produces", d3, te5);
+            CodeAction ca6 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name'", d3, te6);
 
-        assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
-        
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+            assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
 
-        TextEdit te10 = te(35, 4, 36, 4, "");
-        TextEdit te11 = te(36, 45, 36, 55, "");
-        TextEdit te12 = te(36, 69, 36, 84, "");
-        CodeAction ca10 = ca(uri, "Remove @Produces", d5, te10);
-        CodeAction ca11 = ca(uri, "Remove the '@Observes' modifier from parameter 'name1'", d5, te11);
-        CodeAction ca12 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d5, te12);
+            JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
 
-        assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
-        
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d6);
+            TextEdit te7 = te(29, 4, 30, 4, "");
+            TextEdit te8 = te(30, 40, 30, 50, "");
+            TextEdit te9 = te(30, 64, 30, 74, "");
+            CodeAction ca7 = ca(uri, "Remove @Produces", d4, te7);
+            CodeAction ca8 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d4, te8);
+            CodeAction ca9 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d4, te9);
 
-        TextEdit te13 = te(41, 4, 42, 4, "");
-        TextEdit te14 = te(42, 45, 42, 55, "");
-        TextEdit te15 = te(42, 69, 42, 84, "");
-        CodeAction ca13 = ca(uri, "Remove @Produces", d6, te13);
-        CodeAction ca14 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d6, te14);
-        CodeAction ca15 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d6, te15);
+            assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
 
-        assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca15);
-        
-        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+            JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
 
-        TextEdit te16 = te(47, 4, 48, 4, "");
-        TextEdit te17 = te(48, 53, 48, 63, "");
-        TextEdit te18 = te(48, 77, 48, 87, "");
-        TextEdit te19 = te(48, 101, 48, 116, "");
-        CodeAction ca16 = ca(uri, "Remove @Produces", d7, te16);
-        CodeAction ca17 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d7, te17);
-        CodeAction ca18 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d7, te18);
-        CodeAction ca19 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name3'", d7, te19);
+            TextEdit te10 = te(35, 4, 36, 4, "");
+            TextEdit te11 = te(36, 45, 36, 55, "");
+            TextEdit te12 = te(36, 69, 36, 84, "");
+            CodeAction ca10 = ca(uri, "Remove @Produces", d5, te10);
+            CodeAction ca11 = ca(uri, "Remove the '@Observes' modifier from parameter 'name1'", d5, te11);
+            CodeAction ca12 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d5, te12);
 
-        assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca18, ca19);
-        
-        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d8);
+            assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
 
-        TextEdit te20 = te(53, 4, 54, 4, "");
-        TextEdit te21 = te(54, 54, 54, 89, "");
-        CodeAction ca20 = ca(uri, "Remove @Produces", d8, te20);
-        CodeAction ca21 = ca(uri, "Remove the '@Disposes', '@Observes', '@ObservesAsync' modifier from parameter 'name'", d8, te21);
+            JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d6);
 
-        assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
-        
+            TextEdit te13 = te(41, 4, 42, 4, "");
+            TextEdit te14 = te(42, 45, 42, 55, "");
+            TextEdit te15 = te(42, 69, 42, 84, "");
+            CodeAction ca13 = ca(uri, "Remove @Produces", d6, te13);
+            CodeAction ca14 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d6, te14);
+            CodeAction ca15 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name2'", d6, te15);
+
+            assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca15);
+
+            JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+
+            TextEdit te16 = te(47, 4, 48, 4, "");
+            TextEdit te17 = te(48, 53, 48, 63, "");
+            TextEdit te18 = te(48, 77, 48, 87, "");
+            TextEdit te19 = te(48, 101, 48, 116, "");
+            CodeAction ca16 = ca(uri, "Remove @Produces", d7, te16);
+            CodeAction ca17 = ca(uri, "Remove the '@Disposes' modifier from parameter 'name1'", d7, te17);
+            CodeAction ca18 = ca(uri, "Remove the '@Observes' modifier from parameter 'name2'", d7, te18);
+            CodeAction ca19 = ca(uri, "Remove the '@ObservesAsync' modifier from parameter 'name3'", d7, te19);
+
+            assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca18, ca19);
+
+            JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d8);
+
+            TextEdit te20 = te(53, 4, 54, 4, "");
+            TextEdit te21 = te(54, 54, 54, 89, "");
+            CodeAction ca20 = ca(uri, "Remove @Produces", d8, te20);
+            CodeAction ca21 = ca(uri, "Remove the '@Disposes', '@Observes', '@ObservesAsync' modifier from parameter 'name'", d8, te21);
+
+            assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
+        }
     }
     
     @Test

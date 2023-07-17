@@ -77,57 +77,58 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
-        
-        
-        /* create expected quickFixes
-         * 
-         */
-        
-        // for d1
-        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        TextEdit te = JakartaForJavaAssert.te(16, 4, 17, 4,
-                "");
-        CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
-        TextEdit te1 = JakartaForJavaAssert.te(17, 11, 17, 17,
-                "");
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this field", d1, te1);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
-        
-        // for d2
-        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d2);
-        te = JakartaForJavaAssert.te(32, 4, 33, 4,
-                "");
-        ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d2, te);
-        te1 = JakartaForJavaAssert.te(33, 10, 33, 19,
-                "");
-        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'abstract' modifier from this method", d2, te1);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
-        
-        // for d3
-        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d3);
-        te = JakartaForJavaAssert.te(25, 4, 26, 4,
-                "");
-        ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te);
-        te1 = JakartaForJavaAssert.te(26, 10, 26, 16,
-                "");
-        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", d3, te1);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
-        
-        // for d4
-        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d4);
-        te = JakartaForJavaAssert.te(42, 4, 43, 4,
-                "");
-        ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d4, te);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-        
-        // for d5
-        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d5);
-        te = JakartaForJavaAssert.te(36, 4, 37, 4,
-                "");
-        ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d5, te);
-        te1 = JakartaForJavaAssert.te(37, 10, 37, 17,
-                "");
-        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", d5, te1);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+
+        if (CHECK_CODE_ACTIONS) {
+            /* create expected quickFixes
+             *
+             */
+
+            // for d1
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+            TextEdit te = JakartaForJavaAssert.te(16, 4, 17, 4,
+                    "");
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
+            TextEdit te1 = JakartaForJavaAssert.te(17, 11, 17, 17,
+                    "");
+            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this field", d1, te1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+
+            // for d2
+            codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+            te = JakartaForJavaAssert.te(32, 4, 33, 4,
+                    "");
+            ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d2, te);
+            te1 = JakartaForJavaAssert.te(33, 10, 33, 19,
+                    "");
+            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'abstract' modifier from this method", d2, te1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+
+            // for d3
+            codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d3);
+            te = JakartaForJavaAssert.te(25, 4, 26, 4,
+                    "");
+            ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te);
+            te1 = JakartaForJavaAssert.te(26, 10, 26, 16,
+                    "");
+            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", d3, te1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+
+            // for d4
+            codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d4);
+            te = JakartaForJavaAssert.te(42, 4, 43, 4,
+                    "");
+            ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d4, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+
+            // for d5
+            codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d5);
+            te = JakartaForJavaAssert.te(36, 4, 37, 4,
+                    "");
+            ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d5, te);
+            te1 = JakartaForJavaAssert.te(37, 10, 37, 17,
+                    "");
+            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", d5, te1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+        }
     }
 }

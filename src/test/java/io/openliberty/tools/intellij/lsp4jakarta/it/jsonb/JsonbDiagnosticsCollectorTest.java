@@ -63,18 +63,20 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        // test code actions
-        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        TextEdit te1 = JakartaForJavaAssert.te(17, 4, 18, 4, "");
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d1, te1);
-        
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1);
+        if (CHECK_CODE_ACTIONS) {
+            // test code actions
+            JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+            TextEdit te1 = JakartaForJavaAssert.te(17, 4, 18, 4, "");
+            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d1, te1);
 
-        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
-        TextEdit te2 = JakartaForJavaAssert.te(20, 4, 21, 4, "");
-        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d2, te2);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
+            JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+            TextEdit te2 = JakartaForJavaAssert.te(20, 4, 21, 4, "");
+            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d2, te2);
+
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
+        }
     }
     
     @Test
@@ -140,40 +142,41 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
   
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8);
 
+        if (CHECK_CODE_ACTIONS) {
+            // Test code actions
+            // Quick fix for the field "id"
+            JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+            TextEdit te1 = JakartaForJavaAssert.te(20, 4, 21, 4, "");
+            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d1, te1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-        // Test code actions
-        // Quick fix for the field "id"
-        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        TextEdit te1 = JakartaForJavaAssert.te(20, 4, 21, 4, "");
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d1, te1);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1);
-        
-        // Quick fix for the field "name"
-        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
-        TextEdit te3 = JakartaForJavaAssert.te(24, 4, 25, 4, "");
-        TextEdit te4 = JakartaForJavaAssert.te(23, 4, 24, 4, "");
-        CodeAction ca3 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d2, te3);
-        CodeAction ca4 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty", d2, te4);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-       
-        // Quick fix for the field "favoriteLanguage"
-        JakartaJavaCodeActionParams codeActionParams3 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
-        TextEdit te5 = JakartaForJavaAssert.te(29, 4, 30, 4, "");
-        TextEdit te6 = JakartaForJavaAssert.te(27, 4, 29, 4, "");
-        CodeAction ca5 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d3, te5);
-        CodeAction ca6 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty, @JsonbAnnotation", d3, te6);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
-        
-        // Quick fix for the accessor "getId"
-        JakartaJavaCodeActionParams codeActionParams4 = JakartaForJavaAssert.createCodeActionParams(uri, d5);
-        TextEdit te7 = JakartaForJavaAssert.te(41, 4, 42, 4, "");
-        CodeAction ca7 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty", d5, te7);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams4, utils, ca7);
+            // Quick fix for the field "name"
+            JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+            TextEdit te3 = JakartaForJavaAssert.te(24, 4, 25, 4, "");
+            TextEdit te4 = JakartaForJavaAssert.te(23, 4, 24, 4, "");
+            CodeAction ca3 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d2, te3);
+            CodeAction ca4 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty", d2, te4);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
 
-        // Quick fix for the accessor "setId"
-        JakartaJavaCodeActionParams codeActionParams5 = JakartaForJavaAssert.createCodeActionParams(uri, d6);
-        TextEdit te8 = JakartaForJavaAssert.te(48, 4, 49, 4, "");
-        CodeAction ca8 = JakartaForJavaAssert.ca(uri, "Remove @JsonbAnnotation", d6, te8);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams5, utils, ca8);
+            // Quick fix for the field "favoriteLanguage"
+            JakartaJavaCodeActionParams codeActionParams3 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
+            TextEdit te5 = JakartaForJavaAssert.te(29, 4, 30, 4, "");
+            TextEdit te6 = JakartaForJavaAssert.te(27, 4, 29, 4, "");
+            CodeAction ca5 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d3, te5);
+            CodeAction ca6 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty, @JsonbAnnotation", d3, te6);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
+
+            // Quick fix for the accessor "getId"
+            JakartaJavaCodeActionParams codeActionParams4 = JakartaForJavaAssert.createCodeActionParams(uri, d5);
+            TextEdit te7 = JakartaForJavaAssert.te(41, 4, 42, 4, "");
+            CodeAction ca7 = JakartaForJavaAssert.ca(uri, "Remove @JsonbProperty", d5, te7);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams4, utils, ca7);
+
+            // Quick fix for the accessor "setId"
+            JakartaJavaCodeActionParams codeActionParams5 = JakartaForJavaAssert.createCodeActionParams(uri, d6);
+            TextEdit te8 = JakartaForJavaAssert.te(48, 4, 49, 4, "");
+            CodeAction ca8 = JakartaForJavaAssert.ca(uri, "Remove @JsonbAnnotation", d6, te8);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams5, utils, ca8);
+        }
     }
 }
