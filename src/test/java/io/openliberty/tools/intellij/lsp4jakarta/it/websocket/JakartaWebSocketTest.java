@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class JakartaWebSocketTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void addPathParamsAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -70,15 +69,17 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         );
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
-        
-        // Expected code actions
-        JakartaJavaCodeActionParams codeActionsParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        String newText = "\nimport jakarta.websocket.server.PathParam;\nimport jakarta.websocket.server.ServerEndpoint;\nimport jakarta.websocket.Session;\n\n" 
-                        + "/**\n * Expected Diagnostics are related to validating that the parameters have the \n * valid annotation @PathParam (code: AddPathParamsAnnotation)\n * See issue #247 (onOpen) and #248 (onClose)\n */\n" 
-                        + "@ServerEndpoint(value = \"/infos\")\npublic class AnnotationTest {\n    // @PathParam missing annotation for \"String missingAnnotation\"\n    @OnOpen\n    public void OnOpen(Session session, @PathParam(value = \"\") ";
-        TextEdit te = JakartaForJavaAssert.te(5, 32, 18, 40, newText);
-        CodeAction ca = JakartaForJavaAssert.ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+
+        if (CHECK_CODE_ACTIONS) {
+            // Expected code actions
+            JakartaJavaCodeActionParams codeActionsParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+            String newText = "\nimport jakarta.websocket.server.PathParam;\nimport jakarta.websocket.server.ServerEndpoint;\nimport jakarta.websocket.Session;\n\n"
+                    + "/**\n * Expected Diagnostics are related to validating that the parameters have the \n * valid annotation @PathParam (code: AddPathParamsAnnotation)\n * See issue #247 (onOpen) and #248 (onClose)\n */\n"
+                    + "@ServerEndpoint(value = \"/infos\")\npublic class AnnotationTest {\n    // @PathParam missing annotation for \"String missingAnnotation\"\n    @OnOpen\n    public void OnOpen(Session session, @PathParam(value = \"\") ";
+            TextEdit te = JakartaForJavaAssert.te(5, 32, 18, 40, newText);
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+        }
     }
 
     @Test

@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class MultipleConstructorInjectTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void multipleInject() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -67,19 +66,19 @@ public class MultipleConstructorInjectTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInject");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1,d2,d3);
-       
-        // test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        TextEdit te = JakartaForJavaAssert.te(21, 4, 22, 4,"");
-        CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca);
-        
-        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
-        TextEdit te2 = JakartaForJavaAssert.te(30, 4, 31, 4,"");
-        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te2);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
-        
-        
+
+        if (CHECK_CODE_ACTIONS) {
+            // test expected quick-fix
+            JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+            TextEdit te = JakartaForJavaAssert.te(21, 4, 22, 4, "");
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca);
+
+            JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
+            TextEdit te2 = JakartaForJavaAssert.te(30, 4, 31, 4, "");
+            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te2);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
+        }
     }
 
 }

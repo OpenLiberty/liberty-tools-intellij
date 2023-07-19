@@ -40,7 +40,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class PostConstructAnnotationTest extends BaseJakartaTest {
 
     @Test
-    @Ignore
     public void GeneratedAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
@@ -65,17 +64,18 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te1 = te(19, 4, 20, 4, "");
-        TextEdit te2 = te(20, 29, 20, 40, "");
-        CodeAction ca1 = ca(uri, "Remove @PostConstruct", d2, te1);
-        CodeAction ca2 = ca(uri, "Remove all parameters", d2, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-        
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d1);
-        TextEdit te3 = te(15, 11, 15, 18, "void");
-        CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
-        assertJavaCodeAction(codeActionParams2, utils, ca3);
-    }
+        if (CHECK_CODE_ACTIONS) {
+            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+            TextEdit te1 = te(19, 4, 20, 4, "");
+            TextEdit te2 = te(20, 29, 20, 40, "");
+            CodeAction ca1 = ca(uri, "Remove @PostConstruct", d2, te1);
+            CodeAction ca2 = ca(uri, "Remove all parameters", d2, te2);
+            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 
+            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d1);
+            TextEdit te3 = te(15, 11, 15, 18, "void");
+            CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
+            assertJavaCodeAction(codeActionParams2, utils, ca3);
+        }
+    }
 }
