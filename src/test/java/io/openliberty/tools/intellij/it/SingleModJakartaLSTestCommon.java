@@ -100,7 +100,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
-        String expectedHoverData = "Only public methods may be exposed as resource methods";
+        String expectedHoverData = "Only public methods can be exposed as resource methods";
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
 
         // get focus on file tab prior to copy
