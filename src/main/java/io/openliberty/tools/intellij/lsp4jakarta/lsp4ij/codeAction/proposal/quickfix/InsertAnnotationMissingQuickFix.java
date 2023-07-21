@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.InsertAnnotationProposal;
@@ -116,16 +117,16 @@ public class InsertAnnotationMissingQuickFix {
     }
 
     private static String getLabel(String[] annotations) {
-        StringBuilder name = new StringBuilder("Insert ");
+        StringBuilder list = new StringBuilder();
         for (int i = 0; i < annotations.length; i++) {
             String annotation = annotations[i];
             String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
             if (i > 0) {
-                name.append(", ");
+                list.append(", "); // assume comma list is ok: @A, @B, @C
             }
-            name.append("@");
-            name.append(annotationName);
+            list.append("@"); // Java syntax
+            list.append(annotationName);
         }
-        return name.toString();
+        return Messages.getMessage("InsertItem", list.toString());
     }
 }

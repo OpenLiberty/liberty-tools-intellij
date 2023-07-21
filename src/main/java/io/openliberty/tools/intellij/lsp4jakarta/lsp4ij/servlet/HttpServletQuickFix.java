@@ -18,13 +18,13 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ExtendClassProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,12 +46,12 @@ public class HttpServletQuickFix {
         if (parentType != null) {
             // Create code action
             // interface
-            final String TITLE_MESSAGE = "Let ''{0}'' extend ''{1}''";
-            String args[] = { parentType.getName(),
-                    ServletConstants.HTTP_SERVLET };
-            ChangeCorrectionProposal proposal = new ExtendClassProposal(MessageFormat.format(TITLE_MESSAGE, args),
-                    context.getSource().getCompilationUnit(), parentType, context.getASTRoot(), "jakarta.servlet.http.HttpServlet",
-                    0);
+            String title = Messages.getMessage("LetClassExtend",
+                    parentType.getName(),
+                    ServletConstants.HTTP_SERVLET);
+            ChangeCorrectionProposal proposal = new ExtendClassProposal(title,
+                    context.getSource().getCompilationUnit(), parentType, context.getASTRoot(),
+                    "jakarta.servlet.http.HttpServlet", 0);
             CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
             if (codeAction != null) {
                 codeActions.add(codeAction);

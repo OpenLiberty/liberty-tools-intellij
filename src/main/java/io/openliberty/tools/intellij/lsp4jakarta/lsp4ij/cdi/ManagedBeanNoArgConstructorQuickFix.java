@@ -17,6 +17,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddConstructorProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -65,7 +66,7 @@ public class ManagedBeanNoArgConstructorQuickFix {
         targetContext = context.copy();
         node = targetContext.getCoveredNode();
         parentType = getBinding(node);
-        String name = "Add a no-arg protected constructor to this class";
+        String name = Messages.getMessage("AddProtectedConstructor");
         ChangeCorrectionProposal proposal = new AddConstructorProposal(name,
                 targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0);
         CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
@@ -78,7 +79,7 @@ public class ManagedBeanNoArgConstructorQuickFix {
         targetContext = context.copy();
         node = targetContext.getCoveredNode();
         parentType = getBinding(node);
-        name = "Add a no-arg public constructor to this class";
+        name = Messages.getMessage("AddPublicConstructor");
         proposal = new AddConstructorProposal(name,
                 targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
         codeAction = targetContext.convertToCodeAction(proposal, diagnostic);

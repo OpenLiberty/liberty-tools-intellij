@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation, Matthew Shocrylas and others.
+ * Copyright (c) 2021, 2023 IBM Corporation, Matthew Shocrylas and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -89,9 +90,9 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     }
                     // no public constructor defined
                     if (nonPublicConstructors.size() > 0) {
-                        String diagnosticMessage = isRootResource
-                                ? "Root resource classes are instantiated by the JAX-RS runtime and MUST have a public constructor"
-                                : "Provider classes are instantiated by the JAX-RS runtime and MUST have a public constructor";
+                        String diagnosticMessage = isRootResource ?
+                                Messages.getMessage("RootResourceClasses") :
+                                Messages.getMessage("ProviderClasses");
                         for (PsiMethod constructor : nonPublicConstructors) {
                             diagnostics.add(createDiagnostic(constructor, unit, diagnosticMessage,
                                     Jax_RSConstants.DIAGNOSTIC_CODE_NO_PUBLIC_CONSTRUCTORS, null,
@@ -106,7 +107,7 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         } else if (entry.getValue() < maxParams) {
                             PsiMethod method = entry.getKey();
                             diagnostics.add(createDiagnostic(method, unit,
-                                    "This constructor is unused, as root resource classes will only use the constructor with the most parameters.",
+                                    Messages.getMessage("ConstructorIsUnused"),
                                     Jax_RSConstants.DIAGNOSTIC_CODE_UNUSED_CONSTRUCTOR, null,
                                     DiagnosticSeverity.Warning));
                         }
@@ -114,7 +115,7 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (equalMaxParamMethods.size() > 1) { // more than one
                         for (PsiMethod method : equalMaxParamMethods) {
                             diagnostics.add(createDiagnostic(method, unit,
-                                    "Multiple constructors have the same number of parameters, it might be ambiguous which constructor is used.",
+                                    Messages.getMessage("MultipleConstructorsNumberOfParameters"),
                                     Jax_RSConstants.DIAGNOSTIC_CODE_AMBIGUOUS_CONSTRUCTORS, null,
                                     DiagnosticSeverity.Warning));
                         }

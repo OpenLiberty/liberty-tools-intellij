@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveParamsProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -61,8 +62,8 @@ public class ResourceMethodMultipleEntityParamsQuickFix {
                 final PsiClass parentType = PsiTreeUtil.getParentOfType(targetNode, PsiClass.class);
                 final PsiParameter[] parameters = PsiTreeUtil.getParentOfType(targetNode, PsiMethod.class).getParameterList().getParameters();
 
-                final String TITLE_MESSAGE = "Remove all entity parameters except "
-                        + parameters[entityParamIndex].getName();
+                final String TITLE_MESSAGE = Messages.getMessage("RemoveAllEntityParametersExcept",
+                        parameters[entityParamIndex].getName());
 
                 final List<PsiParameter> entityParams = new ArrayList<>();
                 entityParamIndexes.forEach(x -> {

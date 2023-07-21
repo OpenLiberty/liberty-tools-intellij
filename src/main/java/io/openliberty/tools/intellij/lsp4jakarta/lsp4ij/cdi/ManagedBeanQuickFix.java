@@ -18,6 +18,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -69,10 +70,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
     }
 
     private static String getLabel(String annotation) {
-        StringBuilder name = new StringBuilder("Replace current scope with ");
         String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
-        name.append("@");
-        name.append(annotationName);
-        return name.toString();
+        return Messages.getMessage("ReplaceCurrentScope", "@" + annotationName);
     }
 }

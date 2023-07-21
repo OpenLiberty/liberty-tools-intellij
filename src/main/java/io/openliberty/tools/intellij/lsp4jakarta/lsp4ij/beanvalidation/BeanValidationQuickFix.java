@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveAnnotationsProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -53,7 +54,7 @@ public class BeanValidationQuickFix {
             final Optional<PsiAnnotation> annotationToRemove =
                     Arrays.stream(annotations).filter(a -> annotationName.equals(a.getQualifiedName())).findFirst();
             if (annotationToRemove.isPresent()) {
-                final String name = "Remove constraint annotation " + annotationName + " from this " + getType(modifierListOwner);
+                final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
                 final RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(name, context.getSource().getCompilationUnit(),
                         context.getASTRoot(), parentType, 0, Collections.singletonList(annotationToRemove.get()));
                 final CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
@@ -69,7 +70,7 @@ public class BeanValidationQuickFix {
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
-        final String name = "Remove static modifier from this " + getType(modifierListOwner);
+        final String name = Messages.getMessage("RemoveStaticModifier");
         final ModifyModifiersProposal proposal = new ModifyModifiersProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(),
                 Collections.singletonList("static"));
@@ -77,14 +78,5 @@ public class BeanValidationQuickFix {
         if (codeAction != null) {
             codeActions.add(codeAction);
         }
-    }
-
-    private String getType(PsiModifierListOwner modifierListOwner) {
-        if (modifierListOwner instanceof PsiField) {
-            return "field";
-        } else if (modifierListOwner instanceof PsiMethod) {
-            return "method";
-        }
-        return "element";
     }
 }

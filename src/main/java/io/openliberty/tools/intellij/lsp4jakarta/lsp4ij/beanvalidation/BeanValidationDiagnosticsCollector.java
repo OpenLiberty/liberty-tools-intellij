@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation, Reza Akhavan and others.
+ * Copyright (c) 2020, 2023 IBM Corporation, Reza Akhavan and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -74,17 +75,16 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                  List<Diagnostic> diagnostics) {
         if (element != null) {
             String annotationName = annotation.getQualifiedName();
-            boolean isMethod = (element instanceof PsiMethod) ? true : false;
+            boolean isMethod = element instanceof PsiMethod;
 
             if (((PsiModifierListOwner)element).hasModifierProperty(PsiModifier.STATIC)) {
-                String source = isMethod ? "methods" : "fields"; // have to use different 'source' here to pass tests
-                // for build
+                String source = isMethod ?
+                        Messages.getMessage("ConstraintAnnotationsMethod") :
+                        Messages.getMessage("ConstraintAnnotationsField");
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                        "Constraint annotations are not allowed on static " + source, DIAGNOSTIC_CODE_STATIC,
+                        source, DIAGNOSTIC_CODE_STATIC,
                         annotationName, DiagnosticSeverity.Error));
             } else {
-                String source = isMethod ? "methods." : "fields."; // have to use different 'source' here to pass tests
-                // for build
                 PsiType type = (isMethod) ? ((PsiMethod) element).getReturnType() : ((PsiField) element).getType();
                 if (type instanceof PsiClassType) {
                     PsiType t = PsiPrimitiveType.getUnboxedType(type);
@@ -94,11 +94,12 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 }
 
                 if (matchedAnnotation.equals(ASSERT_FALSE) || matchedAnnotation.equals(ASSERT_TRUE)) {
+                    String source = isMethod ?
+                            Messages.getMessage("AnnotationBooleanMethods", "@" + getSimpleName(annotationName)) :
+                            Messages.getMessage("AnnotationBooleanFields", "@" + getSimpleName(annotationName));
                     if (!type.equals(PsiType.BOOLEAN)) {
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                "The @" + getSimpleName(annotationName) + " annotation can only be used on boolean and Boolean type "
-                                        + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(DECIMAL_MAX) || matchedAnnotation.equals(DECIMAL_MIN)
                         || matchedAnnotation.equals(DIGITS)) {
@@ -109,19 +110,20 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiType.SHORT)
                             && !type.equals(PsiType.INT)
                             && !type.equals(PsiType.LONG)) {
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), "The @"
-                                        + getSimpleName(annotationName)
-                                        + " annotation can only be used on: \n- BigDecimal \n- BigInteger \n- CharSequence"
-                                        + "\n- byte, short, int, long (and their respective wrappers) \n type " + source,
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationBigDecimalMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationBigDecimalFields", "@" + getSimpleName(annotationName));
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), source,
                                 DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(EMAIL)) {
                     if (!type.getCanonicalText().endsWith(STRING)
                             && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                "The @" + getSimpleName(annotationName)
-                                        + " annotation can only be used on String and CharSequence type " + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(FUTURE) || matchedAnnotation.equals(FUTURE_OR_PRESENT)
                         || matchedAnnotation.equals(PAST) || matchedAnnotation.equals(PAST_OR_PRESENT)) {
@@ -130,13 +132,11 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     String dataTypeFQName = getMatchedJavaElementName(containingClass, dataType,
                             SET_OF_DATE_TYPES.toArray(new String[0]));
                     if (dataTypeFQName == null) {
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationDateMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationDateFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                "The @" + getSimpleName(annotationName) + " annotation can only be used on: Date, Calendar, Instant, "
-                                        + "LocalDate, LocalDateTime, LocalTime, MonthDay, OffsetDateTime, "
-                                        + "OffsetTime, Year, YearMonth, ZonedDateTime, "
-                                        + "HijrahDate, JapaneseDate, JapaneseDate, MinguoDate and "
-                                        + "ThaiBuddhistDate type " + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(MIN) || matchedAnnotation.equals(MAX)) {
                     if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
@@ -145,10 +145,11 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiType.SHORT)
                             && !type.equals(PsiType.INT)
                             && !type.equals(PsiType.LONG)) {
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), "The @"
-                                        + getSimpleName(annotationName) + " annotation can only be used on \n- BigDecimal \n- BigInteger"
-                                        + "\n- byte, short, int, long (and their respective wrappers) \n type " + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationMinMaxMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationMinMaxFields", "@" + getSimpleName(annotationName));
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(NEGATIVE) || matchedAnnotation.equals(NEGATIVE_OR_ZERO)
                         || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSTIVE_OR_ZERO)) {
@@ -160,26 +161,29 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiType.LONG)
                             && !type.equals(PsiType.FLOAT)
                             && !type.equals(PsiType.DOUBLE)) {
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), "The @"
-                                + getSimpleName(annotationName) + " annotation can only be used on \n- BigDecimal \n- BigInteger"
-                                + "\n- byte, short, int, long, float, double (and their respective wrappers) \n type "
-                                + source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationPositiveMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationPositiveFields", "@" + getSimpleName(annotationName));
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(NOT_BLANK)) {
                     if (!type.getCanonicalText().endsWith(STRING)
                             && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                "The @" + getSimpleName(annotationName)
-                                        + " annotation can only be used on String and CharSequence type " + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(PATTERN)) {
                     if (!type.getCanonicalText().endsWith(STRING)
                             && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
+                        String source = isMethod ?
+                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                "The @" + getSimpleName(annotationName)
-                                        + " annotation can only be used on String and CharSequence type " + source,
-                                DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 }
 

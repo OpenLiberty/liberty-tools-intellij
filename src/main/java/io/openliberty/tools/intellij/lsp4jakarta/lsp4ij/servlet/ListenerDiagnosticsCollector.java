@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation, Reza Akhavan and others.
+ * Copyright (c) 2020, 2023 IBM Corporation, Reza Akhavan and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,6 +17,7 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -61,8 +62,7 @@ public class ListenerDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
                 if (isWebListenerAnnotated && !isImplemented) {
                     diagnostics.add(createDiagnostic(type, unit,
-                            "Annotated classes with @WebListener must implement one or more of the following interfaces: ServletContextListener, ServletContextAttributeListener,"
-                                    + " ServletRequestListener, ServletRequestAttributeListener, HttpSessionListener, HttpSessionAttributeListener, or HttpSessionIdListener.",
+                            Messages.getMessage("AnnotatedWithWebListenerMustImplement"),
                             ServletConstants.DIAGNOSTIC_CODE_LISTENER, null, DiagnosticSeverity.Error));
                 }
             }
