@@ -82,7 +82,7 @@ public class ServletDiagnosticsCollector extends AbstractDiagnosticsCollector {
                                 ServletConstants.DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
                     } else if (r == 0) { // unknown super type
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("WebServletMustExtend"),
+                                Messages.getMessage("WebServletShouldExtend"),
                                 ServletConstants.DIAGNOSTIC_CODE, null, DiagnosticSeverity.Warning));
                     }
 
