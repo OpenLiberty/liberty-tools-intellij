@@ -117,14 +117,11 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(EMAIL)) {
-                    if (!type.getCanonicalText().endsWith(STRING)
-                            && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
-                        String source = isMethod ?
-                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
-                    }
+                    checkStringOnly(element, diagnostics, annotationName, isMethod, type);
+                } else if (matchedAnnotation.equals(NOT_BLANK)) {
+                    checkStringOnly(element, diagnostics, annotationName, isMethod, type);
+                } else if (matchedAnnotation.equals(PATTERN)) {
+                    checkStringOnly(element, diagnostics, annotationName, isMethod, type);
                 } else if (matchedAnnotation.equals(FUTURE) || matchedAnnotation.equals(FUTURE_OR_PRESENT)
                         || matchedAnnotation.equals(PAST) || matchedAnnotation.equals(PAST_OR_PRESENT)) {
                     String dataType = type.getCanonicalText();
@@ -167,24 +164,6 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(NOT_BLANK)) {
-                    if (!type.getCanonicalText().endsWith(STRING)
-                            && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
-                        String source = isMethod ?
-                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
-                    }
-                } else if (matchedAnnotation.equals(PATTERN)) {
-                    if (!type.getCanonicalText().endsWith(STRING)
-                            && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
-                        String source = isMethod ?
-                                Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
-                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
-                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
-                    }
                 }
 
                 // These ones contains check on all collection types which requires resolving
@@ -216,6 +195,17 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 //    				}
 //    			}
             }
+        }
+    }
+
+    private void checkStringOnly(PsiElement element, List<Diagnostic> diagnostics, String annotationName, boolean isMethod, PsiType type) {
+        if (!type.getCanonicalText().endsWith(STRING)
+                && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
+            String source = isMethod ?
+                    Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
+                    Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
+            diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                    source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
         }
     }
 }
