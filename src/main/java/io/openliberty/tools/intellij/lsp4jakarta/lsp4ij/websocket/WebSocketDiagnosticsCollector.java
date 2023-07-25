@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2022 IBM Corporation and others. 
+ * Copyright (c) 2022, 2023 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the 
  * terms of the Eclipse Public License v. 2.0 which is available at 
@@ -22,6 +22,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -115,7 +116,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                             });
                             if (!hasPathParamAnnot) {
                                 diagnostics.add(createDiagnostic(param, unit,
-                                        WebSocketConstants.DIAGNOSTIC_PATH_PARAMS_ANNOT_MISSING,
+                                        Messages.getMessage("PathParamsAnnotationMissing"),
                                         WebSocketConstants.DIAGNOSTIC_CODE_PATH_PARAMS_ANNOT, null,
                                         DiagnosticSeverity.Error));
                             }
@@ -150,7 +151,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                                 String pathValue = pair.getLiteralValue();
                                 if (!endpointPathVars.contains(pathValue)) {
                                     diagnostics.add(createDiagnostic(annotation, unit,
-                                            WebSocketConstants.PATHPARAM_VALUE_WARN_MSG,
+                                            Messages.getMessage("PathParamWarning"),
                                             WebSocketConstants.PATHPARAM_DIAGNOSTIC_CODE, null,
                                             DiagnosticSeverity.Warning));
                                 }
@@ -194,11 +195,11 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                                     case TEXT:
                                         if (onMessageTextUsed != null) {
                                             diagnostics.add(createDiagnostic(annotation, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                             diagnostics.add(createDiagnostic(onMessageTextUsed, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                         }
@@ -207,11 +208,11 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                                     case BINARY:
                                         if (onMessageBinaryUsed != null) {
                                             diagnostics.add(createDiagnostic(annotation, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                             diagnostics.add(createDiagnostic(onMessageBinaryUsed, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                         }
@@ -220,11 +221,11 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                                     case PONG:
                                         if (onMessagePongUsed != null) {
                                             diagnostics.add(createDiagnostic(annotation, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                             diagnostics.add(createDiagnostic(onMessagePongUsed, unit,
-                                                    WebSocketConstants.DIAGNOSTIC_ON_MESSAGE_DUPLICATE_METHOD,
+                                                    Messages.getMessage("OnMessageDuplicateMethod"),
                                                     WebSocketConstants.DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD, null,
                                                     DiagnosticSeverity.Error));
                                         }
@@ -255,21 +256,21 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                         String path = annotationMemberValuePair.getLiteralValue();
                         if (!JDTUtils.hasLeadingSlash(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_NO_SLASH,
+                                    Messages.getMessage("ServerEndpointNoSlash"),
                                     WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
                         }
                         if (hasRelativePathURIs(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_RELATIVE,
+                                    Messages.getMessage("ServerEndpointRelative"),
                                     WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
                         } else if (!JDTUtils.isValidLevel1URI(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_NOT_LEVEL1,
+                                    Messages.getMessage("ServerEndpointNotLevel1"),
                                     WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
                         }
                         if (hasDuplicateURIVariables(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_DUPLICATE_VAR,
+                                    Messages.getMessage("ServerEndpointDuplicateVar"),
                                     WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
                         }
                     }
@@ -405,7 +406,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
     private String createParamTypeDiagMsg(Set<String> methodParamOptTypes, String methodAnnotTarget) {
         String paramMessage = String.join("\n- ", methodParamOptTypes);
-        return String.format(WebSocketConstants.PARAM_TYPE_DIAG_MSG, "@" + methodAnnotTarget, paramMessage);
+        return Messages.getMessage("WebSocketParamType", "@" + methodAnnotTarget, paramMessage);
     }
 
     /**

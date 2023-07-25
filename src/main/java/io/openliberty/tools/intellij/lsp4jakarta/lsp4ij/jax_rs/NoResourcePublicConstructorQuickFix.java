@@ -18,6 +18,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddConstructorProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public class NoResourcePublicConstructorQuickFix {
 
-    private final static String TITLE_MESSAGE = "Make constructor public";
+    private final static String TITLE_MESSAGE = Messages.getMessage("MakeConstructorPublic");
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
 
@@ -67,7 +68,7 @@ public class NoResourcePublicConstructorQuickFix {
                 node = targetContext.getCoveredNode();
                 parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
 
-                final String name = "Add a no-arg public constructor to this class";
+                final String name = Messages.getMessage("NoargPublicConstructor");
                 proposal = new AddConstructorProposal(name,
                         targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
                 codeAction = targetContext.convertToCodeAction(proposal, diagnostic);

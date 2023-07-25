@@ -16,6 +16,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyReturnTypeProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -37,7 +38,7 @@ public class PostConstructReturnTypeQuickFix {
         List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiMethod parentType = getBinding(node);
-        String name = "Change return type to void";
+        String name = Messages.getMessage("ChangeReturnTypeToVoid");
         ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);

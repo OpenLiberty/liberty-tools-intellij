@@ -14,6 +14,7 @@
 
  import com.intellij.psi.*;
  import com.intellij.psi.util.PsiTreeUtil;
+ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
  import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveAnnotationsProposal;
  import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
  import org.eclipse.lsp4j.CodeAction;
@@ -56,18 +57,15 @@ public class RemoveParamAnnotationQuickFix {
             }
             if (!annotationsToRemove.isEmpty()) {
                 // Create label
-                final StringBuilder sb = new StringBuilder("Remove the ");
+                final StringBuilder sb = new StringBuilder();
+                // Java annotations in comma delimited list, assume that is ok.
                 sb.append("'@").append(getShortName(annotationsToRemove.get(0))).append("'");
                 for (int j = 1; j < annotationsToRemove.size(); ++j) {
                     sb.append(", '@").append(getShortName(annotationsToRemove.get(j))).append("'");
                 }
-                sb.append(" annotation");
-                if (annotationsToRemove.size() > 1) {
-                    sb.append('s');
-                }
-                sb.append(" from parameter '").append(parameter.getName()).append("'");
+                String label = Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
                 // Remove annotations
-                removeAnnotations(diagnostic, context.copy(), codeActions, i, sb.toString(), annotationsToRemove);
+                removeAnnotations(diagnostic, context.copy(), codeActions, i, label, annotationsToRemove);
             }
         }
         return codeActions;

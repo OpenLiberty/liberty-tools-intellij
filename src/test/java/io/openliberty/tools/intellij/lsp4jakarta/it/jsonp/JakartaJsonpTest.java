@@ -49,15 +49,15 @@ public class JakartaJsonpTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         Diagnostic d1 = JakartaForJavaAssert.d(20, 60, 64,
-                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String", 
+                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String.",
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidCreatePointerArg");
         
         Diagnostic d2 = JakartaForJavaAssert.d(21, 62, 70,
-                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String", 
+                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String.",
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidCreatePointerArg");
         
         Diagnostic d3 = JakartaForJavaAssert.d(22, 60, 80,
-                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String", 
+                "Json.createPointer target must be a sequence of '/' prefixed tokens or an empty String.",
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidCreatePointerArg");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);

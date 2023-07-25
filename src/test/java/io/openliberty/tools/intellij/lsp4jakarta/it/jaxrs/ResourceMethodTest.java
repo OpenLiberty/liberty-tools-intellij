@@ -52,7 +52,7 @@ public class ResourceMethodTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         
-        Diagnostic d = JakartaForJavaAssert.d(20, 17, 30, "Only public methods can be exposed as resource methods",
+        Diagnostic d = JakartaForJavaAssert.d(20, 17, 30, "Only public methods can be exposed as resource methods.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NonPublicResourceMethod");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
@@ -79,7 +79,7 @@ public class ResourceMethodTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
 
-        Diagnostic d = JakartaForJavaAssert.d(21, 13, 46, "Resource methods cannot have more than one entity parameter",
+        Diagnostic d = JakartaForJavaAssert.d(21, 13, 46, "Resource methods cannot have more than one entity parameter.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "ResourceMethodMultipleEntityParams");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);

@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -59,7 +60,7 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
         ArrayList<String> attributes = new ArrayList<>();
         attributes.add("name");
         attributes.add("referencedColumnName");
-        String name = "Add the missing attributes to the @MapKeyJoinColumn annotation";
+        String name = Messages.getMessage("AddTheMissingAttributes");
         PsiElement node = context.getCoveredNode();
         PsiModifierListOwner binding = getBinding(node); // field or method in this case
         List<PsiAnnotation> annotationNodes = getAnnotations(binding, annotations);

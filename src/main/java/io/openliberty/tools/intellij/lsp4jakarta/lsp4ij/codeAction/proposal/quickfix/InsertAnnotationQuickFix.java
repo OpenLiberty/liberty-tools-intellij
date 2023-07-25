@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -109,9 +110,6 @@ public class InsertAnnotationQuickFix {
     }
 
     protected String getLabel(String annotationName, String... attributes) {
-        StringBuilder label = new StringBuilder("Insert ");
-        label.append("@");
-        label.append(annotationName);
-        return label.toString();
+        return Messages.getMessage("InsertItem", "@" + annotation); // uses Java syntax
     }
 }

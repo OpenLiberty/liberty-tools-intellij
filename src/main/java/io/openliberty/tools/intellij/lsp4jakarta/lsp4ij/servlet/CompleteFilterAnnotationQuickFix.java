@@ -18,6 +18,7 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -130,15 +131,12 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
     }
 
     private static String getLabel(String annotation, String attribute, String labelType) {
-        StringBuilder name = new StringBuilder("Add the `" + attribute + "` attribute to ");
-        if (labelType.equals("Remove")) {
-            name = new StringBuilder("Remove the `" + attribute + "` attribute from ");
-        }
         String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
-        name.append("@");
-        name.append(annotationName);
-        return name.toString();
-    }
+        annotationName = "@" + annotationName;
+        if (labelType.equals("Remove")) {
+            return Messages.getMessage("RemoveTheAttriubuteFrom", attribute, annotationName);
+        }
+        return Messages.getMessage("AddTheAttributeTo", attribute, annotationName);    }
 
     private static PsiAnnotation getAnnotation(PsiElement e) {
         if (e instanceof PsiAnnotation) {

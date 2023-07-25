@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -62,7 +63,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
             for (PsiField field : allFields) {
                 if (field.hasModifierProperty(PsiModifier.FINAL)
                         && containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
-                    String msg = createAnnotationDiagnostic(INJECT, "a final field.");
+                    String msg = Messages.getMessage("InjectNoFinalField");
                     diagnostics.add(createDiagnostic(field, unit, msg,
                             DIAGNOSTIC_CODE_INJECT_FINAL, field.getType().getInternalCanonicalText(),
                             DiagnosticSeverity.Error));
@@ -81,26 +82,26 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                     if (isConstructorMethod(method))
                         injectedConstructors.add(method);
                     if (isFinal) {
-                        String msg = createAnnotationDiagnostic(INJECT, "a final method.");
+                        String msg = Messages.getMessage("InjectNoFinalMethod");
                         diagnostics.add(createDiagnostic(method, unit, msg,
                                 DIAGNOSTIC_CODE_INJECT_FINAL, method.getReturnType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
                     }
                     if (isAbstract) {
-                        String msg = createAnnotationDiagnostic(INJECT, "an abstract method.");
+                        String msg = Messages.getMessage("InjectNoAbstractMethod");
                         diagnostics.add(createDiagnostic(method, unit, msg,
                                 DIAGNOSTIC_CODE_INJECT_ABSTRACT, method.getReturnType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
                     }
                     if (isStatic) {
-                        String msg = createAnnotationDiagnostic(INJECT, "a static method.");
+                        String msg = Messages.getMessage("InjectNoStaticMethod");
                         diagnostics.add(createDiagnostic(method, unit, msg,
                                 DIAGNOSTIC_CODE_INJECT_STATIC, method.getReturnType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
                     }
 
                     if (isGeneric) {
-                        String msg = createAnnotationDiagnostic(INJECT, "a generic method.");
+                        String msg = Messages.getMessage("InjectNoGenericMethod");
                         diagnostics.add(createDiagnostic(method, unit, msg,
                                 DIAGNOSTIC_CODE_INJECT_GENERIC, method.getReturnType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
@@ -110,17 +111,13 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
 
             // if more than one 'inject' constructor, add diagnostic to all constructors
             if (injectedConstructors.size() > 1) {
-                String msg = createAnnotationDiagnostic(INJECT, "more than one constructor.");
+                String msg = Messages.getMessage("InjectMoreThanOneConstructor");
                 for (PsiMethod m : injectedConstructors) {
                     diagnostics.add(createDiagnostic(m, unit, msg,
                             DIAGNOSTIC_CODE_INJECT_CONSTRUCTOR, null, DiagnosticSeverity.Error));
                 }
             }
         }
-    }
-
-    private String createAnnotationDiagnostic(String annotation, String attributeType) {
-        return "The @" + annotation + " annotation must not define " + attributeType;
     }
 
     private boolean containsAnnotation(PsiClass type, PsiAnnotation[] annotations, String annotationFQName) {

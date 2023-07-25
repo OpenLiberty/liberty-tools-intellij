@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import org.eclipse.lsp4j.CodeAction;
@@ -93,20 +94,9 @@ public class RemoveModifierConflictQuickFix {
         PsiClass parentType = getBinding(node);
         PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
-        String type = "";
-        if (modifierListOwner instanceof PsiLocalVariable) {
-            type = "variable";
-        } else if (modifierListOwner instanceof PsiField) {
-            type = "field";
-        } else if (modifierListOwner instanceof PsiMethod) {
-            type = "method";
-        } else if (modifierListOwner instanceof PsiClass) {
-            type = "class";
-        }
+        String label = getLabel(modifierListOwner, modifier);
 
-        String name = "Remove the \'" + modifier[0] + "\' modifier from this ";
-        name = name.concat(type);
-        ModifyModifiersProposal proposal = new ModifyModifiersProposal(name, context.getSource().getCompilationUnit(),
+        ModifyModifiersProposal proposal = new ModifyModifiersProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifier));
         CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
 
@@ -115,29 +105,23 @@ public class RemoveModifierConflictQuickFix {
         }
     }
 
-    /**
-     * Removes a set of modifiers from a given ASTNode with a given code action label
-     */
-    /** protected void removeModifier(Diagnostic diagnostic, JavaCodeActionContext context, IBinding parentType,
-		List<CodeAction> codeActions, ASTNode coveredNode, String label, String... modifier) throws CoreException {
-	
-        ModifyModifiersProposal proposal = new ModifyModifiersProposal(label, context.getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, coveredNode, new ArrayList<>(), Arrays.asList(modifiers));
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-
-        if (codeAction != null) {
-            codeActions.add(codeAction);
+    private String getLabel(PsiModifierListOwner modifierListOwner, String... modifier) {
+        String label;
+        if (modifierListOwner instanceof PsiLocalVariable){
+            label = Messages.getMessage("RemoveTheModifierFromThisVariable", modifier[0]);
+        } else if (modifierListOwner instanceof PsiField) {
+            label = Messages.getMessage("RemoveTheModifierFromThisField", modifier[0]);
+        } else if (modifierListOwner instanceof PsiMethod) {
+            label = Messages.getMessage("RemoveTheModifierFromThisMethod", modifier[0]);
+        } else if (modifierListOwner instanceof PsiClass) {
+            label = Messages.getMessage("RemoveTheModifierFromThisClass", modifier[0]);
+        } else {
+            label = Messages.getMessage("RemoveTheModifierFromThis", modifier[0], "");
         }
-    } **/
+        return label;
+    }
 
     protected PsiClass getBinding(PsiElement node) {
-        /** ASTNode parentNode = node.getParent();
-        if (node.getParent() instanceof VariableDeclarationFragment) {
-            return ((VariableDeclarationFragment) node.getParent()).resolveBinding();
-        } else if (node.getParent() instanceof MethodDeclaration) {
-            return ((MethodDeclaration) node.getParent()).resolveBinding();
-        }
-        return Bindings.getBindingOfParentType(node); **/
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 

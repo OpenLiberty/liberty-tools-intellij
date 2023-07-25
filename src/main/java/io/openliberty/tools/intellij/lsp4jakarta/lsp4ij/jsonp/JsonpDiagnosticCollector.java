@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation and others.
+ * Copyright (c) 2022, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,6 +20,7 @@ import java.util.List;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
@@ -53,7 +54,7 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
                 // If the argument supplied to a createPointer invocation is a String literal and is neither an empty String
                 // or a sequence of '/' prefixed tokens, a diagnostic highlighting the invalid argument is created.
                 Range range = PositionUtils.toNameRange(arg);
-                Diagnostic diagnostic = new Diagnostic(range, JsonpConstants.CREATE_POINTER_ERROR_MESSAGE);
+                Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("CreatePointerErrorMessage"));
                 completeDiagnostic(diagnostic, JsonpConstants.DIAGNOSTIC_CODE_CREATE_POINTER);
                 diagnostics.add(diagnostic);
             }

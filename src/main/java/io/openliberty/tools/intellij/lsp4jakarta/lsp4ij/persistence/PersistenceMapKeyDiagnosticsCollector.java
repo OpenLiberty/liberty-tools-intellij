@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation, Ankush Sharma and others.
+ * Copyright (c) 2020, 2023 IBM Corporation, Ankush Sharma and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -66,7 +67,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                     if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
                         // A single field cannot have the same
                         diagnostics.add(createDiagnostic(method, unit,
-                                "@MapKeyClass and @MapKey annotations cannot be used on the same field or property",
+                                Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
                                 PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
                                 DiagnosticSeverity.Error));
                     }
@@ -101,7 +102,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                     if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
                         // A single field cannot have the same
                         diagnostics.add(createDiagnostic(field, unit,
-                                "@MapKeyClass and @MapKey annotations cannot be used on the same field or property",
+                                Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
                                 PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
                                 DiagnosticSeverity.Error));
                     }
@@ -115,7 +116,9 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
 
     private void validateMapKeyJoinColumnAnnotations(List<PsiAnnotation> annotations, PsiElement element,
                                                      PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String prefix = (element instanceof PsiMethod) ? "A method " : "A field ";
+        String message = (element instanceof PsiMethod) ?
+                Messages.getMessage("MultipleMapKeyJoinColumnMethod") :
+                Messages.getMessage("MultipleMapKeyJoinColumnField");
         annotations.forEach(annotation -> {
             boolean allNamesSpecified, allReferencedColumnNameSpecified;
             List<PsiNameValuePair> memberValues = Arrays.asList(annotation.getParameterList().getAttributes());
@@ -124,8 +127,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             allReferencedColumnNameSpecified = memberValues.stream()
                     .anyMatch((mv) -> mv.getName().equals(PersistenceConstants.REFERENCEDCOLUMNNAME));
             if (!allNamesSpecified || !allReferencedColumnNameSpecified) {
-                diagnostics.add(createDiagnostic(element, unit, prefix
-                                + "with multiple @MapKeyJoinColumn annotations must specify both the name and referencedColumnName attributes in the corresponding @MapKeyJoinColumn annotations.",
+                diagnostics.add(createDiagnostic(element, unit, message,
                         PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES, null, DiagnosticSeverity.Error));
             }
         });

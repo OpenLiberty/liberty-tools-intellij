@@ -23,7 +23,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 

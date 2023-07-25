@@ -21,6 +21,7 @@ import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.DeleteAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -131,16 +132,16 @@ public class RemoveAnnotationConflictQuickFix {
     }
 
     private static String getLabel(String[] annotations) {
-        StringBuilder name = new StringBuilder("Remove ");
+        StringBuilder list = new StringBuilder();
         for (int i = 0; i < annotations.length; i++) {
             String annotation = annotations[i];
             String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
             if (i > 0) {
-                name.append(", ");
+                list.append(", "); // assume comma list is ok: @A, @B, @C
             }
-            name.append("@");
-            name.append(annotationName);
+            list.append("@"); // Java syntax
+            list.append(annotationName);
         }
-        return name.toString();
+        return Messages.getMessage("RemoveItem", list.toString());
     }
 }
