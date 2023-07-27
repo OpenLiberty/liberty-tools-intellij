@@ -83,7 +83,7 @@ public class PropertiesManagerForJava {
     private final DiagnosticsHandler diagnosticsHandler;
 
     private PropertiesManagerForJava() {
-        this.codeActionHandler = new CodeActionHandler();
+        this.codeActionHandler = new CodeActionHandler("mp");
         this.diagnosticsHandler = new DiagnosticsHandler("mp");
     }
 
