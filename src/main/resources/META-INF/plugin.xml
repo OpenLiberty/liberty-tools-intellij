@@ -123,34 +123,49 @@
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
 
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.NoValueAssignedToPropertyQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-health#ImplementHealthCheck"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.ImplementHealthCheckQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-health#HealthAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.HealthAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-metrics#ApplicationScopedAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-restclient#InjectAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-restclient#RestClientAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-restclient#InjectAndRestClientAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
+                                   group="mp"
                                    targetDiagnostic="microprofile-restclient#RegisterRestClientAnnotationMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix"/>
         <javaCodeActionParticipant kind="source"
+                                   group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jax_rs#NonPublicResourceMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NonPublicResourceMethodQuickFix"/>
 
         <configSourceProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>

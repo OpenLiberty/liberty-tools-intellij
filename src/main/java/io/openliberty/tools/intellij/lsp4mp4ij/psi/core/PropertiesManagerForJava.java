@@ -87,7 +87,7 @@ public class PropertiesManagerForJava {
     private final CodeActionHandler codeActionHandler;
 
     private PropertiesManagerForJava() {
-        this.codeActionHandler = new CodeActionHandler();
+        this.codeActionHandler = new CodeActionHandler("mp");
     }
 
     /**
