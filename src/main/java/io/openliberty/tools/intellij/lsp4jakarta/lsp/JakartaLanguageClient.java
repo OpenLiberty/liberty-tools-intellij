@@ -19,7 +19,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
+import org.eclipse.lsp4ij.LanguageClientImpl;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;

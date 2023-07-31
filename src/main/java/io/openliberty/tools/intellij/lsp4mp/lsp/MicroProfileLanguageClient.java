@@ -24,7 +24,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
+import org.eclipse.lsp4ij.LanguageClientImpl;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.CodeAction;

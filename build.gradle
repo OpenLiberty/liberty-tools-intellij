@@ -41,7 +41,6 @@ repositories {
     maven {
         url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
     }
-
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -77,6 +76,7 @@ dependencies {
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
+    implementation 'org.eclipse.lsp4ij:org.eclipse.lsp4ij:0.0.1'
 
     // Test: basics.
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
@@ -115,6 +115,9 @@ dependencies {
     }
     implementation files(new File(buildDir, 'server')) {
         builtBy 'copyDeps'
+    }
+    lsp('org.eclipse.lsp4ij:org.eclipse.lsp4ij:0.0.1') {
+        transitive = false
     }
 }
 

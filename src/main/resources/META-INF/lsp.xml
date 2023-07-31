@@ -12,9 +12,9 @@
     <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
     <extensionPoints>
         <extensionPoint name="server"
-                        beanClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.ServerExtensionPointBean"/>
+                        beanClass="org.eclipse.lsp4ij.ServerExtensionPointBean"/>
         <extensionPoint name="languageMapping"
-                        beanClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageMappingExtensionPointBean"/>
+                        beanClass="org.eclipse.lsp4ij.LanguageMappingExtensionPointBean"/>
     </extensionPoints>
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!-- MicroProfile LS -->
@@ -57,40 +57,40 @@
 
         <!-- Completion support for all language servers -->
         <completion.contributor id="LSPCompletionContributor" language="any"
-                                implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.completion.LSContentAssistProcessor"
+                                implementationClass="org.eclipse.lsp4ij.operations.completion.LSContentAssistProcessor"
                                 order="first"/>
 
         <!-- Diagnostic support for all language servers -->
         <inspectionToolProvider
-                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
-        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
+                implementation="org.eclipse.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
+        <projectService serviceImplementation="org.eclipse.lsp4ij.LanguageServiceAccessor"/>
         <!-- TODO re-enable goto handler -->
         <!-- <gotoDeclarationHandler
-                implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
+                implementation="org.eclipse.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
 
         <!-- Hover for LemMinX + Liberty LemMinX ext -->
         <lang.documentationProvider id="LSPTextHoverXML" language="XML"
-                                    implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
         <!-- Hover for Liberty Config LS bootstrap.properties and LSP4MP microprofile-config.properties -->
         <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
-                                    implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
         <!-- Hover for Java files, LSP4MP and LSP4Jakarta -->
         <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA"
-                                    implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.hover.LSPTextHover"
+                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
         <codeInsight.inlayProvider language="JAVA"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codelens.LSPInlayProvider"/>
-        <externalAnnotator language="XML" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="TEXT" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="Properties" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="JAVA" implementationClass="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+                                   implementationClass="org.eclipse.lsp4ij.operations.codelens.LSPInlayProvider"/>
+        <externalAnnotator language="XML" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="TEXT" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="Properties" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
+        <externalAnnotator language="JAVA" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
     </extensions>
 
     <project-components>
         <component>
-            <implementation-class>io.openliberty.tools.intellij.lsp4mp.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
+            <implementation-class>org.eclipse.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
         </component>
     </project-components>
 </idea-plugin>

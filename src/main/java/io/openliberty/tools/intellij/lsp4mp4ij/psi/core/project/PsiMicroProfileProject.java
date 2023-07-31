@@ -13,7 +13,7 @@ import com.intellij.openapi.compiler.CompilerPaths;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.DocumentContentSynchronizer;
+import org.eclipse.lsp4ij.DocumentContentSynchronizer;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.project.ConfigSourcePropertiesProvider;
 import org.eclipse.lsp4mp.commons.utils.ConfigSourcePropertiesProviderUtils;
 import org.eclipse.lsp4mp.commons.utils.IConfigSourcePropertiesProvider;
