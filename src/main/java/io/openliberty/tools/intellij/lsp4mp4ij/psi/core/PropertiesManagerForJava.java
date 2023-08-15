@@ -14,10 +14,7 @@ import com.intellij.lang.jvm.JvmParameter;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -27,6 +24,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLensContext;
@@ -34,8 +32,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCom
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.JavaCompletionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.JavaDefinitionContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.JavaHoverContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
@@ -51,10 +47,8 @@ import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeLensParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaCompletionParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDefinitionParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsSettings;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaHoverParams;
-import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
@@ -86,8 +80,11 @@ public class PropertiesManagerForJava {
 
     private final CodeActionHandler codeActionHandler;
 
+    private final DiagnosticsHandler diagnosticsHandler;
+
     private PropertiesManagerForJava() {
         this.codeActionHandler = new CodeActionHandler();
+        this.diagnosticsHandler = new DiagnosticsHandler("mp");
     }
 
     /**
@@ -285,53 +282,7 @@ public class PropertiesManagerForJava {
      * @return diagnostics for the given uris list.
      */
     public List<PublishDiagnosticsParams> diagnostics(MicroProfileJavaDiagnosticsParams params, IPsiUtils utils) {
-        List<String> uris = params.getUris();
-        if (uris == null) {
-            return Collections.emptyList();
-        }
-        DocumentFormat documentFormat = params.getDocumentFormat();
-        List<PublishDiagnosticsParams> publishDiagnostics = new ArrayList<PublishDiagnosticsParams>();
-        for (String uri : uris) {
-            List<Diagnostic> diagnostics = new ArrayList<>();
-            PublishDiagnosticsParams publishDiagnostic = new PublishDiagnosticsParams(uri, diagnostics);
-            publishDiagnostics.add(publishDiagnostic);
-            collectDiagnostics(uri, utils, documentFormat, params.getSettings(), diagnostics);
-        }
-        return publishDiagnostics;
-    }
-
-    private void collectDiagnostics(String uri, IPsiUtils utils, DocumentFormat documentFormat,
-                                    MicroProfileJavaDiagnosticsSettings settings, List<Diagnostic> diagnostics) {
-        PsiFile typeRoot = ApplicationManager.getApplication().runReadAction((Computable<PsiFile>) () -> resolveTypeRoot(uri, utils));
-        if (typeRoot == null) {
-            return;
-        }
-
-        try {
-            Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
-            DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
-                // Collect all adapted diagnostics participant
-                JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
-                List<IJavaDiagnosticsParticipant> definitions = IJavaDiagnosticsParticipant.EP_NAME.extensions()
-                        .filter(definition -> definition.isAdaptedForDiagnostics(context))
-                        .collect(Collectors.toList());
-                if (definitions.isEmpty()) {
-                    return;
-                }
-
-                // Begin, collect, end participants
-                definitions.forEach(definition -> definition.beginDiagnostics(context));
-                definitions.forEach(definition -> {
-                    List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
-                    if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
-                        diagnostics.addAll(collectedDiagnostics);
-                    }
-                });
-                definitions.forEach(definition -> definition.endDiagnostics(context));
-            });
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
+        return diagnosticsHandler.collectDiagnostics(params, utils);
     }
 
     /**

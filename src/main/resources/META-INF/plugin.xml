@@ -35,7 +35,7 @@
         <extensionPoint name="javaHoverParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
         <extensionPoint name="javaDiagnosticsParticipant"
-                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant"/>
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.corrections.JavaDiagnosticsDefinition"/>
         <extensionPoint name="projectLabelProvider"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
         <extensionPoint name="javaDefinitionParticipant"
@@ -93,14 +93,63 @@
         <javaHoverParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigHoverParticipant"/>
 
+        <!-- MicroProfile Diagnostic Participants -->
         <javaDiagnosticsParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTDiagnosticsParticipant"/>
         <javaDiagnosticsParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java.MicroProfileHealthDiagnosticsParticipant"/>
         <javaDiagnosticsParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant"/>
         <javaDiagnosticsParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant"/>
+
+        <!-- Jakarta Diagnostic Participants -->
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSClassDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonp.JsonpDiagnosticCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceMapKeyDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector"/>
 
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>

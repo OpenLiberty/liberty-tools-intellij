@@ -13,12 +13,16 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
@@ -28,7 +32,7 @@ import org.eclipse.lsp4j.Range;
  * Abstract class for collecting Java diagnostics.
  *
  */
-public class AbstractDiagnosticsCollector implements DiagnosticsCollector {
+public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollector, IJavaDiagnosticsParticipant {
 
     /**
      * Constructor
@@ -82,6 +86,25 @@ public class AbstractDiagnosticsCollector implements DiagnosticsCollector {
             diagnostic.setCode(code);
         diagnostic.setSeverity(severity);
         return diagnostic;
+    }
+
+    /**
+     * Collect diagnostics according to the context.
+     *
+     * @param context the java diagnostics context
+     *
+     * @return diagnostics list and null otherwise.
+     *
+     */
+    @Override
+    public final List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
+        PsiFile typeRoot = context.getTypeRoot();
+        if (typeRoot instanceof PsiJavaFile) {
+            List<Diagnostic> diagnostics = new ArrayList<>();
+            collectDiagnostics((PsiJavaFile) typeRoot, diagnostics);
+            return diagnostics;
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -301,4 +324,5 @@ public class AbstractDiagnosticsCollector implements DiagnosticsCollector {
     protected static boolean isConstructorMethod(PsiMethod m) {
         return m.isConstructor();
     }
+
 }
