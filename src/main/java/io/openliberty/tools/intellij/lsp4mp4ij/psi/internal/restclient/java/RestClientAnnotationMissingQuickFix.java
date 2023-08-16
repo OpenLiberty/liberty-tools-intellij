@@ -15,6 +15,8 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientErrorCode;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 /**
  * QuickFix for fixing
@@ -39,4 +41,8 @@ public class RestClientAnnotationMissingQuickFix extends InsertAnnotationMissing
 		return RestClientAnnotationMissingQuickFix.class.getName();
 	}
 
+	@Override
+	protected MicroProfileCodeActionId getCodeActionId() {
+		return MicroProfileCodeActionId.InsertRestClientAnnotation;
+	}
 }

@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.InsertAnnotationAttributeQuickFix;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 /**
  * QuickFix for fixing
@@ -37,6 +38,11 @@ public class InsertDefaultValueAnnotationAttributeQuickFix extends InsertAnnotat
 	@Override
 	public String getParticipantId() {
 		return InsertDefaultValueAnnotationAttributeQuickFix.class.getName();
+	}
+
+	@Override
+	protected MicroProfileCodeActionId getCodeActionId() {
+		return MicroProfileCodeActionId.ConfigPropertyInsertDefaultValue;
 	}
 
 }

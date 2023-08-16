@@ -13,10 +13,8 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java;
 
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
@@ -66,7 +64,7 @@ public class ChangeUtil {
 			return;
 		}
 
-		io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.TextEditConverter converter = new io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.TextEditConverter(unit, edit, uri, utils);
+		TextEditConverter converter = new TextEditConverter(unit, edit, uri, utils);
 		if (resourceOperationSupported) {
 			List<Either<TextDocumentEdit, ResourceOperation>> changes = root.getDocumentChanges();
 			if (changes == null) {

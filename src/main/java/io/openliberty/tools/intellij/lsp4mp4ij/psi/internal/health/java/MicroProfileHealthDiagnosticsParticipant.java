@@ -30,12 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.LIVENESS_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.MicroProfileHealthConstants.READINESS_ANNOTATION;
-
 /**
  *
  * MicroProfile Health Diagnostics:
@@ -68,7 +62,7 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 		// Collection of diagnostics for MicroProfile Health is done only if
 		// microprofile-health is on the classpath
 		Module javaProject = context.getJavaProject();
-		return PsiTypeUtils.findType(javaProject, HEALTH_CHECK_INTERFACE) != null;
+		return PsiTypeUtils.findType(javaProject, MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE) != null;
 	}
 
 	@Override
@@ -99,10 +93,8 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 		DocumentFormat documentFormat = context.getDocumentFormat();
 		PsiClass[] interfaces = findImplementedInterfaces(classType);
 		boolean implementsHealthCheck = Stream.of(interfaces)
-				.anyMatch(interfaceType -> HEALTH_CHECK_INTERFACE_NAME.equals(interfaceType.getName()));
-		boolean hasOneOfHealthAnnotation = AnnotationUtils.hasAnnotation(classType, LIVENESS_ANNOTATION)
-				|| AnnotationUtils.hasAnnotation(classType, READINESS_ANNOTATION)
-				|| AnnotationUtils.hasAnnotation(classType, HEALTH_ANNOTATION);
+				.anyMatch(interfaceType -> MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE_NAME.equals(interfaceType.getName()));
+		boolean hasOneOfHealthAnnotation = AnnotationUtils.hasAnyAnnotation(classType, MicroProfileHealthConstants.LIVENESS_ANNOTATION, MicroProfileHealthConstants.READINESS_ANNOTATION, MicroProfileHealthConstants.HEALTH_ANNOTATION);
 		// Diagnostic 1:display Health annotation diagnostic message if
 		// Health/Liveness/Readiness annotation exists but HealthCheck interface is not
 		// implemented
@@ -135,7 +127,7 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 			message.append("`");
 		}
 		message.append(" using the @Liveness");
-		boolean hasHealth = PsiTypeUtils.findType(classType.getManager(), HEALTH_ANNOTATION) != null;
+		boolean hasHealth = PsiTypeUtils.findType(classType.getManager(), MicroProfileHealthConstants.HEALTH_ANNOTATION) != null;
 		if (!hasHealth) {
 			message.append(" or ");
 		} else {
@@ -160,7 +152,7 @@ public class MicroProfileHealthDiagnosticsParticipant implements IJavaDiagnostic
 		}
 		message.append(
 				" implementing the HealthCheck interface should use the @Liveness");
-		boolean hasHealth = PsiTypeUtils.findType(classType.getManager(), HEALTH_ANNOTATION) != null;
+		boolean hasHealth = PsiTypeUtils.findType(classType.getManager(), MicroProfileHealthConstants.HEALTH_ANNOTATION) != null;
 		if (!hasHealth) {
 			message.append(" or ");
 		} else {

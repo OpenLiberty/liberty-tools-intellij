@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -39,7 +40,6 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.isJaxRsRequestMethod;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.overlaps;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION_BASE_URI;
 
@@ -53,7 +53,7 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.Mi
 public class MicroProfileRestClientCodeLensParticipant implements IJavaCodeLensParticipant {
 
 	@Override
-	public boolean isAdaptedForCodeLens(JavaCodeLensContext context) {
+	public boolean isAdaptedForCodeLens(JavaCodeLensContext context, ProgressIndicator monitor) {
 		MicroProfileJavaCodeLensParams params = context.getParams();
 		if (!params.isUrlCodeLensEnabled()) {
 			return false;
@@ -65,7 +65,7 @@ public class MicroProfileRestClientCodeLensParticipant implements IJavaCodeLensP
 	}
 
 	@Override
-	public List<CodeLens> collectCodeLens(JavaCodeLensContext context) {
+	public List<CodeLens> collectCodeLens(JavaCodeLensContext context, ProgressIndicator monitor) {
 		PsiFile typeRoot = context.getTypeRoot();
 		PsiElement[] elements = typeRoot.getChildren();
 		IPsiUtils utils = context.getUtils();
@@ -97,7 +97,7 @@ public class MicroProfileRestClientCodeLensParticipant implements IJavaCodeLensP
 				// ignore element if method range overlaps the type range, happens for generated
 				// bytecode, i.e. with lombok
 				PsiClass parentType = PsiTreeUtil.getParentOfType(element, PsiClass.class);
-				if (parentType != null && overlaps(parentType.getNameIdentifier().getTextRange(),
+				if (parentType != null && PsiTypeUtils.overlaps(parentType.getNameIdentifier().getTextRange(),
 						((PsiMethod) element).getNameIdentifier().getTextRange())) {
 					continue;
 				}

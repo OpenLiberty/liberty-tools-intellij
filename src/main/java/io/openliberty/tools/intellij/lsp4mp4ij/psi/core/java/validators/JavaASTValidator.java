@@ -18,8 +18,8 @@ import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaErrorCode;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationAttributeRule;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationAttributeRule;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
@@ -56,7 +56,7 @@ public class JavaASTValidator extends JavaRecursiveElementVisitor implements Clo
 
 	private static final Logger LOGGER = Logger.getLogger(JavaASTValidator.class.getName());
 
-	public static final ExtensionPointName<JavaASTValidatorExtensionPointBean> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaASTValidator.validator");
+	public static final ExtensionPointName<JavaASTValidatorExtensionPointBean> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaASTValidator.validator");
 
 	private List<Diagnostic> diagnostics;
 

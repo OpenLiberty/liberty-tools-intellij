@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
- * which is available at https://www.apache.org/licenses/LICENSE-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
- *
- * Contributors:
- *     Red Hat Inc. - initial API and implementation
- *******************************************************************************/
+* Copyright (c) 2021 Red Hat Inc. and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+* which is available at https://www.apache.org/licenses/LICENSE-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+*
+* Contributors:
+*     Red Hat Inc. - initial API and implementation
+*******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations;
 
 import com.intellij.psi.JavaPsiFacade;
@@ -20,9 +20,9 @@ import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiBinaryExpression;
 import com.intellij.psi.PsiLiteral;
 import com.intellij.psi.PsiPrefixExpression;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.validators.JavaASTValidatorRegistry;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * JDT Java AST visitor which validate annotation attributes by using annotation
  * rules registered.
- *
+ * 
  * @author Angelo ZERR
  *
  */
@@ -57,11 +57,11 @@ public class AnnotationRulesJavaASTValidator extends JavaASTValidator {
 				// Validate attributes of the AST annotation
 				for (AnnotationAttributeRule attributeRule : attributeRules) {
 
-					PsiAnnotationMemberValue attributeValueExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
-							attributeRule.getAttribute());
-					if (attributeValueExpr != null) {
-						validateAnnotationAttributeValue(attributeValueExpr, attributeRule);
-					}
+						PsiAnnotationMemberValue attributeValueExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+								attributeRule.getAttribute());
+						if (attributeValueExpr != null) {
+							validateAnnotationAttributeValue(attributeValueExpr, attributeRule);
+						}
 				}
 
 			}
@@ -72,7 +72,7 @@ public class AnnotationRulesJavaASTValidator extends JavaASTValidator {
 	 * Validate the given AST attribute value expression
 	 * <code>attributeValueExpr</code> by using the given rule
 	 * <code>attributeValue</code> and create a diagnostic if there is an error.
-	 *
+	 * 
 	 * @param attributeValueExpr
 	 * @param attributeRule
 	 */

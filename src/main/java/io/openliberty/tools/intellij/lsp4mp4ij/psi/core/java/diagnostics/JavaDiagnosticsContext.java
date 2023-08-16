@@ -13,13 +13,13 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiFile;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.AbstractJavaContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 
 import org.eclipse.lsp4mp.commons.DocumentFormat;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.AbstractJavaContext;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsSettings;
 
 import java.util.Collections;

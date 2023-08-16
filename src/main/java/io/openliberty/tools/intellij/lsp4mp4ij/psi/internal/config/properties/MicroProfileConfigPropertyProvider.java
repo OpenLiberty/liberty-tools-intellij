@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties;
 
 import com.intellij.lang.jvm.JvmMember;
 import com.intellij.openapi.module.Module;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -18,15 +19,19 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMember;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierListOwner;
+import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiVariable;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.AbstractAnnotationTypeReferencePropertiesProvider;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesCollector;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.SearchContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import org.apache.commons.lang3.StringUtils;
 
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.hasAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.findType;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.getResolvedTypeName;
 
@@ -52,7 +57,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 		if (javaElement instanceof PsiField || javaElement instanceof PsiVariable) {
 			// Generate the property only class is not annotated with @ConfigProperties
 			PsiClass classType = PsiTreeUtil.getParentOfType(javaElement, PsiClass.class);
-			boolean hasConfigPropertiesAnnotation = AnnotationUtils.hasAnnotation(classType, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION);
+			boolean hasConfigPropertiesAnnotation = hasAnnotation(classType, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION);
 			if (!hasConfigPropertiesAnnotation) {
 				collectProperty(javaElement, configPropertyAnnotation, null, false, context);
 			}
@@ -65,7 +70,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 				useFieldNameIfAnnotationIsNotPresent);
 		if (propertyName != null && !propertyName.isEmpty()) {
 			String defaultValue = configPropertyAnnotation != null
-					? AnnotationUtils.getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE)
+					? getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE)
 					: null;
 			collectProperty(javaElement, propertyName, defaultValue, context);
 		}
@@ -74,7 +79,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 	protected String getPropertyName(PsiElement javaElement, PsiAnnotation configPropertyAnnotation, String prefix,
 									 boolean useFieldNameIfAnnotationIsNotPresent) {
 		if (configPropertyAnnotation != null) {
-			return getPropertyName(AnnotationUtils.getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME),
+			return getPropertyName(getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME),
 					prefix);
 		} else if (useFieldNameIfAnnotationIsNotPresent) {
 			return getPropertyName(getName(javaElement), prefix);
@@ -124,5 +129,43 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 		super.addItemMetadata(context.getCollector(), name, type, description, sourceType, sourceField, sourceMethod, defaultValue,
 				extensionName, binary);
 	}
+
+//
+//	private void oldMethod(PsiModifierListOwner psiElement, PsiAnnotation configPropertyAnnotation, SearchContext context) {
+//		IPropertiesCollector collector = context.getCollector();
+//		String name = getAnnotationMemberValue(configPropertyAnnotation,
+//				QuarkusConstants.CONFIG_PROPERTY_ANNOTATION_NAME);
+//		if (StringUtils.isNotEmpty(name)) {
+//			String propertyTypeName = "";
+//			if (psiElement instanceof PsiField) {
+//				propertyTypeName = PsiTypeUtils.getResolvedTypeName((PsiField) psiElement);
+//			} else if (psiElement instanceof PsiMethod) {
+//				propertyTypeName = PsiTypeUtils.getResolvedResultTypeName((PsiMethod) psiElement);
+//			} else if (psiElement instanceof PsiVariable) {
+//				propertyTypeName = PsiTypeUtils.getResolvedTypeName((PsiVariable) psiElement);
+//			}
+//			PsiClass fieldClass = JavaPsiFacade.getInstance(psiElement.getProject()).findClass(propertyTypeName, GlobalSearchScope.allScope(psiElement.getProject()));
+//
+//			String type = PsiTypeUtils.getPropertyType(fieldClass, propertyTypeName);
+//			String description = null;
+//			String sourceType = PsiTypeUtils.getSourceType(psiElement);
+//			String sourceField = null;
+//			String sourceMethod = null;
+//			if (psiElement instanceof PsiField || psiElement instanceof PsiMethod) {
+//				sourceField = PsiTypeUtils.getSourceField((PsiMember) psiElement);
+//			} else if (psiElement instanceof PsiParameter) {
+//				PsiMethod method = (PsiMethod) ((PsiParameter) psiElement).getDeclarationScope();
+//					sourceMethod = PsiTypeUtils.getSourceMethod(method);
+//			}
+//			String defaultValue = getAnnotationMemberValue(configPropertyAnnotation,
+//					QuarkusConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
+//			String extensionName = null;
+//
+//			super.updateHint(collector, fieldClass);
+//
+//			addItemMetadata(collector, name, type, description, sourceType, sourceField, sourceMethod, defaultValue,
+//					extensionName, PsiTypeUtils.isBinary(psiElement));
+//		}
+//	}
 
 }

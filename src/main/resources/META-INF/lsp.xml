@@ -10,13 +10,13 @@
 
 <idea-plugin>
     <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
-    <extensionPoints>
+    <extensionPoints defaultExtensionNs="org.eclipse.lsp4ij">
         <extensionPoint name="server"
                         beanClass="org.eclipse.lsp4ij.ServerExtensionPointBean"/>
         <extensionPoint name="languageMapping"
                         beanClass="org.eclipse.lsp4ij.LanguageMappingExtensionPointBean"/>
     </extensionPoints>
-    <extensions defaultExtensionNs="open-liberty.intellij">
+    <extensions defaultExtensionNs="org.eclipse.lsp4ij">
         <!-- MicroProfile LS -->
         <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
@@ -81,7 +81,7 @@
                                     implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
                                     order="first"/>
         <codeInsight.inlayProvider language="JAVA"
-                                   implementationClass="org.eclipse.lsp4ij.operations.codelens.LSPInlayProvider"/>
+                                   implementationClass="org.eclipse.lsp4ij.operations.codelens.LSPCodelensInlayProvider"/>
         <externalAnnotator language="XML" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
         <externalAnnotator language="TEXT" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
         <externalAnnotator language="Properties" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>

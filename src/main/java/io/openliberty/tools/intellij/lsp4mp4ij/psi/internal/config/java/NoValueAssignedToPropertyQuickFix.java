@@ -13,12 +13,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
-import static org.eclipse.lsp4mp.commons.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
+import static org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,7 +27,8 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.CodeActionFactory;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+import org.eclipse.lsp4mp.ls.commons.CodeActionFactory;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
@@ -51,7 +49,8 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 /**
  * QuickFix for fixing
@@ -99,7 +98,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 				// the properties file exists
 				TextDocumentItem document = new TextDocumentItem(uri, "properties", 0, insertText);
 				CodeAction codeAction = CodeActionFactory.insert(
-						getTitle(propertyName, configSource.getConfigFileName()), new Position(0, 0), insertText,
+						getTitle(propertyName, configSource.getConfigFileName()), MicroProfileCodeActionId.AssignValueToProperty, new Position(0, 0), insertText,
 						document, diagnostic);
 				codeActions.add(codeAction);
 			}
@@ -127,8 +126,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 		String insertText = propertyName + "=" + lineSeparator;
 		TextDocumentEdit tde = insertTextEdit(new TextDocumentItem(uri, "properties", 0, insertText), insertText,
 				new Position(0, 0));
-		WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(tde)));
-		unresolved.setEdit(workspaceEdit);
+		unresolved.setEdit(new WorkspaceEdit(Collections.singletonList(Either.forLeft(tde))));
 		return unresolved;
 	}
 
@@ -144,7 +142,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 		if (diagnostic.getData() != null) {
 			// retrieve the property name from the diagnostic data
 			JsonObject data = (JsonObject) diagnostic.getData();
-			JsonElement name = data.get(DIAGNOSTIC_DATA_NAME);
+			JsonElement name = data.get(MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME);
 			if (name != null) {
 				return name.getAsString();
 			}
@@ -157,8 +155,8 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 		int offset = utils.toOffset(typeRoot, hoverPosition.getLine(), hoverPosition.getCharacter());
 		PsiElement hoverElement = typeRoot.findElementAt(offset);
 
-		PsiAnnotation configPropertyAnnotation = getAnnotation(hoverElement, CONFIG_PROPERTY_ANNOTATION);
-		return getAnnotationMemberValue(configPropertyAnnotation, CONFIG_PROPERTY_ANNOTATION_NAME);
+		PsiAnnotation configPropertyAnnotation = getAnnotation(hoverElement, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION);
+		return getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME);
 	}
 
 	private static String getTitle(String propertyName, String configFileName) {

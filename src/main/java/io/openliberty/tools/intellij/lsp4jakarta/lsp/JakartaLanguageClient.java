@@ -19,6 +19,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
+import org.eclipse.lsp4ij.IndexAwareLanguageClient;
 import org.eclipse.lsp4ij.LanguageClientImpl;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
@@ -38,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusLanguageClient.java
  * to match LSP4MP, Language Server for MicroProfile
  */
-public class JakartaLanguageClient extends LanguageClientImpl implements JakartaLanguageClientAPI, MicroProfileProjectService.Listener {
+public class JakartaLanguageClient extends IndexAwareLanguageClient implements JakartaLanguageClientAPI, MicroProfileProjectService.Listener {
   private static final Logger LOGGER = LoggerFactory.getLogger(JakartaLanguageClient.class);
 
   public JakartaLanguageClient(Project project) {
@@ -52,14 +53,14 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
     List<String> snippetContexts = classpathParams.getSnippetCtx();
     Project project = getProject();
     return runAsBackground("Computing Jakarta context",
-            () -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project));
+            monitor -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project));
   }
 
   // Support the message "jakarta/java/cursorcontext"
   @Override
   public CompletableFuture<JavaCursorContextResult> getJavaCursorContext(JakartaJavaCompletionParams params) {
     return runAsBackground("Computing Java cursor context",
-            () -> {
+            monitor -> {
               IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
               return PropertiesManagerForJakarta.getInstance().javaCursorContext(params, utils);
             });
@@ -70,14 +71,14 @@ public class JakartaLanguageClient extends LanguageClientImpl implements Jakarta
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     return runAsBackground("Computing Jakarta Java diagnostics",
-            () -> PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils));
+            monitor -> PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils));
   }
 
   // Support the message "jakarta/java/codeaction
   public CompletableFuture<List<CodeAction>> getCodeAction(JakartaJavaCodeActionParams params) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     return runAsBackground("Computing Jakarta code actions",
-            () -> PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils));
+            monitor -> PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils));
   }
 
   @Override

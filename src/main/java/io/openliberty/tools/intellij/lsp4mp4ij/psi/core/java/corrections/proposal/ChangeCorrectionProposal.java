@@ -10,11 +10,6 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal;
 
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.event.DocumentEvent;
-
-import java.util.List;
-
 public abstract class ChangeCorrectionProposal {
     private String name;
     private final String kind;

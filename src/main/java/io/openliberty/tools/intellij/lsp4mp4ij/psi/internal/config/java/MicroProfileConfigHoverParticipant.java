@@ -12,8 +12,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
 
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.PropertiesHoverParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 
 /**
  *

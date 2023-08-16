@@ -12,7 +12,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java;
 
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;

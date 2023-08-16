@@ -25,8 +25,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSource;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PropertiesConfigSource;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider;
 
 /**
  * Provides the META-INF/microprofile-config.properties configuration source

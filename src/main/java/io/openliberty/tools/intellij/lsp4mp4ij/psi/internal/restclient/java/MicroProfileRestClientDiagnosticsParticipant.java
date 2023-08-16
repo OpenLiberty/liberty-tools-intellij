@@ -21,14 +21,14 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Query;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientErrorCode;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
@@ -36,9 +36,6 @@ import org.eclipse.lsp4j.Range;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.MicroProfileRestClientConstants.REST_CLIENT_ANNOTATION;
 
 /**
  *
@@ -79,7 +76,7 @@ public class MicroProfileRestClientDiagnosticsParticipant implements IJavaDiagno
 		// Collection of diagnostics for MicroProfile RestClient is done only if
 		// microprofile-rest-client is on the classpath
 		Module javaProject = context.getJavaProject();
-		return PsiTypeUtils.findType(javaProject, REST_CLIENT_ANNOTATION) != null;
+		return PsiTypeUtils.findType(javaProject, MicroProfileRestClientConstants.REST_CLIENT_ANNOTATION) != null;
 	}
 
 	@Override
@@ -118,11 +115,16 @@ public class MicroProfileRestClientDiagnosticsParticipant implements IJavaDiagno
 	private static void validateField(PsiField field, List<Diagnostic> diagnostics, JavaDiagnosticsContext context) {
 		String uri = context.getUri();
 		DocumentFormat documentFormat = context.getDocumentFormat();
-		boolean hasInjectAnnotation = AnnotationUtils.hasAnnotation(field, MicroProfileConfigConstants.INJECT_ANNOTATION);
-		boolean hasRestClientAnnotation = AnnotationUtils.hasAnnotation(field, REST_CLIENT_ANNOTATION);
+		boolean hasInjectAnnotation = AnnotationUtils.hasAnyAnnotation(field, MicroProfileConfigConstants.INJECT_JAVAX_ANNOTATION, MicroProfileConfigConstants.INJECT_JAKARTA_ANNOTATION);
+		boolean hasRestClientAnnotation = AnnotationUtils.hasAnnotation(field, MicroProfileRestClientConstants.REST_CLIENT_ANNOTATION);
 		String fieldTypeName = PsiTypeUtils.getResolvedTypeName(field);
 		PsiClass fieldType = PsiTypeUtils.findType(field.getManager(), fieldTypeName);
-		boolean hasRegisterRestClient = AnnotationUtils.hasAnnotation(fieldType, REGISTER_REST_CLIENT_ANNOTATION)
+		if (fieldType == null) {
+			// document is in invalid state? better bail now.
+			// See https://github.com/redhat-developer/intellij-quarkus/issues/823
+			return;
+		}
+		boolean hasRegisterRestClient = AnnotationUtils.hasAnnotation(fieldType, MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION)
 				&& fieldType.isInterface();
 
 		if (!hasRegisterRestClient) {
@@ -191,7 +193,7 @@ public class MicroProfileRestClientDiagnosticsParticipant implements IJavaDiagno
 
 	private static void validateInterfaceType(PsiClass interfaceType, List<Diagnostic> diagnostics,
 			JavaDiagnosticsContext context) {
-		boolean hasRegisterRestClient = AnnotationUtils.hasAnnotation(interfaceType, REGISTER_REST_CLIENT_ANNOTATION);
+		boolean hasRegisterRestClient = AnnotationUtils.hasAnnotation(interfaceType, MicroProfileRestClientConstants.REGISTER_REST_CLIENT_ANNOTATION);
 		if (hasRegisterRestClient) {
 			return;
 		}
@@ -199,11 +201,10 @@ public class MicroProfileRestClientDiagnosticsParticipant implements IJavaDiagno
 		final AtomicInteger nbReferences = new AtomicInteger(0);
 		Query<PsiReference> query = ReferencesSearch.search(interfaceType, createSearchScope(context.getJavaProject()));
 		query.forEach(match -> {
-			PsiElement o = PsiTreeUtil.getParentOfType(match.getElement(), PsiField.class);
-			if (o instanceof PsiField) {
-				PsiField field = (PsiField) o;
-				boolean hasInjectAnnotation = AnnotationUtils.hasAnnotation(field, MicroProfileConfigConstants.INJECT_ANNOTATION);
-				boolean hasRestClientAnnotation = AnnotationUtils.hasAnnotation(field, REST_CLIENT_ANNOTATION);
+			PsiField field = PsiTreeUtil.getParentOfType(match.getElement(), PsiField.class);
+			if (field != null) {
+				boolean hasInjectAnnotation = AnnotationUtils.hasAnyAnnotation(field, MicroProfileConfigConstants.INJECT_JAVAX_ANNOTATION, MicroProfileConfigConstants.INJECT_JAKARTA_ANNOTATION);
+				boolean hasRestClientAnnotation = AnnotationUtils.hasAnnotation(field, MicroProfileRestClientConstants.REST_CLIENT_ANNOTATION);
 				if (hasInjectAnnotation && hasRestClientAnnotation) {
 					nbReferences.incrementAndGet();
 				}

@@ -21,7 +21,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLiteral;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiNameValuePair;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 

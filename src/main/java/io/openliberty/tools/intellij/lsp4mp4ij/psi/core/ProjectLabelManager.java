@@ -11,13 +11,11 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
@@ -90,12 +88,10 @@ public class ProjectLabelManager {
 		try {
 			VirtualFile file = utils.findFile(params.getUri());
 			if (file == null) {
-				// The uri doesn't belong to an Eclipse project
+				// The uri doesn't belong to an IDEA project
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}
-			Module module = ApplicationManager.getApplication().runReadAction((Computable<Module>) () -> {
-				return utils.getModule(file);
-			});
+			Module module = utils.getModule(file);
 			if (module == null) {
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}

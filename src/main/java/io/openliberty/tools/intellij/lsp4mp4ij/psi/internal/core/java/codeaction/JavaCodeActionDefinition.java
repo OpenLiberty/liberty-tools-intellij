@@ -19,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
-import com.intellij.openapi.extensions.RequiredElement;
 import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
@@ -37,18 +36,15 @@ import org.jetbrains.annotations.Nullable;
 public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeActionParticipant>
 		implements IJavaCodeActionParticipant {
 
-	public static final ExtensionPointName<JavaCodeActionDefinition> EP = ExtensionPointName.create("open-liberty.intellij.javaCodeActionParticipant");
+	public static final ExtensionPointName<JavaCodeActionDefinition> EP = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaCodeActionParticipant");
 
 	private static final Logger LOGGER = Logger.getLogger(JavaCodeActionDefinition.class.getName());
-	private static final String KIND_ATTR = "kind";
-	private static final String TARGET_DIAGNOSTIC_ATTR = "targetDiagnostic";
 
 	@Attribute("kind")
-	private String kind;
+	public String kind;
 
-	@Attribute(TARGET_DIAGNOSTIC_ATTR)
-	@RequiredElement
-	private String targetDiagnostic;
+	@Attribute("targetDiagnostic")
+	public String targetDiagnostic;
 
 	@Attribute("implementationClass")
 	public String implementationClass;

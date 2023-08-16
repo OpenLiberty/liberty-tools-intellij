@@ -14,8 +14,8 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover;
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.AbstractJavaContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.AbstractJavaContext;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.eclipse.lsp4j.Position;
 

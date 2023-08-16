@@ -19,14 +19,15 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiModifierListOwner;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.SearchContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.findType;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.getResolvedTypeName;
 
@@ -135,7 +136,7 @@ public class MicroProfileConfigPropertiesProvider extends MicroProfileConfigProp
 	}
 
 	private static String getPrefixFromAnnotation(PsiAnnotation configPropertiesAnnotation) {
-		String prefix = AnnotationUtils.getAnnotationMemberValue(configPropertiesAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_PREFIX);
+		String prefix = getAnnotationMemberValue(configPropertiesAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_PREFIX);
 		return prefix == null || MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_UNCONFIGURED_PREFIX.equals(prefix) ? null : prefix;
 	}
 
@@ -153,12 +154,12 @@ public class MicroProfileConfigPropertiesProvider extends MicroProfileConfigProp
 				PsiClass fieldClass = PsiTypeUtils.findType(child.getManager(), fieldTypeName);
 				if (PsiTypeUtils.isSimpleFieldType(fieldClass, fieldTypeName)) {
 					// Java simple type (int, String, etc...) generate a property.
-					PsiAnnotation configPropertyAnnotation = AnnotationUtils.getAnnotation(child,
+					PsiAnnotation configPropertyAnnotation = getAnnotation(child,
 							MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION);
 					super.collectProperty((PsiModifierListOwner) child, configPropertyAnnotation, prefix, true, context);
 				} else {
 					// Class type, generate properties from this class type.
-					PsiAnnotation configPropertyAnnotation = AnnotationUtils.getAnnotation(child,
+					PsiAnnotation configPropertyAnnotation = getAnnotation(child,
 							MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION);
 					String propertyName = super.getPropertyName(child, configPropertyAnnotation, prefix, true);
 					populateConfigObject(fieldClass, propertyName, typesAlreadyProcessed, context);

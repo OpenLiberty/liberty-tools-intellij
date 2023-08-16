@@ -18,12 +18,12 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PositionUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
@@ -31,12 +31,15 @@ import org.eclipse.lsp4mp.commons.DocumentFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.DEPENDENT_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.DIAGNOSTIC_SOURCE;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.GAUGE_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.METRIC_ID;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.REQUEST_SCOPED_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.SESSION_SCOPED_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.REQUEST_SCOPED_JAVAX_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.SESSION_SCOPED_JAVAX_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.DEPENDENT_JAVAX_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.REQUEST_SCOPED_JAKARTA_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.SESSION_SCOPED_JAKARTA_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants.DEPENDENT_JAKARTA_ANNOTATION;
 
 /**
  * 
@@ -88,9 +91,8 @@ public class MicroProfileMetricsDiagnosticsParticipant implements IJavaDiagnosti
 		String uri = context.getUri();
 		IPsiUtils utils = context.getUtils();
 		DocumentFormat documentFormat = context.getDocumentFormat();
-		boolean hasInvalidScopeAnnotation = AnnotationUtils.hasAnnotation(classType, REQUEST_SCOPED_ANNOTATION)
-				|| AnnotationUtils.hasAnnotation(classType, SESSION_SCOPED_ANNOTATION)
-				|| AnnotationUtils.hasAnnotation(classType, DEPENDENT_ANNOTATION);
+		boolean hasInvalidScopeAnnotation = AnnotationUtils.hasAnyAnnotation(classType, REQUEST_SCOPED_JAVAX_ANNOTATION, SESSION_SCOPED_JAVAX_ANNOTATION, DEPENDENT_JAVAX_ANNOTATION,
+																						REQUEST_SCOPED_JAKARTA_ANNOTATION, SESSION_SCOPED_JAKARTA_ANNOTATION, DEPENDENT_JAKARTA_ANNOTATION);
 		// check for Gauge annotation for Diagnostic 1 only if the class has an invalid
 		// scope annotation
 		if (hasInvalidScopeAnnotation) {

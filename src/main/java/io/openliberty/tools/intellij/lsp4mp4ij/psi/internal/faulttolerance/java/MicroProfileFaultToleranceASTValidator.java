@@ -23,11 +23,9 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.text.MessageFormat;
@@ -42,6 +40,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.COMPLETION_STAGE_TYPE_UTILITY;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.FUTURE_TYPE_UTILITY;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.UNI_TYPE_UTILITY;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValueExpression;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.ASYNCHRONOUS_ANNOTATION;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.DELAY_RETRY_ANNOTATION_MEMBER;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.DELAY_UNIT_RETRY_ANNOTATION_MEMBER;
@@ -53,6 +57,9 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttoleranc
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.JITTER_RETRY_ANNOTATION_MEMBER;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.MAX_DURATION_RETRY_ANNOTATION_MEMBER;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.RETRY_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceErrorCode.DELAY_EXCEEDS_MAX_DURATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceErrorCode.FALLBACK_METHOD_DOES_NOT_EXIST;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceErrorCode.FAULT_TOLERANCE_DEFINITION_EXCEPTION;
 
 /**
  * Collects diagnostics related to the <code>@Fallback</code> and
@@ -76,7 +83,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 		super();
 		this.methodsCache = new HashMap<>();
 		this.allowedReturnTypesForAsynchronousAnnotation = new HashSet<>(
-				Arrays.asList(MicroProfileConfigConstants.FUTURE_TYPE_UTILITY, MicroProfileConfigConstants.COMPLETION_STAGE_TYPE_UTILITY));
+				Arrays.asList(FUTURE_TYPE_UTILITY, COMPLETION_STAGE_TYPE_UTILITY));
 	}
 
 	@Override
@@ -86,7 +93,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 				|| PsiTypeUtils.findType(javaProject, ASYNCHRONOUS_ANNOTATION) != null
 				|| PsiTypeUtils.findType(javaProject, RETRY_ANNOTATION) != null;
 		if (adapted) {
-			addAllowedReturnTypeForAsynchronousAnnotation(javaProject, MicroProfileConfigConstants.UNI_TYPE_UTILITY);
+			addAllowedReturnTypeForAsynchronousAnnotation(javaProject, UNI_TYPE_UTILITY);
 		}
 		return adapted;
 	}
@@ -99,19 +106,19 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 
 	@Override
 	public void visitMethod(PsiMethod node) {
-		validateMethod(node);
+			validateMethod(node);
 	}
 
 	@Override
 	public void visitClass(PsiClass type) {
 		for (PsiAnnotation annotation : type.getAnnotations()) {
-			if (AnnotationUtils.isMatchAnnotation(annotation, ASYNCHRONOUS_ANNOTATION)) {
+			if (isMatchAnnotation(annotation, ASYNCHRONOUS_ANNOTATION)) {
 				PsiMethod[] methods = type.getMethods();
 				for (PsiMethod node : methods) {
 					validateAsynchronousAnnotation(node, annotation);
 				}
 				break;
-			} else if (AnnotationUtils.isMatchAnnotation(annotation, RETRY_ANNOTATION)) {
+			} else if (isMatchAnnotation(annotation, RETRY_ANNOTATION)) {
 				validateRetryAnnotation(annotation);
 			}
 		}
@@ -126,11 +133,11 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	 */
 	private void validateMethod(PsiMethod node) {
 		for (PsiAnnotation annotation : node.getAnnotations()) {
-			if (AnnotationUtils.isMatchAnnotation(annotation, FALLBACK_ANNOTATION)) {
+			if (isMatchAnnotation(annotation, FALLBACK_ANNOTATION)) {
 				validateFallbackAnnotation(node, annotation);
-			} else if (AnnotationUtils.isMatchAnnotation(annotation, ASYNCHRONOUS_ANNOTATION)) {
+			} else if (isMatchAnnotation(annotation, ASYNCHRONOUS_ANNOTATION)) {
 				validateAsynchronousAnnotation(node, annotation);
-			} else if (AnnotationUtils.isMatchAnnotation(annotation, RETRY_ANNOTATION)) {
+			} else if (isMatchAnnotation(annotation, RETRY_ANNOTATION)) {
 				validateRetryAnnotation(annotation);
 			}
 		}
@@ -144,14 +151,14 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	 * @param annotation The @Fallback annotation
 	 */
 	private void validateFallbackAnnotation(PsiMethod node, PsiAnnotation annotation) {
-		PsiAnnotationMemberValue fallbackMethodExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+		PsiAnnotationMemberValue fallbackMethodExpr = getAnnotationMemberValueExpression(annotation,
 				FALLBACK_METHOD_FALLBACK_ANNOTATION_MEMBER);
 		if (fallbackMethodExpr != null) {
-			String fallbackMethodName = AnnotationUtils.getAnnotationMemberValue(annotation, FALLBACK_METHOD_FALLBACK_ANNOTATION_MEMBER);
+			String fallbackMethodName = getAnnotationMemberValue(annotation, FALLBACK_METHOD_FALLBACK_ANNOTATION_MEMBER);
 			//fallbackMethodName = fallbackMethodName.substring(1, fallbackMethodName.length() - 1);
 			if (!getExistingMethods(node).contains(fallbackMethodName)) {
 				String message = MessageFormat.format(FALLBACK_ERROR_MESSAGE, fallbackMethodName);
-				super.addDiagnostic(message, DIAGNOSTIC_SOURCE, fallbackMethodExpr, MicroProfileFaultToleranceErrorCode.FALLBACK_METHOD_DOES_NOT_EXIST,
+				super.addDiagnostic(message, DIAGNOSTIC_SOURCE, fallbackMethodExpr, FALLBACK_METHOD_DOES_NOT_EXIST,
 						DiagnosticSeverity.Error);
 			}
 		}
@@ -176,7 +183,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 			String allowedTypes = allowedReturnTypesForAsynchronousAnnotation.stream()
 					.collect(Collectors.joining("', '", "'", "'"));
 			String message = MessageFormat.format(ASYNCHRONOUS_ERROR_MESSAGE, node.getName(), allowedTypes);
-			super.addDiagnostic(message, DIAGNOSTIC_SOURCE, node.getReturnTypeElement(), MicroProfileFaultToleranceErrorCode.FAULT_TOLERANCE_DEFINITION_EXCEPTION,
+			super.addDiagnostic(message, DIAGNOSTIC_SOURCE, node.getReturnTypeElement(), FAULT_TOLERANCE_DEFINITION_EXCEPTION,
 					DiagnosticSeverity.Error);
 		}
 	}
@@ -188,17 +195,17 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	 * @param annotation The @Retry annotation
 	 */
 	private void validateRetryAnnotation(PsiAnnotation annotation) {
-		PsiAnnotationMemberValue delayExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation, DELAY_RETRY_ANNOTATION_MEMBER);
-		PsiAnnotationMemberValue maxDurationExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+		PsiAnnotationMemberValue delayExpr = getAnnotationMemberValueExpression(annotation, DELAY_RETRY_ANNOTATION_MEMBER);
+		PsiAnnotationMemberValue maxDurationExpr = getAnnotationMemberValueExpression(annotation,
 				MAX_DURATION_RETRY_ANNOTATION_MEMBER);
 		if (delayExpr != null && maxDurationExpr != null) {
 
-			PsiAnnotationMemberValue delayUnitExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+			PsiAnnotationMemberValue delayUnitExpr = getAnnotationMemberValueExpression(annotation,
 					DELAY_UNIT_RETRY_ANNOTATION_MEMBER);
-			PsiAnnotationMemberValue durationUnitExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+			PsiAnnotationMemberValue durationUnitExpr = getAnnotationMemberValueExpression(annotation,
 					DURATION_UNIT_RETRY_ANNOTATION_MEMBER);
-			PsiAnnotationMemberValue jitterExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation, JITTER_RETRY_ANNOTATION_MEMBER);
-			PsiAnnotationMemberValue jitterUnitExpr = AnnotationUtils.getAnnotationMemberValueExpression(annotation,
+			PsiAnnotationMemberValue jitterExpr = getAnnotationMemberValueExpression(annotation, JITTER_RETRY_ANNOTATION_MEMBER);
+			PsiAnnotationMemberValue jitterUnitExpr = getAnnotationMemberValueExpression(annotation,
 					JITTER_DELAY_UNIT_RETRY_ANNOTATION_MEMBER);
 
 			Object delayConstant = JavaPsiFacade.getInstance(getContext().getJavaProject().getProject()).getConstantEvaluationHelper().computeConstantExpression(delayExpr);
@@ -227,24 +234,20 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 				if (maxDelayValue >= maxDurationValue) {
 					super.addDiagnostic(RETRY_WARNING_MESSAGE,
 							DIAGNOSTIC_SOURCE, delayExpr,
-							MicroProfileFaultToleranceErrorCode.DELAY_EXCEEDS_MAX_DURATION,
+							DELAY_EXCEEDS_MAX_DURATION,
 							DiagnosticSeverity.Warning);
 				}
 			}
 		}
 	}
 
-	private double findDurationUnit(PsiAnnotationMemberValue memberUnitExpr,
-									long memberUnitNum) {
+	private double findDurationUnit(PsiAnnotationMemberValue memberUnitExpr, long memberUnitNum) {
 		String memberUnit = null;
-		if (memberUnitExpr != null) {
-			if (memberUnitExpr != null && memberUnitExpr instanceof PsiReferenceExpression) {
-				memberUnit = ((PsiReferenceExpression) memberUnitExpr).getReferenceName();
-			}
+		if (memberUnitExpr instanceof PsiReferenceExpression) {
+			memberUnit = ((PsiReferenceExpression) memberUnitExpr).getReferenceName();
 		}
 		return memberUnit != null
-				? getDurationInNanos(ChronoUnit.valueOf(memberUnit),
-				memberUnitNum)
+				? getDurationInNanos(ChronoUnit.valueOf(memberUnit), memberUnitNum)
 				: getDurationInNanos(ChronoUnit.MILLIS, memberUnitNum);
 	}
 

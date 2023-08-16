@@ -1,0 +1,78 @@
+/*******************************************************************************
+* Copyright (c) 2023 Red Hat Inc. and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+* which is available at https://www.apache.org/licenses/LICENSE-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+*
+* Contributors:
+*     Red Hat Inc. - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java;
+
+
+import java.util.logging.Logger;
+
+import com.intellij.openapi.module.Module;
+import com.intellij.psi.PsiAnnotation;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiType;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.MicroProfileGraphQLConstants;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
+
+/**
+ * Diagnostics for microprofile-graphql.
+ *
+ * @see https://download.eclipse.org/microprofile/microprofile-graphql-1.0/microprofile-graphql.html
+ */
+public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
+
+	private static final Logger LOGGER = Logger.getLogger(MicroProfileGraphQLASTValidator.class.getName());
+
+	private static final String NO_VOID_MESSAGE = "Methods annotated with microprofile-graphql's `@Query` cannot have 'void' as a return type.";
+	private static final String NO_VOID_MUTATION_MESSAGE = "Methods annotated with microprofile-graphql's `@Mutation` cannot have 'void' as a return type.";
+	@Override
+	public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
+		Module javaProject = context.getJavaProject();
+		// Check if microprofile-graphql is on the path
+		return PsiTypeUtils.findType(javaProject, MicroProfileGraphQLConstants.QUERY_ANNOTATION) != null;
+	}
+
+	@Override
+	public void visitMethod(PsiMethod node) {
+		validateMethod(node);
+		super.visitMethod(node);
+	}
+
+	private void validateMethod(PsiMethod node) {
+		// ignore constructors, and non-void methods for now, it's faster than iterating through all annotations
+		if (node.getReturnTypeElement() == null ||
+			!PsiType.VOID.equals(node.getReturnType())) {
+			return;
+		}
+		for (PsiAnnotation annotation : node.getAnnotations()) {
+			if (isMatchAnnotation(annotation, MicroProfileGraphQLConstants.QUERY_ANNOTATION) ) {
+				super.addDiagnostic(NO_VOID_MESSAGE, //
+						MicroProfileGraphQLConstants.DIAGNOSTIC_SOURCE, //
+						node.getReturnTypeElement(), //
+						MicroProfileGraphQLErrorCode.NO_VOID_QUERIES, //
+						DiagnosticSeverity.Error);
+			} else if (isMatchAnnotation(annotation, MicroProfileGraphQLConstants.MUTATION_ANNOTATION)) {
+				super.addDiagnostic(NO_VOID_MUTATION_MESSAGE, //
+						MicroProfileGraphQLConstants.DIAGNOSTIC_SOURCE, //
+						node.getReturnTypeElement(), //
+						MicroProfileGraphQLErrorCode.NO_VOID_MUTATIONS, //
+						DiagnosticSeverity.Error);
+			}
+		}
+	}
+
+}

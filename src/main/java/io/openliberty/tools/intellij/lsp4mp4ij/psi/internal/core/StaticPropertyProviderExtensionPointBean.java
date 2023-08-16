@@ -5,13 +5,12 @@ import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
-// import com.redhat.devtools.intellij.quarkus.lsp4ij.server.StreamConnectionProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class StaticPropertyProviderExtensionPointBean extends BaseKeyedLazyInstance<StaticPropertyProvider> {
     public static final ExtensionPointName<StaticPropertyProviderExtensionPointBean> EP_NAME =
-            ExtensionPointName.create("open-liberty.intellij.staticPropertyProvider");
+            ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.staticPropertyProvider");
 
     @Attribute("resource")
     public String resource;

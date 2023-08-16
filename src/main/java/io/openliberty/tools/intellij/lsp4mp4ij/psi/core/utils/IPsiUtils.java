@@ -42,6 +42,8 @@ public interface IPsiUtils {
 
     String getJavadoc(PsiMethod method, DocumentFormat documentFormat);
 
+    //String getJavadoc(PsiMember method, com.redhat.qute.commons.DocumentFormat documentFormat);
+
     Range toRange(PsiElement element, int offset, int length);
 
     Range toRange(Document document, int offset, int length);

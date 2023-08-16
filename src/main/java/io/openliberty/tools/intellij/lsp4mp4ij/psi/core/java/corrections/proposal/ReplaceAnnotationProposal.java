@@ -14,12 +14,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiImportStatement;
 import com.intellij.psi.PsiJavaFile;
@@ -47,7 +42,7 @@ public class ReplaceAnnotationProposal extends InsertAnnotationProposal {
 
 	@Override
 	public void performUpdate() {
-		// First delete unneeded annotation(s) then add the new one.
+		super.performUpdate();
 		PsiModifierList list = getBinding().getModifierList();
 		for(String annotationFQCN : removeAnnotations) {
 			PsiAnnotation annotation = list.findAnnotation(annotationFQCN);
@@ -62,6 +57,5 @@ public class ReplaceAnnotationProposal extends InsertAnnotationProposal {
 				annotation.delete();
 			}
 		}
-		super.performUpdate();
 	}
 }

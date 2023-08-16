@@ -26,7 +26,7 @@ import com.intellij.openapi.vfs.VirtualFile;
  */
 public interface IConfigSourceProvider {
 
-	public static final ExtensionPointName<IConfigSourceProvider> EP_NAME = ExtensionPointName.create("open-liberty.intellij.configSourceProvider");
+	public static final ExtensionPointName<IConfigSourceProvider> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.configSourceProvider");
 
 	/**
 	 * Returns a list of configuration sources for a given Java project
