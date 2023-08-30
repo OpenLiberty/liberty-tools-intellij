@@ -45,8 +45,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
-        Project project = libertyModule.getProject();
-        String projectName = project.getName();
+        String projectName = libertyModule.getName();
         final int result = Messages.showYesNoDialog(
                 LocalizedResourceUtil.getMessage("liberty.project.remove.confirmation.dialog.message", projectName),
                 getChooseDialogTitle(),
