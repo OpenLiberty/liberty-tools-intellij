@@ -56,7 +56,7 @@ public class JavaASTValidator extends JavaRecursiveElementVisitor implements Clo
 
 	private static final Logger LOGGER = Logger.getLogger(JavaASTValidator.class.getName());
 
-	public static final ExtensionPointName<JavaASTValidatorExtensionPointBean> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaASTValidator.validator");
+	public static final ExtensionPointName<JavaASTValidatorExtensionPointBean> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaASTValidator.validator");
 
 	private List<Diagnostic> diagnostics;
 

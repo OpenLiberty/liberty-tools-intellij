@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class AnnotationValidator {
 
-	public static final ExtensionPointName<AnnotationRuleExtensionPointBean> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaASTValidator.annotationValidator");
+	public static final ExtensionPointName<AnnotationRuleExtensionPointBean> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaASTValidator.annotationValidator");
 
 	private static final Logger LOGGER = Logger.getLogger(AnnotationValidator.class.getName());
 

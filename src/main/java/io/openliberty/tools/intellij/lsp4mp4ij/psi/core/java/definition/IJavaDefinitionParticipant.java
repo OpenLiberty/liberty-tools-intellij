@@ -25,7 +25,7 @@ import java.util.List;
  *
  */
 public interface IJavaDefinitionParticipant {
-	public static final ExtensionPointName<IJavaDefinitionParticipant> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaDefinitionParticipant");
+	public static final ExtensionPointName<IJavaDefinitionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaDefinitionParticipant");
 
 	/**
 	 * Returns true if definition must be collected for the given context and false

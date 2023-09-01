@@ -19,7 +19,7 @@ import com.intellij.util.Query;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/IPropertiesProvider.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/IPropertiesProvider.java</a>
  */
 public interface IPropertiesProvider {
-	public static final ExtensionPointName<IPropertiesProvider> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.propertiesProvider");
+	public static final ExtensionPointName<IPropertiesProvider> EP_NAME = ExtensionPointName.create("open-liberty.intellij.propertiesProvider");
 
 	/**
 	 * Begin the search.

@@ -23,7 +23,7 @@ import java.util.List;
  *
  */
 public interface IProjectLabelProvider {
-	public static final ExtensionPointName<IProjectLabelProvider> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.projectLabelProvider");
+	public static final ExtensionPointName<IProjectLabelProvider> EP_NAME = ExtensionPointName.create("open-liberty.intellij.projectLabelProvider");
 
 	/**
 	 * Returns a list of project labels ("maven", "microprofile", etc.) for the given project

@@ -9,40 +9,46 @@
   -->
 
 <idea-plugin>
-    <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
-    <extensionPoints defaultExtensionNs="org.eclipse.lsp4ij">
-        <extensionPoint name="server"
-                        beanClass="org.eclipse.lsp4ij.ServerExtensionPointBean"/>
-        <extensionPoint name="languageMapping"
-                        beanClass="org.eclipse.lsp4ij.LanguageMappingExtensionPointBean"/>
-    </extensionPoints>
     <extensions defaultExtensionNs="org.eclipse.lsp4ij">
         <!-- MicroProfile LS -->
         <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                label="MicroProfile Language Server">
+            <description>MicroProfile Language Server</description>
+        </server>
         <languageMapping language="Properties" serverId="lsp4mp"
                          filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
+<!--        <serverIconProvider serverId="lsp4mp" class="com.redhat.devtools.intellij.quarkus.lang.QuarkusServerIconProvider" />-->
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
         <server id="libertyXml" class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                label="Liberty XML Language Server">
+            <description>Liberty XML Language Server</description>
+        </server>
         <languageMapping language="XML" serverId="libertyXml"/>
 
         <!-- Liberty Config LS -->
         <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                label="Liberty Configuration Language Server">
+            <description>Liberty Configuration Language Server</description>
+        </server>
         <languageMapping language="Properties" serverId="libertyls"
                          filePattern="**/{src/main/liberty/config,usr/servers/**}/{bootstrap.properties,server.env}"/>
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                label="Jakarta Language Server">
+            <description>Jakarta Language Server</description>
+        </server>
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
@@ -54,43 +60,6 @@
         <!-- Suppress certain Properties language inspections on server.env files -->
         <lang.inspectionSuppressor language="Properties"
                                    implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
-
-        <!-- Completion support for all language servers -->
-        <completion.contributor id="LSPCompletionContributor" language="any"
-                                implementationClass="org.eclipse.lsp4ij.operations.completion.LSContentAssistProcessor"
-                                order="first"/>
-
-        <!-- Diagnostic support for all language servers -->
-        <inspectionToolProvider
-                implementation="org.eclipse.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
-        <projectService serviceImplementation="org.eclipse.lsp4ij.LanguageServiceAccessor"/>
-        <!-- TODO re-enable goto handler -->
-        <!-- <gotoDeclarationHandler
-                implementation="org.eclipse.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
-
-        <!-- Hover for LemMinX + Liberty LemMinX ext -->
-        <lang.documentationProvider id="LSPTextHoverXML" language="XML"
-                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
-                                    order="first"/>
-        <!-- Hover for Liberty Config LS bootstrap.properties and LSP4MP microprofile-config.properties -->
-        <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"
-                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
-                                    order="first"/>
-        <!-- Hover for Java files, LSP4MP and LSP4Jakarta -->
-        <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA"
-                                    implementationClass="org.eclipse.lsp4ij.operations.hover.LSPTextHover"
-                                    order="first"/>
-        <codeInsight.inlayProvider language="JAVA"
-                                   implementationClass="org.eclipse.lsp4ij.operations.codelens.LSPCodelensInlayProvider"/>
-        <externalAnnotator language="XML" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="TEXT" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="Properties" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
-        <externalAnnotator language="JAVA" implementationClass="org.eclipse.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>
     </extensions>
 
-    <project-components>
-        <component>
-            <implementation-class>org.eclipse.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
-        </component>
-    </project-components>
 </idea-plugin>

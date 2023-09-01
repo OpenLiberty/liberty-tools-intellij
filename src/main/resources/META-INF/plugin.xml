@@ -18,12 +18,14 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
+    <depends>org.eclipse.lsp4ij</depends>
     <idea-version since-build="231" until-build="231.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
         <projectService serviceImplementation="io.openliberty.tools.intellij.LibertyProjectSettings"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager"/>
         <configurationType implementation="io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType"/>
     </extensions>
 
@@ -52,6 +54,7 @@
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
+        <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
