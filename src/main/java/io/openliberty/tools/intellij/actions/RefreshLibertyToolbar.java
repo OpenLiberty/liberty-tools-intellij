@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
@@ -78,7 +79,8 @@ public class RefreshLibertyToolbar extends AnAction {
             }
             simpleToolWindowPanel.setToolbar(actionToolbar.getComponent());
             if (tree != null) {
-                simpleToolWindowPanel.setContent(tree);
+                JBScrollPane scrollPane = new JBScrollPane(tree);
+                simpleToolWindowPanel.setContent(scrollPane);
             } else {
                 JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
