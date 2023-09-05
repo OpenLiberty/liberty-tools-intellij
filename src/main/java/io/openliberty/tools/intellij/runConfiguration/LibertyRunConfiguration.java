@@ -119,7 +119,8 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             throw new ExecutionException(e);
         }
         // run the start dev mode action
-        AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
+        boolean isContainer = runInContainer();
+        AnAction action = ActionManager.getInstance().getAction(isContainer ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
         LibertyDevStartAction libAction = (LibertyDevStartAction) action;
 
         // set custom start params
@@ -129,7 +130,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             libertyModule.setCustomStartParams("");
         }
         // FIXME implement runInContainer checkbox from run config see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
-        // libertyModule.setRunInContainer(runInContainer());
+         libertyModule.setRunInContainer(runInContainer());
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);

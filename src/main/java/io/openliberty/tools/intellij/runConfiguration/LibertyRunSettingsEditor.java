@@ -15,10 +15,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.ui.EditorTextField;
+import com.intellij.ui.StateRestoringCheckBox;
 import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Editor associated with Liberty run & debug configurations. Defines when configuration changes are updated, default values, etc.
@@ -28,12 +31,25 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     private JPanel root;
     private LabeledComponent<EditorTextField> editableParams;
     private LabeledComponent<ComboBox> libertyModule;
+    private StateRestoringCheckBox runInContainerCheckBox;
+    private JRadioButton radioButton1;
+    private JTextField textField1;
 
+    private boolean isRunInContainerSelected = false;
     // FIXME runInContainer
-    // private LabeledComponent<StateRestoringCheckBox> runInContainer;
+//     private LabeledComponent<StateRestoringCheckBox> runInContainer;
 
     public LibertyRunSettingsEditor(Project project) {
         libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFilesAsString(project).toArray()));
+        runInContainerCheckBox.addItemListener(e -> {
+            if (e.getStateChange() == 1) {
+                isRunInContainerSelected = true;
+                fireEditorStateChanged();
+            } else {
+                isRunInContainerSelected = false;
+                fireEditorStateChanged();
+            }
+        });
     }
 
     @Override
@@ -50,6 +66,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         }
         // FIXME runInContainer state is not being saved, cannot "Apply" run in container checkbox change to run config, see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
         // runInContainer.getComponent().setSelected(configuration.runInContainer());
+        runInContainerCheckBox.setSelected(isRunInContainerSelected);
         editableParams.getComponent().setText(configuration.getParams());
     }
 
@@ -58,7 +75,10 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         configuration.setParams(editableParams.getComponent().getText());
         configuration.setBuildFile(String.valueOf(libertyModule.getComponent().getSelectedItem()));
         // FIXME runInContainer
-        // configuration.setRunInContainer(runInContainer.getComponent().isSelected());
+        configuration.setRunInContainer( true);
+        configuration.setRunInContainer( radioButton1.isSelected());
+        configuration.setParams(textField1.getText());
+         //configuration.setRunInContainer(runInContainer.getComponent().isSelected());
     }
 
     @NotNull
@@ -74,7 +94,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         editableParams = new LabeledComponent<>();
         editableParams.setComponent(new EditorTextField());
         // FIXME runInContainer
-        // runInContainer = new LabeledComponent<>();
-        // runInContainer.setComponent(new StateRestoringCheckBox());
+        runInContainerCheckBox = new StateRestoringCheckBox();
     }
 }
