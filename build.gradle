@@ -92,9 +92,6 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-launcher:1.9.3'
     testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.3'
 
-    // Test: Logging Network Calls.
-    testImplementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-
     // Test: Video Recording.
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
@@ -144,10 +141,10 @@ runIdeForUiTests {
     systemProperty "robot-server.port", "8082"
     systemProperty "ide.mac.message.dialogs.as.sheets", "false"
     systemProperty "jb.privacy.policy.text", "<!--999.999-->"
+    systemProperty "jb.consents.confirmation.enabled", "false"
     systemProperty "idea.trust.all.projects", "true"
     systemProperty "ide.show.tips.on.startup.default.value", "false"
     systemProperty "ide.mac.file.chooser.native", "false"
-    systemProperty "jb.consents.confirmation.enabled", "false"
     systemProperty "jbScreenMenuBar.enabled", "false"
     systemProperty "apple.laf.useScreenMenuBar", "false"
 }
