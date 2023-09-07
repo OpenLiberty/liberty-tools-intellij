@@ -125,8 +125,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             throw new ExecutionException(e);
         }
         // run the start dev mode action
-        boolean isContainer = runInContainer();
-        AnAction action = ActionManager.getInstance().getAction(isContainer ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
+        AnAction action = ActionManager.getInstance().getAction(runInContainer() ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
 
         // set custom start params
         if (getParams() != null) {
