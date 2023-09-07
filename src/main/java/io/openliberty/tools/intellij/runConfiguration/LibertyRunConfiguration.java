@@ -133,8 +133,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         } else {
             libertyModule.setCustomStartParams("");
         }
-        // FIXME implement runInContainer checkbox from run config see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
-         libertyModule.setRunInContainer(runInContainer());
+        libertyModule.setRunInContainer(runInContainer());
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);
