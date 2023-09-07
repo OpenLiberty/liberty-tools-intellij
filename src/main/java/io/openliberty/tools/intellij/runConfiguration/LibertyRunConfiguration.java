@@ -81,7 +81,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         getOptions().setBuildFile(buildFile);
     }
 
-    // FIXME runInContainer, see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
     public Boolean runInContainer() {
         return getOptions().runInContainer();
     }

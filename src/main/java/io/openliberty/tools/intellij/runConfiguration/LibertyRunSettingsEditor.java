@@ -30,11 +30,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     private LabeledComponent<EditorTextField> editableParams;
     private LabeledComponent<ComboBox> libertyModule;
     private StateRestoringCheckBox runInContainerCheckBox;
-    private JTextField textField1;
-
-//    private boolean isRunInContainerSelected = false;
-    // FIXME runInContainer
-//     private LabeledComponent<StateRestoringCheckBox> runInContainer;
 
     public LibertyRunSettingsEditor(Project project) {
         libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFilesAsString(project).toArray()));
@@ -52,8 +47,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
                 break;
             }
         }
-        // FIXME runInContainer state is not being saved, cannot "Apply" run in container checkbox change to run config, see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
-        // runInContainer.getComponent().setSelected(configuration.runInContainer());
         runInContainerCheckBox.setSelected(configuration.runInContainer());
         editableParams.getComponent().setText(configuration.getParams());
     }
@@ -63,10 +56,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         configuration.setParams(editableParams.getComponent().getText());
         configuration.setBuildFile(String.valueOf(libertyModule.getComponent().getSelectedItem()));
         configuration.setRunInContainer(runInContainerCheckBox.isSelected());
-
-        // FIXME runInContainer
-        configuration.setParams(textField1.getText());
-         //configuration.setRunInContainer(runInContainer.getComponent().isSelected());
     }
 
     @NotNull
@@ -81,7 +70,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         libertyModule.setComponent(comboBox);
         editableParams = new LabeledComponent<>();
         editableParams.setComponent(new EditorTextField());
-        // FIXME runInContainer
         runInContainerCheckBox = new StateRestoringCheckBox();
     }
 }
