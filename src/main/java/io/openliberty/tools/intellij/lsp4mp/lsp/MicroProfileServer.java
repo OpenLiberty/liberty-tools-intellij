@@ -34,20 +34,11 @@ public class MicroProfileServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
 
     public MicroProfileServer() {
+        super("Microprofile Server");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
         String javaHome = System.getProperty("java.home");
-        if (javaHome == null) {
-            LOGGER.error("Unable to launch the Eclipse LSP4MP language server. Could not resolve the java home system property");
-            return;
-        }
-        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            LOGGER.error("Unable to launch the Eclipse LSP4MP language server." +
-                    " Java " + Constants.REQUIRED_JAVA_VERSION + " or more recent is required to run 'Liberty Tools for IntelliJ'." +
-                    " Change the boot Java runtime of the IDE as documented here:" +
-                    " https://www.jetbrains.com/help/idea/switching-boot-jdk.html");
-            return;
-        }
+
         if (lsp4mpServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true"));

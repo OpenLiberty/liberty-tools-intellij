@@ -2,8 +2,11 @@ package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.annotation.Nullable;
+import javax.swing.*;
 import java.io.*;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +20,9 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     private List<String> commands;
     private @Nullable String workingDir;
 
-    public ProcessStreamConnectionProvider() {
+    public ProcessStreamConnectionProvider(String serverType) {
+        String javaHome = System.getProperty("java.home");
+        checkJavaHome(javaHome, serverType);
     }
 
     public ProcessStreamConnectionProvider(List<String> commands) {
@@ -159,6 +164,36 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     public String toString() {
         return "ProcessStreamConnectionProvider [commands=" + this.getCommands() + ", workingDir=" //$NON-NLS-1$//$NON-NLS-2$
                 + this.getWorkingDirectory() + "]"; //$NON-NLS-1$
+    }
+    public void checkJavaHome(String javaHome, String serverType) {
+
+        if (javaHome == null) {
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-home.null");
+            LOGGER.error(errorMessage);
+            showErrorPopup(errorMessage);
+            return;
+        }
+
+        File javaHomeDir = new File(javaHome);
+        if (!javaHomeDir.exists()) {
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.javaHomeDir.exist") + javaHome;
+            LOGGER.error(errorMessage);
+            showErrorPopup(errorMessage);
+            return;
+        }
+
+        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
+            String errorMessage =LocalizedResourceUtil.getMessage( "liberty.action.selection.dialog.java-version",Constants.REQUIRED_JAVA_VERSION,serverType);
+            LOGGER.error(errorMessage);
+            showErrorPopup(errorMessage);
+        }
+    }
+
+    private void showErrorPopup(String errorMessage) {
+        // Wrap the errorMessage in HTML tags to create a two-line popup
+        String htmlErrorMessage = "<html><body style='width: 200px; text-align: center;'>" + errorMessage + "</body></html>";
+
+        JOptionPane.showMessageDialog(null, htmlErrorMessage, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
 }

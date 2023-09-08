@@ -18,6 +18,7 @@ import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,20 +34,10 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
     private static final Logger LOGGER = LoggerFactory.getLogger(LibertyConfigLanguageServer.class);
 
     public LibertyConfigLanguageServer() {
+        super("LibertyConfigLanguageServer");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-jar-with-dependencies.jar");
         String javaHome = System.getProperty("java.home");
-        if (javaHome == null) {
-            LOGGER.error("Unable to launch the Liberty language server. Could not resolve the java home system property");
-            return;
-        }
-        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            LOGGER.error("Unable to launch the Liberty language server." +
-                    " Java " + Constants.REQUIRED_JAVA_VERSION + " or more recent is required to run 'Liberty Tools for IntelliJ'." +
-                    " Change the boot Java runtime of the IDE as documented here:" +
-                    " https://www.jetbrains.com/help/idea/switching-boot-jdk.html");
-            return;
-        }
         if (libertyServerPath.exists()) {
             ArrayList<String> params = new ArrayList<>();
             params.add(javaHome + File.separator + "bin" + File.separator + "java");
