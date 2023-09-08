@@ -86,4 +86,10 @@ public final class Constants {
      * Constants for langauge servers
      */
     public static final String SERVER_ENV_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/server.env";
+
+    public static final String LIBERTY_XML_SERVER = "LibertyConfigLanguageServer";
+    public static final String LIBERTY_CONFIG_SERVER="LibertyConfigLanguageServer";
+    public static final String JAKARTA_LANG_SERVER="Jakarta Language Server";
+    public static final String MICROPROFILE_SERVER="Microprofile Server";
+
 }

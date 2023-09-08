@@ -31,7 +31,7 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(JakartaLanguageServer.class);
 
     public JakartaLanguageServer() {
-        super("Jakarta Language Server");
+        super(Constants.JAKARTA_LANG_SERVER);
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
         String javaHome = System.getProperty("java.home");
