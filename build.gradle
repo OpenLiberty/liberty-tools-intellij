@@ -144,7 +144,7 @@ intellij {
     version = '2023.1.2'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle',
-      file("../lsp4ij/build/libs/lsp4ij-0.0.3.uber.jar") ]
+      file("../intellij-lsp-common-provider/lsp4ij/build/libs/lsp4ij-0.0.3.uber.jar") ]
     updateSinceUntilBuild = false
 }
 
