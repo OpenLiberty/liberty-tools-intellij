@@ -183,7 +183,7 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
         }
 
         if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage =LocalizedResourceUtil.getMessage( "liberty.action.selection.dialog.java-version",Constants.REQUIRED_JAVA_VERSION,serverType);
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-version", Constants.REQUIRED_JAVA_VERSION, serverType);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
         }
