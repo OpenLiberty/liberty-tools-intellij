@@ -2,7 +2,7 @@
     <id>open-liberty.intellij</id>
     <name>Liberty Tools</name>
 
-    <vendor url="https://openliberty.io/">Open-Liberty</vendor>
+    <vendor url="https://github.com/OpenLiberty/liberty-tools-intellij/issues">Open-Liberty</vendor>
 
     <category>Framework Integration</category>
 
