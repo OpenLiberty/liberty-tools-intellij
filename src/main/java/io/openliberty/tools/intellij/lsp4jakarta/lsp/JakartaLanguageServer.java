@@ -31,10 +31,10 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(JakartaLanguageServer.class);
 
     public JakartaLanguageServer() {
-        super(Constants.JAKARTA_LANG_SERVER);
+        String javaHome = System.getProperty("java.home");
+        checkJavaHome(javaHome, Constants.JAKARTA_LANG_SERVER);
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
-        String javaHome = System.getProperty("java.home");
         if (lsp4JakartaServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4JakartaServerPath.getAbsolutePath(), "-DrunAsync=true"));

@@ -1,5 +1,12 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationListener;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.openliberty.tools.intellij.util.Constants;
@@ -20,9 +27,7 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     private List<String> commands;
     private @Nullable String workingDir;
 
-    public ProcessStreamConnectionProvider(String serverType) {
-        String javaHome = System.getProperty("java.home");
-        checkJavaHome(javaHome, serverType);
+    public ProcessStreamConnectionProvider() {
     }
 
     public ProcessStreamConnectionProvider(List<String> commands) {
@@ -168,7 +173,7 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     public void checkJavaHome(String javaHome, String serverType) {
 
         if (javaHome == null) {
-            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-home.null");
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-home.null",serverType);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return;
@@ -176,24 +181,31 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
 
         File javaHomeDir = new File(javaHome);
         if (!javaHomeDir.exists()) {
-            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.javaHomeDir.exist") + javaHome;
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.javaHomeDir.exist",serverType,Constants.REQUIRED_JAVA_VERSION,javaHome);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return;
         }
 
         if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-version", Constants.REQUIRED_JAVA_VERSION, serverType);
+            String errorMessage = LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.java-version", serverType,Constants.REQUIRED_JAVA_VERSION,javaHome);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
         }
     }
 
-    private void showErrorPopup(String errorMessage) {
-        // Wrap the errorMessage in HTML tags to create a two-line popup
-        String htmlErrorMessage = "<html><body style='width: 200px; text-align: center;'>" + errorMessage + "</body></html>";
+    private void notifyError(String errMsg, Project project) {
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
+                .setTitle(LocalizedResourceUtil.getMessage("liberty.action.cannot.start"))
+                .setIcon(LibertyPluginIcons.libertyIcon)
+                .setSubtitle("")
+                .setListener(NotificationListener.URL_OPENING_LISTENER);
+        Notifications.Bus.notify(notif, project);
+    }
 
-        JOptionPane.showMessageDialog(null, htmlErrorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+    private void showErrorPopup(String errorMessage) {
+        notifyError(errorMessage, ProjectManager.getInstance().getDefaultProject());
+
     }
 
 }
