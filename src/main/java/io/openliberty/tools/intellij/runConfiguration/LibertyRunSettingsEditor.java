@@ -28,6 +28,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     private JPanel root;
     private LabeledComponent<EditorTextField> editableParams;
     private LabeledComponent<ComboBox> libertyModule;
+    private LabeledComponent<EditorTextField> projectModule;
 
     // FIXME runInContainer
     // private LabeledComponent<StateRestoringCheckBox> runInContainer;
@@ -51,12 +52,14 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         // FIXME runInContainer state is not being saved, cannot "Apply" run in container checkbox change to run config, see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
         // runInContainer.getComponent().setSelected(configuration.runInContainer());
         editableParams.getComponent().setText(configuration.getParams());
+        projectModule.getComponent().setText(configuration.getProject().getName());
     }
 
     @Override
     protected void applyEditorTo(@NotNull LibertyRunConfiguration configuration) throws ConfigurationException {
         configuration.setParams(editableParams.getComponent().getText());
         configuration.setBuildFile(String.valueOf(libertyModule.getComponent().getSelectedItem()));
+        configuration.setProjectName(projectModule.getComponent().getText());
         // FIXME runInContainer
         // configuration.setRunInContainer(runInContainer.getComponent().isSelected());
     }
@@ -73,6 +76,8 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         libertyModule.setComponent(comboBox);
         editableParams = new LabeledComponent<>();
         editableParams.setComponent(new EditorTextField());
+        projectModule = new LabeledComponent<>();
+        projectModule.setComponent(new EditorTextField());
         // FIXME runInContainer
         // runInContainer = new LabeledComponent<>();
         // runInContainer.setComponent(new StateRestoringCheckBox());
