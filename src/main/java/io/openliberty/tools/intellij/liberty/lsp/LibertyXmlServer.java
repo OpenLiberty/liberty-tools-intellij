@@ -13,7 +13,7 @@ package io.openliberty.tools.intellij.liberty.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
+import org.microshed.lsp4ij.server.ProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

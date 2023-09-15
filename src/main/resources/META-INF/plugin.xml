@@ -18,7 +18,9 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="231" until-build="231.*"/>
+    <!-- Not really optional, this attribute prevents a warning message during installation. -->
+    <depends optional="true">org.microshed.lsp4ij</depends>
+    <idea-version since-build="231" until-build="232.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
