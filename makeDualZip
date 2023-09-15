@@ -1,6 +1,5 @@
-set -x
-#Must start in the liberty-tools-intellij directory
-#The lsp4ij source must be cloned in the same parent directory.
+# Must start in the liberty-tools-intellij directory
+# The lsp4ij source must be cloned in the same parent directory.
 export LSP4IJ_DIR=intellij-lsp-common-provider/lsp4ij
 export TMP_DIR=p
 export LT_INTELLIJ_ZIP=liberty-tools-intellij-23.0.7-SNAPSHOT.zip
@@ -8,9 +7,11 @@ export LT_INTELLIJ_UBER_ZIP=$LT_INTELLIJ_ZIP.uber.zip # yes two zips
 export LSP4IJ_ZIP=lsp4ij-0.0.4.zip
 export JETBRAINS_DIST_DIR=build/distributions
 
-gradle clean buildPlugin
 # Run the other build and return to this directory
 (cd ../$LSP4IJ_DIR && gradle clean buildPlugin)
+
+# Build the main plugin.
+gradle clean buildPlugin
 
 # Clean up
 [ ! -d $TMP_DIR ] && mkdir $TMP_DIR
