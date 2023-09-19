@@ -33,11 +33,11 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
 
     public LibertyConfigLanguageServer() {
         String javaHome = System.getProperty("java.home");
+        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
+        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-jar-with-dependencies.jar");
         if(checkJavaHome(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
             return;
         }
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-jar-with-dependencies.jar");
         if (libertyServerPath.exists()) {
             ArrayList<String> params = new ArrayList<>();
             params.add(javaHome + File.separator + "bin" + File.separator + "java");

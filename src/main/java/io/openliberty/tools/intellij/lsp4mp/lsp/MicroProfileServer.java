@@ -35,12 +35,11 @@ public class MicroProfileServer extends ProcessStreamConnectionProvider {
 
     public MicroProfileServer() {
         String javaHome = System.getProperty("java.home");
+        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
+        File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
         if(checkJavaHome(javaHome, Constants.MICROPROFILE_SERVER)){
             return;
         }
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
-
         if (lsp4mpServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true"));

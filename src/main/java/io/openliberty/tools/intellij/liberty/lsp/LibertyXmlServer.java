@@ -33,12 +33,12 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
 
     public LibertyXmlServer() {
         String javaHome = System.getProperty("java.home");
-        if(checkJavaHome(javaHome, Constants.LIBERTY_XML_SERVER)){
-            return;
-        }
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lemminxServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lemminx-uber.jar");
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-lemminx-2.0-jar-with-dependencies.jar");
+        if(checkJavaHome(javaHome, Constants.LIBERTY_XML_SERVER)){
+            return;
+        }
         if (lemminxServerPath.exists() && libertyServerPath.exists()) {
             ArrayList<String> params = new ArrayList<>();
             params.add(javaHome + File.separator + "bin" + File.separator + "java");

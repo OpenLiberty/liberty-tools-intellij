@@ -32,11 +32,11 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
 
     public JakartaLanguageServer() {
         String javaHome = System.getProperty("java.home");
+        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
+        File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
         if(checkJavaHome(javaHome, Constants.JAKARTA_LANG_SERVER)){
             return;
         }
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
         if (lsp4JakartaServerPath.exists()) {
             setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4JakartaServerPath.getAbsolutePath(), "-DrunAsync=true"));
