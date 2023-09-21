@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2023 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -11,10 +11,9 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
-import java.util.List;
-
-import com.intellij.openapi.extensions.ExtensionPointName;
 import org.eclipse.lsp4j.Diagnostic;
+
+import java.util.List;
 
 /**
  * Java diagnostics participants API.
