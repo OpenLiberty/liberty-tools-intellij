@@ -25,6 +25,8 @@ public class LibertyRunConfigurationOptions extends ModuleBasedConfigurationOpti
 
     private final StoredProperty<Boolean> runInContainerProperty = property(false).provideDelegate(this, "runInContainer");
 
+    private final StoredProperty<String> projectNameProperty = string("").provideDelegate(this, "projectName");
+
     public String getParams() {
         return paramsProperty.getValue(this);
     }
@@ -47,5 +49,13 @@ public class LibertyRunConfigurationOptions extends ModuleBasedConfigurationOpti
 
     public void setRunInContainer(Boolean runInContainer) {
         runInContainerProperty.setValue(this, runInContainer);
+    }
+
+    public String getProjectName() {
+        return projectNameProperty.getValue(this);
+    }
+
+    public void setProjectName(String projectName) {
+        projectNameProperty.setValue(this, projectName);
     }
 }
