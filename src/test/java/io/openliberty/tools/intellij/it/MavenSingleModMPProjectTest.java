@@ -9,14 +9,10 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -201,140 +197,5 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport);
         TestUtils.validateTestReportExists(pathToUTReport);
-    }
-
-    /**
-     * Tests dashboard startInContainer/stop actions run from the project's drop-down action menu.
-     * Notes:
-     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
-     * this method should be moved to SingleModProjectTestCommon.
-     * 2. This test is restricted to Linux only because, on other platforms, the docker build process
-     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
-     * timeout set by the plugins and there is currently no way to extend this timeout through the
-     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
-     */
-    @Test
-    @Video
-    @EnabledOnOs({OS.LINUX})
-    public void testStartInContainerActionUsingDropDownMenu() {
-        String testName = "testStartInContainerActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
-
-        // Start dev mode in a container.
-        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", false, 3);
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false, 3);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests dashboard startInContainer/stop actions run from the project's drop-down action menu
-     * and the Liberty tool window toolbar play button.
-     * Notes:
-     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
-     * this method should be moved to SingleModProjectTestCommon.
-     * 2. This test is restricted to Linux only because, on other platforms, the docker build process
-     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
-     * timeout set by the plugins and there is currently no way to extend this timeout through the
-     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
-     */
-    @Test
-    @Video
-    @EnabledOnOs({OS.LINUX})
-    public void testStartInContainerActionUsingPlayToolbarButton() {
-        String testName = "testStartInContainerActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
-
-        // Start dev mode in a container.
-        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true, 3);
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests dashboard startInContainer/stop actions run from the project's pop-up action menu.
-     * Notes:
-     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
-     * this method should be moved to SingleModProjectTestCommon.
-     * 2. This test is restricted to Linux only because, on other platforms, the docker build process
-     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
-     * timeout set by the plugins and there is currently no way to extend this timeout through the
-     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
-     */
-    @Test
-    @Video
-    @EnabledOnOs({OS.LINUX})
-    public void testStartInContainerActionUsingPopUpMenu() {
-        String testName = "testStartInContainerActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
-
-        // Start dev mode in a container.
-        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Start in container", 3);
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, SM_MP_PROJECT_NAME, "Liberty: Stop", 3);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
-    }
-
-    /**
-     * Tests dashboard startInContainer/stop actions run from the search everywhere panel.
-     * Notes:
-     * 1, Once issue <a href="https://github.com/OpenLiberty/liberty-tools-intellij/issues/299">...</a> is resolved,
-     * this method should be moved to SingleModProjectTestCommon.
-     * 2. This test is restricted to Linux only because, on other platforms, the docker build process
-     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
-     * timeout set by the plugins and there is currently no way to extend this timeout through the
-     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
-     */
-    @Test
-    @Video
-    @EnabledOnOs({OS.LINUX})
-    public void testStartInContainerActionUsingSearch() {
-        String testName = "testStartInContainerActionUsingSearch";
-        String absoluteWLPPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
-
-        // Start dev mode in a container.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3);
-
-        try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, SM_MP_PROJECT_RES_URI, SM_MP_PROJECT_PORT, SM_MP_PROJECT_OUTPUT, absoluteWLPPath, true);
-        } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3);
-
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
-            }
-        }
     }
 }

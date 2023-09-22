@@ -35,8 +35,8 @@ liberty {
 }
 
 ext {
-    liberty.server.var.'default.http.port' = '9090'
-    liberty.server.var.'default.https.port' = '9453'
+    liberty.server.var.'default.http.port' = '9080'
+    liberty.server.var.'default.https.port' = '9443'
     liberty.server.var.'project.name' = project.name
 }
 
