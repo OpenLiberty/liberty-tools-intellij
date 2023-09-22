@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
         String javaHome = System.getProperty("java.home");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-2.0-jar-with-dependencies.jar");
-        if(checkJavaHome(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
+        if(!isJavaHomeValid(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
             return;
         }
         if (libertyServerPath.exists()) {

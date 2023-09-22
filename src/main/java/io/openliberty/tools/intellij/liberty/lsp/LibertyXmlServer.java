@@ -36,7 +36,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lemminxServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lemminx-uber.jar");
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-lemminx-2.0-jar-with-dependencies.jar");
-        if(checkJavaHome(javaHome, Constants.LIBERTY_XML_SERVER)){
+        if(!isJavaHomeValid(javaHome, Constants.LIBERTY_XML_SERVER)){
             return;
         }
         if (lemminxServerPath.exists() && libertyServerPath.exists()) {

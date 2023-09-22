@@ -169,35 +169,35 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
         return "ProcessStreamConnectionProvider [commands=" + this.getCommands() + ", workingDir=" //$NON-NLS-1$//$NON-NLS-2$
                 + this.getWorkingDirectory() + "]"; //$NON-NLS-1$
     }
-    public boolean checkJavaHome(String javaHome, String serverType) {
+    public boolean isJavaHomeValid(String javaHome, String serverType) {
 
         if (javaHome == null) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHome.is.null",serverType,Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.getMessage("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
-            return true;
+            return false;
         }
 
         File javaHomeDir = new File(javaHome);
         if (!javaHomeDir.exists()) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHomeDir.does.not.exist",serverType,Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.getMessage("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
-            return true;
+            return false;
         }
 
         if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage = LocalizedResourceUtil.getMessage("java.version.message", serverType,Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.getMessage("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void notifyError(String errMsg, Project project) {
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
-                .setTitle("Java runtime error")
+                .setTitle(LocalizedResourceUtil.getMessage("java.runtime.error.message"))
                 .setIcon(AllIcons.General.Warning)
                 .setSubtitle("")
                 .setListener(NotificationListener.URL_OPENING_LISTENER);
