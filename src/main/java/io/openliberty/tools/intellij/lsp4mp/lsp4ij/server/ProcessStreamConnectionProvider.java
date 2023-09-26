@@ -1,16 +1,17 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -198,7 +199,7 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     private void notifyError(String errMsg, Project project) {
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
                 .setTitle(LocalizedResourceUtil.getMessage("java.runtime.error.message"))
-                .setIcon(AllIcons.General.Warning)
+                .setIcon(LibertyPluginIcons.libertyIcon)
                 .setSubtitle("")
                 .setListener(NotificationListener.URL_OPENING_LISTENER);
         Notifications.Bus.notify(notif, project);
