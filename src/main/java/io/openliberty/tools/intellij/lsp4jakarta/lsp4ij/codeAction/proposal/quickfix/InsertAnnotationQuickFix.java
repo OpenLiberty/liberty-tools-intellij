@@ -136,8 +136,6 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
     }
 
     private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
-        LOGGER.log(Level.WARNING, "#####&&&&&&&&& print label --" + label + "####", label);
-
         ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
         codeAction.setRelevance(0);
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
