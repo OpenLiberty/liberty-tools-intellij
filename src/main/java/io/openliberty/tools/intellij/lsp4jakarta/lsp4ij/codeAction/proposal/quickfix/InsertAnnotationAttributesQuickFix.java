@@ -32,4 +32,9 @@ public class InsertAnnotationAttributesQuickFix extends InsertAnnotationQuickFix
     //@Override
     protected String getLabel(String annotation, String... attributes) {
         return Messages.getMessage("AddAtoB", attributes[0], annotation);    }
+
+    @Override
+    public String getParticipantId() {
+        return InsertAnnotationAttributesQuickFix.class.getName();
+    }
 }
