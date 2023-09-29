@@ -70,16 +70,12 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        if (CHECK_CODE_ACTIONS) {
-            // Expected code actions
-            JakartaJavaCodeActionParams codeActionsParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-            String newText = "\nimport jakarta.websocket.server.PathParam;\nimport jakarta.websocket.server.ServerEndpoint;\nimport jakarta.websocket.Session;\n\n"
-                    + "/**\n * Expected Diagnostics are related to validating that the parameters have the \n * valid annotation @PathParam (code: AddPathParamsAnnotation)\n * See issue #247 (onOpen) and #248 (onClose)\n */\n"
-                    + "@ServerEndpoint(value = \"/infos\")\npublic class AnnotationTest {\n    // @PathParam missing annotation for \"String missingAnnotation\"\n    @OnOpen\n    public void OnOpen(Session session, @PathParam(value = \"\") ";
-            TextEdit te = JakartaForJavaAssert.te(5, 32, 18, 40, newText);
-            CodeAction ca = JakartaForJavaAssert.ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
-        }
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\\n\\nimport java.io.IOException;\\n\\nimport jakarta.websocket.OnClose;\\nimport jakarta.websocket.OnOpen;\\nimport jakarta.websocket.server.PathParam;import jakarta.websocket.server.ServerEndpoint;\\nimport jakarta.websocket.Session;\\n\\n/**\\n * Expected Diagnostics are related to validating that the parameters have the \\n * valid annotation @PathParam (code: AddPathParamsAnnotation)\\n * See issue #247 (onOpen) and #248 (onClose)\\n */\\n@ServerEndpoint(value = \"/infos\")\\npublic class AnnotationTest {\\n    // @PathParam missing annotation for \"String missingAnnotation\"\\n    @OnOpen\\n    public void OnOpen(Session session, @PathParam(\"\") String missingAnnotation) throws IOException {\\n        System.out.println(\"Websocket opened: \" + session.getId().toString());\\n    }\\n    \\n    // Used to check that the expected diagnostic handle more than one case\\n    @OnClose\\n    public void OnClose(Session session, Integer missingAnnotation1, String missingAnnotation2) {\\n        System.out.println(\"Websocket opened: \" + session.getId().toString());\\n    }\\n}\\n";
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 28, 0, newText);
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
     }
 
     @Test
