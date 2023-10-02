@@ -45,7 +45,6 @@ public class LibertyConfigLanguageClient extends LanguageClientImpl implements L
     public void processConfigXml(List<String> uris) {
         LanguageServerWrapper wrapper = getLanguageServerWrapper();
         if (wrapper != null) {
-            // TODO: test on Windows, may need to use uri-normalizing methods from LCLS
             List<FileEvent> fileEvents = uris.stream()
                     .map(uri -> new FileEvent(uri, FileChangeType.Changed)).toList();
             DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams();
