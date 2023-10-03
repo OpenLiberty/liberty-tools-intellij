@@ -83,10 +83,8 @@ public final class Constants {
             });
 
     /**
-     * Constants for langauge servers
+     * Constants for language servers
      */
-    public static final String SERVER_ENV_GLOB_PATTERN = "**/*.env";
-
     public static final String LIBERTY_XML_SERVER = "LemMinX";
     public static final String LIBERTY_CONFIG_SERVER="Liberty Config";
     public static final String JAKARTA_LANG_SERVER="Eclipse LSP4Jakarta";
