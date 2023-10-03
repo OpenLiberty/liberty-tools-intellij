@@ -85,5 +85,5 @@ public final class Constants {
     /**
      * Constants for langauge servers
      */
-    public static final String SERVER_ENV_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/server.env";
+    public static final String SERVER_ENV_GLOB_PATTERN = "**/*.env";
 }
