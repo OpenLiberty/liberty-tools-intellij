@@ -26,7 +26,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -156,16 +155,16 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        if (CHECK_CODE_ACTIONS) {
+//        if (CHECK_CODE_ACTIONS) {
             // test quick fixes
             JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-            TextEdit te1 = te(7, 4, 7, 4, "protected EntityMissingConstructor() {\n\t}\n\n\t");
-            CodeAction ca1 = ca(uri, "Add a no-arg protected constructor to this class", d, te1);
-            TextEdit te2 = te(7, 4, 7, 4, "public EntityMissingConstructor() {\n\t}\n\n\t");
-            CodeAction ca2 = ca(uri, "Add a no-arg public constructor to this class", d, te2);
+            TextEdit te1 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    protected EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
+            CodeAction ca1 = ca(uri, "AddNoArgProtectedConstructor", d, te1);
+            TextEdit te2 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    public EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
+            CodeAction ca2 = ca(uri, "AddNoArgPublicConstructor", d, te2);
 
             assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-        }
+//        }
     }
 
     @Test
