@@ -95,4 +95,56 @@ public class JakartaServletTest extends BaseJakartaTest {
         }
     }
 
+    @Test
+    public void implementFilter() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DontImplementFilter.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 34, "Annotated classes with @WebServlet must implement the Filter interface.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ImplementFilter");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        if (CHECK_CODE_ACTIONS) {
+            // test associated quick-fix code action
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+            TextEdit te = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Filter");
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementFilter' implement 'Filter'", d, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        }
+    }
+
+    @Test
+    public void implementListener() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DontImplementListener.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 34, "Annotated classes with @WebServlet must implement the Listener interface.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ImplementListener");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        if (CHECK_CODE_ACTIONS) {
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        TextEdit te = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'Listener'", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        }
+    }
+
 }

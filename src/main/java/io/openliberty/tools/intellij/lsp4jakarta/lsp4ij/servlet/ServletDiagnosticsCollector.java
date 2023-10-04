@@ -112,6 +112,25 @@ public class ServletDiagnosticsCollector extends AbstractDiagnosticsCollector {
                                 ServletConstants.DIAGNOSTIC_CODE_DUPLICATE_ATTRIBUTES, null,
                                 DiagnosticSeverity.Error));
                     }
+
+
+                    /* Filter implementation diagnostic check */
+                    PsiClass filterInterface = facade.findClass(ServletConstants.FILTER_FQ_NAME,
+                            GlobalSearchScope.allScope(type.getProject()));
+                    if (!type.isInheritor(filterInterface, true)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("WebServletMustImplementFilter"),
+                                ServletConstants.DIAGNOSTIC_CODE_FILTER, null, DiagnosticSeverity.Error));
+                    }
+
+                    /* Listener implementation diagnostic check */
+                    /*PsiClass listenerInterface = facade.findClass(ServletConstants.LISTENER_FQ_NAME,
+                            GlobalSearchScope.allScope(type.getProject()));
+                    if (!type.isInheritor(filterInterface, true)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("WebServletMustImplementListener"),
+                                ServletConstants.DIAGNOSTIC_CODE_LISTENER, null, DiagnosticSeverity.Error));
+                    }*/
                 }
             }
         }

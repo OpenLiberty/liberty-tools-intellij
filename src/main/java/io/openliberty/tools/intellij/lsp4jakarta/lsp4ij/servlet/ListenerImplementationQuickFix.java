@@ -17,15 +17,27 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ImplementInterfaceProposal;
 import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * QuickFix for fixing HttpServlet extension error by providing the code actions
@@ -38,48 +50,74 @@ import java.util.List;
  *
  */
 
-public class ListenerImplementationQuickFix {
+public class ListenerImplementationQuickFix implements IJavaCodeActionParticipant {
+
+    private static final Logger LOGGER = Logger.getLogger(ListenerImplementationQuickFix.class.getName());
+
+    private final static String TITLE_MESSAGE = Messages.getMessage("LetClassImplement");
+    @Override
+    public String getParticipantId() {
+        return ListenerImplementationQuickFix.class.getName();
+    }
+
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
-        // Create code action
-        // interface
 
-        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.SERVLET_CONTEXT_LISTENER,
-                "jakarta.servlet.ServletContextListener");
-        setUpCodeAction(codeActions, diagnostic, context,
+        String[] listenerConstants = {
+                ServletConstants.SERVLET_CONTEXT_LISTENER,
                 ServletConstants.SERVLET_CONTEXT_ATTRIBUTE_LISTENER,
-                "jakarta.servlet.ServletContextAttributeListener");
-        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.SERVLET_REQUEST_LISTENER,
-                "jakarta.servlet.ServletRequestListener");
-        setUpCodeAction(codeActions, diagnostic, context,
+                ServletConstants.SERVLET_REQUEST_LISTENER,
                 ServletConstants.SERVLET_REQUEST_ATTRIBUTE_LISTENER,
-                "jakarta.servlet.ServletRequestAttributeListener");
-        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.HTTP_SESSION_LISTENER,
-                "jakarta.servlet.http.HttpSessionListener");
-        setUpCodeAction(codeActions, diagnostic, context,
+                ServletConstants.HTTP_SESSION_LISTENER,
                 ServletConstants.HTTP_SESSION_ATTRIBUTE_LISTENER,
-                "jakarta.servlet.http.HttpSessionAttributeListener");
-        setUpCodeAction(codeActions, diagnostic, context, ServletConstants.HTTP_SESSION_ID_LISTENER,
-                "jakarta.servlet.http.HttpSessionIdListener");
+                ServletConstants.HTTP_SESSION_ID_LISTENER
+        };
+
+        for (String constant : listenerConstants) {
+            String httpExt = (constant.contains("HTTP")) ? "http." : "";
+            String interfaceType = "jakarta.servlet." + httpExt + constant;
+            context.put("interface", interfaceType);
+
+            codeActions.add(createCodeAction(context, diagnostic));
+        }
 
         return codeActions;
+    }
+
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        final PsiElement node = context.getCoveredNode();
+        final PsiClass parentType = getBinding(node);
+        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+        String interfaceType = (String) context.get("interface");
+
+        assert parentMethod != null;
+        ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
+                null, parentType, context.getASTRoot(), interfaceType, 0,
+                context.getCompilationUnit());
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to listener implementation", e);
+        }
+        return toResolve;
     }
 
     private PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 
-    private void setUpCodeAction(List<CodeAction> codeActions, Diagnostic diagnostic, JavaCodeActionContext sourceContext,
-                                       String interfaceName, String interfaceType) {
-        JavaCodeActionContext targetContext = sourceContext.copy();
-        PsiElement node = targetContext.getCoveredNode(); // find covered node in the new context
-        PsiClass targetType = getBinding(node);
-        if (targetType != null) {
-            ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                    null, targetType, targetContext.getASTRoot(), interfaceType, 0,
-                    sourceContext.getCompilationUnit());
-            CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
-            codeActions.add(codeAction);
-        }
+    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(TITLE_MESSAGE);
+        codeAction.setRelevance(0);
+        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        codeAction.setKind(CodeActionKind.QuickFix);
+        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
+                context.getParams().getRange(), Collections.emptyMap(),
+                context.getParams().isResourceOperationSupported(),
+                context.getParams().isCommandConfigurationUpdateSupported()));
+        return codeAction;
     }
 }
