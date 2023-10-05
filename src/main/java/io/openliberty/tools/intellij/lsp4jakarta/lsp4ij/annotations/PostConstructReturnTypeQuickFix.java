@@ -45,8 +45,8 @@ import java.util.logging.Logger;
 public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipant {
 
     private static final Logger LOGGER = Logger.getLogger(PostConstructReturnTypeQuickFix.class.getName());
-
     private final static String TITLE_MESSAGE = Messages.getMessage("ChangeReturnTypeToVoid");
+
     @Override
     public String getParticipantId() {
         return PostConstructReturnTypeQuickFix.class.getName();
@@ -56,6 +56,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         List<CodeAction> codeActions = new ArrayList<>();
         final PsiElement node = context.getCoveredNode();
         final PsiMethod parentType = getBinding(node);
+
         if (parentType != null) {
             codeActions.add(createCodeAction(context, diagnostic));
         }
@@ -67,6 +68,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiMethod parentType = getBinding(node);
+
         assert parentType != null;
         ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(TITLE_MESSAGE, context.getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
