@@ -80,10 +80,10 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
 
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
-
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         PsiModifierListOwner binding = getBinding(node);
+        // annotationNode is null when adding an annotation and non-null when adding attributes.
         PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
 
         assert binding != null;
