@@ -75,7 +75,6 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
         PsiElement node = context.getCoveredNode();
         List<CodeAction> codeActions = new ArrayList<>();
         addAttributes(diagnostic, context, codeActions, this.annotation);
-
         return codeActions;
     }
 
@@ -84,13 +83,11 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
 
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
-        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
         PsiModifierListOwner binding = getBinding(node);
         PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
 
-        assert parentMethod != null;
+        assert binding != null;
         String label = getLabel(this.annotation, attributes);
-
         ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), binding, annotationNode, 0, this.annotation, Arrays.asList(attributes));
         try {

@@ -20,7 +20,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
  * @author Lidia Ataupillco Ramos
  *
  */
-public class InsertAnnotationAttributesQuickFix extends InsertAnnotationQuickFix {
+public abstract class InsertAnnotationAttributesQuickFix extends InsertAnnotationQuickFix {
     public InsertAnnotationAttributesQuickFix(String annotation, String... attributes) {
         this(annotation, false, attributes);
     }
@@ -29,12 +29,8 @@ public class InsertAnnotationAttributesQuickFix extends InsertAnnotationQuickFix
         super(annotation, generateOnlyOneCodeAction, attributes);
     }
 
-    //@Override
+    @Override
     protected String getLabel(String annotation, String... attributes) {
         return Messages.getMessage("AddAtoB", attributes[0], annotation);    }
 
-    @Override
-    public String getParticipantId() {
-        return InsertAnnotationAttributesQuickFix.class.getName();
-    }
 }
