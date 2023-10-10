@@ -45,7 +45,6 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
-        VirtualFile buildFile = libertyModule.getBuildFile();
 
         // open run config
         RunManager runManager = RunManager.getInstance(project);
@@ -67,27 +66,24 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         } else {
             // 1+ run configs found for the given project
             final String[] runConfigNames = toRunConfigNames(libertyModuleSettings);
-            final String[] runConfigNamesTooltips = toRunConfigNamesTooltips(libertyModuleSettings);
 
-            LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(project, LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.message", libertyModule.getName()), LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.title"), LibertyPluginIcons.libertyIcon_40, runConfigNames, runConfigNamesTooltips, runConfigNames[0]);
+            //it will display the dialog box with the run configurations with the selected project
+            LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(project,
+                    LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.message", libertyModule.getName()),
+                    LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.title"),
+                    LibertyPluginIcons.libertyIcon_40, runConfigNames, runConfigNames,
+                    runConfigNames[0]);
             libertyChooserDiag.show();
-            final int ret = libertyChooserDiag.getSelectedIndex();
 
+            final int ret = libertyChooserDiag.getSelectedIndex();
             if (ret >= 0 && ret < libertyModuleSettings.size()) {
                 selectedLibertyConfig = libertyModuleSettings.get(ret);
-                // opens run config dialog
-                selectedLibertyConfig.setEditBeforeRun(true);
-                ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
-                if (builder != null) {
-                    ExecutionManager.getInstance(project).restartRunProfile(builder.build());
-                }
             } else {
                 // The user pressed cancel on the dialog. No need to show an error message.
                 return;
             }
-
         }
-
+        openRunConfigDialog(selectedLibertyConfig, project);
     }
 
     /**
@@ -104,25 +100,35 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         return runConfigSettings;
     }
 
+    /**
+     * To get the run config names.
+     *
+     * @param list
+     * @return array of run config names.
+     */
     protected final String[] toRunConfigNames(@NotNull List<RunnerAndConfigurationSettings> list) {
         final int size = list.size();
         final String[] runConfigNames = new String[size];
 
         for (int i = 0; i < size; ++i) {
-            // We need a differentiator for the Shift-Shift Dialog Chooser in the event two projects have the
-            // same name. get the build dir name where the build file resides to be that differentiator.
             runConfigNames[i] = list.get(i).getConfiguration().getName();
         }
         return runConfigNames;
     }
 
-    protected final String[] toRunConfigNamesTooltips(@NotNull List<RunnerAndConfigurationSettings> list) {
-        final int size = list.size();
-        final String[] runConfigNamesTooltips = new String[size];
-
-        for (int i = 0; i < size; ++i) {
-            runConfigNamesTooltips[i] = list.get(i).getConfiguration().getName();
+    /**
+     * Display selectedLibertyConfig
+     *
+     * @param selectedLibertyConfig
+     * @param project
+     */
+    private void openRunConfigDialog(@NotNull RunnerAndConfigurationSettings selectedLibertyConfig, Project project) {
+        // opens run config dialog
+        selectedLibertyConfig.setEditBeforeRun(true);
+        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(
+                DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
+        if (builder != null) {
+            ExecutionManager.getInstance(project).restartRunProfile(builder.build());
         }
-        return runConfigNamesTooltips;
     }
 }
