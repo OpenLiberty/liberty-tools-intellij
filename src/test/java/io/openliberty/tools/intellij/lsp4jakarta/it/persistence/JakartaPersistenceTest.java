@@ -157,14 +157,14 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
 //        if (CHECK_CODE_ACTIONS) {
-            // test quick fixes
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-            TextEdit te1 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    protected EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
-            CodeAction ca1 = ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d, te1);
-            TextEdit te2 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    public EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
-            CodeAction ca2 = ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d, te2);
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
+        TextEdit te1 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    protected EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
+        CodeAction ca1 = ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d, te1);
+        TextEdit te2 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    public EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
+        CodeAction ca2 = ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d, te2);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 //        }
     }
 
