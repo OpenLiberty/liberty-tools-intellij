@@ -53,7 +53,7 @@ public class ManagedBeanNoArgConstructorQuickFix implements IJavaCodeActionParti
     }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        return addConstructor(diagnostic,context);
+        return addConstructor(diagnostic, context);
     }
 
     @Override
@@ -106,5 +106,4 @@ public class ManagedBeanNoArgConstructorQuickFix implements IJavaCodeActionParti
                 context.getParams().isCommandConfigurationUpdateSupported()));
         return codeAction;
     }
-
 }

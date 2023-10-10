@@ -72,7 +72,7 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
     }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        return addConstructor(diagnostic,context);
+        return addConstructor(diagnostic, context);
     }
 
     @Override
@@ -93,7 +93,6 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Unable to create workspace edit for code actions to add constructors", e);
             }
-
         }
         return toResolve;
     }
@@ -125,5 +124,4 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
                 context.getParams().isCommandConfigurationUpdateSupported()));
         return codeAction;
     }
-
 }
