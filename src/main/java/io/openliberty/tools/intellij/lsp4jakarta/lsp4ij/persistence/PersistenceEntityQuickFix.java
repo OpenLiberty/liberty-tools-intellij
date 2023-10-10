@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddConstructorProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
@@ -64,6 +65,7 @@ import java.util.logging.Logger;
  */
 public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
     private static final Logger LOGGER = Logger.getLogger(PersistenceEntityQuickFix.class.getName());
+
     @Override
     public String getParticipantId() {
         return PersistenceEntityQuickFix.class.getName();
@@ -83,7 +85,7 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
             String constructorName = toResolve.getTitle();
             ChangeCorrectionProposal proposal = new AddConstructorProposal(constructorName,
                     context.getSource().getCompilationUnit(), context.getASTRoot(), parentType, 0,
-                    constructorName.equals("AddNoArgProtectedConstructor") ? "protected" : "public");
+                    constructorName.equals(Messages.getMessage("AddNoArgProtectedConstructor")) ? "protected" : "public");
 
             try {
                 WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
@@ -96,15 +98,13 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
         return toResolve;
     }
 
-
-
     protected PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 
     private List<CodeAction> addConstructor(Diagnostic diagnostic, JavaCodeActionContext context) {
         List<CodeAction> codeActions = new ArrayList<>();
-        String[] constructorNames = {"AddNoArgProtectedConstructor", "AddNoArgPublicConstructor"};
+        String[] constructorNames = {Messages.getMessage("AddNoArgProtectedConstructor"), Messages.getMessage("AddNoArgPublicConstructor")};
 
         for (String name : constructorNames) {
             CodeAction codeAction = createCodeAction(context, diagnostic, name);
@@ -112,6 +112,7 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
         }
         return codeActions;
     }
+
     private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
         ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
         codeAction.setRelevance(0);
