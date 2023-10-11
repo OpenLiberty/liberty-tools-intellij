@@ -17,9 +17,19 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +42,13 @@ import java.util.List;
  * @author Himanshu Chotwani
  *
  */
-public class RemoveModifierConflictQuickFix {
+public class RemoveModifierConflictQuickFix implements IJavaCodeActionParticipant {
     
     private final String[] modifiers;
 
     protected final boolean generateOnlyOneCodeAction;
+
+    private static final Logger LOGGER = Logger.getLogger(RemoveModifierConflictQuickFix.class.getName());
     
     
     /**
@@ -64,16 +76,27 @@ public class RemoveModifierConflictQuickFix {
         this.generateOnlyOneCodeAction = generateOnlyOneCodeAction;
         this.modifiers = modifiers;
     }
-    
+
+    @Override
+    public String getParticipantId() {
+        return RemoveModifierConflictQuickFix.class.getName();
+    }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
         removeModifiers(diagnostic, context, codeActions);
+//        PsiElement node = context.getCoveredNode();
+//        PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
+//        for (String modifier : modifiers) {
+//            String label = getLabel(modifierListOwner, modifier);
+//            codeActions.add(createCodeAction(context, diagnostic, label));
+//        }
         return codeActions;
     }
-    
+
+
     protected void removeModifiers(Diagnostic diagnostic, JavaCodeActionContext context,
-            List<CodeAction> codeActions) {
+                                   List<CodeAction> codeActions) {
         if (generateOnlyOneCodeAction || modifiers.length == 1) {
             removeModifier(diagnostic, context, codeActions, modifiers);
         } else {
@@ -83,26 +106,34 @@ public class RemoveModifierConflictQuickFix {
             }
         }
     }
-    
-    /**
-     * use setData() API with diagnostic to pass in ElementType in diagnostic collector class.
-     *
-     */
-    private void removeModifier(Diagnostic diagnostic, JavaCodeActionContext context,
-            List<CodeAction> codeActions, String... modifier) {
-        PsiElement node = context.getCoveredNode();
-        PsiClass parentType = getBinding(node);
-        PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
-        String label = getLabel(modifierListOwner, modifier);
+        @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        final PsiElement node = context.getCoveredNode();
+        final PsiClass parentType = getBinding(node);
+        final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
+
+        String label = getLabel(modifierListOwner, modifiers);
 
         ModifyModifiersProposal proposal = new ModifyModifiersProposal(label, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifier));
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
+                context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifiers));
 
-        if (codeAction != null) {
-            codeActions.add(codeAction);
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action " + label, e);
         }
+        return toResolve;
+    }
+
+    private void removeModifier(Diagnostic diagnostic, JavaCodeActionContext context,
+                                List<CodeAction> codeActions, String... modifier) {
+        PsiElement node = context.getCoveredNode();
+        PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
+        String label = getLabel(modifierListOwner, modifier);
+        codeActions.add(createCodeAction(context, diagnostic, label));
     }
 
     private String getLabel(PsiModifierListOwner modifierListOwner, String... modifier) {
@@ -123,6 +154,18 @@ public class RemoveModifierConflictQuickFix {
 
     protected PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
+    }
+
+    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
+        codeAction.setRelevance(0);
+        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        codeAction.setKind(CodeActionKind.QuickFix);
+        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
+                context.getParams().getRange(), Collections.emptyMap(),
+                context.getParams().isResourceOperationSupported(),
+                context.getParams().isCommandConfigurationUpdateSupported()));
+        return codeAction;
     }
 
 }
