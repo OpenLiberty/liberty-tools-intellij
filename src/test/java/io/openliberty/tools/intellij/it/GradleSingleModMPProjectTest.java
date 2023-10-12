@@ -24,7 +24,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * Single module Microprofile project name.
      */
     private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
-    
+
     /**
      * The path to the folder containing the test projects.
      */
@@ -33,7 +33,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Project port.
      */
-    private final int SM_MP_PROJECT_PORT = 9090;
+    private final int SM_MP_PROJECT_PORT = 9080;
 
     /**
      * Project resource URI.
