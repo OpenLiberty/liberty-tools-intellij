@@ -89,7 +89,6 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
-        //final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
         String interfaceType = (String) context.get("interface");
 
         assert parentType != null;

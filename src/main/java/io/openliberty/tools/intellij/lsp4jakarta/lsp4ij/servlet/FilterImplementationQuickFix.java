@@ -59,7 +59,6 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
-
         if (parentType != null) {
             String title = Messages.getMessage("LetClassImplement",
                     parentType.getName(),
@@ -75,7 +74,6 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
-        //final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
         assert parentType != null;
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
