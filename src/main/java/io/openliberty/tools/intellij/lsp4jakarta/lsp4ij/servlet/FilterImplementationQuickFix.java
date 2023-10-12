@@ -50,7 +50,6 @@ import java.util.logging.Logger;
 public class FilterImplementationQuickFix implements IJavaCodeActionParticipant {
     private static final Logger LOGGER = Logger.getLogger(FilterImplementationQuickFix.class.getName());
 
-    private final static String TITLE_MESSAGE = Messages.getMessage("LetClassImplement");
     @Override
     public String getParticipantId() {
         return FilterImplementationQuickFix.class.getName();
@@ -60,8 +59,12 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
+
         if (parentType != null) {
-            codeActions.add(createCodeAction(context, diagnostic));
+            String title = Messages.getMessage("LetClassImplement",
+                    parentType.getName(),
+                    ServletConstants.FILTER);
+            codeActions.add(createCodeAction(context, diagnostic, title));
         }
         return codeActions;
     }
@@ -72,9 +75,9 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
-        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+        //final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
-        assert parentMethod != null;
+        assert parentType != null;
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
                 null, parentType, context.getASTRoot(),
                 "jakarta.servlet.Filter", 0, context.getSource().getCompilationUnit());
@@ -87,8 +90,8 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         return toResolve;
     }
 
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(TITLE_MESSAGE);
+    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
         codeAction.setRelevance(0);
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
         codeAction.setKind(CodeActionKind.QuickFix);

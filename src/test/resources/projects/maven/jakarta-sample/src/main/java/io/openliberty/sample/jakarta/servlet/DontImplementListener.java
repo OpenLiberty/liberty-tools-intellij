@@ -1,8 +1,8 @@
 package io.openliberty.sample.jakarta.servlet;
 
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebListener;
 
-@WebServlet(name = "listenerdemo", urlPatterns = { "/listener" })
+@WebListener
 public class DontImplementListener {
 
 }

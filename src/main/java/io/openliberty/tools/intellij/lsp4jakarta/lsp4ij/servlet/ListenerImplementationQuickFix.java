@@ -32,7 +32,6 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +53,6 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
 
     private static final Logger LOGGER = Logger.getLogger(ListenerImplementationQuickFix.class.getName());
 
-    private final static String TITLE_MESSAGE = Messages.getMessage("LetClassImplement");
     @Override
     public String getParticipantId() {
         return ListenerImplementationQuickFix.class.getName();
@@ -62,6 +60,8 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
+        PsiElement node = context.getCoveredNode();
+        PsiClass parentType = getBinding(node);
 
         String[] listenerConstants = {
                 ServletConstants.SERVLET_CONTEXT_LISTENER,
@@ -77,8 +77,8 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
             String httpExt = (constant.contains("HTTP")) ? "http." : "";
             String interfaceType = "jakarta.servlet." + httpExt + constant;
             context.put("interface", interfaceType);
-
-            codeActions.add(createCodeAction(context, diagnostic));
+            String title = Messages.getMessage("LetClassImplement", parentType.getName(), constant);
+            codeActions.add(createCodeAction(context, diagnostic, title));
         }
 
         return codeActions;
@@ -89,10 +89,10 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
-        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+        //final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
         String interfaceType = (String) context.get("interface");
 
-        assert parentMethod != null;
+        assert parentType != null;
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
                 null, parentType, context.getASTRoot(), interfaceType, 0,
                 context.getCompilationUnit());
@@ -109,8 +109,8 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(TITLE_MESSAGE);
+    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
         codeAction.setRelevance(0);
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
         codeAction.setKind(CodeActionKind.QuickFix);

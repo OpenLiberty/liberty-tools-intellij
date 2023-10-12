@@ -1,8 +1,8 @@
 package io.openliberty.sample.jakarta.servlet;
 
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebFilter;
 
-@WebServlet(name = "filterdemo", urlPatterns = { "/filter" })
+@WebFilter(urlPatterns = { "/filter" })
 public class DontImplementFilter {
 
 }
