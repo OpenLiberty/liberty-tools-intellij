@@ -1,17 +1,7 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp4ij.server;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import io.openliberty.tools.intellij.LibertyPluginIcons;
-import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -169,45 +159,6 @@ public abstract class ProcessStreamConnectionProvider implements StreamConnectio
     public String toString() {
         return "ProcessStreamConnectionProvider [commands=" + this.getCommands() + ", workingDir=" //$NON-NLS-1$//$NON-NLS-2$
                 + this.getWorkingDirectory() + "]"; //$NON-NLS-1$
-    }
-    public boolean isJavaHomeValid(String javaHome, String serverType) {
-
-        if (javaHome == null) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
-            LOGGER.error(errorMessage);
-            showErrorPopup(errorMessage);
-            return false;
-        }
-
-        File javaHomeDir = new File(javaHome);
-        if (!javaHomeDir.exists()) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
-            LOGGER.error(errorMessage);
-            showErrorPopup(errorMessage);
-            return false;
-        }
-
-        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage = LocalizedResourceUtil.getMessage("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
-            LOGGER.error(errorMessage);
-            showErrorPopup(errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    private void notifyError(String errMsg, Project project) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
-                .setTitle(LocalizedResourceUtil.getMessage("java.runtime.error.message"))
-                .setIcon(LibertyPluginIcons.libertyIcon)
-                .setSubtitle("")
-                .setListener(NotificationListener.URL_OPENING_LISTENER);
-        Notifications.Bus.notify(notif, project);
-    }
-
-    private void showErrorPopup(String errorMessage) {
-        notifyError(errorMessage, ProjectManager.getInstance().getDefaultProject());
-
     }
 
 }
