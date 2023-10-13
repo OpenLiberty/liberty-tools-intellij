@@ -70,7 +70,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         final PsiMethod parentType = getBinding(node);
 
         assert parentType != null;
-        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(TITLE_MESSAGE, context.getCompilationUnit(),
+        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(TITLE_MESSAGE, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
