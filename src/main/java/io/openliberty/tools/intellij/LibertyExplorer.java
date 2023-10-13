@@ -305,8 +305,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 boolean leaf,
                 int row,
                 boolean hasFocus) {
+            /**
+             * modification to get tooltiptext for liberty module tree
+             */
+            tree.setToolTipText(getBuildPath(value));
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
             // assign gear icon to action nodes
             if (leaf) {
                 setIcon(LibertyPluginIcons.IntelliJGear);
@@ -325,6 +328,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
             return this;
         }
+    }
+    
+    private static String getBuildPath(Object value) {
+        LibertyModuleNode node = (LibertyModuleNode) value;
+        return node.getFilePath().toString().replace("file://", "");
     }
 
     private static void executeAction(Tree tree) {
