@@ -305,6 +305,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 boolean leaf,
                 int row,
                 boolean hasFocus) {
+            /**
+             * modification to get tooltiptext for liberty module tree
+             */
+            tree.setToolTipText(((LibertyModuleNode) value).getFilePath().toString());
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
             // assign gear icon to action nodes
@@ -312,7 +316,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 setIcon(LibertyPluginIcons.IntelliJGear);
                 return this;
             }
-
             // select icon for node based on project type
             LibertyModuleNode moduleNode = (LibertyModuleNode) value;
             if (moduleNode.isGradleProjectType()) {
