@@ -65,6 +65,7 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
                 parentType.getName(),
                 ServletConstants.HTTP_SERVLET);
         codeActions.add(createCodeAction(context, diagnostic, title));
+       
         return codeActions;
     }
 
@@ -78,10 +79,9 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         String title = Messages.getMessage("LetClassExtend",
                 parentType.getName(),
                 ServletConstants.HTTP_SERVLET);
-        ChangeCorrectionProposal proposal = new ExtendClassProposal(title,
-                context.getSource().getCompilationUnit(), parentType, context.getASTRoot(),
-                "jakarta.servlet.http.HttpServlet", 0);
-
+        ChangeCorrectionProposal proposal = new ExtendClassProposal(title, context.getCompilationUnit(),
+                    context.getSource().getCompilationUnit(), parentType,
+                    "jakarta.servlet.http.HttpServlet", 0);
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
