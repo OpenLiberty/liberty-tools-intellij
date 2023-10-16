@@ -31,18 +31,10 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(JakartaLanguageServer.class);
 
     public JakartaLanguageServer() {
+        String javaHome = System.getProperty("java.home");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
-        String javaHome = System.getProperty("java.home");
-        if (javaHome == null) {
-            LOGGER.error("Unable to launch the Eclipse LSP4Jakarta language server. Could not resolve the java home system property");
-            return;
-        }
-        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            LOGGER.error("Unable to launch the Eclipse LSP4Jakarta language server." +
-                    " Java " + Constants.REQUIRED_JAVA_VERSION + " or more recent is required to run 'Liberty Tools for IntelliJ'." +
-                    " Change the boot Java runtime of the IDE as documented here:" +
-                    " https://www.jetbrains.com/help/idea/switching-boot-jdk.html");
+        if(!isJavaHomeValid(javaHome, Constants.JAKARTA_LANG_SERVER)){
             return;
         }
         if (lsp4JakartaServerPath.exists()) {

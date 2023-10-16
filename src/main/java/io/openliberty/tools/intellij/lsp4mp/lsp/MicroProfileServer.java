@@ -13,7 +13,6 @@ package io.openliberty.tools.intellij.lsp4mp.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
-import io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer;
 import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
@@ -34,18 +33,10 @@ public class MicroProfileServer extends ProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
 
     public MicroProfileServer() {
+        String javaHome = System.getProperty("java.home");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
-        String javaHome = System.getProperty("java.home");
-        if (javaHome == null) {
-            LOGGER.error("Unable to launch the Eclipse LSP4MP language server. Could not resolve the java home system property");
-            return;
-        }
-        if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            LOGGER.error("Unable to launch the Eclipse LSP4MP language server." +
-                    " Java " + Constants.REQUIRED_JAVA_VERSION + " or more recent is required to run 'Liberty Tools for IntelliJ'." +
-                    " Change the boot Java runtime of the IDE as documented here:" +
-                    " https://www.jetbrains.com/help/idea/switching-boot-jdk.html");
+        if(!isJavaHomeValid(javaHome, Constants.MICROPROFILE_SERVER)){
             return;
         }
         if (lsp4mpServerPath.exists()) {
