@@ -1,15 +1,15 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2023 IBM Corporation and others.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v. 2.0 which is available at
-* http://www.eclipse.org/legal/epl-2.0.
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*     IBM Corporation - initial API and implementation
-*******************************************************************************/
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 
 package io.openliberty.tools.intellij.lsp4jakarta.it.servlet;
 
@@ -60,7 +60,12 @@ public class JakartaServletTest extends BaseJakartaTest {
         if (CHECK_CODE_ACTIONS) {
             // test associated quick-fix code action
             JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            TextEdit te = JakartaForJavaAssert.te(5, 34, 5, 34, " extends HttpServlet");
+            String newText = "package io.openliberty.sample.jakarta.servlet;\n\n" +
+                    "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n\n" +
+                    "@WebServlet(name = \"demoServlet\", urlPatterns = {\"/demo\"})\n" +
+                    "public class DontExtendHttpServlet extends HttpServlet {\n\n}";
+
+            TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
             CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
         }

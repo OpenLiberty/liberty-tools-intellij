@@ -40,12 +40,11 @@ import java.util.logging.Logger;
 /**
  * QuickFix for fixing HttpServlet extension error by providing the code actions
  * which implements IJavaCodeActionParticipant
- *
+ * <p>
  * Adapted from
  * https://github.com/eclipse/lsp4mp/blob/master/microprofile.jdt/org.eclipse.lsp4mp.jdt.core/src/main/java/org/eclipse/lsp4mp/jdt/internal/health/java/ImplementHealthCheckQuickFix.java
  *
  * @author Credit to Angelo ZERR
- *
  */
 public class HttpServletQuickFix implements IJavaCodeActionParticipant {
 
@@ -56,28 +55,32 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         return HttpServletQuickFix.class.getName();
     }
 
+    /**
+     * Generates a list of code actions based on the provided JavaCodeActionContext and Diagnostic.
+     *
+     * @param context    the java code action context.
+     * @param diagnostic the diagnostic which must be fixed and null otherwise.
+     * @return
+     */
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
 
-        if (parentType != null) {
-            // Create code action
-            // interface
-            String title = Messages.getMessage("LetClassExtend",
-                    parentType.getName(),
-                    ServletConstants.HTTP_SERVLET);
-            ChangeCorrectionProposal proposal = new ExtendClassProposal(title, context.getCompilationUnit(),
-                    context.getSource().getCompilationUnit(), parentType,
-                    "jakarta.servlet.http.HttpServlet", 0);
-            CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-            if (codeAction != null) {
-                codeActions.add(codeAction);
-            }
-        }
+        String title = Messages.getMessage("LetClassExtend",
+                parentType.getName(),
+                ServletConstants.HTTP_SERVLET);
+        codeActions.add(createCodeAction(context, diagnostic, title));
+
         return codeActions;
     }
 
+    /**
+     * this method will resolve the code for the quick actions
+     *
+     * @param context the code action context to resolve
+     * @return
+     */
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
@@ -91,7 +94,6 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         ChangeCorrectionProposal proposal = new ExtendClassProposal(title, context.getCompilationUnit(),
                 context.getSource().getCompilationUnit(), parentType,
                 "jakarta.servlet.http.HttpServlet", 0);
-
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
@@ -101,6 +103,14 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         return toResolve;
     }
 
+    /**
+     * Creates a CodeAction with the specified title, relevance, diagnostics, kind, and additional data.
+     *
+     * @param context
+     * @param diagnostic
+     * @param title
+     * @return
+     */
     private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
         ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
         codeAction.setRelevance(0);
