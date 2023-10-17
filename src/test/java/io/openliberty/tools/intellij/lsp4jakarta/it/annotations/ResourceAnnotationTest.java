@@ -52,10 +52,10 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected annotations
-        Diagnostic d1 = d(24, 0, 22, "The @Resource annotation must define the attribute 'type'.",
+        Diagnostic d1 = d(22, 0, 22, "The @Resource annotation must define the attribute 'type'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceTypeAttribute");
 
-        Diagnostic d2 = d(41, 0, 30, "The @Resource annotation must define the attribute 'name'.",
+        Diagnostic d2 = d(39, 0, 30, "The @Resource annotation must define the attribute 'name'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceNameAttribute");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
@@ -64,30 +64,32 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
 //        if (CHECK_CODE_ACTIONS) {
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;" +
-                "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    " +
+                "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation " +
+                "{\n\n    private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
+                "private boolean isHappy;\n\n	@Resource(name = \"test\")\n   " +
+                " private boolean isSad;\n\n\n    private String emailAddress;\n\n\n}\n\n" +
+                "@Resource(name = \"aa\",type=\"\")\nclass PostDoctoralStudent {\n\n    " +
                 "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
-                "private boolean isHappy;\n\n	@Resource(name = \"test\")\n    private boolean isSad;\n\n\n    " +
-                "private String emailAddress;\n\n\n    public ResourceAnnotation() {\n    " +
-                "}\n}\n\n@Resource(name = \"aa\",type=\"\")\nclass PostDoctoralStudent {\n\n    " +
-                "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    private boolean isHappy;\n\n	" +
-                "@Resource\n    private boolean isSad;\n\n\n    " +
-                "private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass MasterStudent {\n\n    " +
-                "private Integer studentId;\n\n} \n";
-        TextEdit te = te(0, 0, 47, 0, newText);
+                "private boolean isHappy;\n\n	@Resource\n    private boolean isSad;\n\n\n    " +
+                "private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass " +
+                "MasterStudent {\n\n    private Integer studentId;\n\n} \n";
+        TextEdit te = te(0, 0, 45, 0, newText);
         CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;" +
-                "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    " +
-                "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    private boolean isHappy;\n\n	" +
-                "@Resource(name = \"test\")\n    private boolean isSad;\n\n\n    private String emailAddress;\n\n\n    " +
-                "public ResourceAnnotation() {\n    }\n}\n\n@Resource(name = \"aa\")\nclass PostDoctoralStudent {\n\n    " +
-                "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    private boolean isHappy;\n\n	" +
-                "@Resource\n    private boolean isSad;\n\n\n    private String emailAddress;\n\n}\n\n" +
+        newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, " +
+                "name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;" +
+                "\n\n\n	@Resource(shareable = true)\n    private boolean isHappy;\n\n	" +
+                "@Resource(name = \"test\")\n    private boolean isSad;\n\n\n    " +
+                "private String emailAddress;\n\n\n}\n\n@Resource(name = \"aa\")\n" +
+                "class PostDoctoralStudent {\n\n    private Integer studentId;\n\n\n	" +
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n	@Resource\n    " +
+                "private boolean isSad;\n\n\n    private String emailAddress;\n\n}\n\n" +
                 "@Resource(type = Object.class, name=\"\")\nclass MasterStudent {\n\n    " +
                 "private Integer studentId;\n\n} \n";
-        TextEdit te1 = te(0, 0, 47, 0, newText);
+        TextEdit te1 = te(0, 0, 45, 0, newText);
         CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
 //        }
