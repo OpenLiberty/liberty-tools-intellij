@@ -42,7 +42,7 @@ import java.util.List;
  * @author Himanshu Chotwani
  *
  */
-public class RemoveModifierConflictQuickFix implements IJavaCodeActionParticipant {
+public abstract class RemoveModifierConflictQuickFix implements IJavaCodeActionParticipant {
     
     private final String[] modifiers;
 
@@ -77,20 +77,9 @@ public class RemoveModifierConflictQuickFix implements IJavaCodeActionParticipan
         this.modifiers = modifiers;
     }
 
-    @Override
-    public String getParticipantId() {
-        return RemoveModifierConflictQuickFix.class.getName();
-    }
-
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
         removeModifiers(diagnostic, context, codeActions);
-//        PsiElement node = context.getCoveredNode();
-//        PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
-//        for (String modifier : modifiers) {
-//            String label = getLabel(modifierListOwner, modifier);
-//            codeActions.add(createCodeAction(context, diagnostic, label));
-//        }
         return codeActions;
     }
 
@@ -116,8 +105,9 @@ public class RemoveModifierConflictQuickFix implements IJavaCodeActionParticipan
 
         String label = getLabel(modifierListOwner, modifiers);
 
+        assert parentType != null;
         ModifyModifiersProposal proposal = new ModifyModifiersProposal(label, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifiers));
+            context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(), Arrays.asList(modifiers), false);
 
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
