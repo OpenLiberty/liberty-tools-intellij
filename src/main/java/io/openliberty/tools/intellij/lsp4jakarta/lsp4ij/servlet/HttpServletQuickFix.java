@@ -66,12 +66,12 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiClass parentType = getBinding(node);
-
-        String title = Messages.getMessage("LetClassExtend",
-                parentType.getName(),
-                ServletConstants.HTTP_SERVLET);
-        codeActions.add(createCodeAction(context, diagnostic, title));
-
+        if (parentType != null) {
+            String title = Messages.getMessage("LetClassExtend",
+                    parentType.getName(),
+                    ServletConstants.HTTP_SERVLET);
+            codeActions.add(createCodeAction(context, diagnostic, title));
+        }
         return codeActions;
     }
 

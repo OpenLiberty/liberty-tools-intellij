@@ -57,18 +57,19 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        if (CHECK_CODE_ACTIONS) {
-            // test associated quick-fix code action
-            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            String newText = "package io.openliberty.sample.jakarta.servlet;\n\n" +
-                    "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n\n" +
-                    "@WebServlet(name = \"demoServlet\", urlPatterns = {\"/demo\"})\n" +
-                    "public class DontExtendHttpServlet extends HttpServlet {\n\n}";
+        //TODO: this condition will be enabled when all quickfixes are refactored.
+        // if (CHECK_CODE_ACTIONS) {
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.servlet;\n\n" +
+                "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n\n" +
+                "@WebServlet(name = \"demoServlet\", urlPatterns = {\"/demo\"})\n" +
+                "public class DontExtendHttpServlet extends HttpServlet {\n\n}";
 
-            TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
-            CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-        }
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        // }
     }
 
     @Test
