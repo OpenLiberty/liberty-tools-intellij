@@ -77,5 +77,28 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
             CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
             assertJavaCodeAction(codeActionParams2, utils, ca3);
         }
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n\n    " +
+                "private Integer studentId;\n\n    " +
+                "private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n\n    " +
+                "@PostConstruct()\n    " +
+                "public Integer getStudentId() {\n        " +
+                "return this.studentId;\n    }\n\n    " +
+                "@PostConstruct\n    " +
+                "public void getHappiness() {\n\n    }\n\n    " +
+                "@PostConstruct\n    " +
+                "public void throwTantrum() throws Exception {\n        " +
+                "System.out.println(\"I'm sad\");\n    " +
+                "}\n\n    " +
+                "private String emailAddress;\n\n}\n";
+        TextEdit te = te(0, 0, 32, 0, newText);
+        CodeAction ca = ca(uri, "Remove all parameters", d2, te);
+        assertJavaCodeAction(codeActionParams1, utils, ca);
     }
 }

@@ -31,6 +31,8 @@ public abstract class RemoveElementsProposal extends ChangeCorrectionProposal {
     private final PsiModifierListOwner binding;
     private final List<? extends PsiElement> elementsToRemove;
 
+    private boolean isFormatRequired = true;
+
     protected RemoveElementsProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
                                 PsiModifierListOwner binding, int relevance,
                                 List<? extends PsiElement> elementsToRemove) {
@@ -41,10 +43,23 @@ public abstract class RemoveElementsProposal extends ChangeCorrectionProposal {
         this.elementsToRemove = elementsToRemove;
     }
 
+    protected RemoveElementsProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
+                                     PsiModifierListOwner binding, int relevance,
+                                     List<? extends PsiElement> elementsToRemove, boolean isFormatRequired) {
+        super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
+        this.invocationNode = invocationNode;
+        this.binding = binding;
+        this.elementsToRemove = elementsToRemove;
+        this.isFormatRequired =isFormatRequired;
+    }
+
     @Override
     public final Change getChange() {
         elementsToRemove.forEach(PsiElement::delete);
-        PositionUtils.formatDocument(binding); // fix up whitespace
+        if (isFormatRequired) {
+            PositionUtils.formatDocument(binding); // fix up whitespace
+        }
         final Document document = invocationNode.getViewProvider().getDocument();
         return new Change(sourceCU.getViewProvider().getDocument(), document);
     }
