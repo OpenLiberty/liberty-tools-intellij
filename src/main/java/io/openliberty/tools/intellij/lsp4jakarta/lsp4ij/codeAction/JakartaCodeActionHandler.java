@@ -36,6 +36,9 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceA
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketConstants;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveStaticModifierQuickFix;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -109,9 +112,12 @@ public class JakartaCodeActionHandler {
             RemovePreDestroyAnnotationQuickFix RemovePreDestroyAnnotationQuickFix = new RemovePreDestroyAnnotationQuickFix();
             RemovePostConstructAnnotationQuickFix RemovePostConstructAnnotationQuickFix = new RemovePostConstructAnnotationQuickFix();
             PostConstructReturnTypeQuickFix PostConstructReturnTypeQuickFix = new PostConstructReturnTypeQuickFix();
+            RemoveFinalModifierQuickFix RemoveFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
+            RemoveStaticModifierQuickFix RemoveStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
             RemoveMethodParametersQuickFix RemoveMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
             AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
             AddResourceMissingTypeQuickFix AddResourceMissingTypeQuickFix = new AddResourceMissingTypeQuickFix();
+            RemoveAbstractModifierQuickFix RemoveAbstractModifierQuickFix = new RemoveAbstractModifierQuickFix();
             RemoveInjectAnnotationQuickFix RemoveInjectAnnotationQuickFix = new RemoveInjectAnnotationQuickFix();
             RemoveProduceAnnotationQuickFix RemoveProduceAnnotationQuickFix = new RemoveProduceAnnotationQuickFix();
             RemoveInvalidInjectParamAnnotationQuickFix RemoveInvalidInjectParamAnnotationQuickFix = new RemoveInvalidInjectParamAnnotationQuickFix();
@@ -169,6 +175,11 @@ public class JakartaCodeActionHandler {
                     if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR)) {
                         codeActions.addAll(PersistenceEntityQuickFix.getCodeActions(context, diagnostic));
                     }
+                    if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS)
+                            || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES)
+                            || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS)) {
+                        codeActions.addAll(RemoveFinalModifierQuickFix.getCodeActions(context, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE)) {
                         codeActions.addAll(ManagedBeanQuickFix.getCodeActions(context, diagnostic));
                     }
@@ -203,15 +214,35 @@ public class JakartaCodeActionHandler {
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_SCOPEDECL)) {
                         codeActions.addAll(ScopeDeclarationQuickFix.getCodeActions(context, diagnostic));
                     }
+                    if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_FINAL)) {
+                        JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
+                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(RemoveFinalModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                    }
                     if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_CONSTRUCTOR) ||
                             diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_GENERIC)) {
                         codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_ABSTRACT)) {
+                        JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
+                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(RemoveAbstractModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_STATIC)) {
+                        JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
+                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(RemoveStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
 
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
                         codeActions.addAll(RemovePostConstructAnnotationQuickFix.getCodeActions(context, diagnostic));
                         codeActions.addAll(RemoveMethodParametersQuickFix.getCodeActions(contextCopy, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC)) {
+                        JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
+                        codeActions.addAll(RemovePreDestroyAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(RemoveStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_PARAMS)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
