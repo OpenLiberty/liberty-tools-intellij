@@ -18,6 +18,7 @@ import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class LibertyCustomConfigManager implements LibraryTable.Listener, Dispos
         void processConfigXml(List<String> uris);
     }
 
-    public static LibertyCustomConfigManager getInstance(Project project) {
+    public static LibertyCustomConfigManager getInstance(@NotNull Project project) {
         return project.getService(LibertyCustomConfigManager.class);
     }
 
