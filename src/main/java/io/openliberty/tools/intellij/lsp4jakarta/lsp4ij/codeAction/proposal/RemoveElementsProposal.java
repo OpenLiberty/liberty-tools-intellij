@@ -56,7 +56,7 @@ public abstract class RemoveElementsProposal extends ChangeCorrectionProposal {
     @Override
     public final Change getChange() {
         elementsToRemove.forEach(PsiElement::delete);
-        if(isFormatRequired) {
+        if (isFormatRequired) {
             PositionUtils.formatDocument(binding); // fix up whitespace
         }
         final Document document = invocationNode.getViewProvider().getDocument();
