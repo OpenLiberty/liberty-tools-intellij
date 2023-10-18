@@ -26,4 +26,9 @@ public class RemoveStaticModifierQuickFix extends RemoveModifierConflictQuickFix
     public RemoveStaticModifierQuickFix() {
         super(false, "static");
     }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveStaticModifierQuickFix.class.getName();
+    }
 }

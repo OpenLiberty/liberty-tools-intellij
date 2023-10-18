@@ -49,8 +49,8 @@ public class HttpServletQuickFix {
             String title = Messages.getMessage("LetClassExtend",
                     parentType.getName(),
                     ServletConstants.HTTP_SERVLET);
-            ChangeCorrectionProposal proposal = new ExtendClassProposal(title,
-                    context.getSource().getCompilationUnit(), parentType, context.getASTRoot(),
+            ChangeCorrectionProposal proposal = new ExtendClassProposal(title, context.getCompilationUnit(),
+                    context.getSource().getCompilationUnit(), parentType,
                     "jakarta.servlet.http.HttpServlet", 0);
             CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
             if (codeAction != null) {
