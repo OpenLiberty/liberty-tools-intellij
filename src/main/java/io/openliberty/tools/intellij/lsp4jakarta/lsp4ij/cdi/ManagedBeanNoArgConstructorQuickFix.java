@@ -53,29 +53,33 @@ public class ManagedBeanNoArgConstructorQuickFix implements IJavaCodeActionParti
     }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        return addConstructor(diagnostic, context);
+        PsiElement node = context.getCoveredNode();
+        PsiClass parentType = getBinding(node);
+
+        if (parentType != null) {
+            return addConstructor(diagnostic, context);
+        }
+        return Collections.emptyList();
     }
 
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        final PsiElement node = context.getCoveredNode();
-        final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
+        PsiElement node = context.getCoveredNode();
+        PsiClass parentType = getBinding(node);
 
-        if (parentType != null) {
-            String constructorName = toResolve.getTitle();
-            ChangeCorrectionProposal proposal = new AddConstructorProposal(constructorName,
-                    context.getSource().getCompilationUnit(), context.getASTRoot(), parentType, 0,
-                    constructorName.equals(Messages.getMessage("AddProtectedConstructor")) ? "protected" : "public");
+        String constructorName = toResolve.getTitle();
+        ChangeCorrectionProposal proposal = new AddConstructorProposal(constructorName,
+                context.getSource().getCompilationUnit(), context.getASTRoot(), parentType, 0,
+                constructorName.equals(Messages.getMessage("AddProtectedConstructor")) ? "protected" : "public");
 
-            try {
-                WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                toResolve.setEdit(we);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Unable to create workspace edit for code actions to add constructors", e);
-            }
-
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code actions to add constructors", e);
         }
+
         return toResolve;
     }
 
