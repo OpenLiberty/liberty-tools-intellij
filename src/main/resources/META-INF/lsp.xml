@@ -37,7 +37,7 @@
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="Properties" serverId="libertyls"
-                         filePattern="**/{src/main/liberty/config,usr/servers/**}/{bootstrap.properties,server.env}"/>
+                         filePattern="**/{*.properties,*.env}"/>
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
@@ -64,6 +64,8 @@
         <inspectionToolProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.diagnostics.LSPInspectionToolProvider"/>
         <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServiceAccessor"/>
+        <!-- Enable watcher to handle custom liberty config files and provide LCLS support -->
+        <projectService serviceImplementation="io.openliberty.tools.intellij.liberty.lsp.LibertyCustomConfigManager"/>
         <!-- TODO re-enable goto handler -->
         <!-- <gotoDeclarationHandler
                 implementation="io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.navigation.LSPGotoDeclarationHandler"/> -->
