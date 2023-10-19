@@ -16,6 +16,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyReturnTypeProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -58,7 +59,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         final PsiMethod parentType = getBinding(node);
 
         if (parentType != null) {
-            codeActions.add(createCodeAction(context, diagnostic));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE, getParticipantId()));
         }
         return codeActions;
     }
@@ -79,18 +80,6 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to change return type to void", e);
         }
         return toResolve;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(TITLE_MESSAGE);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 
     protected PsiMethod getBinding(PsiElement node) {
