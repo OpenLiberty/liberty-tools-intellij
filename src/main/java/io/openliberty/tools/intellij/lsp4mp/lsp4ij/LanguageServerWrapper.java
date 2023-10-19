@@ -365,9 +365,9 @@ public class LanguageServerWrapper {
         } else if (LOGGER.isDebugEnabled()) {
             LOGGER.warn(message.getClass().getSimpleName() + ": " + this.serverDefinition.id + '\n' + message.toString());
         }
-        // else {
-        //     LOGGER.warn(message.getClass().getSimpleName() + ": " + this.serverDefinition.id + '\n' + message.toString());
-        // }
+//        else {
+//            LOGGER.warn(message.getClass().getSimpleName() + ": " + this.serverDefinition.id + '\n' + message.toString());
+//        }
     }
 
     /**

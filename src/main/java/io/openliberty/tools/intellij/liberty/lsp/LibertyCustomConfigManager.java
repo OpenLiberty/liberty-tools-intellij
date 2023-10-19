@@ -32,7 +32,7 @@ public class LibertyCustomConfigManager implements LibraryTable.Listener, Dispos
 
     @Override
     public void dispose() {
-
+        this.appConnection.disconnect();
     }
 
     public interface Listener {
@@ -48,7 +48,6 @@ public class LibertyCustomConfigManager implements LibraryTable.Listener, Dispos
 
     public LibertyCustomConfigManager(Project project) {
         this.project = project;
-        LibraryTablesRegistrar.getInstance().getLibraryTable(project).addListener(this, project);
         listener = new LibertyCustomConfigListener(this);
         appConnection = ApplicationManager.getApplication().getMessageBus().connect(project);
         appConnection.subscribe(VirtualFileManager.VFS_CHANGES, listener);
