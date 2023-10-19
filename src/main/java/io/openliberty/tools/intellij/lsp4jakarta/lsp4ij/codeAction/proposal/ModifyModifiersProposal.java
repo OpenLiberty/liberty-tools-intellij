@@ -46,6 +46,8 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
     // list of modifiers (if they exist) to remove
     private final List<String> modifiersToRemove;
 
+    private boolean isFormatRequired = true;
+
     /**
      *  Constructor for ModifyModifiersProposal that accepts both a list of modifiers to remove as well as to add
      * 
@@ -61,6 +63,25 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
         this.modifiers = modifiers;
         this.modifiersToAdd = modifiersToAdd;        
         this.modifiersToRemove = modifiersToRemove;
+    }
+
+    /**
+     *  Constructor for ModifyModifiersProposal that accepts both a list of modifiers to remove as well as to add
+     *  this constructor having an optional parameter isFormatRequired
+     *
+     * @param modifiersToAdd        list of valid modifiers as strings to be added
+     * @param modifiersToRemove     list of modifiers as strings to be removed
+     */
+    public ModifyModifiersProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
+                                   PsiModifierListOwner binding, int relevance, PsiModifierList modifiers, List<String> modifiersToAdd, List<String> modifiersToRemove, boolean isFormatRequired) {
+        super(label, CodeActionKind.QuickFix, relevance);
+        this.sourceCU = sourceCU;
+        this.invocationNode = invocationNode;
+        this.binding = binding;
+        this.modifiers = modifiers;
+        this.modifiersToAdd = modifiersToAdd;
+        this.modifiersToRemove = modifiersToRemove;
+        this.isFormatRequired = isFormatRequired;
     }
     
     /**
@@ -100,7 +121,9 @@ public class ModifyModifiersProposal extends ChangeCorrectionProposal {
                 modifiers.setModifierProperty(modifier, true);
             }
         });
-        PositionUtils.formatDocument(binding); // add the necessary new lines, must use 'binding,' it's already in the document
+        if (isFormatRequired) {
+            PositionUtils.formatDocument(binding); // add the necessary new lines, must use 'binding,' it's already in the document
+        }
         final Document document = invocationNode.getViewProvider().getDocument();
         return new Change(sourceCU.getViewProvider().getDocument(), document);
     }
