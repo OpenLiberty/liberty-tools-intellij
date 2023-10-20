@@ -170,8 +170,6 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-servlet#ExtendHttpServlet"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix"/>
-                                   targetDiagnostic="jakarta-di#RemoveInjectOrFinal"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInjectOrStatic"
