@@ -24,7 +24,6 @@ import com.intellij.openapi.util.JDOMExternalizerUtil;
 import com.intellij.openapi.util.WriteExternalException;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
-import io.openliberty.tools.intellij.actions.LibertyDevStartAction;
 import io.openliberty.tools.intellij.util.Constants;
 import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
