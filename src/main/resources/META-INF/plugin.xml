@@ -181,22 +181,27 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInjectOrAbstract"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix"/>
+
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#AddPathParamsAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix"/>
+
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#MissingResourceTypeAttribute"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix"/>
+
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#MissingResourceNameAttribute"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix"/>
+
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#PostConstructReturnType"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix"/>
+        
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#MissingEmptyConstructor"
