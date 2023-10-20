@@ -1,4 +1,4 @@
-<idea-plugin>
+ <idea-plugin>
     <id>open-liberty.intellij</id>
     <name>Liberty Tools</name>
 
@@ -161,7 +161,10 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
-
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#ExtendHttpServlet"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jax_rs#NonPublicResourceMethod"
@@ -198,7 +201,7 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#PostConstructReturnType"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix"/>
-
+        
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#MissingEmptyConstructor"
