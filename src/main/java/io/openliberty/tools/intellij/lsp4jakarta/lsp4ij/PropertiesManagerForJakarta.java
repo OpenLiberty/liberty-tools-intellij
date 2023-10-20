@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020,2022 Red Hat, Inc.
+ * Copyright (c) 2020, 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -12,44 +12,30 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.lang.jvm.JvmTypeDeclaration;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.JakartaCodeActionHandler;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSClassDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonp.JsonpDiagnosticCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceMapKeyDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.*;
-import org.eclipse.lsp4mp.commons.*;
+import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
+import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,25 +51,13 @@ public class PropertiesManagerForJakarta {
         return INSTANCE;
     }
 
-    private List<DiagnosticsCollector> diagnosticsCollectors = new ArrayList<>();
     private JakartaCodeActionHandler codeActionHandler = new JakartaCodeActionHandler();
 
+    private final DiagnosticsHandler diagnosticsHandler;
+
     private PropertiesManagerForJakarta() {
-        diagnosticsCollectors.add(new ServletDiagnosticsCollector());
-        diagnosticsCollectors.add(new AnnotationDiagnosticsCollector());
-        diagnosticsCollectors.add(new FilterDiagnosticsCollector());
-        diagnosticsCollectors.add(new ListenerDiagnosticsCollector());
-        diagnosticsCollectors.add(new BeanValidationDiagnosticsCollector());
-        diagnosticsCollectors.add(new PersistenceEntityDiagnosticsCollector());
-        diagnosticsCollectors.add(new PersistenceMapKeyDiagnosticsCollector());
-        diagnosticsCollectors.add(new ResourceMethodDiagnosticsCollector());
-        diagnosticsCollectors.add(new Jax_RSClassDiagnosticsCollector());
-        diagnosticsCollectors.add(new JsonbDiagnosticsCollector());
-        diagnosticsCollectors.add(new ManagedBeanDiagnosticsCollector());
-        diagnosticsCollectors.add(new DependencyInjectionDiagnosticsCollector());
-        diagnosticsCollectors.add(new JsonpDiagnosticCollector());
-        diagnosticsCollectors.add(new WebSocketDiagnosticsCollector());
         codeActionHandler = new JakartaCodeActionHandler();
+        diagnosticsHandler = new DiagnosticsHandler("jakarta");
     }
 
     /**
@@ -94,40 +68,7 @@ public class PropertiesManagerForJakarta {
      * @return diagnostics for the given uris list.
      */
     public List<PublishDiagnosticsParams> diagnostics(JakartaDiagnosticsParams params, IPsiUtils utils) {
-        List<String> uris = params.getUris();
-        if (uris == null) {
-            return Collections.emptyList();
-        }
-        DocumentFormat documentFormat = params.getDocumentFormat();
-        List<PublishDiagnosticsParams> publishDiagnostics = new ArrayList<PublishDiagnosticsParams>();
-        for (String uri : uris) {
-            List<Diagnostic> diagnostics = new ArrayList<>();
-            PublishDiagnosticsParams publishDiagnostic = new PublishDiagnosticsParams(uri, diagnostics);
-            publishDiagnostics.add(publishDiagnostic);
-            collectDiagnostics(uri, utils, documentFormat, diagnostics);
-        }
-        return publishDiagnostics;
-    }
-
-    private void collectDiagnostics(String uri, IPsiUtils utils, DocumentFormat documentFormat, List<Diagnostic> diagnostics) {
-        PsiFile typeRoot = ApplicationManager.getApplication().runReadAction((Computable<PsiFile>) () -> resolveTypeRoot(uri, utils));
-        if (typeRoot == null) {
-            return;
-        }
-
-        try {
-            if (typeRoot instanceof PsiJavaFile) {
-                Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
-                DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
-                    PsiJavaFile unit = (PsiJavaFile) typeRoot;
-                    for (DiagnosticsCollector collector : diagnosticsCollectors) {
-                        collector.collectDiagnostics(unit, diagnostics);
-                    }
-                });
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
+        return diagnosticsHandler.collectDiagnostics(adapt(params), utils);
     }
 
     /**
@@ -407,5 +348,12 @@ public class PropertiesManagerForJakarta {
         return ApplicationManager.getApplication().runReadAction((Computable<List<CodeAction>>) () -> {
             return codeActionHandler.codeAction(params, utils);
         });
+    }
+
+    private MicroProfileJavaDiagnosticsParams adapt(JakartaDiagnosticsParams params) {
+        MicroProfileJavaDiagnosticsParams mpParams = new MicroProfileJavaDiagnosticsParams(params.getUris(),
+                new MicroProfileJavaDiagnosticsSettings(Collections.emptyList()));
+        mpParams.setDocumentFormat(params.getDocumentFormat());
+        return mpParams;
     }
 }
