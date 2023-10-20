@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -116,7 +117,7 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
      */
     private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions, String name, String... attributes) {
         String label = getLabel(name, attributes);
-        codeActions.add(createCodeAction(context, diagnostic, label));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
 
     protected PsiModifierListOwner getBinding(PsiElement node) {
@@ -130,17 +131,5 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
 
     protected String getLabel(String annotationName, String... attributes) {
         return Messages.getMessage("InsertItem", "@" + annotation); // uses Java syntax
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 }

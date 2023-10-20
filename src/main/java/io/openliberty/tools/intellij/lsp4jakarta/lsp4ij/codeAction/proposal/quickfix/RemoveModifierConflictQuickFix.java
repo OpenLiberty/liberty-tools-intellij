@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -123,7 +124,7 @@ public abstract class RemoveModifierConflictQuickFix implements IJavaCodeActionP
         PsiElement node = context.getCoveredNode();
         PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         String label = getLabel(modifierListOwner, modifier);
-        codeActions.add(createCodeAction(context, diagnostic, label));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
 
     private String getLabel(PsiModifierListOwner modifierListOwner, String... modifier) {
@@ -145,17 +146,4 @@ public abstract class RemoveModifierConflictQuickFix implements IJavaCodeActionP
     protected PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
-    }
-
 }
