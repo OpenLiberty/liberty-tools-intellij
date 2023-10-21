@@ -39,6 +39,7 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class JakartaServletTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void ExtendWebServlet() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -66,6 +67,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         }
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void CompleteWebServletAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

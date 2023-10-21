@@ -39,6 +39,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class BeanValidationTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void validFieldConstraints() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -55,6 +56,7 @@ public class BeanValidationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void fieldConstraintValidation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -194,7 +196,8 @@ public class BeanValidationTest extends BaseJakartaTest {
             assertJavaCodeAction(codeActionParams3, utils, ca3, ca4);
         }
     }
-    
+
+    @Ignore("until listener leak is resolved")
     @Test
     public void methodConstraintValidation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

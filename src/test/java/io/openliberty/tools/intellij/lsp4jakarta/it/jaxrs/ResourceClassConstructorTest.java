@@ -25,6 +25,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class ResourceClassConstructorTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void MultipleConstructorsWithEqualParams() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -60,6 +62,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void MultipleConstructorsWithDifferentLength() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -80,6 +83,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void NoPublicConstructor() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -104,7 +108,8 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 
-    
+
+    @Ignore("until listener leak is resolved")
     @Test
     public void NoPublicConstructorProviderClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

@@ -40,6 +40,7 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void deleteExtraJsonbCreatorAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -77,7 +78,8 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
         }
     }
-    
+
+    @Ignore("until listener leak is resolved")
     @Test
     public void JsonbTransientNotMutuallyExclusive() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

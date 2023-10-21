@@ -24,6 +24,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class GeneratedAnnotationTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void GeneratedAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

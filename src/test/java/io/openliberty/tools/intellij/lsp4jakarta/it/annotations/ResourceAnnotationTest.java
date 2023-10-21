@@ -39,6 +39,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class ResourceAnnotationTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void ResourceAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

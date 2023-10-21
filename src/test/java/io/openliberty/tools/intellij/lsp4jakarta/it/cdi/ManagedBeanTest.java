@@ -41,6 +41,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class ManagedBeanTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void managedBeanAnnotations() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -78,7 +79,8 @@ public class ManagedBeanTest extends BaseJakartaTest {
             assertJavaCodeAction(codeActionParams2, utils, ca2);
         }
     }
-    
+
+    @Ignore("until listener leak is resolved")
     @Test
     public void scopeDeclaration() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -137,6 +139,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         }
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void producesAndInject() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -178,6 +181,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         }
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void injectAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -309,6 +313,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         }
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void producesAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -455,7 +460,8 @@ public class ManagedBeanTest extends BaseJakartaTest {
             assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
         }
     }
-    
+
+    @Ignore("until listener leak is resolved")
     @Test
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));

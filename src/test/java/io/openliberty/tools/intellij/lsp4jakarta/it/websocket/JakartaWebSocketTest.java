@@ -39,6 +39,7 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class JakartaWebSocketTest extends BaseJakartaTest {
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void addPathParamsAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -82,6 +83,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         }
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void changeInvalidParamType() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -107,6 +109,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testPathParamInvalidURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -125,6 +128,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testServerEndpointRelativeURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -143,6 +147,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testServerEndpointNoSlashURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -162,6 +167,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testServerEndpointInvalidTemplateURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -179,6 +185,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testServerEndpointDuplicateVariableURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -196,6 +203,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    @Ignore("until listener leak is resolved")
     @Test
     public void testDuplicateOnMessage() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
