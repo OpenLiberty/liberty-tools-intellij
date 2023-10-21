@@ -25,4 +25,9 @@ public class AddResourceMissingNameQuickFix extends InsertAnnotationAttributesQu
     public AddResourceMissingNameQuickFix() {
         super("jakarta.annotation.Resource", false, "name");
     }
+
+    @Override
+    public String getParticipantId() {
+        return AddResourceMissingNameQuickFix.class.getName();
+    }
 }

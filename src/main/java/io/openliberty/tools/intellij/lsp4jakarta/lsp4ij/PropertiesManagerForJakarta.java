@@ -22,14 +22,15 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.JakartaCodeActionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.*;
+import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeActionParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsSettings;
 import org.slf4j.Logger;
@@ -51,12 +52,13 @@ public class PropertiesManagerForJakarta {
         return INSTANCE;
     }
 
-    private JakartaCodeActionHandler codeActionHandler = new JakartaCodeActionHandler();
+    private List<DiagnosticsCollector> diagnosticsCollectors = new ArrayList<>();
+    private final CodeActionHandler codeActionHandler;
 
     private final DiagnosticsHandler diagnosticsHandler;
 
     private PropertiesManagerForJakarta() {
-        codeActionHandler = new JakartaCodeActionHandler();
+        codeActionHandler = new CodeActionHandler("jakarta");
         diagnosticsHandler = new DiagnosticsHandler("jakarta");
     }
 
@@ -346,7 +348,17 @@ public class PropertiesManagerForJakarta {
 
     public List<CodeAction> getCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils) {
         return ApplicationManager.getApplication().runReadAction((Computable<List<CodeAction>>) () -> {
-            return codeActionHandler.codeAction(params, utils);
+            final List<? extends CodeAction> unresolvedCodeActions = codeActionHandler.codeAction(adapt(params), utils);
+            if (unresolvedCodeActions != null) {
+                final List<CodeAction> resolvedCodeActions = new ArrayList<>(unresolvedCodeActions.size());
+                unresolvedCodeActions.forEach(unresolvedCodeAction -> {
+                    if (unresolvedCodeAction != null) {
+                        resolvedCodeActions.add(codeActionHandler.resolveCodeAction(unresolvedCodeAction, utils));
+                    }
+                });
+                return resolvedCodeActions;
+            }
+            return null;
         });
     }
 
@@ -354,6 +366,13 @@ public class PropertiesManagerForJakarta {
         MicroProfileJavaDiagnosticsParams mpParams = new MicroProfileJavaDiagnosticsParams(params.getUris(),
                 new MicroProfileJavaDiagnosticsSettings(Collections.emptyList()));
         mpParams.setDocumentFormat(params.getDocumentFormat());
+        return mpParams;
+    }
+
+    private MicroProfileJavaCodeActionParams adapt(JakartaJavaCodeActionParams params) {
+        MicroProfileJavaCodeActionParams mpParams = new MicroProfileJavaCodeActionParams(params.getTextDocument(), params.getRange(), params.getContext());
+        mpParams.setResourceOperationSupported(params.isResourceOperationSupported());
+        mpParams.setResolveSupported(true);
         return mpParams;
     }
 }

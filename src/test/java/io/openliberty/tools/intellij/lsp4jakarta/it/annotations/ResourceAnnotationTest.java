@@ -60,16 +60,38 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        if (CHECK_CODE_ACTIONS) {
-            JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-            TextEdit te = te(22, 0, 22, 22, "@Resource(name = \"aa\", type = \"\")");
-            CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
-            assertJavaCodeAction(codeActionParams, utils, ca);
+        //TODO: uncomment this if condition, once refactoring is done for all the quick fixes.
+//        if (CHECK_CODE_ACTIONS) {
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;" +
+                "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation " +
+                "{\n\n    private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
+                "private boolean isHappy;\n\n	@Resource(name = \"test\")\n   " +
+                " private boolean isSad;\n\n\n    private String emailAddress;\n\n\n}\n\n" +
+                "@Resource(name = \"aa\",type=\"\")\nclass PostDoctoralStudent {\n\n    " +
+                "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
+                "private boolean isHappy;\n\n	@Resource\n    private boolean isSad;\n\n\n    " +
+                "private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass " +
+                "MasterStudent {\n\n    private Integer studentId;\n\n} \n";
+        TextEdit te = te(0, 0, 45, 0, newText);
+        CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
+        assertJavaCodeAction(codeActionParams, utils, ca);
 
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-            TextEdit te1 = te(39, 0, 39, 30, "@Resource(type = \"\", name = \"\")");
-            CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
-        }
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, " +
+                "name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;" +
+                "\n\n\n	@Resource(shareable = true)\n    private boolean isHappy;\n\n	" +
+                "@Resource(name = \"test\")\n    private boolean isSad;\n\n\n    " +
+                "private String emailAddress;\n\n\n}\n\n@Resource(name = \"aa\")\n" +
+                "class PostDoctoralStudent {\n\n    private Integer studentId;\n\n\n	" +
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n	@Resource\n    " +
+                "private boolean isSad;\n\n\n    private String emailAddress;\n\n}\n\n" +
+                "@Resource(type = Object.class, name=\"\")\nclass MasterStudent {\n\n    " +
+                "private Integer studentId;\n\n} \n";
+        TextEdit te1 = te(0, 0, 45, 0, newText);
+        CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
+//        }
     }
 }

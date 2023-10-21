@@ -47,6 +47,12 @@ import java.util.stream.Collectors;
  */
 public class CodeActionHandler {
 
+	private final String group;
+
+	public CodeActionHandler(String group) {
+		this.group = group;
+	}
+
 	/**
 	 * Returns all the code actions applicable for the context given by the
 	 * parameters.
@@ -98,6 +104,7 @@ public class CodeActionHandler {
 				// Get list of code action definition for the given kind
 				List<io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition> codeActionDefinitions = io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition.EP.extensions()
 						.filter(definition -> definition.isAdaptedForCodeAction(context))
+						.filter(definition -> group.equals(definition.getGroup()))
 						.filter(definition -> codeActionKind.equals(definition.getKind()))
 						.collect(Collectors.toList());
 				if (codeActionDefinitions != null) {
@@ -201,6 +208,7 @@ public class CodeActionHandler {
 
 		IJavaCodeActionParticipant participant = JavaCodeActionDefinition.EP.extensions()
 				.filter(definition -> unresolved.getKind().startsWith(definition.getKind()))
+				.filter(definition -> group.equals(definition.getGroup()))
 				.filter(definition -> participantId.equals(definition.getParticipantId()))
 				.findFirst().orElse(null);
 		return participant.resolveCodeAction(context.copy());
