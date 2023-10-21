@@ -82,7 +82,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:231.9011.34') {
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:232.10072.27') {
         transitive = false
     }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -128,7 +128,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2023.1.2'
+    version = '2023.2.3'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
