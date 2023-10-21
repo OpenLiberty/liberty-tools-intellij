@@ -36,6 +36,8 @@ import org.junit.runners.JUnit4;
 import java.io.File;
 import java.util.Arrays;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
+
 @RunWith(JUnit4.class)
 public class JakartaWebSocketTest extends BaseJakartaTest {
 
@@ -57,30 +59,40 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 "Parameters of type String, any Java primitive type, or boxed version thereof must be annotated with @PathParams.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "AddPathParamsAnnotation"
         );
-        
+
         // OnClose PathParams Annotation check
         Diagnostic d2 = JakartaForJavaAssert.d(24, 49, 67,
                 "Parameters of type String, any Java primitive type, or boxed version thereof must be annotated with @PathParams.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "AddPathParamsAnnotation"
         );
-        
+
         Diagnostic d3 = JakartaForJavaAssert.d(24, 76, 94,
                 "Parameters of type String, any Java primitive type, or boxed version thereof must be annotated with @PathParams.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "AddPathParamsAnnotation"
         );
-
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        if (CHECK_CODE_ACTIONS) {
-            // Expected code actions
-            JakartaJavaCodeActionParams codeActionsParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-            String newText = "\nimport jakarta.websocket.server.PathParam;\nimport jakarta.websocket.server.ServerEndpoint;\nimport jakarta.websocket.Session;\n\n"
-                    + "/**\n * Expected Diagnostics are related to validating that the parameters have the \n * valid annotation @PathParam (code: AddPathParamsAnnotation)\n * See issue #247 (onOpen) and #248 (onClose)\n */\n"
-                    + "@ServerEndpoint(value = \"/infos\")\npublic class AnnotationTest {\n    // @PathParam missing annotation for \"String missingAnnotation\"\n    @OnOpen\n    public void OnOpen(Session session, @PathParam(value = \"\") ";
-            TextEdit te = JakartaForJavaAssert.te(5, 32, 18, 40, newText);
-            CodeAction ca = JakartaForJavaAssert.ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
-        }
+        //TODO: uncomment this if condition, once refactoring is done for all the quick fixes.
+//        if (CHECK_CODE_ACTIONS) {
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport java.io.IOException;" +
+                "\n\nimport jakarta.websocket.OnClose;\nimport jakarta.websocket.OnOpen;\n" +
+                "import jakarta.websocket.server.PathParam;import jakarta.websocket.server.ServerEndpoint;\n" +
+                "import jakarta.websocket.Session;\n\n/**\n * Expected Diagnostics are related to validating that the " +
+                "parameters have the \n * valid annotation @PathParam (code: AddPathParamsAnnotation)\n * " +
+                "See issue #247 (onOpen) and #248 (onClose)\n */\n@ServerEndpoint(value = \"/infos\")\n" +
+                "public class AnnotationTest {\n    // @PathParam missing annotation for \"String missingAnnotation\"\n" +
+                "    @OnOpen\n    public void OnOpen(Session session, @PathParam(\"\") String missingAnnotation) " +
+                "throws IOException {\n        System.out.println(\"Websocket opened: \" + session.getId().toString());" +
+                "\n    }\n    \n    // Used to check that the expected diagnostic handle more than one case\n    " +
+                "@OnClose\n    public void OnClose(Session session, Integer missingAnnotation1, " +
+                "String missingAnnotation2) {\n        System.out.println(\"Websocket opened: \" + " +
+                "session.getId().toString());\n    }\n}\n";
+        TextEdit te = te(0, 0, 28, 0, newText);
+        CodeAction ca = ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+//        }
     }
 
     @Ignore("until listener leak is resolved")

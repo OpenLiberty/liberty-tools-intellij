@@ -88,30 +88,21 @@ public class DependencyInjectionTest extends BaseJakartaTest {
             TextEdit te = JakartaForJavaAssert.te(16, 4, 17, 4,
                     "");
             CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
-            TextEdit te1 = JakartaForJavaAssert.te(17, 11, 17, 17,
-                    "");
-            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this field", d1, te1);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
 
             // for d2
             codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d2);
             te = JakartaForJavaAssert.te(32, 4, 33, 4,
                     "");
             ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d2, te);
-            te1 = JakartaForJavaAssert.te(33, 10, 33, 19,
-                    "");
-            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'abstract' modifier from this method", d2, te1);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
 
             // for d3
             codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d3);
             te = JakartaForJavaAssert.te(25, 4, 26, 4,
                     "");
             ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te);
-            te1 = JakartaForJavaAssert.te(26, 10, 26, 16,
-                    "");
-            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", d3, te1);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
 
             // for d4
             codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d4);
@@ -125,10 +116,136 @@ public class DependencyInjectionTest extends BaseJakartaTest {
             te = JakartaForJavaAssert.te(36, 4, 37, 4,
                     "");
             ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d5, te);
-            te1 = JakartaForJavaAssert.te(37, 10, 37, 17,
-                    "");
-            ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", d5, te1);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
         }
+
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+        String textD1 = "package io.openliberty.sample.jakarta.di;\n\n" +
+                "import jakarta.inject.Inject;\n" +
+                "import jakarta.enterprise.inject.Produces;\n\n" +
+                "import java.util.ArrayList;\n" +
+                "import java.util.List;\n\n" +
+                "public abstract class GreetingServlet {\n\n    " +
+                "/**\n     *\n     */\n    " +
+                "private static final long serialVersionUID = 1L;\n\n    " +
+                "// d1: test code for @Inject fields cannot be final\n    " +
+                "@Inject\n    private Greeting greeting = new Greeting();\n\n    " +
+                "@Produces\n    " +
+                "public GreetingNoDefaultConstructor getInstance() {\n        " +
+                "return new GreetingNoDefaultConstructor(\"Howdy\");\n    }\n\n    " +
+                "// d2\n    " +
+                "@Inject\n    public final void injectFinal() {\n        " +
+                "// test code for @Inject methods cannot be final\n        " +
+                "return;\n    }\n\n    " +
+                "// d3: test code for @Inject methods cannot be abstract\n    " +
+                "@Inject\n    public abstract void injectAbstract();\n\n    " +
+                "// d4: test code for @Inject methods cannot be static\n    " +
+                "@Inject\n    " +
+                "public static void injectStatic() {\n        " +
+                "return;\n    }\n\n    " +
+                "// d5: test code for @Inject methods cannot be generic\n    " +
+                "@Inject\n    " +
+                "public <T> List<T> injectGeneric(T arg) {\n        " +
+                "// do nothing\n        " +
+                "return new ArrayList<T>();\n    " +
+                "};\n\n}\n";
+
+        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 49, 0, textD1);
+        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this field", d1, te1);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1);
+
+        String textD2 = "package io.openliberty.sample.jakarta.di;\n\n" +
+                "import jakarta.inject.Inject;\n" +
+                "import jakarta.enterprise.inject.Produces;\n\n" +
+                "import java.util.ArrayList;\n" +
+                "import java.util.List;\n\n" +
+                "public abstract class GreetingServlet {\n\n    " +
+                "/**\n     *\n     */\n    " +
+                "private static final long serialVersionUID = 1L;\n\n    " +
+                "// d1: test code for @Inject fields cannot be final\n    " +
+                "@Inject\n    private final Greeting greeting = new Greeting();\n\n    " +
+                "@Produces\n    public GreetingNoDefaultConstructor getInstance() {\n        " +
+                "return new GreetingNoDefaultConstructor(\"Howdy\");\n    }\n\n    " +
+                "// d2\n    @Inject\n    public final void injectFinal() {\n        " +
+                "// test code for @Inject methods cannot be final\n        " +
+                "return;\n    }\n\n    " +
+                "// d3: test code for @Inject methods cannot be abstract\n    " +
+                "@Inject\n    public void injectAbstract();\n\n    " +
+                "// d4: test code for @Inject methods cannot be static\n    " +
+                "@Inject\n    public static void injectStatic() {\n        " +
+                "return;\n    }\n\n    " +
+                "// d5: test code for @Inject methods cannot be generic\n    " +
+                "@Inject\n    " +
+                "public <T> List<T> injectGeneric(T arg) {\n        " +
+                "// do nothing\n        " +
+                "return new ArrayList<T>();\n    " +
+                "};\n\n}\n";
+        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+        te1 = JakartaForJavaAssert.te(0, 0, 49, 0, textD2);
+        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'abstract' modifier from this method", d2, te1);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1);
+
+        String textD3 = "package io.openliberty.sample.jakarta.di;\n\n" +
+                "import jakarta.inject.Inject;\n" +
+                "import jakarta.enterprise.inject.Produces;\n\n" +
+                "import java.util.ArrayList;\n" +
+                "import java.util.List;\n\n" +
+                "public abstract class GreetingServlet {\n\n    " +
+                "/**\n     *\n     */\n    " +
+                "private static final long serialVersionUID = 1L;\n\n    // d1: test code for @Inject fields cannot be final\n    " +
+                "@Inject\n    private final Greeting greeting = new Greeting();\n\n    " +
+                "@Produces\n    " +
+                "public GreetingNoDefaultConstructor getInstance() {\n        " +
+                "return new GreetingNoDefaultConstructor(\"Howdy\");\n    " +
+                "}\n\n    " +
+                "// d2\n    @Inject\n    public void injectFinal() {\n        " +
+                "// test code for @Inject methods cannot be final\n        " +
+                "return;\n    }\n\n    " +
+                "// d3: test code for @Inject methods cannot be abstract\n    " +
+                "@Inject\n    public abstract void injectAbstract();\n\n    " +
+                "// d4: test code for @Inject methods cannot be static\n    " +
+                "@Inject\n    public static void injectStatic() {\n        " +
+                "return;\n    }\n\n    " +
+                "// d5: test code for @Inject methods cannot be generic\n    " +
+                "@Inject\n    " +
+                "public <T> List<T> injectGeneric(T arg) {\n        " +
+                "// do nothing\n        " +
+                "return new ArrayList<T>();\n    };\n\n}\n";
+        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d3);
+        te1 = JakartaForJavaAssert.te(0, 0, 49, 0, textD3);
+        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", d3, te1);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1);
+
+        String textD4 = "package io.openliberty.sample.jakarta.di;\n\n" +
+                "import jakarta.inject.Inject;\n" +
+                "import jakarta.enterprise.inject.Produces;\n\n" +
+                "import java.util.ArrayList;\nimport java.util.List;\n\n" +
+                "public abstract class GreetingServlet " +
+                "{\n\n    /**\n     *\n     */\n    " +
+                "private static final long serialVersionUID = 1L;\n\n    " +
+                "// d1: test code for @Inject fields cannot be final\n    " +
+                "@Inject\n    " +
+                "private final Greeting greeting = new Greeting();\n\n    " +
+                "@Produces\n    " +
+                "public GreetingNoDefaultConstructor getInstance() {\n        " +
+                "return new GreetingNoDefaultConstructor(\"Howdy\");\n    }\n\n    " +
+                "// d2\n    @Inject\n    " +
+                "public final void injectFinal() {\n        " +
+                "// test code for @Inject methods cannot be final\n        " +
+                "return;\n    }\n\n    " +
+                "// d3: test code for @Inject methods cannot be abstract\n    " +
+                "@Inject\n    " +
+                "public abstract void injectAbstract();\n\n    " +
+                "// d4: test code for @Inject methods cannot be static\n    " +
+                "@Inject\n    public void injectStatic() {\n        " +
+                "return;\n    }\n\n    " +
+                "// d5: test code for @Inject methods cannot be generic\n    " +
+                "@Inject\n    " +
+                "public <T> List<T> injectGeneric(T arg) {\n        " +
+                "// do nothing\n        return new ArrayList<T>();\n    };\n\n}\n";
+        codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d5);
+        te1 = JakartaForJavaAssert.te(0, 0, 49, 0, textD4);
+        ca1 = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", d5, te1);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1);
     }
 }

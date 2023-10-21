@@ -19,6 +19,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -27,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,20 +60,20 @@ public class ManagedBeanConstructorTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
+        //TODO Enable the remaining test cases once the refactoring is completed
         if (CHECK_CODE_ACTIONS) {
-            // test expected quick-fix
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
             TextEdit te1 = te(15, 44, 21, 1,
                     "\nimport jakarta.inject.Inject;\n\n@Dependent\npublic class ManagedBeanConstructor {\n	private int a;\n	\n	@Inject\n	");
-            TextEdit te2 = te(19, 1, 19, 1,
-                    "protected ManagedBeanConstructor() {\n\t}\n\n\t");
-            TextEdit te3 = te(19, 1, 19, 1,
-                    "public ManagedBeanConstructor() {\n\t}\n\n\t");
             CodeAction ca1 = ca(uri, "Insert @Inject", d, te1);
-            CodeAction ca2 = ca(uri, "Add a no-arg protected constructor to this class", d, te2);
-            CodeAction ca3 = ca(uri, "Add a no-arg public constructor to this class", d, te3);
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2, ca3);
         }
-    }
 
+        // test expected quick-fix
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
+        TextEdit te2 = te(0, 0, 25, 0, "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     Hani Damlaj\n *******************************************************************************/\n\npackage io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\npublic class ManagedBeanConstructor {\n    private int a;\n\n    protected ManagedBeanConstructor() {\n    }\n\n    public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n");
+        TextEdit te3 = te(0, 0, 25, 0, "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     Hani Damlaj\n *******************************************************************************/\n\npackage io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\npublic class ManagedBeanConstructor {\n    private int a;\n\n    public ManagedBeanConstructor() {\n    }\n\n    public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n");
+        CodeAction ca2 = ca(uri, Messages.getMessage("AddProtectedConstructor"), d, te2);
+        CodeAction ca3 = ca(uri, Messages.getMessage("AddPublicConstructor"), d, te3);
+        assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);
+
+    }
 }
