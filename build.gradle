@@ -64,6 +64,7 @@ configurations {
 
 dependencies {
     // LSP4IJ dependencies
+    implementation 'org.microshed:lsp4ij:0.0.5'
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
@@ -138,8 +139,7 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2023.1.2'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle',
-               file("../intellij-lsp-common-provider/lsp4ij/build/libs/lsp4ij-0.0.4.uber.jar")]
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
 }
 

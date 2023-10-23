@@ -9,7 +9,7 @@
   -->
 
 <idea-plugin>
-    <extensions defaultExtensionNs="org.microshed.lsp4ij">
+    <extensions defaultExtensionNs="open-liberty.intellij">
         <!-- MicroProfile LS -->
         <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
