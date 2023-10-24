@@ -12,9 +12,9 @@ package io.openliberty.tools.intellij.liberty.lsp;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LSPIJUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.microshed.lsp4ij.LSPIJUtils;
 
 import java.util.List;
 
