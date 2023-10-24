@@ -63,17 +63,16 @@ configurations {
 }
 
 dependencies {
-    // LSP4IJ dependencies
-    implementation 'org.microshed:lsp4ij:0.0.5'
+    implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
+    implementation 'org.microshed:lsp4ij:0.0.5' // includes org.eclipse.lsp4j
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
-//    implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
     implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.0'
-    implementation ('io.openliberty.tools:liberty-langserver:2.0') {
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1-SNAPSHOT'
+    implementation ('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT') {
         exclude group: 'org.eclipse.lsp4j'
     }
     implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1') {
@@ -92,7 +91,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:231.9011.34') {
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:232.10072.27') {
         transitive = false
     }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -105,16 +104,17 @@ dependencies {
     // Test: Video Recording.
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
+    // define jars to grab locally (if falling back to mavenLocal() repo)
     lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
         transitive = false
     }
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0:uber') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.0:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.1-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:2.0:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
     lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1:jar-with-dependencies') {
@@ -137,7 +137,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2023.1.2'
+    version = '2023.2.3'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
@@ -165,6 +165,11 @@ test {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
+    }
+
+    filter {
+        // disable lsp4jakarta integration tests until listener leak issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/541
+        excludeTestsMatching "io.openliberty.tools.intellij.lsp4jakarta.it.*"
     }
 }
 

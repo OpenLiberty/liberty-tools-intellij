@@ -30,7 +30,7 @@
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
         <languageMapping language="Properties" serverId="libertyls"
-                         filePattern="**/{src/main/liberty/config,usr/servers/**}/{bootstrap.properties,server.env}"/>
+                         filePattern="**/{*.properties,*.env}"/>
 
         <!-- Jakarta LS -->
         <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
@@ -47,6 +47,8 @@
         <!-- Suppress certain Properties language inspections on server.env files -->
         <lang.inspectionSuppressor language="Properties"
                                    implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
+        <!-- Enable watcher to handle custom liberty config files and provide LCLS support -->
+        <projectService serviceImplementation="io.openliberty.tools.intellij.liberty.lsp.LibertyCustomConfigManager"/>
     </extensions>
 
 </idea-plugin>

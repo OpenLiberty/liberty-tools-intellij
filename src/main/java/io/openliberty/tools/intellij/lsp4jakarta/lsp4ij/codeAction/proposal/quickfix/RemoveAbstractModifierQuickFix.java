@@ -23,4 +23,9 @@ public class RemoveAbstractModifierQuickFix extends RemoveModifierConflictQuickF
     public RemoveAbstractModifierQuickFix() {
         super (false, "abstract");
     }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveAbstractModifierQuickFix.class.getName();
+    }
 }
