@@ -204,6 +204,11 @@
                                    targetDiagnostic="jakarta-annotations#PostConstructParams"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMethodParametersQuickFix"/>
 
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jax_rs#ResourceMethodMultipleEntityParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodMultipleEntityParamsQuickFix"/>
+
         <configSourceProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
 
