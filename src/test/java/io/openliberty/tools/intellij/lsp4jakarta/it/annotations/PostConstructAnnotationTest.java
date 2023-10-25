@@ -26,7 +26,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -64,16 +63,51 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d1);
+        TextEdit te3 = te(0, 0, 31, 1, "package io.openliberty.sample.jakarta.annotations;\n" +
+                "\n" +
+                "import jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n" +
+                "\n" +
+                "@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n" +
+                "\n" +
+                "    private Integer studentId;\n" +
+                "\n" +
+                "    private boolean isHappy;\n" +
+                "\n" +
+                "    private boolean isSad;\n" +
+                "\n" +
+                "    @PostConstruct()\n" +
+                "    public void getStudentId() {\n" +
+                "        return this.studentId;\n" +
+                "    }\n" +
+                "\n" +
+                "    @PostConstruct\n" +
+                "    public void getHappiness(String type) {\n" +
+                "\n" +
+                "    }\n" +
+                "\n" +
+                "    @PostConstruct\n" +
+                "    public void throwTantrum() throws Exception {\n" +
+                "        System.out.println(\"I'm sad\");\n" +
+                "    }\n" +
+                "\n" +
+                "    private String emailAddress;\n" +
+                "\n" +
+                "}");
+        CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
+        assertJavaCodeAction(codeActionParams2, utils, ca3);
+
+        // TODO : Enable the remaining test cases once the refactoring is completed.
+
         if (CHECK_CODE_ACTIONS) {
+
             JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
             TextEdit te1 = te(19, 4, 20, 4, "");
             CodeAction ca1 = ca(uri, "Remove @PostConstruct", d2, te1);
             assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d1);
-            TextEdit te3 = te(15, 11, 15, 18, "void");
-            CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
-            assertJavaCodeAction(codeActionParams2, utils, ca3);
         }
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
