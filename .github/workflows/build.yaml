@@ -31,6 +31,11 @@ jobs:
           minimum-size: 8GB
           maximum-size: 10GB
           disk-root: "C:"
+      - name: 'Checkout lsp4ij'
+        uses: actions/checkout@v3
+        with:
+          repository: MicroShed/lsp4ij
+          path: lsp4ij
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
@@ -40,16 +45,12 @@ jobs:
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
-      - name: 'Run UI integration tests'
-        working-directory: ./liberty-tools-intellij
-        run: bash ./src/test/resources/ci/scripts/run.sh
-      - name: 'Archive Test logs and reports'
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.reportName }}
-          path: |
-            liberty-tools-intellij/build/reports/
+      - name: 'Build lsp4ij'
+        working-directory: ./lsp4ij
+        run: bash ./gradlew jar
+      - name: 'Install lsp4ij jar in local Maven repository'
+        working-directory: ./lsp4ij
+        run: mvn install:install-file -Dfile=build/libs/lsp4ij-0.0.5.jar -DgroupId=org.microshed -DartifactId=lsp4ij -Dversion=0.0.5 -Dpackaging=jar -DgeneratePom=true
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin
@@ -63,3 +64,13 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
+      - name: 'Run UI integration tests'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/run.sh
+      - name: 'Archive Test logs and reports'
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.reportName }}
+          path: |
+            liberty-tools-intellij/build/reports/
