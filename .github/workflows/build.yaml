@@ -50,7 +50,7 @@ jobs:
         run: bash ./gradlew jar
       - name: 'Install lsp4ij jar in local Maven repository'
         working-directory: ./lsp4ij
-        run: mvn install:install-file -Dfile=build/libs/lsp4ij-0.0.5.jar -DgroupId=org.microshed -DartifactId=lsp4ij -Dversion=0.0.5 -Dpackaging=jar -DgeneratePom=true
+        run: bash ./mvn install:install-file -Dfile=build/libs/lsp4ij-0.0.5.jar -DgroupId=org.microshed -DartifactId=lsp4ij -Dversion=0.0.5 -Dpackaging=jar -DgeneratePom=true
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin
