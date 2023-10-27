@@ -157,11 +157,6 @@ test {
         showStandardStreams = true
         exceptionFormat = 'full'
     }
-
-    filter {
-        // disable lsp4jakarta integration tests until listener leak issue is resolved: https://github.com/OpenLiberty/liberty-tools-intellij/issues/541
-        excludeTestsMatching "io.openliberty.tools.intellij.lsp4jakarta.it.*"
-    }
 }
 
 tasks {
