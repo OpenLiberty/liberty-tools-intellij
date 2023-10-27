@@ -366,7 +366,4 @@
     <!-- Point to LSP xml -->
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml"
                 xpointer="xpointer(/idea-plugin/*)"/>
-<!--    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"-->
-<!--                href="file://libs/lsp4ij-0.0.5.uber.jar!/META-INF/lsp4ij.xml"-->
-<!--                xpointer="xpointer(/idea-plugin/*)"/>-->
 </idea-plugin>
