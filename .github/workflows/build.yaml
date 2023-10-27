@@ -45,12 +45,9 @@ jobs:
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
-      - name: 'Build lsp4ij'
+      - name: 'Build lsp4ij jar and publish to local Maven repository'
         working-directory: ./lsp4ij
-        run: bash ./gradlew jar
-      - name: 'Install lsp4ij jar in local Maven repository'
-        working-directory: ./lsp4ij
-        run: bash ./mvnw install:install-file -Dfile=build/libs/lsp4ij-0.0.5.jar -DgroupId=org.microshed -DartifactId=lsp4ij -Dversion=0.0.5 -Dpackaging=jar -DgeneratePom=true
+        run: bash ./gradlew publishToMavenLocal
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin
