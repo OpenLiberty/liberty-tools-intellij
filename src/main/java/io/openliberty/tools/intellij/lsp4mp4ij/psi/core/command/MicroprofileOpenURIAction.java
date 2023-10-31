@@ -4,7 +4,7 @@ import com.google.gson.JsonPrimitive;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.operations.codelens.LSPInlayProvider;
+import org.microshed.lsp4ij.operations.codelens.LSPInlayProvider;
 
 import java.util.List;
 

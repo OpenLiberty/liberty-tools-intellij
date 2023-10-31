@@ -14,8 +14,9 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.JavaVersionUtil;
+import org.microshed.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
         String javaHome = System.getProperty("java.home");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
-        if(!isJavaHomeValid(javaHome, Constants.JAKARTA_LANG_SERVER)){
+        if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.JAKARTA_LANG_SERVER)){
             return;
         }
         if (lsp4JakartaServerPath.exists()) {

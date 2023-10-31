@@ -13,8 +13,9 @@ package io.openliberty.tools.intellij.liberty.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.server.ProcessStreamConnectionProvider;
+import io.openliberty.tools.intellij.util.JavaVersionUtil;
 import io.openliberty.tools.intellij.util.Constants;
+import org.microshed.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -34,7 +35,7 @@ public class LibertyConfigLanguageServer extends ProcessStreamConnectionProvider
         String javaHome = System.getProperty("java.home");
         IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
         File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-jar-with-dependencies.jar");
-        if(!isJavaHomeValid(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
+        if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
             return;
         }
         if (libertyServerPath.exists()) {

@@ -16,7 +16,10 @@
 
 This extension is built using the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin/).
 
-1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git && cd liberty-tools-intellij`
+1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
+2. Clone the lsp4ij repository: `git clone git@github.com:MicroShed/lsp4ij.git`
+3. Build lsp4ij: `./gradlew jar`
+4. Save it in your local Maven repository: `./gradlew publishToMavenLocal` (this also runs the `jar` task)
 2. Import this repository as a Gradle project in IntelliJ IDEA
 3. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
 

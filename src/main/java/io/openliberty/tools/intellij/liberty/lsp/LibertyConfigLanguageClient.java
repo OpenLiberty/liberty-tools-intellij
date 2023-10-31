@@ -11,18 +11,15 @@
 package io.openliberty.tools.intellij.liberty.lsp;
 
 import java.util.List;
-
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
-
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageServerWrapper;
+import org.microshed.lsp4ij.LanguageClientImpl;
+import org.microshed.lsp4ij.LanguageServerWrapper;
 
 /**
  * Client for Liberty language server
