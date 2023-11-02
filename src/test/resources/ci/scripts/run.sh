@@ -35,9 +35,9 @@ prefetchDependencies() {
 
     # Run through dev mode server install/create and feature installation for the Maven app.
     cd "src/test/resources/projects/maven/singleModMavenMP"
-    ./mvnw liberty:install-server
+    ./mvnw liberty:install-server -ntp
     ./mvnw liberty:create
-    ./mvnw liberty:install-feature
+    ./mvnw liberty:install-feature -ntp
 
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"

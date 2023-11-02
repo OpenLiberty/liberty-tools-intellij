@@ -15,16 +15,26 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Quickfix for adding new annotations with or without attributes
@@ -33,13 +43,15 @@ import java.util.List;
  * @author Lidia Ataupillco Ramos
  *
  */
-public class InsertAnnotationQuickFix {
+public abstract class InsertAnnotationQuickFix implements IJavaCodeActionParticipant {
 
     private final String[] attributes;
 
     private final String annotation;
 
     protected final boolean generateOnlyOneCodeAction;
+
+    private static final Logger LOGGER = Logger.getLogger(InsertAnnotationQuickFix.class.getName());
 
     public InsertAnnotationQuickFix(String annotation, String... attributes) {
         this(annotation, false, attributes);
@@ -62,23 +74,38 @@ public class InsertAnnotationQuickFix {
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         PsiElement node = context.getCoveredNode();
+        List<CodeAction> codeActions = new ArrayList<>();
+        addAttributes(diagnostic, context, codeActions, this.annotation);
+        return codeActions;
+    }
+
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        final PsiElement node = context.getCoveredNode();
         PsiModifierListOwner binding = getBinding(node);
         // annotationNode is null when adding an annotation and non-null when adding attributes.
         PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
 
-        List<CodeAction> codeActions = new ArrayList<>();
-        addAttributes(diagnostic, context, binding, annotationNode, codeActions, this.annotation);
-
-        return codeActions;
+        assert binding != null;
+        String label = getLabel(this.annotation, attributes);
+        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
+                context.getASTRoot(), binding, annotationNode, 0, this.annotation, Arrays.asList(attributes));
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action " + label, e);
+        }
+        return toResolve;
     }
 
-    protected void addAttributes(Diagnostic diagnostic, JavaCodeActionContext context, PsiModifierListOwner binding,
-                                 PsiAnnotation annotation, List<CodeAction> codeActions, String name) {
+    protected void addAttributes(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions, String name) {
         if (generateOnlyOneCodeAction) {
-            addAttribute(diagnostic, context, binding, annotation, codeActions, name, attributes);
+            addAttribute(diagnostic, context, codeActions, name, attributes);
         } else {
             for (String attribute : attributes) {
-                addAttribute(diagnostic, context, binding, annotation, codeActions, name, attribute);
+                addAttribute(diagnostic, context, codeActions, name, attribute);
             }
         }
     }
@@ -88,16 +115,9 @@ public class InsertAnnotationQuickFix {
      * collector class.
      *
      */
-    private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, PsiModifierListOwner binding,
-                              PsiAnnotation annotation, List<CodeAction> codeActions, String name, String... attributes) {
+    private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions, String name, String... attributes) {
         String label = getLabel(name, attributes);
-        ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), binding, annotation, 0, name, Arrays.asList(attributes));
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-
-        if (codeAction != null) {
-            codeActions.add(codeAction);
-        }
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
 
     protected PsiModifierListOwner getBinding(PsiElement node) {
