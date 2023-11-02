@@ -19,10 +19,14 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.InvalidDataException;
+import com.intellij.openapi.util.JDOMExternalizerUtil;
+import com.intellij.openapi.util.WriteExternalException;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
-import io.openliberty.tools.intellij.actions.LibertyDevStartAction;
 import io.openliberty.tools.intellij.util.Constants;
+import org.jdom.Element;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +40,8 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
 
     private final LibertyModules libertyModules;
     private LibertyModule libertyModule;
+    @NonNls
+    private static final String RUN_IN_CONTAINER_TAG = "RUN_IN_CONTAINER";
 
     public LibertyRunConfiguration(Project project, ConfigurationFactory factory, String name) {
         super(name, getRunConfigurationModule(project), factory);
@@ -74,7 +80,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         getOptions().setBuildFile(buildFile);
     }
 
-    // FIXME runInContainer, see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
     public Boolean runInContainer() {
         return getOptions().runInContainer();
     }
@@ -119,8 +124,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             throw new ExecutionException(e);
         }
         // run the start dev mode action
-        AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
-        LibertyDevStartAction libAction = (LibertyDevStartAction) action;
+        AnAction action = ActionManager.getInstance().getAction(runInContainer() ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
 
         // set custom start params
         if (getParams() != null) {
@@ -128,8 +132,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         } else {
             libertyModule.setCustomStartParams("");
         }
-        // FIXME implement runInContainer checkbox from run config see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
-        // libertyModule.setRunInContainer(runInContainer());
+        libertyModule.setRunInContainer(runInContainer());
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);
@@ -153,4 +156,15 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return null;
     }
 
+    @Override
+    public void writeExternal(@NotNull Element element) throws WriteExternalException {
+        super.writeExternal(element);
+        JDOMExternalizerUtil.writeField(element, RUN_IN_CONTAINER_TAG, String.valueOf(getOptions().runInContainer()));
+    }
+
+    @Override
+    public void readExternal(@NotNull Element element) throws InvalidDataException {
+        super.readExternal(element);
+        getOptions().setRunInContainer( Boolean.parseBoolean(JDOMExternalizerUtil.readField(element, RUN_IN_CONTAINER_TAG, Boolean.FALSE.toString())));
+    }
 }
