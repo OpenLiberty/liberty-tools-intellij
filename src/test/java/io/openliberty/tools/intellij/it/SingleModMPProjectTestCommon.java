@@ -777,6 +777,9 @@ public abstract class SingleModMPProjectTestCommon {
         String testName = "testStartInContainerActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", false, 3);
         try {
@@ -809,6 +812,9 @@ public abstract class SingleModMPProjectTestCommon {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true, 3);
         try {
@@ -839,6 +845,9 @@ public abstract class SingleModMPProjectTestCommon {
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start in container", 3);
@@ -871,6 +880,9 @@ public abstract class SingleModMPProjectTestCommon {
     public void testStartInContainerActionUsingSearch() {
         String testName = "testStartInContainerActionUsingSearch";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3);
