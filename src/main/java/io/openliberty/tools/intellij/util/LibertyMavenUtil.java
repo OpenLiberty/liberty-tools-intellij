@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -35,6 +36,7 @@ import java.util.Iterator;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class LibertyMavenUtil {
+    private static Logger LOGGER = Logger.getInstance(LibertyMavenUtil.class);
 
     /**
      * Return the project name given a pom.xml build file
@@ -199,12 +201,12 @@ public class LibertyMavenUtil {
      * @return String command to execute in the terminal or an exception to display
      * @throws LibertyException
      */
-    public static String getMavenSettingsCmd(Project project) throws LibertyException {
+    public static String getMavenSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
         if (MavenServerManager.WRAPPED_MAVEN.equals(mavenHome)) {
             // it is set to use the wrapper
-            return getLocalMavenWrapper(project);
+            return getLocalMavenWrapper(buildFile);
         } else {
             // try to use maven home path defined in the settings
             return getCustomMavenPath(project, mavenHome);
@@ -214,19 +216,19 @@ public class LibertyMavenUtil {
     /**
      * Get the local wrapper path for Maven that is in the project level
      *
-     * @param project liberty project
+     * @param buildFile the build file specified in the application project directory
      * @return the Maven wrapper path to be executed or an exception to display
      * @throws LibertyException
      */
-    private static String getLocalMavenWrapper(Project project) throws LibertyException {
+    private static String getLocalMavenWrapper(VirtualFile buildFile) throws LibertyException {
         String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
-        File file = new File(project.getBasePath(), mvnw);
-        if (!file.exists()){
+        File wrapper = new File(buildFile.getParent().getPath(), mvnw);
+        if (!wrapper.exists()){
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.does.not.exist");
             throw new LibertyException("A Maven wrapper for the project could not be found. Make sure to configure a " +
                     "valid Maven wrapper or change the build preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
         }
-        if (!file.canExecute()) {
+        if (!wrapper.canExecute()) {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.cannot.execute");
             throw new LibertyException("Could not execute Maven wrapper because the process does not have permission to " +
                     "execute it. Consider giving executable permission for the Maven wrapper file or changing the build " +
@@ -249,6 +251,7 @@ public class LibertyMavenUtil {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
             throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);
         }
+
         // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
         // and consequently, it will return null. For this reason, we need to use ./bin/mvn in order to execute maven.
         String maven = SystemInfo.isWindows ? "mvn.cmd" : "mvn";
@@ -261,7 +264,7 @@ public class LibertyMavenUtil {
                 String mavenJdk = getMavenJdkPath(project);
                 String mavenPath = mavenHomeFile.getAbsolutePath();
                 String classworldsPath = LibertyMavenUtil.getMavenClassworldsJarPath(mavenPath);
-                File java = new File (new File(mavenJdk, "bin"), "java");
+                File java = new File (new File(mavenJdk, "bin"), "java"); // mavenJdk could be null, checked later
                 File classworldsConf = MavenUtil.getMavenConfFile(mavenHomeFile);
 
                 if (java.exists() && classworldsConf.exists() && classworldsPath != null && mavenJdk != null) {
