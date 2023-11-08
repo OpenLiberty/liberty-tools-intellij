@@ -317,9 +317,18 @@ public class LibertyMavenUtil {
         MavenServerManager mavenManager = MavenServerManager.getInstance();
         Collection<MavenServerConnector> msc = mavenManager.getAllConnectors();
         for (Iterator<MavenServerConnector> it = msc.iterator(); it.hasNext();){
-            MavenServerConnector ms = it.next();
-            if (ms.getProject().getProjectFilePath().equals(project.getProjectFilePath())) {
-                return ms.getJdk().getHomePath();
+            final MavenServerConnector ms = it.next();
+            final Project msProject = ms.getProject();
+            if (msProject != null) {
+                final String msProjectFilePath = msProject.getProjectFilePath();
+                final String projectFilePath = project.getProjectFilePath();
+                // Project.getProjectFilePath() returns null for the default project.
+                // If both projects are the default project then
+                // getProjectFilePath == projectFilePath should be true.
+                if ((msProjectFilePath != null && msProjectFilePath.equals(projectFilePath))
+                        || msProjectFilePath == projectFilePath) {
+                    return ms.getJdk().getHomePath();
+                }
             }
         }
         return null;
