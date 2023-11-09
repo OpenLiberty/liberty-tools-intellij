@@ -183,10 +183,6 @@ public class LibertyGradleUtil {
     public static String getGradleSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(buildFile.getParent().getPath());
         if (gradleProjectSettings == null) {
-            // Try the project dir after trying the directory containing the build file assuming it was a subdirectory in the project.
-            gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
-        }
-        if (gradleProjectSettings == null) {
             String translatedMessage = LocalizedResourceUtil.getMessage("gradle.settings.is.null");
             throw new LibertyException("Could not execute action because there is an error with Gradle configuration. Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
         }
