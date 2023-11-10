@@ -38,7 +38,11 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
         String projectType = libertyModule.getProjectType();
         String startCmd;
         try {
-            startCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+            if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                startCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD;
+            } else {
+                startCmd = LibertyGradleUtil.getGradleSettingsCmd(project) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+            }
             startCmd += libertyModule.getCustomStartParams();
         } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd

@@ -43,7 +43,11 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         DebugModeHandler debugHandler = new DebugModeHandler();
         String buildSettingsCmd;
         try {
-            buildSettingsCmd = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? LibertyMavenUtil.getMavenSettingsCmd(project) : LibertyGradleUtil.getGradleSettingsCmd(project);
+            if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
+            } else {
+                buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project);
+            }
         } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd.
             // Log a warning because a Logger.error creates an entry on "IDE Internal Errors", which we do not want.
