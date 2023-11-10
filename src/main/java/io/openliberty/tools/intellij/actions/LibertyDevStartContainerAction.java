@@ -39,7 +39,7 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
         String startCmd;
         try {
             if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-                startCmd = LibertyMavenUtil.getMavenSettingsCmd(project) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD;
+                startCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD;
             } else {
                 startCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
             }

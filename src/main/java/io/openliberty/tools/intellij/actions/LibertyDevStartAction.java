@@ -44,7 +44,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String buildSettingsCmd;
         try {
             if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-                buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project);
+                buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
             } else {
                 buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile);
             }
