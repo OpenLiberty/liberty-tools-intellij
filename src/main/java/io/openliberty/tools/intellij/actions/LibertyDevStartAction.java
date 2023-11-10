@@ -46,7 +46,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
                 buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
             } else {
-                buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project);
+                buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile);
             }
         } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd.
