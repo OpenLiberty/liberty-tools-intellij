@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveParamsProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -93,7 +94,7 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
 
         final String title = getTitle(parameters[entityParamIndex]);
 
-        codeActions.add(createCodeAction(context, diagnostic, title));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId()));
     }
 
     private static String getTitle(PsiParameter parameters) {
@@ -133,18 +134,6 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e);
         }
         return toResolve;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 
     /**

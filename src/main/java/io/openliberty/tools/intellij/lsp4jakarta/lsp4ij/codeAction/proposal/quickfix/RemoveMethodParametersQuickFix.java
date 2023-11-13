@@ -18,6 +18,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveParamsProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -59,7 +60,7 @@ public class RemoveMethodParametersQuickFix implements IJavaCodeActionParticipan
         final PsiElement node = context.getCoveredNode();
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
         if (parentMethod != null) {
-            codeActions.add(createCodeAction(context, diagnostic));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, NAME, getParticipantId()));
         }
         return codeActions;
     }
@@ -82,17 +83,5 @@ public class RemoveMethodParametersQuickFix implements IJavaCodeActionParticipan
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e);
         }
         return toResolve;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(NAME);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 }
