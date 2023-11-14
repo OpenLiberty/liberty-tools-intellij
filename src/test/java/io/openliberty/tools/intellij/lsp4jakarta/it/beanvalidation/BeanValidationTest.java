@@ -168,18 +168,19 @@ public class BeanValidationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8,
                 d9, d10, d11, d12, d13, d14, d15, d16, d17, d19, d20);
 
-        if (CHECK_CODE_ACTIONS) {
+//        if (CHECK_CODE_ACTIONS) {
             // Test quickfix codeActions - type (1-17), static, static+type (should only display static)
+            String newText = "package io.openliberty.sample.jakarta.beanvalidation;\\n\\nimport java.util.Calendar;\\nimport java.util.List;\\n\\nimport jakarta.validation.constraints.*;\\n\\npublic class FieldConstraintValidation {\\n\\n    private int isHappy;                    // invalid types\\n\\n    @AssertFalse\\n    private Double isSad;\\n\\n    @DecimalMax(\"30.0\")\\n    @DecimalMin(\"10.0\")\\n    private String bigDecimal;\\n\\n    @Digits(fraction = 0, integer = 0)\\n    private boolean digits;\\n\\n    @Email\\n    private Integer emailAddress;\\n\\n    @FutureOrPresent\\n    private boolean graduationDate;\\n\\n    @Future\\n    private double fergiesYear;\\n\\n    @Min(value = 50)\\n    @Max(value = 100)\\n    private boolean gpa;\\n\\n    @Negative\\n    private boolean subZero;\\n\\n    @NegativeOrZero\\n    private String notPos;\\n\\n    @NotBlank\\n    private boolean saysomething;\\n\\n    @Pattern(regexp = \"\")\\n    private Calendar thisIsUsed;\\n\\n    @Past\\n    private double theGoodOldDays;\\n\\n    @PastOrPresent\\n    private char[] aGoodFieldName;\\n\\n    @Positive\\n    private String[] area;\\n\\n    @PositiveOrZero\\n    private List<String> maybeZero;\\n\\n    @AssertTrue\\n    private static boolean typeValid;       // static\\n\\n    @Past\\n    private static boolean doubleBad;      // static and invalid type\\n}";
             JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-            TextEdit te = te(9, 4, 10, 4, "");
-            CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
+            TextEdit te = te(0, 0, 64, 1, newText);
+            CodeAction ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d1, te);
 
             assertJavaCodeAction(codeActionParams, utils, ca);
 
             JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d19);
             TextEdit te1 = te(59, 4, 60, 4, "");
             TextEdit te2 = te(60, 11, 60, 18, "");
-            CodeAction ca1 = ca(uri, "Remove constraint annotation AssertTrue from element", d19, te1);
+            CodeAction ca1 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d19, te1);
             CodeAction ca2 = ca(uri, "Remove static modifier from element", d19, te2);
 
             assertJavaCodeAction(codeActionParams2, utils, ca1, ca2);
@@ -188,11 +189,11 @@ public class BeanValidationTest extends BaseJakartaTest {
             JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d20);
             TextEdit te3 = te(62, 4, 63, 4, "");
             TextEdit te4 = te(63, 11, 63, 18, "");
-            CodeAction ca3 = ca(uri, "Remove constraint annotation Past from element", d20, te3);
+            CodeAction ca3 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.Past from element", d20, te3);
             CodeAction ca4 = ca(uri, "Remove static modifier from element", d20, te4);
 
             assertJavaCodeAction(codeActionParams3, utils, ca3, ca4);
-        }
+//        }
     }
     
     @Test
@@ -220,27 +221,36 @@ public class BeanValidationTest extends BaseJakartaTest {
         
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        if (CHECK_CODE_ACTIONS) {
+//        if (CHECK_CODE_ACTIONS) {
             // Test quickfix codeActions
+            String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\\n\\n" +
+                    "import jakarta.validation.constraints.AssertFalse;\\n" +
+                    "import jakarta.validation.constraints.AssertTrue;\\n\\npublic class MethodConstraintValidation {\\n\\n" +
+                    "    // valid cases\\n    @AssertFalse\\n    private boolean falseMethod() {\\n        return false;\\n" +
+                    "    }\\n\\n    @AssertTrue\\n    public boolean trueMethod() {\\n        return true;\\n    }\\n\\n" +
+                    "    // invalid cases\\n    public static boolean anotherTruth() {  // static\\n        return true;\\n    }\\n\\n" +
+                    "    @AssertTrue\\n    public String notBoolean() {            // invalid type\\n        return \"aha!\";\\n" +
+                    "    }\\n\\n    @AssertFalse\\n    private static int notBoolTwo(int x) {  // invalid type, static\\n" +
+                    "        return x;\\n    }\\n\\n}";
             JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-            TextEdit te = te(19, 4, 20, 4, "");
+            TextEdit te = te(0, 0, 34, 1, newText1);
             TextEdit te2 = te(20, 10, 20, 17, "");
-            CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
+            CodeAction ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d1, te);
             CodeAction ca2 = ca(uri, "Remove static modifier from element", d1, te2);
 
             assertJavaCodeAction(codeActionParams, utils, ca, ca2);
 
             codeActionParams = createCodeActionParams(uri, d2);
             te = te(24, 4, 25, 4, "");
-            ca = ca(uri, "Remove constraint annotation AssertTrue from element", d2, te);
+            ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d2, te);
 
             assertJavaCodeAction(codeActionParams, utils, ca);
 
             codeActionParams = createCodeActionParams(uri, d3);
             te = te(19, 4, 20, 4, "");
             te2 = te(20, 10, 20, 17, "");
-            ca = ca(uri, "Remove constraint annotation AssertFalse from element", d3, te);
+            ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertFalse from element", d3, te);
             ca2 = ca(uri, "Remove static modifier from element", d3, te2);
-        }
+//        }
     }
 }

@@ -52,18 +52,19 @@ public class ResourceMethodTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         
-        Diagnostic d = JakartaForJavaAssert.d(20, 17, 30, "Only public methods can be exposed as resource methods.",
+        Diagnostic d = JakartaForJavaAssert.d(7, 17, 30, "Only public methods can be exposed as resource methods.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NonPublicResourceMethod");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        if (CHECK_CODE_ACTIONS) {
+//        if (CHECK_CODE_ACTIONS) {
             // Test for quick-fix code action
+        String newText = "package io.openliberty.sample.jakarta.jax_rs;\\n\\nimport jakarta.ws.rs.HEAD;\\n\\npublic class NotPublicResourceMethod {\\n\\n    @HEAD\\n    public void privateMethod() {\\n\\n    }\\n\\n}\\n";
             JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            TextEdit te = JakartaForJavaAssert.te(20, 4, 20, 11, "public"); // range may need to change
+            TextEdit te = JakartaForJavaAssert.te(0, 0, 12, 0, newText); // range may need to change
             CodeAction ca = JakartaForJavaAssert.ca(uri, "Make method public", d, te);
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-        }
+//        }
     }
 
     @Test

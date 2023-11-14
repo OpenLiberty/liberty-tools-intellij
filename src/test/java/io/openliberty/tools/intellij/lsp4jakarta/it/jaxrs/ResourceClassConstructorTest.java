@@ -22,15 +22,21 @@ import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
+
+import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
+import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.assertJavaCodeAction;
 
 @RunWith(JUnit4.class)
 public class ResourceClassConstructorTest extends BaseJakartaTest {
@@ -104,7 +110,6 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 
-    
     @Test
     public void NoPublicConstructorProviderClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -126,5 +131,21 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NoPublicConstructors");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+
+        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\nimport jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\nimport jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\nimport jakarta.ws.rs.ext.MessageBodyReader;\nimport jakarta.ws.rs.ext.Provider;\n\n\n@Consumes(\"application/x-www-form-urlencoded\")\n@Provider\npublic class NoPublicConstructorProviderClass implements MessageBodyReader<Object> {\n\n    public NoPublicConstructorProviderClass() {\n\n    }\n\n    protected NoPublicConstructorProviderClass(int arg1) {\n\n    }\n\n    @Override\n    public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {\n        return false;\n    }\n\n    @Override\n    public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,\n                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n        return null;\n    }\n\n}\n";
+
+
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
+        TextEdit te = te(0, 0, 39, 0, newText);
+        CodeAction ca = ca(uri, "Make constructor public", d1, te);
+
+        assertJavaCodeAction(codeActionParams, utils, ca);
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        TextEdit te1 = te(0, 0, 64, 1, "new");
+        CodeAction ca1 = ca(uri, "Make constructor public", d2, te1);
+
+
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
 }
