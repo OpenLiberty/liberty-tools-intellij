@@ -41,7 +41,6 @@ import java.util.logging.Logger;
  * ModifyModifiersProposal.
  *
  * @author Shaunak Tulshibagwale
- *
  */
 public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParticipant {
 
@@ -62,29 +61,10 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
         if (parentMethod != null) {
             List<CodeAction> codeActions = new ArrayList<>();
 
-//            JavaCodeActionContext targetContext = context.copy();
-//            node = targetContext.getCoveredNode();
-//            PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-//            parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-//
-//            ChangeCorrectionProposal proposal = new ModifyModifiersProposal(TITLE_MESSAGE, targetContext.getSource().getCompilationUnit(),
-//                    targetContext.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
-//
-//            // Convert the proposal to LSP4J CodeAction
-//            CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
-//            codeAction.setTitle(TITLE_MESSAGE);
             codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE, getParticipantId()));
 
             final PsiParameterList list = parentMethod.getParameterList();
             if (list != null && list.getParametersCount() > 0) {
-//                targetContext = context.copy();
-//                node = targetContext.getCoveredNode();
-//                parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-//
-//                final String name = Messages.getMessage("NoargPublicConstructor");
-//                proposal = new AddConstructorProposal(name,
-//                        targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
-//                codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
                 codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE, getParticipantId()));
             }
             return codeActions;
@@ -94,13 +74,11 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
 
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
-//        return null;
         final CodeAction toResolve = context.getUnresolved();
         PsiElement node = context.getCoveredNode();
         PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
         assert parentMethod != null;
-//        List<CodeAction> codeActions = new ArrayList<>();
 
         JavaCodeActionContext targetContext = context.copy();
         node = targetContext.getCoveredNode();
@@ -110,10 +88,6 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
         ChangeCorrectionProposal proposal = new ModifyModifiersProposal(TITLE_MESSAGE, targetContext.getSource().getCompilationUnit(),
                 targetContext.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
 
-        // Convert the proposal to LSP4J CodeAction
-//        CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
-//        codeAction.setTitle(TITLE_MESSAGE);
-//        codeActions.add(codeAction);
         try {
             WorkspaceEdit we = targetContext.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
@@ -130,8 +104,6 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
             final String name = Messages.getMessage("NoargPublicConstructor");
             proposal = new AddConstructorProposal(name,
                     targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
-//            codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
-//            codeActions.add(codeAction);
             try {
                 WorkspaceEdit we = targetContext.convertToWorkspaceEdit(proposal);
                 toResolve.setEdit(we);

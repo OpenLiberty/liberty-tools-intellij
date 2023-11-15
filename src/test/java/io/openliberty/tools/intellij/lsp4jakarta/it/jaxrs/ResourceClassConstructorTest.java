@@ -63,7 +63,6 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-jax_rs", "AmbiguousConstructors");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
-
     }
 
     @Test
@@ -108,6 +107,18 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NoPublicConstructors");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+
+        // test codeAction
+        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport jakarta.ws.rs.Path;\n\n" +
+                "@Path(\"/somewhere\")\npublic class NoPublicConstructorClass {\n\n" +
+                "    public NoPublicConstructorClass() {\n\n    }\n\n" +
+                "    protected NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
+        TextEdit te = te(0, 0, 16, 0, newText);
+        CodeAction ca = ca(uri, "Make constructor public", d1, te);
+
+        assertJavaCodeAction(codeActionParams, utils, ca);
     }
 
     @Test
@@ -121,7 +132,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-        
+
         Diagnostic d1 = JakartaForJavaAssert.d(19, 12, 44,
                 "Provider classes are instantiated by the JAX-RS runtime and MUST have a public constructor.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NoPublicConstructors");
@@ -132,20 +143,27 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\nimport jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\nimport jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\nimport jakarta.ws.rs.ext.MessageBodyReader;\nimport jakarta.ws.rs.ext.Provider;\n\n\n@Consumes(\"application/x-www-form-urlencoded\")\n@Provider\npublic class NoPublicConstructorProviderClass implements MessageBodyReader<Object> {\n\n    public NoPublicConstructorProviderClass() {\n\n    }\n\n    protected NoPublicConstructorProviderClass(int arg1) {\n\n    }\n\n    @Override\n    public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {\n        return false;\n    }\n\n    @Override\n    public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,\n                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n        return null;\n    }\n\n}\n";
-
+        // test codeAction
+        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import java.io.IOException;\nimport java.io.InputStream;\n" +
+                "import java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\n" +
+                "import jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\n" +
+                "import jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\n" +
+                "import jakarta.ws.rs.ext.MessageBodyReader;\nimport jakarta.ws.rs.ext.Provider;\n\n\n" +
+                "@Consumes(\"application/x-www-form-urlencoded\")\n@Provider\n" +
+                "public class NoPublicConstructorProviderClass implements MessageBodyReader<Object> {\n\n" +
+                "    public NoPublicConstructorProviderClass() {\n\n    }\n\n" +
+                "    protected NoPublicConstructorProviderClass(int arg1) {\n\n    }\n\n" +
+                "    @Override\n    public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {\n" +
+                "        return false;\n    }\n\n    @Override\n" +
+                "    public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,\n" +
+                "                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n" +
+                "        return null;\n    }\n\n}\n";
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         TextEdit te = te(0, 0, 39, 0, newText);
         CodeAction ca = ca(uri, "Make constructor public", d1, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
-
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te1 = te(0, 0, 64, 1, "new");
-        CodeAction ca1 = ca(uri, "Make constructor public", d2, te1);
-
-
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
 }

@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,7 +37,7 @@ import java.util.Arrays;
 
 @RunWith(JUnit4.class)
 public class ResourceMethodTest extends BaseJakartaTest {
-    
+
     @Test
     public void NonPublicMethod() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -47,24 +46,31 @@ public class ResourceMethodTest extends BaseJakartaTest {
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/jaxrs/NotPublicResourceMethod.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-        
+
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-        
-        
-        Diagnostic d = JakartaForJavaAssert.d(7, 17, 30, "Only public methods can be exposed as resource methods.",
+
+
+        Diagnostic d = JakartaForJavaAssert.d(20, 17, 30, "Only public methods can be exposed as resource methods.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NonPublicResourceMethod");
-        
+
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-//        if (CHECK_CODE_ACTIONS) {
-            // Test for quick-fix code action
-        String newText = "package io.openliberty.sample.jakarta.jax_rs;\\n\\nimport jakarta.ws.rs.HEAD;\\n\\npublic class NotPublicResourceMethod {\\n\\n    @HEAD\\n    public void privateMethod() {\\n\\n    }\\n\\n}\\n";
-            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            TextEdit te = JakartaForJavaAssert.te(0, 0, 12, 0, newText); // range may need to change
-            CodeAction ca = JakartaForJavaAssert.ca(uri, "Make method public", d, te);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-//        }
+        String newText = "/*******************************************************************************\n" +
+                " * Copyright (c) 2021 IBM Corporation, Matthew Shocrylas and others.\n *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n" +
+                " * Contributors:\n *     IBM Corporation, Matthew Shocrylas - initial API and implementation\n" +
+                " *******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.jax_rs;\n\nimport jakarta.ws.rs.HEAD;\n\n" +
+                "public class NotPublicResourceMethod {\n\n    @HEAD\n    public void privateMethod() {\n\n    }\n\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 25, 0, newText); // range may need to change
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Make method public", d, te);
+
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
     }
 
     @Test

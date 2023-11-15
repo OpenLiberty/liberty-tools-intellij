@@ -35,7 +35,6 @@ import java.util.logging.Logger;
  * 2. Removing static modifier from field or method
  *
  * @author Leslie Dawson (lamminade)
- *
  */
 public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
@@ -67,21 +66,14 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         if (diagnostics.size() > 0) {
             diagnostic = diagnostics.get(0);
         }
-        final String annotationName = diagnostic.getData().toString().replace("\"", "");
-//        final String name1 = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
-//        if(name1) {
-//            resolveRemoveConstraintAnnotationsCodeAction(context, diagnostic);
 
-//        }
         String message = toResolve.getTitle();
 
         if (message == Messages.getMessage("RemoveStaticModifier")) {
             resolveStaticModifierCodeAction(context, diagnostic);
             return toResolve;
         }
-//        if(message == Messages.getMessage("RemoveConstraintAnnotation", annotationName)) {
         resolveRemoveConstraintAnnotationsCodeAction(context, diagnostic);
-//        }
         return toResolve;
     }
 
