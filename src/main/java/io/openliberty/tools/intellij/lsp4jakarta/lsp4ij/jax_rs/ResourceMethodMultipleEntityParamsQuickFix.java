@@ -15,7 +15,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveParamsProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -29,10 +28,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +43,8 @@ import java.util.logging.Logger;
 public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActionParticipant {
 
     private static final Logger LOGGER = Logger.getLogger(ResourceMethodMultipleEntityParamsQuickFix.class.getName());
+    private static final String ENTITY_PARAM_INDEX_KEY = "entityParamIndex";
+    private final List<Integer> entityParamIndexes = new ArrayList<>();
 
     @Override
     public String getParticipantId() {
@@ -66,35 +64,32 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
     }
 
     private List<CodeAction> addCodeActions(JavaCodeActionContext context, Diagnostic diagnostic, PsiMethod parentMethod, List<CodeAction> codeActions) {
-        final List<Integer> entityParamIndexes = new ArrayList<>();
 
         final PsiParameterList parameterList = parentMethod.getParameterList();
-        if (parameterList != null && parameterList.getParametersCount() > 0) {
-            final PsiParameter[] parameters = parameterList.getParameters();
+        final PsiParameter[] parameters = parameterList.getParameters();
+        if (parameterList.getParametersCount() > 0) {
             for (int i = 0; i < parameters.length; ++i) {
                 if (isEntityParam(parameters[i])) {
                     entityParamIndexes.add(i);
                 }
             }
         }
-        return iterateAndCreateCodeAction(context, diagnostic, codeActions, entityParamIndexes);
+        return iterateAndCreateCodeAction(context, diagnostic, codeActions);
     }
 
-    private List<CodeAction> iterateAndCreateCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, List<CodeAction> codeActions, List<Integer> entityParamIndexes) {
+    private List<CodeAction> iterateAndCreateCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, List<CodeAction> codeActions) {
         entityParamIndexes.forEach(entityParamIndex -> {
-            addCreateCodeAction(context, diagnostic, codeActions, entityParamIndexes, entityParamIndex);
+            addCreateCodeAction(context, diagnostic, codeActions, entityParamIndex);
         });
         return codeActions;
     }
 
-    private void addCreateCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, List<CodeAction> codeActions, List<Integer> entityParamIndexes, Integer entityParamIndex) {
+    private void addCreateCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, List<CodeAction> codeActions, Integer entityParamIndex) {
         final JavaCodeActionContext targetContext = context.copy();
         final PsiElement targetNode = targetContext.getCoveredNode();
-        final PsiParameter[] parameters = PsiTreeUtil.getParentOfType(targetNode, PsiMethod.class).getParameterList().getParameters();
-
+        final PsiParameter[] parameters = Objects.requireNonNull(PsiTreeUtil.getParentOfType(targetNode, PsiMethod.class)).getParameterList().getParameters();
         final String title = getTitle(parameters[entityParamIndex]);
-
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId()));
+        codeActions.add(createCodeAction(context, diagnostic, title, getParticipantId(), entityParamIndex));
     }
 
     private static String getTitle(PsiParameter parameters) {
@@ -108,21 +103,19 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-        assert parentMethod != null;
-        final PsiParameterList parameterList = parentMethod.getParameterList();
-        final List<PsiParameter> entityParams = new ArrayList<>();
         String title = toResolve.getTitle();
+        CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
+        Integer currentEntityParamIndex = (Integer) data.getExtendedDataEntry(ENTITY_PARAM_INDEX_KEY);
 
-        if (parameterList.getParametersCount() > 0) {
-            final PsiParameter[] parameters = parameterList.getParameters();
-            for (PsiParameter parameter : parameters) {
-                if (isEntityParam(parameter)) {
-                    if (!title.contains(parameter.getName())) {
-                        entityParams.add(parameter);
-                    }
-                }
+        assert parentMethod != null;
+        final PsiParameter[] parameters = parentMethod.getParameterList().getParameters();
+
+        final List<PsiParameter> entityParams = new ArrayList<>();
+        entityParamIndexes.forEach(x -> {
+            if (!x.equals(currentEntityParamIndex)) {
+                entityParams.add(parameters[x]);
             }
-        }
+        });
 
         ChangeCorrectionProposal proposal = new RemoveParamsProposal(title, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0,  entityParams, false);
@@ -154,5 +147,20 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
             }
         }
         return true;
+    }
+
+    public CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
+                                              String quickFixMessage, String participantId, Integer entityParamIndex) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(quickFixMessage);
+        codeAction.setRelevance(0);
+        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        codeAction.setKind(CodeActionKind.QuickFix);
+        Map<String, Object> extendedData = new HashMap<>();
+        extendedData.put(ENTITY_PARAM_INDEX_KEY, entityParamIndex);
+        codeAction.setData(new CodeActionResolveData(context.getUri(), participantId,
+                context.getParams().getRange(), extendedData,
+                context.getParams().isResourceOperationSupported(),
+                context.getParams().isCommandConfigurationUpdateSupported()));
+        return codeAction;
     }
 }
