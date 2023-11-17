@@ -85,7 +85,7 @@ A new terminal tab opens to the run the application in dev mode.
 
 ### Start your application in dev mode with configuration
 
-To start your application in dev mode with custom configuration, select the **Start...** action for your application in the Liberty tool window. The action opens a Liberty Edit Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters). You can also check the box to start your application in dev mode in a container.
+To start your application in dev mode with custom configuration, select the **Start...** action for your application in the Liberty tool window. The action opens a Liberty Edit Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters). You can also check the "Run in container" checkbox to start your application in dev mode in a container.
 
 ![Liberty Start... action](images/liberty-start-with-config.png)
 
@@ -202,7 +202,7 @@ Liberty Tools editing assistance provides code completion, diagnostics, and quic
 
 ![Eclipse LSP4MP microprofile-config.properties completion](images/LSP4MP-mp-properties-completion.png)
 
-3. To use Jakarta EE-specific and MicroProfile-specific quick-fixes, hover over a supported Jakarta EE or MicroProfile diagnostic. A pop-up dialog containing the diagnostic message and a quick-fix (code action) appears.
+3. To use Jakarta EE-specific and MicroProfile-specific quick-fixes, hover over a supported Jakarta EE or MicroProfile diagnostic. A pop-up dialog containing the diagnostic message and a quick-fix suggestion will appear. To see more quick-fix suggestions, click on the "More actions..." link.
 
 ![Jakarta EE quick fix](images/LSP4Jakarta-quickfix.png)
 
