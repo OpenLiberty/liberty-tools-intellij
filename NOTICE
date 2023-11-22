@@ -39,6 +39,11 @@ APACHE SOFTWARE LICENSE 2.0
 The Program includes some or all of the following that IBM obtained
 under the Apache License Version 2.0:
 
+com.google.code.findbugs:jsr305
+com.google.code.gson:gson
+com.google.errorprone:error_prone_annotations
+com.google.guava:failureaccess
+com.google.guava:guava
 com.google.guava:listenablefuture
 com.google.j2objc:j2objc-annotations
 com.kotcrab.remark:remark
