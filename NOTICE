@@ -1,4 +1,4 @@
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+q++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 NOTICES AND INFORMATION FOR Liberty Tools for IntelliJ IDEA
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -47,8 +47,6 @@ com.google.guava:guava
 com.google.guava:listenablefuture
 com.google.j2objc:j2objc-annotations
 com.kotcrab.remark:remark
-io.openliberty.tools:liberty-langserver
-io.openliberty.tools:liberty-langserver-lemminx
 io.smallrye.common:smallrye-common-constraint
 io.smallrye.common:smallrye-common-expression
 io.smallrye.common:smallrye-common-function
@@ -58,12 +56,10 @@ org.codehaus.plexus:plexus-utils
 org.jboss.logging:jboss-logging
 org.jboss.logging:jboss-logging-annotations
 org.jetbrains.kotlin:kotlin-stdlib
-org.jetbrains.kotlin:kotlin-stdlib
 org.jetbrains.kotlin:kotlin-stdlib-common
-org.jetbrains.kotlin:kotlin-stdlib-jdk
+org.jetbrains.kotlin:kotlin-stdlib-jdk7
 org.jetbrains.kotlin:kotlin-stdlib-jdk8
 org.jetbrains:annotations
-org.microshed:lsp4ij
 xerces:xercesImpl
 xml-apis:xml-apis
 xml-resolver:xml-resolver
@@ -863,6 +859,9 @@ org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls | https://mvnrepository.com/artifact/or
 org.eclipse.xtend:org.eclipse.xtend.lib | https://repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib/2.28.0/org.eclipse.xtend.lib-2.28.0-sources.jar
 org.eclipse.xtend:org.eclipse.xtend.lib.macro | https://repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.28.0/org.eclipse.xtend.lib.macro-2.28.0-sources.jar
 org.eclipse.xtext:org.eclipse.xtext.xbase.lib | https://repo1.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.28.0/org.eclipse.xtext.xbase.lib-2.28.0-sources.jar
+io.openliberty.tools:liberty-langserver | https://mvnrepository.com/artifact/io.openliberty.tools/liberty-langserver/2.1.1
+io.openliberty.tools:liberty-langserver-lemminx | https://mvnrepository.com/artifact/io.openliberty.tools/liberty-langserver-lemminx/2.1.1
+org.microshed:lsp4ij | https://github.com/MicroShed/lsp4ij
 
 END OF ECLIPSE PUBLIC LICENSE, VERSION 2 NOTICES AND INFORMATION
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
