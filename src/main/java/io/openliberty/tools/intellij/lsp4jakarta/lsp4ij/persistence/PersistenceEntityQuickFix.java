@@ -27,7 +27,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,7 +126,7 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
         codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
                 context.getParams().getRange(), Collections.emptyMap(),
                 context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
+                context.getParams().isCommandConfigurationUpdateSupported(), null));
         return codeAction;
     }
 }

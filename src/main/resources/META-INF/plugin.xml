@@ -34,8 +34,6 @@
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.StaticPropertyProviderExtensionPointBean"/>
         <extensionPoint name="javaHoverParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant"/>
-        <extensionPoint name="javaDiagnosticsParticipant"
-                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.corrections.JavaDiagnosticsDefinition"/>
         <extensionPoint name="projectLabelProvider"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IProjectLabelProvider"/>
         <extensionPoint name="javaDefinitionParticipant"
@@ -85,8 +83,6 @@
         <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json"
                                 type="org.eclipse.microprofile.jwt.Claim"/>
         <staticPropertyProvider resource="/static-properties/jul-metadata.json"/>
-        <propertiesProvider
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
         <propertiesProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
 

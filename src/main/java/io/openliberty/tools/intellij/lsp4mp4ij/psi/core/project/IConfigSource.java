@@ -9,6 +9,9 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+
 import java.util.List;
 import java.util.Set;
 
@@ -23,9 +26,9 @@ public interface IConfigSource {
 
 	/**
 	 * Returns the property from the given <code>key</code> and null otherwise.
-	 * 
+	 *
 	 * Any property expressions in the property value should not be expanded.
-	 * 
+	 *
 	 * @param key the key
 	 * @return the property from the given <code>key</code> and null otherwise.
 	 */
@@ -34,9 +37,9 @@ public interface IConfigSource {
 	/**
 	 * Returns the property as Integer from the given <code>key</code> and null
 	 * otherwise.
-	 * 
+	 *
 	 * Any property expressions in the property value should not be expanded.
-	 * 
+	 *
 	 * @param key the key
 	 * @return the property as Integer from the given <code>key</code> and null
 	 *         otherwise.
@@ -56,6 +59,8 @@ public interface IConfigSource {
 	 * @return the source file URI of the associated config file
 	 */
 	String getSourceConfigFileURI();
+
+	boolean isSourceConfigFile(VirtualFile file);
 
 	/**
 	 * Returns a list of all values for properties and different profiles that are
@@ -96,4 +101,6 @@ public interface IConfigSource {
 	 * @return the keys of all values defined in this config source
 	 */
 	Set<String> getAllKeys();
+
+	void reload(PsiFile file);
 }

@@ -14,11 +14,12 @@ import java.util.List;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
-import org.microshed.lsp4ij.LanguageClientImpl;
+import org.microshed.lsp4ij.client.LanguageClientImpl;
 import org.microshed.lsp4ij.LanguageServerWrapper;
 
 /**
@@ -40,13 +41,13 @@ public class LibertyConfigLanguageClient extends LanguageClientImpl implements L
 
     @Override
     public void processConfigXml(List<String> uris) {
-        LanguageServerWrapper wrapper = getLanguageServerWrapper();
-        if (wrapper != null) {
+        LanguageServer server = getLanguageServer();
+        if (server != null) {
             List<FileEvent> fileEvents = uris.stream()
                     .map(uri -> new FileEvent(uri, FileChangeType.Changed)).toList();
             DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams();
             params.setChanges(fileEvents);
-            wrapper.getInitializedServer().thenAccept(ls -> ls.getWorkspaceService().didChangeWatchedFiles(params));
+            server.getWorkspaceService().didChangeWatchedFiles(params);
         }
     }
 }

@@ -20,6 +20,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.TypeConversionUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
@@ -35,6 +36,7 @@ import org.eclipse.lsp4mp.commons.utils.AntPathMatcher;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.*;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValueExpression;
@@ -58,7 +60,11 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+	private static final Pattern ARRAY_SPLITTER = Pattern.compile("(?<!\\\\),");
+
 	private static final String EXPECTED_TYPE_ERROR_MESSAGE = "''{0}'' does not match the expected type of ''{1}''.";
+
+	private static final String EMPTY_LIST_LIKE_WARNING_MESSAGE = "''defaultValue=\"\"'' will behave as if no default value is set, and will not be treated as an empty ''{0}''.";
 
 	private static final String NO_VALUE_ERROR_MESSAGE = "The property ''{0}'' is not assigned a value in any config file, and must be assigned at runtime.";
 
@@ -91,6 +97,12 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 		for(PsiAnnotation annotation : typeDeclaration.getAnnotations()) {
 			if (AnnotationUtils.isMatchAnnotation(annotation, CONFIG_PROPERTIES_ANNOTATION)) {
 				PsiAnnotationMemberValue prefixExpr = getAnnotationMemberValueExpression(annotation, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION_PREFIX);
+				if (prefixExpr instanceof PsiLiteral && ((PsiLiteral) prefixExpr).getValue() instanceof String) {
+					currentPrefix = (String) ((PsiLiteral) prefixExpr).getValue();
+				}
+
+			} else if (AnnotationUtils.isMatchAnnotation(annotation, "")) {
+				PsiAnnotationMemberValue prefixExpr = getAnnotationMemberValueExpression(annotation, "");
 				if (prefixExpr instanceof PsiLiteral && ((PsiLiteral) prefixExpr).getValue() instanceof String) {
 					currentPrefix = (String) ((PsiLiteral) prefixExpr).getValue();
 				}
@@ -142,10 +154,17 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 			String defValue = (String) ((PsiLiteral) defaultValueExpr).getValue();
 			Module javaProject = getContext().getJavaProject();
 			PsiType fieldBinding = parent.getType();
-			if (fieldBinding != null && !isAssignable(fieldBinding, javaProject, defValue)) {
-				String message = MessageFormat.format(EXPECTED_TYPE_ERROR_MESSAGE, defValue, fieldBinding.getPresentableText());
-				super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, defaultValueExpr,
-						MicroProfileConfigErrorCode.DEFAULT_VALUE_IS_WRONG_TYPE, DiagnosticSeverity.Error);
+			if (fieldBinding != null && defValue != null) {
+				if (isListLike(fieldBinding) && defValue.isEmpty()) {
+					String message = MessageFormat.format(EMPTY_LIST_LIKE_WARNING_MESSAGE, fieldBinding.getPresentableText());
+					super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, defaultValueExpr,
+							MicroProfileConfigErrorCode.EMPTY_LIST_NOT_SUPPORTED, DiagnosticSeverity.Warning);
+				}
+				if (!isAssignable(fieldBinding, javaProject, defValue)) {
+					String message = MessageFormat.format(EXPECTED_TYPE_ERROR_MESSAGE, defValue, fieldBinding.getPresentableText());
+					super.addDiagnostic(message, MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE, defaultValueExpr,
+							MicroProfileConfigErrorCode.DEFAULT_VALUE_IS_WRONG_TYPE, DiagnosticSeverity.Error);
+				}
 			}
 		}
 	}
@@ -192,44 +211,86 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 		return false;
 	}
 
-	private boolean isAssignable(PsiType fieldBinding, Module javaProject, String defValue) {
-		String fqn = fieldBinding.getCanonicalText();
-		try {
-			if (fqn.startsWith("java.lang.Class")) {
-				return PsiTypeUtils.findType(javaProject, defValue) != null;
-			} else {
-				switch (fqn) {
-					case "boolean":
-					case "java.lang.Boolean":
-						return Boolean.valueOf(defValue) != null;
-					case "byte":
-					case "java.lang.Byte":
-						return Byte.valueOf(defValue) != null;
-					case "short":
-					case "java.lang.Short":
-						return Short.valueOf(defValue) != null;
-					case "int":
-					case "java.lang.Integer":
-						return Integer.valueOf(defValue) != null;
-					case "long":
-					case "java.lang.Long":
-						return Long.valueOf(defValue) != null;
-					case "float":
-					case "java.lang.Float":
-						return Float.valueOf(defValue) != null;
-					case "double":
-					case "java.lang.Double":
-						return Double.valueOf(defValue) != null;
-					case "char":
-					case "java.lang.Character":
-						return Character.valueOf(defValue.charAt(0)) != null;
-					case "java.lang.Class":
-						return  PsiTypeUtils.findType(javaProject, defValue) != null;
-					case "java.lang.String":
-						return true;
-					default:
-						return false;
+	private static boolean isListLike(PsiType type) {
+		if (type instanceof PsiArrayType) {
+			return true;
+		}
+		PsiType erasedType = TypeConversionUtil.erasure(type);
+		String fqn = erasedType.getCanonicalText();
+		return "java.util.List".equals(fqn) || "java.util.Set".equals(fqn);
+	}
+
+
+	private static boolean isAssignable(PsiType fieldBinding, Module javaProject, String defValue) {
+		String fqn = TypeConversionUtil.erasure(fieldBinding).getCanonicalText();
+		// handle list-like types.
+		// MicroProfile config supports arrays, `java.util.List`, and `java.util.Set` by
+		// default. See:
+		// https://download.eclipse.org/microprofile/microprofile-config-2.0/microprofile-config-spec-2.0.html#_array_converters
+		if (isListLike(fieldBinding)) {
+			if (defValue.isEmpty()) {
+				// A different error is shown in this case
+				return true;
+			}
+			String itemsTypeFqn = "java.lang.Object";
+			if (fieldBinding instanceof PsiArrayType) {
+				itemsTypeFqn = TypeConversionUtil.erasure(((PsiArrayType)fieldBinding).getComponentType()).getCanonicalText();
+			} else if (fieldBinding instanceof PsiClassType) {
+				PsiClassType collection = (PsiClassType) fieldBinding;
+				if (collection.getParameterCount() < 1) {
+					return true;
 				}
+				itemsTypeFqn = TypeConversionUtil.erasure(collection.getParameters()[0]).getCanonicalText();
+			}
+			for (String listItemValue : ARRAY_SPLITTER.split(defValue, -1)) {
+				listItemValue = listItemValue.replace("\\,", ",");
+				if (!isAssignable(itemsTypeFqn, listItemValue, javaProject)) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			// Not a list-like type
+			return isAssignable(fqn, defValue, javaProject);
+		}
+	}
+
+	private static boolean isAssignable(String typeFqn, String value, Module javaProject) {
+		try {
+			switch (typeFqn) {
+				case "boolean":
+				case "java.lang.Boolean":
+					return Boolean.valueOf(value) != null;
+				case "byte":
+				case "java.lang.Byte":
+					return Byte.valueOf(value) != null;
+				case "short":
+				case "java.lang.Short":
+					return Short.valueOf(value) != null;
+				case "int":
+				case "java.lang.Integer":
+					return Integer.valueOf(value) != null;
+				case "long":
+				case "java.lang.Long":
+					return Long.valueOf(value) != null;
+				case "float":
+				case "java.lang.Float":
+					return Float.valueOf(value) != null;
+				case "double":
+				case "java.lang.Double":
+					return Double.valueOf(value) != null;
+				case "char":
+				case "java.lang.Character":
+					if (value == null || value.length() != 1) {
+						return false;
+					}
+					return Character.valueOf(value.charAt(0)) != null;
+				case "java.lang.Class":
+					return  PsiTypeUtils.findType(javaProject, value) != null;
+				case "java.lang.String":
+					return true;
+				default:
+					return false;
 			}
 		} catch (NumberFormatException e) {
 			return false;
@@ -244,7 +305,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
 	private static PsiMicroProfileProject getMicroProfileProject(JavaDiagnosticsContext context) {
 		Module javaProject = context.getJavaProject();
 		return PsiMicroProfileProjectManager.getInstance(javaProject.getProject())
-				.getJDTMicroProfileProject(javaProject);
+				.getMicroProfileProject(javaProject);
 	}
 
 	public static void setDataForUnassigned(String name, Diagnostic diagnostic) {

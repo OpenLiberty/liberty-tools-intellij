@@ -11,51 +11,74 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.BulkAwareDocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.util.messages.MessageBusConnection;
+import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link PsiMicroProfileProject} manager.
- * 
+ *
  * @author Angelo ZERR
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java</a>
- *
  */
-@Service
-public final class PsiMicroProfileProjectManager {
+public final class PsiMicroProfileProjectManager implements Disposable {
+
+	private static final Key<PsiMicroProfileProject> KEY = new Key<>(PsiMicroProfileProject.class.getName());
+
+	private static final String JAVA_FILE_EXTENSION = "java";
 
 	public static PsiMicroProfileProjectManager getInstance(Project project) {
 		return ServiceManager.getService(project, PsiMicroProfileProjectManager.class);
 	}
 
-	private Project project;
+	private final MessageBusConnection connection;
 
-	private final Map<Module, PsiMicroProfileProject> projects;
-	private MicroProfileProjectListener microprofileProjectListener;
+	private final Project project;
 
-	private class MicroProfileProjectListener implements ModuleListener, BulkFileListener, BulkAwareDocumentListener.Simple, Disposable {
+	private final MicroProfileProjectListener microprofileProjectListener;
+
+	private class MicroProfileProjectListener implements ModuleListener, ClasspathResourceChangedManager.Listener, BulkFileListener, BulkAwareDocumentListener.Simple, Disposable {
+		@Override
+		public void librariesChanged() {
+			// Do nothing
+		}
+
+		@Override
+		public void sourceFilesChanged(Set<Pair<VirtualFile, Module>> sources) {
+			for (var pair : sources) {
+				VirtualFile file = pair.getFirst();
+				if (isConfigSource(file)) {
+					// A microprofile config file properties file source has been updated, evict the cache of the properties
+					Module javaProject = pair.getSecond();
+					PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject);
+					if (mpProject != null) {
+						mpProject.evictConfigSourcesCache(file);
+					}
+				}
+			}
+		}
+
 		@Override
 		public void after(@NotNull List<? extends VFileEvent> events) {
 			for(VFileEvent event : events) {
@@ -82,9 +105,9 @@ public final class PsiMicroProfileProjectManager {
 		private void processChangedConfigSource(VirtualFile file) {
 			Module javaProject = PsiUtilsLSImpl.getInstance(project).getModule(file);
 			if (javaProject != null) {
-				PsiMicroProfileProject mpProject = getJDTMicroProfileProject(javaProject);
+				PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject);
 				if (mpProject != null) {
-					mpProject.evictConfigSourcesCache();
+					mpProject.evictConfigSourcesCache(null);
 				}
 			}
 		}
@@ -92,7 +115,7 @@ public final class PsiMicroProfileProjectManager {
 		private void evict(Module javaProject) {
 			if (javaProject != null) {
 				// Remove the JDTMicroProfile project instance from the cache.
-				projects.remove(javaProject);
+				removeMicroProfileProject(javaProject);
 			}
 		}
 
@@ -102,28 +125,39 @@ public final class PsiMicroProfileProjectManager {
 
 	private PsiMicroProfileProjectManager(Project project) {
 		this.project = project;
-		this.projects = new HashMap<>();
-		initialize();
+		microprofileProjectListener = new MicroProfileProjectListener();
+		connection = project.getMessageBus().connect(project);
+		connection.subscribe(ClasspathResourceChangedManager.TOPIC, microprofileProjectListener);
+		connection.subscribe(ProjectTopics.MODULES, microprofileProjectListener);
+		EditorFactory.getInstance().getEventMulticaster().addDocumentListener(microprofileProjectListener, microprofileProjectListener);
 	}
 
-	public PsiMicroProfileProject getJDTMicroProfileProject(Module project) {
-		return getJDTMicroProfileProject(project, true);
+	public PsiMicroProfileProject getMicroProfileProject(Module project) {
+		return getMicroProfileProject(project, true);
 	}
 
-	private PsiMicroProfileProject getJDTMicroProfileProject(Module project, boolean create) {
-		Module javaProject = project;
-		PsiMicroProfileProject info = projects.get(javaProject);
-		if (info == null) {
+	private PsiMicroProfileProject getMicroProfileProject(Module javaProject, boolean create) {
+		PsiMicroProfileProject mpProject = javaProject.getUserData(KEY);
+		if (mpProject == null) {
 			if (!create) {
 				return null;
 			}
-			info = new PsiMicroProfileProject(javaProject);
-			projects.put(javaProject, info);
+			mpProject = new PsiMicroProfileProject(javaProject);
+			javaProject.putUserData(KEY, mpProject);
 		}
-		return info;
+		return mpProject;
 	}
 
-	public boolean isConfigSource(VirtualFile file) {
+	/**
+	 * Returns true if the given file is a MicroProfile config properties file (microprofile-config.properties, application.properties, application.yaml, etc) and false otherwise.
+	 *
+	 * @param file the file to check.
+	 * @return true if the given file is a MicroProfile config properties file (microprofile-config.properties, application.properties, application.yaml, etc) and false otherwise.
+	 */
+	public static boolean isConfigSource(VirtualFile file) {
+		if (file == null) {
+			return false;
+		}
 		String fileName = file.getName();
 		for (IConfigSourceProvider provider : IConfigSourceProvider.EP_NAME.getExtensions()) {
 			if (provider.isConfigSource(fileName)) {
@@ -133,14 +167,26 @@ public final class PsiMicroProfileProjectManager {
 		return false;
 	}
 
-	public void initialize() {
-		if (microprofileProjectListener != null) {
-			return;
+	/**
+	 * Returns true if the given file is a Java file and false otherwise.
+	 *
+	 * @param file the file to check.
+	 * @return true if the given file is a Java file and false otherwise.
+	 */
+	public static boolean isJavaFile(VirtualFile file) {
+		return file != null && JAVA_FILE_EXTENSION.equals(file.getExtension());
+	}
+
+	@Override
+	public void dispose() {
+		Module[] modules = ModuleManager.getInstance(project).getModules();
+		for (Module module : modules) {
+			removeMicroProfileProject(module);
 		}
-		microprofileProjectListener = new MicroProfileProjectListener();
-		MessageBusConnection connection = ApplicationManager.getApplication().getMessageBus().connect(project);
-		connection.subscribe(VirtualFileManager.VFS_CHANGES, microprofileProjectListener);
-		project.getMessageBus().connect(project).subscribe(ProjectTopics.MODULES, microprofileProjectListener);
-		EditorFactory.getInstance().getEventMulticaster().addDocumentListener(microprofileProjectListener, microprofileProjectListener);
+		connection.disconnect();
+	}
+
+	private static void removeMicroProfileProject(Module module) {
+		module.putUserData(KEY, null);
 	}
 }

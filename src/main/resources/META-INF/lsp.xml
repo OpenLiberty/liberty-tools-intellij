@@ -11,31 +11,78 @@
 <idea-plugin>
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!-- MicroProfile LS -->
-        <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
+        <server id="lsp4mp"
+                label="Tools for MicroProfile"
+                class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                scope="project">
+            <description><![CDATA[
+                The <a href="https://github.com/eclipse/lsp4mp">MicroProfile language server</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
+                <ul>
+                  <li><b>Java</b> files.</li>
+                  <li>and <b>microprofile-config.properties</b> files.</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="Properties" serverId="lsp4mp"
                          filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
-        <server id="libertyXml" class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
+        <server id="libertyXml"
+                label="Liberty XML"
+                class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                scope="project">
+            <description><![CDATA[
+                The Liberty XML language server provides support in:
+                <ul>
+                  <li><b>XML</b> files.</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="XML" serverId="libertyXml"/>
 
         <!-- Liberty Config LS -->
-        <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
+        <server id="libertyls"
+                label="Liberty Config"
+                class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                scope="project">
+            <description><![CDATA[
+                The Liberty Configuration language server provides support in:
+                <ul>
+                  <li><b>server.env</b> files.</li>
+                  <li><b>bootstrap.properties</b> files.</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="Properties" serverId="libertyls"
                          filePattern="**/{*.properties,*.env}"/>
 
         <!-- Jakarta LS -->
-        <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
+        <server id="jakartals"
+                label="Tools for Jakarta"
+                class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                scope="project">
+            <description><![CDATA[
+                The Jakarta language server provides support in:
+                <ul>
+                  <li><b>Java</b> files.</li>
+                  <li><b>.properties</b> files.</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">

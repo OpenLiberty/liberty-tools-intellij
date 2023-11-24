@@ -27,7 +27,6 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.Arrays;

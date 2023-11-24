@@ -18,7 +18,7 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfi
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
-import static org.eclipse.lsp4mp.commons.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
+import static org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.CodeActionFactory;
+import org.eclipse.lsp4mp.ls.commons.CodeActionFactory;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
@@ -51,7 +51,8 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 /**
  * QuickFix for fixing
@@ -91,7 +92,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 		String insertText = propertyName + "=" + lineSeparator;
 
 		PsiMicroProfileProject mpProject = PsiMicroProfileProjectManager.getInstance(javaProject.getProject()).
-				getJDTMicroProfileProject(javaProject);
+                getMicroProfileProject(javaProject);
 		List<IConfigSource> configSources = mpProject.getConfigSources();
 		for (IConfigSource configSource : configSources) {
 			String uri = configSource.getSourceConfigFileURI();
@@ -99,7 +100,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 				// the properties file exists
 				TextDocumentItem document = new TextDocumentItem(uri, "properties", 0, insertText);
 				CodeAction codeAction = CodeActionFactory.insert(
-						getTitle(propertyName, configSource.getConfigFileName()), new Position(0, 0), insertText,
+						getTitle(propertyName, configSource.getConfigFileName()), MicroProfileCodeActionId.AssignValueToProperty, new Position(0, 0), insertText,
 						document, diagnostic);
 				codeActions.add(codeAction);
 			}
@@ -127,8 +128,7 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 		String insertText = propertyName + "=" + lineSeparator;
 		TextDocumentEdit tde = insertTextEdit(new TextDocumentItem(uri, "properties", 0, insertText), insertText,
 				new Position(0, 0));
-		WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(tde)));
-		unresolved.setEdit(workspaceEdit);
+		unresolved.setEdit(new WorkspaceEdit(Collections.singletonList(Either.forLeft(tde))));
 		return unresolved;
 	}
 
