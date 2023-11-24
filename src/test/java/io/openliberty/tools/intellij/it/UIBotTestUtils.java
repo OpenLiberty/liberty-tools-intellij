@@ -19,6 +19,7 @@ import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.assertj.swing.core.MouseButton;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -1691,7 +1692,7 @@ public class UIBotTestUtils {
      * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
      */
     public static void waitForLTWNoProjectDetectedMsg(RemoteRobot remoteRobot, int waitTime) {
-        String text = "No Liberty Maven or Liberty Gradle projects detected in this workspace.";
+        String text = LocalizedResourceUtil.getMessage("no.liberty.projects.detected");
 
         int maxRetries = 3;
         Exception error = null;
