@@ -282,14 +282,10 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        // Test quickfix codeActions
-        String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
-                "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n" +
-                "    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
-                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n" +
-                "    // invalid cases\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n" +
-                "    @AssertTrue\n    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n" +
-                "    @AssertFalse\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n}";
+        // Test quickfix codeAction
+        String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\nimport jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
+
+
         String newText2 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
                 "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n" +
                 "    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
@@ -306,13 +302,13 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);
 
-        String newText3 = "package io.openliberty.sample.jakarta.beanvalidation;\n\n" +
-                "import jakarta.validation.constraints.AssertFalse;\nimport jakarta.validation.constraints.AssertTrue;\n\n" +
-                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n" +
-                "        return false;\n    }\n\n    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n" +
-                "    // invalid cases\n    @AssertTrue\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n" +
-                "    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n" +
-                "    @AssertFalse\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n}";
+        String newText3 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
+                "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n    // valid cases\n" +
+                "    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
+                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n" +
+                "    @AssertTrue\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n" +
+                "    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n" +
+                "    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
 
         codeActionParams = createCodeActionParams(uri, d2);
         te = te(0, 0, 34, 1, newText3);
@@ -323,11 +319,11 @@ public class BeanValidationTest extends BaseJakartaTest {
         String newText4 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
                 "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n" +
                 "    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
-                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n" +
-                "    // invalid cases\n    @AssertTrue\n    public static boolean anotherTruth() {  // static\n" +
-                "        return true;\n    }\n\n    @AssertTrue\n    public String notBoolean() {            // invalid type\n" +
-                "        return \"aha!\";\n    }\n\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n" +
-                "    }\n\n}";
+                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n" +
+                "    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n" +
+                "    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n" +
+                "    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
+
         String newText5 = "package io.openliberty.sample.jakarta.beanvalidation;\n\n" +
                 "import jakarta.validation.constraints.AssertFalse;\nimport jakarta.validation.constraints.AssertTrue;\n\n" +
                 "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n" +

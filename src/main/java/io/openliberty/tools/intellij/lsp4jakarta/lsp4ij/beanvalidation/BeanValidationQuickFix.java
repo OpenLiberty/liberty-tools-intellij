@@ -60,20 +60,17 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
         final CodeAction toResolve = context.getUnresolved();
         List<Diagnostic> diagnostics = toResolve.getDiagnostics();
-        final String name = Messages.getMessage("RemoveStaticModifier");
 
-        Diagnostic diagnostic = null;
-        if (diagnostics.size() > 0) {
-            diagnostic = diagnostics.get(0);
-        }
 
         String message = toResolve.getTitle();
 
         if (message == Messages.getMessage("RemoveStaticModifier")) {
-            resolveStaticModifierCodeAction(context, diagnostic);
+            resolveStaticModifierCodeAction(context);
             return toResolve;
         }
-        resolveRemoveConstraintAnnotationsCodeAction(context, diagnostic);
+
+        resolveRemoveConstraintAnnotationsCodeAction(context, diagnostics.size() > 0 ? diagnostics.get(0) : null);
+
         return toResolve;
     }
 
@@ -93,25 +90,26 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
         final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         final PsiAnnotation[] annotations = modifierListOwner.getAnnotations();
-        Optional<PsiAnnotation> annotationToRemove = null;
 
         if (annotations != null && annotations.length > 0) {
-            annotationToRemove =
+            final Optional<PsiAnnotation> annotationToRemove =
                     Arrays.stream(annotations).filter(a -> annotationName.equals(a.getQualifiedName())).findFirst();
-        }
+            if (annotationToRemove.isPresent()) {
+                boolean isFormatRequired = false;
+                final RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(name, context.getSource().getCompilationUnit(),
+                        context.getASTRoot(), parentType, 0, Collections.singletonList(annotationToRemove.get()), isFormatRequired);
 
-        final RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(name, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, Collections.singletonList(annotationToRemove.get()));
-
-        try {
-            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-            toResolve.setEdit(we);
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to change return type to void", e);
+                try {
+                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                    toResolve.setEdit(we);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove constraint annotation", e);
+                }
+            }
         }
     }
 
-    private void resolveStaticModifierCodeAction(JavaCodeActionResolveContext context, Diagnostic diagnostic) {
+    private void resolveStaticModifierCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
@@ -127,7 +125,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to change return type to void", e);
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove static modifier", e);
         }
     }
 
