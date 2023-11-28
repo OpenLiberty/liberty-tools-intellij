@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class JaxRsInfoProviderRegistry {
 
-    private static final ExtensionPointName<IJaxRsInfoProvider> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.jaxRsInfoProvider");
+    private static final ExtensionPointName<IJaxRsInfoProvider> EP_NAME = ExtensionPointName.create("open-liberty.intellij.jaxRsInfoProvider");
 
     private static final JaxRsInfoProviderRegistry INSTANCE = new JaxRsInfoProviderRegistry();
 

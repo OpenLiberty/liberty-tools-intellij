@@ -96,6 +96,11 @@
                                    implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
         <!-- Enable watcher to handle custom liberty config files and provide LCLS support -->
         <projectService serviceImplementation="io.openliberty.tools.intellij.liberty.lsp.LibertyCustomConfigManager"/>
+        <projectService id="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"
+                        serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport"/>
     </extensions>
 
 </idea-plugin>

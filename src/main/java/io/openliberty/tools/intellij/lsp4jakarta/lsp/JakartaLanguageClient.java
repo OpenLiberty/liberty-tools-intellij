@@ -18,6 +18,7 @@ import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
+import org.microshed.lsp4ij.client.CoalesceByKey;
 import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
@@ -49,33 +50,37 @@ public class JakartaLanguageClient extends IndexAwareLanguageClient implements J
     String uri = classpathParams.getUri();
     List<String> snippetContexts = classpathParams.getSnippetCtx();
     Project project = getProject();
+    var coalesceBy = new CoalesceByKey("jakarta/java/classpath", uri, snippetContexts);
     return runAsBackground("Computing Jakarta context",
-            monitor -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project));
+            monitor -> PropertiesManagerForJakarta.getInstance().getExistingContextsFromClassPath(uri, snippetContexts, project), coalesceBy);
   }
 
   // Support the message "jakarta/java/cursorcontext"
   @Override
   public CompletableFuture<JavaCursorContextResult> getJavaCursorContext(JakartaJavaCompletionParams params) {
+    var coalesceBy = new CoalesceByKey("jakarta/java/cursorcontext", params.getUri(), params.getPosition());
     return runAsBackground("Computing Java cursor context",
             monitor -> {
               IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
               return PropertiesManagerForJakarta.getInstance().javaCursorContext(params, utils);
-            });
+            }, coalesceBy);
   }
 
   // Support the message "jakarta/java/diagnostics"
   @Override
   public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(JakartaDiagnosticsParams jakartaParams) {
+    var coalesceBy = new CoalesceByKey("jakarta/java/diagnostics", jakartaParams.getUris());
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     return runAsBackground("Computing Jakarta Java diagnostics",
-            monitor -> PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils));
+            monitor -> PropertiesManagerForJakarta.getInstance().diagnostics(jakartaParams, utils), coalesceBy);
   }
 
   // Support the message "jakarta/java/codeaction
   public CompletableFuture<List<CodeAction>> getCodeAction(JakartaJavaCodeActionParams params) {
     IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+    var coalesceBy = new CoalesceByKey("jakarta/java/codeAction", params.getUri());
     return runAsBackground("Computing Jakarta code actions",
-            monitor -> PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils));
+            monitor -> PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils), coalesceBy);
   }
 
   @Override
