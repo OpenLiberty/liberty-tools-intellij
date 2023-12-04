@@ -3,7 +3,10 @@
     <!-- Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/resources/META-INF/lsp.xml -->
     <extensionPoints>
         <extensionPoint name="server"
-                        beanClass="org.microshed.lsp4ij.ServerExtensionPointBean"/>
+                        beanClass="org.microshed.lsp4ij.ServerExtensionPointBean">
+            <with attribute="clientClass" implements="org.microshed.lsp4ij.client.LanguageClientImpl"/>
+            <with attribute="serverClass" implements="org.eclipse.lsp4j.services.LanguageServer"/>
+        </extensionPoint>
         <extensionPoint name="languageMapping"
                         beanClass="org.microshed.lsp4ij.LanguageMappingExtensionPointBean"/>
         <extensionPoint name="serverIconProvider"
