@@ -331,8 +331,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     }
     
     private static String getBuildPath(Object value) {
-        LibertyModuleNode node = (LibertyModuleNode) value;
-        return node.getFilePath().toString().replace("file://", "");
+        LibertyModuleNode node = null;
+        if (value instanceof LibertyModuleNode) {
+            node = (LibertyModuleNode) value;
+        }
+        return (node != null) ? node.getFilePath().toString().replace("file://", "") : "";
     }
 
     private static void executeAction(Tree tree) {
