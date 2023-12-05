@@ -112,7 +112,7 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
         String[] constructorNames = {Messages.getMessage("AddNoArgProtectedConstructor"), Messages.getMessage("AddNoArgPublicConstructor")};
 
         for (String name : constructorNames) {
-            CodeAction codeAction = JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), null);
+            CodeAction codeAction = JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId());
             codeActions.add(codeAction);
         }
         return codeActions;

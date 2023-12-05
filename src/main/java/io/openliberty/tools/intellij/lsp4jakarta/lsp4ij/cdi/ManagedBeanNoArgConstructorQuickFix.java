@@ -95,7 +95,7 @@ public class ManagedBeanNoArgConstructorQuickFix implements IJavaCodeActionParti
 
         for (String name : constructorNames) {
             CodeAction codeAction = JDTUtils.createCodeAction(context, diagnostic, name,
-                    getParticipantId(), null);
+                    getParticipantId());
             codeActions.add(codeAction);
         }
         return codeActions;

@@ -124,7 +124,7 @@ public abstract class RemoveModifierConflictQuickFix implements IJavaCodeActionP
         PsiElement node = context.getCoveredNode();
         PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         String label = getLabel(modifierListOwner, modifier);
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId(), null));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
 
     private String getLabel(PsiModifierListOwner modifierListOwner, String... modifier) {

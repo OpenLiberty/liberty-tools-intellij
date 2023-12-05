@@ -60,7 +60,7 @@ public class NonPublicResourceMethodQuickFix implements IJavaCodeActionParticipa
 
         if (parentMethod != null) {
             return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
-                    getParticipantId(), null));
+                    getParticipantId()));
         }
         return Collections.emptyList();
     }

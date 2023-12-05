@@ -60,7 +60,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
 
         if (parentType != null) {
             codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
-                    getParticipantId(), null));
+                    getParticipantId()));
         }
         return codeActions;
     }
