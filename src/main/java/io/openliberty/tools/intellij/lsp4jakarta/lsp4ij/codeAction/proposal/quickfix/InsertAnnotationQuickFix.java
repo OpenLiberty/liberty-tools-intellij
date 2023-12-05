@@ -117,7 +117,7 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
      */
     private void addAttribute(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions, String name, String... attributes) {
         String label = getLabel(name, attributes);
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId(), null));
     }
 
     protected PsiModifierListOwner getBinding(PsiElement node) {

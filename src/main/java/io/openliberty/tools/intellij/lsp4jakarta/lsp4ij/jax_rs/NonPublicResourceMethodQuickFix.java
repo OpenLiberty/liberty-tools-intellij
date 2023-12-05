@@ -59,7 +59,8 @@ public class NonPublicResourceMethodQuickFix implements IJavaCodeActionParticipa
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
         if (parentMethod != null) {
-            return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE, getParticipantId()));
+            return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
+                    getParticipantId(), null));
         }
         return Collections.emptyList();
     }

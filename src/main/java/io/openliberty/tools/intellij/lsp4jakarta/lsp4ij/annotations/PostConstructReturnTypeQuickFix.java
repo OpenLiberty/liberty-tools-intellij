@@ -59,7 +59,8 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         final PsiMethod parentType = getBinding(node);
 
         if (parentType != null) {
-            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE, getParticipantId()));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
+                    getParticipantId(), null));
         }
         return codeActions;
     }

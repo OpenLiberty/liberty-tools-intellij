@@ -72,7 +72,7 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
             String title = Messages.getMessage("LetClassExtend",
                     parentType.getName(),
                     ServletConstants.HTTP_SERVLET);
-            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId()));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId(), null));
         }
         return codeActions;
     }
