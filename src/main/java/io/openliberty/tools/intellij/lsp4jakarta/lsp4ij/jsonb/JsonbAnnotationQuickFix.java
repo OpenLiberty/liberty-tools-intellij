@@ -25,4 +25,9 @@ public class JsonbAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
     public JsonbAnnotationQuickFix() {
         super("jakarta.json.bind.annotation.JsonbCreator");
     }
+
+    @Override
+    public String getParticipantId() {
+        return JsonbAnnotationQuickFix.class.getName();
+    }
 }

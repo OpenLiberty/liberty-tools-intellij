@@ -29,4 +29,8 @@ public class DeleteConflictMapKeyQuickFix extends RemoveAnnotationConflictQuickF
         super(false, "jakarta.persistence.MapKeyClass", "jakarta.persistence.MapKey");
     }
 
+    @Override
+    public String getParticipantId() {
+        return DeleteConflictMapKeyQuickFix.class.getName();
+    }
 }
