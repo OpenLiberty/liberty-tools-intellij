@@ -64,7 +64,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
         String message = toResolve.getTitle();
 
-        if (message == Messages.getMessage("RemoveStaticModifier")) {
+        if (message.equals(Messages.getMessage("RemoveStaticModifier"))) {
             resolveStaticModifierCodeAction(context);
             return toResolve;
         }

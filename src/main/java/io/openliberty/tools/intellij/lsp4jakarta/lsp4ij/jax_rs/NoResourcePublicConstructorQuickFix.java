@@ -84,7 +84,7 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
 
             String message = toResolve.getTitle();
 
-            if (message == Messages.getMessage("MakeConstructorPublic")) {
+            if (message.equals(Messages.getMessage("MakeConstructorPublic"))) {
 
                 ChangeCorrectionProposal proposal = new ModifyModifiersProposal(Messages.getMessage("MakeConstructorPublic"), targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
@@ -96,7 +96,7 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
                     LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to make constructor public", e);
                 }
 
-            } else if (message == Messages.getMessage("NoargPublicConstructor")) {
+            } else if (message.equals(Messages.getMessage("NoargPublicConstructor"))) {
 
                 ChangeCorrectionProposal proposal = new AddConstructorProposal(Messages.getMessage("NoargPublicConstructor"),
                         targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
