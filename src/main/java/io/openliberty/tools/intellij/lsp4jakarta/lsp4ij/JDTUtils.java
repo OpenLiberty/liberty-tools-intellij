@@ -107,14 +107,6 @@ public class JDTUtils {
 
     public static CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
                                               String quickFixMessage, String participantId) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(quickFixMessage);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), participantId,
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
+        return createCodeAction(context, diagnostic, quickFixMessage, participantId, null);
     }
 }
