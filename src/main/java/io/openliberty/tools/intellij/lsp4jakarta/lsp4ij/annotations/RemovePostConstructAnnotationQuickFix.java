@@ -27,4 +27,8 @@ public class RemovePostConstructAnnotationQuickFix extends RemoveAnnotationConfl
         super(false, "jakarta.annotation.PostConstruct");
     }
 
+    @Override
+    public String getParticipantId() {
+        return RemovePostConstructAnnotationQuickFix.class.getName();
+    }
 }

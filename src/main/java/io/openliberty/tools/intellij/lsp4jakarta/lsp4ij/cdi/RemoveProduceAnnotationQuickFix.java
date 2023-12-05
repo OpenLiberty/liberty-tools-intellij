@@ -24,4 +24,9 @@ public class RemoveProduceAnnotationQuickFix extends RemoveAnnotationConflictQui
     public RemoveProduceAnnotationQuickFix() {
         super(false, "jakarta.enterprise.inject.Produces");
     }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveProduceAnnotationQuickFix.class.getName();
+    }
 }

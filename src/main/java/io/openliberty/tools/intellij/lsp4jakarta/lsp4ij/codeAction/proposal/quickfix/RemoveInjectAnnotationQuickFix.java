@@ -26,4 +26,9 @@ public class RemoveInjectAnnotationQuickFix extends RemoveAnnotationConflictQuic
     public RemoveInjectAnnotationQuickFix() {
         super(false, "jakarta.inject.Inject");
     }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveInjectAnnotationQuickFix.class.getName();
+    }
 }

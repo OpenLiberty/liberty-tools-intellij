@@ -27,4 +27,8 @@ public class RemovePreDestroyAnnotationQuickFix extends RemoveAnnotationConflict
         super(false, "jakarta.annotation.PreDestroy");
     }
 
+    @Override
+    public String getParticipantId() {
+        return RemovePreDestroyAnnotationQuickFix.class.getName();
+    }
 }

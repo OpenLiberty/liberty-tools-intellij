@@ -53,4 +53,9 @@ public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations 
 
         return annotationsListsToRemove;
     }
+
+    @Override
+    public String getParticipantId() {
+        return JsonbTransientAnnotationQuickFix.class.getName();
+    }
 }

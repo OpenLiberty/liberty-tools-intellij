@@ -27,4 +27,8 @@ public class ConflictInjectMultipleConstructorQuickFix extends RemoveAnnotationC
         super(false, "jakarta.inject.Inject");
     }
 
+    @Override
+    public String getParticipantId() {
+        return ConflictInjectMultipleConstructorQuickFix.class.getName();
+    }
 }

@@ -32,6 +32,11 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
     }
 
     @Override
+    public String getParticipantId() {
+        return ScopeDeclarationQuickFix.class.getName();
+    }
+
+    @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);

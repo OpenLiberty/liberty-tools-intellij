@@ -22,4 +22,8 @@ public class ConflictProducesInjectQuickFix extends RemoveAnnotationConflictQuic
         super(false, "jakarta.enterprise.inject.Produces", "jakarta.inject.Inject");
     }
 
+    @Override
+    public String getParticipantId() {
+        return ConflictProducesInjectQuickFix.class.getName();
+    }
 }
