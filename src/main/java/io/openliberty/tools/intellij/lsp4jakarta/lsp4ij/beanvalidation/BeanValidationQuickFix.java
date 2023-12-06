@@ -124,7 +124,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
-        final ModifyModifiersProposal proposal = new ModifyModifiersProposal(Messages.getMessage("RemoveStaticModifier")
+        final ModifyModifiersProposal proposal = new ModifyModifiersProposal(toResolve.getTitle()
                 , context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(),
                 Collections.singletonList("static"));
