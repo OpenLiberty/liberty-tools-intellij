@@ -25,4 +25,7 @@ public class RemoveInvalidInjectParamAnnotationQuickFix extends RemoveParamAnnot
     	super(Arrays.copyOf(ManagedBeanConstants.INVALID_INJECT_PARAMS_FQ,
                 ManagedBeanConstants.INVALID_INJECT_PARAMS_FQ.length));
     }
+     public String getParticipantId() {
+         return RemoveInvalidInjectParamAnnotationQuickFix.class.getName();
+     }
 }
