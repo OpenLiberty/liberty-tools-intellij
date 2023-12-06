@@ -24,6 +24,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCode
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -40,6 +41,8 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
     private static final Logger LOGGER = Logger.getLogger(BeanValidationQuickFix.class.getName());
 
+    private static final String ANNOTATION_NAME = "annotationName";
+
     @Override
     public String getParticipantId() {
         return BeanValidationQuickFix.class.getName();
@@ -47,10 +50,10 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
-        getRemoveConstraintAnnotationsCodeActions(diagnostic, context.copy(), codeActions);
+        getRemoveConstraintAnnotationsCodeActions(diagnostic, context, codeActions);
 
         if (diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_STATIC)) {
-            getRemoveStaticModifierCodeActions(diagnostic, context.copy(), codeActions);
+            getRemoveStaticModifierCodeActions(diagnostic, context, codeActions);
         }
         return codeActions;
     }
@@ -59,8 +62,6 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
 
         final CodeAction toResolve = context.getUnresolved();
-        List<Diagnostic> diagnostics = toResolve.getDiagnostics();
-
 
         String message = toResolve.getTitle();
 
@@ -69,7 +70,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
             return toResolve;
         }
 
-        resolveRemoveConstraintAnnotationsCodeAction(context, diagnostics.size() > 0 ? diagnostics.get(0) : null);
+        resolveRemoveConstraintAnnotationsCodeAction(context);
 
         return toResolve;
     }
@@ -78,16 +79,24 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
         final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+        Map<String, Object> extendedData = new HashMap<>();
+        extendedData.put(ANNOTATION_NAME, annotationName);
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
     }
 
-    private void resolveRemoveConstraintAnnotationsCodeAction(JavaCodeActionResolveContext context, Diagnostic diagnostic) {
+    private void resolveRemoveConstraintAnnotationsCodeAction(JavaCodeActionResolveContext context) {
 
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-        final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
+        CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
+        String annotationName;
+        if (data.getExtendedDataEntry(ANNOTATION_NAME) instanceof String) {
+            annotationName = (String) data.getExtendedDataEntry(ANNOTATION_NAME);
+        } else {
+            annotationName = "";
+        }
+        final String name = toResolve.getTitle();
         final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         final PsiAnnotation[] annotations = modifierListOwner.getAnnotations();
 
@@ -115,8 +124,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         final PsiModifierListOwner modifierListOwner = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
 
-        final ModifyModifiersProposal proposal = new ModifyModifiersProposal(Messages.getMessage(
-                "RemoveStaticModifier")
+        final ModifyModifiersProposal proposal = new ModifyModifiersProposal(Messages.getMessage("RemoveStaticModifier")
                 , context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(),
                 Collections.singletonList("static"));
@@ -136,3 +144,5 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
     }
 }
+
+
