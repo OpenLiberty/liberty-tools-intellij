@@ -16,7 +16,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -41,7 +40,6 @@ import java.util.logging.Logger;
  * ModifyModifiersProposal.
  *
  * @author Shaunak Tulshibagwale
- *
  */
 public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParticipant {
 
@@ -60,7 +58,7 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
         if (parentMethod != null) {
             List<CodeAction> codeActions = new ArrayList<>();
 
-            codeActions.add(JDTUtils.createCodeAction(context,diagnostic,Messages.getMessage("MakeConstructorPublic"), getParticipantId()));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, Messages.getMessage("MakeConstructorPublic"), getParticipantId()));
             codeActions.add(JDTUtils.createCodeAction(context, diagnostic, Messages.getMessage("NoargPublicConstructor"), getParticipantId()));
 
             return codeActions;
@@ -74,42 +72,39 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
         final CodeAction toResolve = context.getUnresolved();
         PsiElement node = context.getCoveredNode();
         PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+        PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
 
         if (parentMethod != null) {
-
-            JavaCodeActionContext targetContext = context.copy();
-            node = targetContext.getCoveredNode();
-            PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-            parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
             String message = toResolve.getTitle();
 
             if (message.equals(Messages.getMessage("MakeConstructorPublic"))) {
 
-                ChangeCorrectionProposal proposal = new ModifyModifiersProposal(Messages.getMessage("MakeConstructorPublic"), targetContext.getSource().getCompilationUnit(),
-                        targetContext.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
+                ChangeCorrectionProposal proposal = new ModifyModifiersProposal(message, context.getSource().getCompilationUnit(),
+                        context.getASTRoot(), parentType, 0, parentMethod.getModifierList(), Collections.singletonList("public"));
 
-                try {
-                    WorkspaceEdit we = targetContext.convertToWorkspaceEdit(proposal);
-                    toResolve.setEdit(we);
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to make constructor public", e);
-                }
+                String warningMessage = "Unable to create workspace edit for code action to make constructor public";
+                convertWorkspaceEdit(proposal, warningMessage, context);
 
             } else if (message.equals(Messages.getMessage("NoargPublicConstructor"))) {
 
-                ChangeCorrectionProposal proposal = new AddConstructorProposal(Messages.getMessage("NoargPublicConstructor"),
-                        targetContext.getSource().getCompilationUnit(), targetContext.getASTRoot(), parentType, 0, "public");
+                ChangeCorrectionProposal proposal = new AddConstructorProposal(message,
+                        context.getSource().getCompilationUnit(), context.getASTRoot(), parentType, 0, "public");
 
-                try {
-                    WorkspaceEdit we = targetContext.convertToWorkspaceEdit(proposal);
-                    toResolve.setEdit(we);
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to add no-arg public constructor to the class", e);
-                }
+                String warningMessage = "Unable to create workspace edit for code action to add no-arg public constructor to the class";
+                convertWorkspaceEdit(proposal, warningMessage, context);
 
             }
-            }
-            return toResolve;
+        }
+        return toResolve;
+    }
+
+    public void convertWorkspaceEdit(ChangeCorrectionProposal proposal, String warningMessage, JavaCodeActionResolveContext context) {
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            context.getUnresolved().setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, warningMessage, e);
         }
     }
+}
