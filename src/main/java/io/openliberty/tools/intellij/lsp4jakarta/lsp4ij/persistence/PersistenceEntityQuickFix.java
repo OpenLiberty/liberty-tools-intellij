@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddConstructorProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -111,22 +112,9 @@ public class PersistenceEntityQuickFix implements IJavaCodeActionParticipant {
         String[] constructorNames = {Messages.getMessage("AddNoArgProtectedConstructor"), Messages.getMessage("AddNoArgPublicConstructor")};
 
         for (String name : constructorNames) {
-            CodeAction codeAction = createCodeAction(context, diagnostic, name);
+            CodeAction codeAction = JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId());
             codeActions.add(codeAction);
         }
         return codeActions;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setTitle(label);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 }
