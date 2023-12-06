@@ -314,13 +314,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
 
             // select icon for node based on project type
-            LibertyModuleNode moduleNode = (LibertyModuleNode) value;
-            if (moduleNode.isGradleProjectType()) {
-                setIcon(LibertyPluginIcons.gradleIcon);
-            } else if (moduleNode.isMavenProjectType()) {
-                setIcon(LibertyPluginIcons.mavenIcon);
-            } else {
-                setIcon(LibertyPluginIcons.libertyIcon);
+            if (value instanceof LibertyModuleNode) {
+                LibertyModuleNode moduleNode = (LibertyModuleNode) value;
+                if (moduleNode.isGradleProjectType()) {
+                    setIcon(LibertyPluginIcons.gradleIcon);
+                } else if (moduleNode.isMavenProjectType()) {
+                    setIcon(LibertyPluginIcons.mavenIcon);
+                } else {
+                    setIcon(LibertyPluginIcons.libertyIcon);
+                }
             }
 
             return this;
