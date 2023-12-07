@@ -25,8 +25,14 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
 import io.openliberty.tools.intellij.LibertyModule;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -227,8 +233,42 @@ public class DebugModeHandler {
     private Path getServerEnvPath(LibertyModule libertyModule) throws Exception {
         String projectPath = libertyModule.getBuildFile().getParent().getPath();
         Path basePath = null;
+
+
+        /*String pomPath = libertyModule.getBuildFile().getPath();
+        ModelReader modelReader = new DefaultModelReader();
+
+        Map<String, Object> inputOptions = new HashMap<>();
+        inputOptions.put(ModelProcessor.SOURCE, new FileModelSource(new File(pomPath)));
+        Model model = modelReader.read(new FileReader(pomPath), inputOptions);
+
+        Plugin plugin = model.getBuild().getPlugins().stream()
+                .filter(p -> p.getGroupId().equals("io.openliberty.tools") && p.getArtifactId().equals("liberty-maven-plugin"))
+                .findFirst()
+                .orElse(null);
+
+        PluginConfiguration pluginConfiguration = (PluginConfiguration) plugin.getConfiguration();
+        Xpp3Dom document = (Xpp3Dom) plugin.getConfiguration();
+        String installDirectory = String.valueOf(pluginConfiguration.getLocation("installDirectory"));
+        System.out.println("The installDirectory property is: " + installDirectory);*/
+
+        File pomfile = new File(libertyModule.getBuildFile().getPath());
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model = reader.read(new FileReader(pomfile));
+        //Object conf = model.getBuild().getPlugins().get(0).getConfiguration().childList.get(0).value;
+
+        //org.w3c.dom.Document document = convertModelToDocument(model);
+
+        XPathFactory xPathFactory = XPathFactory.newInstance();
+        XPath xPath = xPathFactory.newXPath();
+
+        // Example: Get the version of the Maven Compiler Plugin
+        String installDirectory = getValueByXPath(xPath, model, "/project/build/plugins/plugin[artifactId='liberty-maven-plugin']/configuration/installDirectory");
+
+
         if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
+            //basePath = Paths.get("/Users", "dessina", "Documents", "Workspace", "singleModMavenMP", "wlp", "usr", "servers");
+            basePath = Paths.get(installDirectory);
         } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
             basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
         } else {
@@ -261,6 +301,11 @@ public class DebugModeHandler {
             }
             return matchedPaths.get(0);
         }
+    }
+
+    private static String getValueByXPath(XPath xPath, Model model, String expression) throws XPathExpressionException {
+        XPathExpression xPathExpression = xPath.compile(expression);
+        return xPathExpression.evaluate(model);
     }
 
     /**
