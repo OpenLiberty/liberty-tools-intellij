@@ -34,44 +34,46 @@
   */
 public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionParticipant {
 
-	private final String[] annotations;
-	
-    private static final Logger LOGGER = Logger.getLogger(RemoveParamAnnotationQuickFix.class.getName());
-    private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
-    private static final String INDEX_KEY = "paramIndex";
-    public RemoveParamAnnotationQuickFix(String ...annotations) {
-        this.annotations = annotations;
-    }
+     private final String[] annotations;
+     private static final Logger LOGGER = Logger.getLogger(RemoveParamAnnotationQuickFix.class.getName());
+     private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
+     private static final String INDEX_KEY = "paramIndex";
 
-    public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
+     public RemoveParamAnnotationQuickFix(String... annotations) {
+         this.annotations = annotations;
+     }
 
-        final PsiElement node = context.getCoveredNode();
-        final PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
 
-        final List<CodeAction> codeActions = new ArrayList<>();
-        final PsiParameterList parameters = method.getParameterList();
-        int parametersCount = parameters.getParametersCount();
-        for (int i = 0; i < parametersCount; ++i) {
-            final PsiParameter parameter = parameters.getParameter(i);
-            final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
-            final List<String> annotationsToRemove = new ArrayList<>();
-            // Search for annotations to remove from the current method parameter.
-            Arrays.stream(psiAnnotations).forEach(a -> {
-                if (Arrays.stream(annotations).anyMatch(m -> m.equals(a.getQualifiedName()))) {
-                    annotationsToRemove.add(a.getQualifiedName());
-                }
-            });
-            if (!annotationsToRemove.isEmpty()) {
-                // Create label
-                String label = getLabel(parameter,annotationsToRemove);
-                Map<String, Object> extendedData = new HashMap<>();
-                extendedData.put(ANNOTATION_TO_REMOVE, annotationsToRemove);
-                extendedData.put(INDEX_KEY, i);
-                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId(), extendedData));
-            }
-        }
-        return codeActions;
-    }
+         final PsiElement node = context.getCoveredNode();
+         final PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+
+         final List<CodeAction> codeActions = new ArrayList<>();
+         final PsiParameterList parameters = method.getParameterList();
+         int parametersCount = parameters.getParametersCount();
+
+         for (int i = 0; i < parametersCount; ++i) {
+             final PsiParameter parameter = parameters.getParameter(i);
+             final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
+             final List<String> annotationsToRemove = new ArrayList<>();
+             // Search for annotations to remove from the current method parameter.
+             Arrays.stream(psiAnnotations).forEach(a -> {
+                 if (Arrays.stream(annotations).anyMatch(m -> m.equals(a.getQualifiedName()))) {
+                     annotationsToRemove.add(a.getQualifiedName());
+                 }
+             });
+
+             if (!annotationsToRemove.isEmpty()) {
+                 // Create label
+                 String label = getLabel(parameter, annotationsToRemove);
+                 Map<String, Object> extendedData = new HashMap<>();
+                 extendedData.put(ANNOTATION_TO_REMOVE, annotationsToRemove);
+                 extendedData.put(INDEX_KEY, i);
+                 codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId(), extendedData));
+             }
+         }
+         return codeActions;
+     }
 
      private String getLabel(PsiParameter parameter,List<String> annotationsToRemove) {
          final StringBuilder sb = new StringBuilder();
@@ -93,16 +95,17 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
          List<String> annotationsToRemove = new ArrayList<>();
          int paramIndex = 0;
+
          if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List) {
-            annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
+             annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
          }
          if (data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
              paramIndex = (Integer) data.getExtendedDataEntry(INDEX_KEY);
          }
+
          final PsiParameter parameter = method.getParameterList().getParameter(paramIndex);
          final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
          final List<PsiAnnotation> psiAnnotationsToRemove = new ArrayList<>();
-
 
          List<String> finalAnnotationsToRemove = annotationsToRemove;
          Arrays.stream(psiAnnotations).forEach(a -> {
@@ -112,7 +115,7 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          });
 
          assert parentType != null;
-         String label = getLabel(parameter,annotationsToRemove);
+         String label = getLabel(parameter, annotationsToRemove);
          RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getSource().getCompilationUnit(),
                  context.getASTRoot(), parentType, 0, psiAnnotationsToRemove);
          try {
@@ -124,15 +127,15 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          return toResolve;
      }
 
-    protected PsiClass getBinding(PsiElement node) {
-        return PsiTreeUtil.getParentOfType(node, PsiClass.class);
-    }
+     protected PsiClass getBinding(PsiElement node) {
+         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
+     }
 
-    protected static String getShortName(String qualifiedName) {
-        final int i = qualifiedName.lastIndexOf('.');
-        if (i != -1) {
-            return qualifiedName.substring(i+1);
-        }
-        return qualifiedName;
-    }
-}
+     protected static String getShortName(String qualifiedName) {
+         final int i = qualifiedName.lastIndexOf('.');
+         if (i != -1) {
+             return qualifiedName.substring(i + 1);
+         }
+         return qualifiedName;
+     }
+ }
