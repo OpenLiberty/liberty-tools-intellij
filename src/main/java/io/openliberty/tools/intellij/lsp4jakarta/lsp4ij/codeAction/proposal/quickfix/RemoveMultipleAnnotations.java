@@ -16,6 +16,7 @@ import com.google.gson.JsonArray;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
@@ -55,6 +56,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
 
             List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(parentType.getProject(), annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
+
                 // For each list we will create one code action in its own context
                 JavaCodeActionContext newContext = context.copy();
                 PsiElement owningNode = getBinding(newContext.getCoveredNode());
@@ -64,6 +66,11 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
             return codeActions;
         }
         return null;
+    }
+
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        return super.resolveCodeAction(context);
     }
 
     /**
