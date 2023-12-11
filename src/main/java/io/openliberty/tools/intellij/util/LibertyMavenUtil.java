@@ -202,9 +202,10 @@ public class LibertyMavenUtil {
      * @throws LibertyException
      */
     public static String getMavenSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
+        String wrappedMaven = "Use Maven wrapper";
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
-        if (MavenServerManager.WRAPPED_MAVEN.equals(mavenHome)) {
+        if (wrappedMaven.equals(mavenHome)) {
             // it is set to use the wrapper
             return getLocalMavenWrapper(buildFile);
         } else {
