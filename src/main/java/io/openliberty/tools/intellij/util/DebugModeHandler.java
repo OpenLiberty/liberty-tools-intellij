@@ -25,8 +25,6 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
 import io.openliberty.tools.intellij.LibertyModule;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.xpath.XPath;
@@ -50,6 +48,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.w3c.dom.Document;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Used for creating a debug configuration, connecting IntelliJ debugger to Liberty server JVM
@@ -234,41 +236,13 @@ public class DebugModeHandler {
         String projectPath = libertyModule.getBuildFile().getParent().getPath();
         Path basePath = null;
 
-
-        /*String pomPath = libertyModule.getBuildFile().getPath();
-        ModelReader modelReader = new DefaultModelReader();
-
-        Map<String, Object> inputOptions = new HashMap<>();
-        inputOptions.put(ModelProcessor.SOURCE, new FileModelSource(new File(pomPath)));
-        Model model = modelReader.read(new FileReader(pomPath), inputOptions);
-
-        Plugin plugin = model.getBuild().getPlugins().stream()
-                .filter(p -> p.getGroupId().equals("io.openliberty.tools") && p.getArtifactId().equals("liberty-maven-plugin"))
-                .findFirst()
-                .orElse(null);
-
-        PluginConfiguration pluginConfiguration = (PluginConfiguration) plugin.getConfiguration();
-        Xpp3Dom document = (Xpp3Dom) plugin.getConfiguration();
-        String installDirectory = String.valueOf(pluginConfiguration.getLocation("installDirectory"));
-        System.out.println("The installDirectory property is: " + installDirectory);*/
-
-        File pomfile = new File(libertyModule.getBuildFile().getPath());
-        MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read(new FileReader(pomfile));
-        //Object conf = model.getBuild().getPlugins().get(0).getConfiguration().childList.get(0).value;
-
-        //org.w3c.dom.Document document = convertModelToDocument(model);
-
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xPath = xPathFactory.newXPath();
-
-        // Example: Get the version of the Maven Compiler Plugin
-        String installDirectory = getValueByXPath(xPath, model, "/project/build/plugins/plugin[artifactId='liberty-maven-plugin']/configuration/installDirectory");
-
-
         if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            //basePath = Paths.get("/Users", "dessina", "Documents", "Workspace", "singleModMavenMP", "wlp", "usr", "servers");
-            basePath = Paths.get(installDirectory);
+            String installDirectory = getMavenInstallDirectory(libertyModule);
+            if (isNullOrEmpty(installDirectory)) {
+                basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
+            } else {
+                basePath = Paths.get(installDirectory, "usr", "servers");
+            }
         } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
             basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
         } else {
@@ -303,9 +277,35 @@ public class DebugModeHandler {
         }
     }
 
-    private static String getValueByXPath(XPath xPath, Model model, String expression) throws XPathExpressionException {
+    @NotNull
+    private String getMavenInstallDirectory(LibertyModule libertyModule) throws Exception {
+        Document pomDocument = convertPomToDocument(libertyModule.getBuildFile().getPath());
+        XPathFactory xPathFactory = XPathFactory.newInstance();
+        XPath xPath = xPathFactory.newXPath();
+        String expression = "/project/build/plugins/plugin[artifactId='liberty-maven-plugin']/configuration/installDirectory";
+        return removeNewlinesAndSpaces(getValueByXPath(xPath, pomDocument, expression));
+    }
+
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.isBlank();
+    }
+
+    private Document convertPomToDocument(String pomFilePath) throws Exception {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        File pomFile = new File(pomFilePath);
+        Document document = documentBuilder.parse(pomFile);
+        document.getDocumentElement().normalize();
+        return document;
+    }
+
+    private String removeNewlinesAndSpaces(String input) {
+        return input.replaceAll("[\\n\\s]", "");
+    }
+
+    private static String getValueByXPath(XPath xPath, Document pomDocument, String expression) throws XPathExpressionException {
         XPathExpression xPathExpression = xPath.compile(expression);
-        return xPathExpression.evaluate(model);
+        return xPathExpression.evaluate(pomDocument);
     }
 
     /**
