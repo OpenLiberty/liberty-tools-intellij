@@ -148,4 +148,9 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
         }
         return PsiTreeUtil.getParentOfType(e, PsiAnnotation.class);
     }
+
+    @Override
+    public String getParticipantId() {
+        return CompleteServletAnnotationQuickFix.class.getName();
+    }
 }

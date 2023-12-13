@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
@@ -55,7 +56,7 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
         insertAndReplaceAnnotation(diagnostic, context, codeActions, annotations);
     }
 
-    private static void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
+    private void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
                                                    List<CodeAction> codeActions, String... annotations) {
         ArrayList<String> attributes = new ArrayList<>();
         attributes.add("name");
@@ -69,15 +70,9 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
         for (PsiAnnotation annotationNode : annotationNodes) {
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), binding, annotationNode, 0, attributes, annotations);
+        }
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
 
-            // Convert the proposal to LSP4J CodeAction
-            // We need to fix all the annotations so all the changes are combined in this one context.
-            // Therefore, we only need to save the last code action.
-            codeAction = context.convertToCodeAction(proposal, diagnostic);
-        }
-        if (codeAction != null) {
-            codeActions.add(codeAction);
-        }
     }
 
     private static List<PsiAnnotation> getAnnotations(PsiElement e, String... names) {
@@ -93,5 +88,10 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
             }
         }
         return result;
+    }
+
+    @Override
+    public String getParticipantId() {
+        return PersistenceAnnotationQuickFix.class.getName();
     }
 }

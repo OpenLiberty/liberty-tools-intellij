@@ -144,4 +144,9 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
         }
         return PsiTreeUtil.getParentOfType(e, PsiAnnotation.class);
     }
+
+    @Override
+    public String getParticipantId() {
+        return CompleteFilterAnnotationQuickFix.class.getName();
+    }
 }
