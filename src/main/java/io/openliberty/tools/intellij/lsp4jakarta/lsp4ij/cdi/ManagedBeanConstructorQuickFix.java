@@ -12,9 +12,14 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix;
 
 public class ManagedBeanConstructorQuickFix extends InsertAnnotationMissingQuickFix {
     public ManagedBeanConstructorQuickFix() {
         super("jakarta.inject.Inject");
+    }
+    @Override
+    public String getParticipantId() {
+        return ManagedBeanConstructorQuickFix.class.getName();
     }
 }
