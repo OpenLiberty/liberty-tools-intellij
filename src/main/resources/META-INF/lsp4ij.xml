@@ -77,9 +77,8 @@
                 icon="AllIcons.Actions.Copy"/>
     </actions>
 
-    <project-components>
-        <component>
-            <implementation-class>org.microshed.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant</implementation-class>
-        </component>
-    </project-components>
+    <applicationListeners>
+        <listener topic="com.intellij.openapi.project.ProjectManagerListener"
+                  class="org.microshed.lsp4ij.ConnectDocumentToLanguageServerSetupParticipant"/>
+    </applicationListeners>
 </idea-plugin>
