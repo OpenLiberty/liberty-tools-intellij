@@ -15,23 +15,29 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.PsiModifierListOwner;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ReplaceAnnotationProposal;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.SCOPE_FQ_NAMES;
 
 public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
+    private static final Logger LOGGER = Logger.getLogger(ManagedBeanQuickFix.class.getName());
+    private static final String ADD_ANNOTATION = "jakarta.enterprise.context.Dependent";
     public ManagedBeanQuickFix() {
         super("jakarta.enterprise.context.Dependent");
     }
@@ -48,29 +54,38 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
         }
     }
 
-    private static void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
-                                                   List<CodeAction> codeActions, String annotation) {
-        // Diagnostic is reported on the variable declaration, however the
-        // annotations that need to be replaced are on the type declaration (class
-        // definition) containing the variable declaration. We retrieve the type
-        // declaration container here.
-        PsiElement parentNode = context.getCoveredNode();
-        PsiClass classBinding = PsiTreeUtil.getParentOfType(parentNode, PsiClass.class);
-
-        // Insert the annotation and the proper import by using JDT Core Manipulation
-        // API
+    private void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
+                                            List<CodeAction> codeActions, String annotation) {
         String name = getLabel(annotation);
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+    }
+
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        String name = getLabel(ADD_ANNOTATION);
+        PsiElement node = context.getCoveringNode();
+        PsiModifierListOwner parentType = getBinding(node);
         ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(name, context.getCompilationUnit(),
-                context.getASTRoot(), classBinding, 0, annotation, context.getCompilationUnit(), REMOVE_ANNOTATION_NAMES);
-        // Convert the proposal to LSP4J CodeAction
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-        if (codeAction != null) {
-            codeActions.add(codeAction);
+                context.getASTRoot(), parentType, 0, ADD_ANNOTATION, context.getSource().getCompilationUnit(),
+                REMOVE_ANNOTATION_NAMES);
+
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
         }
+        return toResolve;
     }
 
     private static String getLabel(String annotation) {
         String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
         return Messages.getMessage("ReplaceCurrentScope", "@" + annotationName);
+    }
+
+    @Override
+    public String getParticipantId() {
+        return ManagedBeanQuickFix.class.getName();
     }
 }
