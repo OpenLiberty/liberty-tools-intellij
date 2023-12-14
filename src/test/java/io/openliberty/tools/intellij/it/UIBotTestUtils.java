@@ -19,7 +19,6 @@ import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.assertj.swing.core.MouseButton;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
