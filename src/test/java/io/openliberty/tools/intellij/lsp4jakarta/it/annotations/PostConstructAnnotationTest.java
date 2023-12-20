@@ -126,10 +126,9 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
                 "public void getHappiness() {\n\n    }\n\n    " +
                 "@PostConstruct\n    " +
                 "public void throwTantrum() throws Exception {\n        " +
-                "System.out.println(\"I'm sad\");\n    " +
-                "}\n\n    " +
-                "private String emailAddress;\n\n}\n";
-        TextEdit te = te(0, 0, 32, 0, newText);
+                "System.out.println(\"I'm sad\");\n    }\n\n    " +
+                "private String emailAddress;\n\n}";
+        TextEdit te = te(0, 0, 31, 1, newText);
         CodeAction ca = ca(uri, "Remove all parameters", d2, te);
         assertJavaCodeAction(codeActionParams1, utils, ca);
     }
