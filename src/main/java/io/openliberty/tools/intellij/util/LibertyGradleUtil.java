@@ -262,4 +262,22 @@ public class LibertyGradleUtil {
                     "inside IntelliJ Gradle preferences.", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
     }
+
+    public static String getGradleInstallDirectory(VirtualFile file) {
+        String installDirectory = "";
+        Path buildPath = Path.of(file.getPath());
+        File buildFile = buildPath.toFile();
+        try {
+            FileInputStream input = new FileInputStream(buildFile);
+            Properties prop = new Properties();
+            prop.load(input);
+            installDirectory = prop.getProperty("liberty.installDir");
+            if (installDirectory != null) {
+                return installDirectory.replaceAll("^[\"']+|[\"']+$", "");
+            }
+        } catch (IOException e) {
+            LOGGER.error(String.format("Could not installDir from file %s", buildPath), e);
+        }
+        return installDirectory;
+    }
 }

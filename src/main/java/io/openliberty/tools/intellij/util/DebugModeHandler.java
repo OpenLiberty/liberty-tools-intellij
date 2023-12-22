@@ -27,10 +27,6 @@ import com.intellij.openapi.ui.Messages;
 import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -48,10 +44,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Used for creating a debug configuration, connecting IntelliJ debugger to Liberty server JVM
@@ -237,14 +229,19 @@ public class DebugModeHandler {
         Path basePath = null;
 
         if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            String installDirectory = getMavenInstallDirectory(libertyModule);
+            String installDirectory = LibertyMavenUtil.getInstallDirectoryFromPom(libertyModule.getBuildFile());
             if (isNullOrEmpty(installDirectory)) {
                 basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
             } else {
                 basePath = Paths.get(installDirectory, "usr", "servers");
             }
         } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
+            String installDirectory = LibertyGradleUtil.getGradleInstallDirectory(libertyModule.getBuildFile());
+            if (isNullOrEmpty(installDirectory)) {
+                basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
+            } else {
+                basePath = Paths.get(installDirectory, "usr", "servers");
+            }
         } else {
             throw new Exception(String.format("Unexpected project build type: %s. Liberty module %s does not appear to be a Maven or Gradle built project",
                     libertyModule.getProjectType(), libertyModule.getName()));
@@ -277,35 +274,8 @@ public class DebugModeHandler {
         }
     }
 
-    @NotNull
-    private String getMavenInstallDirectory(LibertyModule libertyModule) throws Exception {
-        Document pomDocument = convertPomToDocument(libertyModule.getBuildFile().getPath());
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xPath = xPathFactory.newXPath();
-        String expression = "/project/build/plugins/plugin[artifactId='liberty-maven-plugin']/configuration/installDirectory";
-        return removeNewlinesAndSpaces(getValueByXPath(xPath, pomDocument, expression));
-    }
-
     private boolean isNullOrEmpty(String str) {
         return str == null || str.isBlank();
-    }
-
-    private Document convertPomToDocument(String pomFilePath) throws Exception {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        File pomFile = new File(pomFilePath);
-        Document document = documentBuilder.parse(pomFile);
-        document.getDocumentElement().normalize();
-        return document;
-    }
-
-    private String removeNewlinesAndSpaces(String input) {
-        return input.replaceAll("[\\n\\s]", "");
-    }
-
-    private static String getValueByXPath(XPath xPath, Document pomDocument, String expression) throws XPathExpressionException {
-        XPathExpression xPathExpression = xPath.compile(expression);
-        return xPathExpression.evaluate(pomDocument);
     }
 
     /**

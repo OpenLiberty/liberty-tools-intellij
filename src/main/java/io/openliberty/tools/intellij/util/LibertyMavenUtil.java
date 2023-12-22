@@ -336,4 +336,37 @@ public class LibertyMavenUtil {
         }
         return null;
     }
+
+    public static String getInstallDirectoryFromPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
+        String installDirectory = "";
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new File(file.getPath()));
+
+        doc.getDocumentElement().normalize();
+        NodeList pluginNodes = doc.getElementsByTagName("plugin");
+
+        for (int i = 0; i < pluginNodes.getLength(); i++) {
+            Element pluginElem = (Element) pluginNodes.item(i);
+
+            String groupId = getElementTextContent(pluginElem, "groupId");
+            String artifactId = getElementTextContent(pluginElem, "artifactId");
+
+            if ("io.openliberty.tools".equals(groupId) && "liberty-maven-plugin".equals(artifactId)) {
+                installDirectory = getElementTextContent(pluginElem, "installDirectory");
+                break;
+            }
+        }
+        return removeNewlinesAndSpaces(installDirectory);
+    }
+
+    private static String getElementTextContent(Element parentElement, String tagName) {
+        NodeList nodeList = parentElement.getElementsByTagName(tagName);
+        return (nodeList.getLength() != 0) ? nodeList.item(0).getTextContent() : "";
+    }
+
+    private static String removeNewlinesAndSpaces(String input) {
+        return input.replaceAll("[\\n\\s]", "");
+    }
 }
