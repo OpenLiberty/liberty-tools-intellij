@@ -50,10 +50,10 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
-        getRemoveConstraintAnnotationsCodeActions(diagnostic, context, codeActions);
+        removeConstraintAnnotationsCodeActions(diagnostic, context, codeActions);
 
         if (diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_STATIC)) {
-            getRemoveStaticModifierCodeActions(diagnostic, context, codeActions);
+            removeStaticModifierCodeActions(diagnostic, context, codeActions);
         }
         return codeActions;
     }
@@ -75,7 +75,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         return toResolve;
     }
 
-    private void getRemoveConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
+    private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
         final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
@@ -137,7 +137,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         }
     }
 
-    private void getRemoveStaticModifierCodeActions(Diagnostic diagnostic, JavaCodeActionContext context,
+    private void removeStaticModifierCodeActions(Diagnostic diagnostic, JavaCodeActionContext context,
                                                     List<CodeAction> codeActions) {
 
         final String name = Messages.getMessage("RemoveStaticModifier");
