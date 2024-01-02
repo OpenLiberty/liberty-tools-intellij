@@ -57,11 +57,13 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
              final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
              final List<String> annotationsToRemove = new ArrayList<>();
              // Search for annotations to remove from the current method parameter.
-             Arrays.stream(psiAnnotations).forEach(a -> {
-                 if (Arrays.stream(annotations).anyMatch(m -> m.equals(a.getQualifiedName()))) {
-                     annotationsToRemove.add(a.getQualifiedName());
-                 }
-             });
+             if (psiAnnotations != null) {
+                 Arrays.stream(psiAnnotations).forEach(a -> {
+                     if (Arrays.stream(annotations).anyMatch(m -> m.equals(a.getQualifiedName()))) {
+                         annotationsToRemove.add(a.getQualifiedName());
+                     }
+                 });
+             }
 
              if (!annotationsToRemove.isEmpty()) {
                  // Create label
@@ -108,11 +110,13 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          final List<PsiAnnotation> psiAnnotationsToRemove = new ArrayList<>();
 
          List<String> finalAnnotationsToRemove = annotationsToRemove;
-         Arrays.stream(psiAnnotations).forEach(a -> {
-             if (finalAnnotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
-                 psiAnnotationsToRemove.add(a);
-             }
-         });
+         if (psiAnnotations != null) {
+             Arrays.stream(psiAnnotations).forEach(a -> {
+                 if (finalAnnotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
+                     psiAnnotationsToRemove.add(a);
+                 }
+             });
+         }
 
          assert parentType != null;
          String label = getLabel(parameter, annotationsToRemove);
