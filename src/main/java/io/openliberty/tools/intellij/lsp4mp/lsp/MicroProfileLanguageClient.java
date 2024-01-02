@@ -11,9 +11,6 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.EmptyProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -24,7 +21,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
-import io.openliberty.tools.intellij.lsp4mp.lsp4ij.LanguageClientImpl;
+import org.microshed.lsp4ij.LanguageClientImpl;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.CodeAction;
@@ -44,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**

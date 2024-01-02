@@ -21,13 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-
-import static io.openliberty.tools.intellij.util.Constants.SERVER_ENV_GLOB_PATTERN;
-
 /**
  * Language Substitutor for Liberty server.env files
  * To re-use the IntelliJ parsing for Properties files on server.env files, categorize server.env files that are in a recognized
@@ -47,8 +40,6 @@ public class ServerEnvSubstitutor extends LanguageSubstitutor {
     }
 
     private boolean isLibertyServerEnvFile(VirtualFile file) {
-        Path path = Paths.get(file.getPath());
-        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + SERVER_ENV_GLOB_PATTERN);
-        return matcher.matches(path);
+        return file.getPath().endsWith(".env");
     }
 }
