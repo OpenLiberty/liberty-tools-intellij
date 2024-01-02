@@ -41,10 +41,14 @@ public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeAct
 
 	private static final Logger LOGGER = Logger.getLogger(JavaCodeActionDefinition.class.getName());
 	private static final String KIND_ATTR = "kind";
+	private static final String GROUP_ATTR = "group";
 	private static final String TARGET_DIAGNOSTIC_ATTR = "targetDiagnostic";
 
-	@Attribute("kind")
+	@Attribute(KIND_ATTR)
 	private String kind;
+
+	@Attribute(GROUP_ATTR)
+	private String group;
 
 	@Attribute(TARGET_DIAGNOSTIC_ATTR)
 	@RequiredElement
@@ -93,6 +97,15 @@ public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeAct
 	public String getKind() {
 		return !StringUtils.isEmpty(kind) ? kind : CodeActionKind.QuickFix;
 	}
+
+	/**
+	 * Returns the name of the group which this code action is
+	 * a member or null.
+	 *
+	 * @return the name of the group which this code action is
+	 * a member or null.
+	 */
+	public @Nullable String getGroup() { return group; }
 
 	/**
 	 * Returns the target diagnostic and null otherwise.
