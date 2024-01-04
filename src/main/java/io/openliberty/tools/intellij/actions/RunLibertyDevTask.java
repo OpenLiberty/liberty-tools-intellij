@@ -58,7 +58,7 @@ public class RunLibertyDevTask extends AnAction {
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
             for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
                     JBScrollPane scrollPane = (JBScrollPane) comp;
                     Tree libertyTree = (Tree) scrollPane.getViewport().getView();
 
@@ -106,7 +106,7 @@ public class RunLibertyDevTask extends AnAction {
             Component[] components = libertyWindow.getComponents();
 
             for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
                     JBScrollPane scrollPane = (JBScrollPane) comp;
                     Tree libertyTree = (Tree) scrollPane.getViewport().getView();
                     TreePath[] selectionPaths = libertyTree.getSelectionPaths();

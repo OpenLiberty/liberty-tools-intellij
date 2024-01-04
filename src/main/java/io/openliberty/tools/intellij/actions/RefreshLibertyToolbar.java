@@ -61,7 +61,7 @@ public class RefreshLibertyToolbar extends AnAction {
         Component existingTree = null;
         Component existingActionToolbar = null;
         for (Component comp : components) {
-            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+            if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
                 JBScrollPane scrollPane = (JBScrollPane) comp;
                 existingTree = scrollPane.getViewport().getView();
             }
