@@ -15,7 +15,7 @@ import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
 import io.openliberty.tools.intellij.util.Constants;
-import org.microshed.lsp4ij.server.ProcessStreamConnectionProvider;
+import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;

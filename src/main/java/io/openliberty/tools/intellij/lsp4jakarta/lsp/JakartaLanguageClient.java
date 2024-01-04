@@ -20,6 +20,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJaka
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava;
+import com.redhat.devtools.lsp4ij.client.CoalesceByKey;
+import com.redhat.devtools.lsp4ij.client.IndexAwareLanguageClient;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,14 +29,12 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.*;
-import org.eclipse.lsp4jakarta.ls.api.JakartaLanguageClientAPI;
+import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
 import org.eclipse.lsp4mp.commons.JavaFileInfo;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.utils.JSONUtility;
-import org.microshed.lsp4ij.client.CoalesceByKey;
-import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
 
 import java.util.ArrayList;
 import java.util.List;

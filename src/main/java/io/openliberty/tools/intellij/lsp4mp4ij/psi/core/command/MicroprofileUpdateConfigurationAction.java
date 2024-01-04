@@ -29,8 +29,8 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections.MicroProfile
 import org.eclipse.lsp4j.Command;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.microshed.lsp4ij.commands.CommandExecutor;
-import org.microshed.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
+import com.redhat.devtools.lsp4ij.commands.CommandExecutor;
+import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
 
 import java.util.HashMap;
 import java.util.List;

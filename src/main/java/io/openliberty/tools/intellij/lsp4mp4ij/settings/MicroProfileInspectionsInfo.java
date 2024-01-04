@@ -19,8 +19,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.profile.codeInspection.InspectionProfileManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections.*;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.microshed.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
-import org.microshed.lsp4ij.operations.diagnostics.SeverityMapping;
+import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
+import com.redhat.devtools.lsp4ij.operations.diagnostics.SeverityMapping;
 
 import java.util.ArrayList;
 import java.util.List;

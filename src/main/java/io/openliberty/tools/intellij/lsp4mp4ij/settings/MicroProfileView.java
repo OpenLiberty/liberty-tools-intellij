@@ -17,7 +17,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
-import org.microshed.lsp4ij.ui.components.InspectionHyperlink;
+import com.redhat.devtools.lsp4ij.ui.components.InspectionHyperlink;
 
 import javax.swing.*;
 
