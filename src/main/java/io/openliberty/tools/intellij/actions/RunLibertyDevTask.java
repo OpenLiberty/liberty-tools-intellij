@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -57,8 +58,9 @@ public class RunLibertyDevTask extends AnAction {
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
             for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                    Tree libertyTree = (Tree) comp;
+                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                    JBScrollPane scrollPane = (JBScrollPane) comp;
+                    Tree libertyTree = (Tree) scrollPane.getViewport().getView();
 
                     TreePath[] selectionPaths = libertyTree.getSelectionPaths();
 
@@ -104,8 +106,9 @@ public class RunLibertyDevTask extends AnAction {
             Component[] components = libertyWindow.getComponents();
 
             for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                    Tree libertyTree = (Tree) comp;
+                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                    JBScrollPane scrollPane = (JBScrollPane) comp;
+                    Tree libertyTree = (Tree) scrollPane.getViewport().getView();
                     TreePath[] selectionPaths = libertyTree.getSelectionPaths();
                     if (selectionPaths != null && selectionPaths.length == 1) {
                         String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();

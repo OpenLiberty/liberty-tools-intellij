@@ -41,6 +41,7 @@ public final class Constants {
 
 
     public static final String LIBERTY_TREE = "LibertyTree";
+    public static final String LIBERTY_SCROLL_PANE = "LibertyScrollPane";
 
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions

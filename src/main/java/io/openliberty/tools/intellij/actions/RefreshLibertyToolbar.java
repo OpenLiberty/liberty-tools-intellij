@@ -61,8 +61,9 @@ public class RefreshLibertyToolbar extends AnAction {
         Component existingTree = null;
         Component existingActionToolbar = null;
         for (Component comp : components) {
-            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                existingTree = comp;
+            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                JBScrollPane scrollPane = (JBScrollPane) comp;
+                existingTree = scrollPane.getViewport().getView();
             }
             if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_ACTION_TOOLBAR)) {
                 existingActionToolbar = comp;
@@ -80,6 +81,7 @@ public class RefreshLibertyToolbar extends AnAction {
             simpleToolWindowPanel.setToolbar(actionToolbar.getComponent());
             if (tree != null) {
                 JBScrollPane scrollPane = new JBScrollPane(tree);
+                scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
                 simpleToolWindowPanel.setContent(scrollPane);
             } else {
                 JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));

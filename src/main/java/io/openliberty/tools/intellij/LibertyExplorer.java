@@ -53,6 +53,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         if (tree != null) {
             JBScrollPane scrollPane = new JBScrollPane(tree);
+            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
             this.setContent(scrollPane);
         } else {
             JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
