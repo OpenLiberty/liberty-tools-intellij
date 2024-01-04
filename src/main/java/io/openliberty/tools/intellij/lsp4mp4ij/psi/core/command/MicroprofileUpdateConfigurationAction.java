@@ -30,7 +30,8 @@ import org.microshed.lsp4ij.commands.LSPCommand;
 import org.microshed.lsp4ij.commands.LSPCommandAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.microshed.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
+import com.redhat.devtools.lsp4ij.commands.CommandExecutor;
+import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
 
 import java.util.HashMap;
 import java.util.List;

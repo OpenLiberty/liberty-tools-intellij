@@ -39,8 +39,8 @@ import org.eclipse.lsp4mp.commons.utils.JSONUtility;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageClientAPI;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
 import org.jetbrains.annotations.NotNull;
-import org.microshed.lsp4ij.client.CoalesceByKey;
-import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
+import com.redhat.devtools.lsp4ij.client.CoalesceByKey;
+import com.redhat.devtools.lsp4ij.client.IndexAwareLanguageClient;
 
 import java.io.IOException;
 import java.util.Collections;

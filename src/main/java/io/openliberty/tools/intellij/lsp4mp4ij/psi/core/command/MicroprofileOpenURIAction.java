@@ -3,9 +3,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.command;
 import com.google.gson.JsonPrimitive;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.microshed.lsp4ij.commands.LSPCommand;
-import org.microshed.lsp4ij.commands.LSPCommandAction;
-import org.jetbrains.annotations.NotNull;
+import com.redhat.devtools.lsp4ij.commands.CommandExecutor;
 
 public class MicroprofileOpenURIAction extends LSPCommandAction {
 

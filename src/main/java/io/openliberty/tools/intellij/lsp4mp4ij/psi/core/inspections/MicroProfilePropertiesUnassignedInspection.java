@@ -14,7 +14,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
-import org.microshed.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
+import org.jetbrains.annotations.NotNull;
+import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
 
 /**
  * Dummy inspection for unknown properties in Microprofile properties files

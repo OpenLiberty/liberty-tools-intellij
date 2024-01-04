@@ -13,7 +13,7 @@ package io.openliberty.tools.intellij.liberty.lsp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intellij.openapi.project.Project;
-import org.microshed.lsp4ij.client.LanguageClientImpl;
+import com.redhat.devtools.lsp4ij.client.LanguageClientImpl;
 
 /**
  * Client for Liberty language server
