@@ -27,7 +27,7 @@
             </description>
         </server>
         <languageMapping language="Properties" serverId="lsp4mp"
-                         filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
+                         documentMatcher="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileMatcher"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
