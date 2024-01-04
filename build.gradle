@@ -105,7 +105,7 @@ dependencies {
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     // define jars to grab locally (if falling back to mavenLocal() repo)
-    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0:uber') {
         transitive = false
     }
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0:uber') {
