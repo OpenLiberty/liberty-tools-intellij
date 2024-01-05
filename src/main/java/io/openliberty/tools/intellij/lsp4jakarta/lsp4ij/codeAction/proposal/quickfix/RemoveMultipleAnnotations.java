@@ -15,13 +15,13 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 import com.google.gson.JsonArray;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -58,19 +58,21 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
             for (List<String> annotationList : annotationsListsToRemove) {
 
                 // For each list we will create one code action in its own context
-                JavaCodeActionContext newContext = context.copy();
-                PsiElement owningNode = getBinding(newContext.getCoveredNode());
+//                JavaCodeActionContext newContext = context.copy();
+//                PsiElement owningNode = getBinding(newContext.getCoveredNode());
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
-                removeAnnotation(diagnostic, newContext, owningNode, codeActions, annotationsToRemove);
+//                String name = getLabel(annotationList);
+
+                Map<String, Object> extendedData = new HashMap<>();
+                extendedData.put(ANNOTATION_LIST, annotationsToRemove);
+//                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
+//                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+//                removeAnnotation(diagnostic, context, codeActions, annotationsToRemove);
+                removeAnnotation(diagnostic, context, codeActions, extendedData, annotationsToRemove);
             }
             return codeActions;
         }
         return null;
-    }
-
-    @Override
-    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
-        return super.resolveCodeAction(context);
     }
 
     /**
