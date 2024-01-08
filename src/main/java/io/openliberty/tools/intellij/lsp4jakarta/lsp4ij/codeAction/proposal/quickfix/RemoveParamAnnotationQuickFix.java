@@ -14,22 +14,30 @@
 
  import com.intellij.psi.*;
  import com.intellij.psi.util.PsiTreeUtil;
+ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
  import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
  import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveAnnotationsProposal;
+ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
  import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
  import org.eclipse.lsp4j.CodeAction;
  import org.eclipse.lsp4j.Diagnostic;
+ import org.eclipse.lsp4j.WorkspaceEdit;
+ import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
- import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.List;
+ import java.util.*;
+ import java.util.logging.Logger;
+ import java.util.logging.Level;
 
  /**
   * QuickFix for removing parameter annotations
   */
-public class RemoveParamAnnotationQuickFix {
+public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionParticipant {
 
-	private final String[] annotations;
+     private final String[] annotations;
+     private static final Logger LOGGER = Logger.getLogger(RemoveParamAnnotationQuickFix.class.getName());
+     private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
+     private static final String INDEX_KEY = "paramIndex";
 	
     public RemoveParamAnnotationQuickFix(String ...annotations) {
         this.annotations = annotations;
@@ -57,44 +65,66 @@ public class RemoveParamAnnotationQuickFix {
             }
             if (!annotationsToRemove.isEmpty()) {
                 // Create label
-                final StringBuilder sb = new StringBuilder();
-                // Java annotations in comma delimited list, assume that is ok.
-                sb.append("'@").append(getShortName(annotationsToRemove.get(0))).append("'");
-                for (int j = 1; j < annotationsToRemove.size(); ++j) {
-                    sb.append(", '@").append(getShortName(annotationsToRemove.get(j))).append("'");
-                }
-                String label = Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
-                // Remove annotations
-                removeAnnotations(diagnostic, context.copy(), codeActions, i, label, annotationsToRemove);
+                String label = getLabel(parameter, annotationsToRemove);
+                Map<String, Object> extendedData = new HashMap<>();
+                extendedData.put(ANNOTATION_TO_REMOVE, annotationsToRemove);
+                extendedData.put(INDEX_KEY, i);
+                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId(), extendedData));
             }
         }
         return codeActions;
     }
-
-    protected void removeAnnotations(Diagnostic diagnostic, JavaCodeActionContext context,
-                                     List<CodeAction> codeActions, int parameterIndex,
-                                     String label, List<String> annotationsToRemove) {
-
-        final PsiElement node = context.getCoveredNode();
-        final PsiClass parentType = getBinding(node);
-        final PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-
-        final PsiParameter parameter = method.getParameterList().getParameter(parameterIndex);
-        final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
-        final List<PsiAnnotation> psiAnnotationsToRemove = new ArrayList<>();
-        Arrays.stream(psiAnnotations).forEach(a -> {
-            if (annotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
-                psiAnnotationsToRemove.add(a);
-            }
-        });
-
-        RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, psiAnnotationsToRemove);
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-        if (codeAction != null) {
-            codeActions.add(codeAction);
+    private String getLabel(PsiParameter parameter,List<String> annotationsToRemove) {
+        final StringBuilder sb = new StringBuilder();
+        // Java annotations in comma delimited list, assume that is ok.
+        sb.append("'@").append(getShortName(annotationsToRemove.get(0))).append("'");
+        for (int j = 1; j < annotationsToRemove.size(); ++j) {
+            sb.append(", '@").append(getShortName(annotationsToRemove.get(j))).append("'");
         }
+        return Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
     }
+
+     @Override
+     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+         final PsiElement node = context.getCoveredNode();
+         final CodeAction toResolve = context.getUnresolved();
+         final PsiClass parentType = getBinding(node);
+         final PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
+         List<String> annotationsToRemove = new ArrayList<>();
+         int paramIndex = 0;
+
+         if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List) {
+             annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
+         }
+         if (data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
+             paramIndex = (Integer) data.getExtendedDataEntry(INDEX_KEY);
+         }
+
+         final PsiParameter parameter = method.getParameterList().getParameter(paramIndex);
+         final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
+         final List<PsiAnnotation> psiAnnotationsToRemove = new ArrayList<>();
+
+         List<String> finalAnnotationsToRemove = annotationsToRemove;
+         if (psiAnnotations != null) {
+             Arrays.stream(psiAnnotations).forEach(a -> {
+                 if (finalAnnotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
+                     psiAnnotationsToRemove.add(a);
+                 }
+             });
+         }
+         assert parentType != null;
+         String label = getLabel(parameter, annotationsToRemove);
+         RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getSource().getCompilationUnit(),
+                 context.getASTRoot(), parentType, 0, psiAnnotationsToRemove);
+         try {
+             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+             toResolve.setEdit(we);
+         } catch (Exception e) {
+             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class.", e);
+         }
+         return toResolve;
+     }
 
     protected PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
