@@ -18,9 +18,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -43,7 +45,6 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
-        VirtualFile buildFile = libertyModule.getBuildFile();
 
         // open run config
         RunManager runManager = RunManager.getInstance(project);
@@ -63,23 +64,32 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
             // create new run config
             selectedLibertyConfig = createNewLibertyRunConfig(runManager, libertyModule);
         } else {
-            // TODO if 1+ run configs, prompt user to select the one they want see https://github.com/OpenLiberty/liberty-tools-intellij/issues/167
+
             // 1+ run configs found for the given project
-            RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
+            /*RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
             if (libertyModuleSettings.contains(selectedConfig)) {
-                // if the selected config is for the Liberty module, use that run config
-                selectedLibertyConfig = selectedConfig;
+                // if the selected config is for the Liberty module, use that run config*/
+            // selectedLibertyConfig = selectedConfig;
+            final String[] runConfigNames = toRunConfigNames(libertyModuleSettings);
+
+            //it will display the dialog box with the run configurations with the selected project
+            LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(project,
+                    LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.message", libertyModule.getName()),
+                    LocalizedResourceUtil.getMessage("run.config.file.selection.dialog.title"),
+                    LibertyPluginIcons.libertyIcon_40, runConfigNames, runConfigNames,
+                    runConfigNames[0]);
+            libertyChooserDiag.show();
+
+            final int ret = libertyChooserDiag.getSelectedIndex();
+            if (ret >= 0 && ret < libertyModuleSettings.size()) {
+                selectedLibertyConfig = libertyModuleSettings.get(ret);
             } else {
-                // pick first in list run config in list
-                selectedLibertyConfig = libertyModuleSettings.get(0);
+                // The user pressed cancel on the dialog. No need to show an error message.
+                return;
             }
         }
-        // opens run config dialog
-        selectedLibertyConfig.setEditBeforeRun(true);
-        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
-        if (builder != null) {
-            ExecutionManager.getInstance(project).restartRunProfile(builder.build());
-        }
+
+        openRunConfigDialog(selectedLibertyConfig, project);
     }
 
     /**
@@ -94,5 +104,37 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
         // pre-populate build file and name, need to convert build file to NioPath for OS specific paths
         libertyRunConfiguration.setBuildFile(libertyModule.getBuildFile().toNioPath().toString());
         return runConfigSettings;
+    }
+
+    /**
+     * To get the run config names.
+     *
+     * @param list
+     * @return array of run config names.
+     */
+    protected final String[] toRunConfigNames(@NotNull List<RunnerAndConfigurationSettings> list) {
+        final int size = list.size();
+        final String[] runConfigNames = new String[size];
+
+        for (int i = 0; i < size; ++i) {
+            runConfigNames[i] = list.get(i).getConfiguration().getName();
+        }
+        return runConfigNames;
+    }
+
+    /**
+     * Display selectedLibertyConfig
+     *
+     * @param selectedLibertyConfig
+     * @param project
+     */
+    private void openRunConfigDialog(@NotNull RunnerAndConfigurationSettings selectedLibertyConfig, Project project) {
+        // opens run config dialog
+        selectedLibertyConfig.setEditBeforeRun(true);
+        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(
+                DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
+        if (builder != null) {
+            ExecutionManager.getInstance(project).restartRunProfile(builder.build());
+        }
     }
 }
