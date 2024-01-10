@@ -32,12 +32,14 @@ import org.xml.sax.SAXException;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -220,6 +222,33 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
         });
 
+        tree.addMouseMotionListener(new MouseMotionAdapter() {
+            private String currentTooltipText = null;
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                super.mouseMoved(e);
+
+                TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+                if (path == null ) {
+                    if (currentTooltipText != null) {
+                        tree.setToolTipText(null);
+                        currentTooltipText = null;
+                    }
+                } else {
+                    Object node = path.getLastPathComponent();
+                    if (node instanceof LibertyModuleNode) {
+                        LibertyModuleNode treeNode = (LibertyModuleNode) node;
+                        String tooltipText = getBuildPath(treeNode);
+                        if (!tooltipText.equals(currentTooltipText)) {
+                            tree.setToolTipText(tooltipText);
+                            currentTooltipText = tooltipText;
+                        }
+                    }
+                }
+            }
+        });
+
         tree.addMouseListener(new PopupHandler() {
             @Override
             public void invokePopup(Component comp, int x, int y) {
@@ -308,7 +337,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             /**
              * modification to get tooltiptext for liberty module tree
              */
-            tree.setToolTipText(getBuildPath(value));
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
             // assign gear icon to action nodes
             if (leaf) {
