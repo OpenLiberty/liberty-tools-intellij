@@ -334,10 +334,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 boolean leaf,
                 int row,
                 boolean hasFocus) {
-            /**
-             * modification to get tooltiptext for liberty module tree
-             */
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
             // assign gear icon to action nodes
             if (leaf) {
                 setIcon(LibertyPluginIcons.IntelliJGear);
