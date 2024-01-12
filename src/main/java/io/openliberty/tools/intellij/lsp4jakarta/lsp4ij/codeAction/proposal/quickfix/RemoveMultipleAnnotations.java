@@ -15,9 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 import com.google.gson.JsonArray;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
@@ -58,16 +56,11 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
             for (List<String> annotationList : annotationsListsToRemove) {
 
                 // For each list we will create one code action in its own context
-//                JavaCodeActionContext newContext = context.copy();
-//                PsiElement owningNode = getBinding(newContext.getCoveredNode());
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
-//                String name = getLabel(annotationList);
 
                 Map<String, Object> extendedData = new HashMap<>();
                 extendedData.put(ANNOTATION_LIST, annotationsToRemove);
-//                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
-//                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
-//                removeAnnotation(diagnostic, context, codeActions, annotationsToRemove);
+
                 removeAnnotation(diagnostic, context, codeActions, extendedData, annotationsToRemove);
             }
             return codeActions;
@@ -80,7 +73,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
      * will be removed at one go. For example, to provide the user with the option to remove
      * "@A, @B" and "@C". The return should be [[A, B], [C]]
      *
-     * @param project  The project is the context in which the annotation short names will be resolved to FQnames
+     * @param project     The project is the context in which the annotation short names will be resolved to FQnames
      * @param annotations All the annotations present on the member.
      * @return A List of Lists, with each list containing the annotations that must be
      * removed at the same time.

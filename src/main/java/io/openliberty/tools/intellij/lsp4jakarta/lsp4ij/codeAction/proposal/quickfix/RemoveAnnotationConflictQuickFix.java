@@ -48,8 +48,8 @@ import java.util.stream.Collectors;
 public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActionParticipant {
 
     protected static final String ANNOTATION_LIST = "annotationList";
+    private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
     private String[] annotations;
-
     protected final boolean generateOnlyOneCodeAction;
 
     private static final Logger LOGGER = Logger.getLogger(RemoveAnnotationConflictQuickFix.class.getName());
@@ -81,13 +81,12 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
     }
 
 
-
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);
         if (parentType != null) {
             List<CodeAction> codeActions = new ArrayList<>();
-            removeAnnotations(diagnostic, context, parentType, codeActions);
+            removeAnnotations(diagnostic, context, codeActions);
             return codeActions;
         }
         return Collections.emptyList();
@@ -96,55 +95,49 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
 
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
-//        return null;
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
 
-        String name = toResolve.getTitle();
-        if (annotations.length == 0) {
-            if (data.getExtendedDataEntry(ANNOTATION_LIST) instanceof String[]) {
-                annotations = (String[]) data.getExtendedDataEntry(ANNOTATION_LIST);
-                name = getLabel(annotations);
-            }
+        String annotationsToRemove;
+        if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof String) {
+            annotationsToRemove = (String) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
+        } else {
+            annotationsToRemove = "";
         }
-//        String name = toResolve.getTitle();
-//        String name = getLabel(annotations);
-//        String label = null;
-//        if (name == "Remove @JsonbTransient") {
-//            label = name;
-//        }
-//        else {
-//            label = toResolve.getTitle();
-//        }
 
+        String[] annotationToRemove = new String[0];
+        if (Arrays.stream(annotations).anyMatch(x -> x.contains(annotationsToRemove))) {
+            annotationToRemove = new String[]{annotationsToRemove};
+        }
+
+        String name = toResolve.getTitle();
+        if (data.getExtendedDataEntry(ANNOTATION_LIST) instanceof String[]) {
+            annotationToRemove = (String[]) data.getExtendedDataEntry(ANNOTATION_LIST);
+            name = getLabel(annotationToRemove);
+        }
 
         PsiElement declaringNode = getBinding(context.getCoveredNode());
         ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, declaringNode, annotations);
+                context.getASTRoot(), parentType, 0, declaringNode, annotationToRemove);
+
         // Convert the proposal to LSP4J CodeAction
-//        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-//        if (codeAction != null) {
-//            toResolve.add(codeAction);
-//        }
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to make constructor public", e);
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove annotation", e);
         }
         return toResolve;
     }
 
-    protected void removeAnnotations(Diagnostic diagnostic, JavaCodeActionContext context, PsiElement parentType,
+    protected void removeAnnotations(Diagnostic diagnostic, JavaCodeActionContext context,
                                      List<CodeAction> codeActions) {
         if (generateOnlyOneCodeAction) {
             removeAnnotation(diagnostic, context, codeActions, annotations);
         } else {
             for (String annotation : annotations) {
-//                JavaCodeActionContext newContext = context.copy(); // each code action needs its own context
-//                PsiElement selectedNode = getBinding(newContext.getCoveredNode());
                 removeAnnotation(diagnostic, context, codeActions, annotation);
             }
         }
@@ -154,7 +147,10 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
                                     List<CodeAction> codeActions, String... annotations) {
         // Remove the annotation and the proper import by using JDT Core Manipulation
         // API
-        removeAnnotation(diagnostic, context, codeActions, null, annotations);
+        Map<String, Object> extendedData = new HashMap<>();
+        String annotationToRemove = annotations[0];
+        extendedData.put(ANNOTATION_TO_REMOVE, annotationToRemove);
+        removeAnnotation(diagnostic, context, codeActions, extendedData, annotations);
     }
 
     protected void removeAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
@@ -163,7 +159,6 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         // API
         String name = getLabel(annotations);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), data));
-
     }
 
     protected static PsiElement getBinding(PsiElement node) {
@@ -182,8 +177,9 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         // Look up short names on the classpath to find FQnames. Multiple classes differ in package names.
         PsiShortNamesCache cache = PsiShortNamesCache.getInstance(p);
         PsiClass[] classes = cache.getClassesByName(annotationName, GlobalSearchScope.allScope(p));
+        //TODO : Remove the filter that is used to fetch names starting with 'jakarta.' , Now enabled due to the execution of the JsonbTransientAnnotationQuickFix.
         return Arrays.stream(classes).map(PsiClass::getQualifiedName).collect(Collectors.toList()).stream().
-                filter(str -> str.startsWith("jakarta")).toList();
+                filter(str -> str.startsWith("jakarta.")).toList();
     }
 
     private static String getLabel(String[] annotations) {
