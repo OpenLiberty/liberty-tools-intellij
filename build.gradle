@@ -75,7 +75,7 @@ dependencies {
     implementation ('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1') {
+    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0') {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
     }
@@ -117,7 +117,7 @@ dependencies {
     lsp('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1:jar-with-dependencies') {
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0:jar-with-dependencies') {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {

@@ -69,7 +69,7 @@ public class PropertiesManagerForJakarta {
      * @param utils  the utilities class
      * @return diagnostics for the given uris list.
      */
-    public List<PublishDiagnosticsParams> diagnostics(JakartaDiagnosticsParams params, IPsiUtils utils) {
+    public List<PublishDiagnosticsParams> diagnostics(JakartaJavaDiagnosticsParams params, IPsiUtils utils) {
         return diagnosticsHandler.collectDiagnostics(adapt(params), utils);
     }
 
@@ -346,33 +346,28 @@ public class PropertiesManagerForJakarta {
         return resolveTypeRoot(uri, utils);
     }
 
-    public List<CodeAction> getCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<CodeAction>>) () -> {
-            final List<? extends CodeAction> unresolvedCodeActions = codeActionHandler.codeAction(adapt(params), utils);
-            if (unresolvedCodeActions != null) {
-                final List<CodeAction> resolvedCodeActions = new ArrayList<>(unresolvedCodeActions.size());
-                unresolvedCodeActions.forEach(unresolvedCodeAction -> {
-                    if (unresolvedCodeAction != null) {
-                        resolvedCodeActions.add(codeActionHandler.resolveCodeAction(unresolvedCodeAction, utils));
-                    }
-                });
-                return resolvedCodeActions;
-            }
-            return null;
-        });
+    public List<? extends CodeAction> getCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils) {
+        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeAction>>) () ->
+                codeActionHandler.codeAction(adapt(params), utils));
     }
 
-    private MicroProfileJavaDiagnosticsParams adapt(JakartaDiagnosticsParams params) {
+    public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils) {
+        return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () ->
+                codeActionHandler.resolveCodeAction(unresolved, utils));
+    }
+
+    private MicroProfileJavaDiagnosticsParams adapt(JakartaJavaDiagnosticsParams params) {
         MicroProfileJavaDiagnosticsParams mpParams = new MicroProfileJavaDiagnosticsParams(params.getUris(),
                 new MicroProfileJavaDiagnosticsSettings(Collections.emptyList()));
-        mpParams.setDocumentFormat(params.getDocumentFormat());
+        DocumentFormat df = params.getDocumentFormat();
+        mpParams.setDocumentFormat(df != null ? org.eclipse.lsp4mp.commons.DocumentFormat.forValue(df.getValue()) : null);
         return mpParams;
     }
 
     private MicroProfileJavaCodeActionParams adapt(JakartaJavaCodeActionParams params) {
         MicroProfileJavaCodeActionParams mpParams = new MicroProfileJavaCodeActionParams(params.getTextDocument(), params.getRange(), params.getContext());
         mpParams.setResourceOperationSupported(params.isResourceOperationSupported());
-        mpParams.setResolveSupported(true);
+        mpParams.setResolveSupported(params.isResourceOperationSupported());
         return mpParams;
     }
 }
