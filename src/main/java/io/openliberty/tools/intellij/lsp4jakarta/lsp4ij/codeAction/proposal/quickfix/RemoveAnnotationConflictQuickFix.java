@@ -177,9 +177,7 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         // Look up short names on the classpath to find FQnames. Multiple classes differ in package names.
         PsiShortNamesCache cache = PsiShortNamesCache.getInstance(p);
         PsiClass[] classes = cache.getClassesByName(annotationName, GlobalSearchScope.allScope(p));
-        //TODO : Remove the filter that is used to fetch names starting with 'jakarta.' , Now enabled due to the execution of the JsonbTransientAnnotationQuickFix.
-        return Arrays.stream(classes).map(PsiClass::getQualifiedName).collect(Collectors.toList()).stream().
-                filter(str -> str.startsWith("jakarta.")).toList();
+        return Arrays.stream(classes).map(PsiClass::getQualifiedName).collect(Collectors.toList());
     }
 
     private static String getLabel(String[] annotations) {
