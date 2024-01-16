@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '23.0.12-SNAPSHOT'
+version '24.0.1-SNAPSHOT'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -71,8 +71,8 @@ dependencies {
     implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1-SNAPSHOT'
-    implementation ('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT') {
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1.1'
+    implementation ('io.openliberty.tools:liberty-langserver:2.1.1') {
         exclude group: 'org.eclipse.lsp4j'
     }
     implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1') {
@@ -111,10 +111,10 @@ dependencies {
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0:uber') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.1-SNAPSHOT:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.1.1:jar-with-dependencies') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:2.1-SNAPSHOT:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver:2.1.1:jar-with-dependencies') {
         transitive = false
     }
     lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1:jar-with-dependencies') {
@@ -179,10 +179,35 @@ tasks {
 
 patchPluginXml {
     changeNotes = """
+        <h2> 23.0.12 </h2>
+        Version 23.0.12 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 23.0.12 requires IntelliJ IDEA version 2023.1+ and requires Java 17 or later.
+        <br>
+        Notable changes:
+        <ul>
+        <li> Partial quick fix support for Jakarta EE Web Profile 9.x APIs when editing Java files via the <a href="https://github.com/eclipse/lsp4jakarta">Eclipse LSP4Jakarta</a>, Language Server for Jakarta EE
+        <li> Updated <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.1.1. For information regarding changes for version 2.1, refer to the release notes linked below:
+          <ul>
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.1
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.1
+          </ul>
+        <li> Fix for projects being detected in the Liberty Tool Window when the Liberty Gradle Plugin is commented out in the build.gradle - https://github.com/OpenLiberty/liberty-tools-intellij/issues/445
+        <li> Fix for incorrect project name being displayed in the “Remove Liberty project” confirmation dialog - https://github.com/OpenLiberty/liberty-tools-intellij/issues/321
+        <li> Fix to link to the Liberty Tools for IntelliJ GitHub issues page when an error in the Liberty Tools plugin is reported by the IntelliJ IDE - https://github.com/OpenLiberty/liberty-tools-intellij/issues/468
+        <li> Fix to surface error to user when Java 17 or later is not found when attempting to start up language servers - https://github.com/OpenLiberty/liberty-tools-intellij/issues/196
+        <li> Enhancement to enable custom Liberty configuration support provided by the Liberty Config Language Server - https://github.com/OpenLiberty/liberty-tools-intellij/issues/490
+        <li> Enhancement to add a “Run in container” checkbox to the Liberty run/debug configuration - https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
+        <li> Enhancement to support IntelliJ IDEA version 2023.2.x - https://github.com/OpenLiberty/liberty-tools-intellij/issues/487
+        <li> Fix for ClassCastException from Liberty Tool Window project tree - https://github.com/OpenLiberty/liberty-tools-intellij/issues/561
+        <li> Fix for NullPointerException when the Maven executable is not able to execute - https://github.com/OpenLiberty/liberty-tools-intellij/issues/566
+        <li> Fix for Liberty start actions not working when the Maven build settings are set to use a Maven wrapper and multiple Maven projects are loaded in the IntelliJ workspace - https://github.com/OpenLiberty/liberty-tools-intellij/issues/563
+        <li> Fix for Liberty start actions not working when multiple Gradle projects are loaded in the IntelliJ workspace - https://github.com/OpenLiberty/liberty-tools-intellij/issues/568
+        </ul>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/23.0.6...23.0.12">commit log</a> for the full set of changes since the previous release.
+        <br>
         <h2> 23.0.6 </h2>
         Version 23.0.6 of Liberty Tools for IntelliJ IDEA contains new functionality and fixes. Version 23.0.6 requires IntelliJ IDEA version 2023.1+ and requires Java 17 or later.
         <br>
-        Notable enhancements:
+        Notable changes:
         <ul>
         <li> Diagnostic and hover support when editing server.xml, server.env, bootstrap.properties via the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a>
         <li> Quick fix support when editing server.xml via the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a>
