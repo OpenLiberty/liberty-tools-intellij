@@ -15,6 +15,8 @@ import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -41,6 +43,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CancellationException;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
@@ -118,6 +121,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             LibertyModuleNode node;
             try {
                 projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
+            } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+                throw e;
             } catch (Exception e) {
                 LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
             }
@@ -164,6 +169,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             LibertyModuleNode node;
             try {
                 projectName = LibertyGradleUtil.getProjectName(virtualFile);
+            } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+                throw e;
             } catch (Exception e) {
                 LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
             }

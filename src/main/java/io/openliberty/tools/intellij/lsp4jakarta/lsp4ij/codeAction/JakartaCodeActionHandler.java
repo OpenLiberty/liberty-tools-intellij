@@ -11,6 +11,8 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix;
@@ -55,6 +57,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 /**
  * Code action handler. Partially reused from
@@ -252,6 +255,8 @@ public class JakartaCodeActionHandler {
                     if (diagnostic.getCode().getLeft().equals(WebSocketConstants.DIAGNOSTIC_CODE_PATH_PARAMS_ANNOT)) {
                         codeActions.addAll(AddPathParamQuickFix.getCodeActions(context, diagnostic));
                     }
+                } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+                    throw e;
                 } catch (Exception e) {
                     LOGGER.warn("Exception scanning diagnostics", e); // TODO do we need this? Remove if possible
                 }

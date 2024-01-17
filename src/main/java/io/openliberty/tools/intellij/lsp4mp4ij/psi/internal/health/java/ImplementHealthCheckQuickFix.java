@@ -13,6 +13,8 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health.java;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
@@ -34,6 +36,7 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,6 +87,8 @@ public class ImplementHealthCheckQuickFix implements IJavaCodeActionParticipant 
 					context.getSource().getCompilationUnit());
 			try {
 				toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+			} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+				throw e;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Unable to create workspace edit to make the class implement @HealthCheck", e);
 			}

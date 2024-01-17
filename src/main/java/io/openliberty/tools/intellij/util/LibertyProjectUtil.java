@@ -12,6 +12,8 @@ package io.openliberty.tools.intellij.util;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
@@ -182,6 +185,8 @@ public class LibertyProjectUtil {
                         buildFile.setBuildFile(gradleFile);
                         buildFiles.add(buildFile);
                     }
+                } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+                    throw e;
                 } catch (Exception e) {
                     LOGGER.error(String.format("Error parsing build.gradle %s", gradleFile), e.getMessage());
                 }

@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -153,6 +156,8 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 		String methodReturnTypeString;
 		try {
 			methodReturnTypeString = methodReturnType.getCanonicalText();
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 			throw e;
 		}
