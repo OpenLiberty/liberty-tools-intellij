@@ -11,11 +11,6 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 
 import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.event.BulkAwareDocumentListener;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.ModuleListener;
@@ -23,18 +18,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.newvfs.BulkFileListener;
-import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
-import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,12 +31,13 @@ import java.util.Set;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java</a>
  */
 public final class PsiMicroProfileProjectManager implements Disposable {
+
 	private static final Key<PsiMicroProfileProject> KEY = new Key<>(PsiMicroProfileProject.class.getName());
 
 	private static final String JAVA_FILE_EXTENSION = "java";
 
-	public static PsiMicroProfileProjectManager getInstance(Project project) {
-		return ServiceManager.getService(project, PsiMicroProfileProjectManager.class);
+	public static PsiMicroProfileProjectManager getInstance(@NotNull Project project) {
+		return project.getService(PsiMicroProfileProjectManager.class);
 	}
 
 	private final MessageBusConnection connection;
@@ -58,7 +46,8 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 
 	private final MicroProfileProjectListener microprofileProjectListener;
 
-	private class MicroProfileProjectListener implements ModuleListener, ClasspathResourceChangedManager.Listener, BulkFileListener, BulkAwareDocumentListener.Simple, Disposable {
+	private class MicroProfileProjectListener implements ModuleListener, ClasspathResourceChangedManager.Listener {
+
 		@Override
 		public void librariesChanged() {
 			// Do nothing
@@ -80,39 +69,8 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 		}
 
 		@Override
-		public void after(@NotNull List<? extends VFileEvent> events) {
-			for(VFileEvent event : events) {
-				if ((event instanceof VFileDeleteEvent || event instanceof VFileContentChangeEvent ||
-						event instanceof VFileCreateEvent) && isConfigSource(event.getFile())) {
-					processChangedConfigSource(event.getFile());
-				}
-			}
-		}
-
-		@Override
-		public void afterDocumentChange(@NotNull Document document) {
-			final VirtualFile file = FileDocumentManager.getInstance().getFile(document);
-			if (file != null && isConfigSource(file)) {
-				processChangedConfigSource(file);
-			}
-		}
-
-		@Override
 		public void beforeModuleRemoved(@NotNull Project project, @NotNull Module module) {
 			evict(module);
-		}
-
-		private void processChangedConfigSource(VirtualFile file) {
-			if (file instanceof LightVirtualFile) {
-				file = ((LightVirtualFile) file).getOriginalFile();
-			}
-			Module javaProject = PsiUtilsLSImpl.getInstance(project).getModule(file);
-			if (javaProject != null) {
-				PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject);
-				if (mpProject != null) {
-					mpProject.evictConfigSourcesCache(null);
-				}
-			}
 		}
 
 		private void evict(Module javaProject) {
@@ -121,9 +79,6 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 				removeMicroProfileProject(javaProject);
 			}
 		}
-
-		@Override
-		public void dispose() {}
 	}
 
 	private PsiMicroProfileProjectManager(Project project) {
@@ -132,7 +87,6 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 		connection = project.getMessageBus().connect(project);
 		connection.subscribe(ClasspathResourceChangedManager.TOPIC, microprofileProjectListener);
 		connection.subscribe(ProjectTopics.MODULES, microprofileProjectListener);
-		EditorFactory.getInstance().getEventMulticaster().addDocumentListener(microprofileProjectListener, microprofileProjectListener);
 	}
 
 	public PsiMicroProfileProject getMicroProfileProject(Module project) {
