@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProject.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProject.java</a>
  */
 public class PsiMicroProfileProject {
-
     private final Module javaProject;
 
 	private volatile List<IConfigSource> configSources;
@@ -230,6 +229,9 @@ public class PsiMicroProfileProject {
 	}
 
     private IConfigSource findConfigSource(VirtualFile file) {
+        if (file == null) {
+            return null;
+        }
         List<IConfigSource> configSources = getConfigSources();
         for (IConfigSource configSource : configSources) {
             if (configSource.isSourceConfigFile(file)) {

@@ -28,6 +28,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
@@ -43,7 +44,6 @@ import java.util.Set;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/project/JDTMicroProfileProjectManager.java</a>
  */
 public final class PsiMicroProfileProjectManager implements Disposable {
-
 	private static final Key<PsiMicroProfileProject> KEY = new Key<>(PsiMicroProfileProject.class.getName());
 
 	private static final String JAVA_FILE_EXTENSION = "java";
@@ -103,6 +103,9 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 		}
 
 		private void processChangedConfigSource(VirtualFile file) {
+			if (file instanceof LightVirtualFile) {
+				file = ((LightVirtualFile) file).getOriginalFile();
+			}
 			Module javaProject = PsiUtilsLSImpl.getInstance(project).getModule(file);
 			if (javaProject != null) {
 				PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject);
