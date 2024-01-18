@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * @author Angelo ZERR
  *
  */
-public class CodeActionHandler {
+public final class CodeActionHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CodeActionHandler.class);
 	private final String group;
@@ -99,8 +99,8 @@ public class CodeActionHandler {
 			for (String codeActionKind : codeActionKinds) {
 				// Get list of code action definition for the given kind
 				List<JavaCodeActionDefinition> codeActionDefinitions = JavaCodeActionDefinition.EP.extensions()
-						.filter(definition -> definition.isAdaptedForCodeAction(context))
 						.filter(definition -> group.equals(definition.getGroup()))
+						.filter(definition -> definition.isAdaptedForCodeAction(context))
 						.filter(definition -> codeActionKind.equals(definition.getKind()))
 						.collect(Collectors.toList());
 				if (codeActionDefinitions != null) {
