@@ -13,11 +13,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
-import com.google.gson.JsonObject;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.TypeConversionUtil;
@@ -285,9 +281,7 @@ public class MicroProfileConfigASTValidator extends JavaASTValidator {
         return mpProject.hasProperty(property);
     }
 
-	public static void setDataForUnassigned(String name, Diagnostic diagnostic) {
-		JsonObject data = new JsonObject();
-		data.addProperty(DIAGNOSTIC_DATA_NAME, name);
-		diagnostic.setData(data);
-	}
+    public static void setDataForUnassigned(String name, Diagnostic diagnostic) {
+        diagnostic.setData(new PropertyNameData(name));
+    }
 }
