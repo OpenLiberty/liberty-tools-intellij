@@ -36,7 +36,6 @@ import java.io.File;
 import java.util.Arrays;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
-import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.assertJavaCodeAction;
 
 @RunWith(JUnit4.class)
 public class ResourceClassConstructorTest extends BaseJakartaTest {
@@ -108,24 +107,48 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        // test codeAction
-        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
-                "public class NoPublicConstructorClass {\n\n    public NoPublicConstructorClass() {\n    }\n\n" +
-                "    private NoPublicConstructorClass() {\n\n    }\n\n    protected NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
-
-        String newText1 = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
-                "public class NoPublicConstructorClass {\n\n    public NoPublicConstructorClass() {\n\n    }\n\n" +
+        // Test expected quick fixes for diagnostic 1 (private constructor).
+        String newText1 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
+                "public class NoPublicConstructorClass {\n\n" +
+                "    public NoPublicConstructorClass() {\n    }\n\n" +
+                "    private NoPublicConstructorClass() {\n\n    }\n\n" +
                 "    protected NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
 
+        String newText2 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
+                "public class NoPublicConstructorClass {\n\n" +
+                "    public NoPublicConstructorClass() {\n\n    }\n\n" +
+                "    protected NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        TextEdit te = te(0, 0, 16, 0, newText);
         TextEdit te1 = te(0, 0, 16, 0, newText1);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d1, te);
-        CodeAction ca1 = ca(uri, "Make constructor public", d1, te1);
+        TextEdit te2 = te(0, 0, 16, 0, newText2);
+        CodeAction ca1 = ca(uri, "Add a default 'public' constructor to this class", d1, te1);
+        CodeAction ca2 = ca(uri, "Make constructor public", d1, te2);
 
+        assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
 
-        assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+        // Test expected quick fixes for diagnostic 2 (protected constructor).
+        String newText3 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
+                "public class NoPublicConstructorClass {\n\n    public NoPublicConstructorClass() {\n    }\n\n" +
+                "    private NoPublicConstructorClass() {\n\n    }\n\n" +
+                "    protected NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
+
+        String newText4 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.Path;\n\n@Path(\"/somewhere\")\n" +
+                "public class NoPublicConstructorClass {\n\n" +
+                "    private NoPublicConstructorClass() {\n\n    }\n\n" +
+                "    public NoPublicConstructorClass(int arg1) {\n\n    }\n\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        TextEdit te3 = te(0, 0, 16, 0, newText3);
+        TextEdit te4 = te(0, 0, 16, 0, newText4);
+        CodeAction ca3 = ca(uri, "Add a default 'public' constructor to this class", d2, te3);
+        CodeAction ca4 = ca(uri, "Make constructor public", d2, te4);
+
+        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
     }
 
     @Test
@@ -140,6 +163,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
+        // Test expected diagnostics.
         Diagnostic d1 = JakartaForJavaAssert.d(19, 12, 44,
                 "Provider classes are instantiated by the JAX-RS runtime and MUST have a public constructor.",
                 DiagnosticSeverity.Error, "jakarta-jax_rs", "NoPublicConstructors");
@@ -150,8 +174,8 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        // test codeAction
-        String newText = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\nimport java.io.InputStream;\n" +
+        // Test expected quick fixes for diagnostic 1 (private constructor).
+        String newText1 = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\nimport java.io.InputStream;\n" +
                 "import java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\nimport jakarta.ws.rs.Consumes;\n" +
                 "import jakarta.ws.rs.WebApplicationException;\nimport jakarta.ws.rs.core.MediaType;\n" +
                 "import jakarta.ws.rs.core.MultivaluedMap;\nimport jakarta.ws.rs.ext.MessageBodyReader;\n" +
@@ -164,7 +188,7 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
                 "                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n" +
                 "        return null;\n    }\n\n}\n";
 
-        String newText1 = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\n" +
+        String newText2 = "package io.openliberty.sample.jakarta.jax_rs;\n\nimport java.io.IOException;\n" +
                 "import java.io.InputStream;\nimport java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\n" +
                 "import jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\n" +
                 "import jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\nimport jakarta.ws.rs.ext.MessageBodyReader;\n" +
@@ -178,11 +202,54 @@ public class ResourceClassConstructorTest extends BaseJakartaTest {
                 "        return null;\n    }\n\n}\n";
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        TextEdit te = te(0, 0, 39, 0, newText);
         TextEdit te1 = te(0, 0, 39, 0, newText1);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d1, te);
-        CodeAction ca1 = ca(uri, "Make constructor public", d1, te1);
+        TextEdit te2 = te(0, 0, 39, 0, newText2);
+        CodeAction ca1 = ca(uri, "Add a default 'public' constructor to this class", d1, te1);
+        CodeAction ca2 = ca(uri, "Make constructor public", d1, te2);
 
-        assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+        assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
+
+        // Test expected quick fixes for diagnostic 2 (protected constructor).
+        String newText3 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import java.io.IOException;\nimport java.io.InputStream;\n" +
+                "import java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\n" +
+                "import jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\n" +
+                "import jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\n" +
+                "import jakarta.ws.rs.ext.MessageBodyReader;\nimport jakarta.ws.rs.ext.Provider;\n\n\n" +
+                "@Consumes(\"application/x-www-form-urlencoded\")\n" +
+                "@Provider\npublic class NoPublicConstructorProviderClass implements MessageBodyReader<Object> {\n\n" +
+                "    public NoPublicConstructorProviderClass() {\n    }\n\n" +
+                "    private NoPublicConstructorProviderClass() {\n\n    }\n\n" +
+                "    protected NoPublicConstructorProviderClass(int arg1) {\n\n    }\n\n    @Override\n" +
+                "    public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {\n" +
+                "        return false;\n    }\n\n    @Override\n" +
+                "    public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,\n" +
+                "                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n" +
+                "        return null;\n    }\n\n}\n";
+
+        String newText4 = "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import java.io.IOException;\nimport java.io.InputStream;\n" +
+                "import java.lang.annotation.Annotation;\nimport java.lang.reflect.Type;\n\n" +
+                "import jakarta.ws.rs.Consumes;\nimport jakarta.ws.rs.WebApplicationException;\n" +
+                "import jakarta.ws.rs.core.MediaType;\nimport jakarta.ws.rs.core.MultivaluedMap;\n" +
+                "import jakarta.ws.rs.ext.MessageBodyReader;\nimport jakarta.ws.rs.ext.Provider;\n\n\n" +
+                "@Consumes(\"application/x-www-form-urlencoded\")\n@Provider\n" +
+                "public class NoPublicConstructorProviderClass implements MessageBodyReader<Object> {\n\n" +
+                "    private NoPublicConstructorProviderClass() {\n\n    }\n\n" +
+                "    public NoPublicConstructorProviderClass(int arg1) {\n\n    }\n\n    @Override\n" +
+                "    public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {\n" +
+                "        return false;\n    }\n\n    @Override\n" +
+                "    public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,\n" +
+                "                           MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {\n" +
+                "        return null;\n    }\n\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        TextEdit te3 = te(0, 0, 39, 0, newText3);
+        TextEdit te4 = te(0, 0, 39, 0, newText4);
+        CodeAction ca3 = ca(uri, "Add a default 'public' constructor to this class", d2, te3);
+        CodeAction ca4 = ca(uri, "Make constructor public", d2, te4);
+
+        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+
     }
 }
