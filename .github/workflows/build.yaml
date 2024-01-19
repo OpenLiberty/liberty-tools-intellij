@@ -4,7 +4,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main, code-action-unification ]
+    branches: [ main, useLSP4IJ1201 ]
 
 jobs:
   build:
@@ -36,7 +36,7 @@ jobs:
         with:
           repository: MicroShed/lsp4ij
           path: lsp4ij
-          ref: q1101
+          ref: q1201
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
