@@ -16,14 +16,19 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.qui
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.InsertAnnotationProposal;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -33,9 +38,8 @@ import java.util.logging.Logger;
  * @author Angelo ZERR
  *
  */
-public class InsertAnnotationMissingQuickFix {
+public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeActionParticipant {
     private static final Logger LOGGER = Logger.getLogger(InsertAnnotationMissingQuickFix.class.getName());
-    private static final String ANNOTATION_KEY = "annotation";
 
     private final String[] annotations;
 
@@ -73,6 +77,25 @@ public class InsertAnnotationMissingQuickFix {
         return codeActions;
     }
 
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        String name = getLabel(annotations);
+        PsiElement node = context.getCoveringNode();
+        PsiModifierListOwner parentType = getBinding(node);
+
+        ChangeCorrectionProposal proposal = new InsertAnnotationProposal(name, context.getCompilationUnit(),
+                context.getASTRoot(), parentType, 0, context.getSource().getCompilationUnit(),
+                annotations);
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e);
+        }
+        return toResolve;
+    }
+
     protected static PsiModifierListOwner getBinding(PsiElement node) {
         PsiModifierListOwner binding = PsiTreeUtil.getParentOfType(node, PsiVariable.class);
         if (binding != null) {
@@ -103,17 +126,8 @@ public class InsertAnnotationMissingQuickFix {
 
     protected void insertAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
             List<CodeAction> codeActions, String... annotations) {
-        String name = getLabel(annotations);
-        PsiElement node = context.getCoveringNode();
-        PsiModifierListOwner parentType = getBinding(node);
-
-        ChangeCorrectionProposal proposal = new InsertAnnotationProposal(name, context.getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, context.getSource().getCompilationUnit(),
-                annotations);
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-        if (codeAction != null) {
-            codeActions.add(codeAction);
-        }
+            String label = getLabel(annotations);
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
 
     private static String getLabel(String[] annotations) {
