@@ -38,6 +38,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanCo
 public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
     private static final Logger LOGGER = Logger.getLogger(ManagedBeanQuickFix.class.getName());
     private static final String ADD_ANNOTATION = "jakarta.enterprise.context.Dependent";
+
     public ManagedBeanQuickFix() {
         super("jakarta.enterprise.context.Dependent");
     }
