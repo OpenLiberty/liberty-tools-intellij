@@ -60,7 +60,8 @@ public class RunLibertyDevTask extends AnAction {
             for (Component comp : components) {
                 if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
                     JBScrollPane scrollPane = (JBScrollPane) comp;
-                    Tree libertyTree = (Tree) scrollPane.getViewport().getView();
+                    if (scrollPane.getViewport().getView() instanceof Tree) {
+                        Tree libertyTree = (Tree) scrollPane.getViewport().getView();
 
                     TreePath[] selectionPaths = libertyTree.getSelectionPaths();
 
@@ -71,7 +72,7 @@ public class RunLibertyDevTask extends AnAction {
                             e.getPresentation().setEnabled(true);
                         }
                     }
-                } else {
+                }} else {
                     LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
                 }
             }
@@ -108,7 +109,8 @@ public class RunLibertyDevTask extends AnAction {
             for (Component comp : components) {
                 if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
                     JBScrollPane scrollPane = (JBScrollPane) comp;
-                    Tree libertyTree = (Tree) scrollPane.getViewport().getView();
+                    if (scrollPane.getViewport().getView() instanceof Tree) {
+                        Tree libertyTree = (Tree) scrollPane.getViewport().getView();
                     TreePath[] selectionPaths = libertyTree.getSelectionPaths();
                     if (selectionPaths != null && selectionPaths.length == 1) {
                         String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
@@ -118,7 +120,7 @@ public class RunLibertyDevTask extends AnAction {
                             action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(libertyTree), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
                         }
                     }
-                } else {
+                }} else {
                     LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
                 }
             }
