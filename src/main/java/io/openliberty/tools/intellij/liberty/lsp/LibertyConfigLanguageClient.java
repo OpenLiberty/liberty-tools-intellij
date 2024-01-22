@@ -10,44 +10,21 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.liberty.lsp;
 
-import java.util.List;
-import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
-import org.eclipse.lsp4j.FileChangeType;
-import org.eclipse.lsp4j.FileEvent;
-import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.MessageBusConnection;
 import org.microshed.lsp4ij.client.LanguageClientImpl;
-import org.microshed.lsp4ij.LanguageServerWrapper;
 
 /**
  * Client for Liberty language server
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusLanguageClient.java
  */
-public class LibertyConfigLanguageClient extends LanguageClientImpl implements LibertyCustomConfigManager.Listener {
+public class LibertyConfigLanguageClient extends LanguageClientImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LibertyConfigLanguageClient.class);
 
-    private final MessageBusConnection connection;
-
     public LibertyConfigLanguageClient(Project project) {
         super(project);
-        connection = project.getMessageBus().connect(project);
-        connection.subscribe(LibertyCustomConfigManager.TOPIC, this);
-        LibertyCustomConfigManager.getInstance(project);
     }
 
-    @Override
-    public void processConfigXml(List<String> uris) {
-        LanguageServer server = getLanguageServer();
-        if (server != null) {
-            List<FileEvent> fileEvents = uris.stream()
-                    .map(uri -> new FileEvent(uri, FileChangeType.Changed)).toList();
-            DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams();
-            params.setChanges(fileEvents);
-            server.getWorkspaceService().didChangeWatchedFiles(params);
-        }
-    }
 }
