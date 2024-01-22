@@ -317,12 +317,15 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#InvalidManagedBeanConstructor"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix"/>
-
+                                   targetDiagnostic="jakarta-servlet#InvalidHttpServletAttribute"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#InvalidManagedBeanConstructor"
+                                   targetDiagnostic="jakarta-servlet#CompleteWebFilterAttributes"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#InvalidWebFilterAttribute"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
 
         <configSourceProvider

@@ -63,20 +63,22 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\nimport jakarta.enterprise.context.Dependent;\n\n" +
+                "@RequestScoped\npublic class ManagedBean<T> {\n    @Dependent\n    public int a;\n\n\n    public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
+        String newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\nimport jakarta.enterprise.context.Dependent;\n\n" +
+                "@Dependent\npublic class ManagedBean<T> {\n    public int a;\n\n\n    public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
 
-        if (CHECK_CODE_ACTIONS) {
-            // Assert for the diagnostic d1
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(4, 0, 5, 0, "@Dependent\n");
-            CodeAction ca1 = ca(uri, "Replace current scope with @Dependent", d1, te1);
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        // Assert for the diagnostic d1
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        TextEdit te1 = te(0, 0, 13, 0, newText1);
+        CodeAction ca1 = ca(uri, "Replace current scope with @Dependent", d1, te1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            // Assert for the diagnostic d2
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-            TextEdit te2 = te(4, 0, 5, 0, "@Dependent\n");
-            CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
-            assertJavaCodeAction(codeActionParams2, utils, ca2);
-        }
+        // Assert for the diagnostic d2
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        TextEdit te2 = te(0, 0, 13, 0, newText);
+        CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
     }
     
     @Test

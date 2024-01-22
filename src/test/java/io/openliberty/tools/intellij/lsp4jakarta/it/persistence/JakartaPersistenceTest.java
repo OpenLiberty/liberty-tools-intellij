@@ -112,29 +112,44 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         Diagnostic d5 = d(20, 25, 30,
                 "A field with multiple @MapKeyJoinColumn annotations must specify both the name and referencedColumnName attributes in the corresponding @MapKeyJoinColumn annotations.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "SupplyAttributesToAnnotations");
-        
+
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n\n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test3;\n}";
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn(name = \"n1\")\n    " +
+                "@MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    Map<Integer, String> test2;\n\n    " +
+                "@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    Map<Integer, String> test3;\n}";
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
+                "@MapKeyJoinColumn()\n    Map<Integer, String> test3;\n}";
 
-        if (CHECK_CODE_ACTIONS) {
-            // test quick fixes
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(10, 4, 11, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")");
-            CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        TextEdit te1 = te(0, 0, 21, 1, newText);
+        CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
-            TextEdit te2 = te(14, 4, 15, 52, "@MapKeyJoinColumn(referencedColumnName = \"rcn2\", name = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"\")");
-            CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
+        TextEdit te2 = te(0, 0, 21, 1, newText1);
+        CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
 
-            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
-            TextEdit te3 = te(18, 4, 19, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")");
-            CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
+        TextEdit te3 = te(0, 0, 21, 1, newText2);
+        CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
 
-            assertJavaCodeAction(codeActionParams3, utils, ca3);
-        }
+        assertJavaCodeAction(codeActionParams3, utils, ca3);
     }
 
     @Test
