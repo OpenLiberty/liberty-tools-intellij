@@ -26,7 +26,13 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
 import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -226,15 +232,10 @@ public class DebugModeHandler {
      */
     private Path getServerEnvPath(LibertyModule libertyModule) throws Exception {
         String projectPath = libertyModule.getBuildFile().getParent().getPath();
-        Path basePath = null;
-        if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
-        } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
-        } else {
-            throw new Exception(String.format("Unexpected project build type: %s. Liberty module %s does not appear to be a Maven or Gradle built project",
-                    libertyModule.getProjectType(), libertyModule.getName()));
-        }
+        String projectType = libertyModule.getProjectType();
+
+        String installDirectory = getInstallDirectoryFromLibertyPluginConfig(projectPath, projectType);
+        Path basePath = Paths.get(installDirectory, "usr", "servers");
 
         // Make sure the base path exists. If not return null.
         File basePathFile = new File(basePath.toString());
@@ -261,6 +262,34 @@ public class DebugModeHandler {
             }
             return matchedPaths.get(0);
         }
+    }
+
+    /**
+     * @param projectPath The project location
+     * @param projectType The project build type
+     *
+     * @return Parse the <installDirectory> value from
+     * "liberty-plugin-config.xml" located in target/build folder
+     */
+    private String getInstallDirectoryFromLibertyPluginConfig(String projectPath, String projectType) {
+        String installDirectory = null;
+        try {
+            String buildFolder = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? "target" : "build";
+            Path configPath = Paths.get(projectPath, buildFolder, "liberty-plugin-config.xml");
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(configPath.toString());
+            document.getDocumentElement().normalize();
+
+            NodeList nodeList = document.getElementsByTagName("installDirectory");
+            if (nodeList.getLength() > 0) {
+                Element element = (Element) nodeList.item(0);
+                installDirectory = element.getTextContent();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Unable to find installDirectory from liberty-plugin-config file");
+        }
+        return installDirectory;
     }
 
     /**
