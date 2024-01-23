@@ -41,7 +41,7 @@
         <extensionPoint name="javaDefinitionParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
         <extensionPoint name="javaCompletionParticipant"
-                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.completion.JavaCompletionDefinition"/>
         <extensionPoint name="javaCodeLensParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
         <extensionPoint name="configSourceProvider"
@@ -151,6 +151,8 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector"/>
 
         <projectLabelProvider
+                implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
+        <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MavenProjectLabelProvider"/>
@@ -162,8 +164,10 @@
         <javaDefinitionParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
 
+        <!-- MicroProfile Completion Participants -->
         <javaCompletionParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
 
         <javaCodeLensParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
