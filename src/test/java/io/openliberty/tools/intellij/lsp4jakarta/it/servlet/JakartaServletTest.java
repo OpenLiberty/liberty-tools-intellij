@@ -203,9 +203,6 @@ public class JakartaServletTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-servlet", "InvalidWebFilterAttribute");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
-        String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.annotation.WebFilter;\n" +
-                "import jakarta.servlet.Filter;\n\n@WebFilter(urlPatterns = \"\", value = \"\")\n" +
-                "public abstract class DuplicateAttributeWebFilter implements Filter {\n\n}\n\n";
         String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.annotation.WebFilter;\n" +
                 "import jakarta.servlet.Filter;\n\n@WebFilter( value = \"\")\n" +
                 "public abstract class DuplicateAttributeWebFilter implements Filter {\n\n}\n\n";
@@ -214,14 +211,12 @@ public class JakartaServletTest extends BaseJakartaTest {
                 "public abstract class DuplicateAttributeWebFilter implements Filter {\n\n}\n\n";
 
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 10, 0, newText);
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the `servletNames` attribute from @WebFilter", d, te1);
 
-        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 10, 0, newText1);
-        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove the `urlPatterns` attribute from @WebFilter", d, te2);
+        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 10, 0, newText1);
+        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove the `urlPatterns` attribute from @WebFilter", d, te1);
 
-        TextEdit te3 = JakartaForJavaAssert.te(0, 0, 10, 0, newText2);
-        CodeAction ca3 = JakartaForJavaAssert.ca(uri, "Remove the `value` attribute from @WebFilter", d, te3);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3);
+        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 10, 0, newText2);
+        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove the `value` attribute from @WebFilter", d, te2);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
     }
 }
