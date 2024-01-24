@@ -32,14 +32,13 @@ import org.xml.sax.SAXException;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.*;
+import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -238,8 +237,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 } else {
                     Object node = path.getLastPathComponent();
                     if (node instanceof LibertyModuleNode) {
-                        LibertyModuleNode treeNode = (LibertyModuleNode) node;
-                        String tooltipText = getBuildPath(treeNode);
+                        LibertyModuleNode libertyNode = (LibertyModuleNode) node;
+                        String tooltipText = libertyNode.getFilePath().getPath();
                         if (!tooltipText.equals(currentTooltipText)) {
                             tree.setToolTipText(tooltipText);
                             currentTooltipText = tooltipText;
@@ -354,14 +353,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
             return this;
         }
-    }
-    
-    private static String getBuildPath(Object value) {
-        LibertyModuleNode node = null;
-        if (value instanceof LibertyModuleNode) {
-            node = (LibertyModuleNode) value;
-        }
-        return (node != null) ? node.getFilePath().toString().replace("file://", "") : "";
     }
 
     private static void executeAction(Tree tree) {
