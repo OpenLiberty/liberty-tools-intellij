@@ -13,6 +13,8 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,6 +83,8 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
 		try {
 			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e);
 		}

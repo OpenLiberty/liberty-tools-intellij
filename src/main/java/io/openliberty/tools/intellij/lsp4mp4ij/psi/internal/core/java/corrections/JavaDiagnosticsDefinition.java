@@ -15,6 +15,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.corrections;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +52,8 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
     public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
         try {
             return getInstance().isAdaptedForDiagnostics(context);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e);
             return false;
@@ -59,6 +64,8 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
     public void beginDiagnostics(JavaDiagnosticsContext context) {
         try {
             getInstance().beginDiagnostics(context);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
         }
@@ -69,6 +76,8 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
         try {
             List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
             return diagnostics != null ? diagnostics : Collections.emptyList();
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
             return Collections.emptyList();
@@ -79,6 +88,8 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
     public void endDiagnostics(JavaDiagnosticsContext context) {
         try {
             getInstance().endDiagnostics(context);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
         }

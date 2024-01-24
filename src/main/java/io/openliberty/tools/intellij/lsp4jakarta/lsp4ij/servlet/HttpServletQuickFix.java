@@ -15,6 +15,8 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -34,6 +36,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -98,6 +101,8 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class.", e);
         }

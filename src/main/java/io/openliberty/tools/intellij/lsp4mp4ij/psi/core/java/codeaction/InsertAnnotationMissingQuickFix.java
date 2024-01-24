@@ -19,9 +19,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
@@ -102,6 +105,8 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
 		try {
 			WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
 			toResolve.setEdit(we);
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to insert missing annotation", e);
 		}

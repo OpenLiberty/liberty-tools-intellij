@@ -12,6 +12,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPrimitiveType;
@@ -32,6 +34,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,6 +78,8 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to change return type to void", e);
         }

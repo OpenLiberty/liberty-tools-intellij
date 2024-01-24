@@ -13,24 +13,11 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.DIAGNOSTIC_DATA_NAME;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
-import static org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import org.eclipse.lsp4mp.ls.commons.CodeActionFactory;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
@@ -38,21 +25,23 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSource;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProject;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentEdit;
-import org.eclipse.lsp4j.TextDocumentItem;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
-import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
+import org.eclipse.lsp4mp.ls.commons.CodeActionFactory;
+import org.microshed.lsp4ij.JSONUtils;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionFactory.createAddToUnassignedExcludedCodeAction;
 
 /**
  * QuickFix for fixing
@@ -140,15 +129,14 @@ public class NoValueAssignedToPropertyQuickFix implements IJavaCodeActionPartici
 	}
 
 
-	private static String getPropertyName(Diagnostic diagnostic, JavaCodeActionContext context) {
-		if (diagnostic.getData() != null) {
-			// retrieve the property name from the diagnostic data
-			JsonObject data = (JsonObject) diagnostic.getData();
-			JsonElement name = data.get(DIAGNOSTIC_DATA_NAME);
-			if (name != null) {
-				return name.getAsString();
-			}
-		}
+    private static String getPropertyName(Diagnostic diagnostic, JavaCodeActionContext context) {
+        if (diagnostic.getData() != null) {
+            // retrieve the property name from the diagnostic data
+            PropertyNameData data = JSONUtils.toModel(diagnostic.getData(), PropertyNameData.class);
+            if (data != null && data.getName() != null) {
+                return data.getName();
+            }
+        }
 
 		// retrieve the property name from the data
 		Position hoverPosition = diagnostic.getRange().getStart();
