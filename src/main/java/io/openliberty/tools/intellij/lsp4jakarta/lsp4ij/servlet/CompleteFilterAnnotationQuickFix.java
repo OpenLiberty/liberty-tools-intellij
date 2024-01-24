@@ -148,12 +148,14 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
         }
         if (diagnosticCode.equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_DUPLICATE_ATTRIBUTES)) {
             for (String attribute : attributes) {
-                String name = getLabel(annotation, attribute, "Remove");
-                Map<String, Object> extendedData = new HashMap<>();
-                extendedData.put(DIAGNOSTIC_CODE_KEY, diagnosticCode);
-                extendedData.put(ATTRIBUTE_KEY, attribute);
-                extendedData.put(ANNOTATION_KEY, annotation);
-                codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
+                if (!attribute.equals("servletNames")) {
+                    String name = getLabel(annotation, attribute, "Remove");
+                    Map<String, Object> extendedData = new HashMap<>();
+                    extendedData.put(DIAGNOSTIC_CODE_KEY, diagnosticCode);
+                    extendedData.put(ATTRIBUTE_KEY, attribute);
+                    extendedData.put(ANNOTATION_KEY, annotation);
+                    codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
+                }
             }
         }
     }
