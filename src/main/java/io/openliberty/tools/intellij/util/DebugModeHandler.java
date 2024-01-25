@@ -272,7 +272,7 @@ public class DebugModeHandler {
      * "liberty-plugin-config.xml" located in target/build folder
      */
     private String getInstallDirectoryFromLibertyPluginConfig(String projectPath, String projectType) {
-        String installDirectory = null;
+        String installDirectory = "";
         try {
             String buildFolder = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? "target" : "build";
             Path configPath = Paths.get(projectPath, buildFolder, "liberty-plugin-config.xml");
