@@ -91,18 +91,47 @@ public class ResourceMethodTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        if (CHECK_CODE_ACTIONS) {
-            // Test for quick-fix code action
-            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        //if (CHECK_CODE_ACTIONS) {
+        // Test for quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText1 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n" +
+                "* Contributors:\n*     Bera Sogut\n" +
+                "*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.DELETE;\n" +
+                "import jakarta.ws.rs.FormParam;\n\n" +
+                "public class MultipleEntityParamsResourceMethod {\n\n	" +
+                "@DELETE\n	" +
+                "public void resourceMethodWithTwoEntityParams(String entityParam1, @FormParam(value = \"\") String nonEntityParam) {\n        " +
+                "\n    }\n}\n";
+        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 25, 0, newText1);
+        CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam1", d, te1);
 
-            TextEdit te1 = JakartaForJavaAssert.te(21, 112, 21, 130, "");
-            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam1", d, te1);
+        String newText2 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n* Contributors:\n" +
+                "*     Bera Sogut\n" +
+                "*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.DELETE;\n" +
+                "import jakarta.ws.rs.FormParam;\n\n" +
+                "public class MultipleEntityParamsResourceMethod {\n\n	" +
+                "@DELETE\n	" +
+                "public void resourceMethodWithTwoEntityParams(@FormParam(value = \"\") String nonEntityParam, int entityParam2) {" +
+                "\n        \n    }\n}\n";
+        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 25, 0, newText2);
+        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam2", d, te2);
 
-            TextEdit te2 = JakartaForJavaAssert.te(21, 47, 21, 68, "");
-            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam2", d, te2);
-
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
-        }
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
+        //}
     }
 
 }

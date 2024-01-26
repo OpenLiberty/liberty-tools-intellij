@@ -68,10 +68,8 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
         if (CHECK_CODE_ACTIONS) {
             JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
             TextEdit te = te(19, 1, 20, 1, "");
-            TextEdit te1 = te(20, 29, 20, 40, "");
             CodeAction ca = ca(uri, "Remove @PreDestroy", d1, te);
-            CodeAction ca1 = ca(uri, "Remove all parameters", d1, te1);
-            assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+            assertJavaCodeAction(codeActionParams, utils, ca);
 
             JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
             TextEdit te2 = te(25, 1, 26, 1, "");
@@ -80,6 +78,34 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
             CodeAction ca3 = ca(uri, "Remove the 'static' modifier from this method", d2, te3);
             assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);
         }
+
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.PreDestroy;\n" +
+                "import jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\") \n" +
+                "public class PreDestroyAnnotation { \n\n    " +
+                "private Integer studentId;\n	\n    " +
+                "private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n	\n	" +
+                "@PreDestroy()\n	" +
+                "public Integer getStudentId() {\n		" +
+                "return this.studentId;\n	}\n	\n	" +
+                "@PreDestroy()\n	" +
+                "public boolean getHappiness() {\n		" +
+                "if (type.equals(\"happy\")) return this.isHappy;\n		" +
+                "return this.isSad;\n	}\n	\n	" +
+                "@PreDestroy()\n	" +
+                "public static void makeUnhappy() {\n		" +
+                "System.out.println(\"I'm sad\");\n	}\n	\n	" +
+                "@PreDestroy()\n	" +
+                "public void throwTantrum() throws Exception {\n		" +
+                "System.out.println(\"I'm sad\");\n	}\n\n\n    " +
+                "private String emailAddress;\n\n\n}\n\n\n\n";
+
+        TextEdit te = te(0, 0, 43, 0, newText);
+        CodeAction ca = ca(uri, "Remove all parameters", d1, te);
+        assertJavaCodeAction(codeActionParams, utils, ca);
     }
 
 }

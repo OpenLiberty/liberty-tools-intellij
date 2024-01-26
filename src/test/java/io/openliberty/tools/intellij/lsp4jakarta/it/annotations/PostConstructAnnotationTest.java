@@ -105,11 +105,31 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
 
             JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
             TextEdit te1 = te(19, 4, 20, 4, "");
-            TextEdit te2 = te(20, 29, 20, 40, "");
             CodeAction ca1 = ca(uri, "Remove @PostConstruct", d2, te1);
-            CodeAction ca2 = ca(uri, "Remove all parameters", d2, te2);
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+            assertJavaCodeAction(codeActionParams1, utils, ca1);
 
         }
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n\n    " +
+                "private Integer studentId;\n\n    " +
+                "private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n\n    " +
+                "@PostConstruct()\n    " +
+                "public Integer getStudentId() {\n        " +
+                "return this.studentId;\n    }\n\n    " +
+                "@PostConstruct\n    " +
+                "public void getHappiness() {\n\n    }\n\n    " +
+                "@PostConstruct\n    " +
+                "public void throwTantrum() throws Exception {\n        " +
+                "System.out.println(\"I'm sad\");\n    }\n\n    " +
+                "private String emailAddress;\n\n}";
+        TextEdit te = te(0, 0, 31, 1, newText);
+        CodeAction ca = ca(uri, "Remove all parameters", d2, te);
+        assertJavaCodeAction(codeActionParams1, utils, ca);
     }
 }
