@@ -36,6 +36,7 @@ jobs:
         with:
           repository: MicroShed/lsp4ij
           path: lsp4ij
+          ref: refs/tags/0.0.1
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
