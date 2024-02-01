@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -32,13 +32,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class LibertyProjectUtil {
-    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
     enum BuildFileFilter {
         ADDABLE {
@@ -155,20 +152,18 @@ public class LibertyProjectUtil {
         ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
-        String widgetName = libertyModule.getName();
 
         ContentManager contentManager = toolWindow.getContentManager();
         Content[] contents = contentManager.getContents();
 
         int index = 0;
         for (int i = 0; i < contents.length; i++) {
-            String displayName = contents[i].getDisplayName();
-            if (widgetName.equals(displayName)) {
+            if (contents[i].getPreferredFocusableComponent().equals(widget)) {
                 index = i;
                 break;
             }
         }
-        if (contents.length > 0) {
+        if (contents.length > 0 && index > 0) {
             Content terminalContent = contents[index];
             contentManager.setSelectedContent(terminalContent);
             terminalContent.getComponent().requestFocus();
