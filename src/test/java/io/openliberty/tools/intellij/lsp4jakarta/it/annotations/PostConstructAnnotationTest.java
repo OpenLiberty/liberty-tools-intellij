@@ -97,11 +97,6 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
                 "        System.out.println(\"I'm sad\");\n    }\n\n" +
                 "    private String emailAddress;\n\n}";
 
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te1 = te(0, 0, 31, 1, newText1);
-        CodeAction ca1 = ca(uri, "Remove @PostConstruct", d2, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
-
         String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
                 "import jakarta.annotation.PostConstruct;\n" +
                 "import jakarta.annotation.Resource;\n\n" +
@@ -119,8 +114,12 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
                 "public void throwTantrum() throws Exception {\n        " +
                 "System.out.println(\"I'm sad\");\n    }\n\n    " +
                 "private String emailAddress;\n\n}";
-        TextEdit te = te(0, 0, 31, 1, newText2);
-        CodeAction ca = ca(uri, "Remove all parameters", d2, te);
-        assertJavaCodeAction(codeActionParams1, utils, ca);
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        TextEdit te = te(0, 0, 31, 1, newText1);
+        TextEdit te1 = te(0, 0, 31, 1, newText2);
+        CodeAction ca = ca(uri, "Remove @PostConstruct", d2, te);
+        CodeAction ca1 = ca(uri, "Remove all parameters", d2, te1);
+        assertJavaCodeAction(codeActionParams1, utils, ca, ca1);
     }
 }

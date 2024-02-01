@@ -91,32 +91,6 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
                 "		System.out.println(\"I'm sad\");\n" +
                 "	}\n\n\n    private String emailAddress;\n\n\n}\n\n\n\n";
 
-        TextEdit te = te(0, 0, 43, 0, newText);
-        CodeAction ca = ca(uri, "Remove @PreDestroy", d1, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
-
-        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
-                "import jakarta.annotation.PreDestroy;\n" +
-                "import jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\") \n" +
-                "public class PreDestroyAnnotation { \n\n" +
-                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
-                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
-                "	public Integer getStudentId() {\n		return this.studentId;\n" +
-                "	}\n	\n	@PreDestroy()\n	public boolean getHappiness(String type) {\n" +
-                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
-                "		return this.isSad;\n	}\n	\n" +
-                "	public static void makeUnhappy() {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n	\n	@PreDestroy()\n" +
-                "	public void throwTantrum() throws Exception {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
-                "    private String emailAddress;\n\n\n}\n\n\n\n";
-
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te2 = te(0, 0, 43, 0, newText1);
-        CodeAction ca2 = ca(uri, "Remove @PreDestroy", d2, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca2);
-
         String newText3 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
                 "import jakarta.annotation.PreDestroy;\n" +
                 "import jakarta.annotation.Resource;\n\n" +
@@ -140,9 +114,33 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
                 "System.out.println(\"I'm sad\");\n	}\n\n\n    " +
                 "private String emailAddress;\n\n\n}\n\n\n\n";
 
-        TextEdit te3 = te(0, 0, 43, 0, newText3);
-        CodeAction ca3 = ca(uri, "Remove all parameters", d1, te3);
-        assertJavaCodeAction(codeActionParams, utils, ca3);
+        TextEdit te = te(0, 0, 43, 0, newText);
+        CodeAction ca = ca(uri, "Remove @PreDestroy", d1, te);
+        TextEdit te1 = te(0, 0, 43, 0, newText3);
+        CodeAction ca1 = ca(uri, "Remove all parameters", d1, te1);
+        assertJavaCodeAction(codeActionParams, utils, ca, ca1);
+
+        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.PreDestroy;\n" +
+                "import jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\") \n" +
+                "public class PreDestroyAnnotation { \n\n" +
+                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
+                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
+                "	public Integer getStudentId() {\n		return this.studentId;\n" +
+                "	}\n	\n	@PreDestroy()\n	public boolean getHappiness(String type) {\n" +
+                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
+                "		return this.isSad;\n	}\n	\n" +
+                "	public static void makeUnhappy() {\n" +
+                "		System.out.println(\"I'm sad\");\n	}\n	\n	@PreDestroy()\n" +
+                "	public void throwTantrum() throws Exception {\n" +
+                "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
+                "    private String emailAddress;\n\n\n}\n\n\n\n";
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+        TextEdit te2 = te(0, 0, 43, 0, newText1);
+        CodeAction ca2 = ca(uri, "Remove @PreDestroy", d2, te2);
+        assertJavaCodeAction(codeActionParams1, utils, ca2);
     }
 
 }
