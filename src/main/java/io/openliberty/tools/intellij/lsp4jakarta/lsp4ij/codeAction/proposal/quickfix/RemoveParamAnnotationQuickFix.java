@@ -1,5 +1,5 @@
  /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -91,24 +91,25 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          final PsiClass parentType = getBinding(node);
          final PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
          CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
-         List<String> annotationsToRemove = new ArrayList<>();
-         int paramIndex = 0;
+         List<String> annotationsToRemove;
+         int paramIndex;
 
-         if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List) {
+         if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List &&
+                 data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
              annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
-         }
-         if (data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
              paramIndex = (Integer) data.getExtendedDataEntry(INDEX_KEY);
+         } else {
+             LOGGER.log(Level.WARNING, "The CodeActionResolveData was corrupted somewhere in the LSP layer. Unable to resolve code action.");
+             return null;
          }
 
          final PsiParameter parameter = method.getParameterList().getParameter(paramIndex);
          final PsiAnnotation[] psiAnnotations = parameter.getAnnotations();
          final List<PsiAnnotation> psiAnnotationsToRemove = new ArrayList<>();
 
-         List<String> finalAnnotationsToRemove = annotationsToRemove;
          if (psiAnnotations != null) {
              Arrays.stream(psiAnnotations).forEach(a -> {
-                 if (finalAnnotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
+                 if (annotationsToRemove.stream().anyMatch(m -> m.equals(a.getQualifiedName()))) {
                      psiAnnotationsToRemove.add(a);
                  }
              });
