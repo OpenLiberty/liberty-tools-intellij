@@ -52,10 +52,10 @@ public class RunLibertyDevTask extends AnAction {
             //if the action event data context returns a null project, just return and let successive update calls modify the presentation
             return;
         }
-        getLibertyTree(e, project, true);
+        handleLibertyTreeEvent(e, project, true);
     }
 
-    private static void getLibertyTree(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
+    private static void handleLibertyTreeEvent(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
             Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
@@ -68,13 +68,14 @@ public class RunLibertyDevTask extends AnAction {
                     if (view instanceof Tree) {
                         libertyTree = (Tree) view;
                         TreePath[] selectionPaths = libertyTree.getSelectionPaths();
-                        // when only one child node is selected, enable this action
                         if (selectionPaths != null && selectionPaths.length == 1) {
                             String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
                             if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
                                 if (isUpdate) {
                                     e.getPresentation().setEnabled(true);
+                                    // when only one child node is selected, enable this action
                                 } else {
+                                    // calls selected action
                                     AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
                                     action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(libertyTree), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
                                 }
@@ -107,7 +108,7 @@ public class RunLibertyDevTask extends AnAction {
                 action.actionPerformed(new AnActionEvent(null, e.getDataContext(), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
             }
         } else {
-            getLibertyTree(e, project, false);
+            handleLibertyTreeEvent(e, project, false);
         }
     }
 }
