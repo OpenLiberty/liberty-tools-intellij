@@ -28,7 +28,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
 ## Before you begin
 ### Software requirements
 <!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
-- **IntelliJ IDEA 2023.1** or later. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- Minimum of **IntelliJ IDEA 2023.1**. For the latest supported IntelliJ versions, see the [latest release notes](https://github.com/OpenLiberty/liberty-tools-intellij/releases/latest). Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
 - **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
