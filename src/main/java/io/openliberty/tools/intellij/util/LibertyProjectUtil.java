@@ -153,21 +153,24 @@ public class LibertyProjectUtil {
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
 
-        ContentManager contentManager = toolWindow.getContentManager();
-        Content[] contents = contentManager.getContents();
+        if (toolWindow != null) {
+            ContentManager contentManager = toolWindow.getContentManager();
+            Content[] contents = contentManager.getContents();
 
-        int index = 0;
-        for (int i = 0; i < contents.length; i++) {
-            if (contents[i].getPreferredFocusableComponent().equals(widget)) {
-                index = i;
-                break;
+            int index = 0;
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i].getPreferredFocusableComponent().equals(widget)) {
+                    index = i;
+                    break;
+                }
+            }
+            if (contents.length > 0 && index > 0) {
+                Content terminalContent = contents[index];
+                contentManager.setSelectedContent(terminalContent);
+                terminalContent.getComponent().requestFocus();
             }
         }
-        if (contents.length > 0 && index > 0) {
-            Content terminalContent = contents[index];
-            contentManager.setSelectedContent(terminalContent);
-            terminalContent.getComponent().requestFocus();
-        }
+
         if (widget == null && createWidget) {
             // create a new terminal tab
             ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
