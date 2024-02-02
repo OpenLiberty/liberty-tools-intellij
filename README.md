@@ -94,7 +94,7 @@ The following actions are available when you select a project in the Liberty Too
 
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
-**IntelliJ IDEA 2023.1** or later, using **Java 17** or later.
+Minimum of **IntelliJ IDEA 2023.1** and **Java 17**. For the latest supported IntelliJ versions, see the [latest release notes](https://github.com/OpenLiberty/liberty-tools-intellij/releases/latest).
 
 For more details, check the [user guide](docs/user-guide.md#software-requirements).
 
