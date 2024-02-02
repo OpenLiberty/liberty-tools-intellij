@@ -60,7 +60,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Action command to open the build file.
      */
-    private final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
+    private final String BUILD_FILE_OPEN_CMD = "Liberty: View pom.xml";
 
     /**
      * The path to the integration test reports.
