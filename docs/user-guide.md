@@ -14,8 +14,8 @@ For information regarding known issues and limitations, refer to our [Common Iss
     - [Start your application in dev mode](#start-your-application-in-dev-mode)
     - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
     - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
-- [Run your application's tests](#run-your-applications-tests)
-- [View your application's test reports](#view-your-applications-test-reports)
+- [Run your application tests](#run-your-application-tests)
+- [View your application test reports](#view-your-application-test-reports)
    - [Maven-built applications](#maven-built-applications)
    - [Gradle-built applications](#gradle-built-applications)
 - [Stop your application](#stop-your-application)
@@ -28,7 +28,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
 ## Before you begin
 ### Software requirements
 <!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
-- **IntelliJ IDEA 2023.1** or later. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- Version 23.0.12 requires **IntelliJ IDEA version 2023.1.\*** or **2023.2.\***. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
 - **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
