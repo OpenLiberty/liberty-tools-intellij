@@ -19,7 +19,7 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.util.List;
 
-public class ViewEffectivePom extends LibertyGeneralAction {
+public class ViewPomXml extends LibertyGeneralAction {
 
     /**
      * Returns the name of the action command being processed.
