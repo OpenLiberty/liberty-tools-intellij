@@ -18,8 +18,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ExtendClassProposal;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
@@ -42,7 +40,6 @@ import java.util.logging.Logger;
  */
 public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeActionParticipant {
     private static final Logger LOGGER = Logger.getLogger(InsertAnnotationMissingQuickFix.class.getName());
-    private static final String ANNOTATION_KEY = "annotation";
 
     private final String[] annotations;
 
@@ -83,7 +80,7 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        String name = getLabel(annotations);
+        String name = toResolve.getTitle();
         PsiElement node = context.getCoveringNode();
         PsiModifierListOwner parentType = getBinding(node);
 
@@ -94,7 +91,7 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class.", e);
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
         }
         return toResolve;
     }

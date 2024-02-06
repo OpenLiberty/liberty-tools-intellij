@@ -114,24 +114,26 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-persistence", "SupplyAttributesToAnnotations");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
-        String newText = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
-                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
-                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
-                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
-                "Map<Integer, String> test2;\n\n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    " +
-                "Map<Integer, String> test3;\n}";
-        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
-                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
-                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
-                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn(name = \"n1\")\n    " +
-                "@MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    Map<Integer, String> test2;\n\n    " +
-                "@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    Map<Integer, String> test3;\n}";
-        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\nimport jakarta.persistence.Entity;\n" +
-                "import jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
-                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
-                "Map<Integer, String> test1;\n\n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
-                "Map<Integer, String> test2;\n\n    @MapKeyJoinColumn\n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    " +
+                "@MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    Map<Integer, String> test1;\n    \n    " +
+                "@MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n    \n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
                 "@MapKeyJoinColumn()\n    Map<Integer, String> test3;\n}";
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n    \n    @MapKeyJoinColumn(name = \"n1\",referencedColumnName=\"\")\n    " +
+                "@MapKeyJoinColumn(referencedColumnName = \"rcn2\",name=\"\")\n    Map<Integer, String> test2;\n    \n    " +
+                "@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test3;\n}";
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n    \n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n    \n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
+                "@MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    Map<Integer, String> test3;\n}";
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
         TextEdit te1 = te(0, 0, 21, 1, newText);

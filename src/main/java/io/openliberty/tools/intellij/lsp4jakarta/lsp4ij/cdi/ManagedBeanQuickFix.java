@@ -40,7 +40,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
     private static final String ADD_ANNOTATION = "jakarta.enterprise.context.Dependent";
 
     public ManagedBeanQuickFix() {
-        super("jakarta.enterprise.context.Dependent");
+        super(ADD_ANNOTATION);
     }
 
     private static final String[] REMOVE_ANNOTATION_NAMES = new ArrayList<>(SCOPE_FQ_NAMES).toArray(new String[SCOPE_FQ_NAMES.size()]);
@@ -64,7 +64,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        String name = getLabel(ADD_ANNOTATION);
+        String name = toResolve.getTitle();
         PsiElement node = context.getCoveringNode();
         PsiModifierListOwner parentType = getBinding(node);
         ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(name, context.getCompilationUnit(),

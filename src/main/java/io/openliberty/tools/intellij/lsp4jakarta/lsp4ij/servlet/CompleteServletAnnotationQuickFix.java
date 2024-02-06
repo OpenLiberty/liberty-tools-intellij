@@ -95,7 +95,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
 
             ArrayList<String> attributesToAdd = new ArrayList<>();
             attributesToAdd.add(attribute);
-            String name = getLabel(annotation, attribute, "Add");
+            String name = toResolve.getTitle();
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, attributesToAdd);
             try {
@@ -112,7 +112,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
 
             ArrayList<String> attributesToRemove = new ArrayList<>();
             attributesToRemove.add(attribute);
-            String name = getLabel(annotation, attribute, "Remove");
+            String name = toResolve.getTitle();
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
             try {
