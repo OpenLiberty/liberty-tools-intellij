@@ -15,6 +15,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.completion;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +53,9 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
         try {
             return getInstance().isAdaptedForCompletion(context);
         }
+        catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
+        }
         catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCompletion", e);
             return false;
@@ -60,6 +66,9 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
     public List<? extends CompletionItem> collectCompletionItems(JavaCompletionContext context) {
         try {
             return getInstance().collectCompletionItems(context);
+        }
+        catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         }
         catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error while calling collectCompletionItems", e);
