@@ -72,8 +72,8 @@ public class RunLibertyDevTask extends AnAction {
                             String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
                             if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
                                 if (isUpdate) {
-                                    e.getPresentation().setEnabled(true);
                                     // when only one child node is selected, enable this action
+                                    e.getPresentation().setEnabled(true);
                                 } else {
                                     // calls selected action
                                     AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
