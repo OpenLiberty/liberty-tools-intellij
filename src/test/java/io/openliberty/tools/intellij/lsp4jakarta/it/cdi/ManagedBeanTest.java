@@ -57,7 +57,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic d1 = d(6, 12, 13,
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
+        
         Diagnostic d2 = d(5, 13, 24,
                 "Managed bean class of generic type must have scope @Dependent.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
@@ -87,7 +87,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
         assertJavaCodeAction(codeActionParams2, utils, ca2);
     }
-
+    
     @Test
     public void scopeDeclaration() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -109,7 +109,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic d2 = d(15, 25, 41, "Scope type annotations must be specified by a producer method at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
         d2.setData(new Gson().toJsonTree(Arrays.asList("ApplicationScoped", "RequestScoped", "Produces")));
-
+        
         Diagnostic d3 = d(10, 13, 29, "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
         d3.setData(new Gson().toJsonTree(Arrays.asList("ApplicationScoped", "RequestScoped")));
@@ -1257,6 +1257,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
     }
 
+    
     @Test
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -1265,14 +1266,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/MultipleDisposes.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
+        
         JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-
+        
         Diagnostic d = d(9, 18, 23,
                 "The @Disposes annotation must not be defined on more than one parameter of a method.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveExtraDisposes");
-
+        
         assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 }
