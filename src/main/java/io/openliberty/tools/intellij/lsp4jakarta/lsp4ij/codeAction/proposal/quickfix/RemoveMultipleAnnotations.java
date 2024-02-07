@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,7 +19,10 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCode
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -73,7 +76,7 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
      * will be removed at one go. For example, to provide the user with the option to remove
      * "@A, @B" and "@C". The return should be [[A, B], [C]]
      *
-     * @param project     The project is the context in which the annotation short names will be resolved to FQnames
+     * @param project  The project is the context in which the annotation short names will be resolved to FQnames
      * @param annotations All the annotations present on the member.
      * @return A List of Lists, with each list containing the annotations that must be
      * removed at the same time.

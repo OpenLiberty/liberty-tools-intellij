@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -33,7 +33,12 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -122,7 +127,6 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, declaringNode, annotationToRemove);
 
-        // Convert the proposal to LSP4J CodeAction
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
@@ -145,8 +149,6 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
 
     protected void removeAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
                                     List<CodeAction> codeActions, String... annotations) {
-        // Remove the annotation and the proper import by using JDT Core Manipulation
-        // API
         Map<String, Object> extendedData = new HashMap<>();
         String annotationToRemove = annotations[0];
         extendedData.put(ANNOTATION_TO_REMOVE, annotationToRemove);
