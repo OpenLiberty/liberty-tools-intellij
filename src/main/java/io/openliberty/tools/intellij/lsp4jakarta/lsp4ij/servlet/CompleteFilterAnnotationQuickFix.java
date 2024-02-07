@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  *
  */
 public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQuickFix {
-    private static final Logger LOGGER = Logger.getLogger(CompleteServletAnnotationQuickFix.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CompleteFilterAnnotationQuickFix.class.getName());
     private static final String DIAGNOSTIC_CODE_KEY = "diagnosticCode";
     private static final String ATTRIBUTE_KEY = "attribute";
     private static final String ANNOTATION_KEY = "annotation";
