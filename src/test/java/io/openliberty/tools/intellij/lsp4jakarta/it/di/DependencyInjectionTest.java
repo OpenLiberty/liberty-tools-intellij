@@ -52,7 +52,7 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         /* create expected diagnostics
-         *
+         * 
          */
         Diagnostic d1 = JakartaForJavaAssert.d(17, 27, 35, "The @Inject annotation must not define a final field.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrFinal");
@@ -61,19 +61,19 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         Diagnostic d2 = JakartaForJavaAssert.d(33, 25, 39, "The @Inject annotation must not define an abstract method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrAbstract");
         d2.setData("void");
-
+        
         Diagnostic d3 = JakartaForJavaAssert.d(26, 22, 33, "The @Inject annotation must not define a final method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrFinal");
         d3.setData("void");
-
+ 
         Diagnostic d4 = JakartaForJavaAssert.d(43, 23, 36, "The @Inject annotation must not define a generic method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectForGeneric");
         d4.setData("java.util.List<T>");
-
+        
         Diagnostic d5 = JakartaForJavaAssert.d(37, 23, 35, "The @Inject annotation must not define a static method.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInjectOrStatic");
         d5.setData("void");
-
+        
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
