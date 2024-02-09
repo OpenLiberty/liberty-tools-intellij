@@ -63,11 +63,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
-        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n" +
+        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.enterprise.context.*;\n" +
                 "import jakarta.enterprise.context.Dependent;\n\n" +
-                "@RequestScoped\npublic class ManagedBean<T> {\n    @Dependent\n    public int a;\n\n\n    " +
+                "@RequestScoped\npublic class ManagedBean<T> {\n    " +
+                "@Dependent\n    public int a;\n\n\n    " +
                 "public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
-        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n" +
+        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.enterprise.context.*;\n" +
                 "import jakarta.enterprise.context.Dependent;\n\n" +
                 "@Dependent\npublic class ManagedBean<T> {\n    public int a;\n\n\n    " +
                 "public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
