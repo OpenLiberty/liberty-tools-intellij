@@ -163,13 +163,13 @@ public class JakartaServletTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-servlet", "CompleteWebFilterAttributes");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
-        String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.*;\n" +
+        String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
                 "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(servletNames=\"\")\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
-        String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.*;\n" +
+        String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
                 "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(urlPatterns=\"\")\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
-        String newText2 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.*;\n" +
+        String newText2 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
                 "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(\"\")\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
 
