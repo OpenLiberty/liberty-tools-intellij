@@ -55,7 +55,7 @@ public class RunLibertyDevTask extends AnAction {
         handleLibertyTreeEvent(e, project, true);
     }
 
-    private static void handleLibertyTreeEvent(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
+    private void handleLibertyTreeEvent(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
             Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
