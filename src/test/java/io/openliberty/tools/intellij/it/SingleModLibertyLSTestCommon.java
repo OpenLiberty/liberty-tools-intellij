@@ -252,7 +252,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testDiagnosticInServerXML() {
-        String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
+        String stanzaSnippet = "<logging appsWriteJson=wrong\" />";
         String flaggedString = "wrong";
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
