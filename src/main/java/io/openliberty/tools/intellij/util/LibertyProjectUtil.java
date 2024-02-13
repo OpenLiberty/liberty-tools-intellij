@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,15 +13,19 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentManager;
 import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import org.jetbrains.plugins.terminal.TerminalView;
 import org.xml.sax.SAXException;
 
@@ -29,12 +33,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 public class LibertyProjectUtil {
-    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
+    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
     enum BuildFileFilter {
         ADDABLE {
@@ -149,6 +153,27 @@ public class LibertyProjectUtil {
         TerminalView terminalView = TerminalView.getInstance(project);
         // look for existing terminal tab
         ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
+        TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
+        ToolWindow toolWindow = manager.getToolWindow();
+
+        if (toolWindow != null) {
+            ContentManager contentManager = toolWindow.getContentManager();
+            Content[] contents = contentManager.getContents();
+
+            int index = 0;
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i].getPreferredFocusableComponent().equals(widget)) {
+                    index = i;
+                    break;
+                }
+            }
+            if (contents.length > 0 && index > 0) {
+                Content terminalContent = contents[index];
+                contentManager.setSelectedContent(terminalContent);
+                terminalContent.getComponent().requestFocus();
+            }
+        }
+
         if (widget == null && createWidget) {
             // create a new terminal tab
             ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
