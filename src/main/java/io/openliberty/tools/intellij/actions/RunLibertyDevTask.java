@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -51,27 +52,40 @@ public class RunLibertyDevTask extends AnAction {
             //if the action event data context returns a null project, just return and let successive update calls modify the presentation
             return;
         }
+        handleLibertyTreeEvent(e, project, true);
+    }
+
+    private void handleLibertyTreeEvent(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
             Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
+            Tree libertyTree = null;
             for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                    Tree libertyTree = (Tree) comp;
-
-                    TreePath[] selectionPaths = libertyTree.getSelectionPaths();
-
-                    // when only one child node is selected, enable this action
-                    if (selectionPaths != null && selectionPaths.length == 1) {
-                        String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
-                        if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
-                            e.getPresentation().setEnabled(true);
+                if (comp instanceof JBScrollPane scrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                    Component view = scrollPane.getViewport().getView();
+                    if (view instanceof Tree) {
+                        libertyTree = (Tree) view;
+                        TreePath[] selectionPaths = libertyTree.getSelectionPaths();
+                        if (selectionPaths != null && selectionPaths.length == 1) {
+                            String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
+                            if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
+                                if (isUpdate) {
+                                    // when only one child node is selected, enable this action
+                                    e.getPresentation().setEnabled(true);
+                                } else {
+                                    // calls selected action
+                                    AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
+                                    action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(libertyTree), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
+                                }
+                            }
                         }
                     }
-                } else {
-                    LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
                 }
+            }
+            if (libertyTree == null) {
+                LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
             }
         }
     }
@@ -94,31 +108,7 @@ public class RunLibertyDevTask extends AnAction {
                 action.actionPerformed(new AnActionEvent(null, e.getDataContext(), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
             }
         } else {
-            // triggered through icon on tool window
-            ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
-
-            Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
-
-            JComponent libertyWindow = content.getComponent();
-
-            Component[] components = libertyWindow.getComponents();
-
-            for (Component comp : components) {
-                if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                    Tree libertyTree = (Tree) comp;
-                    TreePath[] selectionPaths = libertyTree.getSelectionPaths();
-                    if (selectionPaths != null && selectionPaths.length == 1) {
-                        String lastPathComponent = selectionPaths[0].getLastPathComponent().toString();
-                        if (Constants.FULL_ACTIONS_MAP.containsKey(lastPathComponent)) {
-                            // calls selected action
-                            AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
-                            action.actionPerformed(new AnActionEvent(null, DataManager.getInstance().getDataContext(libertyTree), e.getPlace(), e.getPresentation(), ActionManager.getInstance(), 0));
-                        }
-                    }
-                } else {
-                    LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
-                }
-            }
+            handleLibertyTreeEvent(e, project, false);
         }
     }
 }
