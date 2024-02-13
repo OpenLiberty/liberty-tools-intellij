@@ -131,8 +131,8 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testInsertLibertyConfigElementIntoServerXML() {
-        String stanzaSnippet = "use";
-        String insertedConfig = "<userInfo></userInfo>";
+        String stanzaSnippet = "log";
+        String insertedConfig = "<logging></logging>";
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
@@ -147,6 +147,7 @@ public abstract class SingleModLibertyLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
+            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
     }
