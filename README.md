@@ -1,7 +1,7 @@
 # Liberty Tools for IntelliJ IDEA
 
 <!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
-> Note: Requires **IntelliJ IDEA 2023.1** or later, and **Java 17** or later. 
+> Note: Version 23.0.12 requires **IntelliJ IDEA 2023.1.\*** or **2023.2.\*** and a minimum of **Java 17**.
 >
 > This page provides an overview of Liberty Tools for IntelliJ IDEA.
 > For minimum requirements information and detailed instructions on how to use Liberty Tools, check the [user-guide](docs/user-guide.md).
@@ -94,7 +94,7 @@ The following actions are available when you select a project in the Liberty Too
 
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
-**IntelliJ IDEA 2023.1** or later, using **Java 17** or later.
+Version 23.0.12 requires **IntelliJ IDEA 2023.1.\*** or **2023.2.\*** and a minimum of **Java 17**.
 
 For more details, check the [user guide](docs/user-guide.md#software-requirements).
 

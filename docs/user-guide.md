@@ -14,8 +14,8 @@ For information regarding known issues and limitations, refer to our [Common Iss
     - [Start your application in dev mode](#start-your-application-in-dev-mode)
     - [Start your application in dev mode with configuration](#start-your-application-in-dev-mode-with-configuration)
     - [Start your application in dev mode in a container](#start-your-application-in-dev-mode-in-a-container)
-- [Run your application's tests](#run-your-applications-tests)
-- [View your application's test reports](#view-your-applications-test-reports)
+- [Run your application tests](#run-your-application-tests)
+- [View your application test reports](#view-your-application-test-reports)
    - [Maven-built applications](#maven-built-applications)
    - [Gradle-built applications](#gradle-built-applications)
 - [Stop your application](#stop-your-application)
@@ -28,7 +28,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
 ## Before you begin
 ### Software requirements
 <!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
-- **IntelliJ IDEA 2023.1** or later. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
+- Version 23.0.12 requires **IntelliJ IDEA version 2023.1.\*** or **2023.2.\***. Liberty Tools for IntelliJ IDEA is compatible with the Community Edition of IntelliJ IDEA.
 - **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
@@ -85,7 +85,7 @@ A new terminal tab opens to the run the application in dev mode.
 
 ### Start your application in dev mode with configuration
 
-To start your application in dev mode with custom configuration, select the **Start...** action for your application in the Liberty tool window. The action opens a Liberty Edit Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters).
+To start your application in dev mode with custom configuration, select the **Start...** action for your application in the Liberty tool window. The action opens a Liberty Edit Configuration dialog. You can specify parameters for the [Liberty Maven dev goal](https://github.com/OpenLiberty/ci.maven/blob/main/docs/dev.md#additional-parameters) or [Liberty Gradle dev task](https://github.com/OpenLiberty/ci.gradle/blob/main/docs/libertyDev.md#command-line-parameters). You can also check the **Run in container** checkbox to start your application in dev mode in a container.
 
 ![Liberty Start... action](images/liberty-start-with-config.png)
 
@@ -193,7 +193,7 @@ Liberty configuration assistance is offered through the Liberty Config Language 
 
 ## Develop with Jakarta EE and MicroProfile APIs
 
-Liberty Tools editing assistance provides code completion in configuration and application files for Jakarta EE and MicroProfile APIs.
+Liberty Tools editing assistance provides code completion, diagnostics, and quick-fixes in configuration and application files for Jakarta EE and MicroProfile APIs.
 
 1. Open a Java or microprofile-config.properties file.
 2. To use Jakarta EE-specific and MicroProfile-specific code completion, press <kbd>Ctrl</kbd> + <kbd>Space</kbd> / <kbd>Cmd</kbd> + <kbd>Space</kbd> anywhere within the document. A drop-down list of completion suggestions appears.
@@ -201,6 +201,10 @@ Liberty Tools editing assistance provides code completion in configuration and a
 ![Eclipse LSP4Jakarta RESTful WS completion](images/LSP4Jakarta-rest-completion.png)
 
 ![Eclipse LSP4MP microprofile-config.properties completion](images/LSP4MP-mp-properties-completion.png)
+
+3. To use Jakarta EE-specific and MicroProfile-specific quick-fixes, hover over a Jakarta EE or MicroProfile diagnostic. A pop-up dialog appears that contains the diagnostic message and a quick-fix suggestion, if available. To see more quick-fix suggestions, click on the **More actions...** link.
+
+![Jakarta EE quick fix](images/LSP4Jakarta-quickfix.png)
 
 Jakarta EE API configuration assistance is offered through Eclipse LSP4Jakarta, the Language Server for Jakarta EE. For more information, see the [project documentation in GitHub](https://github.com/eclipse/lsp4jakarta#eclipse-lsp4jakarta).
 

@@ -1691,7 +1691,13 @@ public class UIBotTestUtils {
      * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
      */
     public static void waitForLTWNoProjectDetectedMsg(RemoteRobot remoteRobot, int waitTime) {
-        String text = "No Liberty Maven or Liberty Gradle projects detected in this workspace.";
+        String text = " 1. If no projects are open in the Project tool window, open or create a Liberty project using " +
+                "the File menu.  2. If one or more existing Maven or Gradle projects are open in the Project tool " +
+                "window, try one of the following actions:   a. Configure the Liberty build plugin in the build file " +
+                "of an existing Maven or Gradle project. b. Add a server.xml file to an existing Maven or Gradle " +
+                "project at 'src/main/liberty/config'. c. Manually add an existing Maven or Gradle project to the" +
+                " Liberty tool window using the 'Liberty: Add project to the tool window' action through the " +
+                "Search Everywhere window.";
 
         int maxRetries = 3;
         Exception error = null;

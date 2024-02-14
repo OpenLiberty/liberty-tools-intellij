@@ -180,15 +180,15 @@ public class LibertyGradleUtil {
      * @return String command to execute in the terminal or an exception to display
      * @throws LibertyException
      */
-    public static String getGradleSettingsCmd(Project project) throws LibertyException {
-        GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(project.getBasePath());
+    public static String getGradleSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
+        GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(buildFile.getParent().getPath());
         if (gradleProjectSettings == null) {
             String translatedMessage = LocalizedResourceUtil.getMessage("gradle.settings.is.null");
             throw new LibertyException("Could not execute action because there is an error with Gradle configuration. Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
         }
         else if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
-            return getLocalGradleWrapperPath(project);
+            return getLocalGradleWrapperPath(gradleProjectSettings.getExternalProjectPath());
         }
         else if (DistributionType.LOCAL.equals(gradleProjectSettings.getDistributionType())) {
             // local gradle to be used
@@ -206,13 +206,13 @@ public class LibertyGradleUtil {
     /**
      * Get the local wrapper path for Gradle that is in the project level
      *
-     * @param project liberty project
+     * @param wrapperDir location of gradle wrapper
      * @return the Graddle wrapper path to be executed or an exception to display
      * @throws LibertyException
      */
-    private static String getLocalGradleWrapperPath(Project project) throws LibertyException {
+    private static String getLocalGradleWrapperPath(String wrapperDir) throws LibertyException {
         String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
-        File file = new File(project.getBasePath(), gradlew);
+        File file = new File(wrapperDir, gradlew);
         if (!file.exists()){
             String translatedMessage = LocalizedResourceUtil.getMessage("gradle.wrapper.does.not.exist");
             throw new LibertyException("A Gradle wrapper for the project could not be found. Make sure to configure a " +
