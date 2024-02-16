@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,6 +23,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
@@ -54,7 +55,9 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         Tree tree = buildTree(project, getBackground());
 
         if (tree != null) {
-            this.setContent(tree);
+            JBScrollPane scrollPane = new JBScrollPane(tree);
+            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+            this.setContent(scrollPane);
         } else {
             JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
             jbTextArea.setEditable(false);
@@ -321,13 +324,15 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
 
             // select icon for node based on project type
-            LibertyModuleNode moduleNode = (LibertyModuleNode) value;
-            if (moduleNode.isGradleProjectType()) {
-                setIcon(LibertyPluginIcons.gradleIcon);
-            } else if (moduleNode.isMavenProjectType()) {
-                setIcon(LibertyPluginIcons.mavenIcon);
-            } else {
-                setIcon(LibertyPluginIcons.libertyIcon);
+            if (value instanceof LibertyModuleNode) {
+                LibertyModuleNode moduleNode = (LibertyModuleNode) value;
+                if (moduleNode.isGradleProjectType()) {
+                    setIcon(LibertyPluginIcons.gradleIcon);
+                } else if (moduleNode.isMavenProjectType()) {
+                    setIcon(LibertyPluginIcons.mavenIcon);
+                } else {
+                    setIcon(LibertyPluginIcons.libertyIcon);
+                }
             }
 
             return this;

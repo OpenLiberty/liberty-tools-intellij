@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
@@ -60,8 +61,9 @@ public class RefreshLibertyToolbar extends AnAction {
         Component existingTree = null;
         Component existingActionToolbar = null;
         for (Component comp : components) {
-            if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_TREE)) {
-                existingTree = comp;
+            if (comp instanceof JBScrollPane && comp.getName() != null && comp.getName().equals(Constants.LIBERTY_SCROLL_PANE)) {
+                JBScrollPane scrollPane = (JBScrollPane) comp;
+                existingTree = scrollPane.getViewport().getView();
             }
             if (comp.getName() != null && comp.getName().equals(Constants.LIBERTY_ACTION_TOOLBAR)) {
                 existingActionToolbar = comp;
@@ -78,7 +80,9 @@ public class RefreshLibertyToolbar extends AnAction {
             }
             simpleToolWindowPanel.setToolbar(actionToolbar.getComponent());
             if (tree != null) {
-                simpleToolWindowPanel.setContent(tree);
+                JBScrollPane scrollPane = new JBScrollPane(tree);
+                scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+                simpleToolWindowPanel.setContent(scrollPane);
             } else {
                 JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
