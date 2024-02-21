@@ -99,7 +99,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingDropDownMenu() {
         String testName = "testStartWithParamsActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -154,7 +154,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingPlayToolbarButton() {
         String testName = "testStartWithParamsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -208,7 +208,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingPopUpMenu() {
         String testName = "testStartWithParamsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -262,7 +262,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingSearch() {
         String testName = "testStartWithParamsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -316,7 +316,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingDropDownMenu() {
         String testName = "testRunTestsActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -355,7 +355,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingPlayToolbarButton() {
         String testName = "testRunTestsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -393,7 +393,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingPopUpMenu() {
         String testName = "testRunTestsActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -431,7 +431,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingSearch() {
         String testName = "testRunTestsActionUsingSearch";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -472,7 +472,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithConfigInDebugModeUsingToolbar";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -532,7 +532,130 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInDebugModeUsingMenu() {
         String testName = "testStartWithConfigInDebugModeUsingMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "menuDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using custom WLP installation path
+     * - Using project frame toolbar's config selection box and Debug icon to select a Liberty configuration and start dev mode.
+     * - Automatic server JVM attachment to the debugger.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingToolbar() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
+        String absoluteWLPPath = getAbsoluteWLPPath();
+        //getWLPInstallPath();
+        //Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "toolBarDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using custom WLP installation path
+     * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingMenu() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
+        String absoluteWLPPath = getAbsoluteWLPPath();
+        //getWLPInstallPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -589,7 +712,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInRunModeUsingToolbar() {
         String testName = "testStartWithConfigInRunModeUsingToolbar";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -628,7 +751,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInRunModeUsingMenu() {
         String testName = "testStartWithConfigInRunModeUsingMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -776,7 +899,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Disabled
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", false, 3);
@@ -841,7 +964,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Disabled
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start in container", 3);
@@ -874,7 +997,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Disabled
     public void testStartInContainerActionUsingSearch() {
         String testName = "testStartInContainerActionUsingSearch";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3);
@@ -997,4 +1120,6 @@ public abstract class SingleModMPProjectTestCommon {
      * Validates that test reports were generated.
      */
     public abstract void validateTestReportsExist();
+
+    public abstract String getAbsoluteWLPPath();
 }

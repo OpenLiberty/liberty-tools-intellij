@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archive>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/singleModGradleMP/src/main/webapp" targetInArchive="/"/>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/singleModGradleMP/build/classes/java/main" targetInArchive="/WEB-INF/classes/"/>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/singleModGradleMP/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
+    <file sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/singleModGradleMP/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+</archive>

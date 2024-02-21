@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archive>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/custom-liberty-install-gradle-app/src/main/webapp" targetInArchive="/"/>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/custom-liberty-install-gradle-app/build/classes/java/main" targetInArchive="/WEB-INF/classes/"/>
+    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/custom-liberty-install-gradle-app/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
+    <file sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/gradle/custom-liberty-install-gradle-app/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+</archive>

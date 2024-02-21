@@ -186,4 +186,9 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(TEST_REPORT_PATH);
     }
+
+    @Override
+    public String getAbsoluteWLPPath() {
+        return Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
+    }
 }

@@ -182,6 +182,7 @@ public class DebugModeHandler {
             }
 
             // Detect if dev mode has started
+            // serverEnvBakPath can only be set once serverEnvPath has been set
             if (serverEnvPath == null) {
                 serverEnvPath = getServerEnvPath(libertyModule);
             } else if (serverEnvBakPath == null) {

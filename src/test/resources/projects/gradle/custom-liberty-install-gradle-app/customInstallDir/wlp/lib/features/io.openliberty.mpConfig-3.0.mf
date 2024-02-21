@@ -1,0 +1,38 @@
+Created-By: 17.0.4.1 (IBM Corporation)
+IBM-API-Package: org.eclipse.microprofile.config; type=stable,
+ org.eclipse.microprofile.config.spi; type=stable,
+ org.eclipse.microprofile.config.inject; type=stable,
+ io.smallrye.config; type=internal
+IBM-App-ForceRestart: install,
+ uninstall
+IBM-AppliesTo: io.openliberty;productVersion="24.0.0.1"
+IBM-Feature-Version: 2
+IBM-InstallTo: core
+IBM-License-Agreement: wlp/lafiles/LA
+IBM-ProductID: io.openliberty
+IBM-ShortName: mpConfig-3.0
+Subsystem-Content: com.ibm.websphere.appserver.appmanager-1.0; type="osgi.subsystem.feature",
+ io.openliberty.jakarta.annotation-2.0; ibm.tolerates:="2.1"; type="osgi.subsystem.feature",
+ io.openliberty.org.eclipse.microprofile.config-3.0; type="osgi.subsystem.feature",
+ com.ibm.websphere.appserver.internal.slf4j-1.7; type="osgi.subsystem.feature",
+ io.openliberty.jakarta.cdi-3.0; ibm.tolerates:="4.0"; type="osgi.subsystem.feature",
+ io.openliberty.io.smallrye.config.jakarta; version="[1.0.0,1.0.200)",
+ io.openliberty.io.smallrye.common.jakarta; version="[1.0.0,1.0.200)",
+ io.openliberty.microprofile.config.internal.common; version="[1.0.0,1.0.200)",
+ io.openliberty.microprofile.config.internal.serverxml; version="[1.0.0,1.0.200)",
+ com.ibm.ws.org.apache.commons.lang3; version="[1.0.0,1.0.200)",
+ com.ibm.ws.cdi.interfaces.jakarta; version="[1.0.0,1.0.200)",
+ com.ibm.ws.org.jboss.logging; version="[1.0.0,1.0.200)"
+Subsystem-Description: %description
+Subsystem-License: https://www.eclipse.org/legal/epl-2.0/
+Subsystem-Localization: OSGI-INF/l10n/io.openliberty.mpConfig-3.0
+Subsystem-ManifestVersion: 1
+Subsystem-Name: MicroProfile Config 3.0
+Subsystem-SymbolicName: io.openliberty.mpConfig-3.0; visibility:=public; singleton:=true
+Subsystem-Type: osgi.subsystem.feature
+Subsystem-Vendor: IBM Corp.
+Subsystem-Version: 1.0.0
+Tool: Bnd-7.0.0.202310060912
+WLP-Activation-Type: parallel
+WLP-DisableAllFeatures-OnConflict: true
+WLP-InstantOn-Enabled: true
