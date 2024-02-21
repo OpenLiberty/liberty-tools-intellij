@@ -39,7 +39,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) settings.getConfiguration();
             LibertyModules libertyModules = LibertyModules.getInstance();
             try {
-                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(runConfig.getBuildFile()));
+                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL("file://" + runConfig.getBuildFile()));
                 LibertyModule libertyModule = libertyModules.getLibertyModule(vBuildFile);
                 if (libertyModule != null && libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
                     libertyModule.clearCustomStartParams();
