@@ -1,7 +1,7 @@
-Open Liberty Version 24.0.0.1 - (24.0.0.1-202401152100)
+WebSphere Application Server Version 23.0.0.11 Liberty - (23.0.0.11-cl231120231030-1102)
 
 
-I. CONTROLLING OPEN LIBERTY
+I. CONTROLLING WEBSPHERE APPLICATION SERVER LIBERTY
 
 The bin directory contains a server script to help control the server process.
 The script supports the following actions:
@@ -35,7 +35,9 @@ If a serverName is not specified, "defaultServer" will be used.
 
 Notes:
 
-The server requires Java 8, 11 or 17.   To download IBM Semeru Runtimes, visit 
+The server requires Java 8, 11 or 17. See the WebSphere Application Server IBM Documentation
+for details about minimum requirements for your development environment
+(Java and operating system).  To download IBM Semeru Runtimes, visit 
 https://developer.ibm.com/languages/java/semeru-runtimes/downloads/
 
 The script will try to find the java executable in your environment by
@@ -52,7 +54,11 @@ to set JAVA_HOME:
   > export PATH=$JAVA_HOME/bin:$PATH
 
 By default, the server uses TCP/IP port 9080 for HTTP traffic, and port
-9443 for HTTPS traffic. 
+9443 for HTTPS traffic. The server management script does not track or
+manage port number assignments. For more information defining the ports
+used by the server, see the WebSphere Application Server Knowledge
+Center.
+
 
 II. SERVER CONFIGURATION FILES
 
@@ -66,8 +72,8 @@ III. INSTALLING AN APPLICATION
 No applications are installed by default.
 
 Before installing an application, update the server configuration file,
-server.xml, to include any required features and resources. 
-For more information, visit http://openliberty.io
+server.xml, to include any required features and resources. For more
+information, see the WebSphere Application Server Knowledge Center.
 
 * Adding the application as a dropin
 
@@ -77,10 +83,13 @@ Be sure to maintain the file extension of the archive or directory so that
 the server can determine the type of the application. Do not define the
 dropin applications in the server configuration.
 
-Adding or removing an application from the dropins folder while the server
-is running will be detected and updated by the server.
+When using the dropin approach, you can add or remove an application
+while the server is running and the changes will be detected by the server.
 The server will detect changes to static or dynamically compiled resources
-like JSPs as soon as they are made. 
+like JSPs as soon as they are made. To update the pre-compiled portions of
+an application, like servlets, delete the application from the dropins
+directory, pause briefly, and add the updated application to the dropins
+directory.
 
 * Adding the application to the server configuration
 
@@ -89,7 +98,7 @@ into the apps directory and define the application in the server
 configuration. To remove the application, remove the application from the
 server configuration. The server can be configured to monitor changes
 in configured applications, and will restart the application for you
-as necessary when changes are detected.
+if changes are detected.
 
 For example:
 
@@ -102,6 +111,7 @@ For example:
 |  |  |  |  +- apps/                Configured application directory
 |  |  |  |  |  +- OrderForm.war
 
+For more information, see the WebSphere Application Server Knowledge Center.
 
 
 IV. DIRECTORY LOCATIONS AND VARIABLES
@@ -120,6 +130,8 @@ By default, the runtime uses the following directory structure:
   +- lib/                                               Platform runtime (internal)
   +- templates/                                         Runtime customization templates and examples
   |  +- servers/                                        Server configuration templates
+  |  +- zos/                                            z/OS-specific templates
+  |  |  +- procs/                                       z/OS proc templates for starting a Liberty server
   +- usr/                          wlp.user.dir         User directory
   |  +- shared/
   |  |  +- jvm.options                                  Server JVM options (optional: merged with server specific jvm.options)
@@ -144,9 +156,9 @@ By default, the runtime uses the following directory structure:
   |  |  |  +- workarea                                  Server's workarea directory
 
 
-** Note: The individual server directory appears in the above list twice. Read-only 
-configuration data may be stored separately from the read-write space required by a
-running server. See Section V.
+** Note: The individual server directory appears in the above list twice. In
+advanced installation patterns, read-only configuration data may be stored
+separately from the read-write space required by a running server. See Section V.
 
 The variables associated with each directory (where present) can be used to
 specify file locations when configuring the server in server.xml. For example, you

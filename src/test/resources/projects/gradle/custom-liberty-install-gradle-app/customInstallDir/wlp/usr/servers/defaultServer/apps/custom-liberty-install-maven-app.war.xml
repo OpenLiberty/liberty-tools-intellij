@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<archive>
-    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/maven/custom-liberty-install-maven-app/src/main/webapp" targetInArchive="/"/>
-    <dir sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/maven/custom-liberty-install-maven-app/target/classes" targetInArchive="/WEB-INF/classes"/>
-    <file sourceOnDisk="/Users/dessina/Documents/Workspace/IntelliJ/liberty-tools-intellij/src/test/resources/projects/maven/custom-liberty-install-maven-app/target/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-</archive>
