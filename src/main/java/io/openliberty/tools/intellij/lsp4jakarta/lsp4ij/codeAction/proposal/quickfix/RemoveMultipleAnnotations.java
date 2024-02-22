@@ -20,9 +20,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,14 +55,9 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
 
             List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(parentType.getProject(), annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
-
                 // For each list we will create one code action in its own context
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
-
-                Map<String, Object> extendedData = new HashMap<>();
-                extendedData.put(ANNOTATION_LIST, annotationsToRemove);
-
-                removeAnnotation(diagnostic, context, codeActions, extendedData, annotationsToRemove);
+                removeAnnotation(diagnostic, context, codeActions, annotationsToRemove);
             }
             return codeActions;
         }

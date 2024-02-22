@@ -52,9 +52,8 @@ import java.util.stream.Collectors;
  */
 public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActionParticipant {
 
-    protected static final String ANNOTATION_LIST = "annotationList";
     private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
-    private String[] annotations;
+    private final String[] annotations;
     protected final boolean generateOnlyOneCodeAction;
 
     private static final Logger LOGGER = Logger.getLogger(RemoveAnnotationConflictQuickFix.class.getName());
@@ -105,27 +104,15 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
 
-        String annotationsToRemove;
-        if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof String) {
-            annotationsToRemove = (String) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
-        } else {
-            annotationsToRemove = "";
+        List<String> resolveAnnotations = new ArrayList<>();
+        if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List) {
+            resolveAnnotations = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
         }
-
-        String[] annotationToRemove = new String[0];
-        if (Arrays.stream(annotations).anyMatch(x -> x.contains(annotationsToRemove))) {
-            annotationToRemove = new String[]{annotationsToRemove};
-        }
-
+        String[] resolveAnnotationsArray = resolveAnnotations.toArray(String[]::new);
         String name = toResolve.getTitle();
-        if (data.getExtendedDataEntry(ANNOTATION_LIST) instanceof String[]) {
-            annotationToRemove = (String[]) data.getExtendedDataEntry(ANNOTATION_LIST);
-            name = getLabel(annotationToRemove);
-        }
-
         PsiElement declaringNode = getBinding(context.getCoveredNode());
         ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, declaringNode, annotationToRemove);
+                context.getASTRoot(), parentType, 0, declaringNode, resolveAnnotationsArray);
 
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
@@ -149,18 +136,12 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
 
     protected void removeAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
                                     List<CodeAction> codeActions, String... annotations) {
-        Map<String, Object> extendedData = new HashMap<>();
-        String annotationToRemove = annotations[0];
-        extendedData.put(ANNOTATION_TO_REMOVE, annotationToRemove);
-        removeAnnotation(diagnostic, context, codeActions, extendedData, annotations);
-    }
-
-    protected void removeAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
-                                    List<CodeAction> codeActions, Map<String, Object> data, String... annotations) {
         // Remove the annotation and the proper import by using JDT Core Manipulation
         // API
         String name = getLabel(annotations);
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), data));
+        Map<String, Object> extendedData = new HashMap<>();
+        extendedData.put(ANNOTATION_TO_REMOVE, Arrays.asList(annotations));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
     }
 
     protected static PsiElement getBinding(PsiElement node) {
