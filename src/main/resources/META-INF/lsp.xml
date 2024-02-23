@@ -16,6 +16,7 @@
                 class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                lastDocumentDisconnectedTimeout="36000"
                 scope="project">
             <description><![CDATA[
                 The <a href="https://github.com/eclipse/lsp4mp">MicroProfile language server</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
@@ -37,6 +38,7 @@
                 class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                lastDocumentDisconnectedTimeout="36000"
                 scope="project">
             <description><![CDATA[
                 The Liberty XML language server provides support in:
@@ -54,6 +56,7 @@
                 class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                lastDocumentDisconnectedTimeout="36000"
                 scope="project">
             <description><![CDATA[
                 The Liberty Configuration language server provides support in:
@@ -73,6 +76,7 @@
                 class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
                 clientImpl="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
                 serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
+                lastDocumentDisconnectedTimeout="36000"
                 scope="project">
             <description><![CDATA[
                 The Jakarta language server provides support in:
