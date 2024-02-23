@@ -137,8 +137,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testMPQuickFixInJavaFile() {
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
@@ -267,8 +265,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testQuickFixInMicroProfileConfigProperties() {
         String MPCfgSnippet = "mp.health.disable";
         String MPCfgNameChooserSnippet = "procedures";
