@@ -286,12 +286,10 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testQuickFixInServerXML() {
-        String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
+        String stanzaSnippet = "<logging appsWriteJson=wrong\" />";
         String flaggedString = "wrong";
-        String correctedStanza = "<mpMetrics authentication=\"true\" />";
+        String correctedStanza = "<logging appsWriteJson=\"true\" />";
         String quickfixChooserString = "Replace with 'true'";
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
@@ -315,6 +313,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         } finally {
             // Replace server.xml content with the original content
+            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
 
