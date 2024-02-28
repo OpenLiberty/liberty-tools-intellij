@@ -64,7 +64,6 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
             for (String annotation : fqAnnotations) {
                 List<String> resultingAnnotations = new ArrayList<>(fqAnnotations);
                 resultingAnnotations.remove(annotation);
-                // For each list we will create one code action in its own context
                 removeAnnotation(diagnostic, context, codeActions,
                         resultingAnnotations.toArray(new String[] {}));
             }
