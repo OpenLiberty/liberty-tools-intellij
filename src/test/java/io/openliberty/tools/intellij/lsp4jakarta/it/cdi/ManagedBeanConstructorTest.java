@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2023 IBM Corporation.
+* Copyright (c) 2021, 2024 IBM Corporation.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -68,8 +68,22 @@ public class ManagedBeanConstructorTest extends BaseJakartaTest {
 
         // test expected quick-fix
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-        TextEdit te2 = te(0, 0, 25, 0, "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     Hani Damlaj\n *******************************************************************************/\n\npackage io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\npublic class ManagedBeanConstructor {\n    private int a;\n\n    protected ManagedBeanConstructor() {\n    }\n\n    public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n");
-        TextEdit te3 = te(0, 0, 25, 0, "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     Hani Damlaj\n *******************************************************************************/\n\npackage io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\npublic class ManagedBeanConstructor {\n    private int a;\n\n    public ManagedBeanConstructor() {\n    }\n\n    public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n");
+        String newText = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
+                "*\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which " +
+                "is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     " +
+                "Hani Damlaj\n *******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\n" +
+                "public class ManagedBeanConstructor {\n    private int a;\n\n    protected ManagedBeanConstructor() {\n    }\n\n    " +
+                "public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n";
+        TextEdit te2 = te(0, 0, 25, 0, newText);
+        String newText1 = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
+                "*\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which " +
+                "is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     " +
+                "Hani Damlaj\n *******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\n" +
+                "public class ManagedBeanConstructor {\n    private int a;\n\n    public ManagedBeanConstructor() {\n    }\n\n    " +
+                "public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n";
+        TextEdit te3 = te(0, 0, 25, 0, newText1);
         CodeAction ca2 = ca(uri, Messages.getMessage("AddProtectedConstructor"), d, te2);
         CodeAction ca3 = ca(uri, Messages.getMessage("AddPublicConstructor"), d, te3);
         assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);

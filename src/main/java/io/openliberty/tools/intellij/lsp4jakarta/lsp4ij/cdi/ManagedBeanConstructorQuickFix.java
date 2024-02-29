@@ -1,4 +1,4 @@
-/* Copyright (c) 2021 IBM Corporation.
+/* Copyright (c) 2021, 2024 IBM Corporation.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,5 +16,10 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 public class ManagedBeanConstructorQuickFix extends InsertAnnotationMissingQuickFix {
     public ManagedBeanConstructorQuickFix() {
         super("jakarta.inject.Inject");
+    }
+
+    @Override
+    public String getParticipantId() {
+        return ManagedBeanConstructorQuickFix.class.getName();
     }
 }

@@ -26,4 +26,10 @@ public class RemoveAnnotationsProposal extends RemoveElementsProposal {
                                      List<PsiAnnotation> annotationsToRemove) {
         super(label, sourceCU, invocationNode, binding, relevance, annotationsToRemove);
     }
+
+    public RemoveAnnotationsProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
+                                     PsiModifierListOwner binding, int relevance,
+                                     List<PsiAnnotation> annotationsToRemove, boolean isFormatRequired) {
+        super(label, sourceCU, invocationNode, binding, relevance, annotationsToRemove, isFormatRequired);
+    }
 }

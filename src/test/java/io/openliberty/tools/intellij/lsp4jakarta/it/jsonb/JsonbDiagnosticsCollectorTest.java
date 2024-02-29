@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2023 IBM Corporation and others.
+* Copyright (c) 2021, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -62,20 +62,48 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        if (CHECK_CODE_ACTIONS) {
-            // test code actions
+            // Starting codeAction tests
+        String newText = "/*******************************************************************************\n" +
+                " * Copyright (c) 2021 IBM Corporation and others.\n *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbCreator;\n\n" +
+                "public class ExtraJsonbCreatorAnnotations {\n" +
+                "    public ExtraJsonbCreatorAnnotations() {}\n    \n    @JsonbCreator\n" +
+                "    private static ExtraJsonbCreatorAnnotations factoryMethod() {\n" +
+                "        return null;\n    }\n}";
+
             JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-            TextEdit te1 = JakartaForJavaAssert.te(17, 4, 18, 4, "");
+            TextEdit te1 = JakartaForJavaAssert.te(0, 0, 24, 1, newText);
             CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d1, te1);
 
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
-            TextEdit te2 = JakartaForJavaAssert.te(20, 4, 21, 4, "");
+        String newText1 = "/*******************************************************************************\n" +
+                " * Copyright (c) 2021 IBM Corporation and others.\n *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbCreator;\n\n" +
+                "public class ExtraJsonbCreatorAnnotations {\n    @JsonbCreator\n" +
+                "    public ExtraJsonbCreatorAnnotations() {}\n    \n" +
+                "    private static ExtraJsonbCreatorAnnotations factoryMethod() {\n" +
+                "        return null;\n    }\n}";
+
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+            TextEdit te2 = JakartaForJavaAssert.te(0, 0, 24, 1, newText1);
             CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @JsonbCreator", d2, te2);
 
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
-        }
     }
     
     @Test
