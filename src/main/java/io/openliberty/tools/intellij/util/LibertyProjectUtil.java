@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;

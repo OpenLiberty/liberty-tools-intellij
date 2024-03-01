@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);

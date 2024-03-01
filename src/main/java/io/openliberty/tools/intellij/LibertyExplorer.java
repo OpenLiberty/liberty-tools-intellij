@@ -42,7 +42,6 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.CancellationException;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
