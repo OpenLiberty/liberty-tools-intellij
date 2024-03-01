@@ -12,11 +12,13 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
@@ -49,22 +51,25 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
         // build tree
-        Tree tree = buildTree(project, getBackground());
+        // Run the read action
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
-        if (tree != null) {
-            JBScrollPane scrollPane = new JBScrollPane(tree);
-            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
-            this.setContent(scrollPane);
-        } else {
-            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-            jbTextArea.setEditable(false);
-            jbTextArea.setBackground(getBackground());
-            jbTextArea.setLineWrap(true);
+            if (tree != null) {
+                JBScrollPane scrollPane = new JBScrollPane(tree);
+                scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+                this.setContent(scrollPane);
+            } else {
+                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+                jbTextArea.setEditable(false);
+                jbTextArea.setBackground(getBackground());
+                jbTextArea.setLineWrap(true);
 
-            this.setContent(jbTextArea);
-        }
-        ActionToolbar actionToolbar = buildActionToolbar(tree);
-        this.setToolbar(actionToolbar.getComponent());
+                this.setContent(jbTextArea);
+            }
+            ActionToolbar actionToolbar = buildActionToolbar(tree);
+            this.setToolbar(actionToolbar.getComponent());
+        });
     }
 
     public static ActionToolbar buildActionToolbar(Tree tree) {
@@ -334,7 +339,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     private static void executeAction(Tree tree) {
         final TreePath path = tree.getSelectionPath();
-        Object node = path.getLastPathComponent();
+        Object node = (path != null) ? path.getLastPathComponent() : null;
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
