@@ -11,8 +11,6 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -99,8 +97,6 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     mavenBuildFile.setProjectName(LibertyMavenUtil.getProjectNameFromPom(virtualFile));
                     mavenBuildFile.setProjectType(Constants.LIBERTY_MAVEN_PROJECT);
                     buildFiles.add(mavenBuildFile);
-                } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-                    throw e;
                 } catch (Exception e) {
                     LOGGER.error(String.format("Could not resolve project name from pom.xml: %s", virtualFile), e.getMessage());
                 }
@@ -116,8 +112,6 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     gradleBuildFile.setProjectName(LibertyGradleUtil.getProjectName(virtualFile));
                     gradleBuildFile.setProjectType(Constants.LIBERTY_GRADLE_PROJECT);
                     buildFiles.add(gradleBuildFile);
-                } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-                    throw e;
                 } catch (Exception e) {
                     LOGGER.error(String.format("Could not resolve project name from settings.gradle: %s", virtualFile), e.getMessage());
                 }
