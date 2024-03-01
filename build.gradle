@@ -64,18 +64,18 @@ configurations {
 
 dependencies {
     implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
-    implementation 'org.microshed:lsp4ij:0.0.1' // includes org.eclipse.lsp4j
-    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0') {
+    implementation 'org.microshed:lsp4ij:0.0.4' // includes org.eclipse.lsp4j
+    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0') {
+    implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1.1'
-    implementation ('io.openliberty.tools:liberty-langserver:2.1.1') {
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1.2'
+    implementation ('io.openliberty.tools:liberty-langserver:2.1.2') {
         exclude group: 'org.eclipse.lsp4j'
     }
-    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1') {
+    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0') {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
     }
@@ -105,19 +105,19 @@ dependencies {
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     // define jars to grab locally (if falling back to mavenLocal() repo)
-    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.6.0:uber') {
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0:uber') {
         transitive = false
     }
-    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.25.0:uber') {
+    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1:uber') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.1.1:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.1.2:jar-with-dependencies') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:2.1.1:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver:2.1.2:jar-with-dependencies') {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.1.1:jar-with-dependencies') {
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0:jar-with-dependencies') {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {

@@ -10,35 +10,42 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
+import com.intellij.codeInspection.InspectionProfile;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.libraries.Library;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.profile.ProfileChangeAdapter;
 import com.intellij.util.messages.MessageBusConnection;
+import io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport;
+import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
-import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
-import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
-import org.microshed.lsp4ij.LanguageClientImpl;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
-import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeLens;
-import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import io.openliberty.tools.intellij.lsp4mp4ij.settings.MicroProfileInspectionsInfo;
+import io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings;
+import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4mp.commons.*;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.utils.JSONUtility;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageClientAPI;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
+import org.microshed.lsp4ij.client.CoalesceByKey;
+import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -47,108 +54,226 @@ import java.util.stream.Collectors;
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusLanguageClient.java
  * to start LSP4MP, Language Server for MicroProfile
  */
-public class MicroProfileLanguageClient extends LanguageClientImpl implements MicroProfileLanguageClientAPI, MicroProfileProjectService.Listener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileLanguageClient.class);
-  private static final String JAVA_FILE_EXTENSION = "java";
+public class MicroProfileLanguageClient extends IndexAwareLanguageClient implements MicroProfileLanguageClientAPI, ClasspathResourceChangedManager.Listener, ProfileChangeAdapter {
 
-  private final MessageBusConnection connection;
+    private final MessageBusConnection connection;
+    private MicroProfileInspectionsInfo inspectionsInfo;
 
-  public MicroProfileLanguageClient(Project project) {
-    super(project);
-    connection = project.getMessageBus().connect(project);
-    connection.subscribe(MicroProfileProjectService.TOPIC, this);
-    MicroProfileProjectService.getInstance(project);
-  }
-
-  private void sendPropertiesChangeEvent(List<MicroProfilePropertiesScope> scope, Set<String> uris) {
-    MicroProfileLanguageServerAPI server = (MicroProfileLanguageServerAPI) getLanguageServer();
-    if (server != null) {
-      MicroProfilePropertiesChangeEvent event = new MicroProfilePropertiesChangeEvent();
-      event.setType(scope);
-      event.setProjectURIs(uris);
-      server.propertiesChanged(event);
+    public MicroProfileLanguageClient(Project project) {
+        super(project);
+        // Call Quarkus deployment support here to react on library changed (to evict quarkus deploiement cache) before
+        // sending an LSP microprofile/propertiesChanged notifications
+        MicroProfileDeploymentSupport.getInstance(project);
+        connection = project.getMessageBus().connect(project);
+        connection.subscribe(ClasspathResourceChangedManager.TOPIC, this);
+        inspectionsInfo = MicroProfileInspectionsInfo.getMicroProfileInspectionInfo(project);
+        connection.subscribe(ProfileChangeAdapter.TOPIC, this);
+        // Track MicroProfile settings changed to push them to the language server with LSP didChangeConfiguration.
+        UserDefinedMicroProfileSettings.getInstance(project).addChangeHandler(getDidChangeConfigurationListener());
     }
-  }
 
-  @Override
-  public void libraryUpdated(Library library) {
-    sendPropertiesChangeEvent(Collections.singletonList(MicroProfilePropertiesScope.dependencies), MicroProfileModuleUtil.getModulesURIs(getProject()));
-  }
-
-  @Override
-  public void sourceUpdated(List<Pair<Module, VirtualFile>> sources) {
-    List<Pair<String,MicroProfilePropertiesScope>> info = sources.stream().
-            filter(pair -> isJavaFile(pair.getRight()) || isConfigSource(pair.getRight(), pair.getLeft())).
-            map(pair -> Pair.of(PsiUtilsLSImpl.getProjectURI(pair.getLeft()), getScope(pair.getRight()))).
-            collect(Collectors.toList());
-    if (!info.isEmpty()) {
-      sendPropertiesChangeEvent(info.stream().map(Pair::getRight).collect(Collectors.toList()), info.stream().map(Pair::getLeft).collect(Collectors.toSet()));
+    @Override
+    public void dispose() {
+        super.dispose();
+        connection.disconnect();
+        UserDefinedMicroProfileSettings.getInstance(getProject()).removeChangeHandler(getDidChangeConfigurationListener());
     }
-  }
 
-  private MicroProfilePropertiesScope getScope(VirtualFile file) {
-    return isJavaFile(file)?MicroProfilePropertiesScope.sources:MicroProfilePropertiesScope.configfiles;
-  }
+    @Override
+    protected Object createSettings() {
+        return UserDefinedMicroProfileSettings.getInstance(getProject()).toSettingsForMicroProfileLS();
+    }
 
-  private boolean isJavaFile(VirtualFile file) {
-    return JAVA_FILE_EXTENSION.equals(file.getExtension());
-  }
+    private void sendPropertiesChangeEvent(List<MicroProfilePropertiesScope> scope, Set<String> uris) {
+        MicroProfileLanguageServerAPI server = (MicroProfileLanguageServerAPI) getLanguageServer();
+        if (server != null) {
+            MicroProfilePropertiesChangeEvent event = new MicroProfilePropertiesChangeEvent();
+            event.setType(scope);
+            event.setProjectURIs(uris);
+            server.propertiesChanged(event);
+        }
+    }
 
-  private boolean isConfigSource(VirtualFile file, Module project) {
-    return PsiMicroProfileProjectManager.getInstance(project.getProject()).isConfigSource(file);
-  }
+    @Override
+    public void profileChanged(@NotNull InspectionProfile profile) {
+        // Track MicroProfile inspections settings (declared in Editor/Inspection/MicroProfile UI settings) changed,
+        // convert them to matching LSP4MP configuration and push them via 'workspace/didChangeConfiguration'.
+        MicroProfileInspectionsInfo newInspectionState = MicroProfileInspectionsInfo.getMicroProfileInspectionInfo(getProject());
+        if (!Objects.equals(newInspectionState, inspectionsInfo)) {
+            inspectionsInfo = newInspectionState;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                new Task.Backgroundable(getProject(), "Updating LSP4MP configuration...", true) {
+                    @Override
+                    public void run(@NotNull ProgressIndicator progressIndicator) {
+                        triggerChangeConfiguration();
+                    }
+                }.queue();
+            }, ModalityState.defaultModalityState(), getProject().getDisposed());
+        }
+    }
 
-  @Override
-  public CompletableFuture<MicroProfileProjectInfo> getProjectInfo(MicroProfileProjectInfoParams params) {
-    return runAsBackground("Computing project information", () -> PropertiesManager.getInstance().getMicroProfileProjectInfo(params, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    @Override
+    public void librariesChanged() {
+        if (isDisposed()) {
+            // The language client has been disposed, ignore changes in libraries
+            return;
+        }
+        sendPropertiesChangeEvent(Collections.singletonList(MicroProfilePropertiesScope.dependencies), MicroProfileModuleUtil.getModulesURIs(getProject()));
+    }
 
-  @Override
-  public CompletableFuture<Hover> getJavaHover(MicroProfileJavaHoverParams javaParams) {
-    return runAsBackground("Computing Java hover", () -> PropertiesManagerForJava.getInstance().hover(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    @Override
+    public void sourceFilesChanged(Set<Pair<VirtualFile, Module>> sources) {
+        if (isDisposed()) {
+            // The language client has been disposed, ignore changes in Java source / microprofile-config.properties files
+            return;
+        }
+        List<Pair<String, MicroProfilePropertiesScope>> info = sources.stream()
+                .filter(pair -> isJavaFile(pair.getFirst()) || isConfigSource(pair.getFirst()))
+                .map(pair -> Pair.pair(PsiUtilsLSImpl.getProjectURI(pair.getSecond()), getScope(pair.getFirst())))
+                .collect(Collectors.toList());
+        if (!info.isEmpty()) {
+            sendPropertiesChangeEvent(info.stream().map(p -> p.getSecond()).collect(Collectors.toList()),
+                    info.stream().map(p -> p.getFirst()).collect(Collectors.toSet()));
+        }
+    }
 
-  @Override
-  public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(MicroProfileJavaDiagnosticsParams javaParams) {
-    return runAsBackground("Computing Java diagnostics", () -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    private MicroProfilePropertiesScope getScope(VirtualFile file) {
+        return isJavaFile(file) ? MicroProfilePropertiesScope.sources : MicroProfilePropertiesScope.configfiles;
+    }
 
-  @Override
-  public CompletableFuture<Location> getPropertyDefinition(MicroProfilePropertyDefinitionParams params) {
-    return runAsBackground("Computing property definition", () -> PropertiesManager.getInstance().findPropertyLocation(params, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    private boolean isJavaFile(VirtualFile file) {
+        return PsiMicroProfileProjectManager.isJavaFile(file);
+    }
 
-  @Override
-  public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectlabels(MicroProfileJavaProjectLabelsParams javaParams) {
-    return runAsBackground("Computing Java projects labels", () -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    private boolean isConfigSource(VirtualFile file) {
+        return PsiMicroProfileProjectManager.isConfigSource(file);
+    }
 
-  @Override
-  public CompletableFuture<JavaFileInfo> getJavaFileInfo(MicroProfileJavaFileInfoParams javaParams) {
-    return runAsBackground("Computing Java file info", () -> PropertiesManagerForJava.getInstance().fileInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    @Override
+    public CompletableFuture<MicroProfileProjectInfo> getProjectInfo(MicroProfileProjectInfoParams params) {
+//        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+//        VirtualFile file = null;
+//        try {
+//            file = utils.findFile(params.getUri());
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        Module module = utils.getModule(file);
+//        if (module == null) {
+//            throw new RuntimeException();
+//        }
+//        CompletableFuture<Void> quarkusDeploymentSupport = MicroProfileDeploymentSupport.getInstance(getProject()).updateClasspathWithQuarkusDeploymentAsync(module);
+//        if (quarkusDeploymentSupport.isDone()) {
+//            return internalGetProjectInfo(params);
+//        }
+//        return quarkusDeploymentSupport
+//                .thenCompose(unused -> internalGetProjectInfo(params));
+        return internalGetProjectInfo(params);
+    }
 
-  @Override
-  public CompletableFuture<CompletionList> getJavaCompletion(MicroProfileJavaCompletionParams javaParams) {
-    return runAsBackground("Computing Java completion", () -> PropertiesManagerForJava.getInstance().completion(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    private CompletableFuture<MicroProfileProjectInfo> internalGetProjectInfo(MicroProfileProjectInfoParams params) {
+        var coalesceBy = new CoalesceByKey("microprofile/projectInfo", params.getUri(), params.getScopes());
+        String filePath = getFilePath(params.getUri());
+        return runAsBackground("Computing MicroProfile properties for '" + filePath + "'.", monitor ->
+                PropertiesManager.getInstance().getMicroProfileProjectInfo(params, PsiUtilsLSImpl.getInstance(getProject()), monitor),
+                coalesceBy);
+    }
 
-  @Override
-  public CompletableFuture<List<? extends CodeLens>> getJavaCodelens(MicroProfileJavaCodeLensParams javaParams) {
-    return runAsBackground("Computing Java codelens", () -> PropertiesManagerForJava.getInstance().codeLens(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
-  
-  @Override
-  public CompletableFuture<List<CodeAction>> getJavaCodeAction(MicroProfileJavaCodeActionParams javaParams) {
-    return runAsBackground("Computing Java code actions", () -> (List<CodeAction>) PropertiesManagerForJava.getInstance().codeAction(javaParams, PsiUtilsLSImpl.getInstance(getProject())));
-  }
+    @Override
+    public CompletableFuture<Hover> getJavaHover(MicroProfileJavaHoverParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/hover", javaParams.getUri(), javaParams.getPosition());
+        return runAsBackground("Computing MicroProfile Java hover", monitor -> PropertiesManagerForJava.getInstance().hover(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
 
-  @Override
-  public CompletableFuture<CodeAction> resolveCodeAction(CodeAction unresolved) {
-    return runAsBackground("Computing Java resolve code actions", () -> {
-      CodeActionResolveData data = JSONUtility.toModel(unresolved.getData(), CodeActionResolveData.class);
-      unresolved.setData(data);
-      return (CodeAction) PropertiesManagerForJava.getInstance().resolveCodeAction(unresolved, PsiUtilsLSImpl.getInstance(getProject()));
-    });
-  }
+    @Override
+    public CompletableFuture<List<PublishDiagnosticsParams>> getJavaDiagnostics(MicroProfileJavaDiagnosticsParams javaParams) {
+        // When project is indexing and user types a lot of characters in the Java editor, the MicroProfile language server
+        // validates the Java document and consumes a 'microprofile/java/diagnostics' for each typed character.
+        // The response of 'microprofile/java/diagnostics' are blocked (or takes some times) and we have
+        // "Too many non-blocking read actions submitted at once in". To avoid having this error, we create a coalesceBy key
+        // managed by IJ ReadAction.nonBlocking() to cancel the previous request.
+        var coalesceBy = new CoalesceByKey("microprofile/java/diagnostics", javaParams.getUris());
+        return runAsBackground("Computing MicroProfile Java diagnostics", monitor -> PropertiesManagerForJava.getInstance().diagnostics(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<Location> getPropertyDefinition(MicroProfilePropertyDefinitionParams params) {
+        var coalesceBy = new CoalesceByKey("microprofile/propertyDefinition", params.getUri(), params.getSourceType(), params.getSourceField(), params.getSourceMethod());
+        return runAsBackground("Computing property definition", monitor -> PropertiesManager.getInstance().findPropertyLocation(params, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectLabels(MicroProfileJavaProjectLabelsParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/projectLabels", javaParams.getUri(), javaParams.getTypes());
+        return runAsBackground("Computing Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<List<ProjectLabelInfoEntry>> getAllJavaProjectLabels() {
+        var coalesceBy = new CoalesceByKey("microprofile/java/workspaceLabels");
+        return runAsBackground("Computing All Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<JavaFileInfo> getJavaFileInfo(MicroProfileJavaFileInfoParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/fileInfo", javaParams.getUri());
+        return runAsBackground("Computing Java file info", monitor -> PropertiesManagerForJava.getInstance().fileInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<List<MicroProfileDefinition>> getJavaDefinition(MicroProfileJavaDefinitionParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/definition", javaParams.getUri(),javaParams.getPosition());
+        return runAsBackground("Computing Java definitions", monitor -> PropertiesManagerForJava.getInstance().definition(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<MicroProfileJavaCompletionResult> getJavaCompletion(MicroProfileJavaCompletionParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/completion", javaParams.getUri(),javaParams.getPosition());
+        return runAsBackground("Computing Java completion", monitor -> {
+            IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+            CompletionList completionList = PropertiesManagerForJava.getInstance().completion(javaParams, utils);
+            JavaCursorContextResult cursorContext = PropertiesManagerForJava.getInstance().javaCursorContext(javaParams, utils);
+            return new MicroProfileJavaCompletionResult(completionList, cursorContext);
+        }, coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<List<? extends CodeLens>> getJavaCodelens(MicroProfileJavaCodeLensParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/codeLens", javaParams.getUri());
+        return runAsBackground("Computing Java codelens", monitor -> PropertiesManagerForJava.getInstance().codeLens(javaParams, PsiUtilsLSImpl.getInstance(getProject()), monitor), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<List<CodeAction>> getJavaCodeAction(MicroProfileJavaCodeActionParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/codeAction", javaParams.getUri());
+        return runAsBackground("Computing Java code actions", monitor -> (List<CodeAction>) PropertiesManagerForJava.getInstance().codeAction(javaParams, PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<CodeAction> resolveCodeAction(CodeAction unresolved) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/resolveCodeAction");
+        return runAsBackground("Computing Java resolve code actions", monitor -> {
+            CodeActionResolveData data = JSONUtility.toModel(unresolved.getData(), CodeActionResolveData.class);
+            unresolved.setData(data);
+            return (CodeAction) PropertiesManagerForJava.getInstance().resolveCodeAction(unresolved, PsiUtilsLSImpl.getInstance(getProject()));
+        }, coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<JavaCursorContextResult> getJavaCursorContext(MicroProfileJavaCompletionParams params) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/javaCursorContext", params.getUri(), params.getPosition());
+        return runAsBackground("Computing Java Cursor context", monitor -> PropertiesManagerForJava.getInstance().javaCursorContext(params, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+    }
+
+    @Override
+    public CompletableFuture<List<SymbolInformation>> getJavaWorkspaceSymbols(String projectUri) {
+        //Workspace symbols not supported yet https://github.com/redhat-developer/intellij-quarkus/issues/808
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<String> getPropertyDocumentation(MicroProfilePropertyDocumentationParams params) {
+        // Requires porting https://github.com/eclipse/lsp4mp/issues/321 / https://github.com/eclipse/lsp4mp/pull/329
+        return CompletableFuture.completedFuture(null);
+    }
 }

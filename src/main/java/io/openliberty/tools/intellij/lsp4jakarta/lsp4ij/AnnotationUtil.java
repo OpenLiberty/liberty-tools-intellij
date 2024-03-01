@@ -12,11 +12,14 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 import java.util.Collections;
 
@@ -35,6 +38,8 @@ public class AnnotationUtil {
             // recognised annotations found in scopes.
             return Arrays.stream(type.getAnnotations()).map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
                     .filter(scopes::contains).distinct().collect(Collectors.toList());
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             return Collections.<String>emptyList();
         }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat, Inc.
+ * Copyright (c) 2020, 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -14,44 +14,23 @@ import com.intellij.lang.jvm.JvmParameter;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifierListOwner;
-import com.intellij.psi.PsiParameter;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLensContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.JavaCompletionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.CompletionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.JavaDefinitionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.JavaHoverContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeLens;
-import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4mp.commons.DocumentFormat;
-import org.eclipse.lsp4mp.commons.JavaFileInfo;
-import org.eclipse.lsp4mp.commons.MicroProfileDefinition;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeActionParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeLensParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaCompletionParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaDefinitionParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
-import org.eclipse.lsp4mp.commons.MicroProfileJavaHoverParams;
-import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4mp.commons.*;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +48,10 @@ import java.util.stream.Collectors;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManagerForJava.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManagerForJava.java</a>
  *
  */
-public class PropertiesManagerForJava {
+public final class PropertiesManagerForJava {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesManagerForJava.class);
+
+    private static final String GROUP_NAME = "mp";
 
     private static final PropertiesManagerForJava INSTANCE = new PropertiesManagerForJava();
 
@@ -78,13 +59,16 @@ public class PropertiesManagerForJava {
         return INSTANCE;
     }
 
+    private final CompletionHandler completionHandler;
+
     private final CodeActionHandler codeActionHandler;
 
     private final DiagnosticsHandler diagnosticsHandler;
 
     private PropertiesManagerForJava() {
-        this.codeActionHandler = new CodeActionHandler("mp");
-        this.diagnosticsHandler = new DiagnosticsHandler("mp");
+        this.completionHandler = new CompletionHandler(GROUP_NAME);
+        this.codeActionHandler = new CodeActionHandler(GROUP_NAME);
+        this.diagnosticsHandler = new DiagnosticsHandler(GROUP_NAME);
     }
 
     /**
@@ -117,7 +101,7 @@ public class PropertiesManagerForJava {
      * @param utils   the utilities class
      * @return the codelens list according the given codelens parameters.
      */
-    public List<? extends CodeLens> codeLens(MicroProfileJavaCodeLensParams params, IPsiUtils utils) {
+    public List<? extends CodeLens> codeLens(MicroProfileJavaCodeLensParams params, IPsiUtils utils,  ProgressIndicator monitor) {
         return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeLens>>) () -> {
             String uri = params.getUri();
             PsiFile typeRoot = resolveTypeRoot(uri, utils);
@@ -125,13 +109,13 @@ public class PropertiesManagerForJava {
                 return Collections.emptyList();
             }
             List<CodeLens> lenses = new ArrayList<>();
-            collectCodeLens(uri, typeRoot, utils, params, lenses);
+            collectCodeLens(uri, typeRoot, utils, params, lenses, monitor);
             return lenses;
         });
     }
 
     private void collectCodeLens(String uri, PsiFile typeRoot, IPsiUtils utils, MicroProfileJavaCodeLensParams params,
-                                 List<CodeLens> lenses) {
+                                 List<CodeLens> lenses,  ProgressIndicator monitor) {
         // Collect all adapted codeLens participant
         try {
             Module module = utils.getModule(uri);
@@ -140,21 +124,21 @@ public class PropertiesManagerForJava {
             }
             JavaCodeLensContext context = new JavaCodeLensContext(uri, typeRoot, utils, module, params);
             List<IJavaCodeLensParticipant> definitions = IJavaCodeLensParticipant.EP_NAME.getExtensionList()
-                    .stream().filter(definition -> definition.isAdaptedForCodeLens(context))
+                    .stream().filter(definition -> definition.isAdaptedForCodeLens(context, monitor))
                     .collect(Collectors.toList());
             if (definitions.isEmpty()) {
                 return;
             }
 
             // Begin, collect, end participants
-            definitions.forEach(definition -> definition.beginCodeLens(context));
+            definitions.forEach(definition -> definition.beginCodeLens(context, monitor));
             definitions.forEach(definition -> {
-                List<CodeLens> collectedLenses = definition.collectCodeLens(context);
+                List<CodeLens> collectedLenses = definition.collectCodeLens(context, monitor);
                 if (collectedLenses != null && !collectedLenses.isEmpty()) {
                     lenses.addAll(collectedLenses);
                 }
             });
-            definitions.forEach(definition -> definition.endCodeLens(context));
+            definitions.forEach(definition -> definition.endCodeLens(context, monitor));
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -168,49 +152,7 @@ public class PropertiesManagerForJava {
      * @return the CompletionItems for the given the completion item params
      */
     public CompletionList completion(MicroProfileJavaCompletionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<CompletionList>) () -> {
-            try {
-                String uri = params.getUri();
-                PsiFile typeRoot = resolveTypeRoot(uri, utils);
-                if (typeRoot == null) {
-                    return null;
-                }
-
-                Module module = utils.getModule(uri);
-                if (module == null) {
-                    return null;
-                }
-
-                Position completionPosition = params.getPosition();
-                int completionOffset = utils.toOffset(typeRoot, completionPosition.getLine(),
-                        completionPosition.getCharacter());
-
-                List<CompletionItem> completionItems = new ArrayList<>();
-                JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
-
-                List<IJavaCompletionParticipant> completions = IJavaCompletionParticipant.EP_NAME.extensions()
-                        .filter(completion -> completion.isAdaptedForCompletion(completionContext))
-                        .collect(Collectors.toList());
-
-                if (completions.isEmpty()) {
-                    return null;
-                }
-
-                completions.forEach(completion -> {
-                    List<? extends CompletionItem> collectedCompletionItems = completion.collectCompletionItems(completionContext);
-                    if (collectedCompletionItems != null) {
-                        completionItems.addAll(collectedCompletionItems);
-                    }
-                });
-
-                CompletionList completionList = new CompletionList();
-                completionList.setItems(completionItems);
-                return completionList;
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-                return null;
-            }
-        });
+        return completionHandler.completion(params, utils);
     }
 
     /**
@@ -319,6 +261,18 @@ public class PropertiesManagerForJava {
             // TODO : aggregate the hover
             return hovers.get(0);
         });
+    }
+
+    /**
+     * Returns the cursor context for the given file and cursor position.
+     *
+     * @param params  the completion params that provide the file and cursor
+     *                position to get the context for
+     * @param utils   the jdt utils
+     * @return the cursor context for the given file and cursor position
+     */
+    public JavaCursorContextResult javaCursorContext(MicroProfileJavaCompletionParams params, IPsiUtils utils) {
+        return completionHandler.javaCursorContext(params, utils);
     }
 
     @Nullable
@@ -430,5 +384,6 @@ public class PropertiesManagerForJava {
     public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils) {
         return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () -> {
             return codeActionHandler.resolveCodeAction(unresolved, utils);
-        });    }
+        });
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 Red Hat Inc. and others.
+* Copyright (c) 2020, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,7 +17,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJaka
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Assert;
 
@@ -143,7 +143,7 @@ public class JakartaForJavaAssert {
         return new Position(line, character);
     }
 
-    public static void assertJavaDiagnostics(JakartaDiagnosticsParams params, IPsiUtils utils, Diagnostic... expected) {
+    public static void assertJavaDiagnostics(JakartaJavaDiagnosticsParams params, IPsiUtils utils, Diagnostic... expected) {
         List<PublishDiagnosticsParams> actual = PropertiesManagerForJakarta.getInstance().diagnostics(params, utils);
         assertDiagnostics(
                 actual != null && actual.size() > 0 ? actual.get(0).getDiagnostics() : Collections.emptyList(),

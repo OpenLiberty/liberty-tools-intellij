@@ -22,7 +22,6 @@ import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiMethod;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.PropertyReplacerStrategy;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationMemberInfo;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.Position;
@@ -32,6 +31,9 @@ import org.eclipse.lsp4mp.commons.MicroProfileDefinition;
 
 import java.util.List;
 import java.util.function.Function;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberAt;
 
 
 /**
@@ -104,14 +106,14 @@ public abstract class AbstractAnnotationDefinitionParticipant implements IJavaDe
 		Position definitionPosition = context.getHyperlinkedPosition();
 
 		// Try to get the annotation
-		PsiAnnotation annotation = AnnotationUtils.getAnnotation(hyperlinkedElement, annotationName);
+		PsiAnnotation annotation = getAnnotation(hyperlinkedElement, annotationName);
 
 		if (annotation == null) {
 			return null;
 		}
 
 		// Try to get the annotation member value
-		AnnotationMemberInfo annotationMemberInfo = AnnotationUtils.getAnnotationMemberAt(annotation, annotationMemberNames,
+		AnnotationMemberInfo annotationMemberInfo = getAnnotationMemberAt(annotation, annotationMemberNames,
 				definitionPosition, typeRoot, utils);
 		if (annotationMemberInfo == null) {
 			return null;

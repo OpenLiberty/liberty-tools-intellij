@@ -131,7 +131,6 @@ public abstract class SingleModJakartaLSTestCommon {
      */
     @Test
     @Video
-    @Disabled
     public void testJakartaQuickFixInJavaPart() {
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";

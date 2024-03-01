@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DiagnosticsHandler {
+public final class DiagnosticsHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsHandler.class);
 
@@ -73,8 +73,8 @@ public class DiagnosticsHandler {
                 // Collect all adapted diagnostic definitions
                 JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
                 List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.extensions()
-                        .filter(definition -> definition.isAdaptedForDiagnostics(context))
                         .filter(definition -> group.equals(definition.getGroup()))
+                        .filter(definition -> definition.isAdaptedForDiagnostics(context))
                         .collect(Collectors.toList());
                 if (definitions.isEmpty()) {
                     return;

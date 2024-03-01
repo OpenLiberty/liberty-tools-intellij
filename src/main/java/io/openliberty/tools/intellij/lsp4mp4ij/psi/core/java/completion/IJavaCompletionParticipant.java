@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021 Red Hat Inc. and others.
+* Copyright (c) 2021, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,7 +24,6 @@ import org.eclipse.lsp4j.CompletionItem;
  * @author datho7561
  */
 public interface IJavaCompletionParticipant {
-	public static final ExtensionPointName<IJavaCompletionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaCompletionParticipant");
 
 	/**
 	 * Returns true if this completion feature should be active in this context, and false otherwise
