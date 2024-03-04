@@ -201,8 +201,8 @@ public class LibertyMavenUtil {
      * @return String command to execute in the terminal or an exception to display
      * @throws LibertyException
      */
+    final static String wrappedMaven = "Use Maven wrapper";
     public static String getMavenSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
-        String wrappedMaven = "Use Maven wrapper";
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
         if (wrappedMaven.equals(mavenHome)) {
