@@ -52,24 +52,23 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         super(true, true);
         // build tree
         // Run the read action
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
-            if (tree != null) {
-                JBScrollPane scrollPane = new JBScrollPane(tree);
-                scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
-                this.setContent(scrollPane);
-            } else {
-                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-                jbTextArea.setEditable(false);
-                jbTextArea.setBackground(getBackground());
-                jbTextArea.setLineWrap(true);
+        Tree tree = buildTree(project, getBackground());
 
-                this.setContent(jbTextArea);
-            }
-            ActionToolbar actionToolbar = buildActionToolbar(tree);
-            this.setToolbar(actionToolbar.getComponent());
-        });
+        if (tree != null) {
+            JBScrollPane scrollPane = new JBScrollPane(tree);
+            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+            this.setContent(scrollPane);
+        } else {
+            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+            jbTextArea.setEditable(false);
+            jbTextArea.setBackground(getBackground());
+            jbTextArea.setLineWrap(true);
+
+            this.setContent(jbTextArea);
+        }
+        ActionToolbar actionToolbar = buildActionToolbar(tree);
+        this.setToolbar(actionToolbar.getComponent());
     }
 
     public static ActionToolbar buildActionToolbar(Tree tree) {
