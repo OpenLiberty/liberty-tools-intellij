@@ -12,13 +12,11 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
@@ -51,8 +49,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
         // build tree
-        // Run the read action
-
         Tree tree = buildTree(project, getBackground());
 
         if (tree != null) {
