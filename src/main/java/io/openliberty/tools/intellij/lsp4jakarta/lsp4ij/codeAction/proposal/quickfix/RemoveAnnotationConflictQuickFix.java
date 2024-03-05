@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  */
 public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActionParticipant {
 
-    private static final String ANNOTATION_TO_REMOVE = "annotationsToRemove";
+    private static final String ANNOTATIONS_TO_REMOVE = "annotationsToRemove";
     private final String[] annotations;
     protected final boolean generateOnlyOneCodeAction;
 
@@ -105,8 +105,8 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
 
         List<String> resolveAnnotations = new ArrayList<>();
-        if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List) {
-            resolveAnnotations = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
+        if (data.getExtendedDataEntry(ANNOTATIONS_TO_REMOVE) instanceof List) {
+            resolveAnnotations = (List<String>) data.getExtendedDataEntry(ANNOTATIONS_TO_REMOVE);
         }
         String[] resolveAnnotationsArray = resolveAnnotations.toArray(String[]::new);
         String name = toResolve.getTitle();
@@ -140,7 +140,7 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         // API
         String name = getLabel(annotations);
         Map<String, Object> extendedData = new HashMap<>();
-        extendedData.put(ANNOTATION_TO_REMOVE, Arrays.asList(annotations));
+        extendedData.put(ANNOTATIONS_TO_REMOVE, Arrays.asList(annotations));
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
     }
 
