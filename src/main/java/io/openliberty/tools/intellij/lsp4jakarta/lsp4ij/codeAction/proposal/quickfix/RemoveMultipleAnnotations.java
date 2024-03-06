@@ -55,7 +55,6 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
 
             List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(parentType.getProject(), annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
-                // For each list we will create one code action in its own context
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
                 removeAnnotation(diagnostic, context, codeActions, annotationsToRemove);
             }
