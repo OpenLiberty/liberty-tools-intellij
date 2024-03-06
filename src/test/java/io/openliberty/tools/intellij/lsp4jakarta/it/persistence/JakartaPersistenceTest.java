@@ -61,25 +61,56 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        if (CHECK_CODE_ACTIONS) {
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        // Starting codeAction tests.
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    Map<Integer, String> testMap = new HashMap<>();\n" +
+                "    \n    \n    @MapKey()\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
 
-            TextEdit te1 = te(15, 4, 16, 4, "");
-            TextEdit te2 = te(14, 4, 15, 4, "");
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n    @MapKeyClass(Map.class)\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+
+            TextEdit te1 = te(0, 0, 20, 0, newText);
+            TextEdit te2 = te(0, 0, 20, 0, newText1);
             CodeAction ca1 = ca(uri, "Remove @MapKeyClass", d1, te1);
             CodeAction ca2 = ca(uri, "Remove @MapKey", d1, te2);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+            assertJavaCodeAction(codeActionParams1, utils, ca2, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
 
-            TextEdit te3 = te(9, 13, 10, 27, "");
-            TextEdit te4 = te(9, 4, 10, 4, "");
+        String newText3 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKeyClass(Map.class)\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+
+            TextEdit te3 = te(0, 0, 20, 0, newText2);
+            TextEdit te4 = te(0, 0, 20, 0, newText3);
             CodeAction ca3 = ca(uri, "Remove @MapKeyClass", d2, te3);
             CodeAction ca4 = ca(uri, "Remove @MapKey", d2, te4);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-        }
+            assertJavaCodeAction(codeActionParams2, utils, ca4, ca3);
     }
 
     @Test

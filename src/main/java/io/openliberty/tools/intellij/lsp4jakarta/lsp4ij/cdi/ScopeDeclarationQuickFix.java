@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -32,6 +32,11 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
     }
 
     @Override
+    public String getParticipantId() {
+        return ScopeDeclarationQuickFix.class.getName();
+    }
+
+    @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);
@@ -59,11 +64,7 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
             for (String annotation : fqAnnotations) {
                 List<String> resultingAnnotations = new ArrayList<>(fqAnnotations);
                 resultingAnnotations.remove(annotation);
-                // For each list we will create one code action in its own context
-                JavaCodeActionContext newContext = context.copy();
-                PsiElement owningNode = getBinding(newContext.getCoveredNode());
-
-                removeAnnotation(diagnostic, newContext, owningNode, codeActions,
+                removeAnnotation(diagnostic, context, codeActions,
                         resultingAnnotations.toArray(new String[] {}));
             }
 

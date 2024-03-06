@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,5 +23,10 @@ public class RemoveProduceAnnotationQuickFix extends RemoveAnnotationConflictQui
 
     public RemoveProduceAnnotationQuickFix() {
         super(false, "jakarta.enterprise.inject.Produces");
+    }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveProduceAnnotationQuickFix.class.getName();
     }
 }
