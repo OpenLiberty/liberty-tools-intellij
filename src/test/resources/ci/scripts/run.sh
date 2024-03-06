@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ############################################################################
-# Copyright (c) 2023 IBM Corporation and others.
+# Copyright (c) 2023, 2024 IBM Corporation and others.
 #
 # This program and the accompanying materials are made available under the
 # terms of the Eclipse Public License v. 2.0 which is available at
@@ -155,7 +155,7 @@ main() {
 
     # Start the IDE.
     echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
-    ./gradlew runIdeForUiTests --info  > remoteServer.log  2>&1 &
+    ./gradlew -Dide.slow.operations.assertion=false runIdeForUiTests --info  > remoteServer.log  2>&1 &
 
     # Wait for the IDE to come up.
     echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."

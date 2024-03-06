@@ -334,7 +334,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     private static void executeAction(Tree tree) {
         final TreePath path = tree.getSelectionPath();
-        Object node = path.getLastPathComponent();
+        Object node = (path != null) ? path.getLastPathComponent() : null;
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
