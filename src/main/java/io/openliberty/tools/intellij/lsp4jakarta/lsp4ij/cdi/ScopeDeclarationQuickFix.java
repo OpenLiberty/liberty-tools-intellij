@@ -50,19 +50,13 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
 
         if (parentType != null) {
 
-            // Convert the short annotation names to their fully qualified equivalents.
-            List<String> fqAnnotations = new ArrayList<>();
-            for (String annotation : annotations) {
-                fqAnnotations.addAll(getFQAnnotationNames(parentType.getProject(), annotation));
-            }
-
             List<CodeAction> codeActions = new ArrayList<>();
             /**
              * for each annotation, choose the current annotation to keep and remove the
              * rest since we can have at most one scope annotation.
              */
-            for (String annotation : fqAnnotations) {
-                List<String> resultingAnnotations = new ArrayList<>(fqAnnotations);
+            for (String annotation : annotations) {
+                List<String> resultingAnnotations = new ArrayList<>(annotations);
                 resultingAnnotations.remove(annotation);
                 removeAnnotation(diagnostic, context, codeActions,
                         resultingAnnotations.toArray(new String[] {}));
