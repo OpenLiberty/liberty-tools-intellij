@@ -137,11 +137,9 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbTransientOnField");
         else if (code.equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_ACCESSOR))
             diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbTransientOnAccessor");
-        // convert to simple name for current tests
-        List<String> diagnosticData = jsonbAnnotations.stream().map(annotation -> getSimpleName(annotation))
-                .collect(Collectors.toList());
+
         diagnostics.add(createDiagnostic(member, unit, diagnosticErrorMessage, code,
-                (JsonArray) (new Gson().toJsonTree(diagnosticData)), DiagnosticSeverity.Error));
+                (JsonArray) (new Gson().toJsonTree(jsonbAnnotations)), DiagnosticSeverity.Error));
         return true;
     }
 

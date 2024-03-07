@@ -104,46 +104,92 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic d1 = d(12, 16, 17,
                 "Scope type annotations must be specified by a producer field at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
-        d1.setData(new Gson().toJsonTree(Arrays.asList("Dependent", "ApplicationScoped", "Produces")));
+        d1.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.Dependent",
+                "jakarta.enterprise.context.ApplicationScoped", "Produces")));
 
-        Diagnostic d2 = d(15, 25, 41, "Scope type annotations must be specified by a producer method at most once.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
-        d2.setData(new Gson().toJsonTree(Arrays.asList("ApplicationScoped", "RequestScoped", "Produces")));
-        
-        Diagnostic d3 = d(10, 13, 29, "Scope type annotations must be specified by a managed bean class at most once.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
-        d3.setData(new Gson().toJsonTree(Arrays.asList("ApplicationScoped", "RequestScoped")));
+        Diagnostic d2 = d(15, 25, 41, "Scope type annotations must be specified " +
+                        "by a producer method at most once.", DiagnosticSeverity.Error, "jakarta-cdi",
+                "InvalidScopeDecl");
+        d2.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.ApplicationScoped",
+                "jakarta.enterprise.context.RequestScoped", "Produces")));
+
+        Diagnostic d3 = d(10, 13, 29, "Scope type annotations must be " +
+                        "specified by a managed bean class at most once.", DiagnosticSeverity.Error,
+                "jakarta-cdi", "InvalidScopeDecl");
+        d3.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.ApplicationScoped",
+                "jakarta.enterprise.context.RequestScoped")));
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        if (CHECK_CODE_ACTIONS) {
-            // Assert for the diagnostic d1
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(11, 33, 12, 4, "");
-            TextEdit te2 = te(11, 14, 11, 33, "");
-            CodeAction ca1 = ca(uri, "Remove @ApplicationScoped", d1, te2);
-            CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te1);
+        //TODO: Uncomment this line of code once all the quickfix changes are done.
+//        if (CHECK_CODE_ACTIONS) {
+        // Assert for the diagnostic d1
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;" +
+                "\nimport java.util.List;\n\nimport jakarta.enterprise.inject.Produces;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n@ApplicationScoped @RequestScoped\n" +
+                "public class ScopeDeclaration {\n    @Produces  @Dependent\n    private int n;\n   " +
+                " \n    @Produces @ApplicationScoped @RequestScoped\n    public List<Integer> getAllProductIds() " +
+                "{\n        return Collections.emptyList();\n    }\n}";
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import java.util.Collections;\nimport java.util.List;\n\n" +
+                "import jakarta.enterprise.inject.Produces;\n\nimport jakarta.enterprise.context.*;" +
+                "\n\n@ApplicationScoped @RequestScoped\npublic class ScopeDeclaration {\n   " +
+                " @Produces @ApplicationScoped\n    private int n;\n    \n    @Produces @ApplicationScoped" +
+                " @RequestScoped\n    public List<Integer> getAllProductIds() {\n        " +
+                "return Collections.emptyList();\n    }\n}";
 
-            // Assert for the diagnostic d2
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-            TextEdit te3 = te(14, 33, 15, 4, "");
-            TextEdit te4 = te(14, 14, 14, 33, "");
-            CodeAction ca3 = ca(uri, "Remove @RequestScoped", d2, te3);
-            CodeAction ca4 = ca(uri, "Remove @ApplicationScoped", d2, te4);
+        TextEdit te1 = te(0, 0, 18, 1, newText);
+        TextEdit te2 = te(0, 0, 18, 1, newText1);
+        CodeAction ca1 = ca(uri, "Remove @ApplicationScoped", d1, te1);
+        CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te2);
+        assertJavaCodeAction(codeActionParams1, utils, ca1,ca2);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+        // Assert for the diagnostic d2
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;\n" +
+                "import java.util.List;\n\nimport jakarta.enterprise.inject.Produces;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n@ApplicationScoped @RequestScoped\n" +
+                "public class ScopeDeclaration {\n    @Produces @ApplicationScoped @Dependent\n   " +
+                " private int n;\n    \n    @Produces  @RequestScoped\n    public List<Integer> getAllProductIds()" +
+                " {\n        return Collections.emptyList();\n    }\n}";
 
-            // Assert for the diagnostic d3
-            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
-            TextEdit te5 = te(9, 19, 10, 0, "");
-            TextEdit te6 = te(9, 0, 9, 19, "");
-            CodeAction ca5 = ca(uri, "Remove @RequestScoped", d3, te5);
-            CodeAction ca6 = ca(uri, "Remove @ApplicationScoped", d3, te6);
+        newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;\nimport " +
+                "java.util.List;\n\nimport jakarta.enterprise.inject.Produces;\n\nimport " +
+                "jakarta.enterprise.context.*;\n\n@ApplicationScoped @RequestScoped\npublic class ScopeDeclaration" +
+                " {\n    @Produces @ApplicationScoped @Dependent\n    private int n;\n    \n   " +
+                " @Produces @ApplicationScoped\n    public List<Integer> getAllProductIds() {\n      " +
+                "  return Collections.emptyList();\n    }\n}";
 
-            assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
-        }
+        TextEdit te3 = te(0, 0, 18, 1, newText1);
+        TextEdit te4 = te(0, 0, 18, 1, newText);
+        CodeAction ca3 = ca(uri, "Remove @RequestScoped", d2, te3);
+        CodeAction ca4 = ca(uri, "Remove @ApplicationScoped", d2, te4);
+        assertJavaCodeAction(codeActionParams2, utils, ca4, ca3);
+
+        // Assert for the diagnostic d3
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+        newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;\n" +
+                "import java.util.List;\n\nimport jakarta.enterprise.inject.Produces;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n@RequestScoped\npublic class ScopeDeclaration {\n  " +
+                "  @Produces @ApplicationScoped @Dependent\n    private int n;\n    \n   " +
+                " @Produces @ApplicationScoped @RequestScoped\n    public List<Integer> getAllProductIds() {\n  " +
+                "      return Collections.emptyList();\n    }\n}";
+
+        newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;" +
+                "\nimport java.util.List;\n\nimport jakarta.enterprise.inject.Produces;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n@ApplicationScoped\npublic class ScopeDeclaration {\n " +
+                "   @Produces @ApplicationScoped @Dependent\n    private int n;\n    \n    " +
+                "@Produces @ApplicationScoped @RequestScoped\n    public List<Integer> getAllProductIds() {\n   " +
+                "     return Collections.emptyList();\n    }\n}";
+
+        TextEdit te5 = te(0, 0, 18, 1, newText1);
+        TextEdit te6 = te(0, 0, 18, 1, newText);
+        CodeAction ca5 = ca(uri, "Remove @RequestScoped", d3, te5);
+        CodeAction ca6 = ca(uri, "Remove @ApplicationScoped", d3, te6);
+        assertJavaCodeAction(codeActionParams3, utils, ca6, ca5);
+//        }
     }
 
     @Test
