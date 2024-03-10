@@ -338,8 +338,8 @@
                 class="io.openliberty.tools.intellij.actions.ViewTestReport"
                 icon="AllIcons.General.Web"/>
 
-        <action id="io.openliberty.tools.intellij.actions.ViewEffectivePom"
-                class="io.openliberty.tools.intellij.actions.ViewEffectivePom"
+        <action id="io.openliberty.tools.intellij.actions.ViewPomXml"
+                class="io.openliberty.tools.intellij.actions.ViewPomXml"
                 icon="AllIcons.FileTypes.Config"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewGradleConfig"
