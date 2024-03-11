@@ -122,8 +122,19 @@ public final class PropertiesManagerForJakarta {
 
     private JavaCursorContextResult adapt(org.eclipse.lsp4mp.commons.JavaCursorContextResult contextResult) {
         if (contextResult != null) {
-            var kind = contextResult.getKind();
-            return new JavaCursorContextResult(JavaCursorContextKind.forValue(kind.getValue()), contextResult.getPrefix());
+            return new JavaCursorContextResult(adapt(contextResult.getKind()), contextResult.getPrefix());
+        }
+        return null;
+    }
+
+    private JavaCursorContextKind adapt(org.eclipse.lsp4mp.commons.JavaCursorContextKind kind) {
+        if (kind != null) {
+            // Workaround for an issue with JavaCursorContextKind.forValue().
+            // See https://github.com/OpenLiberty/liberty-tools-intellij/issues/681 for details.
+            if (kind == org.eclipse.lsp4mp.commons.JavaCursorContextKind.NONE) {
+                return JavaCursorContextKind.NONE;
+            }
+            return JavaCursorContextKind.forValue(kind.getValue());
         }
         return null;
     }
