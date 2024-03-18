@@ -69,7 +69,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // Issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/401
     public void testInsertCodeSnippetIntoJavaPart() {
         String snippetStr = "mp";
         String snippetChooser = "liveness";
@@ -87,7 +86,7 @@ public abstract class SingleModMPLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, "ServiceLiveHealthCheck.java", snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "sample", "mp", "health","ServiceLiveHealthCheck.java");
+            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health","ServiceLiveHealthCheck.java");
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         } finally {
             // Replace modified content with the original content
@@ -137,8 +136,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testMPQuickFixInJavaFile() {
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
@@ -267,8 +264,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testQuickFixInMicroProfileConfigProperties() {
         String MPCfgSnippet = "mp.health.disable";
         String MPCfgNameChooserSnippet = "procedures";

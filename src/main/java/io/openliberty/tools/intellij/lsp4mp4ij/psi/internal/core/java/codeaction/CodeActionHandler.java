@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,20 +23,15 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.correction
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionKind;
-import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeActionParams;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,8 +40,9 @@ import java.util.stream.Collectors;
  * @author Angelo ZERR
  *
  */
-public class CodeActionHandler {
+public final class CodeActionHandler {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CodeActionHandler.class);
 	private final String group;
 
 	public CodeActionHandler(String group) {
@@ -97,14 +93,14 @@ public class CodeActionHandler {
 			}
 
 			List<CodeAction> codeActions = new ArrayList<>();
-			Map<String, List<io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition>> forDiagnostics = new HashMap<>();
+			Map<String, List<JavaCodeActionDefinition>> forDiagnostics = new HashMap<>();
 
 			// Loop for each code action kinds to process the proper code actions
 			for (String codeActionKind : codeActionKinds) {
 				// Get list of code action definition for the given kind
-				List<io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition> codeActionDefinitions = io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition.EP.extensions()
-						.filter(definition -> definition.isAdaptedForCodeAction(context))
+				List<JavaCodeActionDefinition> codeActionDefinitions = JavaCodeActionDefinition.EP.extensions()
 						.filter(definition -> group.equals(definition.getGroup()))
+						.filter(definition -> definition.isAdaptedForCodeAction(context))
 						.filter(definition -> codeActionKind.equals(definition.getKind()))
 						.collect(Collectors.toList());
 				if (codeActionDefinitions != null) {
@@ -131,7 +127,7 @@ public class CodeActionHandler {
 			if (!forDiagnostics.isEmpty()) {
 				// It exists code action to fix diagnostics, loop for each diagnostics
 				params.getContext().getDiagnostics().forEach(diagnostic -> {
-					String code = getCode(diagnostic);
+					String code = getCodeString(diagnostic.getCode());
 					if (code != null) {
 						// Try to get code action definition registered with the "for" source#code
 						String key = diagnostic.getSource() + "#" + code;
@@ -168,6 +164,7 @@ public class CodeActionHandler {
 			ExtendedCodeAction.sort(codeActions);
 			return codeActions;
 		} catch (IOException e) {
+			LOGGER.error("Failed to compute code actions: "+ e.getMessage());
 			return Collections.emptyList();
 		}
 	}
@@ -180,38 +177,43 @@ public class CodeActionHandler {
 	 * @return the given unresolved CodeAction with the workspace edit resolved
 	 */
 	public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils) {
-		CodeActionResolveData data = (CodeActionResolveData) unresolved.getData();
-		String participantId = data.getParticipantId();
-		String uri = data.getDocumentUri();
+		try {
+			CodeActionResolveData data = (CodeActionResolveData) unresolved.getData();
+			String participantId = data.getParticipantId();
+			String uri = data.getDocumentUri();
 
-		PsiFile unit = utils.resolveCompilationUnit(uri);
-		if (unit == null) {
-			return null;
+			PsiFile unit = utils.resolveCompilationUnit(uri);
+			if (unit == null) {
+				return null;
+			}
+
+			utils = utils.refine(utils.getModule(uri));
+
+			int start = DiagnosticsHelper.getStartOffset(unit, data.getRange(), utils);
+			int end = DiagnosticsHelper.getEndOffset(unit, data.getRange(), utils);
+
+			var params = new MicroProfileJavaCodeActionParams();
+			params.setContext(new CodeActionContext(
+					unresolved.getDiagnostics() == null ? Collections.emptyList() : unresolved.getDiagnostics()));
+			params.setResourceOperationSupported(data.isResourceOperationSupported());
+			params.setCommandConfigurationUpdateSupported(data.isCommandConfigurationUpdateSupported());
+			params.setRange(data.getRange());
+			params.setTextDocument(new VersionedTextDocumentIdentifier(uri, null));
+
+			JavaCodeActionResolveContext context = new JavaCodeActionResolveContext(unit,
+					start, end - start, utils, params, unresolved);
+			context.setASTRoot(getASTRoot(unit));
+
+			IJavaCodeActionParticipant participant = JavaCodeActionDefinition.EP.extensions()
+					.filter(definition -> unresolved.getKind().startsWith(definition.getKind()))
+					.filter(definition -> group.equals(definition.getGroup()))
+					.filter(definition -> participantId.equals(definition.getParticipantId()))
+					.findFirst().orElse(null);
+			return participant.resolveCodeAction(context.copy());
+		} catch (IOException e) {
+			LOGGER.error("Failed to resolve code action: "+ e.getMessage());
+			return unresolved;
 		}
-
-		int start = DiagnosticsHelper.getStartOffset(unit, data.getRange(), utils);
-		int end = DiagnosticsHelper.getEndOffset(unit, data.getRange(), utils);
-
-		var params = new MicroProfileJavaCodeActionParams();
-		params.setContext(new CodeActionContext(
-				unresolved.getDiagnostics() == null ? Collections.emptyList() : unresolved.getDiagnostics()));
-		params.setResourceOperationSupported(data.isResourceOperationSupported());
-		params.setCommandConfigurationUpdateSupported(data.isCommandConfigurationUpdateSupported());
-		params.setRange(data.getRange());
-		params.setTextDocument(new VersionedTextDocumentIdentifier(uri, null));
-
-		/*JavaCodeActionResolveContext context = new JavaCodeActionResolveContext(unit, start, end - start, utils, params,
-				unresolved);*/
-		JavaCodeActionResolveContext context = new JavaCodeActionResolveContext(unit,
-				start, end - start, utils, params, unresolved);
-		context.setASTRoot(getASTRoot(unit));
-
-		IJavaCodeActionParticipant participant = JavaCodeActionDefinition.EP.extensions()
-				.filter(definition -> unresolved.getKind().startsWith(definition.getKind()))
-				.filter(definition -> group.equals(definition.getGroup()))
-				.filter(definition -> participantId.equals(definition.getParticipantId()))
-				.findFirst().orElse(null);
-		return participant.resolveCodeAction(context.copy());
 	}
 
 
@@ -219,24 +221,7 @@ public class CodeActionHandler {
 		return unit;
 	}
 
-	private static String getCode(Diagnostic diagnostic) {
-		Object code = null;
-		try {
-			Field f = diagnostic.getClass().getDeclaredField("code");
-			f.setAccessible(true);
-			code = f.get(diagnostic);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return getCodeString(code);
-	}
-
-	private static String getCodeString(Object codeObject) {
-		if (codeObject instanceof String) {
-			return ((String) codeObject);
-		}
-		@SuppressWarnings("unchecked")
-		Either<String, Number> code = (Either<String, Number>) codeObject;
+	private static String getCodeString(Either<String, Integer> code) {
 		if (code == null || code.isRight()) {
 			return null;
 		}

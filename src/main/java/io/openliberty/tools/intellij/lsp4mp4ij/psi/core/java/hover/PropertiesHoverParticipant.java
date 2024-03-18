@@ -39,6 +39,9 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.util.Ranges;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
 
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+
 /**
  *
  * Properties hover participant to hover properties values declared in
@@ -134,7 +137,7 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 		Position hoverPosition = context.getHoverPosition();
 		PsiElement hoverField = (PsiElement) hoverElement;
 
-		PsiAnnotation annotation = AnnotationUtils.getAnnotation(hoverField, annotationName);
+		PsiAnnotation annotation = getAnnotation(hoverField, annotationName);
 
 		if (annotation == null) {
 			return null;
@@ -145,7 +148,7 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 		Range propertyKeyRange = null;
 		boolean found = false;
 		for (String annotationMemberName : annotationMembers) {
-			propertyKey = AnnotationUtils.getAnnotationMemberValue(annotation, annotationMemberName);
+			propertyKey = getAnnotationMemberValue(annotation, annotationMemberName);
 			if (propertyKey != null) {
 				TextRange r = annotation.getTextRange();
 				Pattern memberPattern = Pattern.compile(".*[^\"]\\s*(" + annotationMemberName + ")\\s*=.*",
@@ -179,7 +182,7 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 			propertyKey = propertyReplacer.apply(propertyKey);
 		}
 		PsiMicroProfileProject mpProject = PsiMicroProfileProjectManager.getInstance(javaProject.getProject())
-				.getJDTMicroProfileProject(javaProject);
+				.getMicroProfileProject(javaProject);
 		List<MicroProfileConfigPropertyInformation> propertyInformation = getConfigPropertyInformation(propertyKey,
 				annotation, defaultValueAnnotationMemberName, typeRoot, mpProject, utils);
 		return new Hover(getDocumentation(propertyInformation, context.getDocumentFormat(),
@@ -236,7 +239,7 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 
 		if (defaultValueAnnotationMemberName != null && !defaultProfileDefined) {
 			infos.add(new MicroProfileConfigPropertyInformation(propertyKey,
-					AnnotationUtils.getAnnotationMemberValue(annotation, defaultValueAnnotationMemberName), utils.toUri(typeRoot),
+					getAnnotationMemberValue(annotation, defaultValueAnnotationMemberName), utils.toUri(typeRoot),
 					annotation.getContainingFile().getName()));
 		}
 
