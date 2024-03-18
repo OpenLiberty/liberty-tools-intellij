@@ -8,7 +8,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -470,6 +472,38 @@ public class TestUtils {
             }
         }
         return file.delete();
+    }
+
+    /**
+     * Retrieves custom parameters specified in the Liberty configuration file.
+     *
+     * @param absoluteWLPPath The absolute path to the WebSphere Liberty Profile server directory.
+     * @return A map containing custom parameters extracted from the Liberty configuration file.
+     */
+    public static Map<String, String> getLibertyModuleCustomParams(String absoluteWLPPath) {
+        Map<String, String> customParams = new HashMap<>();
+
+        // Construct the path to the Liberty configuration file
+        String libertyConfigFilePath = absoluteWLPPath + File.separator + "server.xml";
+
+        // Read the Liberty configuration file to extract custom parameters
+        try (BufferedReader br = new BufferedReader(new FileReader(libertyConfigFilePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Assuming custom parameters are specified as key-value pairs in the server.xml file
+                if (line.contains("customParameter")) {
+                    String[] parts = line.split("\"");
+                    if (parts.length >= 3) {
+                        customParams.put(parts[1], parts[3]);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle IOException appropriately
+        }
+
+        return customParams;
     }
 
     /**
