@@ -195,7 +195,7 @@ patchPluginXml {
         <li> Helpful advice is displayed when no project appears in the Liberty dashboard
         <li> Added the Language Servers panel which can be used when technical support is required
         </ul>
-        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/23.0.6...23.0.12">commit log</a> for the full set of changes since the previous release.
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/23.0.12...24.0.3">commit log</a> for the full set of changes since the previous release.
         <br>
         <h2> 23.0.12 </h2>
         Version 23.0.12 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 23.0.12 requires IntelliJ IDEA version 2023.1+ and requires Java 17 or later.
