@@ -1895,7 +1895,7 @@ public class UIBotTestUtils {
         String exitButtonText = "Cancel";
         try {
             // Click on the Add Configuration action button (+) to open the Add New Configuration window.
-            Locator addButtonLocator = byXpath("//div[@tooltiptext.key='add.new.run.configuration.action2.name']");
+            Locator addButtonLocator = byXpath("//div[@accessiblename.key='add.new.run.configuration.action2.name']");
             ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
             addCfgButton.click();
 
