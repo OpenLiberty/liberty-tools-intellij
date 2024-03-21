@@ -180,20 +180,26 @@ tasks {
 patchPluginXml {
     changeNotes = """
         <h2> 24.0.3 </h2>
-        Version 24.0.3 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.3 requires IntelliJ IDEA version 2023.3.4+ and requires Java 17 or later.
+        Version 24.0.3 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.3 requires IntelliJ IDEA version 2023.3.* and requires Java 17 or later.
         <br>
         Notable changes:
         <ul>
-        <li> When the contents of the Liberty dashboard are too large to fit in its window a scroll bar will appear
         <li> Updated <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.1.2. For information regarding changes for version 2.1.2, refer to the release notes linked below:
           <ul>
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.1.2
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.1.2
           </ul>
-        <li> Updated <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> version to 0.10.0
-        <li> Updated <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.0
-        <li> Helpful advice is displayed when no project appears in the Liberty dashboard
-        <li> Added the Language Servers panel which can be used when technical support is required
+        <li> Updated <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.0. For more information regarding changes for version 0.2.0, refer to the release notes linked below:
+          <ul>
+            <li>https://github.com/eclipse/lsp4jakarta/releases/tag/0.2.0
+          </ul>
+        <li> Updated <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> version to 0.10.0. Refer to the release tag below:
+          <ul>
+            <li>https://github.com/eclipse/lsp4mp/releases/tag/0.10.0
+          </ul>
+        <li> When the contents of the Liberty tool window are too large to fit in its window a scroll bar will appear
+        <li> Helpful advice is displayed when no project appears in the Liberty tool window
+        <li> Added the Language Servers tool window which can be used when technical support is required
         </ul>
         See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/23.0.12...24.0.3">commit log</a> for the full set of changes since the previous release.
         <br>
