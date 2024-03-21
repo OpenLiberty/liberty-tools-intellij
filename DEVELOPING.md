@@ -18,7 +18,7 @@ This extension is built using the [gradle-intellij-plugin](https://github.com/Je
 
 1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
 2. Clone the lsp4ij repository: `git clone git@github.com:MicroShed/lsp4ij.git`
-3. Build lsp4ij and save it in your local Maven repository: `./gradlew publishToMavenLocal` (just build the jar: `./gradlew jar`)
+3. Build lsp4ij and save it in your local Maven repository: `./gradlew publishToMavenLocal`. Alternatively, build only the jar: `./gradlew jar`
 4. Import this repository as a Gradle project in IntelliJ IDEA 
 5. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
 
@@ -55,9 +55,11 @@ To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 
 ### Monitoring Language Server Messages
 
-1. Click on the `Language Servers` tool window in the IntelliJ IDE to show the `LSP Consoles`.
-2. Select the language server you wish to monitor and next to `Trace` select `messages` or `verbose`.
-3. Messages to and from the language server will appear in the console allowing you to verify the messages sent in response to user actions in the IDE.
+1. Click on the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
+2. Select the language server you wish to monitor and then select **Trace:**  **messages** or **verbose**.
+3. Messages to and from the language server will appear in the console, so you can verify the messages sent in response to user actions in the IDE.
+
+For more information see the [User Guide](https://github.com/redhat-developer/lsp4ij/blob/main/docs/UserGuide.md#lsp-console)
 
 ## Localization
 
