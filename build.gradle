@@ -180,7 +180,7 @@ tasks {
 patchPluginXml {
     changeNotes = """
         <h2> 24.0.3 </h2>
-        Version 24.0.3 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.3 requires IntelliJ IDEA version 2023.3.* and requires Java 17 or later.
+        Version 24.0.3 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.3 requires IntelliJ IDEA version 2023.2.* or 2023.3.* and a minimum of Java 17.
         <br>
         Notable changes:
         <ul>
