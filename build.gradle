@@ -200,7 +200,7 @@ patchPluginXml {
           </ul>
         <li> When the contents of the Liberty tool window are too large to fit in its window, a scroll bar appears.
         <li> Helpful advice is displayed when no project appears in the Liberty tool window.
-        <li> Added the Language Servers tool window which can be used when technical support is required
+        <li> Added the Language Servers tool window, which you can use when you need technical support.
         </ul>
         See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/23.0.12...24.0.3">commit log</a> for the full set of changes since the previous release.
         <br>
