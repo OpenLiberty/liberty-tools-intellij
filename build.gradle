@@ -189,7 +189,7 @@ patchPluginXml {
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.1.2
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.1.2
           </ul>
-        <li> Updated <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.0. For more information regarding changes for version 0.2.0, refer to the release notes linked below:
+        <li> Updated the <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.0. For more information about changes for version 0.2.0, refer to the following release notes:
           <ul>
             <li>https://github.com/eclipse/lsp4jakarta/releases/tag/0.2.0
           </ul>
