@@ -193,7 +193,7 @@ patchPluginXml {
           <ul>
             <li>https://github.com/eclipse/lsp4jakarta/releases/tag/0.2.0
           </ul>
-        <li> Completion support for MicroProfile APIs when editing Java files via the <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a>.
+        <li> Completion support for MicroProfile APIs when you edit Java files with the <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a>.
         <li> Updated <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> version to 0.10.0. Refer to the release tag below:
           <ul>
             <li>https://github.com/eclipse/lsp4mp/releases/tag/0.10.0
