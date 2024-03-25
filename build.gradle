@@ -184,7 +184,7 @@ patchPluginXml {
         <br>
         Notable changes:
         <ul>
-        <li> Updated <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.1.2. For information regarding changes for version 2.1.2, refer to the release notes linked below:
+        <li> Updated the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.1.2. For more information about the changes for version 2.1.2, refer to the following release notes:
           <ul>
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.1.2
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.1.2
