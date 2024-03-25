@@ -92,7 +92,7 @@ The following actions are available when you select a project in the Liberty Too
 | View unit test report (Maven)        | View the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Open the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
 
-## Technical Support
+## Technical support
 If you experience a problem with this plugin you might be asked to collect language server messages to assist in problem determination. Follow these steps:
 1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
 2. Select the language server you need to monitor and then select **Trace:** **verbose**.
