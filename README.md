@@ -96,7 +96,7 @@ The following actions are available when you select a project in the Liberty Too
 If you experience a problem with this plugin you might be asked to collect language server messages to assist in problem determination. Follow these steps:
 1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
 2. Select the language server you need to monitor and then select **Trace:** **verbose**.
-3. Perform the actions that demonstrate the issue and messages will appear in the console. Click a message and select all the text in the console, for example, Ctrl-A on Windows or Cmd-A on MacOS. Paste the text into a message to send to the developer who is assisting you with the issue.
+3. Perform the actions that demonstrate the issue and messages will appear in the console. Click a message and select all the text in the console, for example, Ctrl-A on Windows or Cmd-A on MacOS. Copy the text and paste it into a message to send to the developer who is assisting you with the issue.
 
 
 ## Requirements
