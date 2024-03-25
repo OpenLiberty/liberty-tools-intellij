@@ -55,7 +55,7 @@ To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 
 ### Monitoring Language Server Messages
 
-1. Click on the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
+1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
 2. Select the language server you wish to monitor and then select **Trace:**  **messages** or **verbose**.
 3. Messages to and from the language server will appear in the console, so you can verify the messages sent in response to user actions in the IDE.
 
