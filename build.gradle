@@ -215,7 +215,7 @@ patchPluginXml {
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.1
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.1
           </ul>
-        <li> Fix for projects being detected in the Liberty tool window when the Liberty Gradle Plugin is commented out in the build.gradle - https://github.com/OpenLiberty/liberty-tools-intellij/issues/445
+        <li> Fix for erroneous detection of projects in the Liberty tool window when the Liberty Gradle Plugin is commented out in the build.gradle file - https://github.com/OpenLiberty/liberty-tools-intellij/issues/445
         <li> Fix for incorrect project name being displayed in the “Remove Liberty project” confirmation dialog - https://github.com/OpenLiberty/liberty-tools-intellij/issues/321
         <li> Fix to link to the Liberty Tools for IntelliJ GitHub issues page when an error in the Liberty Tools plugin is reported by the IntelliJ IDE - https://github.com/OpenLiberty/liberty-tools-intellij/issues/468
         <li> Fix to surface error to user when Java 17 or later is not found when attempting to start up language servers - https://github.com/OpenLiberty/liberty-tools-intellij/issues/196
