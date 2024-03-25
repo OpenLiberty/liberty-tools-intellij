@@ -53,7 +53,7 @@ To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 1. Follow the Eclipse LSP4MP [build instructions](https://github.com/eclipse/lsp4mp#getting-started) to build the `org.eclipse.lsp4mp.ls-x.x.x-SNAPSHOT-jar-with-dependencies.jar`. You do not need to build the `lsp4mp.jdt` component.
 2. In the [build.gradle file](build.gradle), update references to the `org.eclipse.lsp4mp.ls` to point to the version built in the previous step.
 
-### Monitoring Language Server Messages
+### Monitoring language server messages
 
 1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
 2. Select the language server you wish to monitor and then select **Trace:**  **messages** or **verbose**.
