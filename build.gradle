@@ -198,7 +198,7 @@ patchPluginXml {
           <ul>
             <li>https://github.com/eclipse/lsp4mp/releases/tag/0.10.0
           </ul>
-        <li> When the contents of the Liberty tool window are too large to fit in its window a scroll bar will appear
+        <li> When the contents of the Liberty tool window are too large to fit in its window, a scroll bar appears.
         <li> Helpful advice is displayed when no project appears in the Liberty tool window
         <li> Added the Language Servers tool window which can be used when technical support is required
         </ul>
