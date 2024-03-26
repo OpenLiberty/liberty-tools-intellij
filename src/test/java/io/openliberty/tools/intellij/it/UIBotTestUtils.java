@@ -20,7 +20,6 @@ import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.assertj.swing.core.MouseButton;
-import org.assertj.swing.fixture.JTextComponentFixture;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 
