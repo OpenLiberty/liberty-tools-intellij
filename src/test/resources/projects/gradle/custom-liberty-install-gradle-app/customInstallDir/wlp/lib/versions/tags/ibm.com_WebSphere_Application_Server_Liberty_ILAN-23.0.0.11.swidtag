@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SoftwareIdentity name="WebSphere Application Server Liberty ILAN" patch="true" tagId="ibm.com-3e5b4c633588442ba04a89370ebc9832-23.0.0.11" version="23.0.0.11" versionScheme="multipartnumeric" xml:lang="en" xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.iso.org/iso/19770/-2/2015-current/schema.xsd schema.xsd">
+    <Meta persistentId="3e5b4c633588442ba04a89370ebc9832"/>
+    <Meta generator="4-1-20170912"/>
+    <Meta revision="23.0.0.11"/>
+    <Meta build_date="cl231120231030-1102"/>
+    <Link href="swid:ibm.com-3e5b4c633588442ba04a89370ebc9832-23.0.0" rel="ancestor"/>
+    <Entity name="IBM" regid="ibm.com" role="licensor tagCreator softwareCreator"/>
+</SoftwareIdentity>
