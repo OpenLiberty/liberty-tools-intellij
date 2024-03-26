@@ -954,27 +954,24 @@ public abstract class SingleModMPProjectTestCommon {
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.RUN);
 
-        // Validate that the project started.
-        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
 
-        // Check if custom start parameters are cleared after running the configuration
-        String currentParams = getStartParams();
-        Assertions.assertTrue(currentParams.isEmpty() || currentParams.equals(initialParams));
+            // Check if custom start parameters are cleared after running the configuration
+            String currentParams = getStartParams();
+            Assertions.assertTrue(currentParams.isEmpty() || currentParams.equals(initialParams));
 
-        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-            // Stop the server if needed.
-            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+        } finally {
+            // Check if server stop is needed regardless of validation result
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
         }
-
-        // Remove the Liberty run configuration
-        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
-
-        // Check if custom start parameters are cleared after removing the configuration
-        String clearedParams = getStartParams();
-        Assertions.assertTrue(clearedParams.isEmpty() || clearedParams.equals(initialParams));
-
-        // Cleanup configurations.
-        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
     }
 
     /**
