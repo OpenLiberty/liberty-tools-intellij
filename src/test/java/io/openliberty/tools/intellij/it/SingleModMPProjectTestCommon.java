@@ -944,7 +944,7 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Create a Liberty configuration with custom start parameters.
         String configName = "customParamsConfig-" + getSmMPProjectName();
-        UIBotTestUtils.createLibertyConfigurationWithCustomParams(remoteRobot, configName);
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
 
         // Get the initial custom start parameters
         String initialParams = getStartParams();
