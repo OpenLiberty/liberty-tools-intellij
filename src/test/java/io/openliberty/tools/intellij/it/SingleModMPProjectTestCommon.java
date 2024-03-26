@@ -946,53 +946,35 @@ public abstract class SingleModMPProjectTestCommon {
         String configName = "customParamsConfig-" + getSmMPProjectName();
         UIBotTestUtils.createLibertyConfigurationWithCustomParams(remoteRobot, configName);
 
-        // Access and store the current custom start parameters from the Liberty module.
-        Map<String, String> initialParams = getLibertyModuleCustomParams();
+        // Get the initial custom start parameters
+        String initialParams = getStartParams();
 
-        // Remove the configuration.
-        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.RUN);
 
-        // Retrieve and compare the custom start parameters after removal.
-        Map<String, String> currentParams = getLibertyModuleCustomParams();
+        // Validate that the project started.
+        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
 
-        // Verify that the parameters are now empty or back to their default values.
-        Assertions.assertTrue(currentParams.isEmpty() || currentParams.equals(initialParams)); // Compare with initialParams
+        // Check if custom start parameters are cleared after running the configuration
+        String currentParams = getStartParams();
+        Assertions.assertTrue(currentParams.isEmpty() || currentParams.equals(initialParams));
 
-        // Perform cleanup for any residual server processes or configurations.
         if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+            // Stop the server if needed.
             UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
         }
+
+        // Remove the Liberty run configuration
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
-    }
-    /**
-     * Retrieves custom parameters specified in the Liberty configuration file.
-     *
-     * @return A map containing custom parameters extracted from the Liberty configuration file.
-     */
-    public Map<String, String> getLibertyModuleCustomParams() {
-        Map<String, String> customParams = new HashMap<>();
 
-        // Construct the path to the Liberty configuration file
-        Path libertyConfigFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "src", "main", "liberty", "config", "server.xml");
+        // Check if custom start parameters are cleared after removing the configuration
+        String clearedParams = getStartParams();
+        Assertions.assertTrue(clearedParams.isEmpty() || clearedParams.equals(initialParams));
 
-        // Read the Liberty configuration file to extract custom parameters
-        try (BufferedReader br = new BufferedReader(new FileReader(String.valueOf(libertyConfigFilePath)))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                // Assuming custom parameters are specified as key-value pairs in the server.xml file
-                if (line.contains("customParameter")) {
-                    String[] parts = line.split("\"");
-                    if (parts.length >= 3) {
-                        customParams.put(parts[1], parts[3]);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle IOException appropriately
-        }
-
-        return customParams;
+        // Cleanup configurations.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
     }
 
     /**
