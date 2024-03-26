@@ -16,13 +16,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -150,7 +145,6 @@ public abstract class SingleModMPProjectTestCommon {
             UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
         }
     }
-
 
     /**
      * Tests Liberty tool window start.../stop actions selected on the project's drop-down action
