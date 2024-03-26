@@ -68,7 +68,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Dev mode configuration start parameters.
      */
-    private final String DEV_MODE_START_PARAMS = "--hotTests";
+    private String DEV_MODE_START_PARAMS = "--hotTests";
 
     /**
      * Prepares the environment for test execution.
@@ -168,6 +168,16 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getStartParams() {
         return DEV_MODE_START_PARAMS;
+    }
+
+    /**
+     * Clears any start parameters associated with the Liberty server configuration.
+     * Subclasses should override this method to provide implementation specific to their needs.
+     */
+    @Override
+    public void clearStartParams() {
+        // Clearing start parameters
+        DEV_MODE_START_PARAMS = null;
     }
 
     /**
