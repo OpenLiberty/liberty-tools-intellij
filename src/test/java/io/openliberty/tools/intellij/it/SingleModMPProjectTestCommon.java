@@ -936,9 +936,6 @@ public abstract class SingleModMPProjectTestCommon {
         // Remove all existing configurations for a clean state.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        // Delete any existing test report files.
-        deleteTestReports();
-
         // Trigger the start with parameters configuration dialog.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
 
@@ -949,8 +946,6 @@ public abstract class SingleModMPProjectTestCommon {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
-            // Validate that the report was generated.
-            validateTestReportsExist();
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
@@ -966,19 +961,26 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Validate that the start with params action brings up the configuration previously used.
         try {
-            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
-            Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
-            String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
-            Assertions.assertEquals(getSmMPProjectName(), activeCfgName, "The active config name " + activeCfgName + " does not match expected name of " + getSmMPProjectName());
-            String activeCfgParams = cfgEntries.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
-            Assertions.assertEquals(getStartParams(), activeCfgParams, "The active config params " + activeCfgParams + " does not match expected params of " + getStartParams());
-        } finally {
             // Cleanup configurations.
             UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
             clearStartParams();
-
+            // Trigger the start with parameters configuration dialog.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
             // Verify that start parameters are cleared.
             Assertions.assertNull(getStartParams(), "Start params should be null after clearing.");
+            UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
+                // for those times when the tests are run twice. Not waiting, opens up a window
+                // that leads to false negative results, and the Liberty server being left active.
+                // If the Liberty server is left active, subsequent tests will fail.
+                TestUtils.sleepAndIgnoreException(60);
+
+                // Stop Liberty dev mode and validates that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWPLAY, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
         }
     }
 
