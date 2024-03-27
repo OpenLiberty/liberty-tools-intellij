@@ -924,11 +924,78 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Tests that when a Liberty run configuration is removed, any custom start parameters
+     * linked to the Liberty module are also cleared.
+     */
+    @Test
+    @Video
+    public void testCustomStartParametersClearedOnConfigRemoval() {
+        String testName = "testCustomStartParametersClearedOnConfigRemoval";
+        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        // Remove all existing configurations for a clean state.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParams());
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
+                // for those times when the tests are run twice. Not waiting, opens up a window
+                // that leads to false negative results, and the Liberty server being left active.
+                // If the Liberty server is left active, subsequent tests will fail.
+                TestUtils.sleepAndIgnoreException(60);
+
+                // Stop Liberty dev mode and validates that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
+        }
+
+        // Validate that the start with params action brings up the configuration previously used.
+        try {
+            // Cleanup configurations.
+            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+            clearStartParams();
+            // Trigger the start with parameters configuration dialog.
+            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
+            // Verify that start parameters are cleared.
+            Assertions.assertNull(getStartParams(), "Start params should be null after clearing.");
+            UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
+                // for those times when the tests are run twice. Not waiting, opens up a window
+                // that leads to false negative results, and the Liberty server being left active.
+                // If the Liberty server is left active, subsequent tests will fail.
+                TestUtils.sleepAndIgnoreException(60);
+
+                // Stop Liberty dev mode and validates that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWPLAY, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
+        }
+    }
+
+    /**
      * Returns the projects directory path.
      *
      * @return The projects directory path.
      */
     public abstract String getProjectsDirPath();
+
+    /**
+     * Clears any start parameters associated with the Liberty server configuration.
+     * Subclasses should implement this method to clear start parameters specific to their implementation.
+     */
+    public abstract void clearStartParams();
 
     /**
      * Returns the name of the single module MicroProfile project.

@@ -75,7 +75,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Dev mode configuration start parameters.
      */
-    private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
+    private String DEV_MODE_START_PARAMS = "-DhotTests=true";
 
     /**
      * Prepares the environment for test execution.
@@ -104,6 +104,16 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getProjectsDirPath() {
         return PROJECTS_PATH;
+    }
+
+    /**
+     * Clears any start parameters associated with the Liberty server configuration.
+     * Subclasses should override this method to provide implementation specific to their needs.
+     */
+    @Override
+    public void clearStartParams() {
+        // Clearing start parameters
+        DEV_MODE_START_PARAMS = null;
     }
 
     /**
