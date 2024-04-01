@@ -18,10 +18,9 @@ This extension is built using the [gradle-intellij-plugin](https://github.com/Je
 
 1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
 2. Clone the lsp4ij repository: `git clone git@github.com:MicroShed/lsp4ij.git`
-3. Build lsp4ij: `./gradlew jar`
-4. Save it in your local Maven repository: `./gradlew publishToMavenLocal` (this also runs the `jar` task)
-2. Import this repository as a Gradle project in IntelliJ IDEA
-3. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
+3. Build lsp4ij and save it in your local Maven repository. Run the following command from your local clone of the lsp4ij repository: `./gradlew publishToMavenLocal`.
+4. Import this repository as a Gradle project in IntelliJ IDEA 
+5. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
 
    OR  
 
@@ -53,6 +52,14 @@ To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 
 1. Follow the Eclipse LSP4MP [build instructions](https://github.com/eclipse/lsp4mp#getting-started) to build the `org.eclipse.lsp4mp.ls-x.x.x-SNAPSHOT-jar-with-dependencies.jar`. You do not need to build the `lsp4mp.jdt` component.
 2. In the [build.gradle file](build.gradle), update references to the `org.eclipse.lsp4mp.ls` to point to the version built in the previous step.
+
+### Monitoring language server messages
+
+1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
+2. Select the language server you wish to monitor and then select **Trace:**  **messages** or **verbose**.
+3. Messages to and from the language server will appear in the console, so you can verify the messages sent in response to user actions in the IDE.
+
+For more information, see the [LSP console user guide](https://github.com/redhat-developer/lsp4ij/blob/main/docs/UserGuide.md#lsp-console)
 
 ## Localization
 

@@ -1,7 +1,7 @@
 # Liberty Tools for IntelliJ IDEA
 
 <!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
-> Note: Version 23.0.12 requires **IntelliJ IDEA 2023.1.\*** or **2023.2.\*** and a minimum of **Java 17**.
+> Note: Version 24.0.3 requires **IntelliJ IDEA 2023.2.\*** or **2023.3.\*** and a minimum of **Java 17**.
 >
 > This page provides an overview of Liberty Tools for IntelliJ IDEA.
 > For minimum requirements information and detailed instructions on how to use Liberty Tools, check the [user-guide](docs/user-guide.md).
@@ -92,9 +92,16 @@ The following actions are available when you select a project in the Liberty Too
 | View unit test report (Maven)        | View the unit test report file if it exists at `/target/site/surefire-report.html`.                                                                                                                                                                                                                                                                                                                                      |
 | View test report (Gradle)            | Open the test report file, if it exists at the `build/reports/tests/test/index.html` default location. This action command is available only to Gradle projects. Gradle projects have only a single action command for test result reporting.                                                                                                                                                                             |
 
+## Technical support
+If you experience a problem with this plugin you might be asked to collect language server messages to assist in problem determination. Follow these steps:
+1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
+2. Select the language server you need to monitor and then select **Trace:** **verbose**.
+3. Perform the actions that demonstrate the issue and messages will appear in the console. Click a message and select all the text in the console, for example, Ctrl-A on Windows or Cmd-A on MacOS. Copy the text and paste it into a message to send to the developer who is assisting you with the issue.
+
+
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
-Version 23.0.12 requires **IntelliJ IDEA 2023.1.\*** or **2023.2.\*** and a minimum of **Java 17**.
+Version 24.0.3 requires **IntelliJ IDEA 2023.2.\*** or **2023.3.\*** and a minimum of **Java 17**.
 
 For more details, check the [user guide](docs/user-guide.md#software-requirements).
 
