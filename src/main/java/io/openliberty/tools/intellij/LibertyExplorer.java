@@ -12,11 +12,14 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
@@ -42,6 +45,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
@@ -49,22 +53,44 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
         // build tree
-        Tree tree = buildTree(project, getBackground());
+        ModalityState modalityState = getModalityState();
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
-        if (tree != null) {
-            JBScrollPane scrollPane = new JBScrollPane(tree);
-            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
-            this.setContent(scrollPane);
-        } else {
-            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-            jbTextArea.setEditable(false);
-            jbTextArea.setBackground(getBackground());
-            jbTextArea.setLineWrap(true);
+            if (tree != null) {
+//                this.setContent(tree);
+                ApplicationManager.getApplication().invokeLater(() -> this.setContent(tree), modalityState);
+            } else {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+                    jbTextArea.setEditable(false);
+                    jbTextArea.setBackground(getBackground());
+                    jbTextArea.setLineWrap(true);
 
-            this.setContent(jbTextArea);
-        }
-        ActionToolbar actionToolbar = buildActionToolbar(tree);
-        this.setToolbar(actionToolbar.getComponent());
+                    this.setContent(jbTextArea);
+                }, modalityState);
+//                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+//                jbTextArea.setEditable(false);
+//                jbTextArea.setBackground(getBackground());
+//                jbTextArea.setLineWrap(true);
+//
+//                this.setContent(jbTextArea);
+            }
+//            ActionToolbar actionToolbar = buildActionToolbar(tree);
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ActionToolbar actionToolbar = buildActionToolbar(tree);
+                this.setToolbar(actionToolbar.getComponent());
+            }, modalityState);
+//            ApplicationManager.getApplication().invokeLater();
+//            this.setToolbar(actionToolbar.getComponent());
+//            ApplicationManager.getApplication().invokeLater(() -> this.setToolbar(actionToolbar.getComponent()), modalityState);
+        });
+    }
+
+    private ModalityState getModalityState() {
+//        return ModalityState.stateForComponent(getComponent());
+        return ModalityState.defaultModalityState();
     }
 
     public static ActionToolbar buildActionToolbar(Tree tree) {
