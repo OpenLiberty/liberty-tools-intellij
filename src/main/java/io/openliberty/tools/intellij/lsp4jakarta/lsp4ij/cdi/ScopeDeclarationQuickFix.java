@@ -46,7 +46,7 @@ public class ScopeDeclarationQuickFix extends RemoveAnnotationConflictQuickFix {
         List<String> annotations = IntStream.range(0, diagnosticData.size())
                 .mapToObj(idx -> diagnosticData.get(idx).getAsString()).collect(Collectors.toList());
 
-        annotations.remove(ManagedBeanConstants.PRODUCES);
+        annotations.remove(ManagedBeanConstants.PRODUCES_FQ_NAME);
 
         if (parentType != null) {
 

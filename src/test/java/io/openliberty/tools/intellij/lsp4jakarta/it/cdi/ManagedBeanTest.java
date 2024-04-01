@@ -105,13 +105,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "Scope type annotations must be specified by a producer field at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
         d1.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.Dependent",
-                "jakarta.enterprise.context.ApplicationScoped", "Produces")));
+                "jakarta.enterprise.context.ApplicationScoped", "jakarta.enterprise.inject.Produces")));
 
         Diagnostic d2 = d(15, 25, 41, "Scope type annotations must be specified " +
                         "by a producer method at most once.", DiagnosticSeverity.Error, "jakarta-cdi",
                 "InvalidScopeDecl");
         d2.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.ApplicationScoped",
-                "jakarta.enterprise.context.RequestScoped", "Produces")));
+                "jakarta.enterprise.context.RequestScoped", "jakarta.enterprise.inject.Produces")));
 
         Diagnostic d3 = d(10, 13, 29, "Scope type annotations must be " +
                         "specified by a managed bean class at most once.", DiagnosticSeverity.Error,

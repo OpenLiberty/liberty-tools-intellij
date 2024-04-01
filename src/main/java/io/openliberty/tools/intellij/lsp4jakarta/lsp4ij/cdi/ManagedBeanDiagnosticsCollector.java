@@ -105,7 +105,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         isInjectField = true;
                 }
                 if (isProducerField && fieldScopes.size() > 1) {
-                    fieldScopes.add(PRODUCES);
+                    fieldScopes.add(PRODUCES_FQ_NAME);
                     diagnostics.add(createDiagnostic(field, unit,
                             Messages.getMessage("ScopeTypeAnnotationsProducerField"),
                             DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(fieldScopes)),
@@ -162,7 +162,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
 
                 if (isProducerMethod && methodScopes.size() > 1) {
-                    methodScopes.add(PRODUCES);
+                    methodScopes.add(PRODUCES_FQ_NAME);
                     diagnostics.add(createDiagnostic(method, unit,
                             Messages.getMessage("ScopeTypeAnnotationsProducerMethod"),
                             DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(methodScopes)),
