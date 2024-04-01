@@ -24,7 +24,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
@@ -45,7 +44,6 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
@@ -58,7 +56,6 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
             if (tree != null) {
-//                this.setContent(tree);
                 ApplicationManager.getApplication().invokeLater(() -> this.setContent(tree), modalityState);
             } else {
                 ApplicationManager.getApplication().invokeLater(() -> {
@@ -69,28 +66,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
                     this.setContent(jbTextArea);
                 }, modalityState);
-//                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-//                jbTextArea.setEditable(false);
-//                jbTextArea.setBackground(getBackground());
-//                jbTextArea.setLineWrap(true);
-//
-//                this.setContent(jbTextArea);
             }
-//            ActionToolbar actionToolbar = buildActionToolbar(tree);
 
             ApplicationManager.getApplication().invokeLater(() -> {
                 ActionToolbar actionToolbar = buildActionToolbar(tree);
                 this.setToolbar(actionToolbar.getComponent());
             }, modalityState);
-//            ApplicationManager.getApplication().invokeLater();
-//            this.setToolbar(actionToolbar.getComponent());
-//            ApplicationManager.getApplication().invokeLater(() -> this.setToolbar(actionToolbar.getComponent()), modalityState);
         });
     }
 
     private ModalityState getModalityState() {
-//        return ModalityState.stateForComponent(getComponent());
-        return ModalityState.defaultModalityState();
+        return ModalityState.nonModal();
     }
 
     public static ActionToolbar buildActionToolbar(Tree tree) {
