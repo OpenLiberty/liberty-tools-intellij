@@ -44,7 +44,7 @@ public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations 
         // Provide as another option: Remove all other JsonbAnnotations
         annotations.remove(JsonbConstants.JSONB_TRANSIENT_FQ_NAME);
         if (annotations.size() > 0) {
-            annotationsListsToRemove.addAll(Collections.singleton(annotations));
+            annotationsListsToRemove.add(annotations);
         }
 
         return annotationsListsToRemove;
