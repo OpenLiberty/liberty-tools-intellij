@@ -8,9 +8,16 @@
             <with attribute="serverClass" implements="org.eclipse.lsp4j.services.LanguageServer"/>
         </extensionPoint>
         <extensionPoint name="languageMapping"
-                        beanClass="org.microshed.lsp4ij.LanguageMappingExtensionPointBean"/>
-        <extensionPoint name="serverIconProvider"
-                        beanClass="org.microshed.lsp4ij.ServerIconProviderExtensionPointBean"/>
+                        beanClass="org.microshed.lsp4ij.server.definition.extension.LanguageMappingExtensionPointBean"/>
+            <with attribute="documentMatcher" implements="org.microshed.lsp4ij.DocumentMatcher"/>
+        <extensionPoint name="fileTypeMapping"
+                        beanClass="org.microshed.lsp4ij.server.definition.extension.FileTypeMappingExtensionPointBean">
+            <with attribute="documentMatcher" implements="org.microshed.lsp4ij.DocumentMatcher"/>
+        </extensionPoint>
+        <extensionPoint name="fileNamePatternMapping"
+                        beanClass="org.microshed.lsp4ij.server.definition.extension.FileNamePatternMappingExtensionPointBean">
+            <with attribute="documentMatcher" implements="org.microshed.lsp4ij.DocumentMatcher"/>
+        </extensionPoint>
     </extensionPoints>
     <extensions defaultExtensionNs="com.intellij">
         <!-- Completion support for all language servers -->

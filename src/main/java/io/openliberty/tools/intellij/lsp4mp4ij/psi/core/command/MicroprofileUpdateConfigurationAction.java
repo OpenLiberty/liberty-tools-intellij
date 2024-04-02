@@ -26,10 +26,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.FakePsiElement;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections.MicroProfilePropertiesUnassignedInspection;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections.MicroProfilePropertiesUnknownInspection;
-import org.eclipse.lsp4j.Command;
+import org.microshed.lsp4ij.commands.LSPCommand;
+import org.microshed.lsp4ij.commands.LSPCommandAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.microshed.lsp4ij.commands.CommandExecutor;
 import org.microshed.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
 
 import java.util.HashMap;
@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Action for updating the Microprofile configuration, typically requested by LSP4MP.
  */
-public class MicroprofileUpdateConfigurationAction extends AnAction {
+public class MicroprofileUpdateConfigurationAction extends LSPCommandAction {
     private final Map<String, ConfigurationUpdater> updaters = new HashMap<>();
 
     public MicroprofileUpdateConfigurationAction() {
@@ -48,8 +48,8 @@ public class MicroprofileUpdateConfigurationAction extends AnAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        JsonObject configUpdate = getConfigUpdate(e);
+    protected void commandPerformed(@NotNull LSPCommand command, @NotNull AnActionEvent e) {
+        JsonObject configUpdate = getConfigUpdate(command);
         if (configUpdate != null && e.getProject() != null) {
             String section = configUpdate.get("section").getAsString();
             ConfigurationUpdater updater = updaters.get(section);
@@ -61,17 +61,10 @@ public class MicroprofileUpdateConfigurationAction extends AnAction {
         }
     }
 
-    private @Nullable JsonObject getConfigUpdate(@NotNull AnActionEvent e) {
-        @Nullable Command command = e.getData(CommandExecutor.LSP_COMMAND);
-        if (command == null) {
-            return null;
-        }
-        List<Object> arguments = command.getArguments();
-        if (arguments != null && !arguments.isEmpty()) {
-            Object arg = arguments.get(0);
-            if (arg instanceof JsonObject) {
-                return (JsonObject) arg;
-            }
+    private @Nullable JsonObject getConfigUpdate(@NotNull LSPCommand command) {
+        Object arg = command.getArgumentAt(0);
+        if (arg instanceof JsonObject) {
+            return (JsonObject) arg;
         }
         return null;
     }
