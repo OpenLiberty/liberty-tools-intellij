@@ -24,6 +24,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
@@ -50,13 +51,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
-        // build tree
         ModalityState modalityState = getModalityState();
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            // build tree
             Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
             if (tree != null) {
-                ApplicationManager.getApplication().invokeLater(() -> this.setContent(tree), modalityState);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    JBScrollPane scrollPane = new JBScrollPane(tree);
+                    scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+                    this.setContent(scrollPane);
+                }, modalityState);
             } else {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
