@@ -9,13 +9,16 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
@@ -75,7 +78,12 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Dev mode configuration start parameters.
      */
-    private String DEV_MODE_START_PARAMS = "-DhotTests=true";
+    private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
+
+    /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private final String DEV_MODE_START_PARAMS_DEBUG = "-DdebugPort=9876";
 
     /**
      * Prepares the environment for test execution.
@@ -97,6 +105,23 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     /**
+     * Retrieves the path of the WLP directory within the project structure.
+     *
+     * This method first obtains a reference to the project tree view within the IDE's project frame.
+     * It then expands the project tree to locate the directory structure corresponding to the
+     * WebSphere Liberty Profile (WLP) installation within the specified project.
+     *
+     * @return A string representing the path to the WLP directory within the project structure.
+     */
+    @Override
+    public String getWLPPath() {
+        // get a JTreeFixture reference to the file project viewer entry
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(getSmMPProjectName());
+        return projTree.expand(getSmMPProjectName(),"target", "liberty", "wlp", "usr", "servers", "defaultServer").toString();
+    }
+
+    /**
      * Returns the projects directory path.
      *
      * @return The projects directory path.
@@ -104,16 +129,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getProjectsDirPath() {
         return PROJECTS_PATH;
-    }
-
-    /**
-     * Clears any start parameters associated with the Liberty server configuration.
-     * Subclasses should override this method to provide implementation specific to their needs.
-     */
-    @Override
-    public void clearStartParams() {
-        // Clearing start parameters
-        DEV_MODE_START_PARAMS = null;
     }
 
     /**
@@ -186,6 +201,16 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getStartParams() {
         return DEV_MODE_START_PARAMS;
+    }
+
+    /**
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
+     */
+    @Override
+    public String getStartParamsDebugPort() {
+        return DEV_MODE_START_PARAMS_DEBUG;
     }
 
     /**

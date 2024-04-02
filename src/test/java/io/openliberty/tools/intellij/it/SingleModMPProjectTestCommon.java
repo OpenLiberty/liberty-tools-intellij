@@ -16,8 +16,12 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -940,47 +944,58 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
 
         // Run the configuration dialog.
-        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParams());
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParamsDebugPort());
 
         try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+            validateAndStartProject(testName, absoluteWLPPath);
 
         } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
-                // for those times when the tests are run twice. Not waiting, opens up a window
-                // that leads to false negative results, and the Liberty server being left active.
-                // If the Liberty server is left active, subsequent tests will fail.
-                TestUtils.sleepAndIgnoreException(60);
-
-                // Stop Liberty dev mode and validates that the Liberty server is down.
-                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
-            }
+            cleanupAndStopServerIfNeeded(absoluteWLPPath);
         }
 
-        // Validate that the start with params action brings up the configuration previously used.
+        // Cleanup configurations.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start", true, 3);
+
         try {
-            // Cleanup configurations.
-            UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
-            clearStartParams();
-            // Trigger the start with parameters configuration dialog.
-            UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
-            // Verify that start parameters are cleared.
-            Assertions.assertNull(getStartParams(), "Start params should be null after clearing.");
-            UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
+            validateAndStartProject(testName, absoluteWLPPath);
+
+            // Open the server.env file
+            Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+            getWLPPath();
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getSmMPProjectName(), getWLPInstallPath(), "wlp", "usr", "servers", "defaultServer");
+
+            // Read all lines from server.env
+            List<String> lines = Files.readAllLines(serverEnvPath);
+
+            // Check if Debug Port is Default
+            boolean debugPortIsDefault = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=7777"));
+            Assertions.assertTrue(debugPortIsDefault, "Debug Port is not default");
+
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
 
         } finally {
-            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Sleep for a few seconds to allow dev mode to finish running the tests. Specially
-                // for those times when the tests are run twice. Not waiting, opens up a window
-                // that leads to false negative results, and the Liberty server being left active.
-                // If the Liberty server is left active, subsequent tests will fail.
-                TestUtils.sleepAndIgnoreException(60);
+            // Open the terminal window.
+            UIBotTestUtils.openTerminalWindow(remoteRobot);
+            cleanupAndStopServerIfNeeded(absoluteWLPPath);
+        }
+    }
 
-                // Stop Liberty dev mode and validates that the Liberty server is down.
-                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWPLAY, absoluteWLPPath, getSmMPProjectName(), 3);
-            }
+    private void validateAndStartProject(String testName, String absoluteWLPPath) {
+        // Validate that the project started.
+        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+    }
+
+    private void cleanupAndStopServerIfNeeded(String absoluteWLPPath) {
+        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+            // Sleep for a few seconds to allow dev mode to finish running the tests.
+            TestUtils.sleepAndIgnoreException(60);
+
+            // Stop Liberty dev mode and validate that the Liberty server is down.
+            UIBotTestUtils.runStopAction(remoteRobot, "\"testCustomStartParametersClearedOnConfigRemoval\"", UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
         }
     }
 
@@ -990,12 +1005,6 @@ public abstract class SingleModMPProjectTestCommon {
      * @return The projects directory path.
      */
     public abstract String getProjectsDirPath();
-
-    /**
-     * Clears any start parameters associated with the Liberty server configuration.
-     * Subclasses should implement this method to clear start parameters specific to their implementation.
-     */
-    public abstract void clearStartParams();
 
     /**
      * Returns the name of the single module MicroProfile project.
@@ -1035,6 +1044,13 @@ public abstract class SingleModMPProjectTestCommon {
     public abstract String getWLPInstallPath();
 
     /**
+     * Returns the path of the WLP directory within the project structure.
+     *
+     * @return The path of the WLP directory within the project structure.
+     */
+    public abstract String getWLPPath();
+
+    /**
      * Returns the name of the build file used by the project.
      *
      * @return The name of the build file used by the project.
@@ -1054,6 +1070,13 @@ public abstract class SingleModMPProjectTestCommon {
      * @return The custom start parameters to be used to start dev mode.
      */
     public abstract String getStartParams();
+
+    /**
+     * Returns the custom start parameters to be used to start dev mode.
+     *
+     * @return The custom start parameters to be used to start dev mode.
+     */
+    public abstract String getStartParamsDebugPort();
 
     /**
      * Deletes test reports.

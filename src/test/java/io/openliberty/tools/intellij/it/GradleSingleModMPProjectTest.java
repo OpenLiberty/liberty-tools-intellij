@@ -9,11 +9,14 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import com.intellij.remoterobot.fixtures.JTreeFixture;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
@@ -68,7 +71,12 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Dev mode configuration start parameters.
      */
-    private String DEV_MODE_START_PARAMS = "--hotTests";
+    private final String DEV_MODE_START_PARAMS = "--hotTests";
+
+    /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private final String DEV_MODE_START_PARAMS_DEBUG = "--libertyDebugPort=9876";
 
     /**
      * Prepares the environment for test execution.
@@ -86,6 +94,22 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getWLPInstallPath() {
         return WLP_INSTALL_PATH;
+    }
+
+    /**
+     * Retrieves the path of the WLP directory within the project structure.
+     *
+     * This method first obtains a reference to the project tree view within the IDE's project frame.
+     * It then expands the project tree to locate the directory structure corresponding to the
+     * WebSphere Liberty Profile (WLP) installation within the specified project.
+     *
+     * @return A string representing the path to the WLP directory within the project structure.
+     */
+    public String getWLPPath() {
+        // get a JTreeFixture reference to the file project viewer entry
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(getSmMPProjectName());
+        return projTree.expand(getSmMPProjectName(),"build", "wlp", "usr", "servers", "defaultServer").toString();
     }
 
     /**
@@ -171,13 +195,13 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     /**
-     * Clears any start parameters associated with the Liberty server configuration.
-     * Subclasses should override this method to provide implementation specific to their needs.
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
      */
     @Override
-    public void clearStartParams() {
-        // Clearing start parameters
-        DEV_MODE_START_PARAMS = null;
+    public String getStartParamsDebugPort() {
+        return DEV_MODE_START_PARAMS_DEBUG;
     }
 
     /**
