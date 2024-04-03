@@ -119,7 +119,7 @@ public abstract class AbstractStaticPropertiesProvider extends AbstractPropertie
 	private static Gson createGson() {
 		// EnumTypeAdapter from LSP4J should be used, but we cannot use EnumTypeAdapter from LSP4J
 		// coming from LSP4IJ to avoid classpath issues we use a copy of EnumTypeAdapter
-		return new GsonBuilder().registerTypeAdapterFactory(new com.redhat.devtools.intellij.lsp4mp4ij.psi.core.EnumTypeAdapter.Factory()).create();
+		return new GsonBuilder().registerTypeAdapterFactory(new EnumTypeAdapter.Factory()).create();
 	}
 
 

@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  * Copied from https://github.com/eclipse-lsp4j/lsp4j/blob/main/org.eclipse.lsp4j.jsonrpc/src/main/java/org/eclipse/lsp4j/jsonrpc/json/adapters/EnumTypeAdapter.java
  ******************************************************************************/
-package com.redhat.devtools.intellij.lsp4mp4ij.psi.core;
+package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
