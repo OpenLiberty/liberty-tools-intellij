@@ -12,12 +12,9 @@
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!-- MicroProfile LS -->
         <server id="lsp4mp"
-                label="MicroProfile"
-                class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
-                clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
-                lastDocumentDisconnectedTimeout="36000"
-                scope="project">
+                name="MicroProfile"
+                factoryClass="io.openliberty.tools.intellij.lsp4mp.lsp.MircoProfileLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
             <description><![CDATA[
                 The <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
                 <ul>
@@ -34,12 +31,9 @@
         <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
         <server id="libertyXml"
-                label="Liberty LemMinX"
-                class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
-                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
-                lastDocumentDisconnectedTimeout="36000"
-                scope="project">
+                name="Liberty LemMinX"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
             <description><![CDATA[
                 The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty LemMinX Language Server</a> provides support in:
                 <ul>
@@ -52,12 +46,9 @@
 
         <!-- Liberty Config LS -->
         <server id="libertyls"
-                label="Liberty Config"
-                class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
-                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
-                lastDocumentDisconnectedTimeout="36000"
-                scope="project">
+                name="Liberty Config"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
             <description><![CDATA[
                 The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty Config Language Server</a> provides support in:
                 <ul>
@@ -72,12 +63,9 @@
 
         <!-- Jakarta LS -->
         <server id="jakartals"
-                label="Jakarta EE"
-                class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
-                clientImpl="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"
-                lastDocumentDisconnectedTimeout="36000"
-                scope="project">
+                name="Jakarta EE"
+                factoryClass="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
             <description><![CDATA[
                 The <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> provides support in:
                 <ul>
