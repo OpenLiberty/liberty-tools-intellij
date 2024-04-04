@@ -4,13 +4,14 @@
     <extensionPoints>
         <extensionPoint
                 name="server"
-                beanClass="org.microshed.lsp4ij.ServerExtensionPointBean">
+                beanClass="org.microshed.lsp4ij.server.definition.extension.ServerExtensionPointBean">
             <with attribute="factoryClass" implements="org.microshed.lsp4ij.LanguageServerFactory"/>
         </extensionPoint>
         <extensionPoint
                 name="languageMapping"
-                beanClass="org.microshed.lsp4ij.server.definition.extension.LanguageMappingExtensionPointBean"/>
+                beanClass="org.microshed.lsp4ij.server.definition.extension.LanguageMappingExtensionPointBean">
             <with attribute="documentMatcher" implements="org.microshed.lsp4ij.DocumentMatcher"/>
+        </extensionPoint>
         <extensionPoint
                 name="fileTypeMapping"
                 beanClass="org.microshed.lsp4ij.server.definition.extension.FileTypeMappingExtensionPointBean">
