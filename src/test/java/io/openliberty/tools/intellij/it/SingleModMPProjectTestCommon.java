@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,17 +11,15 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.JTreeFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -949,7 +947,17 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             validateAndStartProject(testName, absoluteWLPPath);
 
+            // Expand the Project tree and open server.env file
+            expandProjectTreeNodes();
+            // Check if the specified Custom debug port is used.
+            TestUtils.checkCustomDebugPort(absoluteWLPPath);
+
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+
         } finally {
+            // Open the terminal window.
+            UIBotTestUtils.openTerminalWindow(remoteRobot);
             cleanupAndStopServerIfNeeded(absoluteWLPPath);
         }
 
@@ -962,17 +970,10 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             validateAndStartProject(testName, absoluteWLPPath);
 
-            // Open the server.env file
-            Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
-            getWLPPath();
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getSmMPProjectName(), getWLPInstallPath(), "wlp", "usr", "servers", "defaultServer");
-
-            // Read all lines from server.env
-            List<String> lines = Files.readAllLines(serverEnvPath);
-
-            // Check if Debug Port is Default
-            boolean debugPortIsDefault = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=7777"));
-            Assertions.assertTrue(debugPortIsDefault, "Debug Port is not default");
+            // Expand the Project tree and open server.env file
+            expandProjectTreeNodes();
+            // Check if Default debug port is used.
+            TestUtils.checkDefaultDebugPort(absoluteWLPPath);
 
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
@@ -1044,11 +1045,11 @@ public abstract class SingleModMPProjectTestCommon {
     public abstract String getWLPInstallPath();
 
     /**
-     * Returns the path of the WLP directory within the project structure.
+     * Returns the JTreeFixture representing the expanded project tree nodes
      *
-     * @return The path of the WLP directory within the project structure.
+     * @return The JTreeFixture representing the expanded project tree nodes
      */
-    public abstract String getWLPPath();
+    public abstract JTreeFixture expandProjectTreeNodes();
 
     /**
      * Returns the name of the build file used by the project.

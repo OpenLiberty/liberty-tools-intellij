@@ -523,4 +523,34 @@ public class TestUtils {
 
         return stopServer;
     }
+
+    /**
+     * Reads the server.env file to check if the debug port is set to the default value.
+     *
+     * @param absoluteWLPPath The absolute path to the WLP directory.
+     */
+    public static void checkDefaultDebugPort(String absoluteWLPPath) throws IOException {
+        // Open the server.env file
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        // Read all lines from server.env
+        List<String> lines = Files.readAllLines(serverEnvPath);
+        // Check if Debug Port is Default
+        boolean debugPortIsDefault = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=7777"));
+        Assertions.assertTrue(debugPortIsDefault, "Debug Port is not default");
+    }
+
+    /**
+     * Reads the server.env file to check if the debug port is set to the specified custom value.
+     *
+     * @param absoluteWLPPath The absolute path to the WLP directory.
+     */
+    public static void checkCustomDebugPort(String absoluteWLPPath) throws IOException {
+        // Open the server.env file
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        // Read all lines from server.env
+        List<String> lines = Files.readAllLines(serverEnvPath);
+        // Check if Debug Port is Default
+        boolean debugPortIsDefault = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=9876"));
+        Assertions.assertTrue(debugPortIsDefault, "Debug Port is not default");
+    }
 }

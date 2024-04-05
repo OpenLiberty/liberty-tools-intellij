@@ -97,19 +97,19 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     /**
-     * Retrieves the path of the WLP directory within the project structure.
+     * This method expands specific nodes within a project tree represented by a JTreeFixture.
+     * It locates the ProjectFrameFixture using a remote robot and retrieves a JTreeFixture for the project view.
+     * Then, it expands the nodes corresponding to the given path within the project tree.
      *
-     * This method first obtains a reference to the project tree view within the IDE's project frame.
-     * It then expands the project tree to locate the directory structure corresponding to the
-     * WebSphere Liberty Profile (WLP) installation within the specified project.
-     *
-     * @return A string representing the path to the WLP directory within the project structure.
+     * @return JTreeFixture representing the expanded project tree nodes.
      */
-    public String getWLPPath() {
+    @Override
+    public JTreeFixture expandProjectTreeNodes() {
         // get a JTreeFixture reference to the file project viewer entry
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(getSmMPProjectName());
-        return projTree.expand(getSmMPProjectName(),"build", "wlp", "usr", "servers", "defaultServer").toString();
+        UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getSmMPProjectName(), "build", "wlp", "usr", "servers", "defaultServer");
+        return projTree.expand(getSmMPProjectName(), "build", "wlp", "usr", "servers", "defaultServer");
     }
 
     /**
