@@ -9,15 +9,23 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.runConfiguration;
 
+import com.intellij.openapi.externalSystem.service.ui.command.line.CommandLineField;
+import com.intellij.openapi.externalSystem.service.ui.command.line.CommandLineInfo;
+import com.intellij.openapi.externalSystem.service.ui.project.path.WorkingDirectoryField;
+import com.intellij.openapi.externalSystem.service.ui.project.path.WorkingDirectoryInfo;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ui.configuration.SdkComboBox;
+import com.intellij.openapi.roots.ui.configuration.SdkComboBoxModel;
+import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.StateRestoringCheckBox;
 import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.plugins.gradle.service.execution.GradleCommandLineInfo;
 
 import javax.swing.*;
 
@@ -30,8 +38,13 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     private LabeledComponent<EditorTextField> editableParams;
     private LabeledComponent<ComboBox> libertyModule;
     private StateRestoringCheckBox runInContainerCheckBox;
+    private SdkComboBox sdkComboBox1;
+
+    private Project proj;
 
     public LibertyRunSettingsEditor(Project project) {
+        proj = project;
+        sdkComboBox1.setModel(SdkComboBoxModel.createJdkComboBoxModel(project, new ProjectSdksModel()));
         libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFilesAsString(project).toArray()));
     }
 
@@ -71,5 +84,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         editableParams = new LabeledComponent<>();
         editableParams.setComponent(new EditorTextField());
         runInContainerCheckBox = new StateRestoringCheckBox();
+        sdkComboBox1 = new SdkComboBox(SdkComboBoxModel.createJdkComboBoxModel(proj, new ProjectSdksModel()));
     }
 }
