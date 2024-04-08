@@ -11,7 +11,6 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.JTreeFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -945,10 +944,11 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParamsDebugPort());
 
         try {
-            validateAndStartProject(testName, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            expandProjectTreeNodes();
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerPath());
             // Check if the specified Custom debug port is used.
             TestUtils.checkCustomDebugPort(absoluteWLPPath);
 
@@ -956,8 +956,6 @@ public abstract class SingleModMPProjectTestCommon {
             System.err.println("Error reading the file: " + e.getMessage());
 
         } finally {
-            // Open the terminal window.
-            UIBotTestUtils.openTerminalWindow(remoteRobot);
             cleanupAndStopServerIfNeeded(absoluteWLPPath);
         }
 
@@ -968,10 +966,11 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start", true, 3);
 
         try {
-            validateAndStartProject(testName, absoluteWLPPath);
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            expandProjectTreeNodes();
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerPath());
             // Check if Default debug port is used.
             TestUtils.checkDefaultDebugPort(absoluteWLPPath);
 
@@ -979,18 +978,14 @@ public abstract class SingleModMPProjectTestCommon {
             System.err.println("Error reading the file: " + e.getMessage());
 
         } finally {
-            // Open the terminal window.
-            UIBotTestUtils.openTerminalWindow(remoteRobot);
             cleanupAndStopServerIfNeeded(absoluteWLPPath);
         }
     }
 
-    private void validateAndStartProject(String testName, String absoluteWLPPath) {
-        // Validate that the project started.
-        TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
-    }
-
     private void cleanupAndStopServerIfNeeded(String absoluteWLPPath) {
+
+        // Open the terminal window.
+        UIBotTestUtils.openTerminalWindow(remoteRobot);
         if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
             // Sleep for a few seconds to allow dev mode to finish running the tests.
             TestUtils.sleepAndIgnoreException(60);
@@ -1045,11 +1040,11 @@ public abstract class SingleModMPProjectTestCommon {
     public abstract String getWLPInstallPath();
 
     /**
-     * Returns the JTreeFixture representing the expanded project tree nodes
+     * Returns the path of server.env file.
      *
-     * @return The JTreeFixture representing the expanded project tree nodes
+     * @return The path of server.env file.
      */
-    public abstract JTreeFixture expandProjectTreeNodes();
+    public abstract String[] getWLPServerPath();
 
     /**
      * Returns the name of the build file used by the project.

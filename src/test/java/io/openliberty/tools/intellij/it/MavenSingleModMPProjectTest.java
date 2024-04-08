@@ -9,16 +9,13 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
-import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
@@ -54,6 +51,16 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * Relative location of the WLP installation.
      */
     private final String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
+
+    /**
+     * Target Directory.
+     */
+    private final String TARGET_DIR = "target";
+
+    /**
+     * Liberty Directory.
+     */
+    private final String LIBERTY_DIR = "liberty";
 
     /**
      * Build file name.
@@ -105,19 +112,13 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     /**
-     * This method expands specific nodes within a project tree represented by a JTreeFixture.
-     * It locates the ProjectFrameFixture using a remote robot and retrieves a JTreeFixture for the project view.
-     * Then, it expands the nodes corresponding to the given path within the project tree.
+     * Returns the path of server.env file.
      *
-     * @return JTreeFixture representing the expanded project tree nodes.
+     * @return The path of server.env file.
      */
     @Override
-    public JTreeFixture expandProjectTreeNodes() {
-        // get a JTreeFixture reference to the file project viewer entry
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(getSmMPProjectName());
-        UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getSmMPProjectName(), "target", "liberty", "wlp", "usr", "servers", "defaultServer");
-        return projTree.expand(getSmMPProjectName(), "target", "liberty", "wlp", "usr", "servers", "defaultServer");
+    public String[] getWLPServerPath() {
+        return new String[]{SM_MP_PROJECT_NAME, TARGET_DIR, LIBERTY_DIR, "wlp", "usr", "servers", "defaultServer"};
     }
 
     /**
