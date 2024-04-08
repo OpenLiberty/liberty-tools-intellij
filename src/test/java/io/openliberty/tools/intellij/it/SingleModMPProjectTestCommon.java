@@ -16,6 +16,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
@@ -262,7 +264,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingSearch() {
         String testName = "testStartWithParamsActionUsingSearch";
-        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -275,6 +276,7 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Run the configuration dialog.
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParams());
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         try {
             // Validate that the application started.
@@ -591,15 +593,15 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithCustomConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
-        String absoluteWLPPath = getAbsoluteWLPPath();
-        //getWLPInstallPath();
-        //Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
+        renameFile("custom-" + getBuildFileName(), getBuildFileName());
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Add a new Liberty config.
-        String configName = "toolBarDebug-" + getSmMPProjectName();
+        String configName = "toolBarCustomDebug-" + getSmMPProjectName();
         UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
 
         // Find the newly created config in the config selection box on the project frame.
@@ -608,9 +610,12 @@ public abstract class SingleModMPProjectTestCommon {
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
+        TestUtils.sleepAndIgnoreException(60);
+        String customWLPPath = getCustomWLPPath();
+
         try {
             // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
@@ -632,8 +637,8 @@ public abstract class SingleModMPProjectTestCommon {
                 } finally {
                     try {
                         // Stop the server.
-                        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3);
                         }
                     } finally {
                         // Cleanup configurations.
@@ -641,6 +646,19 @@ public abstract class SingleModMPProjectTestCommon {
                     }
                 }
             }
+        }
+        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
+        renameFile("temp-" + getBuildFileName(), getBuildFileName());
+    }
+
+    private void renameFile(String original, String renamed) {
+        Path originalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), original);
+        Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
+
+        File oldFile = new File(originalBuildFilePath.toString());
+        if(oldFile.exists()) {
+            File newFile = new File(renamedOriginalBuildFilePath.toString());
+            oldFile.renameTo(newFile);
         }
     }
 
@@ -654,22 +672,28 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithCustomConfigInDebugModeUsingMenu() {
         String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
-        String absoluteWLPPath = getAbsoluteWLPPath();
-        //getWLPInstallPath();
+
+        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
+        renameFile("custom-" + getBuildFileName(), getBuildFileName());
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Add a new Liberty config.
-        String configName = "menuDebug-" + getSmMPProjectName();
+        String configName = "menuCustomDebug-" + getSmMPProjectName();
         UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
 
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
 
+        //String absoluteWLPPath = getAbsoluteWLPPath();
+        TestUtils.sleepAndIgnoreException(60);
+
+        String customWLPPath = getCustomWLPPath();
+
         try {
             // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
@@ -691,8 +715,8 @@ public abstract class SingleModMPProjectTestCommon {
                 } finally {
                     try {
                         // Stop the server.
-                        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3);
                         }
                     } finally {
                         // Cleanup configurations.
@@ -701,6 +725,8 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
+        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
+        renameFile("temp-" + getBuildFileName(), getBuildFileName());
     }
 
     /**
@@ -1122,4 +1148,6 @@ public abstract class SingleModMPProjectTestCommon {
     public abstract void validateTestReportsExist();
 
     public abstract String getAbsoluteWLPPath();
+
+    public abstract String getCustomWLPPath();
 }
