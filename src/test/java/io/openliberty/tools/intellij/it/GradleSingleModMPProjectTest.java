@@ -99,7 +99,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * @return The path of server.env file.
      */
     @Override
-    public String[] getWLPServerPath() {
+    public String[] getServerEnvPath() {
         return new String[]{SM_MP_PROJECT_NAME, WLP_INSTALL_PATH, "wlp", "usr", "servers", "defaultServer"};
     }
 

@@ -948,7 +948,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerPath());
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
             // Check if the specified Custom debug port is used.
             TestUtils.checkCustomDebugPort(absoluteWLPPath);
 
@@ -970,7 +970,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerPath());
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
             // Check if Default debug port is used.
             TestUtils.checkDefaultDebugPort(absoluteWLPPath);
 
@@ -986,6 +986,7 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Open the terminal window.
         UIBotTestUtils.openTerminalWindow(remoteRobot);
+
         if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
             // Sleep for a few seconds to allow dev mode to finish running the tests.
             TestUtils.sleepAndIgnoreException(60);
@@ -1044,7 +1045,7 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The path of server.env file.
      */
-    public abstract String[] getWLPServerPath();
+    public abstract String[] getServerEnvPath();
 
     /**
      * Returns the name of the build file used by the project.
