@@ -212,11 +212,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     @Override
-    public String getAbsoluteWLPPath() {
-        return Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, WLP_INSTALL_PATH).toString();
-    }
-
-    @Override
     public String getCustomWLPPath() {
         String wlpPath = "";
         try {
