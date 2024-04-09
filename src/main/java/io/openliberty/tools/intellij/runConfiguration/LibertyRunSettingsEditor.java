@@ -40,10 +40,10 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
     private StateRestoringCheckBox runInContainerCheckBox;
     private SdkComboBox sdkComboBox1;
 
-    private Project proj;
+    private Project projectObj;
 
     public LibertyRunSettingsEditor(Project project) {
-        proj = project;
+        projectObj = project;
         sdkComboBox1.setModel(SdkComboBoxModel.createJdkComboBoxModel(project, new ProjectSdksModel()));
         libertyModule.getComponent().setModel(new DefaultComboBoxModel(LibertyModules.getInstance().getLibertyBuildFilesAsString(project).toArray()));
     }
@@ -84,6 +84,6 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         editableParams = new LabeledComponent<>();
         editableParams.setComponent(new EditorTextField());
         runInContainerCheckBox = new StateRestoringCheckBox();
-        sdkComboBox1 = new SdkComboBox(SdkComboBoxModel.createJdkComboBoxModel(proj, new ProjectSdksModel()));
+        sdkComboBox1 = new SdkComboBox(SdkComboBoxModel.createJdkComboBoxModel(projectObj, new ProjectSdksModel()));
     }
 }
