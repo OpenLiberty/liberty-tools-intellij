@@ -17,8 +17,9 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.util.Map;
 
@@ -593,12 +594,15 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithCustomConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
+        String customWLPPath = "";
 
         renameFile(getBuildFileName(), "temp-" + getBuildFileName());
         renameFile("custom-" + getBuildFileName(), getBuildFileName());
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        deleteBuildDirectory();
 
         // Add a new Liberty config.
         String configName = "toolBarCustomDebug-" + getSmMPProjectName();
@@ -610,8 +614,10 @@ public abstract class SingleModMPProjectTestCommon {
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
-        TestUtils.sleepAndIgnoreException(60);
-        String customWLPPath = getCustomWLPPath();
+        boolean fileExists = checkFileExists();
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+        }
 
         try {
             // Validate that the project started.
@@ -649,17 +655,6 @@ public abstract class SingleModMPProjectTestCommon {
         }
         renameFile(getBuildFileName(), "custom-" + getBuildFileName());
         renameFile("temp-" + getBuildFileName(), getBuildFileName());
-    }
-
-    private void renameFile(String original, String renamed) {
-        Path originalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), original);
-        Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
-
-        File oldFile = new File(originalBuildFilePath.toString());
-        if(oldFile.exists()) {
-            File newFile = new File(renamedOriginalBuildFilePath.toString());
-            oldFile.renameTo(newFile);
-        }
     }
 
     /**
@@ -672,12 +667,15 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithCustomConfigInDebugModeUsingMenu() {
         String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
+        String customWLPPath = "";
 
         renameFile(getBuildFileName(), "temp-" + getBuildFileName());
         renameFile("custom-" + getBuildFileName(), getBuildFileName());
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        deleteBuildDirectory();
 
         // Add a new Liberty config.
         String configName = "menuCustomDebug-" + getSmMPProjectName();
@@ -686,9 +684,10 @@ public abstract class SingleModMPProjectTestCommon {
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
 
-        TestUtils.sleepAndIgnoreException(60);
-
-        String customWLPPath = getCustomWLPPath();
+        boolean fileExists = checkFileExists();
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+        }
 
         try {
             // Validate that the project started.
@@ -726,6 +725,67 @@ public abstract class SingleModMPProjectTestCommon {
         }
         renameFile(getBuildFileName(), "custom-" + getBuildFileName());
         renameFile("temp-" + getBuildFileName(), getBuildFileName());
+    }
+
+    private boolean checkFileExists() {
+        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir(), "liberty-plugin-config.xml");
+        boolean fileExists = false;
+        int maxAttempts = 5;
+        int attempts = 0;
+
+        while (!fileExists && attempts < maxAttempts) {
+            fileExists = Files.exists(filePath); // Check if the file exists
+
+            if (!fileExists) {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    try {
+                        TestUtils.sleepAndIgnoreException(60);
+                    } catch (Exception e) {
+                        Thread.currentThread().interrupt(); // Restore interrupted status
+                        break;
+                    }
+                }
+            }
+        }
+        return fileExists;
+    }
+
+
+    private void renameFile(String original, String renamed) {
+        Path originalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), original);
+        Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
+
+        File oldFile = new File(originalBuildFilePath.toString());
+        if(oldFile.exists()) {
+            File newFile = new File(renamedOriginalBuildFilePath.toString());
+            oldFile.renameTo(newFile);
+        }
+    }
+
+    private void deleteBuildDirectory() {
+        Path folderToDelete = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir());
+
+        try {
+            // Recursively delete all files and directories
+            Files.walkFileTree(folderToDelete, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (!file.getFileName().toString().equals(getTargetDir())) {
+                        Files.delete(file);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir); // Delete directory after all its contents are deleted
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1147,4 +1207,6 @@ public abstract class SingleModMPProjectTestCommon {
     public abstract void validateTestReportsExist();
 
     public abstract String getCustomWLPPath();
+
+    public abstract String getTargetDir();
 }

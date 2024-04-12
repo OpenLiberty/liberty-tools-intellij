@@ -238,4 +238,9 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
         return Paths.get(wlpPath).toAbsolutePath().toString();
     }
+
+    @Override
+    public String getTargetDir() {
+        return TARGET_DIR;
+    }
 }
