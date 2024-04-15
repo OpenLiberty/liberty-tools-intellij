@@ -30,7 +30,7 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 import org.eclipse.lsp4mp.ls.commons.CodeActionFactory;
-import org.microshed.lsp4ij.JSONUtils;
+import com.redhat.devtools.lsp4ij.JSONUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
