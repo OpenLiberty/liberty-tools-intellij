@@ -55,7 +55,7 @@ configurations {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
-    compileTestKotlin {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
             jvmTarget = "17"
         }
