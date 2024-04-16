@@ -629,6 +629,8 @@ public class UIBotTestUtils {
 
                 projTree.expand(filePath);
 
+                TestUtils.sleepAndIgnoreException(5);
+
                 projTree.findText(fileName).doubleClick();
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openFile: double clicked on file name");
                 break;
