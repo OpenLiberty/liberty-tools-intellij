@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,18 +14,22 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +47,7 @@ import java.util.stream.Collectors;
  * * Or only one code action to fix all annotations.
  */
 public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickFix {
+    private static final Logger LOGGER = Logger.getLogger(PersistenceAnnotationQuickFix.class.getName());
 
     public PersistenceAnnotationQuickFix() {
         super("jakarta.persistence.MapKeyJoinColumn");
@@ -51,33 +56,38 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
     @Override
     protected void insertAnnotations(Diagnostic diagnostic, JavaCodeActionContext context,
                                      List<CodeAction> codeActions) {
-        String[] annotations = getAnnotations();
-        insertAndReplaceAnnotation(diagnostic, context, codeActions, annotations);
+        insertAndReplaceAnnotation(diagnostic, context, codeActions);
     }
 
-    private static void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
-                                                   List<CodeAction> codeActions, String... annotations) {
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
         ArrayList<String> attributes = new ArrayList<>();
         attributes.add("name");
         attributes.add("referencedColumnName");
-        String name = Messages.getMessage("AddTheMissingAttributes");
+        String name = toResolve.getTitle();
         PsiElement node = context.getCoveredNode();
-        PsiModifierListOwner binding = getBinding(node); // field or method in this case
-        List<PsiAnnotation> annotationNodes = getAnnotations(binding, annotations);
-        CodeAction codeAction = null;
-
+        PsiModifierListOwner binding = getBinding(node);
+        List<PsiAnnotation> annotationNodes = getAnnotations(binding, this.getAnnotations());
         for (PsiAnnotation annotationNode : annotationNodes) {
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
-                    context.getASTRoot(), binding, annotationNode, 0, attributes, annotations);
+                    context.getASTRoot(), binding, annotationNode, 0, attributes, this.getAnnotations());
+            try {
+                WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                toResolve.setEdit(we);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
+            }
+        }
 
-            // Convert the proposal to LSP4J CodeAction
-            // We need to fix all the annotations so all the changes are combined in this one context.
-            // Therefore, we only need to save the last code action.
-            codeAction = context.convertToCodeAction(proposal, diagnostic);
-        }
-        if (codeAction != null) {
-            codeActions.add(codeAction);
-        }
+        return toResolve;
+    }
+
+    private void insertAndReplaceAnnotation(Diagnostic diagnostic, JavaCodeActionContext context,
+                                            List<CodeAction> codeActions) {
+        String name = Messages.getMessage("AddTheMissingAttributes");
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+
     }
 
     private static List<PsiAnnotation> getAnnotations(PsiElement e, String... names) {
@@ -93,5 +103,10 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
             }
         }
         return result;
+    }
+
+    @Override
+    public String getParticipantId() {
+        return PersistenceAnnotationQuickFix.class.getName();
     }
 }

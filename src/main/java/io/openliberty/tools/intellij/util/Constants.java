@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2023 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -83,7 +83,11 @@ public final class Constants {
             });
 
     /**
-     * Constants for langauge servers
+     * Constants for language servers
      */
-    public static final String SERVER_ENV_GLOB_PATTERN = "**/{src/main/liberty/config,usr/servers/**}/server.env";
+    public static final String LIBERTY_XML_SERVER = "LemMinX";
+    public static final String LIBERTY_CONFIG_SERVER="Liberty Config";
+    public static final String JAKARTA_LANG_SERVER="Eclipse LSP4Jakarta";
+    public static final String MICROPROFILE_SERVER="Eclipse LSP4MP";
+
 }

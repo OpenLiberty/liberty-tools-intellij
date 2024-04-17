@@ -17,6 +17,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
@@ -58,7 +59,8 @@ public class NonPublicResourceMethodQuickFix implements IJavaCodeActionParticipa
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
 
         if (parentMethod != null) {
-            return Collections.singletonList(createCodeAction(context, diagnostic));
+            return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
+                    getParticipantId()));
         }
         return Collections.emptyList();
     }
@@ -81,17 +83,5 @@ public class NonPublicResourceMethodQuickFix implements IJavaCodeActionParticipa
             LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to make method public", e);
         }
         return toResolve;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(TITLE_MESSAGE);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
     }
 }

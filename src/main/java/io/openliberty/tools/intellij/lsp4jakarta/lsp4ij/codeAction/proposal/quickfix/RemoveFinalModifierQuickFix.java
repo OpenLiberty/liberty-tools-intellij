@@ -25,4 +25,9 @@ public class RemoveFinalModifierQuickFix extends RemoveModifierConflictQuickFix 
     public RemoveFinalModifierQuickFix() {
         super(false, "final");
     }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveFinalModifierQuickFix.class.getName();
+    }
 }

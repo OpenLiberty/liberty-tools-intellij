@@ -16,15 +16,25 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyReturnTypeProposal;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Quick fix for AnnotationDiagnosticsCollector that changes the return type of a method to void.
@@ -33,17 +43,44 @@ import java.util.List;
  * @author Yijia Jing
  *
  */
-public class PostConstructReturnTypeQuickFix {
+public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipant {
+
+    private static final Logger LOGGER = Logger.getLogger(PostConstructReturnTypeQuickFix.class.getName());
+    private final static String TITLE_MESSAGE = Messages.getMessage("ChangeReturnTypeToVoid");
+
+    @Override
+    public String getParticipantId() {
+        return PostConstructReturnTypeQuickFix.class.getName();
+    }
+
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         List<CodeAction> codeActions = new ArrayList<>();
-        PsiElement node = context.getCoveredNode();
-        PsiMethod parentType = getBinding(node);
-        String name = Messages.getMessage("ChangeReturnTypeToVoid");
-        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(name, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
-        CodeAction codeAction = context.convertToCodeAction(proposal, diagnostic);
-        codeActions.add(codeAction);
+        final PsiElement node = context.getCoveredNode();
+        final PsiMethod parentType = getBinding(node);
+
+        if (parentType != null) {
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, TITLE_MESSAGE,
+                    getParticipantId()));
+        }
         return codeActions;
+    }
+
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        final PsiElement node = context.getCoveredNode();
+        final PsiMethod parentType = getBinding(node);
+
+        assert parentType != null;
+        ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(TITLE_MESSAGE, context.getSource().getCompilationUnit(),
+                context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
+        try {
+            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+            toResolve.setEdit(we);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to change return type to void", e);
+        }
+        return toResolve;
     }
 
     protected PsiMethod getBinding(PsiElement node) {

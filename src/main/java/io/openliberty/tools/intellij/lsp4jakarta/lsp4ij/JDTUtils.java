@@ -17,9 +17,17 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class JDTUtils {
     // Percent encoding obtained from: https://en.wikipedia.org/wiki/Percent-encoding#Reserved_characters
@@ -72,5 +80,33 @@ public class JDTUtils {
             }
         }
         return accessors;
+    }
+
+    /**
+     * Returns CodeAction object, which contains details of quickfix.
+     *
+     * @param context           JavaCodeActionContext
+     * @param diagnostic        diagnostic message
+     * @param quickFixMessage   quickfix message
+     * @param participantId     participant id
+     * @return                  CodeAction
+     */
+    public static CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
+                                              String quickFixMessage, String participantId,
+                                              Map<String, Object> extendedData) {
+        ExtendedCodeAction codeAction = new ExtendedCodeAction(quickFixMessage);
+        codeAction.setRelevance(0);
+        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        codeAction.setKind(CodeActionKind.QuickFix);
+        codeAction.setData(new CodeActionResolveData(context.getUri(), participantId,
+                context.getParams().getRange(), extendedData != null ? extendedData : Collections.emptyMap(),
+                context.getParams().isResourceOperationSupported(),
+                context.getParams().isCommandConfigurationUpdateSupported()));
+        return codeAction;
+    }
+
+    public static CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
+                                              String quickFixMessage, String participantId) {
+        return createCodeAction(context, diagnostic, quickFixMessage, participantId, null);
     }
 }

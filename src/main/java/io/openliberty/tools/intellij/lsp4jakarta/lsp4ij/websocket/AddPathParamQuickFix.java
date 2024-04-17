@@ -25,4 +25,9 @@ public class AddPathParamQuickFix extends InsertAnnotationQuickFix {
     public AddPathParamQuickFix() {
         super("jakarta.websocket.server.PathParam", false, "value");
     }
+
+    @Override
+    public String getParticipantId() {
+        return AddPathParamQuickFix.class.getName();
+    }
 }
