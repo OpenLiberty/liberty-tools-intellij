@@ -629,6 +629,8 @@ public class UIBotTestUtils {
 
                 projTree.expand(filePath);
 
+                // Awaiting the full expansion of the project tree to ensure that it correctly selects the server.env file.
+                // This process may require modification in the future.
                 TestUtils.sleepAndIgnoreException(5);
 
                 projTree.findText(fileName).doubleClick();
@@ -2406,6 +2408,28 @@ public class UIBotTestUtils {
                     "The OK button on the error dialog was not enabled",
                     okButton::isEnabled);
             okButton.click();
+        }
+    }
+
+    /**
+     * Cleans up resources and stops the Liberty server if necessary.
+     *
+     * @param remoteRobot       The RemoteRobot instance.
+     * @param absoluteWLPPath   The absolute path of the Liberty installation.
+     * @param projectName       The name of the project to select.
+     * @param testName          The name of the test calling this method.
+     */
+    public static void cleanupAndStopServerIfNeeded(RemoteRobot remoteRobot, String absoluteWLPPath, String projectName, String testName) {
+
+        // Open the terminal window.
+        openTerminalWindow(remoteRobot);
+
+        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+            // Sleep for a few seconds to allow dev mode to finish running the tests.
+            TestUtils.sleepAndIgnoreException(60);
+
+            // Stop Liberty dev mode and validate that the Liberty server is down.
+            runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, projectName, 3);
         }
     }
 }

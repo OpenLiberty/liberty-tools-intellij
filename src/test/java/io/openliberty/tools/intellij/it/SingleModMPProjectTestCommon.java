@@ -949,6 +949,7 @@ public abstract class SingleModMPProjectTestCommon {
 
             // Expand the Project tree and open server.env file
             UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
+
             // Check if the specified Custom debug port is used.
             TestUtils.checkCustomDebugPort(absoluteWLPPath);
 
@@ -956,7 +957,8 @@ public abstract class SingleModMPProjectTestCommon {
             System.err.println("Error reading the file: " + e.getMessage());
 
         } finally {
-            cleanupAndStopServerIfNeeded(absoluteWLPPath);
+            // Stops the Liberty server if necessary.
+            UIBotTestUtils.cleanupAndStopServerIfNeeded(remoteRobot, absoluteWLPPath, getSmMPProjectName(), testName);
         }
 
         // Cleanup configurations.
@@ -971,6 +973,7 @@ public abstract class SingleModMPProjectTestCommon {
 
             // Expand the Project tree and open server.env file
             UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
+            
             // Check if Default debug port is used.
             TestUtils.checkDefaultDebugPort(absoluteWLPPath);
 
@@ -978,23 +981,11 @@ public abstract class SingleModMPProjectTestCommon {
             System.err.println("Error reading the file: " + e.getMessage());
 
         } finally {
-            cleanupAndStopServerIfNeeded(absoluteWLPPath);
+            // Stops the Liberty server if necessary.
+            UIBotTestUtils.cleanupAndStopServerIfNeeded(remoteRobot, absoluteWLPPath, getSmMPProjectName(), testName);
         }
     }
 
-    private void cleanupAndStopServerIfNeeded(String absoluteWLPPath) {
-
-        // Open the terminal window.
-        UIBotTestUtils.openTerminalWindow(remoteRobot);
-
-        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-            // Sleep for a few seconds to allow dev mode to finish running the tests.
-            TestUtils.sleepAndIgnoreException(60);
-
-            // Stop Liberty dev mode and validate that the Liberty server is down.
-            UIBotTestUtils.runStopAction(remoteRobot, "\"testCustomStartParametersClearedOnConfigRemoval\"", UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
-        }
-    }
 
     /**
      * Returns the projects directory path.
