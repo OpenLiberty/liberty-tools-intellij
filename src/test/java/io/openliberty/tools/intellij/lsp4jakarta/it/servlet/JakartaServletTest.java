@@ -95,4 +95,76 @@ public class JakartaServletTest extends BaseJakartaTest {
         }
     }
 
+    @Test
+    public void implementFilter() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DontImplementFilter.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 32, "Annotated classes with @WebFilter must implement the Filter interface.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ImplementFilter");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        if (CHECK_CODE_ACTIONS) {
+            // test associated quick-fix code action
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+            TextEdit te = JakartaForJavaAssert.te(5, 32, 5, 32, " implements Filter");
+            CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementFilter' implement 'Filter'", d, te);
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
+        }
+    }
+
+    @Test
+    public void implementListener() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DontImplementListener.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 34, "Annotated classes with @WebListener must implement one or more of the following interfaces: ServletContextListener, ServletContextAttributeListener, ServletRequestListener, ServletRequestAttributeListener, HttpSessionListener, HttpSessionAttributeListener, or HttpSessionIdListener.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ImplementListener");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        if (CHECK_CODE_ACTIONS) {
+            // test associated quick-fix code action
+            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+
+            TextEdit te1 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletContextListener'", d, te1);
+
+            TextEdit te2 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletContextAttributeListener'", d, te2);
+
+            TextEdit te3 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca3 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletRequestListener'", d, te3);
+
+            TextEdit te4 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca4 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletRequestAttributeListener'", d, te4);
+
+            TextEdit te5 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca5 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'HttpSessionListener'", d, te5);
+
+            TextEdit te6 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca6 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'HttpSessionAttributeListener'", d, te6);
+
+            TextEdit te7 = JakartaForJavaAssert.te(5, 34, 5, 34, " implements Listener");
+            CodeAction ca7 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'HttpSessionIdListener'", d, te7);
+
+            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3, ca4, ca5, ca6, ca7);
+        }
+    }
+
 }
