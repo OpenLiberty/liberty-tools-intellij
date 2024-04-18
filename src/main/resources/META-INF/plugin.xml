@@ -213,11 +213,6 @@
 
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-jax_rs#NonPublicResourceMethod"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NonPublicResourceMethodQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
                                    targetDiagnostic="jakarta-jax_rs#ImplementListener"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix"/>
 
@@ -398,6 +393,16 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidScopeDecl"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#ImplementListener"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#ImplementFilter"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterImplementationQuickFix"/>
 
         <configSourceProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>

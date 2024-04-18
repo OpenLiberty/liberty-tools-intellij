@@ -18,6 +18,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
@@ -63,7 +64,7 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
             String title = Messages.getMessage("LetClassImplement",
                     parentType.getName(),
                     ServletConstants.FILTER);
-            codeActions.add(createCodeAction(context, diagnostic, title));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title,getParticipantId()));
         }
         return codeActions;
     }
@@ -88,17 +89,6 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         return toResolve;
     }
 
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String title) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(title);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported()));
-        return codeAction;
-    }
 
     private PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
