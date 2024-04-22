@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2023, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -33,9 +33,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +52,8 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
 
     private static final Logger LOGGER = Logger.getLogger(ListenerImplementationQuickFix.class.getName());
 
+    private final static String INTERFACE_NAME_KEY = "interface";
+
     @Override
     public String getParticipantId() {
         return ListenerImplementationQuickFix.class.getName();
@@ -65,21 +65,20 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
         PsiClass parentType = getBinding(node);
 
         String[] listenerConstants = {
-                ServletConstants.SERVLET_CONTEXT_LISTENER,
-                ServletConstants.SERVLET_CONTEXT_ATTRIBUTE_LISTENER,
-                ServletConstants.SERVLET_REQUEST_LISTENER,
-                ServletConstants.SERVLET_REQUEST_ATTRIBUTE_LISTENER,
-                ServletConstants.HTTP_SESSION_LISTENER,
-                ServletConstants.HTTP_SESSION_ATTRIBUTE_LISTENER,
-                ServletConstants.HTTP_SESSION_ID_LISTENER
+                ServletConstants.SERVLET_CONTEXT_LISTENER_FQ_NAME,
+                ServletConstants.SERVLET_CONTEXT_ATTRIBUTE_LISTENER_FQ_NAME,
+                ServletConstants.SERVLET_REQUEST_LISTENER_FQ_NAME,
+                ServletConstants.SERVLET_REQUEST_ATTRIBUTE_LISTENER_FQ_NAME,
+                ServletConstants.HTTP_SESSION_LISTENER_FQ_NAME,
+                ServletConstants.HTTP_SESSION_ATTRIBUTE_LISTENER_FQ_NAME,
+                ServletConstants.HTTP_SESSION_ID_LISTENER_FQ_NAME
         };
 
-        for (String constant : listenerConstants) {
-            String httpExt = (constant.contains("HTTP")) ? "http." : "";
-            String interfaceType = "jakarta.servlet." + httpExt + constant;
-            context.put("interface", interfaceType);
-            String title = Messages.getMessage("LetClassImplement", parentType.getName(), constant);
-            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId()));
+        for (String interfaceType : listenerConstants) {
+            Map<String, Object> extendedData = new HashMap<>();
+            extendedData.put(INTERFACE_NAME_KEY, interfaceType);
+            String title = getLabel(interfaceType, parentType);
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId(), extendedData));
         }
 
         return codeActions;
@@ -90,12 +89,13 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
-        String interfaceType = (String) context.get("interface");
+        CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
+        String interfaceType = (String) data.getExtendedDataEntry(INTERFACE_NAME_KEY);
 
         assert parentType != null;
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                null, parentType, context.getASTRoot(), interfaceType, 0,
-                context.getCompilationUnit());
+                context.getCompilationUnit(), parentType, context.getASTRoot(),
+                interfaceType, 0, context.getSource().getCompilationUnit());
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);
@@ -107,5 +107,10 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
 
     private PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
+    }
+
+    private static String getLabel(String fqAnnotation, PsiClass parentType) {
+        String annotationName = fqAnnotation.substring(fqAnnotation.lastIndexOf('.') + 1, fqAnnotation.length());
+        return Messages.getMessage("LetClassImplement", parentType.getName(), annotationName);
     }
 }

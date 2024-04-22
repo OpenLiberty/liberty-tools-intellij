@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2023, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -64,7 +64,7 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
             String title = Messages.getMessage("LetClassImplement",
                     parentType.getName(),
                     ServletConstants.FILTER);
-            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title,getParticipantId()));
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic, title, getParticipantId()));
         }
         return codeActions;
     }
@@ -78,7 +78,7 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
 
         assert parentType != null;
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
-                null, parentType, context.getASTRoot(),
+                context.getCompilationUnit(), parentType, context.getASTRoot(),
                 "jakarta.servlet.Filter", 0, context.getSource().getCompilationUnit());
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
