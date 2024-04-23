@@ -91,6 +91,8 @@ public class JakartaCodeActionHandler {
             List<CodeAction> codeActions = new ArrayList<>();
 
             HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
+            FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
+            ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
             CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
             CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
             PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
@@ -125,6 +127,12 @@ public class JakartaCodeActionHandler {
                 try {
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
                         codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER)) {
+                        codeActions.addAll(FilterImplementationQuickFix.getCodeActions(context, diagnostic));
+                    }
+                    if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
+                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
                         codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
