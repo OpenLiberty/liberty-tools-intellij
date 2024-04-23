@@ -48,7 +48,7 @@ repositories {
 configurations {
     lsp
     // needed to avoid ClassCastException org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to class javax.xml.parsers.DocumentBuilderFactory
-    // xml-apis interfering with xercs
+    // xml-apis interfering with Xerces
     all*.exclude group: 'xml-apis'
 
     runtimeClasspath {
@@ -81,7 +81,7 @@ dependencies {
     }
     //required by lsp4j as the version from IJ is incompatible
 //    implementation 'com.google.code.gson:gson:2.8.9'
-//    implementation 'com.vladsch.flexmark:flexmark:0.50.50'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
@@ -137,7 +137,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2023.3.4'
+    version = '2024.1'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false
