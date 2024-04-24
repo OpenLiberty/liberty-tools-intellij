@@ -51,9 +51,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
+        //NOTE: To address the "Slow operations are prohibited on EDT" Exception (https://github.com/OpenLiberty/liberty-tools-intellij/issues/674), we have implemented the workaround outlined in the document (https://plugins.jetbrains.com/docs/intellij/general-threading-rules.html).
+        // We have now moved the method "buildTree(project, getBackground())" to a background thread. To pass control from a background thread to the Event Dispatch Thread (EDT), UI operations are now included within the method "ApplicationManager.getApplication().invokeLater()".
         ModalityState modalityState = getModalityState();
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            // build tree
+            // build tree (Read operations need to be wrapped in a read action)
             Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
             if (tree != null) {
