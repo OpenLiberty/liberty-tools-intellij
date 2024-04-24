@@ -210,12 +210,7 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-jax_rs#ImplementListener"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix"/>
-
+        
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-servlet#ExtendHttpServlet"
