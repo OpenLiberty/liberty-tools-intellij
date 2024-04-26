@@ -89,41 +89,18 @@
                 id="LSPInlayHintProvidersFactory"
                 implementation="org.microshed.lsp4ij.features.LSPInlayHintProvidersFactory"/>
 
-        <!-- LSP textDocument/hover request support -->
-        <!-- This hover support works only if there are no language which defines a 'lang.documentationProvider'. In case if it exists a
-             'lang.documentationProvider' for the language, you need to declare in your plugin.xml
-
-            <lang.documentationProvider
-                language="MyLanguage"
-                implementationClass="org.microshed.lsp4ij.documentation.features.lsp4ij.LSPDocumentationProvider"
-                order="first"/>
-        -->
-        <documentationProvider
-                id="LSPTextHover"
-                implementation="org.microshed.lsp4ij.features.documentation.LSPDocumentationProvider"
-                order="first"/>
-
         <!-- Hover for LemMinX + Liberty LemMinX ext -->
-<!--        <lang.documentationProvider id="LSPTextHoverXML" language="XML"-->
-<!--                                    implementationClass="org.microshed.lsp4ij.operations.documentation.LSPDocumentationProvider"-->
-<!--                                    order="first"/>-->
+        <lang.documentationProvider language="XML"
+                                    implementationClass="org.microshed.lsp4ij.features.documentation.LSPDocumentationProvider"
+                                    order="first"/>
         <!-- Hover for Liberty Config LS bootstrap.properties and LSP4MP microprofile-config.properties -->
-<!--        <lang.documentationProvider id="LSPTextHoverProperties" language="Properties"-->
-<!--                                    implementationClass="org.microshed.lsp4ij.operations.documentation.LSPDocumentationProvider"-->
-<!--                                    order="first"/>-->
+        <lang.documentationProvider language="Properties"
+                                    implementationClass="org.microshed.lsp4ij.features.documentation.LSPDocumentationProvider"
+                                    order="first"/>
         <!-- Hover for Java files, LSP4MP and LSP4Jakarta -->
-<!--        <lang.documentationProvider id="LSPTextHoverJAVA" language="JAVA"-->
-<!--                                    implementationClass="org.microshed.lsp4ij.operations.documentation.LSPDocumentationProvider"-->
-<!--                                    order="first"/>-->
-        <!-- see inlay provider above -->
-<!--        <codeInsight.inlayProvider language="JAVA"-->
-<!--                                   implementationClass="org.microshed.lsp4ij.operations.codelens.LSPCodelensInlayProvider"/>-->
-        <!-- diagnostic provided above ? -->
-<!--        <externalAnnotator language="XML" implementationClass="org.microshed.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>-->
-<!--        <externalAnnotator language="TEXT" implementationClass="org.microshed.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>-->
-<!--        <externalAnnotator language="Properties" implementationClass="org.microshed.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>-->
-<!--        <externalAnnotator language="JAVA" implementationClass="org.microshed.lsp4ij.operations.diagnostics.LSPDiagnosticAnnotator"/>-->
-
+        <lang.documentationProvider language="JAVA"
+                                    implementationClass="org.microshed.lsp4ij.features.documentation.LSPDocumentationProvider"
+                                    order="first"/>
 
 
         <!-- LSP textDocument/folding -->
