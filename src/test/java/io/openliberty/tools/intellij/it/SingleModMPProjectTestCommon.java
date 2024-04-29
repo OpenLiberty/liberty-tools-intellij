@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,7 +16,10 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.util.Map;
 
@@ -583,6 +586,211 @@ public abstract class SingleModMPProjectTestCommon {
     /**
      * Tests:
      * - Creating a new Liberty tools configuration.
+     * - Using custom WLP installation path
+     * - Using project frame toolbar's config selection box and Debug icon to select a Liberty configuration and start dev mode.
+     * - Automatic server JVM attachment to the debugger.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingToolbar() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
+        String customWLPPath = "";
+
+        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
+        renameFile("custom-" + getBuildFileName(), getBuildFileName());
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        deleteBuildDirectory();
+
+        // Add a new Liberty config.
+        String configName = "toolBarCustomDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
+
+        boolean fileExists = checkFileExists();
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+        }
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3);
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
+        renameFile("temp-" + getBuildFileName(), getBuildFileName());
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using custom WLP installation path
+     * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingMenu() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
+        String customWLPPath = "";
+
+        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
+        renameFile("custom-" + getBuildFileName(), getBuildFileName());
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        deleteBuildDirectory();
+
+        // Add a new Liberty config.
+        String configName = "menuCustomDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
+
+        boolean fileExists = checkFileExists();
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+        }
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3);
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
+        renameFile("temp-" + getBuildFileName(), getBuildFileName());
+    }
+
+    private boolean checkFileExists() {
+        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir(), "liberty-plugin-config.xml");
+        boolean fileExists = false;
+        int maxAttempts = 5;
+        int attempts = 0;
+
+        while (!fileExists && attempts < maxAttempts) {
+            fileExists = Files.exists(filePath); // Check if the file exists
+
+            if (!fileExists) {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    try {
+                        TestUtils.sleepAndIgnoreException(60);
+                    } catch (Exception e) {
+                        Thread.currentThread().interrupt(); // Restore interrupted status
+                        break;
+                    }
+                }
+            }
+        }
+        return fileExists;
+    }
+
+
+    private void renameFile(String original, String renamed) {
+        Path originalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), original);
+        Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
+
+        File oldFile = new File(originalBuildFilePath.toString());
+        if(oldFile.exists()) {
+            File newFile = new File(renamedOriginalBuildFilePath.toString());
+            oldFile.renameTo(newFile);
+        }
+    }
+
+    private void deleteBuildDirectory() {
+        Path folderToDelete = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir());
+
+        try {
+            // Recursively delete all files and directories
+            Files.walkFileTree(folderToDelete, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (!file.getFileName().toString().equals(getTargetDir())) {
+                        Files.delete(file);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir); // Delete directory after all its contents are deleted
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
      * - Using project frame toolbar's config selection box and Run icon to select a Liberty configuration and start dev mode.
      */
     @Test
@@ -997,4 +1205,8 @@ public abstract class SingleModMPProjectTestCommon {
      * Validates that test reports were generated.
      */
     public abstract void validateTestReportsExist();
+
+    public abstract String getCustomWLPPath();
+
+    public abstract String getTargetDir();
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,7 +26,12 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.Messages;
 import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -38,12 +43,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Used for creating a debug configuration, connecting IntelliJ debugger to Liberty server JVM
@@ -180,6 +182,7 @@ public class DebugModeHandler {
             }
 
             // Detect if dev mode has started
+            // serverEnvBakPath can only be set once serverEnvPath has been set
             if (serverEnvPath == null) {
                 serverEnvPath = getServerEnvPath(libertyModule);
             } else if (serverEnvBakPath == null) {
@@ -222,45 +225,50 @@ public class DebugModeHandler {
      *
      * @return The default path of the server.env file after Liberty server deployment.
      *
-     * @throws Exception
      */
-    private Path getServerEnvPath(LibertyModule libertyModule) throws Exception {
-        String projectPath = libertyModule.getBuildFile().getParent().getPath();
-        Path basePath = null;
-        if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
-        } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
-        } else {
-            throw new Exception(String.format("Unexpected project build type: %s. Liberty module %s does not appear to be a Maven or Gradle built project",
-                    libertyModule.getProjectType(), libertyModule.getName()));
-        }
+    private Path getServerEnvPath(LibertyModule libertyModule) {
+        String serverDirectory = getServerDirectoryFromLibertyPluginConfig(libertyModule);
+        Path serverEnvPath = Paths.get(serverDirectory, WLP_SERVER_ENV_FILE_NAME);
 
-        // Make sure the base path exists. If not return null.
-        File basePathFile = new File(basePath.toString());
-        if (!basePathFile.exists()) {
+        if (Files.exists(serverEnvPath)) {
+            return serverEnvPath;
+        } else {
+            LOGGER.trace(String.format("Unable to find the server.env file for project %s", libertyModule.getName()));
             return null;
         }
+    }
 
-        try (Stream<Path> matchedStream = Files.find(basePath, 2, (path, basicFileAttribute) -> {
-            if (basicFileAttribute.isRegularFile()) {
-                return path.getFileName().toString().equalsIgnoreCase(WLP_SERVER_ENV_FILE_NAME);
-            }
-            return false;
-        });) {
-            List<Path> matchedPaths = matchedStream.collect(Collectors.toList());
-            int numberOfFilesFound = matchedPaths.size();
+    /**
+     * Parse the <serverDirectory> value from "liberty-plugin-config.xml" located in target/build directory
+     *
+     * @param libertyModule The Liberty module for which this operations is being performed.
+     *
+     * @return server.env file path
+     *
+     */
+    private String getServerDirectoryFromLibertyPluginConfig(LibertyModule libertyModule) {
+        String serverDirectory = "";
 
-            if (numberOfFilesFound != 1) {
-                if (numberOfFilesFound == 0) {
-                    LOGGER.trace(String.format("Unable to find the server.env file for project %s", libertyModule.getName()));
-                    return null;
-                } else {
-                    throw new Exception(String.format("More than one server.env files were found for project %s. Unable to determine the server.env file to use", libertyModule.getName()));
-                }
+        try {
+            String projectPath = libertyModule.getBuildFile().getParent().getPath();
+            String projectType = libertyModule.getProjectType();
+            String buildFolder = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? "target" : "build";
+            Path configPath = Paths.get(projectPath, buildFolder, "liberty-plugin-config.xml");
+
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(configPath.toString());
+            document.getDocumentElement().normalize();
+
+            NodeList nodeList = document.getElementsByTagName("serverDirectory");
+            if (nodeList.getLength() > 0) {
+                Element element = (Element) nodeList.item(0);
+                serverDirectory = element.getTextContent();
             }
-            return matchedPaths.get(0);
+        } catch (Exception e) {
+            LOGGER.trace("Unable to find serverDirectory from liberty-plugin-config file");
         }
+        return serverDirectory;
     }
 
     /**

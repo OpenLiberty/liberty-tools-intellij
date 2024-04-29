@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+ Copyright (c) 2023 IBM Corporation.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v. 2.0 which is available at
+ http://www.eclipse.org/legal/epl-2.0.
+
+ SPDX-License-Identifier: EPL-2.0
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>test</groupId>
+    <artifactId>singleModMavenMP</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Liberty bootstrap.properties variables. -->
+        <liberty.bootstrap.default.http.port>9080</liberty.bootstrap.default.http.port>
+        <liberty.bootstrap.default.https.port>9443</liberty.bootstrap.default.https.port>
+        <liberty.bootstrap.project.name>${project.artifactId}</liberty.bootstrap.project.name>
+    </properties>
+
+    <dependencies>
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>9.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile</groupId>
+            <artifactId>microprofile</artifactId>
+            <version>5.0</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+        <!-- For tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>6.0.0.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-json-binding-provider</artifactId>
+            <version>6.0.0.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>2.0.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <version>3.8.2</version>
+                <configuration>
+                    <installDirectory>
+                        ${project.basedir}/customInstallDir/wlp
+                    </installDirectory>
+                    <runtimeInstallDirectory>
+                        ${project.basedir}/customInstallDir
+                    </runtimeInstallDirectory>
+                    <userDirectory>
+                        ${project.basedir}/customInstallDir/wlp/usr
+                    </userDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <!-- Plugin to run functional tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <http.port>${liberty.bootstrap.default.http.port}</http.port>
+                        <app.path>${liberty.bootstrap.app.path}</app.path>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
