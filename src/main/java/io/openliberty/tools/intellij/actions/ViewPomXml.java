@@ -27,7 +27,7 @@ public class ViewPomXml extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("view.effective.pom");
+        return LocalizedResourceUtil.getMessage("view.pom");
     }
 
     @Override
