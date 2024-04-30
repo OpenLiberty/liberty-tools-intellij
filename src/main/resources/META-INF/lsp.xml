@@ -9,7 +9,7 @@
   -->
 
 <idea-plugin>
-    <extensions defaultExtensionNs="open-liberty.intellij">
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
         <!-- MicroProfile LS -->
         <server id="lsp4mp"
                 label="MicroProfile"

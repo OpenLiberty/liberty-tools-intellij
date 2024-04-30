@@ -11,7 +11,7 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
-def lsp4ijNightlyVersion = '0.0.1-20231222-012709'
+def lsp4ijNightlyVersion = '0.0.1-20240331-012908'
 
 repositories {
     mavenCentral()
@@ -138,7 +138,7 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2023.3.4'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.lsp4ij:' + lsp4ijNightlyVersion + '@nightly']
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.lsp4ij:' + lsp4ijNightlyVersion + '@nightly']
     updateSinceUntilBuild = false
 }
 
