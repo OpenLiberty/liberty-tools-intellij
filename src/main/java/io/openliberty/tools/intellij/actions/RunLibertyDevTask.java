@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -33,6 +34,13 @@ import java.awt.*;
 
 public class RunLibertyDevTask extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(RunLibertyDevTask.class);
+
+    @Override
+    public ActionUpdateThread getActionUpdateThread() {
+        // Schedule actions on the event dispatching thread.
+        // See: https://plugins.jetbrains.com/docs/intellij/basic-action-system.html#principal-implementation-overrides.
+        return ActionUpdateThread.EDT;
+    }
 
     /**
      * Enables/disables the play/action button for the Liberty projects and action options in the Liberty Tool Window tree
