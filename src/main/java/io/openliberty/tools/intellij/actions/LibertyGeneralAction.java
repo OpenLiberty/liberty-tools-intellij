@@ -35,7 +35,7 @@ public abstract class LibertyGeneralAction extends AnAction {
     protected static final Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
 
     @Override
-    public ActionUpdateThread getActionUpdateThread() {
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
         // Schedule actions on the event dispatching thread.
         // See: https://plugins.jetbrains.com/docs/intellij/basic-action-system.html#principal-implementation-overrides.
         return ActionUpdateThread.EDT;
