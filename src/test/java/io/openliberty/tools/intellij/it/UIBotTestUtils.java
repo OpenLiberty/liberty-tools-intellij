@@ -1469,7 +1469,7 @@ public class UIBotTestUtils {
     public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(10));
         if (startParams != null) {
-            ComponentFixture startParamsTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            ComponentFixture startParamsTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='DialogPanel']//div[@class='JTextField']"), Duration.ofSeconds(5));
             startParamsTextField.click();
             startParamsTextField.runJs(
                     "component.setText(\"" + startParams + "\")", true);
@@ -1828,7 +1828,7 @@ public class UIBotTestUtils {
                     Duration.ofSeconds(10));
 
             // Find the new configuration's name text field and give it a name.
-            Locator locator = byXpath("//div[@class='JTextField']");
+            Locator locator = byXpath("//div[@accessiblename='Name:' and @class='JTextField']");
 
             for (int i = 0; i < 3; i++) {
                 try {
@@ -1900,7 +1900,7 @@ public class UIBotTestUtils {
             // Update the configuration name.
             if (cfgName != null) {
                 // Find the new configuration's name text field and give it a name.
-                Locator locator = byXpath("//div[@class='JTextField']");
+                Locator locator = byXpath("//div[@accessiblename='Name:' and @class='JTextField']");
                 JTextFieldFixture nameTextField = dialog.textField(locator, Duration.ofSeconds(10));
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
                         Duration.ofSeconds(1),
@@ -1914,7 +1914,7 @@ public class UIBotTestUtils {
 
             // Update the start parameters field.
             if (startParams != null) {
-                ComponentFixture startParmTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+                ComponentFixture startParmTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='DialogPanel']//div[@class='JTextField']"), Duration.ofSeconds(5));
                 startParmTextField.click();
                 startParmTextField.runJs(
                         "component.setText(\"" + startParams + "\")", true);
@@ -1968,7 +1968,7 @@ public class UIBotTestUtils {
 
         try {
             // Get the name of the configuration.
-            Locator locator = byXpath("//div[@class='JTextField']");
+            Locator locator = byXpath("//div[@accessiblename='Name:' and @class='JTextField']");
             JTextFieldFixture nameTextField = libertyCfgDialog.textField(locator, Duration.ofSeconds(10));
             RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                     Duration.ofSeconds(1),
@@ -1992,7 +1992,7 @@ public class UIBotTestUtils {
             map.put(ConfigEntries.LIBERTYPROJ.toString(), projBldFilePath);
 
             // Get the dev mode parameters
-            ComponentFixture startParamsTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
+            ComponentFixture startParamsTextField = libertyCfgDialog.find(CommonContainerFixture.class, byXpath("//div[@class='DialogPanel']//div[@class='JTextField']"), Duration.ofSeconds(5));
             startParamsTextField.click();
             String params = startParamsTextField.callJs(
                     "component.getText()", true);
