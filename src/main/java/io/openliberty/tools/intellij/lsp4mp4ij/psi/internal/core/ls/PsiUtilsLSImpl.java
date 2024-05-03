@@ -20,9 +20,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.light.LightRecordField;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.ClassUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import org.jetbrains.annotations.Nullable;
 import com.redhat.devtools.lsp4ij.LSPIJUtils;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
@@ -30,7 +32,6 @@ import org.eclipse.lsp4mp.commons.ClasspathKind;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -84,8 +85,8 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public PsiClass findClass(Module module, String className) {
-        JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
-        return facade.findClass(className, GlobalSearchScope.allScope(module.getProject()));
+        return ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), className, null, false,
+                GlobalSearchScope.allScope(module.getProject()));
     }
 
     @Override

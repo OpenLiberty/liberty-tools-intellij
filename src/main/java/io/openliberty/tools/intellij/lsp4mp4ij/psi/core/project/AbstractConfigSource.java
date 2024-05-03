@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -175,13 +176,13 @@ public abstract class AbstractConfigSource<T> implements IConfigSource {
                 try (InputStream input = configFile.getInputStream()) {
                     config = loadConfig(input);
                     lastModified = configFile.getModificationStamp();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     reset();
-                    LOGGER.error("Error while loading properties from '" + configFile + "'.", e);
+                    LOGGER.warn("Error while loading properties from '" + configFile + "'.", e);
                 }
             }
         } catch (RuntimeException e1) {
-            LOGGER.error("Error while getting last modified time for '" + configFile + "'.", e1);
+            LOGGER.warn("Error while getting last modified time for '" + configFile + "'.", e1);
         }
         return config;
     }
@@ -190,12 +191,12 @@ public abstract class AbstractConfigSource<T> implements IConfigSource {
     public void reload(PsiFile file) {
         reset();
         String content = file.getText();
-        try (InputStream input = IOUtils.toInputStream(content)) {
+        try (InputStream input = IOUtils.toInputStream(content, Charset.defaultCharset())) {
             config = loadConfig(input);
             lastModified = System.currentTimeMillis();
-        } catch (IOException e) {
+        } catch (Exception e) {
             reset();
-            LOGGER.error("Error while loading properties from '" + sourceConfigFile + "'.", e);
+            LOGGER.warn("Error while loading properties from '" + sourceConfigFile + "'.", e);
         }
     }
 
@@ -206,7 +207,7 @@ public abstract class AbstractConfigSource<T> implements IConfigSource {
             try {
                 return Integer.parseInt(property.trim());
             } catch (NumberFormatException e) {
-                LOGGER.error("Error while converting '" + property.trim() + "' as Integer for key '" + key + "'", e);
+                LOGGER.warn("Error while converting '" + property.trim() + "' as Integer for key '" + key + "'", e);
                 return null;
             }
         }

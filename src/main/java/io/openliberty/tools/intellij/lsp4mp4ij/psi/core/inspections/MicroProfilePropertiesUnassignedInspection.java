@@ -14,7 +14,6 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
-import org.jetbrains.annotations.NotNull;
 import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
 
 /**

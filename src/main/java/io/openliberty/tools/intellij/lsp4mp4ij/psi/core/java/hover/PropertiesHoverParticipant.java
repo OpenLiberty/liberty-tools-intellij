@@ -28,7 +28,6 @@ import com.intellij.psi.PsiParameter;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.MicroProfileConfigPropertyInformation;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProject;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.Hover;
