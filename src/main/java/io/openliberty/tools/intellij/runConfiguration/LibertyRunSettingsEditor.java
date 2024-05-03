@@ -14,6 +14,7 @@ import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.LabeledComponent;
+import com.intellij.ui.EditorTextField;
 import com.intellij.ui.StateRestoringCheckBox;
 import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ import javax.swing.*;
 public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfiguration> {
 
     private JPanel root;
-    private JTextField editParam;
+    private EditorTextField editParam;
     private LabeledComponent<ComboBox> libertyModule;
     private StateRestoringCheckBox runInContainerCheckBox;
 
@@ -67,7 +68,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         ComboBox comboBox = new ComboBox();
         libertyModule = new LabeledComponent<>();
         libertyModule.setComponent(comboBox);
-        editParam = new JTextField();
+        editParam = new EditorTextField();
         runInContainerCheckBox = new StateRestoringCheckBox();
     }
 }
