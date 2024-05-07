@@ -32,7 +32,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         String runTestsCommand = " ";
-        ShellTerminalWidget widget = getTerminalWidget(false, project, buildFile, getActionCommandName());
+        ShellTerminalWidget widget = getAndFocusTerminalWidget(false, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }

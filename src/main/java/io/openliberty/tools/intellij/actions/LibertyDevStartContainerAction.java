@@ -30,7 +30,7 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        ShellTerminalWidget widget = getTerminalWidget(true, project, buildFile, getActionCommandName());
+        ShellTerminalWidget widget = getAndFocusTerminalWidget(true, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }

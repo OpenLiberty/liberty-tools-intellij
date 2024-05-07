@@ -162,7 +162,7 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @param createWidget create Terminal widget if it does not already exist
      * @return ShellTerminalWidget
      */
-    protected ShellTerminalWidget getTerminalWidget(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected ShellTerminalWidget getAndFocusTerminalWidget(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget);
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running

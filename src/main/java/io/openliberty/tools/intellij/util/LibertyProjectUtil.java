@@ -153,10 +153,22 @@ public class LibertyProjectUtil {
         TerminalView terminalView = TerminalView.getInstance(project);
         // look for existing terminal tab
         ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
+        setFocusToWidget(project, widget);
+
+        if (widget == null && createWidget) {
+            // create a new terminal tab
+            ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
+            libertyModule.setShellWidget(newTerminal);
+            return newTerminal;
+        }
+        return widget;
+    }
+
+    private static void setFocusToWidget(Project project, ShellTerminalWidget widget) {
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
 
-        if (toolWindow != null) {
+        if (toolWindow != null && widget != null) {
             ContentManager contentManager = toolWindow.getContentManager();
             Content[] contents = contentManager.getContents();
 
@@ -167,20 +179,12 @@ public class LibertyProjectUtil {
                     break;
                 }
             }
-            if (contents.length > 0 && index > 0) {
+            if (contents.length > 0) {
                 Content terminalContent = contents[index];
                 contentManager.setSelectedContent(terminalContent);
                 terminalContent.getComponent().requestFocus();
             }
         }
-
-        if (widget == null && createWidget) {
-            // create a new terminal tab
-            ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
-            libertyModule.setShellWidget(newTerminal);
-            return newTerminal;
-        }
-        return widget;
     }
 
     // returns valid build files for the current project

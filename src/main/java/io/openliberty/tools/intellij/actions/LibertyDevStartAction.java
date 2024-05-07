@@ -76,7 +76,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             }
         }
 
-        ShellTerminalWidget widget = getTerminalWidget(true, project, buildFile, getActionCommandName());
+        ShellTerminalWidget widget = getAndFocusTerminalWidget(true, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }

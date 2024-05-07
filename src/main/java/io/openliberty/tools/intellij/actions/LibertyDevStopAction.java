@@ -31,7 +31,7 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        ShellTerminalWidget widget = getTerminalWidget(false, project, buildFile, getActionCommandName());
+        ShellTerminalWidget widget = getAndFocusTerminalWidget(false, project, buildFile, getActionCommandName());
         String stopCmd = "q";
         if (widget == null) {
             return;
