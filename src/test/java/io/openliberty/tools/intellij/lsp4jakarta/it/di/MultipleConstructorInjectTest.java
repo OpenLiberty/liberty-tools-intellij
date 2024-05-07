@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2023 IBM Corporation.
+* Copyright (c) 2021, 2024 IBM Corporation.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -66,19 +65,42 @@ public class MultipleConstructorInjectTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInject");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1,d2,d3);
-
-        if (CHECK_CODE_ACTIONS) {
+        
             // test expected quick-fix
-            JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-            TextEdit te = JakartaForJavaAssert.te(21, 4, 22, 4, "");
-            CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca);
+        String newText = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n* Contributors:\n*     Ananya Rao\n" +
+                "*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.inject.Inject;\n\n" +
+                "public class MultipleConstructorWithInject{\n    private int productNum;\n    private String productDesc;\n	\n" +
+                "    public MultipleConstructorWithInject(int productNum) {\n        this.productNum = productNum;\n	}\n" +
+                "    @Inject\n    public MultipleConstructorWithInject(String productDesc) {\n" +
+                "        this.productDesc = productDesc;\n	}\n\n    @Inject\n" +
+                "    protected MultipleConstructorWithInject(int productNum, String productDesc) {\n" +
+                "        this.productNum = productNum;\n        this.productDesc = productDesc;\n	}\n}\n\n";
 
-            JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
-            TextEdit te2 = JakartaForJavaAssert.te(30, 4, 31, 4, "");
-            CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te2);
-            JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
-        }
+        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 37, 0, newText);
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Remove @Inject", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca);
+
+        String newText1 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n* Contributors:\n" +
+                "*     Ananya Rao\n*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.inject.Inject;\n\n" +
+                "public class MultipleConstructorWithInject{\n    private int productNum;\n    private String productDesc;\n	\n" +
+                "    @Inject\n    public MultipleConstructorWithInject(int productNum) {\n        this.productNum = productNum;\n	}\n" +
+                "    @Inject\n    public MultipleConstructorWithInject(String productDesc) {\n        this.productDesc = productDesc;\n	}\n\n" +
+                "    protected MultipleConstructorWithInject(int productNum, String productDesc) {\n        this.productNum = productNum;\n" +
+                "        this.productDesc = productDesc;\n	}\n}\n\n";
+
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d3);
+        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 37, 0, newText1);
+        CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove @Inject", d3, te2);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca2);
     }
 
 }
