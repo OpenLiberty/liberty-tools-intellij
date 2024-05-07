@@ -12,11 +12,14 @@ package io.openliberty.tools.intellij;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.DoubleClickListener;
@@ -48,23 +51,39 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
-        // build tree
-        Tree tree = buildTree(project, getBackground());
+        //NOTE: To address the "Slow operations are prohibited on EDT" Exception (https://github.com/OpenLiberty/liberty-tools-intellij/issues/674), we have implemented the workaround outlined in the document (https://plugins.jetbrains.com/docs/intellij/general-threading-rules.html).
+        // We have now moved the method "buildTree(project, getBackground())" to a background thread. To pass control from a background thread to the Event Dispatch Thread (EDT), UI operations are now included within the method "ApplicationManager.getApplication().invokeLater()".
+        ModalityState modalityState = getModalityState();
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            // build tree (Read operations need to be wrapped in a read action)
+            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
 
-        if (tree != null) {
-            JBScrollPane scrollPane = new JBScrollPane(tree);
-            scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
-            this.setContent(scrollPane);
-        } else {
-            JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-            jbTextArea.setEditable(false);
-            jbTextArea.setBackground(getBackground());
-            jbTextArea.setLineWrap(true);
+            if (tree != null) {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    JBScrollPane scrollPane = new JBScrollPane(tree);
+                    scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
+                    this.setContent(scrollPane);
+                }, modalityState);
+            } else {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+                    jbTextArea.setEditable(false);
+                    jbTextArea.setBackground(getBackground());
+                    jbTextArea.setLineWrap(true);
 
-            this.setContent(jbTextArea);
-        }
-        ActionToolbar actionToolbar = buildActionToolbar(tree);
-        this.setToolbar(actionToolbar.getComponent());
+                    this.setContent(jbTextArea);
+                }, modalityState);
+            }
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ActionToolbar actionToolbar = buildActionToolbar(tree);
+                this.setToolbar(actionToolbar.getComponent());
+            }, modalityState);
+        });
+    }
+
+    private ModalityState getModalityState() {
+        return ModalityState.nonModal();
     }
 
     public static ActionToolbar buildActionToolbar(Tree tree) {
