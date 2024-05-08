@@ -37,7 +37,7 @@ public class GeneratedAnnotationTest extends BaseJakartaTest {
     @Test
     public void GeneratedAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/annotations/GeneratedAnnotation.java");
@@ -54,7 +54,6 @@ public class GeneratedAnnotationTest extends BaseJakartaTest {
         Diagnostic d2 = JakartaForJavaAssert.d(13, 4, 70,
                 "The @Generated annotation must define the attribute 'date' following the ISO 8601 standard.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "InvalidDateFormat");
-        
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }

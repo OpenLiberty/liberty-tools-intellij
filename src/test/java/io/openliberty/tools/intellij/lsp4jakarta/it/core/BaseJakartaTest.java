@@ -24,6 +24,8 @@ import com.intellij.pom.java.LanguageLevel;
 import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
 import com.intellij.testFramework.builders.ModuleFixtureBuilder;
 import com.intellij.testFramework.fixtures.*;
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -48,13 +50,15 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
 
     @Override
     protected void setUpFixtures() throws Exception {
-        //Don't call super.setUpFixtures() here, that will create FocusListener leak.
+        super.setUpFixtures();
+        // Don't call super.setUpFixtures() here, that will create FocusListener leak.
         myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
         final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
         ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
-        myTestFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
-        myTestFixture.setUp();
-        LanguageLevelProjectExtension.getInstance(myTestFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
+        final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
+        setTestFixture(testFixture);
+        testFixture.setUp();
+        LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
     protected Module createJavaModule(final String name) throws Exception {
@@ -73,20 +77,29 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
      * @return the created modules
      */
     protected List<Module> createMavenModules(List<File> projectDirs) throws Exception {
-        Project project = myTestFixture.getProject();
+        Project project = getTestFixture().getProject();
         List<VirtualFile> pomFiles = new ArrayList<>();
-        for(File projectDir : projectDirs) {
+        for (File projectDir : projectDirs) {
             File moduleDir = new File(project.getBasePath(), projectDir.getName() + counter.getAndIncrement());
             FileUtils.copyDirectory(projectDir, moduleDir);
             VirtualFile pomFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(moduleDir).findFileByRelativePath("pom.xml");
             pomFiles.add(pomFile);
 
         }
-        importProjects(pomFiles.toArray(VirtualFile[]::new));
-        Module[] modules = ModuleManager.getInstance(myTestFixture.getProject()).getModules();
-        for(Module module : modules) {
+        // Make a blocking call to the Kotlin suspend function: importProjectsAsync().
+        BuildersKt.runBlocking(
+                EmptyCoroutineContext.INSTANCE,
+                (scope, continuation) -> importProjectsAsync(pomFiles.toArray(VirtualFile[]::new), continuation)
+        );
+        Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
+        for (Module module : modules) {
             setupJdkForModule(module.getName());
         }
+        // REVISIT: After calling setupJdkForModule() initialization appears to continue in the background
+        // and a may cause a test to intermittently fail if it accesses the module too early. A 10-second wait
+        // is hopefully long enough but would be preferable to synchronize on a completion event if one is
+        // ever introduced in the future.
+        Thread.sleep(10000L);
         // QuarkusProjectService.getInstance(myTestFixture.getProject()).processModules();
         return Arrays.asList(modules).stream().skip(1).collect(Collectors.toList());
     }
@@ -104,11 +117,11 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
      * @return the created module
      */
     protected Module createMavenModule(String name, String xml) throws Exception {
-        Module module = myTestFixture.getModule();
+        Module module = getTestFixture().getModule();
         File moduleDir = new File(module.getModuleFilePath()).getParentFile();
         VirtualFile pomFile = createPomFile(LocalFileSystem.getInstance().findFileByIoFile(moduleDir), xml);
-        importProject(pomFile);
-        Module[] modules = ModuleManager.getInstance(myTestFixture.getProject()).getModules();
+        importProjects(pomFile);
+        Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
         if (modules.length > 0) {
             module = modules[modules.length - 1];
             setupJdkForModule(module.getName());
