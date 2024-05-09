@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -33,6 +34,13 @@ import java.awt.*;
 
 public class RefreshLibertyToolbar extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(RefreshLibertyToolbar.class);
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        // Schedule actions on the event dispatching thread.
+        // See: https://plugins.jetbrains.com/docs/intellij/basic-action-system.html#principal-implementation-overrides.
+        return ActionUpdateThread.EDT;
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
