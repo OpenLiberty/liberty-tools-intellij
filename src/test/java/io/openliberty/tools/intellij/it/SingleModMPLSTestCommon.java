@@ -3,6 +3,7 @@ package io.openliberty.tools.intellij.it;
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.utils.Keyboard;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
@@ -192,7 +193,8 @@ public abstract class SingleModMPLSTestCommon {
             Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
-            // Replace modified content with the original content
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
     }
@@ -252,7 +254,8 @@ public abstract class SingleModMPLSTestCommon {
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
-            // Replace modified content with the original content
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
 
@@ -290,7 +293,8 @@ public abstract class SingleModMPLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
 
         } finally {
-            // Replace modified content with the original content
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
 

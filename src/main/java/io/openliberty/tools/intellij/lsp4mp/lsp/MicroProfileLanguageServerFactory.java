@@ -16,7 +16,7 @@ import org.microshed.lsp4ij.LanguageServerFactory;
 import org.microshed.lsp4ij.client.LanguageClientImpl;
 import org.microshed.lsp4ij.server.StreamConnectionProvider;
 
-public class MircoProfileLanguageServerFactory implements LanguageServerFactory {
+public class MicroProfileLanguageServerFactory implements LanguageServerFactory {
     @Override
     public StreamConnectionProvider createConnectionProvider(Project project) {
         return new MicroProfileServer();
