@@ -29,7 +29,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.*;
-import org.eclipse.lsp4jakarta.api.JakartaLanguageClientAPI;
+import org.eclipse.lsp4jakarta.ls.api.JakartaLanguageClientAPI;
 import org.eclipse.lsp4mp.commons.JavaFileInfo;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;

@@ -15,8 +15,8 @@ package io.openliberty.tools.intellij.lsp4mp.lsp;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.microshed.lsp4ij.AbstractDocumentMatcher;
-import org.microshed.lsp4ij.LSPIJUtils;
+import com.redhat.devtools.lsp4ij.AbstractDocumentMatcher;
+import com.redhat.devtools.lsp4ij.LSPIJUtils;
 
 import java.util.regex.Pattern;
 

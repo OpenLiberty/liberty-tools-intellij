@@ -36,7 +36,6 @@ import java.util.Map;
  * PSI Type utilities.
  *
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/utils/JDTTypeUtils.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/utils/JDTTypeUtils.java</a>
- *
  */
 
 public class PsiTypeUtils {
@@ -109,8 +108,9 @@ public class PsiTypeUtils {
         if (psiElement instanceof PsiField || psiElement instanceof PsiMethod) {
             return ClassUtil.getJVMClassName(((PsiMember)psiElement).getContainingClass());
         } else if (psiElement instanceof PsiParameter) {
-            return ClassUtil.getJVMClassName(((PsiMethod)((PsiParameter)psiElement).getDeclarationScope()).getContainingClass());
-        } if (psiElement instanceof PsiClass) {
+            return ClassUtil.getJVMClassName(((PsiMethod) ((PsiParameter) psiElement).getDeclarationScope()).getContainingClass());
+        }
+        if (psiElement instanceof PsiClass) {
             return getPropertyType((PsiClass) psiElement, null);
         }
         return null;
@@ -124,13 +124,12 @@ public class PsiTypeUtils {
 
     @Nullable
     public static PsiClass findType(PsiManager manager, String name) {
-        JavaPsiFacade facade = JavaPsiFacade.getInstance(manager.getProject());
-        return facade.findClass(name, GlobalSearchScope.allScope(manager.getProject()));
+        return ClassUtil.findPsiClass(manager, name);
     }
 
     public static PsiClass findType(Module module, String name) {
-        JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
-        return facade.findClass(name, GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
+        return ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), name, null, false,
+                GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
     }
 
     public static String getSourceField(PsiMember psiMember) {
@@ -169,7 +168,7 @@ public class PsiTypeUtils {
     /**
      * Returns the first (generic) type parameter for the given <code>psiType</code>.
      * Returns <code>null</code> if the given psiType has no generic type parameter.
-     *
+     * <p>
      * Examples:
      * <ul>.
      *  <li>returns {@code String} for {@code List<String>}</li>
