@@ -3,7 +3,6 @@ package io.openliberty.tools.intellij.it;
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
-import com.intellij.remoterobot.utils.Keyboard;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
@@ -119,8 +118,7 @@ public abstract class SingleModLibertyLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedFeature);
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -147,8 +145,7 @@ public abstract class SingleModLibertyLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -313,8 +310,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
 
