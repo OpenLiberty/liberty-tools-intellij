@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,6 +26,7 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import org.jetbrains.plugins.terminal.TerminalView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -162,9 +163,16 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @param createWidget create Terminal widget if it does not already exist
      * @return ShellTerminalWidget
      */
-    protected ShellTerminalWidget getAndFocusTerminalWidget(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected ShellTerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget);
+        TerminalView terminalView = TerminalView.getInstance(project);
+        // look for existing terminal tab
+        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalView);
+        // look for creating new terminal tab
+        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalView, existingWidget);
+        // Set Focus to existing terminal widget
+        LibertyProjectUtil.setFocusToWidget(project, existingWidget);
+
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
         if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
             String msg;
@@ -177,8 +185,6 @@ public abstract class LibertyGeneralAction extends AnAction {
             LOGGER.warn(msg);
             return null;
         }
-        widget.getComponent().setVisible(true);
-        widget.getComponent().requestFocus();
         return widget;
     }
 

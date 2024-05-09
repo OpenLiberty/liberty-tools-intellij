@@ -149,12 +149,7 @@ public class LibertyProjectUtil {
      * @param createWidget  true if a new widget should be created
      * @return ShellTerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget) {
-        TerminalView terminalView = TerminalView.getInstance(project);
-        // look for existing terminal tab
-        ShellTerminalWidget widget = getTerminalWidget(libertyModule, terminalView);
-        setFocusToWidget(project, widget);
-
+    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget, TerminalView terminalView, ShellTerminalWidget widget) {
         if (widget == null && createWidget) {
             // create a new terminal tab
             ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
@@ -164,7 +159,7 @@ public class LibertyProjectUtil {
         return widget;
     }
 
-    private static void setFocusToWidget(Project project, ShellTerminalWidget widget) {
+    public static void setFocusToWidget(Project project, ShellTerminalWidget widget) {
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
 
@@ -237,7 +232,7 @@ public class LibertyProjectUtil {
      * @param terminalView
      * @return ShellTerminalWidget or null if it does not exist
      */
-    private static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalView terminalView) {
+    public static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalView terminalView) {
         ShellTerminalWidget widget = libertyModule.getShellWidget();
         // check if widget exists in terminal view
         if (widget != null) {
