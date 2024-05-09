@@ -42,7 +42,7 @@ public class BeanValidationTest extends BaseJakartaTest {
     @Test
     public void validFieldConstraints() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/ValidConstraints.java");
@@ -58,7 +58,7 @@ public class BeanValidationTest extends BaseJakartaTest {
     @Test
     public void fieldConstraintValidation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/FieldConstraintValidation.java");
@@ -198,7 +198,7 @@ public class BeanValidationTest extends BaseJakartaTest {
     @Test
     public void methodConstraintValidation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/MethodConstraintValidation.java");
