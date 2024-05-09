@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.17.3'
     id 'org.jetbrains.kotlin.jvm' version '1.7.22'
 }
 
 group 'io.openliberty.tools'
-version '24.0.4-SNAPSHOT'
+version '24.0.6-SNAPSHOT'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -55,7 +55,8 @@ configurations {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
-    compileTestKotlin {
+    // Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
             jvmTarget = "17"
         }
