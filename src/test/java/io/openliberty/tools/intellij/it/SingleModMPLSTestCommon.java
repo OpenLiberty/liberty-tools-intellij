@@ -3,7 +3,6 @@ package io.openliberty.tools.intellij.it;
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
-import com.intellij.remoterobot.utils.Keyboard;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
@@ -194,8 +193,7 @@ public abstract class SingleModMPLSTestCommon {
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified microprofile-config.properties with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -255,8 +253,7 @@ public abstract class SingleModMPLSTestCommon {
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
             // Replace modified microprofile-config.properties with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }
@@ -294,8 +291,7 @@ public abstract class SingleModMPLSTestCommon {
 
         } finally {
             // Replace modified microprofile-config.properties with the original content
-            UIBotTestUtils.goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1); // position for select all
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }
