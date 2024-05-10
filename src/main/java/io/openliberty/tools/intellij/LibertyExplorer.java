@@ -251,8 +251,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     if (node instanceof LibertyModuleNode libertyNode) {
                         final DefaultActionGroup group = new DefaultActionGroup();
                         if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-                            AnAction viewEffectivePom = ActionManager.getInstance().getAction(Constants.VIEW_EFFECTIVE_POM_ACTION_ID);
-                            group.add(viewEffectivePom);
+                            AnAction viewPomXml = ActionManager.getInstance().getAction(Constants.VIEW_POM_XML_ACTION_ID);
+                            group.add(viewPomXml);
                             AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
                             group.add(viewIntegrationReport);
                             AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);

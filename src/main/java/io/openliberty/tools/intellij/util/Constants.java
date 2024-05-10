@@ -65,7 +65,7 @@ public final class Constants {
     public static final String VIEW_UNIT_TEST_REPORT_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewUnitTestReport";
     public static final String VIEW_GRADLE_TEST_REPORT_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewTestReport";
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
-    public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
+    public static final String VIEW_POM_XML_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewPomXml";
 
     // action triggered from shift-shift "Search Everywhere" IntelliJ window or "cmd/ctl + shift + A" Actions menu
     public static final String GO_TO_ACTION_TRIGGERED = "GoToAction";
