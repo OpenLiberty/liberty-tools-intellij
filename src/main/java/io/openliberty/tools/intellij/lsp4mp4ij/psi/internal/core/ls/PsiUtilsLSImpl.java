@@ -15,12 +15,16 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.light.LightRecordField;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.ClassUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import org.jetbrains.annotations.Nullable;
 import org.microshed.lsp4ij.LSPIJUtils;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
@@ -81,8 +85,8 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public PsiClass findClass(Module module, String className) {
-        JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
-        return facade.findClass(className, GlobalSearchScope.allScope(module.getProject()));
+        return ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), className, null, false,
+                GlobalSearchScope.allScope(module.getProject()));
     }
 
     @Override
@@ -92,7 +96,32 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public Location toLocation(PsiElement psiMember) {
-        return LSPIJUtils.toLocation(psiMember);
+        PsiElement sourceElement = getNavigationElement(psiMember);
+
+        if (sourceElement != null) {
+            PsiFile file = sourceElement.getContainingFile();
+            Document document = PsiDocumentManager.getInstance(psiMember.getProject()).getDocument(file);
+            if (document != null) {
+                TextRange range = sourceElement.getTextRange();
+                return toLocation(file, LSPIJUtils.toRange(range, document));
+            }
+        }
+        return null;
+    }
+
+    public static Location toLocation(PsiFile file, Range range) {
+        return toLocation(file.getVirtualFile(), range);
+    }
+
+    public static Location toLocation(VirtualFile file, Range range) {
+        return new Location(LSPIJUtils.toUriAsString(file), range);
+    }
+
+    private static @Nullable PsiElement getNavigationElement(PsiElement psiMember) {
+        if (psiMember instanceof LightRecordField psiRecord) {
+            psiMember = psiRecord.getRecordComponent();
+        }
+        return psiMember.getNavigationElement();
     }
 
     @Override

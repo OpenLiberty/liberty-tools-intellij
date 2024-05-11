@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '24.0.5-SNAPSHOT'
+version '24.0.6-SNAPSHOT'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -48,7 +48,7 @@ repositories {
 configurations {
     lsp
     // needed to avoid ClassCastException org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to class javax.xml.parsers.DocumentBuilderFactory
-    // xml-apis interfering with xercs
+    // xml-apis interfering with Xerces
     all*.exclude group: 'xml-apis'
 
     runtimeClasspath {
@@ -65,7 +65,7 @@ configurations {
 
 dependencies {
     implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
-    implementation 'org.microshed:lsp4ij:0.0.4' // includes org.eclipse.lsp4j
+    implementation 'org.microshed:lsp4ij:0.0.5' // includes org.eclipse.lsp4j
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
@@ -82,7 +82,7 @@ dependencies {
     }
     //required by lsp4j as the version from IJ is incompatible
 //    implementation 'com.google.code.gson:gson:2.8.9'
-//    implementation 'com.vladsch.flexmark:flexmark:0.50.50'
+//    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
@@ -92,7 +92,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:233.11799.241') {
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:241.15989.150') {
         transitive = false
     }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -138,7 +138,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2023.3.4'
+    version = '2024.1.1'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle']
     updateSinceUntilBuild = false

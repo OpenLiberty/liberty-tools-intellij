@@ -87,7 +87,7 @@ public abstract class SingleModJakartaLSTestCommon {
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 

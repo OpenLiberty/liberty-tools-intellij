@@ -192,8 +192,8 @@ public abstract class SingleModMPLSTestCommon {
             Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -252,8 +252,8 @@ public abstract class SingleModMPLSTestCommon {
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }
@@ -290,8 +290,8 @@ public abstract class SingleModMPLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
 
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }

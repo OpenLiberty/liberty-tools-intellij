@@ -1432,12 +1432,23 @@ public class UIBotTestUtils {
         deleteEntry.click();
     }
 
+    public static void pasteOnActiveWindow(RemoteRobot remoteRobot) {
+        pasteOnActiveWindow(remoteRobot, false);
+    }
+
     /**
      * Pastes previously copied content on the currently active window.
+     * In some cases the cursor may be in a context where Select All selects only the text
+     * in a specific area rather than the whole file. In this case the fix is to move the
+     * cursor to the home position 1,1
      *
      * @param remoteRobot The RemoteRobot instance.
+     * @param homeCursor if true move the cursor to 1,1
      */
-    public static void pasteOnActiveWindow(RemoteRobot remoteRobot) {
+    public static void pasteOnActiveWindow(RemoteRobot remoteRobot, boolean homeCursor) {
+        if (homeCursor) {
+            goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1);
+        }
         // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit", "10");

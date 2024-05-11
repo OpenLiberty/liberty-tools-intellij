@@ -11,6 +11,7 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
+import com.intellij.openapi.extensions.ExtensionPointName;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.List;
@@ -23,6 +24,9 @@ import java.util.List;
  *
  */
 public interface IJavaDiagnosticsParticipant {
+
+	// Not used in liberty-tools-intellij:
+	// public static final ExtensionPointName<IJavaDiagnosticsParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaDiagnosticsParticipant");
 
 	/**
 	 * Returns true if diagnostics must be collected for the given context and false

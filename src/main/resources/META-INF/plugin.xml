@@ -18,7 +18,7 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="232" until-build="233.*"/>
+    <idea-version since-build="232" until-build="241.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
@@ -294,6 +294,7 @@
             <attribute name="jitter" range="0"/> <!-- x >=0 -->
             <attribute name="maxRetries" range="-1"/> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
+        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java.MicroProfileGraphQLASTValidator"/>
     </extensions>
 
     <projectListeners>

@@ -24,6 +24,8 @@ import org.eclipse.lsp4j.CompletionItem;
  * @author datho7561
  */
 public interface IJavaCompletionParticipant {
+	// Not used in liberty-tools-intellij:
+	// public static final ExtensionPointName<IJavaCompletionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaCompletionParticipant");
 
 	/**
 	 * Returns true if this completion feature should be active in this context, and false otherwise
