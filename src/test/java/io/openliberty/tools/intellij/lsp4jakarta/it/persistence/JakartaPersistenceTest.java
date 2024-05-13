@@ -42,7 +42,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     @Test
     public void deleteMapKeyOrMapKeyClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyAndMapKeyClassTogether.java");
@@ -85,7 +85,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     @Test
     public void completeMapKeyJoinColumnAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/MultipleMapKeyAnnotations.java");
@@ -140,7 +140,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     @Test
     public void addEmptyConstructor() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityMissingConstructor.java");
@@ -171,7 +171,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     @Test
     public void removeFinalModifiers() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/FinalModifiers.java");

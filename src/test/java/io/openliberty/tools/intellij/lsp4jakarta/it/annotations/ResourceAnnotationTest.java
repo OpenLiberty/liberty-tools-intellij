@@ -42,7 +42,7 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
     @Test
     public void ResourceAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/annotations/ResourceAnnotation.java");

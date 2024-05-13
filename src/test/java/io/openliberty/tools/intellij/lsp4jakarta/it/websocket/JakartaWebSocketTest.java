@@ -44,7 +44,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void addPathParamsAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/AnnotationTest.java");
@@ -97,7 +97,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void changeInvalidParamType() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/InvalidParamType.java");
@@ -122,7 +122,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testPathParamInvalidURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websockets/PathParamURIWarningTest.java");
@@ -140,7 +140,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointRelativeURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointRelativePathTest.java");
@@ -158,7 +158,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointNoSlashURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointNoSlash.java");
@@ -177,7 +177,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointInvalidTemplateURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointInvalidTemplateURI.java");
@@ -194,7 +194,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointDuplicateVariableURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointDuplicateVariableURI.java");
@@ -211,7 +211,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testDuplicateOnMessage() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/DuplicateOnMessage.java");

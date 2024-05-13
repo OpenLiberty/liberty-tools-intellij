@@ -155,7 +155,7 @@ main() {
 
     # Start the IDE.
     echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
-    ./gradlew -Dide.slow.operations.assertion=false runIdeForUiTests --info  > remoteServer.log  2>&1 &
+    ./gradlew runIdeForUiTests --info  > remoteServer.log  2>&1 &
 
     # Wait for the IDE to come up.
     echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."

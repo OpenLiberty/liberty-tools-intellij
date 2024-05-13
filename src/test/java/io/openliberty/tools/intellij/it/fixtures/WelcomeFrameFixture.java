@@ -40,9 +40,8 @@ public class WelcomeFrameFixture extends CommonContainerFixture {
             cf = find(ComponentFixture.class, byXpath("//div[@class='JBOptionButton' and @text='Open']"));
         } else {
             // Handle the view that does not show any recently used projects.
-            cf = find(ComponentFixture.class, byXpath("//div[@class='JButton' and @accessiblename.key='action.WelcomeScreen.OpenProject.text']"));
+            cf = find(ComponentFixture.class, byXpath("//div[@class='JButton' and @defaulticon='open.svg']"));
         }
-
         return cf;
     }
 }
