@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation, Shaunak Tulshibagwale and others.
+ * Copyright (c) 2021, 2024 IBM Corporation, Shaunak Tulshibagwale and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,8 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
@@ -32,6 +34,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,6 +106,8 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             context.getUnresolved().setEdit(we);
+        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, warningMessage, e);
         }
