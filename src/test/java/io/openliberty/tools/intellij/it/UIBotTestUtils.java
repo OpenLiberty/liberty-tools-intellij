@@ -2425,7 +2425,8 @@ public class UIBotTestUtils {
         openTerminalWindow(remoteRobot);
 
         if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-
+            // Sleep for a few seconds to allow dev mode to finish running the tests.
+            TestUtils.sleepAndIgnoreException(60);
             // Stop Liberty dev mode and validate that the Liberty server is down.
             runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, projectName, 3);
         }
