@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.17.3'
     id 'org.jetbrains.kotlin.jvm' version '1.7.22'
 }
 
 group 'io.openliberty.tools'
-version '24.0.3'
+version '24.0.6-SNAPSHOT'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -49,14 +49,15 @@ repositories {
 configurations {
     lsp
     // needed to avoid ClassCastException org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to class javax.xml.parsers.DocumentBuilderFactory
-    // xml-apis interfering with xercs
+    // xml-apis interfering with Xerces
     all*.exclude group: 'xml-apis'
 
     runtimeClasspath {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
-    compileTestKotlin {
+    // Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
             jvmTarget = "17"
         }
@@ -80,7 +81,7 @@ dependencies {
     }
     //required by lsp4j as the version from IJ is incompatible
 //    implementation 'com.google.code.gson:gson:2.8.9'
-//    implementation 'com.vladsch.flexmark:flexmark:0.50.50'
+//    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
@@ -90,7 +91,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:233.11799.241') {
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:241.15989.150') {
         transitive = false
     }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -136,7 +137,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2023.3.4'
+    version = '2024.1.1'
 
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.lsp4ij:' + lsp4ijNightlyVersion + '@nightly']
     updateSinceUntilBuild = false
