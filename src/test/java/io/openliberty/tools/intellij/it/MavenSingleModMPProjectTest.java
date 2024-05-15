@@ -117,8 +117,8 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * @return The path of server.env file.
      */
     @Override
-    public String[] getServerEnvPath() {
-        return new String[]{SM_MP_PROJECT_NAME, TARGET_DIR, LIBERTY_DIR, "wlp", "usr", "servers", "defaultServer", "server.env"};
+    public String[] getWLPServerEnvPath() {
+        return new String[]{SM_MP_PROJECT_NAME, TARGET_DIR, LIBERTY_DIR, "wlp", "usr", "servers", "defaultServer"};
     }
 
     /**

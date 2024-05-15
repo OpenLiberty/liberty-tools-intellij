@@ -938,7 +938,7 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Trigger the start with parameters configuration dialog.
-        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
 
         // Run the configuration dialog.
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParamsDebugPort());
@@ -948,10 +948,10 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerEnvPath());
 
-            // Check if the specified Custom debug port is used.
-            TestUtils.checkCustomDebugPort(absoluteWLPPath);
+            // To check if debug port is set to a custom value (e.g., 9876)
+            TestUtils.checkDebugPort(absoluteWLPPath, 9876);
 
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
@@ -972,10 +972,10 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getServerEnvPath());
-            
-            // Check if Default debug port is used.
-            TestUtils.checkDefaultDebugPort(absoluteWLPPath);
+            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerEnvPath());
+
+            // To check if debug port is set to the default value (7777)
+            TestUtils.checkDebugPort(absoluteWLPPath, 7777);
 
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
@@ -1036,7 +1036,7 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The path of server.env file.
      */
-    public abstract String[] getServerEnvPath();
+    public abstract String[] getWLPServerEnvPath();
 
     /**
      * Returns the name of the build file used by the project.
