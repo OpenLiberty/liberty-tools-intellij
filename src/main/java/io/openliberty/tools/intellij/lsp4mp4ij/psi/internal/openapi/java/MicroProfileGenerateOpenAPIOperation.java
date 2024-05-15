@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -28,16 +30,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CancellationException;
 
 /**
  * Generate OpenAPI annotations by the "Source" kind code action.
@@ -77,7 +75,8 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 				CodeActionResolveData data = new CodeActionResolveData(context.getUri(), getParticipantId(),
 						context.getParams().getRange(),
 						extendedData, context.getParams().isResourceOperationSupported(),
-						context.getParams().isCommandConfigurationUpdateSupported());
+						context.getParams().isCommandConfigurationUpdateSupported(),
+						MicroProfileCodeActionId.GenerateOpenApiAnnotations);
 
 				ExtendedCodeAction codeAction = new ExtendedCodeAction(
 						MessageFormat.format(MESSAGE, getSimpleName(typeName)));
@@ -122,8 +121,9 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 				context.getSource().getCompilationUnit());
 
 		try {
-			WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-			toResolve.setEdit(we);
+			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 		}
 

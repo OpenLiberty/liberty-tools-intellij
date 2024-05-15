@@ -23,7 +23,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaEr
  */
 public enum MicroProfileConfigErrorCode implements IJavaErrorCode {
 
-	NO_VALUE_ASSIGNED_TO_PROPERTY, DEFAULT_VALUE_IS_WRONG_TYPE, EMPTY_KEY;
+	NO_VALUE_ASSIGNED_TO_PROPERTY, DEFAULT_VALUE_IS_WRONG_TYPE, EMPTY_LIST_NOT_SUPPORTED, EMPTY_KEY;
 
 	@Override
 	public String getCode() {

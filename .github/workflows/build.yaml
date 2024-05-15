@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches: '**'
   pull_request:
@@ -36,13 +37,11 @@ jobs:
         with:
           repository: MicroShed/lsp4ij
           path: lsp4ij
-          ref: refs/tags/0.0.1
+          ref: q0401
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
-      - name: Setup FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -201,10 +201,11 @@ public class LibertyMavenUtil {
      * @return String command to execute in the terminal or an exception to display
      * @throws LibertyException
      */
+    final static String wrappedMaven = "Use Maven wrapper";
     public static String getMavenSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
         String mavenHome = mavenSettings.getMavenHome();
-        if (MavenServerManager.WRAPPED_MAVEN.equals(mavenHome)) {
+        if (wrappedMaven.equals(mavenHome)) {
             // it is set to use the wrapper
             return getLocalMavenWrapper(buildFile);
         } else {

@@ -18,7 +18,7 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="231" until-build="232.*"/>
+    <idea-version since-build="232" until-build="241.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
@@ -41,7 +41,7 @@
         <extensionPoint name="javaDefinitionParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant"/>
         <extensionPoint name="javaCompletionParticipant"
-                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant"/>
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.completion.JavaCompletionDefinition"/>
         <extensionPoint name="javaCodeLensParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
         <extensionPoint name="configSourceProvider"
@@ -52,6 +52,7 @@
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
+        <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
@@ -85,8 +86,6 @@
         <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json"
                                 type="org.eclipse.microprofile.jwt.Claim"/>
         <staticPropertyProvider resource="/static-properties/jul-metadata.json"/>
-        <propertiesProvider
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.contextpropagation.properties.MicroProfileContextPropagationProvider"/>
         <propertiesProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider"/>
 
@@ -152,6 +151,8 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector"/>
 
         <projectLabelProvider
+                implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
+        <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileProjectLabelProvider"/>
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MavenProjectLabelProvider"/>
@@ -163,8 +164,10 @@
         <javaDefinitionParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant"/>
 
+        <!-- MicroProfile Completion Participants -->
         <javaCompletionParticipant
-                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
+                group="mp"
+                implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant"/>
 
         <javaCodeLensParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsCodeLensParticipant"/>
@@ -429,6 +432,7 @@
             <attribute name="jitter" range="0"/> <!-- x >=0 -->
             <attribute name="maxRetries" range="-1"/> <!-- x >=0 -->
         </javaASTValidator.annotationValidator>
+        <javaASTValidator.validator implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java.MicroProfileGraphQLASTValidator"/>
     </extensions>
 
     <projectListeners>
@@ -473,8 +477,8 @@
                 class="io.openliberty.tools.intellij.actions.ViewTestReport"
                 icon="AllIcons.General.Web"/>
 
-        <action id="io.openliberty.tools.intellij.actions.ViewEffectivePom"
-                class="io.openliberty.tools.intellij.actions.ViewEffectivePom"
+        <action id="io.openliberty.tools.intellij.actions.ViewPomXml"
+                class="io.openliberty.tools.intellij.actions.ViewPomXml"
                 icon="AllIcons.FileTypes.Config"/>
 
         <action id="io.openliberty.tools.intellij.actions.ViewGradleConfig"

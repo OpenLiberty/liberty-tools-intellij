@@ -11,34 +11,73 @@
 <idea-plugin>
     <extensions defaultExtensionNs="open-liberty.intellij">
         <!-- MicroProfile LS -->
-        <server id="lsp4mp" class="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileServer"
-                clientImpl="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <server id="lsp4mp"
+                name="MicroProfile"
+                factoryClass="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
+                <ul>
+                  <li><b>Java</b> files</li>
+                  <li><b>microprofile-config.properties</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="Properties" serverId="lsp4mp"
-                         filePattern="**/{microprofile-config.properties,microprofile-config-?*.properties}"/>
+                         documentMatcher="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileMatcher"/>
         <languageMapping language="JAVA" serverId="lsp4mp"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
-        <server id="libertyXml" class="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer"
-                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <server id="libertyXml"
+                name="Liberty LemMinX"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty LemMinX Language Server</a> provides support in:
+                <ul>
+                  <li>Any <b>XML</b> file that contains a <i>server</i> root element</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="XML" serverId="libertyXml"/>
 
         <!-- Liberty Config LS -->
-        <server id="libertyls" class="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServer"
-                clientImpl="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <server id="libertyls"
+                name="Liberty Config"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty Config Language Server</a> provides support in:
+                <ul>
+                  <li><b>server.env</b> files</li>
+                  <li><b>bootstrap.properties</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="Properties" serverId="libertyls"
                          filePattern="**/{*.properties,*.env}"/>
 
         <!-- Jakarta LS -->
-        <server id="jakartals" class="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServer"
-                clientImpl="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageClient"
-                serverInterface="org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI"/>
+        <server id="jakartals"
+                name="Jakarta EE"
+                factoryClass="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> provides support in:
+                <ul>
+                  <li><b>Java</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="io.openliberty.tools.intellij.lsp4mp4ij.MicroProfilePostStartupActivity"/>
         <fileType name="server.env" language="TEXT"
                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>
         <!-- Language substitutor for server.env files, treat server.env files as Properties files to get Liberty Config LS capabilities -->
@@ -47,8 +86,11 @@
         <!-- Suppress certain Properties language inspections on server.env files -->
         <lang.inspectionSuppressor language="Properties"
                                    implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
-        <!-- Enable watcher to handle custom liberty config files and provide LCLS support -->
-        <projectService serviceImplementation="io.openliberty.tools.intellij.liberty.lsp.LibertyCustomConfigManager"/>
+        <projectService id="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"
+                        serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport"/>
     </extensions>
 
 </idea-plugin>

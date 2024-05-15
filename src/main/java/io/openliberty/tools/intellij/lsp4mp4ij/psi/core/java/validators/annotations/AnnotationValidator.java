@@ -14,10 +14,13 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,6 +93,8 @@ public class AnnotationValidator {
 				return null;
 			}
 			return rule.validate(value);
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
 			return null;

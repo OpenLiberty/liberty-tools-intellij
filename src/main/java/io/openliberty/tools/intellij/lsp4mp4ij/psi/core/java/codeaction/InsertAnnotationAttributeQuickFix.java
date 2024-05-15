@@ -13,6 +13,8 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -21,13 +23,15 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +67,8 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 		codeAction.setData(
 				new CodeActionResolveData(context.getUri(), getParticipantId(), context.getParams().getRange(), null,
 						context.getParams().isResourceOperationSupported(),
-						context.getParams().isCommandConfigurationUpdateSupported()));
+						context.getParams().isCommandConfigurationUpdateSupported(),
+						getCodeActionId()));
 		return Collections.singletonList(codeAction);
 	}
 
@@ -78,12 +83,20 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
 		try {
 			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e);
 		}
 		return toResolve;
 	}
 
+	/**
+	 * Returns the id for this code action.
+	 *
+	 * @return the id for this code action
+	 */
+	protected abstract MicroProfileCodeActionId getCodeActionId();
 	private static String getLabel(String memberName) {
 		return MessageFormat.format(CODE_ACTION_LABEL, memberName);
 	}

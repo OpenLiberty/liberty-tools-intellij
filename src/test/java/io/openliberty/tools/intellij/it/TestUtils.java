@@ -388,13 +388,12 @@ public class TestUtils {
                     Thread.sleep(retryIntervalSecs * 1000);
                 } catch (Exception e) {
                     e.printStackTrace(System.out);
-                    continue;
                 }
-                continue;
+            } else {
+                return;
             }
-
-            return;
         }
+        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport + " file to be created.");
     }
 
     /**
