@@ -12,6 +12,8 @@
 *******************************************************************************/
  package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
+ import com.intellij.openapi.progress.ProcessCanceledException;
+ import com.intellij.openapi.project.IndexNotReadyException;
  import com.intellij.psi.*;
  import com.intellij.psi.util.PsiTreeUtil;
  import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
@@ -26,6 +28,7 @@
  import org.eclipse.lsp4mp.commons.CodeActionResolveData;
 
  import java.util.*;
+ import java.util.concurrent.CancellationException;
  import java.util.logging.Logger;
  import java.util.logging.Level;
 
@@ -121,6 +124,8 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          try {
              WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
              toResolve.setEdit(we);
+         } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+             throw e;
          } catch (Exception e) {
              LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class.", e);
          }

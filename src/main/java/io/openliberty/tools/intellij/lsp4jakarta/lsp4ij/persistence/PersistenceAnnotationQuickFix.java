@@ -13,6 +13,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -28,6 +30,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -75,6 +78,8 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
             try {
                 WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
                 toResolve.setEdit(we);
+            } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+                throw e;
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
             }
