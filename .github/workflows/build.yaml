@@ -39,9 +39,6 @@ jobs:
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
-      - name: 'Build lsp4ij jar and publish to local Maven repository'
-        working-directory: ./lsp4ij
-        run: bash ./gradlew publishToMavenLocal
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin
