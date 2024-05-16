@@ -11,24 +11,18 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties;
 
 import com.intellij.lang.jvm.JvmMember;
 import com.intellij.openapi.module.Module;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMember;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifierListOwner;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.AbstractAnnotationTypeReferencePropertiesProvider;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesCollector;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.SearchContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.findType;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.getResolvedTypeName;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.*;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.hasAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.*;
 
 /**
  * Properties provider to collect MicroProfile properties from the Java fields
@@ -39,7 +33,7 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtil
  */
 public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeReferencePropertiesProvider {
 
-	private static final String[] ANNOTATION_NAMES = { MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION };
+	private static final String[] ANNOTATION_NAMES = { CONFIG_PROPERTY_ANNOTATION };
 
 	@Override
 	protected String[] getAnnotationNames() {
@@ -52,7 +46,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 		if (javaElement instanceof PsiField || javaElement instanceof PsiVariable) {
 			// Generate the property only class is not annotated with @ConfigProperties
 			PsiClass classType = PsiTreeUtil.getParentOfType(javaElement, PsiClass.class);
-			boolean hasConfigPropertiesAnnotation = AnnotationUtils.hasAnnotation(classType, MicroProfileConfigConstants.CONFIG_PROPERTIES_ANNOTATION);
+			boolean hasConfigPropertiesAnnotation = hasAnnotation(classType, CONFIG_PROPERTIES_ANNOTATION);
 			if (!hasConfigPropertiesAnnotation) {
 				collectProperty(javaElement, configPropertyAnnotation, null, false, context);
 			}
@@ -65,7 +59,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 				useFieldNameIfAnnotationIsNotPresent);
 		if (propertyName != null && !propertyName.isEmpty()) {
 			String defaultValue = configPropertyAnnotation != null
-					? AnnotationUtils.getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE)
+					? getAnnotationMemberValue(configPropertyAnnotation, CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE)
 					: null;
 			collectProperty(javaElement, propertyName, defaultValue, context);
 		}
@@ -74,7 +68,7 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 	protected String getPropertyName(PsiElement javaElement, PsiAnnotation configPropertyAnnotation, String prefix,
 									 boolean useFieldNameIfAnnotationIsNotPresent) {
 		if (configPropertyAnnotation != null) {
-			return getPropertyName(AnnotationUtils.getAnnotationMemberValue(configPropertyAnnotation, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME),
+			return getPropertyName(getAnnotationMemberValue(configPropertyAnnotation, CONFIG_PROPERTY_ANNOTATION_NAME),
 					prefix);
 		} else if (useFieldNameIfAnnotationIsNotPresent) {
 			return getPropertyName(getName(javaElement), prefix);
@@ -98,31 +92,69 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 	private void collectProperty(PsiModifierListOwner javaElement, String name, String defaultValue,
 								 SearchContext context) {
 		Module javaProject = context.getJavaProject();
-		String varTypeName = PsiTypeUtils.getResolvedTypeName(javaElement);
-		PsiClass varType = PsiTypeUtils.findType(javaProject, varTypeName);
-		String type = PsiTypeUtils.getPropertyType(varType, varTypeName);
+		String varTypeName = getResolvedTypeName(javaElement);
+		PsiClass varType = findType(javaProject, varTypeName);
+		String type = getPropertyType(varType, varTypeName);
 		String description = null;
-		String sourceType = PsiTypeUtils.getSourceType(javaElement);
+		String sourceType = getSourceType(javaElement);
 		String sourceField = null;
 		String sourceMethod = null;
 
 		String extensionName = null;
 
-		if (javaElement instanceof PsiField) {
-			sourceField = PsiTypeUtils.getSourceField((PsiMember) javaElement);
+		if (javaElement instanceof PsiField || javaElement instanceof PsiRecordComponent) {
+			sourceField = getSourceField((PsiMember) javaElement);
 		} else if (javaElement instanceof PsiVariable) {
 			PsiVariable localVariable = (PsiVariable) javaElement;
 			PsiMethod method = PsiTreeUtil.getParentOfType(localVariable, PsiMethod.class);
-			sourceMethod = PsiTypeUtils.getSourceMethod(method);
+			sourceMethod = getSourceMethod(method);
 		}
 
 		// Enumerations
-		PsiClass enclosedType = PsiTypeUtils.getEnclosedType(varType, type, javaElement.getManager());
+		PsiClass enclosedType = getEnclosedType(varType, type, javaElement.getManager());
 		super.updateHint(context.getCollector(), enclosedType);
 
-		boolean binary = PsiTypeUtils.isBinary(javaElement);
+		boolean binary = isBinary(javaElement);
 		super.addItemMetadata(context.getCollector(), name, type, description, sourceType, sourceField, sourceMethod, defaultValue,
 				extensionName, binary);
+	}
+
+
+	private void oldMethod(PsiModifierListOwner psiElement, PsiAnnotation configPropertyAnnotation, SearchContext context) {
+		IPropertiesCollector collector = context.getCollector();
+		String name = getAnnotationMemberValue(configPropertyAnnotation,
+				"");
+		if (StringUtils.isNotEmpty(name)) {
+			String propertyTypeName = "";
+			if (psiElement instanceof PsiField) {
+				propertyTypeName = getResolvedTypeName((PsiField) psiElement);
+			} else if (psiElement instanceof PsiMethod) {
+				propertyTypeName = getResolvedResultTypeName((PsiMethod) psiElement);
+			} else if (psiElement instanceof PsiVariable) {
+				propertyTypeName = getResolvedTypeName((PsiVariable) psiElement);
+			}
+			PsiClass fieldClass = JavaPsiFacade.getInstance(psiElement.getProject()).findClass(propertyTypeName, GlobalSearchScope.allScope(psiElement.getProject()));
+
+			String type = getPropertyType(fieldClass, propertyTypeName);
+			String description = null;
+			String sourceType = getSourceType(psiElement);
+			String sourceField = null;
+			String sourceMethod = null;
+			if (psiElement instanceof PsiField || psiElement instanceof PsiMethod) {
+				sourceField = getSourceField((PsiMember) psiElement);
+			} else if (psiElement instanceof PsiParameter) {
+				PsiMethod method = (PsiMethod) ((PsiParameter) psiElement).getDeclarationScope();
+					sourceMethod = getSourceMethod(method);
+			}
+			String defaultValue = getAnnotationMemberValue(configPropertyAnnotation,
+					"");
+			String extensionName = null;
+
+			super.updateHint(collector, fieldClass);
+
+			addItemMetadata(collector, name, type, description, sourceType, sourceField, sourceMethod, defaultValue,
+					extensionName, isBinary(psiElement));
+		}
 	}
 
 }

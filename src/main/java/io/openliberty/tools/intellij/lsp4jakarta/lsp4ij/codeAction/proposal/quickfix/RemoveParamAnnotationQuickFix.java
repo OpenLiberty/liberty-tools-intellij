@@ -25,7 +25,7 @@
  import org.eclipse.lsp4j.CodeAction;
  import org.eclipse.lsp4j.Diagnostic;
  import org.eclipse.lsp4j.WorkspaceEdit;
- import org.eclipse.lsp4mp.commons.CodeActionResolveData;
+ import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
  import java.util.*;
  import java.util.concurrent.CancellationException;

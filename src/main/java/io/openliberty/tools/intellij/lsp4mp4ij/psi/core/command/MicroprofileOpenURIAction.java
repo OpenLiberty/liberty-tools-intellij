@@ -2,33 +2,29 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.command;
 
 import com.google.gson.JsonPrimitive;
 import com.intellij.ide.BrowserUtil;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import org.microshed.lsp4ij.operations.codelens.LSPInlayProvider;
+import org.microshed.lsp4ij.commands.LSPCommand;
+import org.microshed.lsp4ij.commands.LSPCommandAction;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-public class MicroprofileOpenURIAction extends AnAction {
+public class MicroprofileOpenURIAction extends LSPCommandAction {
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
-        String url = getURL(e);
+    protected void commandPerformed(@NotNull LSPCommand command, @NotNull AnActionEvent anActionEvent) {
+        String url = getURL(command);
         if (url != null) {
             BrowserUtil.browse(url);
         }
     }
 
-    private String getURL(AnActionEvent e) {
-        String url = null;
-        List<Object> arguments = e.getData(LSPInlayProvider.LSP_COMMAND).getArguments();
-        if (!arguments.isEmpty()) {
-            Object arg = arguments.get(0);
-            if (arg instanceof JsonPrimitive) {
-                url = ((JsonPrimitive) arg).getAsString();
-            } else if (arg instanceof String) {
-                url = (String) arg;
-            }
+    private String getURL(LSPCommand command) {
+        Object arg = command.getArgumentAt(0);
+        if (arg instanceof JsonPrimitive) {
+            return ((JsonPrimitive) arg).getAsString();
         }
-        return url;
+        if (arg instanceof String) {
+            return (String) arg;
+        }
+        return null;
     }
 }

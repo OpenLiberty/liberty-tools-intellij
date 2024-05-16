@@ -25,7 +25,8 @@ public class MicroProfileConfigConstants {
 
 	public static final String MICRO_PROFILE_CONFIG_DIAGNOSTIC_SOURCE = "microprofile-config";
 
-	public static final String INJECT_ANNOTATION = "javax.inject.Inject";
+	public static final String INJECT_JAVAX_ANNOTATION = "javax.inject.Inject";
+	public static final String INJECT_JAKARTA_ANNOTATION = "jakarta.inject.Inject";
 
 	// @ConfigProperty annotation
 
@@ -48,10 +49,6 @@ public class MicroProfileConfigConstants {
 	public static final String FUTURE_TYPE_UTILITY = "java.util.concurrent.Future";
 
 	public static final String COMPLETION_STAGE_TYPE_UTILITY = "java.util.concurrent.CompletionStage";
-
-	// Diagnostic data
-
-	public static final String DIAGNOSTIC_DATA_NAME = "name";
 
 	public static final String UNI_TYPE_UTILITY = "io.smallrye.mutiny.Uni";
 }

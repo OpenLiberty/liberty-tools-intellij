@@ -18,19 +18,15 @@ import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiNameValuePair;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.AbstractAnnotationTypeReferencePropertiesProvider;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.SearchContext;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4mp.commons.metadata.ItemHint;
 import org.eclipse.lsp4mp.commons.metadata.ValueHint;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.CHANNEL_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.CONNECTOR_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.CONNECTOR_ATTRIBUTES_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.CONNECTOR_ATTRIBUTE_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.EMITTER_CLASS;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.INCOMING_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.OUTGOING_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.*;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.reactivemessaging.MicroProfileReactiveMessagingConstants.*;
 
 /**
  * Properties provider to collect MicroProfile properties from the MicroProfile
@@ -205,23 +201,23 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 		// Extract channel name from
 		// - @Incoming("channel-name") or
 		// - @Outgoing("channel-name") annotation
-		String channelName = AnnotationUtils.getAnnotationMemberValue(incomingOrOutgoingAnnotation, "value");
+		String channelName = getAnnotationMemberValue(incomingOrOutgoingAnnotation, "value");
 		if (StringUtils.isBlank(channelName)) {
 			// channel name must not be blank, see
 			// https://github.com/eclipse/microprofile-reactive-messaging/blob/62c9ed5dffe01125941bb185f1433d6307b83c86/api/src/main/java/org/eclipse/microprofile/reactive/messaging/Incoming.java#L95
 			return;
 		}
-		String sourceType = PsiTypeUtils.getSourceType(javaElement);
+		String sourceType = getSourceType(javaElement);
 		String sourceMethod = null;
 		String sourceField = null;
 		if (javaElement instanceof PsiMethod) {
 			PsiMethod method = (PsiMethod) javaElement;
-			sourceMethod = PsiTypeUtils.getSourceMethod(method);
+			sourceMethod = getSourceMethod(method);
 		} else if (javaElement instanceof PsiField) {
 			PsiField field = (PsiField) javaElement;
-			sourceField = PsiTypeUtils.getSourceField(field);
+			sourceField = getSourceField(field);
 		}
-		boolean binary = PsiTypeUtils.isBinary(javaElement);
+		boolean binary = isBinary(javaElement);
 		String description = null;
 		String type = "org.eclipse.microprofile.reactive.messaging.spi.Connector";
 		addMpMessagingItem(channelName, false, "connector", messageType, sourceType, sourceField,
@@ -240,21 +236,21 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 
 		// 1) Collect connector names into hints ${mp.messaging.connector.binary} and
 		// ${mp.messaging.connector.source}
-		String connectorName = AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "value");
+		String connectorName = getAnnotationMemberValue(connectorAnnotation, "value");
 		String connectorHint = getHint("mp.messaging.connector.", javaElement);
 		String description = null;
-		String sourceType = PsiTypeUtils.getSourceType(javaElement);
+		String sourceType = getSourceType(javaElement);
 		fillValueHint(connectorHint, connectorName, description, sourceType, context);
 
 		// 2) Generate property per @ConnectorAttribute which provides attribute and
 		// direction informations for the current connector
 		// - mp.messaging.[attribute=incoming|outgoing].${connector-name}.[attribute]
-		boolean binary = PsiTypeUtils.isBinary(javaElement);
+		boolean binary = isBinary(javaElement);
 		PsiAnnotation[] annotations = javaElement.getAnnotations();
 		for (PsiAnnotation connectorAttributeAnnotation : annotations) {
-			if (AnnotationUtils.isMatchAnnotation(connectorAttributeAnnotation, CONNECTOR_ATTRIBUTE_ANNOTATION)) {
+			if (isMatchAnnotation(connectorAttributeAnnotation, CONNECTOR_ATTRIBUTE_ANNOTATION)) {
 				processConnectorAttribute(connectorName, connectorAttributeAnnotation, sourceType, binary, context);
-			} else if (AnnotationUtils.isMatchAnnotation(connectorAttributeAnnotation, CONNECTOR_ATTRIBUTES_ANNOTATION)) {
+			} else if (isMatchAnnotation(connectorAttributeAnnotation, CONNECTOR_ATTRIBUTES_ANNOTATION)) {
 				for (PsiNameValuePair pair : connectorAttributeAnnotation.getParameterList().getAttributes()) {
 					if (pair.getValue() instanceof PsiArrayInitializerMemberValue) {
 						PsiArrayInitializerMemberValue connectorAttributeAnnotations = (PsiArrayInitializerMemberValue) pair.getValue();
@@ -281,14 +277,14 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 	 */
 	private void processConnectorAttribute(String connectorName, PsiAnnotation connectorAnnotation, String sourceType,
 										   boolean binary, SearchContext context) {
-		String attributeName = AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "name");
-		String type = getType(AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "type"));
-		String description = AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "description");
-		String defaultValue = AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "defaultValue");
+		String attributeName = getAnnotationMemberValue(connectorAnnotation, "name");
+		String type = getType(getAnnotationMemberValue(connectorAnnotation, "type"));
+		String description = getAnnotationMemberValue(connectorAnnotation, "description");
+		String defaultValue = getAnnotationMemberValue(connectorAnnotation, "defaultValue");
 		if (StringUtils.isEmpty(defaultValue)) {
 			defaultValue = null;
 		}
-		Direction direction = getDirection(AnnotationUtils.getAnnotationMemberValue(connectorAnnotation, "direction"));
+		Direction direction = getDirection(getAnnotationMemberValue(connectorAnnotation, "direction"));
 
 		switch (direction) {
 			case INCOMING:
@@ -400,7 +396,7 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 	private static String getHint(String baseKey, PsiModifierListOwner javaElement) {
 		StringBuilder hint = new StringBuilder("${").append(baseKey);
 		if (javaElement != null) {
-			hint.append(PsiTypeUtils.isBinary(javaElement) ? "binary" : "source");
+			hint.append(isBinary(javaElement) ? "binary" : "source");
 		}
 		return hint.append("}").toString();
 	}
