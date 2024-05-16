@@ -2410,25 +2410,4 @@ public class UIBotTestUtils {
             okButton.click();
         }
     }
-
-    /**
-     * Cleans up resources and stops the Liberty server if necessary.
-     *
-     * @param remoteRobot       The RemoteRobot instance.
-     * @param absoluteWLPPath   The absolute path of the Liberty installation.
-     * @param projectName       The name of the project to select.
-     * @param testName          The name of the test calling this method.
-     */
-    public static void cleanupAndStopServerIfNeeded(RemoteRobot remoteRobot, String absoluteWLPPath, String projectName, String testName) {
-
-        // Open the terminal window.
-        openTerminalWindow(remoteRobot);
-
-        if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-            // Sleep for a few seconds to allow dev mode to finish running the tests.
-            TestUtils.sleepAndIgnoreException(60);
-            // Stop Liberty dev mode and validate that the Liberty server is down.
-            runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, projectName, 3);
-        }
-    }
 }

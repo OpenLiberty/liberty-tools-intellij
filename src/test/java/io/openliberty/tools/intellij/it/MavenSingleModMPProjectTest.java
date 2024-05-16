@@ -53,16 +53,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
 
     /**
-     * Target Directory.
-     */
-    private final String TARGET_DIR = "target";
-
-    /**
-     * Liberty Directory.
-     */
-    private final String LIBERTY_DIR = "liberty";
-
-    /**
      * Build file name.
      */
     private final String BUILD_FILE_NAME = "pom.xml";
@@ -109,16 +99,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getWLPInstallPath() {
         return WLP_INSTALL_PATH;
-    }
-
-    /**
-     * Returns the path of server.env file.
-     *
-     * @return The path of server.env file.
-     */
-    @Override
-    public String[] getWLPServerEnvPath() {
-        return new String[]{SM_MP_PROJECT_NAME, TARGET_DIR, LIBERTY_DIR, "wlp", "usr", "servers", "defaultServer"};
     }
 
     /**

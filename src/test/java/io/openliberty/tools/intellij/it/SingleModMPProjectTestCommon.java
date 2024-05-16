@@ -947,9 +947,6 @@ public abstract class SingleModMPProjectTestCommon {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
-            // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerEnvPath());
-
             // To check if debug port is set to a custom value (e.g., 9876)
             TestUtils.checkDebugPort(absoluteWLPPath, 9876);
 
@@ -958,7 +955,10 @@ public abstract class SingleModMPProjectTestCommon {
 
         } finally {
             // Stops the Liberty server if necessary.
-            UIBotTestUtils.cleanupAndStopServerIfNeeded(remoteRobot, absoluteWLPPath, getSmMPProjectName(), testName);
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop Liberty dev mode and validate that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
         }
 
         // Cleanup configurations.
@@ -971,9 +971,6 @@ public abstract class SingleModMPProjectTestCommon {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
-            // Expand the Project tree and open server.env file
-            UIBotTestUtils.openFile(remoteRobot, getSmMPProjectName(), "server.env", getWLPServerEnvPath());
-
             // To check if debug port is set to the default value (7777)
             TestUtils.checkDebugPort(absoluteWLPPath, 7777);
 
@@ -982,7 +979,10 @@ public abstract class SingleModMPProjectTestCommon {
 
         } finally {
             // Stops the Liberty server if necessary.
-            UIBotTestUtils.cleanupAndStopServerIfNeeded(remoteRobot, absoluteWLPPath, getSmMPProjectName(), testName);
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop Liberty dev mode and validate that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
         }
     }
 
@@ -1030,13 +1030,6 @@ public abstract class SingleModMPProjectTestCommon {
      * @return The path where the Liberty server was installed.
      */
     public abstract String getWLPInstallPath();
-
-    /**
-     * Returns the path of server.env file.
-     *
-     * @return The path of server.env file.
-     */
-    public abstract String[] getWLPServerEnvPath();
 
     /**
      * Returns the name of the build file used by the project.
