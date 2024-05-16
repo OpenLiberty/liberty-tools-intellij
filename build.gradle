@@ -65,6 +65,8 @@ configurations {
 }
 
 dependencies {
+    implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.15.0'
+    implementation 'org.microshed:lsp4ij:0.0.4' // includes org.eclipse.lsp4j
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
