@@ -951,7 +951,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.checkDebugPort(absoluteWLPPath, 9876);
 
         } catch (IOException e) {
-            System.err.println("Error reading the file: " + e.getMessage());
+            Assertions.fail("Error reading the server.env file: " + e.getMessage());
 
         } finally {
             // Stops the Liberty server if necessary.
@@ -975,7 +975,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.checkDebugPort(absoluteWLPPath, 7777);
 
         } catch (IOException e) {
-            System.err.println("Error reading the file: " + e.getMessage());
+            Assertions.fail("Error reading the server.env file: " + e.getMessage());
 
         } finally {
             // Stops the Liberty server if necessary.

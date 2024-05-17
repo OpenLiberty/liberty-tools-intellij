@@ -532,7 +532,7 @@ public class TestUtils {
      * @throws IOException If an I/O error occurs while reading the server.env file.
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
-        // Open the server.env file
+        // Retrieve the WLP server.env file path
         Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);

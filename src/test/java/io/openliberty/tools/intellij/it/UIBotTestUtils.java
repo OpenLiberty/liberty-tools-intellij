@@ -629,10 +629,6 @@ public class UIBotTestUtils {
 
                 projTree.expand(filePath);
 
-                // Awaiting the full expansion of the project tree to ensure that it correctly selects the server.env file.
-                // We need to seek a more effective solution for this in the future.
-                TestUtils.sleepAndIgnoreException(5);
-
                 projTree.findText(fileName).doubleClick();
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openFile: double clicked on file name");
                 break;
