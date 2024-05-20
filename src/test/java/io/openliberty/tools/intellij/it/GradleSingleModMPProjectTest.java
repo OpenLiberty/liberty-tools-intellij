@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -69,6 +69,11 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * Dev mode configuration start parameters.
      */
     private final String DEV_MODE_START_PARAMS = "--hotTests";
+
+    /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private final String DEV_MODE_START_PARAMS_DEBUG = "--libertyDebugPort=9876";
 
     /**
      * Prepares the environment for test execution.
@@ -168,6 +173,16 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getStartParams() {
         return DEV_MODE_START_PARAMS;
+    }
+
+    /**
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
+     */
+    @Override
+    public String getStartParamsDebugPort() {
+        return DEV_MODE_START_PARAMS_DEBUG;
     }
 
     /**

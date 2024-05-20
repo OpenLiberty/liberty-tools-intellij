@@ -78,6 +78,11 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
 
     /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private final String DEV_MODE_START_PARAMS_DEBUG = "-DdebugPort=9876";
+
+    /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
@@ -176,6 +181,16 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @Override
     public String getStartParams() {
         return DEV_MODE_START_PARAMS;
+    }
+
+    /**
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
+     */
+    @Override
+    public String getStartParamsDebugPort() {
+        return DEV_MODE_START_PARAMS_DEBUG;
     }
 
     /**

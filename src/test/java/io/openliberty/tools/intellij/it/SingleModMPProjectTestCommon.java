@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
@@ -924,6 +925,69 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Tests that when a Liberty run configuration is removed, any custom start parameters
+     * linked to the Liberty module are also cleared.
+     */
+    @Test
+    @Video
+    public void testCustomStartParametersClearedOnConfigRemoval() {
+        String testName = "testCustomStartParametersClearedOnConfigRemoval";
+        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+
+        // Remove all existing configurations for a clean state.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
+
+        // Run the configuration dialog.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, getStartParamsDebugPort());
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+
+            // To check if debug port is set to a custom value (e.g., 9876)
+            TestUtils.checkDebugPort(absoluteWLPPath, 9876);
+
+        } catch (IOException e) {
+            Assertions.fail("Error reading the server.env file: " + e.getMessage());
+
+        } finally {
+            // Stops the Liberty server if necessary.
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop Liberty dev mode and validate that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
+        }
+
+        // Cleanup configurations.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start", true, 3);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
+
+            // To check if debug port is set to the default value (7777)
+            TestUtils.checkDebugPort(absoluteWLPPath, 7777);
+
+        } catch (IOException e) {
+            Assertions.fail("Error reading the server.env file: " + e.getMessage());
+
+        } finally {
+            // Stops the Liberty server if necessary.
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop Liberty dev mode and validate that the Liberty server is down.
+                UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3);
+            }
+        }
+    }
+
+
+    /**
      * Returns the projects directory path.
      *
      * @return The projects directory path.
@@ -987,6 +1051,13 @@ public abstract class SingleModMPProjectTestCommon {
      * @return The custom start parameters to be used to start dev mode.
      */
     public abstract String getStartParams();
+
+    /**
+     * Returns the custom start parameters to be used to start dev mode.
+     *
+     * @return The custom start parameters to be used to start dev mode.
+     */
+    public abstract String getStartParamsDebugPort();
 
     /**
      * Deletes test reports.

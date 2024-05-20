@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,8 +18,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * Listens to creation/deletion of Liberty run configurations
@@ -39,12 +38,12 @@ public class LibertyRunManagerListener implements RunManagerListener {
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) settings.getConfiguration();
             LibertyModules libertyModules = LibertyModules.getInstance();
             try {
-                VirtualFile vBuildFile = VfsUtil.findFileByURL(new URL(runConfig.getBuildFile()));
+                VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 LibertyModule libertyModule = libertyModules.getLibertyModule(vBuildFile);
                 if (libertyModule != null && libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
                     libertyModule.clearCustomStartParams();
                 }
-            } catch (MalformedURLException e) {
+            } catch (Exception e) {
                 LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
             }
 

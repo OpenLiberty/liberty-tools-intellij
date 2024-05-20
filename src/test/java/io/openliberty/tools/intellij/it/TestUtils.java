@@ -522,4 +522,23 @@ public class TestUtils {
 
         return stopServer;
     }
+
+    /**
+     * Checks if the debug port is set to the specified value in the server.env file.
+     *
+     * @param absoluteWLPPath The absolute path to the WLP directory.
+     * @param debugPort The debug port to check in the server.env file.
+     * @throws IOException If an I/O error occurs while reading the server.env file.
+     */
+    public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
+        // Retrieve the WLP server.env file path
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        // Read all lines from server.env
+        List<String> lines = Files.readAllLines(serverEnvPath);
+        // Check if Debug Port is set to the specified port
+        boolean debugPortIsSet = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=" + debugPort));
+        Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
+    }
+
+
 }
