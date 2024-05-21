@@ -15,6 +15,13 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.InsertAnnotationMissingQuickFix;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
+
+import java.util.List;
 
 /**
  * QuickFix for fixing
@@ -31,7 +38,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.InsertAn
 public class InjectAnnotationMissingQuickFix extends InsertAnnotationMissingQuickFix {
 
 	public InjectAnnotationMissingQuickFix() {
-		super(MicroProfileConfigConstants.INJECT_ANNOTATION);
+		super(MicroProfileConfigConstants.INJECT_JAKARTA_ANNOTATION, MicroProfileConfigConstants.INJECT_JAVAX_ANNOTATION);
 	}
 
 	@Override
@@ -39,4 +46,19 @@ public class InjectAnnotationMissingQuickFix extends InsertAnnotationMissingQuic
 		return InjectAnnotationMissingQuickFix.class.getName();
 	}
 
+	@Override
+	protected void insertAnnotations(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
+		String[] annotations = getAnnotations();
+		for (String annotation : annotations) {
+			if (PsiTypeUtils.findType(context.getJavaProject(), annotation) != null) {
+				insertAnnotation(diagnostic, context, codeActions, annotation);
+				return;
+			}
+		}
+	}
+
+	@Override
+	protected MicroProfileCodeActionId getCodeActionId() {
+		return MicroProfileCodeActionId.InsertInjectAnnotation;
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,7 +26,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,13 +44,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void addPathParamsAnnotation() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/AnnotationTest.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // OnOpen PathParams Annotation check
@@ -97,13 +97,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void changeInvalidParamType() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/InvalidParamType.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // OnOpen Invalid Param Types
@@ -122,13 +122,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testPathParamInvalidURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websockets/PathParamURIWarningTest.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d = JakartaForJavaAssert.d(22, 59, 77, "PathParam value does not match specified Endpoint URI.",
@@ -140,13 +140,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointRelativeURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointRelativePathTest.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d = JakartaForJavaAssert.d(6, 0, 27, "Server endpoint paths must not contain the sequences '/../', '/./' or '//'.",
@@ -158,13 +158,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointNoSlashURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointNoSlash.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d1 = JakartaForJavaAssert.d(7, 0, 23, "Server endpoint paths must start with a leading '/'.", DiagnosticSeverity.Error,
                 "jakarta-websocket", "ChangeInvalidServerEndpoint");
@@ -177,13 +177,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointInvalidTemplateURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointInvalidTemplateURI.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d = JakartaForJavaAssert.d(6, 0, 46, "Server endpoint paths must be a URI-template (level-1) or a partial URI.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "ChangeInvalidServerEndpoint");
@@ -194,13 +194,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testServerEndpointDuplicateVariableURI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/ServerEndpointDuplicateVariableURI.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d = JakartaForJavaAssert.d(6, 0, 40, "Server endpoint paths must not use the same variable more than once in a path.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "ChangeInvalidServerEndpoint");
@@ -211,13 +211,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
     @Test
     public void testDuplicateOnMessage() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/websocket/DuplicateOnMessage.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d1 = JakartaForJavaAssert.d(12, 4, 14,
                 "Classes annotated with @ServerEndpoint or @ClientEndpoint must have only one @OnMessage annotated method for each of the native WebSocket message formats: text, binary and pong.",

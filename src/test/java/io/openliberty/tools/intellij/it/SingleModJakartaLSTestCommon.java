@@ -87,7 +87,7 @@ public abstract class SingleModJakartaLSTestCommon {
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -131,7 +131,6 @@ public abstract class SingleModJakartaLSTestCommon {
      */
     @Test
     @Video
-    @Disabled
     public void testJakartaQuickFixInJavaPart() {
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";

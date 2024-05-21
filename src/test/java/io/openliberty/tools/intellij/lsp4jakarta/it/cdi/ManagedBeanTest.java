@@ -26,7 +26,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4jakarta.commons.JakartaDiagnosticsParams;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,13 +44,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void managedBeanAnnotations() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/ManagedBean.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // test expected diagnostic
@@ -64,14 +64,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
         String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
-                "import jakarta.enterprise.context.*;\n" +
-                "import jakarta.enterprise.context.Dependent;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n" +
                 "@RequestScoped\npublic class ManagedBean<T> {\n    " +
                 "@Dependent\n    public int a;\n\n\n    " +
                 "public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
         String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
-                "import jakarta.enterprise.context.*;\n" +
-                "import jakarta.enterprise.context.Dependent;\n\n" +
+                "import jakarta.enterprise.context.*;\n\n" +
                 "@Dependent\npublic class ManagedBean<T> {\n    public int a;\n\n\n    " +
                 "public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
 
@@ -91,13 +89,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void scopeDeclaration() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/ScopeDeclaration.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // test expected diagnostic
@@ -195,13 +193,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void producesAndInject() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/ProducesAndInjectTogether.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d1 = d(16, 18, 23, "The @Produces and @Inject annotations must not be used on the same field or property.",
@@ -268,13 +266,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void injectAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/InjectAndDisposesObservesObservesAsync.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d1 = d(10, 18, 31,
@@ -758,13 +756,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void producesAndDisposesObservesObservesAsync() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/ProducesAndDisposesObservesObservesAsync.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d1 = d(12, 18, 31,
@@ -1307,13 +1305,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
     @Test
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(myProject);
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/MultipleDisposes.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
         
-        JakartaDiagnosticsParams diagnosticsParams = new JakartaDiagnosticsParams();
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         
         Diagnostic d = d(9, 18, 23,

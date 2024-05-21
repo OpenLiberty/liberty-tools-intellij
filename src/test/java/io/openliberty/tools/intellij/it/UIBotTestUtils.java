@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -1432,12 +1432,23 @@ public class UIBotTestUtils {
         deleteEntry.click();
     }
 
+    public static void pasteOnActiveWindow(RemoteRobot remoteRobot) {
+        pasteOnActiveWindow(remoteRobot, false);
+    }
+
     /**
      * Pastes previously copied content on the currently active window.
+     * In some cases the cursor may be in a context where Select All selects only the text
+     * in a specific area rather than the whole file. In this case the fix is to move the
+     * cursor to the home position 1,1
      *
      * @param remoteRobot The RemoteRobot instance.
+     * @param homeCursor if true move the cursor to 1,1
      */
-    public static void pasteOnActiveWindow(RemoteRobot remoteRobot) {
+    public static void pasteOnActiveWindow(RemoteRobot remoteRobot, boolean homeCursor) {
+        if (homeCursor) {
+            goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1);
+        }
         // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         ComponentFixture editMenuEntry = projectFrame.getActionMenu("Edit", "10");
@@ -1513,7 +1524,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the play button.
-        String xPath = "//div[@class='LibertyExplorer']//div[@class='ActionButton' and @tooltiptext.key='action.io.openliberty.tools.intellij.actions.RunLibertyDevTask.text']";
+        String xPath = "//div[@class='LibertyExplorer']//div[@class='ActionButton' and @accessiblename.key='action.io.openliberty.tools.intellij.actions.RunLibertyDevTask.text']";
         ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
         actionButton.click();
     }
@@ -1691,7 +1702,13 @@ public class UIBotTestUtils {
      * @param waitTime    The time (seconds) to wait for the required message to appear in the text area.
      */
     public static void waitForLTWNoProjectDetectedMsg(RemoteRobot remoteRobot, int waitTime) {
-        String text = "No Liberty Maven or Liberty Gradle projects detected in this workspace.";
+        String text = " 1. If no projects are open in the Project tool window, open or create a Liberty project using " +
+                "the File menu.  2. If one or more existing Maven or Gradle projects are open in the Project tool " +
+                "window, try one of the following actions:   a. Configure the Liberty build plugin in the build file " +
+                "of an existing Maven or Gradle project. b. Add a server.xml file to an existing Maven or Gradle " +
+                "project at 'src/main/liberty/config'. c. Manually add an existing Maven or Gradle project to the" +
+                " Liberty tool window using the 'Liberty: Add project to the tool window' action through the " +
+                "Search Everywhere window.";
 
         int maxRetries = 3;
         Exception error = null;
@@ -1795,7 +1812,7 @@ public class UIBotTestUtils {
         String exitButtonText = "Cancel";
         try {
             // Click on the Add Configuration action button (+) to open the Add New Configuration window.
-            Locator addButtonLocator = byXpath("//div[@tooltiptext.key='add.new.run.configuration.action2.name']");
+            Locator addButtonLocator = byXpath("//div[@accessiblename.key='add.new.run.configuration.action2.name']");
             ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
             addCfgButton.click();
 
@@ -2115,7 +2132,7 @@ public class UIBotTestUtils {
                 // Find the Liberty tree node and delete all child configurations.
                 boolean processEntries = false;
                 boolean firstEntryClicked = false;
-                Locator locator = byXpath("//div[@tooltiptext.key='remove.run.configuration.action.name']");
+                Locator locator = byXpath("//div[@accessiblename.key='remove.run.configuration.action.name']");
                 ActionButtonFixture removeCfgButton = rdConfigDialog.actionButton(locator);
 
                 for (RemoteText treeEntry : treeEntries) {
@@ -2286,7 +2303,7 @@ public class UIBotTestUtils {
         ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
         libertyTWBar.click();
 
-        String xPath = "//div[@class='LibertyExplorer']//div[@tooltiptext.key='action.io.openliberty.tools.intellij.actions.RefreshLibertyToolbar.text']";
+        String xPath = "//div[@class='LibertyExplorer']//div[@accessiblename.key='action.io.openliberty.tools.intellij.actions.RefreshLibertyToolbar.text']";
         ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
         actionButton.click();
     }

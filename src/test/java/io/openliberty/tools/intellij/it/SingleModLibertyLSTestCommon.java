@@ -118,7 +118,7 @@ public abstract class SingleModLibertyLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedFeature);
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -129,8 +129,8 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testInsertLibertyConfigElementIntoServerXML() {
-        String stanzaSnippet = "use";
-        String insertedConfig = "<userInfo></userInfo>";
+        String stanzaSnippet = "log";
+        String insertedConfig = "<logging></logging>";
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
@@ -145,7 +145,7 @@ public abstract class SingleModLibertyLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -249,7 +249,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testDiagnosticInServerXML() {
-        String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
+        String stanzaSnippet = "<logging appsWriteJson=wrong\" />";
         String flaggedString = "wrong";
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
@@ -283,12 +283,10 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testQuickFixInServerXML() {
-        String stanzaSnippet = "<mpMetrics authentication=wrong\" />";
+        String stanzaSnippet = "<logging appsWriteJson=wrong\" />";
         String flaggedString = "wrong";
-        String correctedStanza = "<mpMetrics authentication=\"true\" />";
+        String correctedStanza = "<logging appsWriteJson=\"true\" />";
         String quickfixChooserString = "Replace with 'true'";
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
@@ -312,7 +310,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         } finally {
             // Replace server.xml content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
 

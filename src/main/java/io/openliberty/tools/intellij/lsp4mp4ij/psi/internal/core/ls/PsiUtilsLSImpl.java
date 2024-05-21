@@ -10,20 +10,21 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.VfsUtil;
-import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.light.LightRecordField;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.ClassUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.JsonRpcHelpers;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
+import org.jetbrains.annotations.Nullable;
 import org.microshed.lsp4ij.LSPIJUtils;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
@@ -32,10 +33,8 @@ import org.eclipse.lsp4mp.commons.DocumentFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.util.Scanner;
 
 /**
@@ -75,22 +74,19 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public Module getModule(VirtualFile file) {
-        if (file != null && !project.isDisposed()) {
-            return ProjectFileIndex.getInstance(project).getModuleForFile(file, false);
-        }
-        return null;
+        return LSPIJUtils.getModule(file, project);
     }
 
     @Override
     public Module getModule(String uri) throws IOException {
         VirtualFile file = findFile(uri);
-        return file!=null?getModule(file):null;
+        return file != null ? getModule(file) : null;
     }
 
     @Override
     public PsiClass findClass(Module module, String className) {
-        JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
-        return facade.findClass(className, GlobalSearchScope.allScope(module.getProject()));
+        return ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), className, null, false,
+                GlobalSearchScope.allScope(module.getProject()));
     }
 
     @Override
@@ -100,27 +96,37 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public Location toLocation(PsiElement psiMember) {
-        PsiElement sourceElement = psiMember instanceof PsiNameIdentifierOwner ? ((PsiNameIdentifierOwner) psiMember).getNameIdentifier().getNavigationElement() : psiMember.getNavigationElement();
+        PsiElement sourceElement = getNavigationElement(psiMember);
+
         if (sourceElement != null) {
             PsiFile file = sourceElement.getContainingFile();
-            Location location = new Location();
-            location.setUri(VfsUtilCore.convertToURL(file.getVirtualFile().getUrl()).toExternalForm());
             Document document = PsiDocumentManager.getInstance(psiMember.getProject()).getDocument(file);
-            TextRange range = sourceElement.getTextRange();
-            int startLine = document.getLineNumber(range.getStartOffset());
-            int startLineOffset = document.getLineStartOffset(startLine);
-            int endLine = document.getLineNumber(range.getEndOffset());
-            int endLineOffset = document.getLineStartOffset(endLine);
-            location.setRange(new Range(LSPIJUtils.toPosition(range.getStartOffset(), document), LSPIJUtils.toPosition(range.getEndOffset(), document)));
-            return location;
+            if (document != null) {
+                TextRange range = sourceElement.getTextRange();
+                return toLocation(file, LSPIJUtils.toRange(range, document));
+            }
         }
         return null;
     }
 
+    public static Location toLocation(PsiFile file, Range range) {
+        return toLocation(file.getVirtualFile(), range);
+    }
+
+    public static Location toLocation(VirtualFile file, Range range) {
+        return new Location(LSPIJUtils.toUriAsString(file), range);
+    }
+
+    private static @Nullable PsiElement getNavigationElement(PsiElement psiMember) {
+        if (psiMember instanceof LightRecordField psiRecord) {
+            psiMember = psiRecord.getRecordComponent();
+        }
+        return psiMember.getNavigationElement();
+    }
+
     @Override
     public VirtualFile findFile(String uri) throws IOException {
-        //return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(Paths.get(new URI(uri)).toFile());
-        return VfsUtil.findFileByURL(new URL(uri));
+        return LSPIJUtils.findResourceFor(uri);
     }
 
     @Override
@@ -166,7 +172,7 @@ public class PsiUtilsLSImpl implements IPsiUtils {
     @Override
     public int toOffset(PsiFile file, int line, int character) {
         Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
-        return document!=null?toOffset(document, line, character):0;
+        return document != null ? toOffset(document, line, character) : 0;
     }
 
     @Override
@@ -192,22 +198,21 @@ public class PsiUtilsLSImpl implements IPsiUtils {
     }
 
     public static ClasspathKind getClasspathKind(VirtualFile file, Module module) {
-        return ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(file)?ClasspathKind.TEST:ClasspathKind.SRC;
+        if (module != null) {
+            return ReadAction.compute(() ->
+                    ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(file) ?
+                            ClasspathKind.TEST : ClasspathKind.SRC);
+        }
+        return ClasspathKind.NONE;
     }
 
     public static String getProjectURI(Module module) {
-        // Module.getModuleFilePath() is an internal only API
-        // return module.getModuleFilePath();
-        VirtualFile[] roots = ModuleRootManager.getInstance(module).getContentRoots();
-        if (roots.length > 0) {
-            return roots[0].toNioPath().toString().replace(File.separatorChar, '/'); // choose one of the context roots
-        }
-        return "/"; // error return value //$NON-NLS-1$
+        return LSPIJUtils.getProjectUri(module);
     }
 
     @Override
     public String toUri(PsiFile typeRoot) {
-        return VfsUtil.toUri(typeRoot.getVirtualFile().getUrl()).toString();
+        return LSPIJUtils.toUriAsString(typeRoot);
     }
 
     @Override

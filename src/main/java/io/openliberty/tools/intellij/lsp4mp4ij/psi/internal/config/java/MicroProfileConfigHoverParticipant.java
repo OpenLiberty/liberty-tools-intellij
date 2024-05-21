@@ -12,8 +12,10 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java;
 
 
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants;
+
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.PropertiesHoverParticipant;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.MicroProfileConfigConstants.*;
 
 /**
  *
@@ -28,6 +30,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.PropertiesHov
 public class MicroProfileConfigHoverParticipant extends PropertiesHoverParticipant {
 
 	public MicroProfileConfigHoverParticipant() {
-		super(MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_NAME, MicroProfileConfigConstants.CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
+		super(CONFIG_PROPERTY_ANNOTATION, CONFIG_PROPERTY_ANNOTATION_NAME, CONFIG_PROPERTY_ANNOTATION_DEFAULT_VALUE);
 	}
 }

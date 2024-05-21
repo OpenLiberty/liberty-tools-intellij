@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -27,7 +27,7 @@ import javax.swing.*;
 public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfiguration> {
 
     private JPanel root;
-    private LabeledComponent<EditorTextField> editableParams;
+    private EditorTextField editParam;
     private LabeledComponent<ComboBox> libertyModule;
     private StateRestoringCheckBox runInContainerCheckBox;
 
@@ -48,12 +48,12 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
             }
         }
         runInContainerCheckBox.setSelected(configuration.runInContainer());
-        editableParams.getComponent().setText(configuration.getParams());
+        editParam.setText(configuration.getParams());
     }
 
     @Override
     protected void applyEditorTo(@NotNull LibertyRunConfiguration configuration) throws ConfigurationException {
-        configuration.setParams(editableParams.getComponent().getText());
+        configuration.setParams(editParam.getText());
         configuration.setBuildFile(String.valueOf(libertyModule.getComponent().getSelectedItem()));
         configuration.setRunInContainer(runInContainerCheckBox.isSelected());
     }
@@ -68,8 +68,7 @@ public class LibertyRunSettingsEditor extends SettingsEditor<LibertyRunConfigura
         ComboBox comboBox = new ComboBox();
         libertyModule = new LabeledComponent<>();
         libertyModule.setComponent(comboBox);
-        editableParams = new LabeledComponent<>();
-        editableParams.setComponent(new EditorTextField());
+        editParam = new EditorTextField();
         runInContainerCheckBox = new StateRestoringCheckBox();
     }
 }

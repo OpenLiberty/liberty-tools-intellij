@@ -35,15 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.findType;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.ASYNCHRONOUS_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.BULKHEAD_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.CIRCUITBREAKER_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.FALLBACK_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.MP_FAULT_TOLERANCE_NONFALLBACK_ENABLED_DESCRIPTION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.MP_FAULT_TOLERANCE_NON_FALLBACK_ENABLED;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.RETRY_ANNOTATION;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.TIMEOUT_ANNOTATION;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.*;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.MicroProfileFaultToleranceConstants.*;
 
 /**
  * Properties provider to collect MicroProfile properties from the MicroProfile
@@ -91,18 +86,18 @@ public class MicroProfileFaultToleranceProvider extends AbstractAnnotationTypeRe
 						String name = method.getName();
 
 						// type
-						String methodResultTypeName = PsiTypeUtils.getResolvedResultTypeName(method);
-						PsiClass returnType = PsiTypeUtils.findType(method.getManager(), methodResultTypeName);
-						String type = PsiTypeUtils.getPropertyType(returnType, methodResultTypeName);
+						String methodResultTypeName = getResolvedResultTypeName(method);
+						PsiClass returnType = findType(method.getManager(), methodResultTypeName);
+						String type = getPropertyType(returnType, methodResultTypeName);
 
 						// description
 						String description = utils.getJavadoc(method, documentFormat);
 
 						// Method source
-						String sourceType = PsiTypeUtils.getSourceType(method);
-						String sourceMethod = PsiTypeUtils.getSourceMethod(method);
+						String sourceType = getSourceType(method);
+						String sourceMethod = getSourceMethod(method);
 
-						String defaultValue = PsiTypeUtils.getDefaultValue(method);
+						String defaultValue = getDefaultValue(method);
 						// Enumerations
 						PsiClass enclosedType = PsiTypeUtils.getEnclosedType(returnType, type, method.getManager());
 
@@ -292,13 +287,13 @@ public class MicroProfileFaultToleranceProvider extends AbstractAnnotationTypeRe
 				if (isProcessed(className, annotationName, mpftContext)) {
 					return;
 				}
-				sourceType = PsiTypeUtils.getPropertyType(annotatedClass, className);
+				sourceType = getPropertyType(annotatedClass, className);
 			} else if (annotatedClassOrMethod instanceof PsiMethod) {
 				PsiMethod annotatedMethod = (PsiMethod) annotatedClassOrMethod;
 				className = annotatedMethod.getContainingClass().getQualifiedName();
 				methodName = annotatedMethod.getName();
-				sourceType = PsiTypeUtils.getSourceType(annotatedMethod);
-				sourceMethod = PsiTypeUtils.getSourceMethod(annotatedMethod);
+				sourceType = getSourceType(annotatedMethod);
+				sourceMethod = getSourceMethod(annotatedMethod);
 			}
 		} else {
 			// Check if properties has been generated for the <annotation>:
@@ -340,7 +335,7 @@ public class MicroProfileFaultToleranceProvider extends AbstractAnnotationTypeRe
 	}
 
 	private static String getParameterDefaultValue(AnnotationParameter parameter, PsiAnnotation mpftAnnotation) {
-		String defaultValue = mpftAnnotation != null ? AnnotationUtils.getAnnotationMemberValue(mpftAnnotation, parameter.getName())
+		String defaultValue = mpftAnnotation != null ? getAnnotationMemberValue(mpftAnnotation, parameter.getName())
 				: null;
 		return defaultValue != null ? defaultValue : parameter.getDefaultValue();
 	}
@@ -380,7 +375,7 @@ public class MicroProfileFaultToleranceProvider extends AbstractAnnotationTypeRe
 			if (javaElement instanceof PsiMethod) {
 				PsiMethod annotatedMethod = (PsiMethod) javaElement;
 				PsiClass classType = annotatedMethod.getContainingClass();
-				PsiAnnotation mpftAnnotationForClass = AnnotationUtils.getAnnotation(classType, annotationName);
+				PsiAnnotation mpftAnnotationForClass = getAnnotation(classType, annotationName);
 				collectProperties(context.getCollector(), info, classType, mpftAnnotationForClass, mpftContext);
 			}
 			// 3. Collect properties for <classname>/<annotation>/<list of parameters> or

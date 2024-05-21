@@ -69,7 +69,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // Issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/401
     public void testInsertCodeSnippetIntoJavaPart() {
         String snippetStr = "mp";
         String snippetChooser = "liveness";
@@ -87,7 +86,7 @@ public abstract class SingleModMPLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, "ServiceLiveHealthCheck.java", snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "sample", "mp", "health","ServiceLiveHealthCheck.java");
+            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health","ServiceLiveHealthCheck.java");
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         } finally {
             // Replace modified content with the original content
@@ -137,8 +136,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testMPQuickFixInJavaFile() {
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
@@ -195,8 +192,8 @@ public abstract class SingleModMPLSTestCommon {
             Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
     }
 
@@ -255,8 +252,8 @@ public abstract class SingleModMPLSTestCommon {
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }
@@ -267,8 +264,6 @@ public abstract class SingleModMPLSTestCommon {
      */
     @Test
     @Video
-    @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
-              // appear on diagnostic popup panel - framework related
     public void testQuickFixInMicroProfileConfigProperties() {
         String MPCfgSnippet = "mp.health.disable";
         String MPCfgNameChooserSnippet = "procedures";
@@ -295,8 +290,8 @@ public abstract class SingleModMPLSTestCommon {
             TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
 
         } finally {
-            // Replace modified content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            // Replace modified microprofile-config.properties with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
 
     }
