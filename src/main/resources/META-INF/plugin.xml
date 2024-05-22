@@ -174,6 +174,7 @@
         <javaCodeLensParticipant
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient.java.MicroProfileRestClientCodeLensParticipant"/>
 
+        <!-- MicroProfile Code Action Participants -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="mp"
                                    targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
@@ -213,52 +214,162 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
-        
+
+        <!-- Jakarta Code Action Participants -->
+
+        <!-- JAX-RS -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#ExtendHttpServlet"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix"/>
+                                   targetDiagnostic="jakarta-jax_rs#ResourceMethodMultipleEntityParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodMultipleEntityParamsQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jax_rs#NonPublicResourceMethod"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NonPublicResourceMethodQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-jax_rs#NoPublicConstructors"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NoResourcePublicConstructorQuickFix"/>
+
+        <!-- Annotations -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#MissingResourceTypeAttribute"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#MissingResourceNameAttribute"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PostConstructReturnType"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PreDestroyParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMethodParametersQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PreDestroyParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePreDestroyAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PreDestroyStatic"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePreDestroyAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PostConstructParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMethodParametersQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#PostConstructParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePostConstructAnnotationQuickFix"/>
+
+        <!-- Bean Validation -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-bean-validation#MakeNotStatic"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-bean-validation#FixTypeOfElement"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationQuickFix"/>
+
+        <!-- Dependency Injection -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInjectOrFinal"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectOrFinal"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInjectOrStatic"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveStaticModifierQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectOrStatic"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInjectOrAbstract"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectOrAbstract"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectForGeneric"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInject"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
 
+        <!-- JSON-B -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#MultipleJsonbCreatorAnnotations"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
+
+        <!-- Persistence -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#MissingEmptyConstructor"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#SupplyAttributesToAnnotations"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#RemoveMapKeyorMapKeyClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.DeleteConflictMapKeyQuickFix"/>
+
+        <!-- WebSocket -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#AddPathParamsAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix"/>
 
+        <!-- Servlet -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#MissingResourceTypeAttribute"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingTypeQuickFix"/>
+                                   targetDiagnostic="jakarta-servlet#ExtendHttpServlet"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.HttpServletQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#CompleteHttpServletAttributes"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#InvalidHttpServletAttribute"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#CompleteWebFilterAttributes"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#InvalidWebFilterAttribute"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#ImplementListener"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-servlet#ImplementFilter"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterImplementationQuickFix"/>
 
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#MissingResourceNameAttribute"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.annotations.AddResourceMissingNameQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PostConstructReturnType"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix"/>
-        
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-persistence#MissingEmptyConstructor"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix"/>
+        <!-- CDI -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidManagedBeanConstructor"
@@ -279,74 +390,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveProducesOrConflictedAnnotations"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-jax_rs#NoPublicConstructors"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.NoResourcePublicConstructorQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-bean-validation#MakeNotStatic"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-bean-validation#FixTypeOfElement"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-jax_rs#ResourceMethodMultipleEntityParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodMultipleEntityParamsQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PreDestroyParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMethodParametersQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PostConstructParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveMethodParametersQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-persistence#SupplyAttributesToAnnotations"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidManagedBeanAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#CompleteHttpServletAttributes"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#InvalidHttpServletAttribute"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteServletAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#CompleteWebFilterAttributes"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#InvalidWebFilterAttribute"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.CompleteFilterAnnotationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PreDestroyStatic"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePreDestroyAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PreDestroyParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePreDestroyAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-annotations#PostConstructParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemovePostConstructAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveProducesOrInject"
@@ -357,50 +404,8 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-jsonb#MultipleJsonbCreatorAnnotations"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-persistence#RemoveMapKeyorMapKeyClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.DeleteConflictMapKeyQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-di#RemoveInjectOrFinal"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-di#RemoveInjectOrAbstract"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-di#RemoveInjectForGeneric"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-di#RemoveInjectOrStatic"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotation"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidScopeDecl"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-di#RemoveInject"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#ImplementListener"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ListenerImplementationQuickFix"/>
-
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-servlet#ImplementFilter"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterImplementationQuickFix"/>
 
         <configSourceProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>
