@@ -59,34 +59,36 @@ public class ManagedBeanConstructorTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO Enable the remaining test cases once the refactoring is completed
-        if (CHECK_CODE_ACTIONS) {
-            TextEdit te1 = te(15, 44, 21, 1,
-                    "\nimport jakarta.inject.Inject;\n\n@Dependent\npublic class ManagedBeanConstructor {\n	private int a;\n	\n	@Inject\n	");
-            CodeAction ca1 = ca(uri, "Insert @Inject", d, te1);
-        }
-
         // test expected quick-fix
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
-        String newText = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
+        String newText1 = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
                 "*\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which " +
                 "is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     " +
                 "Hani Damlaj\n *******************************************************************************/\n\n" +
                 "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\n" +
                 "public class ManagedBeanConstructor {\n    private int a;\n\n    protected ManagedBeanConstructor() {\n    }\n\n    " +
                 "public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n";
-        TextEdit te2 = te(0, 0, 25, 0, newText);
-        String newText1 = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
+        TextEdit te1 = te(0, 0, 25, 0, newText1);
+        String newText2 = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
                 "*\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which " +
                 "is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     " +
                 "Hani Damlaj\n *******************************************************************************/\n\n" +
                 "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n\n@Dependent\n" +
                 "public class ManagedBeanConstructor {\n    private int a;\n\n    public ManagedBeanConstructor() {\n    }\n\n    " +
                 "public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n";
-        TextEdit te3 = te(0, 0, 25, 0, newText1);
-        CodeAction ca2 = ca(uri, Messages.getMessage("AddProtectedConstructor"), d, te2);
-        CodeAction ca3 = ca(uri, Messages.getMessage("AddPublicConstructor"), d, te3);
-        assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);
+        TextEdit te2 = te(0, 0, 25, 0, newText2);
+        String newText3 = "/*******************************************************************************\n * Copyright (c) 2021 IBM Corporation.\n " +
+                "*\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which " +
+                "is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     " +
+                "Hani Damlaj\n *******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.inject.Inject;\n\n@Dependent\n" +
+                "public class ManagedBeanConstructor {\n    private int a;\n\n    " +
+                "@Inject\n    public ManagedBeanConstructor(int a) {\n        this.a = a;\n    }\n}\n";
+        TextEdit te3 = te(0, 0, 25, 0, newText3);
+        CodeAction ca1 = ca(uri, Messages.getMessage("AddProtectedConstructor"), d, te1);
+        CodeAction ca2 = ca(uri, Messages.getMessage("AddPublicConstructor"), d, te2);
+        CodeAction ca3 = ca(uri, Messages.getMessage("InsertItem", "@Inject"), d, te3);
+        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2, ca3);
 
     }
 }
