@@ -11,7 +11,7 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
-def lsp4ijNightlyVersion = '0.0.1-20240518-012816'
+def lsp4ijNightlyVersion = '0.0.2-20240522-012848'
 
 repositories {
     mavenCentral()
