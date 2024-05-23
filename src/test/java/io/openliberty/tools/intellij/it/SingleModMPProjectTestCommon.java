@@ -439,6 +439,7 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Start dev mode.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start", 3);
+        TestUtils.sleepAndIgnoreException(60); // Leave plenty of time for the server to start
 
         try {
             // Validate that the application started.
