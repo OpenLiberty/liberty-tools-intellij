@@ -24,9 +24,8 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -64,13 +63,6 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-annotations", "PreDestroyException");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3);
-        
-        if (CHECK_CODE_ACTIONS) {
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-            TextEdit te3 = te(26, 7, 26, 14, "");
-            CodeAction ca3 = ca(uri, "Remove the 'static' modifier from this method", d2, te3);
-            assertJavaCodeAction(codeActionParams1, utils, ca3);
-        }
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
@@ -137,10 +129,29 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
                 "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
                 "    private String emailAddress;\n\n\n}\n\n\n\n";
 
+        String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
+                "import jakarta.annotation.PreDestroy;\n" +
+                "import jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\") \n" +
+                "public class PreDestroyAnnotation { \n\n" +
+                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
+                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
+                "	public Integer getStudentId() {\n		return this.studentId;\n" +
+                "	}\n	\n	@PreDestroy()\n	public boolean getHappiness(String type) {\n" +
+                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
+                "		return this.isSad;\n	}\n	\n" +
+                "	@PreDestroy()\n	public void makeUnhappy() {\n" +
+                "		System.out.println(\"I'm sad\");\n	}\n	\n	@PreDestroy()\n" +
+                "	public void throwTantrum() throws Exception {\n" +
+                "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
+                "    private String emailAddress;\n\n\n}\n\n\n\n";
+
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
         TextEdit te2 = te(0, 0, 43, 0, newText1);
         CodeAction ca2 = ca(uri, "Remove @PreDestroy", d2, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca2);
+        TextEdit te3 = te(0, 0, 43, 0, newText2);
+        CodeAction ca3 = ca(uri, "Remove the 'static' modifier from this method", d2, te3);
+        assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);
     }
 
 }

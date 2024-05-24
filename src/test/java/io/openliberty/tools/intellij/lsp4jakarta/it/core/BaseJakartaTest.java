@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseJakartaTest extends MavenImportingTestCase {
 
-    protected static final boolean CHECK_CODE_ACTIONS = false;
-
     protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
 
     @Override
