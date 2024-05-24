@@ -204,7 +204,6 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-//        if (CHECK_CODE_ACTIONS) {
         // test quick fixes
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
         TextEdit te1 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    protected EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
@@ -213,7 +212,6 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         CodeAction ca2 = ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d, te2);
 
         assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-//        }
     }
 
     @Test
@@ -256,37 +254,60 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
-        if (CHECK_CODE_ACTIONS) {
-            // test quick fixes
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(10, 10, 10, 16, "");
-            CodeAction ca1 = ca(uri, "Remove the 'final' modifier from this method", d1, te1);
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te1 = te(0, 0, 14, 1, newText1);
+        CodeAction ca1 = ca(uri, "Remove the 'final' modifier from this method", d1, te1);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-            TextEdit te2 = te(7, 4, 7, 10, "");
-            CodeAction ca2 = ca(uri, "Remove the 'final' modifier from this field", d2, te2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te2 = te(0, 0, 14, 1, newText2);
+        CodeAction ca2 = ca(uri, "Remove the 'final' modifier from this field", d2, te2);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
 
-            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
-            TextEdit te3 = te(8, 4, 8, 10, "");
-            CodeAction ca3 = ca(uri, "Remove the 'final' modifier from this field", d3, te3);
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+        String newText3 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te3 = te(0, 0, 14, 1, newText3);
+        CodeAction ca3 = ca(uri, "Remove the 'final' modifier from this field", d3, te3);
 
-            assertJavaCodeAction(codeActionParams3, utils, ca3);
+        assertJavaCodeAction(codeActionParams3, utils, ca3);
 
-            JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
-            TextEdit te4 = te(8, 4, 8, 10, "");
-            CodeAction ca4 = ca(uri, "Remove the 'final' modifier from this field", d4, te4);
+        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+        String newText4 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te4 = te(0, 0, 14, 1, newText4);
+        CodeAction ca4 = ca(uri, "Remove the 'final' modifier from this field", d4, te4);
 
-            assertJavaCodeAction(codeActionParams4, utils, ca4);
+        assertJavaCodeAction(codeActionParams4, utils, ca4);
 
-            JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
-            TextEdit te5 = te(5, 6, 5, 12, "");
-            CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
+        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+        String newText5 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te5 = te(0, 0, 14, 1, newText5);
+        CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
 
-            assertJavaCodeAction(codeActionParams5, utils, ca5);
-        }
+        assertJavaCodeAction(codeActionParams5, utils, ca5);
     }
 }
