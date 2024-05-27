@@ -139,7 +139,7 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2024.1.1'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.intellij.telemetry:0.0.3.33', file("./liberty-tools-intellij/lsp4ij/lsp4ijZip/")]
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.intellij.telemetry:0.0.3.33', file("./lsp4ij/build/distributions/LSP4IJ/")]
     updateSinceUntilBuild = false
 }
 

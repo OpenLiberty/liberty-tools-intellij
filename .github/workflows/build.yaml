@@ -48,10 +48,10 @@ jobs:
       - name: 'Build Lsp4ij'
         working-directory: liberty-tools-intellij/lsp4ij
         run: bash ./gradlew buildPlugin
-      - name: 'Unzip lsp4ij file '
+      - name: 'Unzip lsp4ij file'
         working-directory: ./liberty-tools-intellij/lsp4ij/build/distributions
         run: |
-          unzip -o '*.zip' -d ../lsp4ijZip
+          unzip -o '*.zip' -d .
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin
