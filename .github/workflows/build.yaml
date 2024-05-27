@@ -43,7 +43,7 @@ jobs:
           path: liberty-tools-intellij/lsp4ij
           ref: main
       - name: 'Build Lsp4ij'
-        working-directory: .liberty-tools-intellij/lsp4ij
+        working-directory: liberty-tools-intellij/lsp4ij
         run: bash ./gradlew buildPlugin
       - name: 'Unzip lsp4ij file '
         working-directory: ./liberty-tools-intellij/lsp4ij/build/distributions
