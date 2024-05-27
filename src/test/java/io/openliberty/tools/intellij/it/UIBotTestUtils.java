@@ -361,9 +361,10 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param treeItem    The name of tree item to look for.
      */
-    public static void validateImportedProjectShowsInLTW(RemoteRobot remoteRobot, String treeItem) {
+    public static boolean validateImportedProjectShowsInLTW(RemoteRobot remoteRobot, String treeItem) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
+        // The following comment refers to indexing but more recent changes wait for indexing to stop
         // There is a window between which the Liberty tool window content may show
         // and suddenly disappear when indexing starts. It is not known when indexing may start.
         // It can be immediate or take a few seconds (10+). Wait a bit for it to start.
@@ -374,13 +375,14 @@ public class UIBotTestUtils {
             // that the project is displayed in the Liberty tool window.
         }
 
-        // Wait for the project to appear in the Liberty tool window. Indexing is a long process right now.
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "600");
+        // Wait for the project to appear in the Liberty tool window. This line is sensitive to indexing and depends on the code that waits for indexing before continuing.
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "10");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
                 "Waiting for tree item" + treeItem + " to show in the Liberty tool window.",
                 "Tree item " + treeItem + " did not show in Liberty tool window.",
                 treeFixture::isShowing);
+        return treeFixture.isShowing();
     }
 
     /**
@@ -390,6 +392,25 @@ public class UIBotTestUtils {
      */
     public static void validateProjectFrameClosed(RemoteRobot remoteRobot) {
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
+    }
+
+    /**
+     * Open and validate the Liberty tool window is open
+     */
+    public static void openAndValidateLibertyToolWindow(RemoteRobot remoteRobot, String treeItem) {
+        // Try multiple times in case the O/S is displaying a modal dialog that blocks the button.
+        for (int i = 1; i <=3; i++) {
+            try {
+                UIBotTestUtils.openLibertyToolWindow(remoteRobot);
+                if (UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, treeItem)) {
+                    break;
+                }
+            } catch (Exception e) {
+                // Any of the operations above could end up in an exception if the element is
+                // not found etc. Wait and retry.
+            }
+            TestUtils.sleepAndIgnoreException(3);
+        }
     }
 
     /**

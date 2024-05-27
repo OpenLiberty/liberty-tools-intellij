@@ -5,7 +5,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main, code-action-unification-2 ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -69,5 +69,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.reportName }}
-          path: |
-            liberty-tools-intellij/build/reports/
+          path: liberty-tools-intellij/build/reports/

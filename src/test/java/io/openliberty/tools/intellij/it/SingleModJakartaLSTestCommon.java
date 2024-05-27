@@ -178,11 +178,10 @@ public abstract class SingleModJakartaLSTestCommon {
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
-        UIBotTestUtils.openProjectView(remoteRobot);
-        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-        UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, projectName);
-        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.waitForIndexing(remoteRobot);
+        UIBotTestUtils.openProjectView(remoteRobot);
+        UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
+        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
 
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
