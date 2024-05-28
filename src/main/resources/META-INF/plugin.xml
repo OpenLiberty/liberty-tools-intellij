@@ -19,7 +19,6 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
     <depends>com.redhat.devtools.lsp4ij</depends>
-    <depends>com.redhat.devtools.intellij.telemetry</depends>
 
     <idea-version since-build="232" until-build="241.*"/>
 
