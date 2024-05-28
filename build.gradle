@@ -11,7 +11,6 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
-def lsp4ijNightlyVersion = '0.0.1-20240514-012820'
 
 repositories {
     mavenCentral()
@@ -80,6 +79,7 @@ dependencies {
         exclude group: 'org.eclipse.lsp4j'
     }
     //required by lsp4j as the version from IJ is incompatible
+    testImplementation 'com.google.code.gson:gson:2.8.9'
 //    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
