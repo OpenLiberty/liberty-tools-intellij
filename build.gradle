@@ -139,7 +139,7 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2024.1.1'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', file("./lsp4ij/build/distributions/LSP4IJ/")]
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', file("../lsp4ij/build/distributions/LSP4IJ/")]
     updateSinceUntilBuild = false
 }
 
