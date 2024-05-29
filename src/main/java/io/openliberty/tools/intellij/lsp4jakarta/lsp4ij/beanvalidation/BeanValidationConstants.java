@@ -34,7 +34,7 @@ public class BeanValidationConstants {
     public static final String MIN = "jakarta.validation.constraints.Min";
     public static final String MAX = "jakarta.validation.constraints.Max";
     public static final String NEGATIVE_OR_ZERO = "jakarta.validation.constraints.NegativeOrZero";
-    public static final String POSTIVE_OR_ZERO = "jakarta.validation.constraints.PostiveOrZero";
+    public static final String POSTIVE_OR_ZERO = "jakarta.validation.constraints.PositiveOrZero";
     public static final String NEGATIVE = "jakarta.validation.constraints.Negative";
     public static final String POSITIVE = "jakarta.validation.constraints.Positive";
     public static final String NOT_BLANK = "jakarta.validation.constraints.NotBlank";
