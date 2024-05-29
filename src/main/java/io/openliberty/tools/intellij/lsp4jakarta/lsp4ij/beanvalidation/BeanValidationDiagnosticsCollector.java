@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation, Reza Akhavan and others.
+ * Copyright (c) 2020, 2024 IBM Corporation, Reza Akhavan and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -149,7 +149,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(NEGATIVE) || matchedAnnotation.equals(NEGATIVE_OR_ZERO)
-                        || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSTIVE_OR_ZERO)) {
+                        || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSITIVE_OR_ZERO)) {
                     if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
                             && !type.getCanonicalText().endsWith(BIG_INTEGER)
                             && !type.equals(PsiType.BYTE)
