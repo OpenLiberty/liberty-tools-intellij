@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation.
+ * Copyright (c) 2021, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -56,12 +56,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             boolean isManagedBean = managedBeanAnnotations.size() > 0;
 
             if (managedBeanAnnotations.size() > 1) {
-                // convert to simple name
-                List<String> diagnosticData = managedBeanAnnotations.stream()
-                        .map(annotation -> getSimpleName(annotation)).collect(Collectors.toList());
                 diagnostics.add(createDiagnostic(type, unit,
                         Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
-                        DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(diagnosticData)),
+                        DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(managedBeanAnnotations)),
                         DiagnosticSeverity.Error));
             }
 
@@ -108,12 +105,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         isInjectField = true;
                 }
                 if (isProducerField && fieldScopes.size() > 1) {
-                    List<String> diagnosticData = fieldScopes.stream().map(annotation -> getSimpleName(annotation))
-                            .collect(Collectors.toList()); // convert to simple name
-                    diagnosticData.add(PRODUCES);
+                    fieldScopes.add(PRODUCES_FQ_NAME);
                     diagnostics.add(createDiagnostic(field, unit,
                             Messages.getMessage("ScopeTypeAnnotationsProducerField"),
-                            DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(diagnosticData)),
+                            DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(fieldScopes)),
                             DiagnosticSeverity.Error));
                 }
 
@@ -167,12 +162,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
 
                 if (isProducerMethod && methodScopes.size() > 1) {
-                    List<String> diagnosticData = methodScopes.stream().map(annotation -> getSimpleName(annotation))
-                            .collect(Collectors.toList()); // convert to simple name
-                    diagnosticData.add(PRODUCES);
+                    methodScopes.add(PRODUCES_FQ_NAME);
                     diagnostics.add(createDiagnostic(method, unit,
                             Messages.getMessage("ScopeTypeAnnotationsProducerMethod"),
-                            DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(diagnosticData)),
+                            DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(methodScopes)),
                             DiagnosticSeverity.Error));
                 }
 

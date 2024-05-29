@@ -27,6 +27,7 @@ import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class JDTUtils {
     // Percent encoding obtained from: https://en.wikipedia.org/wiki/Percent-encoding#Reserved_characters
@@ -91,15 +92,21 @@ public class JDTUtils {
      * @return                  CodeAction
      */
     public static CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
-                                              String quickFixMessage, String participantId) {
+                                              String quickFixMessage, String participantId,
+                                              Map<String, Object> extendedData) {
         ExtendedCodeAction codeAction = new ExtendedCodeAction(quickFixMessage);
         codeAction.setRelevance(0);
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
         codeAction.setKind(CodeActionKind.QuickFix);
         codeAction.setData(new CodeActionResolveData(context.getUri(), participantId,
-                context.getParams().getRange(), Collections.emptyMap(),
+                context.getParams().getRange(), extendedData != null ? extendedData : Collections.emptyMap(),
                 context.getParams().isResourceOperationSupported(),
                 context.getParams().isCommandConfigurationUpdateSupported(), null));
         return codeAction;
+    }
+
+    public static CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic,
+                                              String quickFixMessage, String participantId) {
+        return createCodeAction(context, diagnostic, quickFixMessage, participantId, null);
     }
 }

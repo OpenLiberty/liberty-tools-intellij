@@ -61,25 +61,56 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        if (CHECK_CODE_ACTIONS) {
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        // Starting codeAction tests.
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    Map<Integer, String> testMap = new HashMap<>();\n" +
+                "    \n    \n    @MapKey()\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
 
-            TextEdit te1 = te(15, 4, 16, 4, "");
-            TextEdit te2 = te(14, 4, 15, 4, "");
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n    @MapKeyClass(Map.class)\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+
+            TextEdit te1 = te(0, 0, 20, 0, newText);
+            TextEdit te2 = te(0, 0, 20, 0, newText1);
             CodeAction ca1 = ca(uri, "Remove @MapKeyClass", d1, te1);
             CodeAction ca2 = ca(uri, "Remove @MapKey", d1, te2);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+            assertJavaCodeAction(codeActionParams1, utils, ca2, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKey()\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
 
-            TextEdit te3 = te(9, 13, 10, 27, "");
-            TextEdit te4 = te(9, 4, 10, 4, "");
+        String newText3 = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.HashMap;\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.MapKey;\nimport jakarta.persistence.MapKeyClass;\n\n" +
+                "public class MapKeyAndMapKeyClassTogether {\n    @MapKeyClass(Map.class)\n" +
+                "    Map<Integer, String> testMap = new HashMap<>();\n    \n    \n    @MapKey()\n" +
+                "    @MapKeyClass(Map.class)\n    public Map<Integer, String> getTestMap(){\n" +
+                "    	return this.testMap;\n    }\n}\n";
+
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+
+            TextEdit te3 = te(0, 0, 20, 0, newText2);
+            TextEdit te4 = te(0, 0, 20, 0, newText3);
             CodeAction ca3 = ca(uri, "Remove @MapKeyClass", d2, te3);
             CodeAction ca4 = ca(uri, "Remove @MapKey", d2, te4);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
-        }
+            assertJavaCodeAction(codeActionParams2, utils, ca4, ca3);
     }
 
     @Test
@@ -112,29 +143,46 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         Diagnostic d5 = d(20, 25, 30,
                 "A field with multiple @MapKeyJoinColumn annotations must specify both the name and referencedColumnName attributes in the corresponding @MapKeyJoinColumn annotations.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "SupplyAttributesToAnnotations");
-        
+
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    " +
+                "@MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    Map<Integer, String> test1;\n    \n    " +
+                "@MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n    \n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
+                "@MapKeyJoinColumn()\n    Map<Integer, String> test3;\n}";
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n    \n    @MapKeyJoinColumn(name = \"n1\",referencedColumnName=\"\")\n    " +
+                "@MapKeyJoinColumn(referencedColumnName = \"rcn2\",name=\"\")\n    Map<Integer, String> test2;\n    \n    " +
+                "@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test3;\n}";
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport java.util.Map;\n\n" +
+                "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.MapKeyJoinColumn;\n\n" +
+                "@Entity\npublic class MultipleMapKeyAnnotations {\n    @MapKeyJoinColumn()\n    @MapKeyJoinColumn()\n    " +
+                "Map<Integer, String> test1;\n    \n    @MapKeyJoinColumn(name = \"n1\")\n    @MapKeyJoinColumn(referencedColumnName = \"rcn2\")\n    " +
+                "Map<Integer, String> test2;\n    \n    @MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")\n    " +
+                "@MapKeyJoinColumn(name=\"\",referencedColumnName=\"\")\n    Map<Integer, String> test3;\n}";
 
-        if (CHECK_CODE_ACTIONS) {
-            // test quick fixes
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(10, 4, 11, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")");
-            CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        TextEdit te1 = te(0, 0, 21, 1, newText);
+        CodeAction ca1 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d1, te1);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
-            TextEdit te2 = te(14, 4, 15, 52, "@MapKeyJoinColumn(referencedColumnName = \"rcn2\", name = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"\")");
-            CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d3);
+        TextEdit te2 = te(0, 0, 21, 1, newText1);
+        CodeAction ca2 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d3, te2);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
 
-            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
-            TextEdit te3 = te(18, 4, 19, 23, "@MapKeyJoinColumn(name = \"\", referencedColumnName = \"\")\n\t@MapKeyJoinColumn(name = \"n1\", referencedColumnName = \"rcn1\")");
-            CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d5);
+        TextEdit te3 = te(0, 0, 21, 1, newText2);
+        CodeAction ca3 = ca(uri, "Add the missing attributes to the @MapKeyJoinColumn annotation", d5, te3);
 
-            assertJavaCodeAction(codeActionParams3, utils, ca3);
-        }
+        assertJavaCodeAction(codeActionParams3, utils, ca3);
     }
 
     @Test
@@ -156,7 +204,6 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-//        if (CHECK_CODE_ACTIONS) {
         // test quick fixes
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d);
         TextEdit te1 = te(0, 0, 9, 1, "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\npublic class EntityMissingConstructor {\n\n    protected EntityMissingConstructor() {\n    }\n\n    private EntityMissingConstructor(int x) {\n    }\n\n}");
@@ -165,7 +212,6 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         CodeAction ca2 = ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d, te2);
 
         assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
-//        }
     }
 
     @Test
@@ -208,37 +254,60 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
-        if (CHECK_CODE_ACTIONS) {
-            // test quick fixes
-            JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-            TextEdit te1 = te(10, 10, 10, 16, "");
-            CodeAction ca1 = ca(uri, "Remove the 'final' modifier from this method", d1, te1);
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        String newText1 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te1 = te(0, 0, 14, 1, newText1);
+        CodeAction ca1 = ca(uri, "Remove the 'final' modifier from this method", d1, te1);
 
-            assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
-            JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-            TextEdit te2 = te(7, 4, 7, 10, "");
-            CodeAction ca2 = ca(uri, "Remove the 'final' modifier from this field", d2, te2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        String newText2 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te2 = te(0, 0, 14, 1, newText2);
+        CodeAction ca2 = ca(uri, "Remove the 'final' modifier from this field", d2, te2);
 
-            assertJavaCodeAction(codeActionParams2, utils, ca2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
 
-            JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
-            TextEdit te3 = te(8, 4, 8, 10, "");
-            CodeAction ca3 = ca(uri, "Remove the 'final' modifier from this field", d3, te3);
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+        String newText3 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te3 = te(0, 0, 14, 1, newText3);
+        CodeAction ca3 = ca(uri, "Remove the 'final' modifier from this field", d3, te3);
 
-            assertJavaCodeAction(codeActionParams3, utils, ca3);
+        assertJavaCodeAction(codeActionParams3, utils, ca3);
 
-            JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
-            TextEdit te4 = te(8, 4, 8, 10, "");
-            CodeAction ca4 = ca(uri, "Remove the 'final' modifier from this field", d4, te4);
+        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+        String newText4 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public final class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te4 = te(0, 0, 14, 1, newText4);
+        CodeAction ca4 = ca(uri, "Remove the 'final' modifier from this field", d4, te4);
 
-            assertJavaCodeAction(codeActionParams4, utils, ca4);
+        assertJavaCodeAction(codeActionParams4, utils, ca4);
 
-            JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
-            TextEdit te5 = te(5, 6, 5, 12, "");
-            CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
+        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+        String newText5 = "package io.openliberty.sample.jakarta.persistence;\n\nimport jakarta.persistence.Entity;\n\n@Entity\n" +
+                "public class FinalModifiers {\n\n    " +
+                "final int x = 1;\n    " +
+                "final String y = \"hello\", z = \"world\";\n    \n    " +
+                "public final int methody() {\n        final int ret = 100;\n        return 100 + ret;\n    }\n}";
+        TextEdit te5 = te(0, 0, 14, 1, newText5);
+        CodeAction ca5 = ca(uri, "Remove the 'final' modifier from this class", d5, te5);
 
-            assertJavaCodeAction(codeActionParams5, utils, ca5);
-        }
+        assertJavaCodeAction(codeActionParams5, utils, ca5);
     }
 }

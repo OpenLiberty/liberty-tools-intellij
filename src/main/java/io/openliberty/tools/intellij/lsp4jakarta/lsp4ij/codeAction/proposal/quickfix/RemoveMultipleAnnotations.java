@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -55,11 +55,8 @@ public abstract class RemoveMultipleAnnotations extends RemoveAnnotationConflict
 
             List<List<String>> annotationsListsToRemove = getMultipleRemoveAnnotations(parentType.getProject(), annotations);
             for (List<String> annotationList : annotationsListsToRemove) {
-                // For each list we will create one code action in its own context
-                JavaCodeActionContext newContext = context.copy();
-                PsiElement owningNode = getBinding(newContext.getCoveredNode());
                 String[] annotationsToRemove = annotationList.toArray(new String[annotationList.size()]);
-                removeAnnotation(diagnostic, newContext, owningNode, codeActions, annotationsToRemove);
+                removeAnnotation(diagnostic, context, codeActions, annotationsToRemove);
             }
             return codeActions;
         }

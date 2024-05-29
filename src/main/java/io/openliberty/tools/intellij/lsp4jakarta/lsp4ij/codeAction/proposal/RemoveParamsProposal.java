@@ -37,4 +37,10 @@ public class RemoveParamsProposal extends RemoveElementsProposal {
                                 List<PsiParameter> parametersToRemove) {
         super(label, sourceCU, invocationNode, binding, relevance, parametersToRemove);
     }
+
+    public RemoveParamsProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
+                                PsiModifierListOwner binding, int relevance,
+                                List<PsiParameter> parametersToRemove, boolean isFormatRequired) {
+        super(label, sourceCU, invocationNode, binding, relevance, parametersToRemove, isFormatRequired);
+    }
 }

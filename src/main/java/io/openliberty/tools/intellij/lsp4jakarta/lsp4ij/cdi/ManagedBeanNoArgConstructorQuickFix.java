@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation.
+ * Copyright (c) 2021, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,18 +18,16 @@ import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddConstructorProposal;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,25 +92,14 @@ public class ManagedBeanNoArgConstructorQuickFix implements IJavaCodeActionParti
 
     private List<CodeAction> addConstructor(Diagnostic diagnostic, JavaCodeActionContext context) {
         List<CodeAction> codeActions = new ArrayList<>();
-        String[] constructorNames = {Messages.getMessage("AddProtectedConstructor"), Messages.getMessage("AddPublicConstructor")};
+        String[] constructorNames = {Messages.getMessage("AddProtectedConstructor"),
+                Messages.getMessage("AddPublicConstructor")};
 
         for (String name : constructorNames) {
-            CodeAction codeAction = createCodeAction(context, diagnostic, name);
+            CodeAction codeAction = JDTUtils.createCodeAction(context, diagnostic, name,
+                    getParticipantId());
             codeActions.add(codeAction);
         }
         return codeActions;
-    }
-
-    private CodeAction createCodeAction(JavaCodeActionContext context, Diagnostic diagnostic, String label) {
-        ExtendedCodeAction codeAction = new ExtendedCodeAction(label);
-        codeAction.setRelevance(0);
-        codeAction.setDiagnostics(Collections.singletonList(diagnostic));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setTitle(label);
-        codeAction.setData(new CodeActionResolveData(context.getUri(), getParticipantId(),
-                context.getParams().getRange(), Collections.emptyMap(),
-                context.getParams().isResourceOperationSupported(),
-                context.getParams().isCommandConfigurationUpdateSupported(), null));
-        return codeAction;
     }
 }

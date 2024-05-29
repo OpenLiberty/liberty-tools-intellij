@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,6 +17,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,22 +36,22 @@ public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations 
     protected List<List<String>> getMultipleRemoveAnnotations(Project project, List<String> annotations) {
         List<List<String>> annotationsListsToRemove = new ArrayList<List<String>>();
 
-        if (annotations.contains(JsonbConstants.JSONB_TRANSIENT)) {
+        if (annotations.contains(JsonbConstants.JSONB_TRANSIENT_FQ_NAME)) {
             // Provide as one option: Remove JsonbTransient
             annotationsListsToRemove.add(Arrays.asList(JsonbConstants.JSONB_TRANSIENT_FQ_NAME));
         }
 
         // Provide as another option: Remove all other JsonbAnnotations
-        annotations.remove(JsonbConstants.JSONB_TRANSIENT);
+        annotations.remove(JsonbConstants.JSONB_TRANSIENT_FQ_NAME);
         if (annotations.size() > 0) {
-            // Convert the short annotation names to their fully qualified equivalents.
-            List<String> fqAnnotations = new ArrayList<>();
-            for (String annotation : annotations) {
-                fqAnnotations.addAll(getFQAnnotationNames(project, annotation));
-            }
-            annotationsListsToRemove.add(fqAnnotations);
+            annotationsListsToRemove.add(annotations);
         }
 
         return annotationsListsToRemove;
+    }
+
+    @Override
+    public String getParticipantId() {
+        return JsonbTransientAnnotationQuickFix.class.getName();
     }
 }
