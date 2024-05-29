@@ -153,10 +153,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                         + "- byte, short, int, long, float, double (and their respective wrappers) \n"
                         + " type fields.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Positive");
-        // not yet implemented
-//        Diagnostic d18 = d(11, 17, 24,
-//                "The @PositiveOrZero annotation can only be used on boolean and Boolean type fields.",
-//                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "PositiveOrZero");
+        Diagnostic d18 = d(57, 25, 34,
+                "The @PositiveOrZero annotation can only be used on \n- BigDecimal \n- BigInteger\n- byte, short, int, long, float, double (and their respective wrappers) \n type fields.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.PositiveOrZero");
         Diagnostic d19 = d(60, 27, 36,
                 "Constraint annotations are not allowed on static fields.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.AssertTrue");
@@ -165,7 +164,7 @@ public class BeanValidationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.Past");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8,
-                d9, d10, d11, d12, d13, d14, d15, d16, d17, d19, d20);
+                d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20);
 
         // Test quickfix codeActions - type (1-17), static, static+type (should only display static)
         String newText = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
@@ -255,6 +254,26 @@ public class BeanValidationTest extends BaseJakartaTest {
         CodeAction ca4 = ca(uri, "Remove static modifier from element", d20, te4);
 
         assertJavaCodeAction(codeActionParams3, utils, ca3, ca4);
+
+        String newText10 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n}";
+
+        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d18);
+        TextEdit te5 = te(0, 0, 64, 1, newText10);
+        CodeAction ca5 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.PositiveOrZero from element", d1, te5);
+
+        assertJavaCodeAction(codeActionParams4, utils, ca5);
     }
 
     @Test
