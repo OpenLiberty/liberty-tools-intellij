@@ -41,7 +41,7 @@ public class HealthAnnotationMissingQuickFix extends InsertAnnotationMissingQuic
 
 	public HealthAnnotationMissingQuickFix() {
 		super(MicroProfileHealthConstants.LIVENESS_ANNOTATION, MicroProfileHealthConstants.READINESS_ANNOTATION,
-				MicroProfileHealthConstants.HEALTH_ANNOTATION);
+				MicroProfileHealthConstants.HEALTH_ANNOTATION, MicroProfileHealthConstants.STARTUP_ANNOTATION);
 	}
 
 	@Override
