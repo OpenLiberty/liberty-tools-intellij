@@ -75,3 +75,16 @@ jobs:
           name: ${{ matrix.reportName }}
           path: |
             liberty-tools-intellij/build/reports/
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - name: 'Slack Notification'
+        run: |
+          STATUS=$([[ ${{ needs.build.result }} == "success" ]] && echo "succeeded" || echo "failed")
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"Workflow ${{ github.workflow }} triggered by branch ${{ github.ref }}. Build results: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Status: $STATUS\"}" $SLACK_WEBHOOK_URL
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        shell: bash
