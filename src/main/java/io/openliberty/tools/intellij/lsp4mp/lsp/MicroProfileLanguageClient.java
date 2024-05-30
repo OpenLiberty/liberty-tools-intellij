@@ -32,6 +32,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import io.openliberty.tools.intellij.lsp4mp4ij.settings.MicroProfileInspectionsInfo;
 import io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
+import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4mp.commons.*;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
@@ -64,7 +65,7 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
         // Call Quarkus deployment support here to react on library changed (to evict quarkus deploiement cache) before
         // sending an LSP microprofile/propertiesChanged notifications
         MicroProfileDeploymentSupport.getInstance(project);
-        connection = project.getMessageBus().connect(project);
+        connection = project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
         connection.subscribe(ClasspathResourceChangedManager.TOPIC, this);
         inspectionsInfo = MicroProfileInspectionsInfo.getMicroProfileInspectionInfo(project);
         connection.subscribe(ProfileChangeAdapter.TOPIC, this);
