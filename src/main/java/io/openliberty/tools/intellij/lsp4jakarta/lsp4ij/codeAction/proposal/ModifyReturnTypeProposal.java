@@ -15,7 +15,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 import com.intellij.openapi.editor.Document;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.PostConstructReturnTypeQuickFix;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.JakartaCodeActionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -24,7 +23,6 @@ import org.eclipse.lsp4j.CodeActionKind;
  * Code action proposal for changing the return type of a method.
  *
  * @author Yijia Jing
- * @see JakartaCodeActionHandler
  * @see PostConstructReturnTypeQuickFix
  *
  */
