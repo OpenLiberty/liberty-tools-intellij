@@ -11,6 +11,7 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
+def lsp4ijNightlyVersion = '0.0.1-20240517-012838'
 
 repositories {
     mavenCentral()
@@ -64,7 +65,6 @@ configurations {
 }
 
 dependencies {
-
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
@@ -85,6 +85,7 @@ dependencies {
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation 'com.google.code.gson:gson:2.8.9'
     implementation 'org.apache.maven:maven-artifact:3.6.3'
 
     // Test: basics.
@@ -139,7 +140,10 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2024.1.1'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', file("../lsp4ij/build/distributions/LSP4IJ/")]
+    def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
+            file("../lsp4ij/build/distributions/LSP4IJ/") :
+            'com.redhat.devtools.lsp4ij:' + lsp4ijNightlyVersion + '@nightly'
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
     updateSinceUntilBuild = false
 }
 
