@@ -51,7 +51,7 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
             return;
         }
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
-        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
+        startCmd = cdToProjectCmd + "; " + startCmd; // IntelliJ Windows uses Power Shell so ; is ok
         LibertyActionUtil.executeCommand(widget, startCmd);
     }
 }

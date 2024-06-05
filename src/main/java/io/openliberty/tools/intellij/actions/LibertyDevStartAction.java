@@ -82,7 +82,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         }
 
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
-        LibertyActionUtil.executeCommand(widget, cdToProjectCmd);
+        startCmd = cdToProjectCmd + "; " + startCmd; // IntelliJ Windows uses Power Shell so ; is ok
         LibertyActionUtil.executeCommand(widget, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
