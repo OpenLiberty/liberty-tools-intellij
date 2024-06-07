@@ -32,10 +32,10 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         ShellTerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
-        String stopCmd = "q";
         if (widget == null) {
             return;
         }
+        String stopCmd = "q";
         LibertyActionUtil.executeCommand(widget, stopCmd);
     }
 }
