@@ -39,6 +39,10 @@ public class LibertyActionUtil {
             int i = 0;
             try {
                 while (widget.getProcessTtyConnector() == null) {
+                    if (i > 100) {
+                        LOGGER.warn("Time out waiting to execute command: " + cmd1);
+                        return;
+                    }
                     LOGGER.warn("Waiting for cd to execute: " + i++);
                     Thread.sleep(100);
                 }
