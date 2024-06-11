@@ -31,11 +31,11 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        String runTestsCommand = " ";
         ShellTerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }
+        String runTestsCommand = " ";
         LibertyActionUtil.executeCommand(widget, runTestsCommand);
     }
 
