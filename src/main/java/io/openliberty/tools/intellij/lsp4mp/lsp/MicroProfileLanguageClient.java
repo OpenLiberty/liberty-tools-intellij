@@ -21,6 +21,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.profile.ProfileChangeAdapter;
 import com.intellij.util.messages.MessageBusConnection;
+import com.redhat.devtools.lsp4ij.JSONUtils;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
@@ -254,7 +255,7 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     public CompletableFuture<CodeAction> resolveCodeAction(CodeAction unresolved) {
         var coalesceBy = new CoalesceByKey("microprofile/java/resolveCodeAction");
         return runAsBackground("Computing Java resolve code actions", monitor -> {
-            CodeActionResolveData data = JSONUtility.toModel(unresolved.getData(), CodeActionResolveData.class);
+            CodeActionResolveData data = JSONUtils.toModel(unresolved.getData(), CodeActionResolveData.class);
             unresolved.setData(data);
             return (CodeAction) PropertiesManagerForJava.getInstance().resolveCodeAction(unresolved, PsiUtilsLSImpl.getInstance(getProject()));
         }, coalesceBy);
