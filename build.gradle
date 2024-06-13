@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '24.0.6-SNAPSHOT'
+version '24.0.6'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -180,6 +180,20 @@ tasks {
 
 patchPluginXml {
     changeNotes = """
+        <h2> 24.0.6 </h2>
+        <p>Version 24.0.6 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.6 requires IntelliJ IDEA version 2023.2.*, 2023.3.*, or 2024.1.* and a minimum of Java 17.</p>
+        Notable changes:
+        <ul>
+        <li> Added support for IntelliJ IDEA 2024.1 and its successive fix releases.
+        <li> Complete quick fix support for Jakarta EE Web Profile 9.x APIs when editing Java files via the <a href="https://github.com/eclipse/lsp4jakarta">Eclipse LSP4Jakarta</a>, Language Server for Jakarta EE.
+        <li> Enabled GraphQL API support via the <a href="https://github.com/eclipse/lsp4mp">Eclipse LSP4MP</a>, Language Server for MicroProfile.
+        <li> Fix to bring into focus the terminal tab running the Liberty project targeted by a Liberty action.
+        <li> Fix to enable the removal of custom start parameters from the “Liberty: Start” action when a Liberty Run/Debug configuration is deleted.
+        <li> Updated the helper text and hover text for the “Start parameters” input box in the Liberty Run/Debug configuration editor.
+        <li> Renamed the “Liberty: View effective POM” action to “Liberty: View pom.xml”.
+        <p>Note: You may observe slow performance when editing your server.xml file when invoking completion or hover. It is possible you may receive a "No documentation found" message on hover. If observed, please report your experience on this GitHub issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/687.</p>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/24.0.3...24.0.6">commit log</a> for the full set of changes since the previous release.
+        <br>
         <h2> 24.0.3 </h2>
         <p>Version 24.0.3 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.3 requires IntelliJ IDEA version 2023.2.* or 2023.3.* and a minimum of Java 17.</p>
         Notable changes:
