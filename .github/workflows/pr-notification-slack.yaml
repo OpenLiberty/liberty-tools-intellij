@@ -1,10 +1,9 @@
 name: Fetch All Open and Recently Closed Pull Requests using cron job
 
 on:
-  schedule:
-    - cron: '30 7 * * 1-5'  # At 07:30 on every day-of-week from Monday through Friday(UTC Time).
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 10 * * 1-5'  # At 10:00 on every day-of-week from Monday through Friday(UTC Time), 7:30pm in IST.
 
 jobs:
   fetch_all_pull_requests_and_notify_using_condition_and_cron:
@@ -141,17 +140,23 @@ jobs:
         run: |
           echo "Notify value: ${{ steps.fetch_all_pull_requests_using_condition.outputs.notify }}"
 
-      - name: Fetch closed pull requests within the last 24 hours
+      - name: Fetch closed pull requests since the last run
         id: fetch_closed_prs
         run: |
+          if [ -f cache/last_run_timestamp.txt ]; then
+            last_run_timestamp=$(cat cache/last_run_timestamp.txt)
+          else
+            last_run_timestamp=$(date -u -d "-24 hours" +%Y-%m-%dT%H:%M:%SZ)
+          fi
+
+          echo "Last run timestamp: $last_run_timestamp"
+
           closed_prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?state=closed&sort=updated&direction=desc&per_page=100")
 
           echo "Closed PRs API Data ------$closed_prs"
 
           closed_pr_list=""
-          current_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          past_24_hours=$(date -u -d "-24 hours" +%Y-%m-%dT%H:%M:%SZ)
 
           for pr_info in $(echo "$closed_prs" | jq -r '.[] | @base64'); do
             _jq() {
@@ -165,17 +170,19 @@ jobs:
             pr_closed_at=$(_jq '.closed_at')
             pr_created_at=$(_jq '.created_at')
 
-            if [[ "$pr_closed_at" > "$past_24_hours" ]]; then
+            if [[ "$pr_closed_at" > "$last_run_timestamp" ]]; then
               closed_pr_list="${closed_pr_list}\n*Closed Pull Request* #${pr_number}: ${pr_title}\n*Closed by*: ${pr_user}\n*URL*: ${pr_url}\n*Closed At*: ${pr_closed_at}\n"
             fi
           done
+          
+          echo "Latest Closed PR List ------$closed_pr_list"
 
           if [ -n "$closed_pr_list" ]; then
             echo -e "$closed_pr_list" > closed_pr_list.txt
             echo "::set-output name=notify_closed::true"
           else
             echo "::set-output name=notify_closed::false"
-          fi
+          fi      
 
       - name: Send Slack notification for open PRs
         if: success() && steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true'
@@ -222,7 +229,7 @@ jobs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "List of Closed Pull Requests in the last 24 hours"
+                  "text": "List of Pull Requests Closed Since the Last Cron Job"
                 }
               },
               {
@@ -238,6 +245,12 @@ jobs:
           )
           echo "$payload"  # Debugging: Print payload to verify its format
           curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
+
+      - name: Save current timestamp
+        run: |
+          current_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "$current_timestamp" > cache/last_run_timestamp.txt
+          echo "Current run timestamp: $current_timestamp"
 
       - name: Verify Cache Save
         if: always()
@@ -296,3 +309,30 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           BRANCH: main
+
+    permissions:
+      actions: write
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    needs: fetch_all_pull_requests_and_notify_using_condition_and_cron
+    if: always()
+    steps:
+      - name: 'Slack Notification Reminder'
+        run: |
+          payload=$(cat <<-EOF
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Slack Notification to perform Workflow Builder Action"
+                }
+              }
+          EOF
+          )
+          echo "$payload"  # Debugging: Print payload to verify its format
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $WORKFLOW_BUILDER_WEBHOOK || echo "Slack notification failed with status code: $?"
+        env:
+          WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
