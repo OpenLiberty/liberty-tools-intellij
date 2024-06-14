@@ -1,8 +1,7 @@
 name: Build
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  workflow_call: 
   workflow_dispatch:
     inputs:
       useLocalPlugin:

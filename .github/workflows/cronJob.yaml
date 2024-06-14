@@ -1,0 +1,12 @@
+name: Cron Job
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches: '**'
+
+jobs:
+
+  call-build-workflow:
+    uses: ./.github/workflows/build.yaml
