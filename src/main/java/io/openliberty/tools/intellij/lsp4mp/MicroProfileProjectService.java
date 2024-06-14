@@ -32,6 +32,7 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.ConcurrencyUtil;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
+import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -88,9 +89,9 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
                     r -> new Thread(r, "Quarkus lib pool " + project.getName()));
         }
         LibraryTablesRegistrar.getInstance().getLibraryTable(project).addListener(this, project);
-        connection = ApplicationManager.getApplication().getMessageBus().connect(project);
+        connection = ApplicationManager.getApplication().getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
         connection.subscribe(VirtualFileManager.VFS_CHANGES, this);
-        project.getMessageBus().connect().subscribe(ProjectTopics.MODULES, this);
+        project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project)).subscribe(ProjectTopics.MODULES, this);
     }
 
     private void handleLibraryUpdate(Library library) {
