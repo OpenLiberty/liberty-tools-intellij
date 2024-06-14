@@ -103,7 +103,7 @@ public abstract class SingleModMPLSTestCommon {
 
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
-        String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness, or @Health annotation.";
+        String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness or @Health annotation.";
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
