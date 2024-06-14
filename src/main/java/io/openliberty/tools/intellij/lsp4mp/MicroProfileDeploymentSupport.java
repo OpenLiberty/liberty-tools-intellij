@@ -20,7 +20,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
-import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ public class MicroProfileDeploymentSupport implements ClasspathResourceChangedMa
 
     public MicroProfileDeploymentSupport(Project project) {
         this.project = project;
-        connection = project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
+        connection = project.getMessageBus().connect(project);
         connection.subscribe(ClasspathResourceChangedManager.TOPIC, this);
     }
 

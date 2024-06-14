@@ -65,7 +65,7 @@ configurations {
 
 dependencies {
 
-    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.12.0-SNAPSHOT') {
+    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0') {
         exclude group: 'org.eclipse.lsp4j'
     }
     implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1') {

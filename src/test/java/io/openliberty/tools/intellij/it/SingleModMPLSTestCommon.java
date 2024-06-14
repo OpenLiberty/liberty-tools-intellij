@@ -103,7 +103,7 @@ public abstract class SingleModMPLSTestCommon {
 
         String livenessString = "@Liveness";
         String flaggedString = "ServiceLiveHealthCheck";
-        String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness or @Health annotation.";
+        String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness, or @Health annotation.";
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
@@ -206,10 +206,7 @@ public abstract class SingleModMPLSTestCommon {
     public void testMicroProfileConfigHover() {
 
         String testHoverTarget = "client.Service";
-        String hoverExpectedOutcome = "io.openliberty.mp.sample.client.Service/mp-rest/urlThe base URL to use for " +
-                "this service, the equivalent of the baseUrl method. This property (or */mp-rest/uri) is " +
-                "considered required, however implementations may have other ways to define these URLs/URIs.Type: " +
-                "java.lang.StringValue: http://localhost:9081/data/client/service";
+        String hoverExpectedOutcome = "The base URL to use for this service, the equivalent of the baseUrl method. This property (or */mp-rest/uri) is considered required, however implementations may have other ways to define these URLs/URIs.";
 
         //mover cursor to hover point
         UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "microprofile-config.properties", UIBotTestUtils.PopupType.DOCUMENTATION);

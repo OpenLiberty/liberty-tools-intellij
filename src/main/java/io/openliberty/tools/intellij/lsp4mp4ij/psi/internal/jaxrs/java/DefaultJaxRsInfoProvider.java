@@ -66,11 +66,7 @@ public class DefaultJaxRsInfoProvider implements IJaxRsInfoProvider {
 		List<JaxRsMethodInfo> methodInfos = new ArrayList<>();
 		try {
 			collectJaxRsMethodInfo(typeRoot.getChildren(), null, methodInfos, jaxrsContext, utils, monitor);
-		} catch (ProcessCanceledException e) {
-			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-			//TODO delete block when minimum required version is 2024.2
-			throw e;
-		} catch (IndexNotReadyException | CancellationException e) {
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "while collecting JAX-RS method info using the default method", e);

@@ -75,7 +75,7 @@ public final class DiagnosticsHandler {
                 List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.extensions()
                         .filter(definition -> group.equals(definition.getGroup()))
                         .filter(definition -> definition.isAdaptedForDiagnostics(context))
-                        .toList();
+                        .collect(Collectors.toList());
                 if (definitions.isEmpty()) {
                     return;
                 }

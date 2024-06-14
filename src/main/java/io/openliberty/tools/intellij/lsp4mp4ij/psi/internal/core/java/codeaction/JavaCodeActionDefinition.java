@@ -69,11 +69,7 @@ public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeAct
 	public boolean isAdaptedForCodeAction(JavaCodeActionContext context) {
 		try {
 			return getInstance().isAdaptedForCodeAction(context);
-		} catch (ProcessCanceledException e) {
-			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-			//TODO delete block when minimum required version is 2024.2
-			throw e;
-		} catch (IndexNotReadyException | CancellationException e) {
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCodeAction", e);
@@ -86,11 +82,7 @@ public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeAct
 		try {
 			List<? extends CodeAction> codeActions = getInstance().getCodeActions(context, diagnostic);
 			return codeActions != null ? codeActions : Collections.emptyList();
-		} catch (ProcessCanceledException e) {
-			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-			//TODO delete block when minimum required version is 2024.2
-			throw e;
-		} catch (IndexNotReadyException | CancellationException e) {
+		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error while calling getCodeActions", e);

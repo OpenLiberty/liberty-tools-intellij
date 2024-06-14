@@ -22,7 +22,6 @@ import com.intellij.psi.PsiMethod;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,11 +46,7 @@ public class MultiASTVisitor extends JavaRecursiveElementVisitor {
 		for (JavaRecursiveElementVisitor visitor : visitors) {
 			try {
 				visitor.visitAnnotation(node);
-			} catch (ProcessCanceledException e) {
-				//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-				//TODO delete block when minimum required version is 2024.2
-				throw e;
-			} catch (IndexNotReadyException | CancellationException e) {
+			} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 				throw e;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error while visiting node with " + visitor.getClass().getName(), e);
@@ -64,11 +59,7 @@ public class MultiASTVisitor extends JavaRecursiveElementVisitor {
 		for (JavaRecursiveElementVisitor visitor : visitors) {
 			try {
 				visitor.visitClass(node);
-			} catch (ProcessCanceledException e) {
-				//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-				//TODO delete block when minimum required version is 2024.2
-				throw e;
-			} catch (IndexNotReadyException | CancellationException e) {
+			} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 				throw e;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error while visiting node with " + visitor.getClass().getName(), e);
@@ -81,11 +72,7 @@ public class MultiASTVisitor extends JavaRecursiveElementVisitor {
 		for (JavaRecursiveElementVisitor visitor : visitors) {
 			try {
 				visitor.visitMethod(node);
-			} catch (ProcessCanceledException e) {
-				//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-				//TODO delete block when minimum required version is 2024.2
-				throw e;
-			} catch (IndexNotReadyException | CancellationException e) {
+			} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
 				throw e;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error while visiting node with " + visitor.getClass().getName(), e);

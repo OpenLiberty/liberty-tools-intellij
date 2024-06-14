@@ -16,7 +16,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.project.ConfigSourcePropertiesProvider;
-import com.redhat.devtools.lsp4ij.LSPIJUtils;
 import org.eclipse.lsp4mp.commons.utils.ConfigSourcePropertiesProviderUtils;
 import org.eclipse.lsp4mp.commons.utils.IConfigSourcePropertiesProvider;
 import org.eclipse.lsp4mp.commons.utils.PropertyValueExpander;
@@ -196,8 +195,7 @@ public class PsiMicroProfileProject {
         if (existingConfigSource != null) {
             // The config source file exists, update / delete it from the cache
             boolean updated = ReadAction.compute(() -> {
-                PsiFile psiFile = LSPIJUtils.getPsiFile(file, javaProject.getProject());
-
+                PsiFile psiFile = PsiManager.getInstance(javaProject.getProject()).findFile(file);
                 if (psiFile != null) {
                     // The config source file has been updated, reload it
                     existingConfigSource.reload(psiFile);

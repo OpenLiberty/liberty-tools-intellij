@@ -194,7 +194,7 @@ public final class PropertiesManagerForJava {
                             hyperlinkedElement, hyperlinkedPosition);
                     List<IJavaDefinitionParticipant> definitions = IJavaDefinitionParticipant.EP_NAME.extensions()
                             .filter(definition -> definition.isAdaptedForDefinition(context))
-                            .toList();
+                            .collect(Collectors.toList());
                     if (definitions.isEmpty()) {
                         return;
                     }

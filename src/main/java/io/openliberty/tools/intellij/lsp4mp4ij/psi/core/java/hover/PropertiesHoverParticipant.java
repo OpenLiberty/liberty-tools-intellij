@@ -176,25 +176,14 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 			return null;
 		}
 
-		String defaultValue = null;
 		// property references may be surrounded by curly braces in Java file
 		if (propertyReplacer != null) {
 			propertyKey = propertyReplacer.apply(propertyKey);
-			int colonIdx = propertyKey.indexOf(":");
-			if (colonIdx > -1) {
-				defaultValue = propertyKey.substring(colonIdx+1);
-				propertyKey = propertyKey.substring(0,colonIdx);
-			}
 		}
-
-		String defaultAnnotationValue = getAnnotationMemberValue(annotation, defaultValueAnnotationMemberName);
-
 		PsiMicroProfileProject mpProject = PsiMicroProfileProjectManager.getInstance(javaProject.getProject())
 				.getMicroProfileProject(javaProject);
 		List<MicroProfileConfigPropertyInformation> propertyInformation = getConfigPropertyInformation(propertyKey,
-				annotation,
-				defaultAnnotationValue == null? defaultValue : defaultAnnotationValue,
-				typeRoot, mpProject, utils);
+				annotation, defaultValueAnnotationMemberName, typeRoot, mpProject, utils);
 		return new Hover(getDocumentation(propertyInformation, context.getDocumentFormat(),
 				context.isSurroundEqualsWithSpaces()), propertyKeyRange);
 	}
@@ -222,30 +211,34 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 
 	/**
 	 * Returns all the config property information for the given property key.
-	 * <p>
+	 *
 	 * Includes the information for all the different profiles.
 	 *
-	 * @param propertyKey  the property key without the profile
-	 * @param annotation   the annotation that defines the
-	 *                     config property
-	 * @param defaultValue default value and null otherwise.
-	 * @param project      the project
-	 * @param utils        the JDT LS utilities.
+	 * @param propertyKey                      the property key without the profile
+	 * @param annotation                       the annotation that defines the
+	 *                                         config property
+	 * @param defaultValueAnnotationMemberName the annotation member name for
+	 *                                         default value and null otherwise.
+	 * @param project                          the project
+	 * @param utils                            the JDT LS utilities.
 	 * @return the config property information for the given property key
 	 */
 	private static List<MicroProfileConfigPropertyInformation> getConfigPropertyInformation(String propertyKey,
-																							PsiAnnotation annotation,
-																							String defaultValue,
-																							PsiFile typeRoot,
-																							PsiMicroProfileProject project,
-																							IPsiUtils utils) {
+			PsiAnnotation annotation, String defaultValueAnnotationMemberName, PsiFile typeRoot,
+			PsiMicroProfileProject project, IPsiUtils utils) {
 
 		List<MicroProfileConfigPropertyInformation> infos = project.getPropertyInformations(propertyKey);
-		boolean defaultProfileDefined = infos.stream().anyMatch(info -> propertyKey.equals(info.getPropertyNameWithProfile()));
+		boolean defaultProfileDefined = false;
 
-		if (!defaultProfileDefined) {
+		for (MicroProfileConfigPropertyInformation info : infos) {
+			if (info.getPropertyNameWithProfile().equals(propertyKey)) {
+				defaultProfileDefined = true;
+			}
+		}
+
+		if (defaultValueAnnotationMemberName != null && !defaultProfileDefined) {
 			infos.add(new MicroProfileConfigPropertyInformation(propertyKey,
-					defaultValue, utils.toUri(typeRoot),
+					getAnnotationMemberValue(annotation, defaultValueAnnotationMemberName), utils.toUri(typeRoot),
 					annotation.getContainingFile().getName()));
 		}
 
@@ -278,7 +271,7 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 
 		for (MicroProfileConfigPropertyInformation info : propertyInformation) {
 
-			if (!content.isEmpty()) {
+			if (content.length() > 0) {
 				content.append("  \n");
 			}
 
