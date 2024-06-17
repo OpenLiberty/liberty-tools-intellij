@@ -30,7 +30,7 @@ jobs:
             os: windows-latest
             reportName: windows-test-report
     env:
-      USE_LOCAL_PLUGIN: ${{ github.event.inputs.useLocalPlugin }}
+      USE_LOCAL_PLUGIN: ${{ github.event.inputs.useLocalPlugin || 'false' }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
