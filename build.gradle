@@ -11,6 +11,8 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
+def lsp4ijVersion = '0.0.2-20240615-013020'
+
 
 repositories {
     mavenCentral()
@@ -139,7 +141,10 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2024.1.1'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', file("../lsp4ij/build/distributions/LSP4IJ/")]
+    def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
+            file("../lsp4ij/build/distributions/LSP4IJ/") :
+            'com.redhat.devtools.lsp4ij:' + lsp4ijNightlyVersion + '@nightly'
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
     updateSinceUntilBuild = false
 }
 
