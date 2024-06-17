@@ -155,7 +155,7 @@ main() {
 
     # Start the IDE.
     echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
-    ./gradlew runIdeForUiTests --info  > remoteServer.log  2>&1 &
+    ./gradlew runIdeForUiTests -PuseLocal=$USE_LOCAL_PLUGIN --info  > remoteServer.log  2>&1 &
 
     # Wait for the IDE to come up.
     echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."
@@ -172,7 +172,7 @@ main() {
 
     # Run the tests
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
-    ./gradlew test
+    ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN
 
     # If there were any errors, gather some debug data before exiting.
     rc=$?
