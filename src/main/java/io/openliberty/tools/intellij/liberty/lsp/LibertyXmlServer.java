@@ -13,6 +13,7 @@ package io.openliberty.tools.intellij.liberty.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
 import io.openliberty.tools.intellij.util.Constants;
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
@@ -68,7 +69,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
     //            "shouldLanguageServerExitOnShutdown": true
     //            }
     @Override
-    public Object getInitializationOptions(URI rootUri) {
+    public Object getInitializationOptions(VirtualFile rootUri) {
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> settings = new HashMap<>();
         Map<String, Object> xml = new HashMap<>();
