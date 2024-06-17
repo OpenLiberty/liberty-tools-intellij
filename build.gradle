@@ -142,7 +142,7 @@ intellij {
 
     def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
             file("../lsp4ij/build/distributions/LSP4IJ/") :
-            'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
+            'com.redhat.devtools.lsp4ij:' + lsp4ijVersion + '@nightly'
     plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
     updateSinceUntilBuild = false
 }
