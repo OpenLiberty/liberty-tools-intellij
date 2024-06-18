@@ -15,7 +15,6 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
 
     steps:
       - name: Checkout repository
@@ -48,11 +47,9 @@ jobs:
           path: cache
           key: ${{ env.CACHE_KEY }}
 
-      - name: Ensure cache directory exists
-        run: mkdir -p cache
-
-      - name: Check if cache restored
+      - name: Ensure cache directory exists and check if cache restored
         run: |
+          mkdir -p cache
           if [ -f cache/notified_prs.json ]; then
             echo "Cache restored successfully."
             cat cache/notified_prs.json
@@ -263,6 +260,8 @@ jobs:
   slack-notification:
     runs-on: ubuntu-latest
     needs: fetch_all_pull_requests_and_notify_using_condition_and_cron
+    env:
+      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
     if: always()
     steps:
       - name: 'Slack Notification Reminder'
