@@ -9,6 +9,14 @@ jobs:
   fetch_all_pull_requests_and_notify_using_condition_and_cron:
     runs-on: ubuntu-latest
 
+    env:
+      REPO: ${{ github.repository }}
+      BRANCH: main
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -17,23 +25,14 @@ jobs:
         run: |
           gh extension install actions/gh-actions-cache
 
-          echo "Fetching list of cache keys........"
+          # Fetching list of cache keys........
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
-          echo "Cache keys-->: $cacheKeys"
-
-          # Print the contents of the cacheKeysForPR variable
-          echo "Contents of cacheKeys:"
-          echo "$cacheKeys"
-
-          # Extract the first two cache keys
-          mostRecentCacheKeys=$(echo "$cacheKeys" | head -n 1)
-
-          # Print the most recent cache keys
-          echo "Most recent one cache key:"
-          echo "$mostRecentCacheKeys"
           
-          if [ -n "$mostRecentCacheKeys" ]; then
-            echo "CACHE_KEY=$mostRecentCacheKeys" >> $GITHUB_ENV
+          # Extract the most recent cache key
+          mostRecentCacheKey=$(echo "$cacheKeys" | head -n 1)
+          
+          if [ -n "$mostRecentCacheKey" ]; then
+            echo "CACHE_KEY=$mostRecentCacheKey" >> $GITHUB_ENV
           else
             echo "No recent cache key found, generating a new one...."
             echo "CACHE_KEY=${{ runner.os }}-pr-cache-${{ github.run_number }}" >> $GITHUB_ENV
@@ -41,10 +40,6 @@ jobs:
           
           echo "Done"
           # 'secrets.GITHUB_TOKEN' is automatically provided by GitHub Actions for each workflow run. You don't need to manually create or manage this token.
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          BRANCH: main
 
       - name: Restore cache
         id: cache-restore
@@ -52,15 +47,6 @@ jobs:
         with:
           path: cache
           key: ${{ env.CACHE_KEY }}
-
-      - name: Check cache hit or not
-        id: check-cache-result
-        run: |
-          if [ "${{ steps.cache-restore.outputs.cache-hit }}" == "true" ]; then
-          echo "Cache restored from exact key: ${{ env.CACHE_KEY }}"
-          else
-            echo "Cache was not restored from the exact key."
-          fi
 
       - name: Ensure cache directory exists
         run: mkdir -p cache
@@ -78,14 +64,11 @@ jobs:
         id: fetch_all_pull_requests_using_condition
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?state=open&sort=created&direction=desc&per_page=100")
-          
-          echo "API Data ------$pr_infos"
-
+          "${{ env.API_URL }}?state=open&sort=created&direction=desc&per_page=100")
+  
           # Load previous PR data if exists
           if [ -f cache/notified_prs.json ]; then
             previous_prs=$(cat cache/notified_prs.json)
-            echo "Previous PRs ------- $previous_prs"
           else
             previous_prs="[]"
           fi
@@ -110,7 +93,6 @@ jobs:
             pr_data=$(jq -n --arg number "$pr_number" --arg updated_at "$pr_updated_at" '{number: $number, updated_at: $updated_at}')
             new_notified_prs=$(echo "$new_notified_prs" | jq --argjson pr_data "$pr_data" '. += [$pr_data]')
 
-            echo "Whole PR data ------- $pr_data"
             echo "New Notified PR List------ $new_notified_prs"
 
             # Check if the PR is new or updated
@@ -118,7 +100,6 @@ jobs:
             echo "Checking PR is new or not --- $previous_pr"
             if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
               pr_list="${pr_list}\n*Pull Request* #${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}\n*Draft*: ${pr_draft}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
-              echo "New PR List ------- $pr_list"
               notify=true
               echo "Boolean Value for notify ------- $notify"
             fi
@@ -126,8 +107,6 @@ jobs:
 
           # Save current PR data for future comparison
           echo "$new_notified_prs" > cache/notified_prs.json
-          echo "Latest Modified ------" 
-          cat cache/notified_prs.json  # Ensure the JSON file is updated and print its content for debugging
 
           if [ "$notify" = true ]; then
             echo -e "$pr_list" > pr_list.txt
@@ -135,10 +114,6 @@ jobs:
           else
             echo "::set-output name=notify::false"
           fi
-
-      - name: Debug Notify Value for Open PRs or Updated PRs
-        run: |
-          echo "Notify value: ${{ steps.fetch_all_pull_requests_using_condition.outputs.notify }}"
 
       - name: Fetch closed pull requests since the last run
         id: fetch_closed_prs
@@ -152,9 +127,7 @@ jobs:
           echo "Last run timestamp: $last_run_timestamp"
 
           closed_prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?state=closed&sort=updated&direction=desc&per_page=100")
-
-          echo "Closed PRs API Data ------$closed_prs"
+          "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
 
           closed_pr_list=""
 
@@ -186,10 +159,7 @@ jobs:
 
       - name: Send Slack notification for open PRs
         if: success() && steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          echo "Condition value ------: ${{ steps.fetch_all_pull_requests_using_condition.outputs.notify }}"
           pr_list=$(cat pr_list.txt)
           payload=$(cat <<-EOF
           {
@@ -217,10 +187,7 @@ jobs:
 
       - name: Send Slack notification for closed PRs
         if: success() && steps.fetch_closed_prs.outputs.notify_closed == 'true'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          echo "Condition value for closed PRs ------: ${{ steps.fetch_closed_prs.outputs.notify_closed }}"
           closed_pr_list=$(cat closed_pr_list.txt)
           payload=$(cat <<-EOF
           {
@@ -268,31 +235,15 @@ jobs:
 
       - name: Cleanup the restored cache key
         run: |
-          gh extension install actions/gh-actions-cache
 
-          echo "Fetching list of cache keys"
+          # Fetching list of cache keys........
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
           echo "Cache keys-->: $cacheKeys"
 
-          # Print the contents of the cacheKeysForPR variable
-          echo "Contents of cacheKeys:"
-          echo "$cacheKeys"
-
           # Extract the most recent cache key
           mostRecentCacheKey=$(echo "$cacheKeys" | head -n 1)
-
-          # Print the most recent cache key
-          echo "Most recent cache key:"
-          echo "$mostRecentCacheKey"
-
-          # Extract all cache keys except the most recent one
-          otherCacheKeys=$(echo "$cacheKeys" | tail -n +2)
-
-          # Print the cache keys except the most recent one
-          echo "Cache keys except the most recent one:::"
-          echo "$otherCacheKeys"
           
-          # Setting this to not fail the workflow while deleting cache keys.........
+          # Setting this to not fail the workflow while deleting cache key
           set +e
           if [ -n "$mostRecentCacheKey" ] && [[ $mostRecentCacheKey == Linux-pr-cache-* ]]; then
             echo "Deleting the most recent cache key..."
@@ -305,10 +256,6 @@ jobs:
           # The permissions can be fine-tuned in the repository settings under "Settings" > "Actions" > "General" > "Workflow permissions."
           # Make sure to enable "Read and write permissions" in order to delete the cache key with "secrets.GITHUB_TOKEN". 
           # Otherwise, the repository owner will need to create a Personal Access Token (PAT) with write permissions, add it as a secret, and specify it as GH_TOKEN.
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          BRANCH: main
 
     permissions:
       actions: write
@@ -334,5 +281,3 @@ jobs:
           )
           echo "$payload"  # Debugging: Print payload to verify its format
           curl -X POST -H 'Content-type: application/json' --data "$payload" $WORKFLOW_BUILDER_WEBHOOK || echo "Slack notification failed with status code: $?"
-        env:
-          WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
