@@ -13,7 +13,7 @@
         <!-- MicroProfile LS -->
         <server id="lsp4mp"
                 name="MicroProfile"
-                factoryClass="io.openliberty.tools.intellij.lsp4mp.lsp.MircoProfileLanguageServerFactory"
+                factoryClass="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageServerFactory"
                 lastDocumentDisconnectedTimeout="36000">
             <description><![CDATA[
                 The <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
