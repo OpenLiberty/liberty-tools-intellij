@@ -19,7 +19,6 @@ import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
 import org.jetbrains.idea.maven.project.MavenHomeType;
 import org.jetbrains.idea.maven.project.MavenWorkspaceSettingsComponent;
-import org.jetbrains.idea.maven.project.StaticResolvedMavenHomeType;
 import org.jetbrains.idea.maven.server.MavenServerConnector;
 import org.jetbrains.idea.maven.server.MavenServerManager;
 import org.jetbrains.idea.maven.utils.MavenUtil;
@@ -37,6 +36,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
+
+import static org.jetbrains.idea.maven.project.MavenHomeKt.resolveMavenHomeType;
+import static org.jetbrains.idea.maven.project.MavenHomeKt.staticOrBundled;
 
 public class LibertyMavenUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyMavenUtil.class);
@@ -213,7 +215,7 @@ public class LibertyMavenUtil {
             return getLocalMavenWrapper(buildFile);
         } else {
             // try to use maven home path defined in the settings
-            return getCustomMavenPath(project, (StaticResolvedMavenHomeType) mavenHome);
+            return getCustomMavenPath(project, mavenHome.getTitle());
         }
     }
 
@@ -249,8 +251,8 @@ public class LibertyMavenUtil {
      * @return Maven path to be executed or an exception to display
      * @throws LibertyException
      */
-    private static String getCustomMavenPath(Project project, StaticResolvedMavenHomeType customMavenHome) throws LibertyException {
-        File mavenHomeFile = MavenUtil.getMavenHomeFile(customMavenHome); // when customMavenHome path is invalid it returns null
+    private static String getCustomMavenPath(Project project, String customMavenHome) throws LibertyException {
+        File mavenHomeFile = MavenUtil.getMavenHomeFile(staticOrBundled(resolveMavenHomeType(customMavenHome))); // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
             throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);
