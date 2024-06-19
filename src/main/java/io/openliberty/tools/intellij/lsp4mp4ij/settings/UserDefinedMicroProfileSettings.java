@@ -22,7 +22,7 @@ import com.intellij.util.xmlb.annotations.Tag;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.microshed.lsp4ij.features.diagnostics.SeverityMapping;
+import com.redhat.devtools.lsp4ij.features.diagnostics.SeverityMapping;
 
 import java.util.Collections;
 import java.util.HashMap;

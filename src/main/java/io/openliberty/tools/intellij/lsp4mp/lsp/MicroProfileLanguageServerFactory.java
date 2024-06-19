@@ -12,9 +12,9 @@ package io.openliberty.tools.intellij.lsp4mp.lsp;
 import com.intellij.openapi.project.Project;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
-import org.microshed.lsp4ij.LanguageServerFactory;
-import org.microshed.lsp4ij.client.LanguageClientImpl;
-import org.microshed.lsp4ij.server.StreamConnectionProvider;
+import com.redhat.devtools.lsp4ij.LanguageServerFactory;
+import com.redhat.devtools.lsp4ij.client.LanguageClientImpl;
+import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider;
 
 public class MicroProfileLanguageServerFactory implements LanguageServerFactory {
     @Override

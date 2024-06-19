@@ -21,6 +21,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.profile.ProfileChangeAdapter;
 import com.intellij.util.messages.MessageBusConnection;
+import com.redhat.devtools.lsp4ij.JSONUtils;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
@@ -32,6 +33,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import io.openliberty.tools.intellij.lsp4mp4ij.settings.MicroProfileInspectionsInfo;
 import io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileModuleUtil;
+import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4mp.commons.*;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
@@ -39,8 +41,8 @@ import org.eclipse.lsp4mp.commons.utils.JSONUtility;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageClientAPI;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
 import org.jetbrains.annotations.NotNull;
-import org.microshed.lsp4ij.client.CoalesceByKey;
-import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
+import com.redhat.devtools.lsp4ij.client.CoalesceByKey;
+import com.redhat.devtools.lsp4ij.client.IndexAwareLanguageClient;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -64,7 +66,7 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
         // Call Quarkus deployment support here to react on library changed (to evict quarkus deploiement cache) before
         // sending an LSP microprofile/propertiesChanged notifications
         MicroProfileDeploymentSupport.getInstance(project);
-        connection = project.getMessageBus().connect(project);
+        connection = project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
         connection.subscribe(ClasspathResourceChangedManager.TOPIC, this);
         inspectionsInfo = MicroProfileInspectionsInfo.getMicroProfileInspectionInfo(project);
         connection.subscribe(ProfileChangeAdapter.TOPIC, this);
@@ -253,7 +255,7 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     public CompletableFuture<CodeAction> resolveCodeAction(CodeAction unresolved) {
         var coalesceBy = new CoalesceByKey("microprofile/java/resolveCodeAction");
         return runAsBackground("Computing Java resolve code actions", monitor -> {
-            CodeActionResolveData data = JSONUtility.toModel(unresolved.getData(), CodeActionResolveData.class);
+            CodeActionResolveData data = JSONUtils.toModel(unresolved.getData(), CodeActionResolveData.class);
             unresolved.setData(data);
             return (CodeAction) PropertiesManagerForJava.getInstance().resolveCodeAction(unresolved, PsiUtilsLSImpl.getInstance(getProject()));
         }, coalesceBy);
