@@ -97,12 +97,12 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 	private static final String[] ANNOTATION_NAMES = { CONNECTOR_ANNOTATION, INCOMING_ANNOTATION, OUTGOING_ANNOTATION,
 	CHANNEL_ANNOTATION};
 
-	private static enum Direction {
-		INCOMING, OUTGOING, INCOMING_AND_OUTGOING;
+    private enum Direction {
+		INCOMING, OUTGOING, INCOMING_AND_OUTGOING
 	}
 
-	private static enum MessageType {
-		INCOMING, OUTGOING, CONNECTOR;
+    private enum MessageType {
+		INCOMING, OUTGOING, CONNECTOR
 	}
 
 	@Override
@@ -358,12 +358,11 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 		if (StringUtils.isEmpty(connectorAttributeType)) {
 			return null;
 		}
-		switch (connectorAttributeType) {
-			case "string":
-				return "java.lang.String";
-			default:
-				return connectorAttributeType;
-		}
+        if ("string".equals(connectorAttributeType)) {
+            return "java.lang.String";
+        } else {
+            return connectorAttributeType;
+        }
 	}
 
 	private static String getMPMessagingName(MessageType messageType, boolean dynamic, String connectorOrChannelName,

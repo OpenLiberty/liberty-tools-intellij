@@ -39,12 +39,14 @@ public interface StreamConnectionProvider {
      *         provided {@link OutputStream}
      */
     public default InputStream forwardCopyTo(InputStream input, OutputStream output) {
-        if (input == null)
+        if (input == null) {
             return null;
-        if (output == null)
+        }
+        if (output == null) {
             return input;
+        }
 
-        FilterInputStream filterInput = new FilterInputStream(input) {
+        return new FilterInputStream(input) {
             @Override
             public int read() throws IOException {
                 int res = super.read();
@@ -70,8 +72,6 @@ public interface StreamConnectionProvider {
                 return bytes;
             }
         };
-
-        return filterInput;
     }
 
     /**

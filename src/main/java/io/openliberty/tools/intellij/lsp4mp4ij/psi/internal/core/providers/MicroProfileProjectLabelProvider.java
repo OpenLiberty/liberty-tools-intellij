@@ -33,7 +33,7 @@ public class MicroProfileProjectLabelProvider implements IProjectLabelProvider {
 	public List<String> getProjectLabels(Module project) {
 		if (PsiMicroProfileUtils.isMicroProfileProject(project)) {
 			return Collections.singletonList(MICROPROFILE_LABEL);
-		};
+		}
 		return Collections.emptyList();
 	}
 }

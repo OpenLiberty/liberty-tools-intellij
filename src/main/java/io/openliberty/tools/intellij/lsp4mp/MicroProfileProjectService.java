@@ -95,9 +95,8 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
 
     private void handleLibraryUpdate(Library library) {
             project.getMessageBus().syncPublisher(TOPIC).libraryUpdated(library);
-            schemas.forEach((module, pair) -> {
-                pair.setRight(Boolean.FALSE);
-            });
+            schemas.forEach((module, pair) ->
+                pair.setRight(Boolean.FALSE));
     }
 
     @Override
@@ -112,7 +111,7 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
 
     @Override
     public void after(@NotNull List<? extends VFileEvent> events) {
-        List<Pair<Module, VirtualFile>> pairs = events.stream().map(event -> toPair(event)).filter(Objects::nonNull).collect(Collectors.toList());
+        List<Pair<Module, VirtualFile>> pairs = events.stream().map(this::toPair).filter(Objects::nonNull).collect(Collectors.toList());
         if (!pairs.isEmpty()) {
             pairs.forEach(pair -> schemas.computeIfPresent(pair.getLeft(), (m, p) -> {
                 p.setRight(Boolean.FALSE);

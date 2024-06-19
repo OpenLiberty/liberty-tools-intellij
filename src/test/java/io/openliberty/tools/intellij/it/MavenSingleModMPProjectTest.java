@@ -35,32 +35,32 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Project port.
      */
-    private final int SM_MP_PROJECT_PORT = 9080;
+    private static final int SM_MP_PROJECT_PORT = 9080;
 
     /**
      * Project resource URI.
      */
-    private final String SM_MP_PROJECT_RES_URI = "api/resource";
+    private static final String SM_MP_PROJECT_RES_URI = "api/resource";
 
     /**
      * Project response.
      */
-    private final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
+    private static final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
 
     /**
      * Relative location of the WLP installation.
      */
-    private final String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
+    private final String wlpInstallPath = Paths.get("target", "liberty").toString();
 
     /**
      * Build file name.
      */
-    private final String BUILD_FILE_NAME = "pom.xml";
+    private static final String BUILD_FILE_NAME = "pom.xml";
 
     /**
      * Action command to open the build file.
      */
-    private final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
+    private static final String BUILD_FILE_OPEN_CMD = "Liberty: View effective POM";
 
     /**
      * The path to the integration test reports.
@@ -75,7 +75,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Dev mode configuration start parameters.
      */
-    private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
+    private static final String DEV_MODE_START_PARAMS = "-DhotTests=true";
 
     /**
      * Prepares the environment for test execution.
@@ -93,7 +93,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @Override
     public String getWLPInstallPath() {
-        return WLP_INSTALL_PATH;
+        return wlpInstallPath;
     }
 
     /**

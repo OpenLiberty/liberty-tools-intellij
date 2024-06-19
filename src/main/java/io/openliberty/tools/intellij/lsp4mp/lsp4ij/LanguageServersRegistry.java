@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class LanguageServersRegistry {
+public final class LanguageServersRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageServersRegistry.class);
 
     public abstract static class LanguageServerDefinition {
@@ -110,15 +110,15 @@ public class LanguageServersRegistry {
             }
         }
 
-    private static LanguageServersRegistry INSTANCE = null;
+    private static LanguageServersRegistry instance;
     public static LanguageServersRegistry getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new LanguageServersRegistry();
+        if (instance == null) {
+            instance = new LanguageServersRegistry();
         }
-        return INSTANCE;
+        return instance;
     }
 
-    private List<ContentTypeToLanguageServerDefinition> connections = new ArrayList<>();
+    private final List<ContentTypeToLanguageServerDefinition> connections = new ArrayList<>();
 
     private LanguageServersRegistry() {
         initialize();

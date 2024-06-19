@@ -34,7 +34,7 @@ public class EndpointIT {
     /**
      * The message expected to come back when calling the test resoruce endpoint.
      */
-    private String expectedGreeting = "Hello! Welcome to Open Liberty";
+    private final String expectedGreeting = "Hello! Welcome to Open Liberty";
 
     /**
      * The request response.

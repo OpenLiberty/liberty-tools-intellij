@@ -63,10 +63,10 @@ public class JDTUtils {
      * @return          a list of accessor methods
      */
     public static List<PsiMethod> getFieldAccessors(PsiJavaFile unit, PsiField field) {
-        List<PsiMethod> accessors = new ArrayList<PsiMethod>();
+        List<PsiMethod> accessors = new ArrayList<>();
         String fieldName = field.getName();
         fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        List<String> accessorNames = new ArrayList<String>();
+        List<String> accessorNames = new ArrayList<>();
         accessorNames.add("get" + fieldName);
         accessorNames.add("set" + fieldName);
         accessorNames.add("is" + fieldName);
@@ -74,8 +74,9 @@ public class JDTUtils {
         for (PsiClass type : unit.getClasses()) {
             for (PsiMethod method : type.getMethods()) {
                 String methodName = method.getName();
-                if (accessorNames.contains(methodName))
+                if (accessorNames.contains(methodName)) {
                     accessors.add(method);
+                }
             }
         }
         return accessors;

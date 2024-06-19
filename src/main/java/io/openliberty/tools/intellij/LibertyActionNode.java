@@ -13,7 +13,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class LibertyActionNode extends DefaultMutableTreeNode {
     public String name;
-    private LibertyModule libertyModule;
+    private final LibertyModule libertyModule;
 
     public LibertyActionNode(String name, LibertyModule libertyModule) {
         super(name);

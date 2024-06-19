@@ -95,7 +95,7 @@ public class JavaCodeActionDefinition extends BaseKeyedLazyInstance<IJavaCodeAct
 	 * @return the code action kind.
 	 */
 	public String getKind() {
-		return !StringUtils.isEmpty(kind) ? kind : CodeActionKind.QuickFix;
+		return StringUtils.isEmpty(kind) ? CodeActionKind.QuickFix : kind;
 	}
 
 	/**

@@ -63,7 +63,7 @@ public class RemoveParamAnnotationQuickFix {
                 for (int j = 1; j < annotationsToRemove.size(); ++j) {
                     sb.append(", '@").append(getShortName(annotationsToRemove.get(j))).append("'");
                 }
-                String label = Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
+                String label = Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName());
                 // Remove annotations
                 removeAnnotations(diagnostic, context.copy(), codeActions, i, label, annotationsToRemove);
             }

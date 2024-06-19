@@ -37,7 +37,7 @@ import java.awt.Component;
 public abstract class AbstractLSPInlayProvider implements InlayHintsProvider<NoSettings> {
     public static final DataKey<Command> LSP_COMMAND = DataKey.create("io.openliberty.tools.intellij.lsp4mp.lsp4ij.command");
 
-    private SettingsKey<NoSettings> key = new SettingsKey<>("LSP.hints");
+    private final SettingsKey<NoSettings> key = new SettingsKey<>("LSP.hints");
 
     @Override
     public boolean isVisibleInSettings() {
@@ -69,9 +69,7 @@ public abstract class AbstractLSPInlayProvider implements InlayHintsProvider<NoS
             @NotNull
             @Override
             public JComponent createComponent(@NotNull ChangeListener changeListener) {
-                return LayoutKt.panel(new LCFlags[0], "LSP", builder -> {
-                    return null;
-                });
+                return LayoutKt.panel(new LCFlags[0], "LSP", builder -> null);
             }
         };
     }

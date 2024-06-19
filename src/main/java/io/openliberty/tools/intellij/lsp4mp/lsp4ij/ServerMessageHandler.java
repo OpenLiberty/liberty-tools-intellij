@@ -14,7 +14,7 @@ import org.eclipse.lsp4j.ShowMessageRequestParams;
 import javax.swing.Icon;
 import java.util.concurrent.CompletableFuture;
 
-public class ServerMessageHandler {
+public final class ServerMessageHandler {
     private ServerMessageHandler() {
         // this class shouldn't be instantiated
     }
@@ -67,7 +67,7 @@ public class ServerMessageHandler {
     }
 
     public static CompletableFuture<MessageActionItem> showMessageRequest(LanguageServerWrapper wrapper, ShowMessageRequestParams params) {
-        String options[] = params.getActions().stream().map(MessageActionItem::getTitle).toArray(String[]::new);
+        String[] options = params.getActions().stream().map(MessageActionItem::getTitle).toArray(String[]::new);
         CompletableFuture<MessageActionItem> future = new CompletableFuture<>();
 
         ApplicationManager.getApplication().invokeLater(() -> {

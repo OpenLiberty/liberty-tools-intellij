@@ -136,7 +136,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
     private static String getLabel(String annotation, String attribute, String labelType) {
         String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
         annotationName = "@" + annotationName;
-        if (labelType.equals("Remove")) {
+        if ("Remove".equals(labelType)) {
             return Messages.getMessage("RemoveTheAttriubuteFrom", attribute, annotationName);
         }
         return Messages.getMessage("AddTheAttributeTo", attribute, annotationName);

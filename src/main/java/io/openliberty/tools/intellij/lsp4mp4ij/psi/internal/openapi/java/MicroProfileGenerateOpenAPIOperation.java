@@ -47,9 +47,9 @@ import java.util.Optional;
  */
 public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionParticipant {
 
-	private final static String MESSAGE = "Generate OpenAPI Annotations for ''{0}''";
+	private static final String MESSAGE = "Generate OpenAPI Annotations for ''{0}''";
 
-	private final static String TYPE_NAME_KEY = "type";
+	private static final String TYPE_NAME_KEY = "type";
 
 	@Override
 	public String getParticipantId() {
@@ -106,7 +106,7 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 		Optional<PsiClass> typeDeclarationOpt = PsiTreeUtil.findChildrenOfType(cu, PsiClass.class).stream() //
 				.filter(type -> type instanceof PsiClass
 						&& typeName.equals(((PsiClass) type).getQualifiedName())) //
-				.map(type -> (PsiClass) type) //
+				.map(PsiClass.class::cast) //
 				.findFirst();
 
 		if (typeDeclarationOpt.isEmpty()) {
@@ -131,7 +131,7 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 	}
 
 
-	private static final String getSimpleName(String fullyQualifiedName) {
+	private static String getSimpleName(String fullyQualifiedName) {
 		int lastDot = fullyQualifiedName.lastIndexOf('.');
 		if (lastDot == -1) {
 			// It probably wasn't actually fully qualified :|

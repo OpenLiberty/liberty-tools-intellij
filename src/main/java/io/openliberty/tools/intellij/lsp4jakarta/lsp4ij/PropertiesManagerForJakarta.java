@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class PropertiesManagerForJakarta {
+public final class PropertiesManagerForJakarta {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesManagerForJakarta.class);
 
@@ -52,7 +52,7 @@ public class PropertiesManagerForJakarta {
         return INSTANCE;
     }
 
-    private List<DiagnosticsCollector> diagnosticsCollectors = new ArrayList<>();
+    private final List<DiagnosticsCollector> diagnosticsCollectors = new ArrayList<>();
     private final CodeActionHandler codeActionHandler;
 
     private final DiagnosticsHandler diagnosticsHandler;
@@ -86,7 +86,7 @@ public class PropertiesManagerForJakarta {
         // ask the Java component if the classpath of the current module contains the specified Jakarta types.
         JavaPsiFacade javaFacade = JavaPsiFacade.getInstance(project);
         GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        List<String> validCtx = new ArrayList<String>();
+        List<String> validCtx = new ArrayList<>();
         if (javaFacade != null && scope != null) {
             for (String typeCtx : snippetContexts) {
                 Object type = ApplicationManager.getApplication().runReadAction((Computable<Object>) () -> javaFacade.findClass(typeCtx, scope));
@@ -112,7 +112,7 @@ public class PropertiesManagerForJakarta {
                     className = classes[0].getName();
                 } else {
                     className = javaFile.getName();
-                    if (className.endsWith(".java") == true) {
+                    if (className.endsWith(".java")) {
                         className = className.substring(0, className.length() - 5);
                     }
                 }
@@ -146,7 +146,7 @@ public class PropertiesManagerForJakarta {
      * @return the cursor context for the given file and cursor position
      */
     public JavaCursorContextResult javaCursorContext(JakartaJavaCompletionParams params, IPsiUtils utils) {
-        JavaCursorContextResult result = ApplicationManager.getApplication().runReadAction((Computable<JavaCursorContextResult>) () -> {
+        return ApplicationManager.getApplication().runReadAction((Computable<JavaCursorContextResult>) () -> {
             String uri = params.getUri();
             PsiFile typeRoot = resolveTypeRoot(uri, utils);
             if (!(typeRoot instanceof PsiJavaFile)) {
@@ -165,8 +165,6 @@ public class PropertiesManagerForJakarta {
             String prefix = getJavaCursorPrefix(document, completionOffset);
             return new JavaCursorContextResult(kind, prefix);
         });
-
-        return result;
     }
 
     private static JavaCursorContextKind getJavaCursorContextKind(PsiJavaFile javaFile, int completionOffset) {
@@ -197,13 +195,13 @@ public class PropertiesManagerForJakarta {
             PsiAnnotation psiAnnotation = (PsiAnnotation) parent;
             PsiAnnotationOwner annotationOwner = psiAnnotation.getOwner();
             if (annotationOwner instanceof PsiClass) {
-                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_CLASS:JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
+                return psiAnnotation.getStartOffsetInParent() == 0? JavaCursorContextKind.BEFORE_CLASS:JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
             }
             if (annotationOwner instanceof PsiMethod){
-                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_METHOD:JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
+                return psiAnnotation.getStartOffsetInParent() == 0? JavaCursorContextKind.BEFORE_METHOD:JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
             }
             if (annotationOwner instanceof PsiField) {
-                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_FIELD:JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
+                return psiAnnotation.getStartOffsetInParent() == 0? JavaCursorContextKind.BEFORE_FIELD:JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
             }
         }
 

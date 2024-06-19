@@ -58,7 +58,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables = new ArrayList<Tuple.Two<PsiAnnotation, PsiElement>>();
+            ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables = new ArrayList<>();
             String[] validAnnotations = { AnnotationConstants.GENERATED_FQ_NAME };
             String[] validTypeAnnotations = { AnnotationConstants.GENERATED_FQ_NAME,
                     AnnotationConstants.RESOURCE_FQ_NAME };
@@ -71,8 +71,9 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             if (psiPackage != null) {
                 PsiAnnotation[] pkgAnnotations = psiPackage.getAnnotations();
                 for (PsiAnnotation annotation : pkgAnnotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                    if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations)) {
                         annotatables.add(new Tuple.Two<>(annotation, psiPackage));
+                    }
                 }
             }
 
@@ -81,24 +82,27 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 // Type
                 PsiAnnotation[] annotations = type.getAnnotations();
                 for (PsiAnnotation annotation : annotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
+                    if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations)) {
                         annotatables.add(new Tuple.Two<>(annotation, type));
+                    }
                 }
                 // Method
                 PsiMethod[] methods = type.getMethods();
                 for (PsiMethod method : methods) {
                     annotations = method.getAnnotations();
                     for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validMethodAnnotations))
+                        if (isValidAnnotation(annotation.getQualifiedName(), validMethodAnnotations)) {
                             annotatables.add(new Tuple.Two<>(annotation, method));
+                        }
                     }
                     // method parameters
                     PsiParameter[] parameters = method.getParameterList().getParameters();
                     for (PsiParameter parameter : parameters) {
                         annotations = parameter.getAnnotations();
                         for (PsiAnnotation annotation : annotations) {
-                            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations)) {
                                 annotatables.add(new Tuple.Two<>(annotation, parameter));
+                            }
                         }
                     }
                 }
@@ -107,8 +111,9 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 for (PsiField field : fields) {
                     annotations = field.getAnnotations();
                     for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
+                        if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations)) {
                             annotatables.add(new Tuple.Two<>(annotation, field));
+                        }
                     }
                 }
             }
@@ -121,9 +126,9 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
                     for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
                         // If date element exists and is non-empty, it must follow ISO 8601 format.
-                        if (pair.getAttributeName().equals("date")) {
+                        if ("date".equals(pair.getAttributeName())) {
                             String date = pair.getLiteralValue();
-                            if (date != null && !date.equals("")) {
+                            if (date != null && !"".equals(date)) {
                                 if (!Pattern.matches(AnnotationConstants.ISO_8601_REGEX, date)) {
                                     String diagnosticMessage = Messages.getMessage(
                                             "AnnotationMustDefineAttributeFollowing8601", "@Generated", "date");
@@ -140,10 +145,10 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         Boolean nameEmpty = true;
                         Boolean typeEmpty = true;
                         for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
-                            if (pair.getAttributeName().equals("name")) {
+                            if ("name".equals(pair.getAttributeName())) {
                                 nameEmpty = false;
                             }
-                            if (pair.getAttributeName().equals("type")) {
+                            if ("type".equals(pair.getAttributeName())) {
                                 typeEmpty = false;
                             }
                         }

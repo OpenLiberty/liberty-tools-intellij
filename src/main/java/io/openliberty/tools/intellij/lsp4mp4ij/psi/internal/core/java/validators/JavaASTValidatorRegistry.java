@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * @author Angelo ZERR
  *
  */
-public class JavaASTValidatorRegistry extends AnnotationValidator {
+public final class JavaASTValidatorRegistry extends AnnotationValidator {
 
 	private static final Logger LOGGER = Logger.getLogger(JavaASTValidatorRegistry.class.getName());
 
@@ -68,7 +68,7 @@ public class JavaASTValidatorRegistry extends AnnotationValidator {
 	}
 
 	private boolean extensionProvidersLoaded;
-	private boolean registryListenerIntialized;
+    private final boolean registryListenerIntialized;
 
 	private final List<JavaASTValidatorExtensionPointBean> validatorsFromClass;
 
@@ -96,8 +96,9 @@ public class JavaASTValidatorRegistry extends AnnotationValidator {
 	}
 
 	private synchronized void loadExtensionJavaASTValidators() {
-		if (extensionProvidersLoaded)
-			return;
+        if (extensionProvidersLoaded) {
+            return;
+        }
 
 		// Immediately set the flag, as to ensure that this method is never
 		// called twice

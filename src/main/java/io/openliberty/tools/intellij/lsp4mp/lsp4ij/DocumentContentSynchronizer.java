@@ -42,9 +42,9 @@ public class DocumentContentSynchronizer implements DocumentListener {
      * clients of the Document with a method for retrieving the DocumentContentSynchronizers which cannot be accessed
      * through the native Document API (that provides no getDocumentListeners() method).
      */
-    public final static Key<Set<DocumentContentSynchronizer>> KEY = Key.create(DocumentContentSynchronizer.class.getName());
+    public static final Key<Set<DocumentContentSynchronizer>> KEY = Key.create(DocumentContentSynchronizer.class.getName());
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DocumentContentSynchronizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentContentSynchronizer.class);
 
     private final @Nonnull
     LanguageServerWrapper languageServerWrapper;
@@ -54,7 +54,7 @@ public class DocumentContentSynchronizer implements DocumentListener {
     URI fileUri;
     private final TextDocumentSyncKind syncKind;
 
-    private int version = 0;
+    private int version;
     private final List<TextDocumentContentChangeEvent> changeEvents;
     private long modificationStamp;
     final @Nonnull

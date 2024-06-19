@@ -96,7 +96,7 @@ public class PsiTypeUtils {
             if (defaultValue instanceof PsiAnnotation) {
                 value = ((PsiAnnotation)defaultValue).getQualifiedName();
                 int index = value.lastIndexOf('.');
-                if (index != (-1)) {
+                if (index != -1) {
                     value = value.substring(index + 1, value.length());
                 }
             } else if (defaultValue instanceof PsiLiteral) {
@@ -104,7 +104,7 @@ public class PsiTypeUtils {
             } else if (defaultValue instanceof PsiReference) {
                 value = ((PsiReference)defaultValue).getCanonicalText();
                 int index = value.lastIndexOf('.');
-                if (index != (-1)) {
+                if (index != -1) {
                     value = value.substring(index + 1, value.length());
                 }
             }
@@ -206,13 +206,13 @@ public class PsiTypeUtils {
     }
 
     public static boolean isPrimitiveBoolean(String valueClass) {
-        return valueClass.equals("boolean");
+        return "boolean".equals(valueClass);
     }
 
     public static boolean isPrimitiveType(String valueClass) {
-        return valueClass.equals("java.lang.String") || valueClass.equals("java.lang.Boolean")
-                || valueClass.equals("java.lang.Integer") || valueClass.equals("java.lang.Long")
-                || valueClass.equals("java.lang.Double") || valueClass.equals("java.lang.Float");
+        return "java.lang.String".equals(valueClass) || "java.lang.Boolean".equals(valueClass)
+                || "java.lang.Integer".equals(valueClass) || "java.lang.Long".equals(valueClass)
+                || "java.lang.Double".equals(valueClass) || "java.lang.Float".equals(valueClass);
     }
 
     public static String findPropertiesResource(VirtualFile packageRoot, String propertiesFileName) {

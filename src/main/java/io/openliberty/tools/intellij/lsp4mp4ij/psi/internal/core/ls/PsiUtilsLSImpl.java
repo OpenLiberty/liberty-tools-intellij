@@ -43,7 +43,7 @@ import java.util.Scanner;
  *
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/core/ls/JDTUtilsLSImpl.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/core/ls/JDTUtilsLSImpl.java</a>
  */
-public class PsiUtilsLSImpl implements IPsiUtils {
+public final class PsiUtilsLSImpl implements IPsiUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(PsiUtilsLSImpl.class);
     private final Project project;
     private final Module module;

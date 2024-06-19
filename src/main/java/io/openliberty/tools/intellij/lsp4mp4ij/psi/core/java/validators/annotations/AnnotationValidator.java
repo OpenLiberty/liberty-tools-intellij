@@ -70,9 +70,8 @@ public class AnnotationValidator {
 		AnnotationRule existingRule = this.rulesByAnnotation.get(annotation);
 		if (existingRule != null) {
 			// Remove rule
-			rule.getRules().forEach(attributeRule -> {
-				existingRule.getRules().remove(attributeRule);
-			});
+			rule.getRules().forEach(attributeRule ->
+				existingRule.getRules().remove(attributeRule));
 		}
 	}
 

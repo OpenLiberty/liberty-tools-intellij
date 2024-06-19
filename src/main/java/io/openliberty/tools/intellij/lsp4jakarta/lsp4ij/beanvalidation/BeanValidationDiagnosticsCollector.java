@@ -85,7 +85,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         source, DIAGNOSTIC_CODE_STATIC,
                         annotationName, DiagnosticSeverity.Error));
             } else {
-                PsiType type = (isMethod) ? ((PsiMethod) element).getReturnType() : ((PsiField) element).getType();
+                PsiType type = isMethod ? ((PsiMethod) element).getReturnType() : ((PsiField) element).getType();
                 if (type instanceof PsiClassType) {
                     PsiType t = PsiPrimitiveType.getUnboxedType(type);
                     if (t != null) {

@@ -47,7 +47,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             for (PsiClass type : alltypes) {
                 methods = type.getMethods();
                 for (PsiMethod method : methods) {
-                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
+                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<>();
                     boolean hasMapKeyAnnotation = false;
                     boolean hasMapKeyClassAnnotation = false;
                     allAnnotations = method.getAnnotations();
@@ -55,11 +55,11 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                                 PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
                         if (matchedAnnotation != null) {
-                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation))
+                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation)) {
                                 hasMapKeyAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
+                            } else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation)) {
                                 hasMapKeyClassAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
+                            } else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
                                 mapKeyJoinCols.add(annotation);
                             }
                         }
@@ -82,7 +82,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                 // Annotations
                 fields = type.getFields();
                 for (PsiField field : fields) {
-                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
+                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<>();
                     boolean hasMapKeyAnnotation = false;
                     boolean hasMapKeyClassAnnotation = false;
                     allAnnotations = field.getAnnotations();
@@ -90,11 +90,11 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                                 PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
                         if (matchedAnnotation != null) {
-                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation))
+                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation)) {
                                 hasMapKeyAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
+                            } else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation)) {
                                 hasMapKeyClassAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
+                            } else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
                                 mapKeyJoinCols.add(annotation);
                             }
                         }
@@ -116,16 +116,17 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
 
     private void validateMapKeyJoinColumnAnnotations(List<PsiAnnotation> annotations, PsiElement element,
                                                      PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String message = (element instanceof PsiMethod) ?
+        String message = element instanceof PsiMethod ?
                 Messages.getMessage("MultipleMapKeyJoinColumnMethod") :
                 Messages.getMessage("MultipleMapKeyJoinColumnField");
         annotations.forEach(annotation -> {
-            boolean allNamesSpecified, allReferencedColumnNameSpecified;
+            boolean allNamesSpecified;
+            boolean allReferencedColumnNameSpecified;
             List<PsiNameValuePair> memberValues = Arrays.asList(annotation.getParameterList().getAttributes());
             allNamesSpecified = memberValues.stream()
-                    .anyMatch((mv) -> mv.getName().equals(PersistenceConstants.NAME));
+                    .anyMatch(mv -> mv.getName().equals(PersistenceConstants.NAME));
             allReferencedColumnNameSpecified = memberValues.stream()
-                    .anyMatch((mv) -> mv.getName().equals(PersistenceConstants.REFERENCEDCOLUMNNAME));
+                    .anyMatch(mv -> mv.getName().equals(PersistenceConstants.REFERENCEDCOLUMNNAME));
             if (!allNamesSpecified || !allReferencedColumnNameSpecified) {
                 diagnostics.add(createDiagnostic(element, unit, message,
                         PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES, null, DiagnosticSeverity.Error));

@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public final class LocalizedResourceUtil {
     private static final Logger LOGGER = Logger.getLogger(LocalizedResourceUtil.class.getName());
-    private static ResourceBundle resourceBundle = null;
+    private static ResourceBundle resourceBundle;
 
     private static synchronized void initializeBundles() {
         resourceBundle = ResourceBundle.getBundle("messages.LibertyBundles", Locale.getDefault());
@@ -45,6 +45,6 @@ public final class LocalizedResourceUtil {
         } catch (Exception e) {
             LOGGER.info("Failed to get message for '" + key + "'");
         }
-        return (msg == null) ? key : msg;
+        return msg == null ? key : msg;
     }
 }

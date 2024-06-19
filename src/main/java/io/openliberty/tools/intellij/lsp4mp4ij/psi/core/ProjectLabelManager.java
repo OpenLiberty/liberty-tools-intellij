@@ -35,7 +35,7 @@ import java.util.List;
  * @see <a ref="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/ProjectLabelManager.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/ProjectLabelManager.java</a>
  *
  */
-public class ProjectLabelManager {
+public final class ProjectLabelManager {
 	private static final ProjectLabelManager INSTANCE = new ProjectLabelManager();
 
 	public static ProjectLabelManager getInstance() {
@@ -93,9 +93,7 @@ public class ProjectLabelManager {
 				// The uri doesn't belong to an Eclipse project
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}
-			Module module = ApplicationManager.getApplication().runReadAction((Computable<Module>) () -> {
-				return utils.getModule(file);
-			});
+			Module module = ApplicationManager.getApplication().runReadAction((Computable<Module>) () -> utils.getModule(file));
 			if (module == null) {
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}

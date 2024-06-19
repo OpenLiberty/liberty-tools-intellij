@@ -79,7 +79,9 @@ public class RunLibertyDevTask extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         final Project project = LibertyProjectUtil.getProject(e.getDataContext());
-        if (project == null) return;
+        if (project == null) {
+            return;
+        }
 
         // triggered through shift+shift/Search Everywhere window
         if (Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace())) {

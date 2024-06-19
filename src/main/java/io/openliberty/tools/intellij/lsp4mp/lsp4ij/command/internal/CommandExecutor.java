@@ -131,12 +131,11 @@ public class CommandExecutor {
     private static CompletableFuture<LanguageServer> getLanguageServerForCommand(Project project,
                                                                                  Command command,
                                                                                  Document document, LanguageServersRegistry.LanguageServerDefinition languageServerDefinition) throws IOException {
-        CompletableFuture<LanguageServer> languageServerFuture = LanguageServiceAccessor.getInstance(project)
+        return LanguageServiceAccessor.getInstance(project)
                 .getInitializedLanguageServer(document, languageServerDefinition, serverCapabilities -> {
                     ExecuteCommandOptions provider = serverCapabilities.getExecuteCommandProvider();
                     return provider != null && provider.getCommands().contains(command.getCommand());
                 });
-        return languageServerFuture;
     }
 
     @SuppressWarnings("unused") // ECJ compiler for some reason thinks handlerService == null is always false

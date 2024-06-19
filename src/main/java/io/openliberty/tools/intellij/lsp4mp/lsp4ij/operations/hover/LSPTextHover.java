@@ -63,7 +63,8 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
 
     private PsiElement lastElement;
     private int        lastOffset = -1;
-    private CompletableFuture<List<Hover>> request,lspRequest;
+    private CompletableFuture<List<Hover>> request;
+    private CompletableFuture<List<Hover>> lspRequest;
 
     public LSPTextHover() {
         LOGGER.info("LSPTextHover");
@@ -224,7 +225,7 @@ public class LSPTextHover extends DocumentationProviderEx implements ExternalDoc
                     this.lastElement = element;
                     this.lastOffset = offset;
                     this.lspRequest = LanguageServiceAccessor.getInstance(element.getProject())
-                            .getLanguageServers(document, capabilities -> isHoverCapable(capabilities))
+                            .getLanguageServers(document, this::isHoverCapable)
                             .thenApplyAsync(languageServers -> // Async is very important here, otherwise the LS Client thread is in
                                     // deadlock and doesn't read bytes from LS
                             {

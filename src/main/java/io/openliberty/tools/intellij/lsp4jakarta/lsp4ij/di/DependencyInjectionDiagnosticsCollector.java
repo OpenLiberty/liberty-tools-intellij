@@ -53,8 +53,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
 
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        if (unit == null)
+        if (unit == null) {
             return;
+        }
 
         PsiClass[] alltypes;
         alltypes = unit.getClasses();
@@ -70,7 +71,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                 }
             }
 
-            List<PsiMethod> injectedConstructors = new ArrayList<PsiMethod>();
+            List<PsiMethod> injectedConstructors = new ArrayList<>();
             PsiMethod[] allMethods = type.getMethods();
             for (PsiMethod method : allMethods) {
                 boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
@@ -79,8 +80,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                 boolean isGeneric = method.hasTypeParameters();
 
                 if (containsAnnotation(type, method.getAnnotations(), INJECT_FQ_NAME)) {
-                    if (isConstructorMethod(method))
+                    if (isConstructorMethod(method)) {
                         injectedConstructors.add(method);
+                    }
                     if (isFinal) {
                         String msg = Messages.getMessage("InjectNoFinalMethod");
                         diagnostics.add(createDiagnostic(method, unit, msg,
@@ -121,8 +123,6 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
     }
 
     private boolean containsAnnotation(PsiClass type, PsiAnnotation[] annotations, String annotationFQName) {
-        return Stream.of(annotations).anyMatch(annotation -> {
-                return isMatchedJavaElement(type, annotation.getQualifiedName(), annotationFQName);
-        });
+        return Stream.of(annotations).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), annotationFQName));
     }
 }

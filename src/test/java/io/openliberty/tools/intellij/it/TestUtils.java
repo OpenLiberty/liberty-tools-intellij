@@ -85,7 +85,7 @@ public class TestUtils {
         if (!foundStoppedMsg) {
             // If instructed not to fail the test on error, report the last error back to the caller.
             if (!failOnNoStop) {
-                String cause = (error != null) ? "Cause: " + error.getMessage() : "Cause: " + SEVER_STOPPED_MSG + " not found in server log.";
+                String cause = error != null ? "Cause: " + error.getMessage() : "Cause: " + SEVER_STOPPED_MSG + " not found in server log.";
                 throw new RuntimeException("Unable to verify that the Liberty server stopped. " + cause);
             }
 
@@ -143,7 +143,7 @@ public class TestUtils {
                     content.append(responseLine).append(System.lineSeparator());
                 }
 
-                if (!(content.toString().contains(expectedResponse))) {
+                if (!content.toString().contains(expectedResponse)) {
                     Thread.sleep(retryIntervalSecs * 1000);
                     conn.disconnect();
                     continue;
@@ -513,7 +513,7 @@ public class TestUtils {
             try {
                 // The file maybe an old log. For now, check for the message indicating
                 // that the server is stopped.
-                if (!(isTextInFile(msgLogPath.toString(), SEVER_STOPPED_MSG))) {
+                if (!isTextInFile(msgLogPath.toString(), SEVER_STOPPED_MSG)) {
                     stopServer = true;
                 }
             } catch (Exception e) {

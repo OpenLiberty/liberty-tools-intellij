@@ -26,9 +26,9 @@ public class LoggingStreamConnectionProviderProxy implements StreamConnectionPro
     private OutputStream outputStream;
     private InputStream errorStream;
     private final String id;
-    private File logFile;
-    private boolean logToFile = true;
-    private boolean logToConsole = false;
+    private final File logFile;
+    private final boolean logToFile = true;
+    private boolean logToConsole;
 
 
     /**

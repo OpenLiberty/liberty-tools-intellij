@@ -25,7 +25,7 @@ import io.openliberty.tools.intellij.LibertyPluginIcons;
 /**
  * Custom file type for server.env files
  */
-public class ServerEnvFileType extends LanguageFileType implements FileTypeIdentifiableByVirtualFile {
+public final class ServerEnvFileType extends LanguageFileType implements FileTypeIdentifiableByVirtualFile {
 
     public static final ServerEnvFileType INSTANCE = new ServerEnvFileType();
 

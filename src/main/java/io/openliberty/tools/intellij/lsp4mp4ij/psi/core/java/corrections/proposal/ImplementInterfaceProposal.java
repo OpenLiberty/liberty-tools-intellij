@@ -27,9 +27,9 @@ public class ImplementInterfaceProposal extends ASTRewriteCorrectionProposal {
 
 	private static final String TITLE_MESSAGE = "Let ''{0}'' implement ''{1}''";
 
-	private PsiClass fBinding;
-	private PsiFile fAstRoot;
-	private String interfaceType;
+    private final PsiClass fBinding;
+    private final PsiFile fAstRoot;
+    private final String interfaceType;
 
 	public ImplementInterfaceProposal(PsiFile targetCU, PsiClass binding, PsiFile astRoot,
 									  String interfaceType, int relevance, PsiFile sourceCU) {

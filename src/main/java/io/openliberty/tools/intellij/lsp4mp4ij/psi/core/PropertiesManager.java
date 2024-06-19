@@ -22,6 +22,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.SearchScope;
+import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.MergeQuery;
 import com.intellij.util.Query;
 import com.intellij.util.UniqueResultsQuery;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManager.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManager.java</a>
  *
  */
-public class PropertiesManager {
+public final class PropertiesManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesManager.class);
 
     private static final PropertiesManager INSTANCE = new PropertiesManager();
@@ -175,7 +176,7 @@ public class PropertiesManager {
         List<IPropertiesProvider> allProviders = new ArrayList<>();
         allProviders.addAll(IPropertiesProvider.EP_NAME.getExtensionList());
         allProviders.addAll(StaticPropertyProviderExtensionPointBean.EP_NAME.getExtensionList().stream()
-                .map(bean -> bean.getInstance()).collect(Collectors.toList()));
+                .map(BaseKeyedLazyInstance::getInstance).collect(Collectors.toList()));
         return allProviders;
     }
 

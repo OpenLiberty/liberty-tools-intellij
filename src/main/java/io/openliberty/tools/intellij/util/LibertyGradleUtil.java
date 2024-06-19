@@ -27,7 +27,7 @@ import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
 public class LibertyGradleUtil {
-    private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);
+    private static final Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);
 
     /**
      * Given the gradle build file get the project name
@@ -93,7 +93,7 @@ public class LibertyGradleUtil {
      */
     public static BuildFile validBuildGradle(PsiFile file) throws IOException {
             String buildFile = fileToString(file.getVirtualFile().getPath());
-            if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
+            if (buildFile.isEmpty()) { return new BuildFile(false, false); }
 
             // instead of iterating over capture groups in a plugin{}, search directly
             // look for our plugin not defined in a line comment. if defined, grab version # from Group 2
@@ -105,11 +105,11 @@ public class LibertyGradleUtil {
             if (gradleLibertyPluginIdMatcher.find()) {
                 if (gradleLibertyPluginIdMatcher.groupCount() < 2) {
                     // if version is not defined, assumes latest is pulled
-                    return (new BuildFile(true, true));
+                    return new BuildFile(true, true);
                 }
                 ComparableVersion pluginVersion = new ComparableVersion(gradleLibertyPluginIdMatcher.group(2));
                 ComparableVersion containerVersion = new ComparableVersion(Constants.LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION);
-                return (new BuildFile(true, pluginVersion.compareTo(containerVersion) >= 0));
+                return new BuildFile(true, pluginVersion.compareTo(containerVersion) >= 0);
             }
 
             // check if "apply plugin: 'liberty'" is specified in the build.gradle
@@ -138,11 +138,11 @@ public class LibertyGradleUtil {
                     Matcher matcher2 = pattern2.matcher(sub);
                     while (matcher2.find()) {
                         String plugin = sub.substring(matcher2.start(), matcher2.end());
-                        return (new BuildFile(true, containerVersion(plugin)));
+                        return new BuildFile(true, containerVersion(plugin));
                     }
                 }
             }
-        return (new BuildFile(false, false));
+        return new BuildFile(false, false);
     }
 
     /**

@@ -60,11 +60,10 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
     protected Module createJavaModule(final String name) throws Exception {
         ModuleFixture moduleFixture = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture();
         moduleFixture.setUp();
-        Module module = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture().getModule();
-        return module;
+        return myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture().getModule();
     }
 
-    private static AtomicInteger counter = new AtomicInteger(0);
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
     /**
      * Create a new module into the test project from existing project folder.

@@ -83,7 +83,7 @@ public class PersistenceAnnotationQuickFix extends InsertAnnotationMissingQuickF
     private static List<PsiAnnotation> getAnnotations(PsiElement e, String... names) {
         List<PsiAnnotation> result = new ArrayList<>();
         if (e instanceof PsiField) {
-            PsiField field = ((PsiField) e);
+            PsiField field = (PsiField) e;
             PsiAnnotation[] annotations = field.getAnnotations();
             for (String name : names) {
                 List<PsiAnnotation> partial = Arrays.stream(annotations)

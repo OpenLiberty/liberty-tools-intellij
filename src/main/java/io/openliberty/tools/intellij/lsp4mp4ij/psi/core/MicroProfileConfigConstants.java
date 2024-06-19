@@ -18,7 +18,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/MicroProfileConfigConstants.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/MicroProfileConfigConstants.java</a>
  *
  */
-public class MicroProfileConfigConstants {
+public final class MicroProfileConfigConstants {
 
 	private MicroProfileConfigConstants() {
 	}

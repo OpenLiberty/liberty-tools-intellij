@@ -36,7 +36,7 @@ public class AnnotationUtil {
             return Arrays.stream(type.getAnnotations()).map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
                     .filter(scopes::contains).distinct().collect(Collectors.toList());
         } catch (Exception e) {
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
     }
 }

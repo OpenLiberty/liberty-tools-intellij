@@ -26,7 +26,7 @@ public class LibertyActionUtil {
      * @param cmd
      */
     public static void executeCommand(ShellTerminalWidget widget, String cmd) {
-        Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
+        Logger logger = Logger.getInstance(LibertyActionUtil.class);
         try {
             widget.grabFocus();
             TtyConnector connector = widget.getTtyConnector();
@@ -41,7 +41,7 @@ public class LibertyActionUtil {
             result.append(cmd).append(enterCode);
             connector.write(result.toString());
         } catch (IOException e) {
-            LOGGER.error(String.format("Failed to execute command: %s", cmd), e);
+            logger.error(String.format("Failed to execute command: %s", cmd), e);
         }
 
     }

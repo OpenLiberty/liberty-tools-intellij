@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 
 public final class Messages {
     private static final Logger LOGGER = LoggerFactory.getLogger(Messages.class);
-    private static ResourceBundle resourceBundle = null;
+    private static ResourceBundle resourceBundle;
 
     private static synchronized void initializeBundles() {
         resourceBundle = ResourceBundle.getBundle("org.eclipse.lsp4jakarta.jdt.core.messages.messages",
@@ -46,6 +46,6 @@ public final class Messages {
         } catch (Exception e) {
             LOGGER.debug("Failed to get message for '" + key + "'", e);
         }
-        return (msg == null) ? key : msg;
+        return msg == null ? key : msg;
     }
 }

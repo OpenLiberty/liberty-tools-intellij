@@ -48,14 +48,14 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 allAnnotations = type.getAnnotations();
 
                 /* ============ Entity Annotation Diagnostics =========== */
-                PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation entityAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
-                        EntityAnnotation = annotation;
+                        entityAnnotation = annotation;
                     }
                 }
 
-                if (EntityAnnotation != null) {
+                if (entityAnnotation != null) {
                     // Define boolean requirements for the diagnostics
                     boolean hasPublicOrProtectedNoArgConstructor = false;
                     boolean hasArgConstructor = false;
@@ -71,8 +71,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             }
                             // Don't need to perform subtractions to check flags because eclipse notifies on
                             // illegal constructor modifiers
-                            if (!method.hasModifierProperty(PsiModifier.PUBLIC) && !method.hasModifierProperty(PsiModifier.PROTECTED))
+                            if (!method.hasModifierProperty(PsiModifier.PUBLIC) && !method.hasModifierProperty(PsiModifier.PROTECTED)) {
                                 continue;
+                            }
                             hasPublicOrProtectedNoArgConstructor = true;
                         }
                         // All Methods of this class should not be final
@@ -100,8 +101,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     }
 
                     // Ensure that the Entity class is not given a final modifier
-                    if (type.hasModifierProperty(PsiModifier.FINAL))
+                    if (type.hasModifierProperty(PsiModifier.FINAL)) {
                         isEntityClassFinal = true;
+                    }
 
                     // Create Diagnostics if needed
                     if (!hasPublicOrProtectedNoArgConstructor && hasArgConstructor) {

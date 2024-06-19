@@ -90,9 +90,10 @@ public class MicroProfileFaultToleranceCompletionParticipant implements IJavaCom
 	 *         the offset is not in a <code>@Fallback</code> annotation
 	 */
 	private static PsiAnnotation getFallbackAnnotation(PsiMethod method, int offset) {
-		if (method == null) return null;
-		PsiAnnotation annotation = AnnotationUtils.getAnnotation(method, FALLBACK_ANNOTATION);
-		return annotation;
+        if (method == null) {
+            return null;
+        }
+		return AnnotationUtils.getAnnotation(method, FALLBACK_ANNOTATION);
 	}
 
 	@Nullable
@@ -115,7 +116,7 @@ public class MicroProfileFaultToleranceCompletionParticipant implements IJavaCom
 	 */
 	private static Range getCompletionReplaceRange(PsiAnnotation fallbackAnnotation, IPsiUtils utils, int triggerOffset) {
 		TextRange range = fallbackAnnotation.getTextRange();
-		if (range == null || range.getStartOffset() == (-1)) {
+		if (range == null || range.getStartOffset() == -1) {
 			return null;
 		}
 		int annotationStart = range.getStartOffset();

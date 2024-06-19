@@ -90,167 +90,167 @@ public class JakartaCodeActionHandler {
 
             List<CodeAction> codeActions = new ArrayList<>();
 
-            HttpServletQuickFix HttpServletQuickFix = new HttpServletQuickFix();
-            FilterImplementationQuickFix FilterImplementationQuickFix = new FilterImplementationQuickFix();
-            ListenerImplementationQuickFix ListenerImplementationQuickFix = new ListenerImplementationQuickFix();
-            CompleteServletAnnotationQuickFix CompleteServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
-            CompleteFilterAnnotationQuickFix CompleteFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
-            PersistenceAnnotationQuickFix PersistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
-            DeleteConflictMapKeyQuickFix DeleteConflictMapKeyQuickFix = new DeleteConflictMapKeyQuickFix();
-            NonPublicResourceMethodQuickFix NonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
-            ResourceMethodMultipleEntityParamsQuickFix ResourceMethodMultipleEntityParamsQuickFix = new ResourceMethodMultipleEntityParamsQuickFix();
-            NoResourcePublicConstructorQuickFix NoResourcePublicConstructorQuickFix = new NoResourcePublicConstructorQuickFix();
-            ManagedBeanQuickFix ManagedBeanQuickFix = new ManagedBeanQuickFix();
-            PersistenceEntityQuickFix PersistenceEntityQuickFix = new PersistenceEntityQuickFix();
-            ConflictProducesInjectQuickFix ConflictProducesInjectQuickFix = new ConflictProducesInjectQuickFix();
-            BeanValidationQuickFix BeanValidationQuickFix = new BeanValidationQuickFix();
-            ManagedBeanConstructorQuickFix ManagedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
-            ManagedBeanNoArgConstructorQuickFix ManagedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
-            JsonbAnnotationQuickFix JsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
-            JsonbTransientAnnotationQuickFix JsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
-            ScopeDeclarationQuickFix ScopeDeclarationQuickFix = new ScopeDeclarationQuickFix();
-            RemovePreDestroyAnnotationQuickFix RemovePreDestroyAnnotationQuickFix = new RemovePreDestroyAnnotationQuickFix();
-            RemovePostConstructAnnotationQuickFix RemovePostConstructAnnotationQuickFix = new RemovePostConstructAnnotationQuickFix();
-            PostConstructReturnTypeQuickFix PostConstructReturnTypeQuickFix = new PostConstructReturnTypeQuickFix();
-            RemoveFinalModifierQuickFix RemoveFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
-            RemoveStaticModifierQuickFix RemoveStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
-            RemoveMethodParametersQuickFix RemoveMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
-            AddResourceMissingNameQuickFix AddResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
-            AddResourceMissingTypeQuickFix AddResourceMissingTypeQuickFix = new AddResourceMissingTypeQuickFix();
-            RemoveAbstractModifierQuickFix RemoveAbstractModifierQuickFix = new RemoveAbstractModifierQuickFix();
-            RemoveInjectAnnotationQuickFix RemoveInjectAnnotationQuickFix = new RemoveInjectAnnotationQuickFix();
-            RemoveProduceAnnotationQuickFix RemoveProduceAnnotationQuickFix = new RemoveProduceAnnotationQuickFix();
-            RemoveInvalidInjectParamAnnotationQuickFix RemoveInvalidInjectParamAnnotationQuickFix = new RemoveInvalidInjectParamAnnotationQuickFix();
-            AddPathParamQuickFix AddPathParamQuickFix = new AddPathParamQuickFix();
+            HttpServletQuickFix httpServletQuickFix = new HttpServletQuickFix();
+            FilterImplementationQuickFix filterImplementationQuickFix = new FilterImplementationQuickFix();
+            ListenerImplementationQuickFix listenerImplementationQuickFix = new ListenerImplementationQuickFix();
+            CompleteServletAnnotationQuickFix completeServletAnnotationQuickFix = new CompleteServletAnnotationQuickFix();
+            CompleteFilterAnnotationQuickFix completeFilterAnnotationQuickFix = new CompleteFilterAnnotationQuickFix();
+            PersistenceAnnotationQuickFix persistenceAnnotationQuickFix = new PersistenceAnnotationQuickFix();
+            DeleteConflictMapKeyQuickFix deleteConflictMapKeyQuickFix = new DeleteConflictMapKeyQuickFix();
+            NonPublicResourceMethodQuickFix nonPublicResourceMethodQuickFix = new NonPublicResourceMethodQuickFix();
+            ResourceMethodMultipleEntityParamsQuickFix resourceMethodMultipleEntityParamsQuickFix = new ResourceMethodMultipleEntityParamsQuickFix();
+            NoResourcePublicConstructorQuickFix noResourcePublicConstructorQuickFix = new NoResourcePublicConstructorQuickFix();
+            ManagedBeanQuickFix managedBeanQuickFix = new ManagedBeanQuickFix();
+            PersistenceEntityQuickFix persistenceEntityQuickFix = new PersistenceEntityQuickFix();
+            ConflictProducesInjectQuickFix conflictProducesInjectQuickFix = new ConflictProducesInjectQuickFix();
+            BeanValidationQuickFix beanValidationQuickFix = new BeanValidationQuickFix();
+            ManagedBeanConstructorQuickFix managedBeanConstructorQuickFix = new ManagedBeanConstructorQuickFix();
+            ManagedBeanNoArgConstructorQuickFix managedBeanNoArgConstructorQuickFix = new ManagedBeanNoArgConstructorQuickFix();
+            JsonbAnnotationQuickFix jsonbAnnotationQuickFix = new JsonbAnnotationQuickFix();
+            JsonbTransientAnnotationQuickFix jsonbTransientAnnotationQuickFix = new JsonbTransientAnnotationQuickFix();
+            ScopeDeclarationQuickFix scopeDeclarationQuickFix = new ScopeDeclarationQuickFix();
+            RemovePreDestroyAnnotationQuickFix removePreDestroyAnnotationQuickFix = new RemovePreDestroyAnnotationQuickFix();
+            RemovePostConstructAnnotationQuickFix removePostConstructAnnotationQuickFix = new RemovePostConstructAnnotationQuickFix();
+            PostConstructReturnTypeQuickFix postConstructReturnTypeQuickFix = new PostConstructReturnTypeQuickFix();
+            RemoveFinalModifierQuickFix removeFinalModifierQuickFix = new RemoveFinalModifierQuickFix();
+            RemoveStaticModifierQuickFix removeStaticModifierQuickFix = new RemoveStaticModifierQuickFix();
+            RemoveMethodParametersQuickFix removeMethodParametersQuickFix = new RemoveMethodParametersQuickFix();
+            AddResourceMissingNameQuickFix addResourceMissingNameQuickFix = new AddResourceMissingNameQuickFix();
+            AddResourceMissingTypeQuickFix addResourceMissingTypeQuickFix = new AddResourceMissingTypeQuickFix();
+            RemoveAbstractModifierQuickFix removeAbstractModifierQuickFix = new RemoveAbstractModifierQuickFix();
+            RemoveInjectAnnotationQuickFix removeInjectAnnotationQuickFix = new RemoveInjectAnnotationQuickFix();
+            RemoveProduceAnnotationQuickFix removeProduceAnnotationQuickFix = new RemoveProduceAnnotationQuickFix();
+            RemoveInvalidInjectParamAnnotationQuickFix removeInvalidInjectParamAnnotationQuickFix = new RemoveInvalidInjectParamAnnotationQuickFix();
+            AddPathParamQuickFix addPathParamQuickFix = new AddPathParamQuickFix();
 
             for (Diagnostic diagnostic : params.getContext().getDiagnostics()) {
                 try {
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE)) {
-                        codeActions.addAll(HttpServletQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(httpServletQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER)) {
-                        codeActions.addAll(FilterImplementationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(filterImplementationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_LISTENER)) {
-                        codeActions.addAll(ListenerImplementationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(listenerImplementationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE)) {
-                        codeActions.addAll(AddResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(addResourceMissingNameQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE)) {
-                        codeActions.addAll(AddResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(addResourceMissingTypeQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE)) {
-                        codeActions.addAll(PostConstructReturnTypeQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(postConstructReturnTypeQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTE)
                             || diagnostic.getCode().getLeft()
                             .equals(ServletConstants.DIAGNOSTIC_CODE_DUPLICATE_ATTRIBUTES)) {
                         codeActions
-                                .addAll(CompleteServletAnnotationQuickFix.getCodeActions(context, diagnostic));
+                                .addAll(completeServletAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE)
                             || diagnostic.getCode().getLeft()
                             .equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_DUPLICATE_ATTRIBUTES)) {
                         codeActions
-                                .addAll(CompleteFilterAnnotationQuickFix.getCodeActions(context, diagnostic));
+                                .addAll(completeFilterAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_NON_PUBLIC)) {
-                        codeActions.addAll(NonPublicResourceMethodQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(nonPublicResourceMethodQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_MULTIPLE_ENTITY_PARAMS)) {
-                        codeActions.addAll(ResourceMethodMultipleEntityParamsQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(resourceMethodMultipleEntityParamsQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(Jax_RSConstants.DIAGNOSTIC_CODE_NO_PUBLIC_CONSTRUCTORS)) {
-                        codeActions.addAll(NoResourcePublicConstructorQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(noResourcePublicConstructorQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft()
                             .equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES)) {
-                        codeActions.addAll(PersistenceAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(persistenceAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft()
                             .equals(PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION)) {
-                        codeActions.addAll(DeleteConflictMapKeyQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(deleteConflictMapKeyQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR)) {
-                        codeActions.addAll(PersistenceEntityQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(persistenceEntityQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS)
                             || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES)
                             || diagnostic.getCode().getLeft().equals(PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS)) {
-                        codeActions.addAll(RemoveFinalModifierQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeFinalModifierQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE)) {
-                        codeActions.addAll(ManagedBeanQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(managedBeanQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT)) {
-                        codeActions.addAll(ConflictProducesInjectQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(conflictProducesInjectQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_INJECT_PARAM)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveInvalidInjectParamAnnotationQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removeInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeInvalidInjectParamAnnotationQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_PRODUCES_PARAM)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemoveProduceAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveInvalidInjectParamAnnotationQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removeProduceAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeInvalidInjectParamAnnotationQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_STATIC)
                             || diagnostic.getCode().getLeft().equals(BeanValidationConstants.DIAGNOSTIC_CODE_INVALID_TYPE)) {
-                        codeActions.addAll(BeanValidationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(beanValidationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.CONSTRUCTOR_DIAGNOSTIC_CODE)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(ManagedBeanConstructorQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(ManagedBeanNoArgConstructorQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(managedBeanConstructorQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(managedBeanNoArgConstructorQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION)) {
-                        codeActions.addAll(JsonbAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(jsonbAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_FIELD)) {
-                        codeActions.addAll(JsonbTransientAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(jsonbTransientAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(ManagedBeanConstants.DIAGNOSTIC_CODE_SCOPEDECL)) {
-                        codeActions.addAll(ScopeDeclarationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(scopeDeclarationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_FINAL)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveFinalModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removeInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeFinalModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_CONSTRUCTOR) ||
                             diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_GENERIC)) {
-                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_ABSTRACT)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveAbstractModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removeInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeAbstractModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(DependencyInjectionConstants.DIAGNOSTIC_CODE_INJECT_STATIC)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemoveInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removeInjectAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
 
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemovePostConstructAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveMethodParametersQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removePostConstructAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeMethodParametersQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemovePreDestroyAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removePreDestroyAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeStaticModifierQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_PARAMS)) {
                         JavaCodeActionContext contextCopy = context.copy(); // each code action needs its own context.
-                        codeActions.addAll(RemovePreDestroyAnnotationQuickFix.getCodeActions(context, diagnostic));
-                        codeActions.addAll(RemoveMethodParametersQuickFix.getCodeActions(contextCopy, diagnostic));
+                        codeActions.addAll(removePreDestroyAnnotationQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(removeMethodParametersQuickFix.getCodeActions(contextCopy, diagnostic));
                     }
                     if (diagnostic.getCode().getLeft().equals(WebSocketConstants.DIAGNOSTIC_CODE_PATH_PARAMS_ANNOT)) {
-                        codeActions.addAll(AddPathParamQuickFix.getCodeActions(context, diagnostic));
+                        codeActions.addAll(addPathParamQuickFix.getCodeActions(context, diagnostic));
                     }
                 } catch (Exception e) {
                     LOGGER.warn("Exception scanning diagnostics", e); // TODO do we need this? Remove if possible

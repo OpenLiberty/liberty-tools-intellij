@@ -19,7 +19,9 @@ public class PreDestroyAnnotation {
 	
 	@PreDestroy()
 	public boolean getHappiness(String type) {
-		if (type.equals("happy")) return this.isHappy;
+        if ("happy".equals(type)) {
+            return this.isHappy;
+        }
 		return this.isSad;
 	}
 	

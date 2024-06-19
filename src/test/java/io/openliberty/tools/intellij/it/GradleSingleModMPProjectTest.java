@@ -33,42 +33,42 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Project port.
      */
-    private final int SM_MP_PROJECT_PORT = 9080;
+    private static final int SM_MP_PROJECT_PORT = 9080;
 
     /**
      * Project resource URI.
      */
-    private final String SM_MP_PROJECT_RES_URI = "api/resource";
+    private static final String SM_MP_PROJECT_RES_URI = "api/resource";
 
     /**
      * Project response.
      */
-    private final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
+    private static final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
 
     /**
      * Relative location of the WLP installation.
      */
-    private final String WLP_INSTALL_PATH = "build";
+    private static final String WLP_INSTALL_PATH = "build";
 
     /**
      * The path to the test report.
      */
-    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
+    private final Path testReportPath = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
 
     /**
      * Build file name.
      */
-    private final String BUILD_FILE_NAME = "build.gradle";
+    private static final String BUILD_FILE_NAME = "build.gradle";
 
     /**
      * Action command to open the build file.
      */
-    private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
+    private static final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
 
     /**
      * Dev mode configuration start parameters.
      */
-    private final String DEV_MODE_START_PARAMS = "--hotTests";
+    private static final String DEV_MODE_START_PARAMS = "--hotTests";
 
     /**
      * Prepares the environment for test execution.
@@ -175,8 +175,8 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @Override
     public void deleteTestReports() {
-        boolean testReportDeleted = TestUtils.deleteFile(TEST_REPORT_PATH);
-        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + TEST_REPORT_PATH + " was not be deleted.");
+        boolean testReportDeleted = TestUtils.deleteFile(testReportPath);
+        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + testReportPath + " was not be deleted.");
     }
 
     /**
@@ -184,6 +184,6 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(TEST_REPORT_PATH);
+        TestUtils.validateTestReportExists(testReportPath);
     }
 }

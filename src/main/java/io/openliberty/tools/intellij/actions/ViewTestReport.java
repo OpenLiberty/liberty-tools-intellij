@@ -120,10 +120,10 @@ public class ViewTestReport extends LibertyGeneralAction {
 
     private File findCustomTestReport(VirtualFile parentFile) throws IOException {
         // look for the most recently modified index.html files in the workspace
-        ArrayList<File> customTestReports = new ArrayList<File>();
+        ArrayList<File> customTestReports = new ArrayList<>();
         try (Stream<Path> walk = Files.walk(Paths.get(parentFile.getPath()))
                 .filter(Files::isRegularFile)) {
-            List<String> result = walk.map(x -> x.toString())
+            List<String> result = walk.map(Path::toString)
                     // exclude files from {bin, classes, target} dirs
                     .filter(f -> !f.contains("bin") || !f.contains("classes") || !f.contains("target"))
                     .filter(f -> f.endsWith("index.html")).collect(Collectors.toList());

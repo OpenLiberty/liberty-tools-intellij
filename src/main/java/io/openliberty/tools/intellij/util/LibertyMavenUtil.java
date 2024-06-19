@@ -57,7 +57,7 @@ public class LibertyMavenUtil {
         NodeList nList = root.getChildNodes();
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node nNode = nList.item(temp);
-            if (nNode.getNodeName().equals("artifactId")) {
+            if ("artifactId".equals(nNode.getNodeName())) {
                 if (nNode.getTextContent() != null) {
                     return nNode.getTextContent();
                 }
@@ -93,14 +93,14 @@ public class LibertyMavenUtil {
             Node nNode = nList.item(temp);
 
             // check for liberty maven plugin in profiles
-            if (nNode.getNodeName().equals("profiles")) {
+            if ("profiles".equals(nNode.getNodeName())) {
                 NodeList profiles = nNode.getChildNodes();
                 for (int i = 0; i < profiles.getLength(); i++) {
                     Node profile = profiles.item(i);
-                    if (profile.getNodeName().equals("profile")) {
+                    if ("profile".equals(profile.getNodeName())) {
                         NodeList profileList = profile.getChildNodes();
                         for (int j = 0; j < profileList.getLength(); j++) {
-                            if (profileList.item(j).getNodeName().equals("build")) {
+                            if ("build".equals(profileList.item(j).getNodeName())) {
                                 NodeList buildNodeList = profileList.item(j).getChildNodes();
                                 buildFile = mavenPluginDetected(buildNodeList);
                                 if (buildFile.isValidBuildFile()){
@@ -113,7 +113,7 @@ public class LibertyMavenUtil {
             }
 
             // check for liberty maven plugin in plugins
-            if (nNode.getNodeName().equals("build")) {
+            if ("build".equals(nNode.getNodeName())) {
                 NodeList buildNodeList = nNode.getChildNodes();
                 buildFile = mavenPluginDetected(buildNodeList);
                 if (buildFile.isValidBuildFile()){
@@ -124,7 +124,7 @@ public class LibertyMavenUtil {
                 // indicates this is a parent pom, list in the Liberty Dev Dashboard
                 for (int i = 0; i < buildNodeList.getLength(); i++) {
                     Node buildNode = buildNodeList.item(i);
-                    if (buildNode.getNodeName().equals("pluginManagement")) {
+                    if ("pluginManagement".equals(buildNode.getNodeName())) {
                         NodeList pluginManagementList = buildNode.getChildNodes();
                         buildFile = mavenPluginDetected(pluginManagementList);
                     }
@@ -137,7 +137,7 @@ public class LibertyMavenUtil {
     private static BuildFile mavenPluginDetected(NodeList buildList) {
         for (int i = 0; i < buildList.getLength(); i++) {
             Node buildNode = buildList.item(i);
-            if (buildNode.getNodeName().equals("plugins")) {
+            if ("plugins".equals(buildNode.getNodeName())) {
                 NodeList plugins = buildNode.getChildNodes();
                 if (buildNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element pluginsElem = (Element) buildNode;
@@ -158,16 +158,16 @@ public class LibertyMavenUtil {
                             if (pluginElem.getElementsByTagName("version").getLength() != 0) {
                                 version = pluginElem.getElementsByTagName("version").item(0).getTextContent();
                             }
-                            if (groupId.equals("io.openliberty.tools") && artifactId.equals("liberty-maven-plugin")){
+                            if ("io.openliberty.tools".equals(groupId) && "liberty-maven-plugin".equals(artifactId)){
                                 boolean validContainerVersion = containerVersion(version);
-                                return (new BuildFile(true, validContainerVersion));
+                                return new BuildFile(true, validContainerVersion);
                             }
                         }
                     }
                 }
             }
         }
-        return (new BuildFile(false, false));
+        return new BuildFile(false, false);
     }
 
     /**

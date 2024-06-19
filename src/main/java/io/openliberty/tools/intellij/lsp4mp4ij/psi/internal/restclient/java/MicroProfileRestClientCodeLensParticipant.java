@@ -145,18 +145,17 @@ public class MicroProfileRestClientCodeLensParticipant implements IJavaCodeLensP
 			return baseURLFromConfig;
 		}
 		// Search base url from the @RegisterRestClient/baseUri
-		String baseURIFromAnnotation = getAnnotationMemberValue(registerRestClientAnnotation,
+		return getAnnotationMemberValue(registerRestClientAnnotation,
 				REGISTER_REST_CLIENT_ANNOTATION_BASE_URI);
-		return baseURIFromAnnotation;
 	}
 
 	private static String getBaseURIFromConfig(PsiClass type, PsiMicroProfileProject mpProject) {
-		String property = new StringBuilder(type.getQualifiedName()).append("/mp-rest/uri").toString();
+		String property = type.getQualifiedName() + "/mp-rest/uri";
 		return mpProject.getProperty(property);
 	}
 
 	private static String getBaseURLFromConfig(PsiClass type, PsiMicroProfileProject mpProject) {
-		String property = new StringBuilder(type.getQualifiedName()).append("/mp-rest/url").toString();
+		String property = type.getQualifiedName() + "/mp-rest/url";
 		return mpProject.getProperty(property);
 	}
 }

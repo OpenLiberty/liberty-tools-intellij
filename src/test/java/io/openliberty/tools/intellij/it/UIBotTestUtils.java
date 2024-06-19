@@ -258,7 +258,7 @@ public class UIBotTestUtils {
                 }
 
                 // If the Start... action was selected, make sure the Edit Configuration dialog is displayed.
-                if (action.equals("Start...")) {
+                if ("Start...".equals(action)) {
                     // Finding the dialog may take a quite some time on Windows.
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));
@@ -302,7 +302,7 @@ public class UIBotTestUtils {
                 menuAction.click();
 
                 // If the Liberty: Start... action was selected, make sure the Edit Configuration dialog is displayed.
-                if (action.equals("Liberty: Start...")) {
+                if ("Liberty: Start...".equals(action)) {
                     // Finding the dialog may take a quite some time on Windows.
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));
@@ -534,8 +534,8 @@ public class UIBotTestUtils {
                 error = null;
 
                 // Click on the Liberty tool window toolbar to give it focus.
-                ComponentFixture LibertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
-                LibertyTWBar.click();
+                ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
+                libertyTWBar.click();
 
                 // Expand the project tree to show the available actions.
                 String xPath = "//div[@class='LibertyExplorer']//div[@class='ActionButton' and contains(@myaction.key, 'action.ExpandAll.text')]";
@@ -786,7 +786,7 @@ public class UIBotTestUtils {
                 // Find the target text on the editor and move the move to it.
                 editorNew.findText(contains(hoverTarget)).moveMouse();
                 // clear and "lightbulb" icons?
-                if (!hoverFile.equals("server.xml")) {
+                if (!"server.xml".equals(hoverFile)) {
                     keyboard.hotKey(VK_ESCAPE);
                 }
 
@@ -1161,7 +1161,7 @@ public class UIBotTestUtils {
                 // find the location in the file to begin the stanza insertion
                 goToLineAndColumn(remoteRobot, keyboard, line, col);
 
-                if (type.name().equals("FEATURE")) {
+                if ("FEATURE".equals(type.name())) {
                     String textToFind = "feature";
                     // if this is a feature stanza, hit enter to place it on the next line
                     // in the featureManager Block
@@ -1315,10 +1315,11 @@ public class UIBotTestUtils {
      */
     public static void goToLineAndColumn(RemoteRobot remoteRobot, Keyboard keyboard, int line, int column) {
         // trigger the line:col popup window to place cursor at exact location in file
-        if (remoteRobot.isMac())
+        if (remoteRobot.isMac()) {
             keyboard.hotKey(KeyEvent.VK_META, KeyEvent.VK_L);
-        else
+        } else {
             keyboard.hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_G);
+        }
         keyboard.enterText(line + ":" + column);
         keyboard.enter();
     }
@@ -1349,7 +1350,7 @@ public class UIBotTestUtils {
         List<RemoteText> rts = popup.findAllText();
 
         // print out the string data found in the popup window - for debugging
-        popup.findAllText().forEach((it) -> System.out.println(it.getText()));
+        popup.findAllText().forEach(it -> System.out.println(it.getText()));
 
         StringBuilder popupString = new StringBuilder();
         for (RemoteText rt : rts) {
@@ -1601,19 +1602,19 @@ public class UIBotTestUtils {
                 }
 
                 // If the Liberty: Start... action was selected, make sure the Edit Configuration dialog is displayed.
-                if (action.equals("Liberty: Start...")) {
+                if ("Liberty: Start...".equals(action)) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));
                 }
 
                 // If the Liberty: Add project to the tool window action was selected, make sure the Add Liberty project dialog is displayed.
-                if (action.equals("Liberty: Add project to the tool window")) {
+                if ("Liberty: Add project to the tool window".equals(action)) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Add Liberty project"), Duration.ofSeconds(30));
                 }
 
                 // If the Liberty: Add project to the tool window action was selected, make sure the Remove Liberty project dialog is displayed.
-                if (action.equals("Liberty: Remove project from the tool window")) {
+                if ("Liberty: Remove project from the tool window".equals(action)) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Remove Liberty project"), Duration.ofSeconds(30));
                 }
@@ -1809,7 +1810,7 @@ public class UIBotTestUtils {
 
             List<RemoteText> rts = pluginCfgTree.findAllText();
             for (RemoteText rt : rts) {
-                if (rt.getText().equals("Liberty")) {
+                if ("Liberty".equals(rt.getText())) {
                     rt.click();
                     break;
                 }
@@ -1831,7 +1832,7 @@ public class UIBotTestUtils {
                             Duration.ofSeconds(1),
                             "Waiting for the name text field to be enabled or populated by default",
                             "The name text field was not enabled or populated by default",
-                            () -> nameTextField.isEnabled() && !(nameTextField.getText().isEmpty()) && nameTextField.getText().equals("Unnamed"));
+                            () -> nameTextField.isEnabled() && !nameTextField.getText().isEmpty() && "Unnamed".equals(nameTextField.getText()));
 
                     nameTextField.click();
                 } catch (Exception e) {
@@ -1954,7 +1955,7 @@ public class UIBotTestUtils {
      * @return The opened Liberty configuration entries.
      */
     public static Map<String, String> getOpenedLibertyConfigDataAndCloseOnExit(RemoteRobot remoteRobot) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
 
         // Get a hold of the Liberty Edit Configuration dialog.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -1980,7 +1981,7 @@ public class UIBotTestUtils {
                     Duration.ofSeconds(1),
                     "Waiting for the combo box labeled Liberty project on the Liberty edit config dialog to be populated",
                     "The combo box labeled Liberty project on the Liberty edit config dialog was not populated",
-                    () -> projBldFileBox.listValues().size() != 0);
+                    () -> !projBldFileBox.listValues().isEmpty());
             List<String> entries = projBldFileBox.listValues();
             String projBldFilePath = entries.get(0);
             map.put(ConfigEntries.LIBERTYPROJ.toString(), projBldFilePath);
@@ -2119,7 +2120,7 @@ public class UIBotTestUtils {
                 ActionButtonFixture removeCfgButton = rdConfigDialog.actionButton(locator);
 
                 for (RemoteText treeEntry : treeEntries) {
-                    if (treeEntry.getText().equals("Liberty")) {
+                    if ("Liberty".equals(treeEntry.getText())) {
                         processEntries = true;
                         continue;
                     }
@@ -2262,7 +2263,7 @@ public class UIBotTestUtils {
 
             // Validate that the server stopped. Fail the test if the last iteration fails.
             try {
-                boolean failOnError = (i == (maxRetries - 1));
+                boolean failOnError = i == (maxRetries - 1);
                 TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 12, failOnError);
                 break;
             } catch (Exception e) {

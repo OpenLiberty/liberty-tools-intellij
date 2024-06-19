@@ -71,7 +71,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
 
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
     protected final List<BuildFile> getBuildFileList(Project project) {
-        final List<BuildFile> buildFiles = new ArrayList<BuildFile>();
+        final List<BuildFile> buildFiles = new ArrayList<>();
         final List<BuildFile> mavenBuildFiles;
         final List<BuildFile> gradleBuildFiles;
         try {

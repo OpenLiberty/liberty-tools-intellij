@@ -53,7 +53,7 @@ public class ModifyReturnTypeProposal extends ChangeCorrectionProposal {
     @Override
     public Change getChange() {
         if (binding instanceof PsiMethod) {
-            PsiMethod method = ((PsiMethod) binding);
+            PsiMethod method = (PsiMethod) binding;
             PsiTypeElement oldType = method.getReturnTypeElement();
             PsiElementFactory factory = JavaPsiFacade.getInstance(binding.getProject()).getElementFactory();
             PsiTypeElement newType = factory.createTypeElement(newReturnType);

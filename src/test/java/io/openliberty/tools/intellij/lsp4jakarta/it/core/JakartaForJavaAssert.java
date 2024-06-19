@@ -49,7 +49,7 @@ public class JakartaForJavaAssert {
 
     public static void assertJavaCodeAction(JakartaJavaCodeActionParams params, IPsiUtils utils, CodeAction... expected) {
         List<? extends CodeAction> actual = PropertiesManagerForJakarta.getInstance().getCodeAction(params, utils);
-        assertCodeActions(actual != null && actual.size() > 0 ? actual : Collections.emptyList(), expected);
+        assertCodeActions(actual != null && !actual.isEmpty() ? actual : Collections.emptyList(), expected);
     }
 
     public static void assertCodeActions(List<? extends CodeAction> actual, CodeAction... expected) {
@@ -146,7 +146,7 @@ public class JakartaForJavaAssert {
     public static void assertJavaDiagnostics(JakartaDiagnosticsParams params, IPsiUtils utils, Diagnostic... expected) {
         List<PublishDiagnosticsParams> actual = PropertiesManagerForJakarta.getInstance().diagnostics(params, utils);
         assertDiagnostics(
-                actual != null && actual.size() > 0 ? actual.get(0).getDiagnostics() : Collections.emptyList(),
+                actual != null && !actual.isEmpty() ? actual.get(0).getDiagnostics() : Collections.emptyList(),
                 expected);
     }
 

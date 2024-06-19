@@ -35,7 +35,7 @@ public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTes
     /**
      * Build file name.
      */
-    private final String BUILD_FILE_NAME = "pom.xml";
+    private static final String BUILD_FILE_NAME = "pom.xml";
 
     /**
      * Prepares the environment for test execution.

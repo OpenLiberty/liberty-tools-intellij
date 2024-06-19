@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
-    private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
+    private static final Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
@@ -134,7 +134,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node = new LibertyModuleNode(module);
 
             top.add(node);
-            ArrayList<Object> settings = new ArrayList<Object>();
+            ArrayList<Object> settings = new ArrayList<>();
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_MAVEN_PROJECT);
             map.put(projectName, settings);
@@ -180,7 +180,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node = new LibertyModuleNode(module);
 
             top.add(node);
-            ArrayList<Object> settings = new ArrayList<Object>();
+            ArrayList<Object> settings = new ArrayList<>();
             settings.add(virtualFile);
             settings.add(Constants.LIBERTY_GRADLE_PROJECT);
             map.put(projectName, settings);

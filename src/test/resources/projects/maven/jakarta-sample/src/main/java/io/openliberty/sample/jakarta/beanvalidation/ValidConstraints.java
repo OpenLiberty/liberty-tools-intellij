@@ -75,7 +75,7 @@ public class ValidConstraints {
     private String thisIsUsed;
     
     @Null
-    private String NeverUsed;
+    private String neverUsed;
 
     @Past
     private OffsetDateTime theGoodOldDays;

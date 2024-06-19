@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public class PropertiesConfigSource extends AbstractConfigSource<Properties> {
 
-	private transient PropertyValueExpander propertyValueExpander = null;
+	private transient PropertyValueExpander propertyValueExpander;
 
 	public PropertiesConfigSource(String configFileName, String profile, int ordinal, Module javaProject) {
 		super(configFileName, profile, ordinal, javaProject);
@@ -105,7 +105,7 @@ public class PropertiesConfigSource extends AbstractConfigSource<Properties> {
 		if (properties == null) {
 			return Collections.emptySet();
 		}
-		return properties.keySet().stream().map(key -> (String) key).collect(Collectors.toSet());
+		return properties.keySet().stream().map(String.class::cast).collect(Collectors.toSet());
 	}
 
 }

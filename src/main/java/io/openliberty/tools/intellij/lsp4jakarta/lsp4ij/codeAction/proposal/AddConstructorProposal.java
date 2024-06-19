@@ -65,9 +65,9 @@ public class AddConstructorProposal extends ChangeCorrectionProposal {
         PsiMethod newConstructor = JavaPsiFacade.getElementFactory(binding.getProject()).createConstructor();
         // set visibility
         PsiModifierList modifiers = newConstructor.getModifierList();
-        if (visibility.equals("protected")) {
+        if ("protected".equals(visibility)) {
             modifiers.setModifierProperty(PsiModifier.PROTECTED, true);
-        } else if (visibility.equals("public")) {
+        } else if ("public".equals(visibility)) {
             modifiers.setModifierProperty(PsiModifier.PUBLIC, true);
         }
         // Find a place in the user program to insert the new constructor.

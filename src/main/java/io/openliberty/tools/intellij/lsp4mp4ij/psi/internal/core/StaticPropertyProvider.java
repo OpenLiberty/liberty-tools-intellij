@@ -47,7 +47,7 @@ public class StaticPropertyProvider extends AbstractStaticPropertiesProvider {
 			return true;
 		} else {
 			Module javaProject = context.getJavaProject();
-			return (PsiTypeUtils.findType(javaProject, type) != null);
+			return PsiTypeUtils.findType(javaProject, type) != null;
 		}
 	}
 

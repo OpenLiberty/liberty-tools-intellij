@@ -104,7 +104,7 @@ public class LanguageServerWrapper {
     }
 
     private Listener fileBufferListener = new Listener();
-    private MessageBusConnection messageBusConnection = null;
+    private MessageBusConnection messageBusConnection;
 
     @Nonnull
     public final LanguageServersRegistry.LanguageServerDefinition serverDefinition;
@@ -128,7 +128,7 @@ public class LanguageServerWrapper {
      * Map containing unregistration handlers for dynamic capability registrations.
      */
     private @Nonnull Map<String, Runnable> dynamicRegistrations = new HashMap<>();
-    private boolean initiallySupportsWorkspaceFolders = false;
+    private boolean initiallySupportsWorkspaceFolders;
 
     /* Backwards compatible constructor */
     public LanguageServerWrapper(@Nonnull Module project, @Nonnull LanguageServersRegistry.LanguageServerDefinition serverDefinition) {
@@ -292,9 +292,8 @@ public class LanguageServerWrapper {
             }).thenAccept(res -> {
                 serverCapabilities = res.getCapabilities();
                 this.initiallySupportsWorkspaceFolders = supportsWorkspaceFolders(serverCapabilities);
-            }).thenRun(() -> {
-                this.languageServer.initialized(new InitializedParams());
-            }).thenRun(() -> {
+            }).thenRun(() ->
+                this.languageServer.initialized(new InitializedParams())).thenRun(() -> {
                 final Map<URI, Document> toReconnect = filesToReconnect;
                 initializeFuture.thenRunAsync(() -> {
                     if (this.initialProject != null) {
@@ -753,12 +752,12 @@ public class LanguageServerWrapper {
         if (initializeFuture == null) { // language server is shutting down but registration messages are still arriving
             if (LOGGER.isDebugEnabled()) {
                 StringBuffer buffer = new StringBuffer();
-                params.getRegistrations().forEach(reg -> { buffer.append(reg.getMethod()).append(","); });
+                params.getRegistrations().forEach(reg -> buffer.append(reg.getMethod()).append(","));
                 LOGGER.info("registerCapability, initializeFuture==null, ignore capabilities " + buffer);
             }
             return;
         }
-        initializeFuture.thenRun(() -> {
+        initializeFuture.thenRun(() ->
             params.getRegistrations().forEach(reg -> {
                 if ("workspace/didChangeWorkspaceFolders".equals(reg.getMethod())) { //$NON-NLS-1$
                     assert serverCapabilities != null :
@@ -805,8 +804,7 @@ public class LanguageServerWrapper {
                     serverCapabilities.setCodeActionProvider(Boolean.TRUE);
                     addRegistration(reg, () -> serverCapabilities.setCodeActionProvider(beforeRegistration));
                 }
-            });
-        });
+            }));
     }
 
     private void addRegistration(@Nonnull Registration reg, @Nonnull Runnable unregistrationHandler) {

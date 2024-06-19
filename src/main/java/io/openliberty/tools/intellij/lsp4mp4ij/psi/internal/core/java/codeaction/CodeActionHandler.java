@@ -233,7 +233,7 @@ public class CodeActionHandler {
 
 	private static String getCodeString(Object codeObject) {
 		if (codeObject instanceof String) {
-			return ((String) codeObject);
+			return (String) codeObject;
 		}
 		@SuppressWarnings("unchecked")
 		Either<String, Number> code = (Either<String, Number>) codeObject;

@@ -94,30 +94,37 @@ public class AnnotationAttributeRule {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((attribute == null) ? 0 : attribute.hashCode());
-		result = prime * result + ((rangeExpression == null) ? 0 : rangeExpression.hashCode());
+		result = prime * result + (attribute == null ? 0 : attribute.hashCode());
+		result = prime * result + (rangeExpression == null ? 0 : rangeExpression.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
 		AnnotationAttributeRule other = (AnnotationAttributeRule) obj;
 		if (attribute == null) {
-			if (other.attribute != null)
-				return false;
-		} else if (!attribute.equals(other.attribute))
-			return false;
+            if (other.attribute != null) {
+                return false;
+            }
+		} else if (!attribute.equals(other.attribute)) {
+            return false;
+        }
 		if (rangeExpression == null) {
-			if (other.rangeExpression != null)
-				return false;
-		} else if (!rangeExpression.equals(other.rangeExpression))
-			return false;
+            if (other.rangeExpression != null) {
+                return false;
+            }
+		} else if (!rangeExpression.equals(other.rangeExpression)) {
+            return false;
+        }
 		return true;
 	}
 

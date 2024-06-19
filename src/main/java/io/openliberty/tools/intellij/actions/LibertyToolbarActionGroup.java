@@ -16,7 +16,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.Tree;
 
 public class LibertyToolbarActionGroup extends DefaultActionGroup {
-    private Tree tree;
+    private final Tree tree;
 
     public LibertyToolbarActionGroup(Tree tree) {
         super("LibertyActionToolBar", false);

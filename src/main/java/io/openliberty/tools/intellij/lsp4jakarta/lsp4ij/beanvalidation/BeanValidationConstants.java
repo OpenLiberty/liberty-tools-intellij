@@ -75,11 +75,11 @@ public class BeanValidationConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";
     public static final String DIAGNOSTIC_CODE_STATIC = "MakeNotStatic";
 
-    public final static Set<String> SET_OF_ANNOTATIONS = Collections
+    public static final Set<String> SET_OF_ANNOTATIONS = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(ASSERT_TRUE, ASSERT_FALSE, DIGITS, DECIMAL_MAX,
                     DECIMAL_MIN, EMAIL, PAST_OR_PRESENT, FUTURE_OR_PRESENT, PAST, FUTURE, MIN, MAX, NEGATIVE_OR_ZERO,
                     POSTIVE_OR_ZERO, NEGATIVE, POSITIVE, NOT_BLANK, PATTERN, SIZE, NOT_EMPTY)));
-    public final static Set<String> SET_OF_DATE_TYPES = Collections
+    public static final Set<String> SET_OF_DATE_TYPES = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(THAI_BUDDHIST_DATE, MINGUO_DATE, JAPANESE_DATE,
                     HIJRAH_DATE, ZONED_DATE_TIME, YEAR_MONTH, YEAR, OFFSET_TIME, OFFSET_DATE_TIME, MONTH_DAY,
                     LOCAL_TIME, LOCAL_DATE_TIME, LOCAL_DATE, INSTANT, CALENDAR, DATE)));

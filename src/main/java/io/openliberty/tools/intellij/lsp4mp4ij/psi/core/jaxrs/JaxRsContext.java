@@ -140,7 +140,7 @@ public class JaxRsContext {
 	 * @return the value of the @ApplicationPath annotation, or null if not found
 	 */
 	private static String findApplicationPath(PsiClass annotationType, JavaCodeLensContext context) {
-		AtomicReference<String> applicationPathRef = new AtomicReference<String>();
+		AtomicReference<String> applicationPathRef = new AtomicReference<>();
 
 		Query<PsiClass> pattern = AnnotatedElementsSearch.searchElements(annotationType, context.getJavaProject().getModuleWithDependenciesScope(),
 				PsiClass.class);

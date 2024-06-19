@@ -44,21 +44,22 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        if (unit == null)
+        if (unit == null) {
             return;
+        }
 
         PsiClass[] types = unit.getClasses();
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : types) {
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
-                            .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
+                            .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
                     scopeFQNames);
-            boolean isManagedBean = managedBeanAnnotations.size() > 0;
+            boolean isManagedBean = !managedBeanAnnotations.isEmpty();
 
             if (managedBeanAnnotations.size() > 1) {
                 // convert to simple name
                 List<String> diagnosticData = managedBeanAnnotations.stream()
-                        .map(annotation -> getSimpleName(annotation)).collect(Collectors.toList());
+                        .map(AbstractDiagnosticsCollector::getSimpleName).collect(Collectors.toList());
                 diagnostics.add(createDiagnostic(type, unit,
                         Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
                         DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(diagnosticData)),
@@ -66,10 +67,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
 
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
-            PsiField fields[] = type.getFields();
+            PsiField[] fields = type.getFields();
             for (PsiField field : fields) {
                 String[] annotationNames = Stream.of(field.getAnnotations())
-                        .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
+                        .map(PsiAnnotation::getQualifiedName).toArray(String[]::new);
                 List<String> fieldScopes = getMatchedJavaElementNames(type, annotationNames, scopeFQNames);
 
                 /**
@@ -100,15 +101,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                  * Here we only look at the fields.
                  */
                 List<String> fieldInjects = getMatchedJavaElementNames(type, annotationNames, injectAnnotations);
-                boolean isProducerField = false, isInjectField = false;
+                boolean isProducerField = false;
+                boolean isInjectField = false;
                 for (String annotation : fieldInjects) {
-                    if (PRODUCES_FQ_NAME.equals(annotation))
+                    if (PRODUCES_FQ_NAME.equals(annotation)) {
                         isProducerField = true;
-                    else if (INJECT_FQ_NAME.equals(annotation))
+                    } else if (INJECT_FQ_NAME.equals(annotation)) {
                         isInjectField = true;
+                    }
                 }
                 if (isProducerField && fieldScopes.size() > 1) {
-                    List<String> diagnosticData = fieldScopes.stream().map(annotation -> getSimpleName(annotation))
+                    List<String> diagnosticData = fieldScopes.stream().map(AbstractDiagnosticsCollector::getSimpleName)
                             .collect(Collectors.toList()); // convert to simple name
                     diagnosticData.add(PRODUCES);
                     diagnostics.add(createDiagnostic(field, unit,
@@ -138,12 +141,13 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
 
             PsiMethod[] methods = type.getMethods();
-            List<PsiMethod> constructorMethods = new ArrayList<PsiMethod>();
+            List<PsiMethod> constructorMethods = new ArrayList<>();
             for (PsiMethod method : methods) {
 
                 // Find all methods on the type that are constructors.
-                if (isConstructorMethod(method))
+                if (isConstructorMethod(method)) {
                     constructorMethods.add(method);
+                }
 
                 /**
                  * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#declaring_bean_scope
@@ -155,19 +159,21 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                  * Here we only look at the methods.
                  */
                 String[] annotationNames = Stream.of(method.getAnnotations())
-                        .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
+                        .map(PsiAnnotation::getQualifiedName).toArray(String[]::new);
                 List<String> methodScopes = getMatchedJavaElementNames(type, annotationNames, scopeFQNames);
                 List<String> methodInjects = getMatchedJavaElementNames(type, annotationNames, injectAnnotations);
-                boolean isProducerMethod = false, isInjectMethod = false;
+                boolean isProducerMethod = false;
+                boolean isInjectMethod = false;
                 for (String annotation : methodInjects) {
-                    if (PRODUCES_FQ_NAME.equals(annotation))
+                    if (PRODUCES_FQ_NAME.equals(annotation)) {
                         isProducerMethod = true;
-                    else if (INJECT_FQ_NAME.equals(annotation))
+                    } else if (INJECT_FQ_NAME.equals(annotation)) {
                         isInjectMethod = true;
+                    }
                 }
 
                 if (isProducerMethod && methodScopes.size() > 1) {
-                    List<String> diagnosticData = methodScopes.stream().map(annotation -> getSimpleName(annotation))
+                    List<String> diagnosticData = methodScopes.stream().map(AbstractDiagnosticsCollector::getSimpleName)
                             .collect(Collectors.toList()); // convert to simple name
                     diagnosticData.add(PRODUCES);
                     diagnostics.add(createDiagnostic(method, unit,
@@ -196,7 +202,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
             }
 
-            if (isManagedBean && constructorMethods.size() > 0) {
+            if (isManagedBean && !constructorMethods.isEmpty()) {
                 /**
                  * If the managed bean does not have a constructor that takes no parameters, it
                  * must have a constructor annotated @Inject. No additional special annotations
@@ -205,7 +211,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
                 // If there are no constructor methods, there is an implicit empty constructor
                 // generated by the compiler.
-                List<PsiMethod> methodsNeedingDiagnostics = new ArrayList<PsiMethod>();
+                List<PsiMethod> methodsNeedingDiagnostics = new ArrayList<>();
                 for (PsiMethod m : constructorMethods) {
                     if (m.getParameterList().getParametersCount() == 0) {
                         methodsNeedingDiagnostics.clear();
@@ -223,8 +229,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (hasParameterizedInjectConstructor) {
                         methodsNeedingDiagnostics.clear();
                         break;
-                    } else
+                    } else {
                         methodsNeedingDiagnostics.add(m);
+                    }
                 }
 
                 // Deliver a diagnostic on all parameterized constructors that they must add an
@@ -241,7 +248,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             if (isManagedBean) {
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 boolean isDependent = managedBeanAnnotations.stream()
-                        .anyMatch(annotation -> DEPENDENT_FQ_NAME.equals(annotation));
+                        .anyMatch(DEPENDENT_FQ_NAME::equals);
 
                 if (isClassGeneric && !isDependent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -299,7 +306,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         }
                     }
 
-                    if(numDisposes == 0) continue;
+                    if (numDisposes == 0) {
+                        continue;
+                    }
                     if(numDisposes > 1) {
                         diagnostics.add(createDiagnostic(method, unit,
                                 Messages.getMessage("ManagedBeanDisposeOneParameter"),
@@ -330,14 +339,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
             }
 
-            if (targetAnnotation == null)
+            if (targetAnnotation == null) {
                 continue;
+            }
 
             Set<String> invalidAnnotations = new TreeSet<>();
             PsiParameter[] params = method.getParameterList().getParameters();
             for (PsiParameter param : params) {
                 List<String> paramScopes = getMatchedJavaElementNames(type, Stream.of(param.getAnnotations())
-                                .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
+                                .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
                         INVALID_INJECT_PARAMS_FQ);
                 for (String annotation : paramScopes) {
                     invalidAnnotations.add("@" + getSimpleName(annotation));

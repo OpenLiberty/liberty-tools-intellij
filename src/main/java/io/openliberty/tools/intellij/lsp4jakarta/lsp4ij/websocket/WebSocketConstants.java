@@ -103,7 +103,7 @@ public class WebSocketConstants {
 
     public static final Set<String> RAW_WRAPPER_OBJS = new HashSet<>(
             Arrays.asList("String", "Boolean", "Integer", "Long", "Double", "Float"));
-    public static final Set<String> WRAPPER_OBJS = RAW_WRAPPER_OBJS.stream().map(raw -> "java.lang.".concat(raw))
+    public static final Set<String> WRAPPER_OBJS = RAW_WRAPPER_OBJS.stream().map("java.lang."::concat)
             .collect(Collectors.toSet());
 
     // Enums

@@ -55,8 +55,9 @@ public class ResourceMethodDiagnosticsCollector extends AbstractDiagnosticsColle
                         String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                                 methodDesignators);
                         if (matchedAnnotation != null) {
-                            if (isValid && !isPublic)
+                            if (isValid && !isPublic) {
                                 isValid = false;
+                            }
                             if (!Jax_RSConstants.PATH_ANNOTATION.equals(matchedAnnotation)) {
                                 isResourceMethod = true;
                                 break;
@@ -83,8 +84,9 @@ public class ResourceMethodDiagnosticsCollector extends AbstractDiagnosticsColle
                                     break;
                                 }
                             }
-                            if (isEntityParam)
+                            if (isEntityParam) {
                                 numEntityParams++;
+                            }
                         }
                         if (numEntityParams > 1) {
                             diagnostics.add(createDiagnostic(method, unit,

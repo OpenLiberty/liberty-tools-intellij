@@ -23,7 +23,7 @@ public class TreeDataProvider implements DataProvider {
     public VirtualFile currentFile;
     public String projectName;
     public String projectType;
-    public HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
+    public HashMap<String, ArrayList<Object>> map = new HashMap<>();
 
     @Nullable
     @Override

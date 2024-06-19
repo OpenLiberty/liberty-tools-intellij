@@ -101,23 +101,17 @@ public class AnnotationRulesJavaASTValidator extends JavaASTValidator {
 	}
 
 	private static boolean isInteger(PsiAnnotationMemberValue attributeValueExpr) {
-		if ((attributeValueExpr instanceof PsiLiteral && ((PsiLiteral) attributeValueExpr).getValue() instanceof Number) || (attributeValueExpr instanceof PsiPrefixExpression
-				&& (((PsiPrefixExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.MINUS
-				|| ((PsiPrefixExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PLUS))) {
-			return true;
-		}
-		return false;
+        return (attributeValueExpr instanceof PsiLiteral && ((PsiLiteral) attributeValueExpr).getValue() instanceof Number) || (attributeValueExpr instanceof PsiPrefixExpression
+                && (((PsiPrefixExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.MINUS
+                || ((PsiPrefixExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PLUS));
 	}
 
 	private static boolean isInfixIntegerExpression(PsiAnnotationMemberValue attributeValueExpr) {
-		if (attributeValueExpr instanceof PsiBinaryExpression
-				&& (((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.ASTERISK
-				|| ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.DIV
-				|| ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PERC
-				|| ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PLUS
-				|| ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.MINUS)) {
-			return true;
-		}
-		return false;
+        return attributeValueExpr instanceof PsiBinaryExpression
+                && (((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.ASTERISK
+                || ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.DIV
+                || ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PERC
+                || ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.PLUS
+                || ((PsiBinaryExpression) attributeValueExpr).getOperationTokenType() == JavaTokenType.MINUS);
 	}
 }

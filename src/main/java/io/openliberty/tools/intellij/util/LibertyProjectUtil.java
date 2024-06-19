@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class LibertyProjectUtil {
-    private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
+    private static final Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);;
 
     enum BuildFileFilter {
         ADDABLE {
@@ -160,7 +160,7 @@ public class LibertyProjectUtil {
 
     // returns valid build files for the current project
     private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType, BuildFileFilter filter) throws ParserConfigurationException, SAXException, IOException {
-        ArrayList<BuildFile> buildFiles = new ArrayList<BuildFile>();
+        ArrayList<BuildFile> buildFiles = new ArrayList<>();
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
             PsiFile[] mavenFiles = FilenameIndex.getFilesByName(project, "pom.xml", GlobalSearchScope.projectScope(project));

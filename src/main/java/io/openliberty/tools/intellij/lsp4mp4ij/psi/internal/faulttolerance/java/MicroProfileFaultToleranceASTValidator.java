@@ -70,7 +70,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 
 	private final Set<String> allowedReturnTypesForAsynchronousAnnotation;
 
-	private static Logger LOGGER = Logger.getLogger(MicroProfileFaultToleranceASTValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MicroProfileFaultToleranceASTValidator.class.getName());
 
 	public MicroProfileFaultToleranceASTValidator() {
 		super();
@@ -167,12 +167,8 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	private void validateAsynchronousAnnotation(PsiMethod node, PsiAnnotation annotation) {
 		PsiType methodReturnType = node.getReturnType();
 		String methodReturnTypeString;
-		try {
-			methodReturnTypeString = methodReturnType.getCanonicalText();
-		} catch (Exception e) {
-			throw e;
-		}
-		if ((!isAllowedReturnTypeForAsynchronousAnnotation(methodReturnTypeString))) {
+        methodReturnTypeString = methodReturnType.getCanonicalText();
+		if (!isAllowedReturnTypeForAsynchronousAnnotation(methodReturnTypeString)) {
 			String allowedTypes = allowedReturnTypesForAsynchronousAnnotation.stream()
 					.collect(Collectors.joining("', '", "'", "'"));
 			String message = MessageFormat.format(ASYNCHRONOUS_ERROR_MESSAGE, node.getName(), allowedTypes);
@@ -274,9 +270,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 		Set<String> methods = methodsCache.get(type);
 		if (methods == null) {
 			methods = Stream.of(type.getMethods()) //
-					.map(m -> {
-						return m.getName();
-					}).collect(Collectors.toSet());
+					.map(PsiMethod::getName).collect(Collectors.toSet());
 			methodsCache.put(type, methods);
 		}
 		return methods;

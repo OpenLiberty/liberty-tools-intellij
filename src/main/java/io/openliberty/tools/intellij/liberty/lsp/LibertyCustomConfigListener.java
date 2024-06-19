@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class LibertyCustomConfigListener implements BulkFileListener {
-    private final static Logger LOGGER = Logger.getInstance(LibertyCustomConfigListener.class);
+    private static final Logger LOGGER = Logger.getInstance(LibertyCustomConfigListener.class);
 
     private final LibertyCustomConfigManager manager;
     public static final String LIBERTY_PLUGIN_CONFIG_XML = "liberty-plugin-config.xml"; 

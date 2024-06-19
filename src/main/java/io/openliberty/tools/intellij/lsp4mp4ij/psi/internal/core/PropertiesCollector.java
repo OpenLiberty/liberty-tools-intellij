@@ -137,9 +137,8 @@ public class PropertiesCollector implements IPropertiesCollector {
 
 	private Optional<ItemMetadata> getExistingProperty(ItemMetadata property) {
 		List<ItemMetadata> configProperties = configuration.getProperties();
-		Optional<ItemMetadata> configProperty = configProperties.stream()
+		return configProperties.stream()
 				.filter(cp -> cp.getName().equals(property.getName())).findFirst();
-		return configProperty;
 	}
 
 	private void mergeWithReplace(ItemMetadata property) {

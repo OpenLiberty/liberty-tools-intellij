@@ -46,7 +46,7 @@ public class NonPublicResourceMethodQuickFix implements IJavaCodeActionParticipa
 
     private static final Logger LOGGER = Logger.getLogger(NonPublicResourceMethodQuickFix.class.getName());
 
-    private final static String TITLE_MESSAGE = Messages.getMessage("MakeMethodPublic");
+    private static final String TITLE_MESSAGE = Messages.getMessage("MakeMethodPublic");
 
     @Override
     public String getParticipantId() {

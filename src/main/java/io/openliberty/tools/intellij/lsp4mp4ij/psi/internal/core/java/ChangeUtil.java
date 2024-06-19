@@ -101,7 +101,7 @@ public class ChangeUtil {
 		}
 		boolean hasChanges = false;
 		// @formatter:off
-		if ((edit.getChanges() != null && !edit.getChanges().isEmpty())) {
+		if (edit.getChanges() != null && !edit.getChanges().isEmpty()) {
 			hasChanges = edit.getChanges().values().stream()
 					.filter(changes -> changes != null && !changes.isEmpty() && hasChanges(changes)).findFirst()
 					.isPresent();

@@ -16,7 +16,7 @@ public class PathParamURIWarningTest {
     @OnOpen
     public void OnOpen(Session session) throws IOException {
         this.session = session;
-        System.out.println("Websocket opened: " + session.getId().toString());
+        System.out.println("Websocket opened: " + session.getId());
     }
 
     @OnMessage

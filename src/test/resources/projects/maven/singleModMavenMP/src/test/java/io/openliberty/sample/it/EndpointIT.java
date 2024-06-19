@@ -22,7 +22,7 @@ public class EndpointIT {
     private static final String RESOURCE_ENDPOINT = "/api/resource";
     private static final String LIVENESS_ENDPOINT = "/health/live";
     private static final String READINESS_ENDPOINT = "/health/ready";
-    private String expectedGreeting = "Hello! Welcome to Open Liberty";
+    private final String expectedGreeting = "Hello! Welcome to Open Liberty";
     private Response response;
     private static Client client;
 

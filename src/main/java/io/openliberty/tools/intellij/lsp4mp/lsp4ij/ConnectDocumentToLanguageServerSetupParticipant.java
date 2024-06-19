@@ -31,7 +31,7 @@ public class ConnectDocumentToLanguageServerSetupParticipant implements ProjectC
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectDocumentToLanguageServerSetupParticipant.class);
 
-    private Project project;
+    private final Project project;
 
     public ConnectDocumentToLanguageServerSetupParticipant(Project project) {
         this.project = project;

@@ -20,6 +20,6 @@ public class HelloController {
         if (slhc.call().equals("up")) {
             return "Hello World";
         }
-        return ("blah");
+        return "blah";
     }
 }

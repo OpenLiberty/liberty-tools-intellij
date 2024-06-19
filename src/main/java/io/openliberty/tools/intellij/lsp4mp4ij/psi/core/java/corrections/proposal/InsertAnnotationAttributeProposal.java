@@ -53,7 +53,7 @@ public class InsertAnnotationAttributeProposal extends ASTRewriteCorrectionPropo
 	}
 
 	private void addDefinedAtributes() {
-		Set<String> implementedAttribs = new HashSet<String>();
+		Set<String> implementedAttribs = new HashSet<>();
 		for(PsiNameValuePair pair : fAnnotation.getParameterList().getAttributes()) {
 			implementedAttribs.add(pair.getAttributeName());
 		}

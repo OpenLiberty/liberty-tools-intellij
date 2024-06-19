@@ -190,8 +190,9 @@ public final class CompletionProposalTools {
 	private static int lengthOfPrefixMatch(String first, String second) {
 		int i;
 		for (i = 0; i < Math.min(first.length(), second.length()); i++) {
-			if (first.charAt(i) != second.charAt(i))
-				break;
+            if (first.charAt(i) != second.charAt(i)) {
+                break;
+            }
 		}
 		return i;
 	}

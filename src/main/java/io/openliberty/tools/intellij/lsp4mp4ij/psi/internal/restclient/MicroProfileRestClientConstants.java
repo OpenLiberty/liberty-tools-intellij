@@ -18,7 +18,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.restclient;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/restclient/MicroProfileRestClientConstants.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/restclient/MicroProfileRestClientConstants.java</a>
  *
  */
-public class MicroProfileRestClientConstants {
+public final class MicroProfileRestClientConstants {
 
 	private MicroProfileRestClientConstants() {
 	}

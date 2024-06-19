@@ -36,11 +36,11 @@ public class PsiMicroProfileProject {
 
 	private volatile List<IConfigSource> configSources;
 
-	private volatile transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
-	private volatile transient PropertyValueExpander propertyValueExpander = null;
+	private transient volatile IConfigSourcePropertiesProvider aggregatedPropertiesProvider;
+	private transient volatile PropertyValueExpander propertyValueExpander;
 
-	private final Object NOTIFY_MAP_LOCK = new Object();
-	private volatile transient Map<Document, WeakReference<Document>> documentsToNotify = new WeakHashMap<>();
+	private final Object notifyMapLock = new Object();
+	private transient volatile Map<Document, WeakReference<Document>> documentsToNotify = new WeakHashMap<>();
 
 	public PsiMicroProfileProject(Module javaProject) {
 		this.javaProject = javaProject;
@@ -123,8 +123,7 @@ public class PsiMicroProfileProject {
 			return defaultValue;
 		}
 		try {
-			int intValue = Integer.parseInt(value);
-			return intValue;
+			return Integer.parseInt(value);
 		} catch (NumberFormatException nfe) {
 			return defaultValue;
 		}
@@ -174,9 +173,7 @@ public class PsiMicroProfileProject {
 			}
 		}
 		return propertyToInfoMap.values().stream() //
-				.sorted((a, b) -> {
-					return a.getPropertyNameWithProfile().compareTo(b.getPropertyNameWithProfile());
-				}) //
+				.sorted((a, b) -> a.getPropertyNameWithProfile().compareTo(b.getPropertyNameWithProfile())) //
 				.map(info -> {
 					String resolved = this.getProperty(info.getPropertyNameWithProfile());
 					return new MicroProfileConfigPropertyInformation(info.getPropertyNameWithProfile(), resolved,
@@ -206,7 +203,7 @@ public class PsiMicroProfileProject {
 
 	private void refreshDocuments() {
 		Map<Document, WeakReference<Document>> docsToNotify = null;
-		synchronized (NOTIFY_MAP_LOCK) {
+		synchronized (notifyMapLock) {
 			docsToNotify = documentsToNotify;
 			documentsToNotify = new WeakHashMap<>();
 		}
@@ -218,9 +215,8 @@ public class PsiMicroProfileProject {
 			if (document != null) {
 				final Set<DocumentContentSynchronizer> synchronizers = document.getUserData(DocumentContentSynchronizer.KEY);
 				if (synchronizers != null) {
-					synchronizers.forEach(synchronizer -> {
-						synchronizer.documentFullRefresh(document);
-					});
+					synchronizers.forEach(synchronizer ->
+						synchronizer.documentFullRefresh(document));
 				}
 			}
 		});
@@ -230,7 +226,7 @@ public class PsiMicroProfileProject {
 	 * Register a document to be notified if the config source cache is cleared.
 	 */
 	public void notifyIfCacheEvicted(Document document) {
-		synchronized (NOTIFY_MAP_LOCK) {
+		synchronized (notifyMapLock) {
 			documentsToNotify.putIfAbsent(document, new WeakReference<>(document));
 		}
 	}
@@ -279,7 +275,7 @@ public class PsiMicroProfileProject {
 
 	private IConfigSourcePropertiesProvider getAggregatedPropertiesProvider() {
 		List<IConfigSource> configSources = getConfigSources();
-		if (configSources.size() == 0) {
+		if (configSources.isEmpty()) {
 			// Return an empty IConfigSourcePropertiesProvider
 			return new IConfigSourcePropertiesProvider() {
 

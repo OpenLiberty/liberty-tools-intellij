@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipant {
 
     private static final Logger LOGGER = Logger.getLogger(PostConstructReturnTypeQuickFix.class.getName());
-    private final static String TITLE_MESSAGE = Messages.getMessage("ChangeReturnTypeToVoid");
+    private static final String TITLE_MESSAGE = Messages.getMessage("ChangeReturnTypeToVoid");
 
     @Override
     public String getParticipantId() {

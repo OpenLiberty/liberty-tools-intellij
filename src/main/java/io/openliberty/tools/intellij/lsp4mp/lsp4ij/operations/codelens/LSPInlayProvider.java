@@ -71,7 +71,7 @@ public class LSPInlayProvider implements InlayHintsProvider<NoSettings> {
     public static final DataKey<Command> LSP_COMMAND = DataKey.create("open-liberty.intellij.lsp4ij.command");
     private static final long TIMEOUT = 5L;
 
-    private SettingsKey<NoSettings> key = new SettingsKey<>("LSP.hints");
+    private final SettingsKey<NoSettings> key = new SettingsKey<>("LSP.hints");
 
     @Override
     public boolean isVisibleInSettings() {
@@ -103,9 +103,7 @@ public class LSPInlayProvider implements InlayHintsProvider<NoSettings> {
             @NotNull
             @Override
             public JComponent createComponent(@NotNull ChangeListener changeListener) {
-                return LayoutKt.panel(new LCFlags[0], "LSP", builder -> {
-                    return null;
-                });
+                return LayoutKt.panel(new LCFlags[0], "LSP", builder -> null);
             }
         };
     }
@@ -181,9 +179,8 @@ public class LSPInlayProvider implements InlayHintsProvider<NoSettings> {
     private void executeClientCommand(LanguageServer languageServer, CodeLens codeLens, Component source, Project project) {
         if (LanguageServiceAccessor.getInstance(project).checkCapability(languageServer,
                 capabilites -> Boolean.TRUE.equals(capabilites.getCodeLensProvider().getResolveProvider()))) {
-            languageServer.getTextDocumentService().resolveCodeLens(codeLens).thenAcceptAsync(resolvedCodeLens -> {
-                executeClientCommand(source, resolvedCodeLens);
-            });
+            languageServer.getTextDocumentService().resolveCodeLens(codeLens).thenAcceptAsync(resolvedCodeLens ->
+                executeClientCommand(source, resolvedCodeLens));
         } else {
             executeClientCommand(source, codeLens);
         }

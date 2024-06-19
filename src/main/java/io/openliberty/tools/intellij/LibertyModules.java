@@ -20,9 +20,9 @@ import java.util.*;
 /**
  * Singleton to save the Liberty modules in the open project
  */
-public class LibertyModules {
+public final class LibertyModules {
 
-    private static LibertyModules instance = null;
+    private static LibertyModules instance;
 
     // key is build file associated with the Liberty project
     Map<VirtualFile, LibertyModule> libertyModules;
@@ -31,7 +31,7 @@ public class LibertyModules {
         libertyModules = Collections.synchronizedMap(new HashMap<>());
     }
 
-    public synchronized static LibertyModules getInstance() {
+    public static synchronized LibertyModules getInstance() {
         if (instance == null) {
             instance = new LibertyModules();
         }

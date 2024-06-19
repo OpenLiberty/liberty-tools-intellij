@@ -136,8 +136,7 @@ public class LSPDiagnosticsForServer {
      */
     public void refreshQuickFixesIfNeeded() {
         refreshQuickFixes = CompletableFutures
-                .computeAsyncCompose(cancelChecker -> {
-                    return CompletableFuture.allOf(diagnostics
+                .computeAsyncCompose(cancelChecker -> CompletableFuture.allOf(diagnostics
                             .values()
                             .toArray(new CompletableFuture[diagnostics.values().size()]))
                             .thenRun(() -> {
@@ -163,8 +162,7 @@ public class LSPDiagnosticsForServer {
                                     // Refresh the Intellij validation to update quickfixes
                                     DaemonCodeAnalyzer.getInstance(project).restart(file);
                                 });
-                            });
-                });
+                            }));
 
     }
 
@@ -224,8 +222,7 @@ public class LSPDiagnosticsForServer {
      */
     private CompletableFuture<List<IntentionAction>> loadCodeActionsFor(Diagnostic diagnostic) {
         return CompletableFutures
-                .computeAsyncCompose(cancelChecker -> {
-                    return languageServerWrapper
+                .computeAsyncCompose(cancelChecker -> languageServerWrapper
                             .getInitializedServer()
                             .thenCompose(ls -> {
                                 // Language server is initialized here
@@ -247,8 +244,7 @@ public class LSPDiagnosticsForServer {
                                                     .map(ca -> new LSPCodeActionIntentionAction(ca, languageServerWrapper))
                                                     .collect(Collectors.toList());
                                         });
-                            });
-                });
+                            }));
     }
 
 

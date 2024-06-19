@@ -41,9 +41,7 @@ public class ConfigSourcePropertiesProvider implements IConfigSourcePropertiesPr
 			return keys;
 		}
 		keys = configSource.getAllKeys().stream() //
-				.filter(key -> {
-					return StringUtils.hasText(configSource.getProperty(key));
-				}) //
+				.filter(key -> StringUtils.hasText(configSource.getProperty(key))) //
 				.collect(Collectors.toSet());
 		return keys;
 	}

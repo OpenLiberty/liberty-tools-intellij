@@ -140,9 +140,8 @@ public class LSPInlayHintInlayProvider extends AbstractLSPInlayProvider {
                                       Project project) {
         if (LanguageServiceAccessor.getInstance(project).checkCapability(languageServer,
                 capabilites -> isResolveSupported(capabilites.getInlayHintProvider()))) {
-            languageServer.getTextDocumentService().resolveInlayHint(inlayHint).thenAcceptAsync(resolvedInlayHint -> {
-                executeClientCommand(source, resolvedInlayHint.getLabel().getRight().get(index).getCommand());
-            });
+            languageServer.getTextDocumentService().resolveInlayHint(inlayHint).thenAcceptAsync(resolvedInlayHint ->
+                executeClientCommand(source, resolvedInlayHint.getLabel().getRight().get(index).getCommand()));
         } else {
             executeClientCommand(source, inlayHint.getLabel().getRight().get(index).getCommand());
         }
@@ -155,8 +154,6 @@ public class LSPInlayHintInlayProvider extends AbstractLSPInlayProvider {
 
     private String getInlayHintString(InlayHint inlayHint) {
         Either<String, List<InlayHintLabelPart>> label = inlayHint.getLabel();
-        return label.map(Function.identity(), parts -> {
-           return parts==null?null:parts.stream().map(InlayHintLabelPart::getValue).collect(Collectors.joining());
-        });
+        return label.map(Function.identity(), parts -> parts==null?null:parts.stream().map(InlayHintLabelPart::getValue).collect(Collectors.joining()));
     }
 }

@@ -62,7 +62,7 @@ public class ResourceMethodMultipleEntityParamsQuickFix {
                 final PsiClass parentType = PsiTreeUtil.getParentOfType(targetNode, PsiClass.class);
                 final PsiParameter[] parameters = PsiTreeUtil.getParentOfType(targetNode, PsiMethod.class).getParameterList().getParameters();
 
-                final String TITLE_MESSAGE = Messages.getMessage("RemoveAllEntityParametersExcept",
+                final String titleMessage = Messages.getMessage("RemoveAllEntityParametersExcept",
                         parameters[entityParamIndex].getName());
 
                 final List<PsiParameter> entityParams = new ArrayList<>();
@@ -72,12 +72,12 @@ public class ResourceMethodMultipleEntityParamsQuickFix {
                     }
                 });
 
-                ChangeCorrectionProposal proposal = new RemoveParamsProposal(TITLE_MESSAGE, targetContext.getSource().getCompilationUnit(),
+                ChangeCorrectionProposal proposal = new RemoveParamsProposal(titleMessage, targetContext.getSource().getCompilationUnit(),
                         targetContext.getASTRoot(), parentType, 0, entityParams);
 
                 // Convert the proposal to LSP4J CodeAction
                 CodeAction codeAction = targetContext.convertToCodeAction(proposal, diagnostic);
-                codeAction.setTitle(TITLE_MESSAGE);
+                codeAction.setTitle(titleMessage);
                 codeActions.add(codeAction);
             });
             return codeActions;

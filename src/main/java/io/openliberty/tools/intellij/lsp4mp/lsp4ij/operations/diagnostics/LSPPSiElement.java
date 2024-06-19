@@ -39,9 +39,9 @@ public class LSPPSiElement implements PsiElement {
     private final PsiFile file;
     private final int start;
     private final int end;
-    private String text;
-    private Map<Key, Object> userData = new HashMap<>();
-    private Map<Key, Object> copyableUserData = new HashMap<>();
+    private final String text;
+    private final Map<Key, Object> userData = new HashMap<>();
+    private final Map<Key, Object> copyableUserData = new HashMap<>();
     private final PsiReference reference = new LSPPsiReference(this);
 
     public LSPPSiElement(Project project, PsiFile file, int start, int end, String text) {

@@ -39,7 +39,7 @@ import java.util.List;
  */
 public class NoResourcePublicConstructorQuickFix {
 
-    private final static String TITLE_MESSAGE = Messages.getMessage("MakeConstructorPublic");
+    private static final String TITLE_MESSAGE = Messages.getMessage("MakeConstructorPublic");
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
 

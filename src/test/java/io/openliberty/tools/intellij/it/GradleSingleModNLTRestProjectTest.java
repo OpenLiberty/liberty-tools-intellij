@@ -37,7 +37,7 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
     /**
      * Build file name.
      */
-    private final String BUILD_FILE_NAME = "build.gradle";
+    private static final String BUILD_FILE_NAME = "build.gradle";
 
     /**
      * Prepares the environment for test execution.

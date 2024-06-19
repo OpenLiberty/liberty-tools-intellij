@@ -33,7 +33,7 @@ import java.util.List;
 public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations {
     @Override
     protected List<List<String>> getMultipleRemoveAnnotations(Project project, List<String> annotations) {
-        List<List<String>> annotationsListsToRemove = new ArrayList<List<String>>();
+        List<List<String>> annotationsListsToRemove = new ArrayList<>();
 
         if (annotations.contains(JsonbConstants.JSONB_TRANSIENT)) {
             // Provide as one option: Remove JsonbTransient
@@ -42,7 +42,7 @@ public class JsonbTransientAnnotationQuickFix extends RemoveMultipleAnnotations 
 
         // Provide as another option: Remove all other JsonbAnnotations
         annotations.remove(JsonbConstants.JSONB_TRANSIENT);
-        if (annotations.size() > 0) {
+        if (!annotations.isEmpty()) {
             // Convert the short annotation names to their fully qualified equivalents.
             List<String> fqAnnotations = new ArrayList<>();
             for (String annotation : annotations) {

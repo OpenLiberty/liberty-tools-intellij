@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManagerForJava.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/PropertiesManagerForJava.java</a>
  *
  */
-public class PropertiesManagerForJava {
+public final class PropertiesManagerForJava {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesManagerForJava.class);
 
     private static final PropertiesManagerForJava INSTANCE = new PropertiesManagerForJava();
@@ -306,7 +306,9 @@ public class PropertiesManagerForJava {
             Position hoverPosition = params.getPosition();
             int hoveredOffset = utils.toOffset(document, hoverPosition.getLine(), hoverPosition.getCharacter());
             PsiElement hoverElement = getHoveredElement(typeRoot, hoveredOffset);
-            if (hoverElement == null) return null;
+            if (hoverElement == null) {
+                return null;
+            }
 
             DocumentFormat documentFormat = params.getDocumentFormat();
             boolean surroundEqualsWithSpaces = params.isSurroundEqualsWithSpaces();
@@ -415,9 +417,7 @@ public class PropertiesManagerForJava {
      * @return the codeAction list according the given codeAction parameters.
      */
     public List<? extends CodeAction> codeAction(MicroProfileJavaCodeActionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeAction>>) () -> {
-            return codeActionHandler.codeAction(params, utils);
-        });
+        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeAction>>) () -> codeActionHandler.codeAction(params, utils));
     }
 
     /**
@@ -428,7 +428,5 @@ public class PropertiesManagerForJava {
      * @return the codeAction list according the given codeAction parameters.
      */
     public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () -> {
-            return codeActionHandler.resolveCodeAction(unresolved, utils);
-        });    }
+        return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () -> codeActionHandler.resolveCodeAction(unresolved, utils));    }
 }

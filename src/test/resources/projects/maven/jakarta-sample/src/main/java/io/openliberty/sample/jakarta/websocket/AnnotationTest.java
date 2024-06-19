@@ -17,12 +17,12 @@ public class AnnotationTest {
     // @PathParam missing annotation for "String missingAnnotation"
     @OnOpen
     public void OnOpen(Session session, String missingAnnotation) throws IOException {
-        System.out.println("Websocket opened: " + session.getId().toString());
+        System.out.println("Websocket opened: " + session.getId());
     }
     
     // Used to check that the expected diagnostic handle more than one case
     @OnClose
     public void OnClose(Session session, Integer missingAnnotation1, String missingAnnotation2) {
-        System.out.println("Websocket opened: " + session.getId().toString());
+        System.out.println("Websocket opened: " + session.getId());
     }
 }

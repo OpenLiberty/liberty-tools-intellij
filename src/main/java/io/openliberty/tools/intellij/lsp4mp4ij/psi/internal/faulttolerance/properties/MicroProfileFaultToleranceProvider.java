@@ -312,7 +312,7 @@ public class MicroProfileFaultToleranceProvider extends AbstractAnnotationTypeRe
 		// parameter
 		List<AnnotationParameter> parameters = info.getParameters();
 		for (AnnotationParameter parameter : parameters) {
-			String propertyName = new StringBuilder(prefix).append('/').append(parameter.getName()).toString();
+			String propertyName = prefix + '/' + parameter.getName();
 			String parameterType = parameter.getType();
 			String description = parameter.getDescription();
 			String defaultValue = getParameterDefaultValue(parameter, mpftAnnotation);

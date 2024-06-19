@@ -66,10 +66,10 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
 
                 if (isRootResource || isProviderResource) { // annotated class
-                    List<PsiMethod> nonPublicConstructors = new ArrayList<PsiMethod>();
+                    List<PsiMethod> nonPublicConstructors = new ArrayList<>();
                     boolean hasPublicConstructor = false;
                     int maxParams = 0;
-                    Map<PsiMethod, Integer> constructorParamsMap = new HashMap<PsiMethod, Integer>();
+                    Map<PsiMethod, Integer> constructorParamsMap = new HashMap<>();
                     PsiMethod[] methods = type.getMethods();
                     for (PsiMethod method : methods) {
                         if (isConstructorMethod(method)) {
@@ -89,7 +89,7 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         }
                     }
                     // no public constructor defined
-                    if (nonPublicConstructors.size() > 0) {
+                    if (!nonPublicConstructors.isEmpty()) {
                         String diagnosticMessage = isRootResource ?
                                 Messages.getMessage("RootResourceClasses") :
                                 Messages.getMessage("ProviderClasses");
@@ -100,7 +100,7 @@ public class Jax_RSClassDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         }
                     }
                     // check public constructors' parameters
-                    ArrayList<PsiMethod> equalMaxParamMethods = new ArrayList<PsiMethod>();
+                    ArrayList<PsiMethod> equalMaxParamMethods = new ArrayList<>();
                     for (Map.Entry<PsiMethod, Integer> entry : constructorParamsMap.entrySet()) {
                         if (entry.getValue() == maxParams) {
                             equalMaxParamMethods.add(entry.getKey());

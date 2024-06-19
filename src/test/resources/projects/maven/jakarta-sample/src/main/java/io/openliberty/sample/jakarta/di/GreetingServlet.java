@@ -25,8 +25,6 @@ public abstract class GreetingServlet {
     // d2
     @Inject
     public final void injectFinal() {
-        // test code for @Inject methods cannot be final
-        return;
     }
 
     // d3: test code for @Inject methods cannot be abstract
@@ -36,14 +34,13 @@ public abstract class GreetingServlet {
     // d4: test code for @Inject methods cannot be static
     @Inject
     public static void injectStatic() {
-        return;
     }
 
     // d5: test code for @Inject methods cannot be generic
     @Inject
     public <T> List<T> injectGeneric(T arg) {
         // do nothing
-        return new ArrayList<T>();
+        return new ArrayList<>();
     };
 
 }

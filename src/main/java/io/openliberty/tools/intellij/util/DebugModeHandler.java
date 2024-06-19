@@ -53,7 +53,7 @@ public class DebugModeHandler {
     protected static Logger LOGGER = Logger.getInstance(DebugModeHandler.class);
 
     // Default host name
-    private static String DEFAULT_ATTACH_HOST = "localhost";
+    private static final String DEFAULT_ATTACH_HOST = "localhost";
 
     // Regex captures the debug port value from the custom Maven parameters input
     private static final Pattern MAVEN_DEBUG_REGEX = Pattern.compile("(?<=" + Constants.LIBERTY_MAVEN_DEBUG_PARAM + ")([^\\s]+)");
@@ -62,7 +62,7 @@ public class DebugModeHandler {
     private static final Pattern GRADLE_DEBUG_REGEX = Pattern.compile("(?<=" + Constants.LIBERTY_GRADLE_DEBUG_PARAM + ")([^\\s]+)");
 
     // Debug address key in Liberty server.env files
-    private static String WLP_ENV_DEBUG_ADDRESS = "WLP_DEBUG_ADDRESS";
+    private static final String WLP_ENV_DEBUG_ADDRESS = "WLP_DEBUG_ADDRESS";
 
     // WLP server environment file name.
     public static String WLP_SERVER_ENV_FILE_NAME = "server.env";
@@ -247,7 +247,7 @@ public class DebugModeHandler {
                 return path.getFileName().toString().equalsIgnoreCase(WLP_SERVER_ENV_FILE_NAME);
             }
             return false;
-        });) {
+        })) {
             List<Path> matchedPaths = matchedStream.collect(Collectors.toList());
             int numberOfFilesFound = matchedPaths.size();
 

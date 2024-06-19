@@ -45,7 +45,7 @@ import static io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.JaxRsCo
  * @author Angelo ZERR
  *
  */
-public class JaxRsUtils {
+public final class JaxRsUtils {
 
 	private JaxRsUtils() {
 
@@ -96,13 +96,13 @@ public class JaxRsUtils {
 	 *         and false otherwise.
 	 */
 	public static boolean isJaxRsRequestMethod(PsiMethod method) {
-		return (hasAnnotation(method, JAVAX_WS_RS_GET_ANNOTATION)
+		return hasAnnotation(method, JAVAX_WS_RS_GET_ANNOTATION)
 				|| hasAnnotation(method, JAVAX_WS_RS_POST_ANNOTATION)
 				|| hasAnnotation(method, JAVAX_WS_RS_PUT_ANNOTATION)
 				|| hasAnnotation(method, JAVAX_WS_RS_DELETE_ANNOTATION)
 				|| hasAnnotation(method, JAVAX_WS_RS_HEAD_ANNOTATION)
 				|| hasAnnotation(method, JAVAX_WS_RS_OPTIONS_ANNOTATION)
-				|| hasAnnotation(method, JAVAX_WS_RS_PATCH_ANNOTATION));
+				|| hasAnnotation(method, JAVAX_WS_RS_PATCH_ANNOTATION);
 	}
 
 	/**

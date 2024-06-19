@@ -694,7 +694,7 @@ public abstract class SingleModMPProjectTestCommon {
             String activeCfgName1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(configName1, activeCfgName1, "The active config name " + activeCfgName1 + " does not match expected name of " + configName1);
             String activeCfgProjBldPath1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
-            activeCfgProjBldPath1 = (activeCfgProjBldPath1.endsWith("...")) ? activeCfgProjBldPath1.replace("...", "") : activeCfgProjBldPath1;
+            activeCfgProjBldPath1 = activeCfgProjBldPath1.endsWith("...") ? activeCfgProjBldPath1.replace("...", "") : activeCfgProjBldPath1;
             Assertions.assertTrue(cfgPrjBldPath1.contains(activeCfgProjBldPath1), "The active config project build file path " + activeCfgProjBldPath1 + " is not contained in expected path of " + cfgPrjBldPath1);
             String activeCfgParams1 = cfgEntries1.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
             Assertions.assertEquals("", activeCfgParams1, "The active config params " + activeCfgParams1 + " does not match expected params of blank");
@@ -708,7 +708,7 @@ public abstract class SingleModMPProjectTestCommon {
             String activeCfgName2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(configName2, activeCfgName2, "The active config name " + activeCfgName2 + " does not match expected name of " + configName2);
             String activeCfgProjBldPath2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
-            activeCfgProjBldPath2 = (activeCfgProjBldPath2.endsWith("...")) ? activeCfgProjBldPath2.replace("...", "") : activeCfgProjBldPath2;
+            activeCfgProjBldPath2 = activeCfgProjBldPath2.endsWith("...") ? activeCfgProjBldPath2.replace("...", "") : activeCfgProjBldPath2;
             Assertions.assertTrue(cfgPrjBldPath2.contains(activeCfgProjBldPath2), "The active config project build file path " + activeCfgProjBldPath2 + " is not contained expected path of " + cfgPrjBldPath2);
             String activeCfgParams2 = cfgEntries2.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
             Assertions.assertEquals("", activeCfgParams2, "The active config params " + activeCfgParams2 + " does not match expected params of blank");
@@ -738,7 +738,7 @@ public abstract class SingleModMPProjectTestCommon {
             String newActiveCfgName1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(newCfgName1, newActiveCfgName1, "The active config name " + newActiveCfgName1 + " does not match expected name of " + newCfgName1);
             String newActiveCfgProjBldPath1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
-            newActiveCfgProjBldPath1 = (newActiveCfgProjBldPath1.endsWith("...")) ? newActiveCfgProjBldPath1.replace("...", "") : newActiveCfgProjBldPath1;
+            newActiveCfgProjBldPath1 = newActiveCfgProjBldPath1.endsWith("...") ? newActiveCfgProjBldPath1.replace("...", "") : newActiveCfgProjBldPath1;
             Assertions.assertTrue(newCfgProjBldPath1.contains(newActiveCfgProjBldPath1), "The active config project build file path " + newActiveCfgProjBldPath1 + " is not contained in expected path of " + newCfgProjBldPath1);
             String newActiveCfgParams1 = newCfgEntries1.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
             Assertions.assertEquals(newCfgStartParams1, newActiveCfgParams1, "The active config params " + newActiveCfgParams1 + " does not match expected params of " + newCfgStartParams1);
@@ -752,7 +752,7 @@ public abstract class SingleModMPProjectTestCommon {
             String newActiveCfgName2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.NAME.toString());
             Assertions.assertEquals(newCfgName2, newActiveCfgName2, "The active config name " + newActiveCfgName2 + " does not match expected name of " + newCfgName2);
             String newActiveCfgProjBldPath2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.LIBERTYPROJ.toString());
-            newActiveCfgProjBldPath2 = (newActiveCfgProjBldPath2.endsWith("...")) ? newActiveCfgProjBldPath2.replace("...", "") : newActiveCfgProjBldPath2;
+            newActiveCfgProjBldPath2 = newActiveCfgProjBldPath2.endsWith("...") ? newActiveCfgProjBldPath2.replace("...", "") : newActiveCfgProjBldPath2;
             Assertions.assertTrue(newCfgProjBldPath2.contains(newActiveCfgProjBldPath2), "The active config project build file path " + newActiveCfgProjBldPath2 + " does not contained in expected path of " + newCfgProjBldPath2);
             String newActiveCfgParams2 = newCfgEntries2.get(UIBotTestUtils.ConfigEntries.PARAMS.toString());
             Assertions.assertEquals(newCfgStartParams2, newActiveCfgParams2, "The active config params " + newActiveCfgParams2 + " does not match expected params of " + newCfgStartParams2);

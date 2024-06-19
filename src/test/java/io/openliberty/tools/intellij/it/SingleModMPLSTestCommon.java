@@ -236,8 +236,8 @@ public abstract class SingleModMPLSTestCommon {
     @Test
     @Video
     public void testDiagnosticInMicroProfileConfigProperties() {
-        String MPCfgSnippet = "mp.health.disable";
-        String MPCfgNameChooserSnippet = "procedures";
+        String mPCfgSnippet = "mp.health.disable";
+        String mPCfgNameChooserSnippet = "procedures";
         String incorrectValue = "none";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
@@ -248,7 +248,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", mPCfgSnippet, mPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, "microprofile-config.properties", UIBotTestUtils.PopupType.DIAGNOSTIC);
@@ -270,8 +270,8 @@ public abstract class SingleModMPLSTestCommon {
     @Disabled // due to intermittent test failures - quickfix selection link is intermittently failing
               // appear on diagnostic popup panel - framework related
     public void testQuickFixInMicroProfileConfigProperties() {
-        String MPCfgSnippet = "mp.health.disable";
-        String MPCfgNameChooserSnippet = "procedures";
+        String mPCfgSnippet = "mp.health.disable";
+        String mPCfgNameChooserSnippet = "procedures";
         String incorrectValue = "none";
         String quickfixChooserString = "Replace with 'true'?";
         String correctedValue = "mp.health.disable-default-procedures=true";
@@ -286,7 +286,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", mPCfgSnippet, mPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, "microprofile-config.properties", quickfixChooserString);

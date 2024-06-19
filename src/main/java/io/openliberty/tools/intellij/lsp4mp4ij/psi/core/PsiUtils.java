@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Set;
 
 public class PsiUtils {
-    private static Set<String> SILENCED_CODEGENS = Collections.singleton("lombok");
+    private static final Set<String> SILENCED_CODEGENS = Collections.singleton("lombok");
 
     public static Range toRange(PsiElement element, int offset, int length) {
         Document buffer = PsiDocumentManager.getInstance(element.getProject()).getCachedDocument(element.getContainingFile());

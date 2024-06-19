@@ -24,7 +24,7 @@ import java.util.List;
 
 public class LibertyCustomConfigManager implements LibraryTable.Listener, Disposable {
 
-    private final static Logger LOGGER = Logger.getInstance(LibertyCustomConfigManager.class);
+    private static final Logger LOGGER = Logger.getInstance(LibertyCustomConfigManager.class);
 
     private final Project project;
     private final MessageBusConnection appConnection;

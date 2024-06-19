@@ -87,13 +87,12 @@ public class LSPCodeActionIntentionAction implements IntentionAction {
                 languageServerWrapper.getInitializedServer()
                         .thenApply(ls ->
                                 ls.getTextDocumentService().resolveCodeAction(codeAction)
-                                        .thenAccept(resolved -> {
+                                        .thenAccept(resolved ->
                                             ApplicationManager.getApplication().invokeLater(() -> {
                                                 DocumentUtil.writeInRunUndoTransparentAction(() -> {
                                                     apply(resolved != null ? resolved : codeAction, project);
                                                 });
-                                            });
-                                        })
+                                            }))
                         );
             } else {
                 apply(codeAction, project);
@@ -133,7 +132,7 @@ public class LSPCodeActionIntentionAction implements IntentionAction {
         ServerCapabilities capabilities = this.languageServerWrapper.getServerCapabilities();
         if (capabilities != null) {
             ExecuteCommandOptions provider = capabilities.getExecuteCommandProvider();
-            return (provider != null && provider.getCommands().contains(command.getCommand()));
+            return provider != null && provider.getCommands().contains(command.getCommand());
         }
         return false;
     }

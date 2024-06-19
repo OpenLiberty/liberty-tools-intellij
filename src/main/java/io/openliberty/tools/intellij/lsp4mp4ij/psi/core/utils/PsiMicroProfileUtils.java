@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/utils/JDTMicroProfileUtils.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/core/utils/JDTMicroProfileUtils.java</a>
  *
  */
-public class PsiMicroProfileUtils {
+public final class PsiMicroProfileUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PsiMicroProfileUtils.class);
 

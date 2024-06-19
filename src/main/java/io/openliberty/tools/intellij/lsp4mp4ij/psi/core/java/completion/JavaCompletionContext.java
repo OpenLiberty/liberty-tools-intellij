@@ -25,7 +25,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
  */
 public class JavaCompletionContext extends AbstractJavaContext {
 
-	private int offset;
+    private final int offset;
 
 	public JavaCompletionContext(String uri, PsiFile typeRoot, IPsiUtils utils, Module module, int offset) {
 		super(uri, typeRoot, utils, module);

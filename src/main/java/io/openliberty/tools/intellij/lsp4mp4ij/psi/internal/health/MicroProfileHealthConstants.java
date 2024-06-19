@@ -18,7 +18,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.health;
  * @see <a href="https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/health/MicroProfileHealthConstants.java">https://github.com/redhat-developer/quarkus-ls/blob/master/microprofile.jdt/com.redhat.microprofile.jdt.core/src/main/java/com/redhat/microprofile/jdt/internal/health/MicroProfileHealthConstants.java</a>
  *
  */
-public class MicroProfileHealthConstants {
+public final class MicroProfileHealthConstants {
 
 	private MicroProfileHealthConstants() {
 	}

@@ -59,9 +59,8 @@ public class MicroProfileReactiveMessagingASTValidator extends JavaASTValidator 
     @Override
     public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
         Module javaProject = context.getJavaProject();
-        boolean adapted = PsiTypeUtils.findType(javaProject, INCOMING_ANNOTATION) != null
+        return PsiTypeUtils.findType(javaProject, INCOMING_ANNOTATION) != null
                 || PsiTypeUtils.findType(javaProject, OUTGOING_ANNOTATION) != null;
-        return adapted;
     }
 
     @Override

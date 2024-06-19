@@ -292,7 +292,7 @@ public class LSIncompleteCompletionProposal extends LookupElement {
                         while (currentSnippetOffsetInInsertText + offsetInSnippet < insertText.length() && !close) {
                             char currentChar = insertText.charAt(currentSnippetOffsetInInsertText + offsetInSnippet);
                             if (valueBuilder.length() > 0 &&
-                                    ((isChoice && (currentChar == ',' || currentChar == '|') || currentChar == '}'))) {
+                                    (isChoice && (currentChar == ',' || currentChar == '|') || currentChar == '}')) {
                                 String value = valueBuilder.toString();
                                 if (value.startsWith("$")) { //$NON-NLS-1$
                                     String varValue = getVariableValue(value.substring(1));
@@ -395,8 +395,7 @@ public class LSIncompleteCompletionProposal extends LookupElement {
                 try {
                     int lineOffsetStart = document.getLineStartOffset(currentLineIndex);
                     int lineOffsetEnd = document.getLineEndOffset(currentLineIndex);
-                    String line = document.getText(new TextRange(lineOffsetStart, lineOffsetEnd));
-                    return line;
+                    return document.getText(new TextRange(lineOffsetStart, lineOffsetEnd));
                 } catch (RuntimeException e) {
                     LOGGER.warn(e.getMessage(), e);
                     return ""; //$NON-NLS-1$
@@ -406,8 +405,7 @@ public class LSIncompleteCompletionProposal extends LookupElement {
                 try {
                     int startOffset = LSPIJUtils.toOffset(selectedRange.getStart(), document);
                     int endOffset = LSPIJUtils.toOffset(selectedRange.getEnd(), document);
-                    String selectedText = document.getText(new TextRange(startOffset, endOffset));
-                    return selectedText;
+                    return document.getText(new TextRange(startOffset, endOffset));
                 } catch (RuntimeException e) {
                     LOGGER.warn(e.getMessage(), e);
                     return ""; //$NON-NLS-1$

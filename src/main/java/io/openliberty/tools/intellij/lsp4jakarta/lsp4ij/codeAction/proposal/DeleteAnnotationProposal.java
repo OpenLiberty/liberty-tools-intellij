@@ -62,7 +62,7 @@ public class DeleteAnnotationProposal extends ChangeCorrectionProposal {
     @Override
     public Change getChange() {
         if (declaringNode instanceof PsiModifierListOwner) {
-            PsiModifierListOwner targetNode = ((PsiModifierListOwner) declaringNode);
+            PsiModifierListOwner targetNode = (PsiModifierListOwner) declaringNode;
             PsiAnnotation[] targetAnnotations = targetNode.getAnnotations();
             for (var annotation : targetAnnotations) {
                 // Allow the names in targetAnnotations to be fully qualified or short (no package name).

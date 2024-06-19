@@ -55,10 +55,12 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     public void completeDiagnostic(Diagnostic diagnostic, String code, DiagnosticSeverity severity) {
         String source = getDiagnosticSource();
-        if (source != null)
+        if (source != null) {
             diagnostic.setSource(source);
-        if (code != null)
+        }
+        if (code != null) {
             diagnostic.setCode(code);
+        }
         diagnostic.setSeverity(severity);
     }
 
@@ -77,13 +79,16 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                                           DiagnosticSeverity severity) {
         Range range = PositionUtils.toNameRange(el);
         Diagnostic diagnostic = new Diagnostic(range, msg);
-        if (data != null)
+        if (data != null) {
             diagnostic.setData(data);
+        }
         String source = getDiagnosticSource();
-        if (source != null)
+        if (source != null) {
             diagnostic.setSource(source);
-        if (code != null)
+        }
+        if (code != null) {
             diagnostic.setCode(code);
+        }
         diagnostic.setSeverity(severity);
         return diagnostic;
     }
@@ -131,8 +136,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         if (nameEndsWith(annotationFQName, elementName) && unit != null) {
             // For performance reason, we check if the import of annotation name is
             // declared
-            if (isImportedJavaElement(unit, annotationFQName))
+            if (isImportedJavaElement(unit, annotationFQName)) {
                 return true;
+            }
             // only check fully qualified annotations
             if (annotationFQName.equals(elementName)) {
                 PsiReference ref = annotation.getReference();
@@ -160,13 +166,14 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         if (nameEndsWith(javaElementFQName, javaElementName)) {
             // For performance reason, we check if the import of annotation name is
             // declared
-            if (isImportedJavaElement(type, javaElementFQName))
+            if (isImportedJavaElement(type, javaElementFQName)) {
                 return true;
+            }
             // only check fully qualified java element
             if (javaElementFQName.equals(javaElementName)) {
                 JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
                 Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
-                return (o != null);
+                return o != null;
             }
         }
         return false;
@@ -241,7 +248,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
             for (PsiClass interfase : interfaces) {
                 String fqName = interfase.getQualifiedName();
                 for (String iName : interfaceFQNames) {
-                    if (fqName.equals(iName)) return true;
+                    if (fqName.equals(iName)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -261,8 +270,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                 .filter(fqName -> nameEndsWith(fqName, javaElementName))
                 .toArray(String[]::new);
         if (matches.length > 0) {
-            if (isMatchedJavaElement(type, javaElementName, matches[0]) == true) // only check the first one for now
+            if (isMatchedJavaElement(type, javaElementName, matches[0])) { // only check the first one for now
                 return matches[0];
+            }
         }
         return null;
     }
@@ -277,12 +287,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      */
     protected static List<String> getMatchedJavaElementNames(PsiClass type, String[] javaElementNames,
                                                              String[] javaElementFQNames) {
-        return Stream.of(javaElementFQNames).filter(fqName -> {
-            boolean anyMatch = Stream.of(javaElementNames).anyMatch(name -> {
+        return Stream.of(javaElementFQNames).filter(fqName -> Stream.of(javaElementNames).anyMatch(name -> {
                 return isMatchedJavaElement(type, name, fqName);
-            });
-            return anyMatch;
-        }).collect(Collectors.toList());
+            })).collect(Collectors.toList());
     }
 
     /**

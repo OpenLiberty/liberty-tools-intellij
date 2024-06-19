@@ -76,7 +76,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         PsiMethod[] allMethods = type.getMethods();
         for (PsiMethod method : allMethods) {
             PsiAnnotation[] allAnnotations = method.getAnnotations();
-            Set<String> specialParamTypes = null, rawSpecialParamTypes = null;
+            Set<String> specialParamTypes = null;
+            Set<String> rawSpecialParamTypes = null;
 
             for (PsiAnnotation annotation : allAnnotations) {
                 String annotationName = annotation.getQualifiedName();
@@ -109,11 +110,9 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                         if (!isSpecialType) {
                             // check that if parameter is not a specialType, it has a @PathParam annotation
-                            PsiAnnotation[] param_annotations = param.getAnnotations();
-                            boolean hasPathParamAnnot = Arrays.asList(param_annotations).stream().anyMatch(annot -> {
-                                return isMatchedJavaElement(type, annot.getQualifiedName(),
-                                        WebSocketConstants.PATH_PARAM_ANNOTATION);
-                            });
+                            PsiAnnotation[] paramAnnotations = param.getAnnotations();
+                            boolean hasPathParamAnnot = Arrays.asList(paramAnnotations).stream().anyMatch(annot -> isMatchedJavaElement(type, annot.getQualifiedName(),
+                                        WebSocketConstants.PATH_PARAM_ANNOTATION));
                             if (!hasPathParamAnnot) {
                                 diagnostics.add(createDiagnostic(param, unit,
                                         Messages.getMessage("PathParamsAnnotationMissing"),
@@ -306,7 +305,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         if (endpointURI == null) {
             return null;
         }
-        List<String> endpointPathVars = new ArrayList<String>();
+        List<String> endpointPathVars = new ArrayList<>();
         String[] endpointParts = endpointURI.split(WebSocketConstants.URI_SEPARATOR);
         for (String part : endpointParts) {
             if (part.startsWith(WebSocketConstants.CURLY_BRACE_START)
@@ -351,12 +350,12 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         // Check that class follows
         // https://jakarta.ee/specifications/websocket/2.0/websocket-spec-2.0.html#applications
         List<String> endpointAnnotations = getMatchedJavaElementNames(type,
-                Stream.of(type.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
+                Stream.of(type.getAnnotations()).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
                 WebSocketConstants.WS_ANNOTATION_CLASS);
 
         boolean useSuperclass = InheritanceUtil.isInheritor(type, WebSocketConstants.FQ_ENDPOINT_SUPERCLASS);
 
-        wsEndpoint.put(WebSocketConstants.IS_ANNOTATION, (endpointAnnotations.size() > 0));
+        wsEndpoint.put(WebSocketConstants.IS_ANNOTATION, (!endpointAnnotations.isEmpty()));
         wsEndpoint.put(WebSocketConstants.IS_SUPERCLASS, useSuperclass);
 
         return wsEndpoint;
@@ -426,7 +425,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
      * @return if a URI has duplicate variables
      */
     private boolean hasDuplicateURIVariables(String uriString) {
-        HashSet<String> variables = new HashSet<String>();
+        HashSet<String> variables = new HashSet<>();
         for (String segment : uriString.split(WebSocketConstants.URI_SEPARATOR)) {
             if (segment.matches(WebSocketConstants.REGEX_URI_VARIABLE)) {
                 String variable = segment.substring(1, segment.length() - 1);

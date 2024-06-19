@@ -6,7 +6,8 @@ import jakarta.persistence.Entity;
 public final class FinalModifiers {
 
     final int x = 1;
-    final String y = "hello", z = "world";
+    final String y = "hello";
+    final String z = "world";
     
     public final int methody() {
         final int ret = 100;
