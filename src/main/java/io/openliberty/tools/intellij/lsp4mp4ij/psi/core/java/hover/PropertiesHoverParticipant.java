@@ -233,20 +233,13 @@ public class PropertiesHoverParticipant implements IJavaHoverParticipant {
 	 * @param utils        the JDT LS utilities.
 	 * @return the config property information for the given property key
 	 */
-	private static List<MicroProfileConfigPropertyInformation> getConfigPropertyInformation(String propertyKey,
-																							PsiAnnotation annotation,
-																							String defaultValue,
-																							PsiFile typeRoot,
-																							PsiMicroProfileProject project,
-																							IPsiUtils utils) {
+	private static List<MicroProfileConfigPropertyInformation> getConfigPropertyInformation(String propertyKey, PsiAnnotation annotation, String defaultValue, PsiFile typeRoot, PsiMicroProfileProject project, IPsiUtils utils) {
 
 		List<MicroProfileConfigPropertyInformation> infos = project.getPropertyInformations(propertyKey);
 		boolean defaultProfileDefined = infos.stream().anyMatch(info -> propertyKey.equals(info.getPropertyNameWithProfile()));
 
 		if (!defaultProfileDefined) {
-			infos.add(new MicroProfileConfigPropertyInformation(propertyKey,
-					defaultValue, utils.toUri(typeRoot),
-					annotation.getContainingFile().getName()));
+			infos.add(new MicroProfileConfigPropertyInformation(propertyKey, defaultValue, utils.toUri(typeRoot), annotation.getContainingFile().getName()));
 		}
 
 		return infos;
