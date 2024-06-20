@@ -1,7 +1,19 @@
 name: Build
 
 on:
+  workflow_call:
+    inputs:
+      useLocalPlugin:
+        description: 'Use lsp4ij locally'
+        required: true
+        type: boolean
+        default: false
   workflow_dispatch:
+    inputs:
+      useLocalPlugin:
+        description: 'Use lsp4ij locally'
+        required: true
+        default: 'false'
   push:
     branches: '**'
   pull_request:
@@ -24,6 +36,8 @@ jobs:
           - runtime: windows
             os: windows-latest
             reportName: windows-test-report
+    env:
+      USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || 'false' }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -39,9 +53,27 @@ jobs:
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
+
+      # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
+      - name: 'Checkout lsp4ij'
+        if: env.USE_LOCAL_PLUGIN == 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: redhat-developer/lsp4ij
+          path: lsp4ij
+          ref: main
+      - name: 'Build Lsp4ij'
+        if: env.USE_LOCAL_PLUGIN == 'true'
+        working-directory: ./lsp4ij
+        run: bash ./gradlew buildPlugin
+      - name: 'Unzip lsp4ij file'
+        if: env.USE_LOCAL_PLUGIN == 'true'
+        working-directory: ./lsp4ij/build/distributions
+        run: |
+          unzip -o '*.zip' -d .
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
-        run: bash ./gradlew buildPlugin
+        run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
       - name: 'Archive artifacts'
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v3
