@@ -98,18 +98,14 @@ public class LibertyModule {
     }
 
     public String getCustomStartParams() {
-        if (customStartParams == null) {
-            clearCustomStartParams();
-        }
         return customStartParams;
     }
 
     public void setCustomStartParams(String customStartParams) {
+        if (customStartParams == null) {
+            customStartParams = "";
+        }
         this.customStartParams = customStartParams;
-    }
-
-    public void clearCustomStartParams() {
-        customStartParams = "";
     }
 
     public boolean runInContainer() {
