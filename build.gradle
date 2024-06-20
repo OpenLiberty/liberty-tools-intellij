@@ -140,7 +140,10 @@ intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     version = '2024.1.3'
 
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', 'com.redhat.devtools.lsp4ij:' + lsp4ijVersion + '@nightly']
+    def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
+            file("../lsp4ij/build/distributions/LSP4IJ/") :
+            'com.redhat.devtools.lsp4ij:' + lsp4ijVersion + '@nightly'
+    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
     updateSinceUntilBuild = false
 }
 
