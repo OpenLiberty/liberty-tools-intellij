@@ -38,7 +38,6 @@ import java.util.Iterator;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-import static org.jetbrains.idea.maven.project.MavenHomeKt.resolveMavenHomeType;
 import static org.jetbrains.idea.maven.project.MavenHomeKt.staticOrBundled;
 
 public class LibertyMavenUtil {
@@ -297,11 +296,18 @@ public class LibertyMavenUtil {
         }
     }
 
+    /**
+     * This method checks if the provided 'MavenHomeType' is an instance of 'StaticResolvedMavenHomeType'.
+     * If it is, it returns the casted object. Otherwise, it uses a fallback method (staticOrBundled) to return default 'BundledMaven3.INSTANCE'
+     * @param customMavenHome the custom MavenHomeType to be resolved
+     * @return the resolved StaticResolvedMavenHomeType
+     */
     private static StaticResolvedMavenHomeType getResolvedMavenHomeType(MavenHomeType customMavenHome) {
         if (customMavenHome instanceof StaticResolvedMavenHomeType) {
             return (StaticResolvedMavenHomeType) customMavenHome;
         }
-        return null;
+        // If 'customMavenHome' is not an instance of 'StaticResolvedMavenHomeType', return default 'BundledMaven3.INSTANCE'.
+        return staticOrBundled(customMavenHome);
     }
 
     /**
