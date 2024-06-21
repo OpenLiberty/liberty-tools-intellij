@@ -1,0 +1,12 @@
+name: Cron Job
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  call-build-workflow:
+    uses: ./.github/workflows/build.yaml
+    with:
+      useLocalPlugin: true
