@@ -3,7 +3,7 @@ name: Fetch All Open and Recently Closed Pull Requests using cron job
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 10 * * 1-5'  # At 10:00 on every day-of-week from Monday through Friday(UTC Time), 7:30pm in IST.
+    - cron: '30 15 * * 1-5'  # At 15:30 on every day-of-week from Monday through Friday(UTC Time), 9pm in IST and 11:30 AM in EST.
 
 jobs:
   fetch_all_pull_requests_and_notify_using_condition_and_cron:
@@ -62,7 +62,7 @@ jobs:
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "${{ env.API_URL }}?state=open&sort=created&direction=desc&per_page=100")
-  
+          
           # Load previous PR data if exists
           if [ -f cache/notified_prs.json ]; then
             previous_prs=$(cat cache/notified_prs.json)
@@ -96,7 +96,13 @@ jobs:
             previous_pr=$(echo "$previous_prs" | jq --arg number "$pr_number" '.[] | select(.number == $number)')
             echo "Checking PR is new or not --- $previous_pr"
             if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
-              pr_list="${pr_list}\n*Pull Request* #${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}\n*Draft*: ${pr_draft}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
+              draft_status=""
+              echo "------Draft value ---- $pr_draft"
+              if [ "$pr_draft" = "true" ]; then
+                draft_status="\n*Draft*: true"
+              fi
+
+              pr_list="${pr_list}\n*Pull Request* #${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
               notify=true
               echo "Boolean Value for notify ------- $notify"
             fi
@@ -154,60 +160,76 @@ jobs:
             echo "::set-output name=notify_closed::false"
           fi      
 
-      - name: Send Slack notification for open PRs
-        if: success() && steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true'
+      - name: Send Slack notification for PRs
+        if: success() && (steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true' || steps.fetch_closed_prs.outputs.notify_closed == 'true')
         run: |
-          pr_list=$(cat pr_list.txt)
-          payload=$(cat <<-EOF
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "List of Open/New/Updated Pull Requests using Cron Job"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "${pr_list}"
-                }
-              }
-            ]
-          }
-          EOF
-          )
-          echo "$payload"  # Debugging: Print payload to verify its format
-          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
+          # Initialize PR lists
+          pr_list=""
+          closed_pr_list=""
 
-      - name: Send Slack notification for closed PRs
-        if: success() && steps.fetch_closed_prs.outputs.notify_closed == 'true'
-        run: |
-          closed_pr_list=$(cat closed_pr_list.txt)
+          # Check if the open PRs file exists and read its content
+          if [ -f pr_list.txt ]; then
+            pr_list=$(cat pr_list.txt)
+          fi
+
+          # Check if the closed PRs file exists and read its content
+          if [ -f closed_pr_list.txt ]; then
+            closed_pr_list=$(cat closed_pr_list.txt)
+          fi
+
+          # Initialize payload blocks
+          payload_blocks=()
+
+          # Add open PRs section if not empty
+          if [ -n "$pr_list" ]; then
+            payload_blocks+=("{
+              \"type\": \"header\",
+              \"text\": {
+                \"type\": \"plain_text\",
+                \"text\": \"List of Open/New/Updated Pull Requests using Cron Job\"
+              }
+            }")
+            payload_blocks+=("{
+              \"type\": \"section\",
+              \"text\": {
+                \"type\": \"mrkdwn\",
+                \"text\": \"$pr_list\"
+              }
+            }")
+          fi
+
+          # Add closed PRs section if not empty
+          if [ -n "$closed_pr_list" ]; then
+            payload_blocks+=("{
+              \"type\": \"header\",
+              \"text\": {
+                \"type\": \"plain_text\",
+                \"text\": \"List of Pull Requests Closed Since the Last Cron Job\"
+              }
+            }")
+            payload_blocks+=("{
+              \"type\": \"section\",
+              \"text\": {
+                \"type\": \"mrkdwn\",
+                \"text\": \"$closed_pr_list\"
+              }
+            }")
+          fi
+
+          # Construct the payload
           payload=$(cat <<-EOF
           {
             "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "List of Pull Requests Closed Since the Last Cron Job"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "${closed_pr_list}"
-                }
-              }
+              $(IFS=,; echo "${payload_blocks[*]}")
             ]
           }
           EOF
           )
-          echo "$payload"  # Debugging: Print payload to verify its format
+
+          # Debugging: Print payload to verify its format
+          echo "$payload"
+
+          # Send the payload to Slack
           curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
 
       - name: Save current timestamp
