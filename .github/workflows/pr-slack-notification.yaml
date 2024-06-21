@@ -1,0 +1,304 @@
+name: Fetch All Open and Recently Closed Pull Requests using cron job
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 15 * * 1-5'  # At 15:30 on every day-of-week from Monday through Friday(UTC Time), 9pm in IST and 11:30 AM in EST.
+
+jobs:
+  fetch_all_pull_requests_and_notify_using_condition_and_cron:
+    runs-on: ubuntu-latest
+
+    env:
+      REPO: ${{ github.repository }}
+      BRANCH: main
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Fetch recent cache
+        run: |
+          gh extension install actions/gh-actions-cache
+
+          # Fetching list of cache keys........
+          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
+          
+          # Extract the most recent cache key
+          mostRecentCacheKey=$(echo "$cacheKeys" | head -n 1)
+          
+          if [ -n "$mostRecentCacheKey" ]; then
+            echo "CACHE_KEY=$mostRecentCacheKey" >> $GITHUB_ENV
+          else
+            echo "No recent cache key found, generating a new one...."
+            echo "CACHE_KEY=${{ runner.os }}-pr-cache-${{ github.run_number }}" >> $GITHUB_ENV
+          fi
+          
+          echo "Done"
+          # 'secrets.GITHUB_TOKEN' is automatically provided by GitHub Actions for each workflow run. You don't need to manually create or manage this token.
+
+      - name: Restore cache
+        id: cache-restore
+        uses: actions/cache@v2
+        with:
+          path: cache
+          key: ${{ env.CACHE_KEY }}
+
+      - name: Ensure cache directory exists and check if cache restored
+        run: |
+          mkdir -p cache
+          if [ -f cache/notified_prs.json ]; then
+            echo "Cache restored successfully."
+            cat cache/notified_prs.json
+          else
+            echo "Cache not restored or file does not exist.."
+          fi
+
+      - name: Fetch all opened pull request details using condition
+        id: fetch_all_pull_requests_using_condition
+        run: |
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "${{ env.API_URL }}?state=open&sort=created&direction=desc&per_page=100")
+          
+          # Load previous PR data if exists
+          if [ -f cache/notified_prs.json ]; then
+            previous_prs=$(cat cache/notified_prs.json)
+          else
+            previous_prs="[]"
+          fi
+
+          pr_list=""
+          new_notified_prs="[]"
+          notify=false
+
+          for pr_info in $(echo "$pr_infos" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo "$pr_info" | base64 --decode | jq -r "${1}"
+            }
+
+            pr_number=$(_jq '.number')
+            pr_title=$(_jq '.title')
+            pr_user=$(_jq '.user.login')
+            pr_url=$(_jq '.html_url')
+            pr_draft=$(_jq '.draft')
+            pr_created_at=$(_jq '.created_at')
+            pr_updated_at=$(_jq '.updated_at')
+
+            pr_data=$(jq -n --arg number "$pr_number" --arg updated_at "$pr_updated_at" '{number: $number, updated_at: $updated_at}')
+            new_notified_prs=$(echo "$new_notified_prs" | jq --argjson pr_data "$pr_data" '. += [$pr_data]')
+
+            echo "New Notified PR List------ $new_notified_prs"
+
+            # Check if the PR is new or updated
+            previous_pr=$(echo "$previous_prs" | jq --arg number "$pr_number" '.[] | select(.number == $number)')
+            echo "Checking PR is new or not --- $previous_pr"
+            if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
+              draft_status=""
+              echo "------Draft value ---- $pr_draft"
+              if [ "$pr_draft" = "true" ]; then
+                draft_status="\n*Draft*: true"
+              fi
+
+              pr_list="${pr_list}\n*Pull Request* #${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
+              notify=true
+              echo "Boolean Value for notify ------- $notify"
+            fi
+          done
+
+          # Save current PR data for future comparison
+          echo "$new_notified_prs" > cache/notified_prs.json
+
+          if [ "$notify" = true ]; then
+            echo -e "$pr_list" > pr_list.txt
+            echo "::set-output name=notify::true"
+          else
+            echo "::set-output name=notify::false"
+          fi
+
+      - name: Fetch closed pull requests since the last run
+        id: fetch_closed_prs
+        run: |
+          if [ -f cache/last_run_timestamp.txt ]; then
+            last_run_timestamp=$(cat cache/last_run_timestamp.txt)
+          else
+            last_run_timestamp=$(date -u -d "-24 hours" +%Y-%m-%dT%H:%M:%SZ)
+          fi
+
+          echo "Last run timestamp: $last_run_timestamp"
+
+          closed_prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
+
+          closed_pr_list=""
+
+          for pr_info in $(echo "$closed_prs" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo "$pr_info" | base64 --decode | jq -r "${1}"
+            }
+
+            pr_number=$(_jq '.number')
+            pr_title=$(_jq '.title')
+            pr_user=$(_jq '.user.login')
+            pr_url=$(_jq '.html_url')
+            pr_closed_at=$(_jq '.closed_at')
+            pr_created_at=$(_jq '.created_at')
+
+            if [[ "$pr_closed_at" > "$last_run_timestamp" ]]; then
+              closed_pr_list="${closed_pr_list}\n*Closed Pull Request* #${pr_number}: ${pr_title}\n*Closed by*: ${pr_user}\n*URL*: ${pr_url}\n*Closed At*: ${pr_closed_at}\n"
+            fi
+          done
+          
+          echo "Latest Closed PR List ------$closed_pr_list"
+
+          if [ -n "$closed_pr_list" ]; then
+            echo -e "$closed_pr_list" > closed_pr_list.txt
+            echo "::set-output name=notify_closed::true"
+          else
+            echo "::set-output name=notify_closed::false"
+          fi      
+
+      - name: Send Slack notification for PRs
+        if: success() && (steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true' || steps.fetch_closed_prs.outputs.notify_closed == 'true')
+        run: |
+          # Initialize PR lists
+          pr_list=""
+          closed_pr_list=""
+
+          # Check if the open PRs file exists and read its content
+          if [ -f pr_list.txt ]; then
+            pr_list=$(cat pr_list.txt)
+          fi
+
+          # Check if the closed PRs file exists and read its content
+          if [ -f closed_pr_list.txt ]; then
+            closed_pr_list=$(cat closed_pr_list.txt)
+          fi
+
+          # Initialize payload blocks
+          payload_blocks=()
+
+          # Add open PRs section if not empty
+          if [ -n "$pr_list" ]; then
+            payload_blocks+=("{
+              \"type\": \"header\",
+              \"text\": {
+                \"type\": \"plain_text\",
+                \"text\": \"List of Open/New/Updated Pull Requests using Cron Job\"
+              }
+            }")
+            payload_blocks+=("{
+              \"type\": \"section\",
+              \"text\": {
+                \"type\": \"mrkdwn\",
+                \"text\": \"$pr_list\"
+              }
+            }")
+          fi
+
+          # Add closed PRs section if not empty
+          if [ -n "$closed_pr_list" ]; then
+            payload_blocks+=("{
+              \"type\": \"header\",
+              \"text\": {
+                \"type\": \"plain_text\",
+                \"text\": \"List of Pull Requests Closed Since the Last Cron Job\"
+              }
+            }")
+            payload_blocks+=("{
+              \"type\": \"section\",
+              \"text\": {
+                \"type\": \"mrkdwn\",
+                \"text\": \"$closed_pr_list\"
+              }
+            }")
+          fi
+
+          # Construct the payload
+          payload=$(cat <<-EOF
+          {
+            "blocks": [
+              $(IFS=,; echo "${payload_blocks[*]}")
+            ]
+          }
+          EOF
+          )
+
+          # Debugging: Print payload to verify its format
+          echo "$payload"
+
+          # Send the payload to Slack
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
+
+      - name: Save current timestamp
+        run: |
+          current_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "$current_timestamp" > cache/last_run_timestamp.txt
+          echo "Current run timestamp: $current_timestamp"
+
+      - name: Verify Cache Save
+        if: always()
+        run: |
+          echo "Checking saved cache content...."
+          ls -l cache/
+          cat cache/notified_prs.json
+
+      - name: Save cache
+        if: always()
+        uses: actions/cache@v2
+        with:
+          path: cache
+          key: ${{ runner.os }}-pr-cache-${{ github.run_number }}
+
+      - name: Cleanup the restored cache key
+        run: |
+
+          # Fetching list of cache keys........
+          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
+          echo "Cache keys-->: $cacheKeys"
+
+          # Extract the most recent cache key
+          mostRecentCacheKey=$(echo "$cacheKeys" | head -n 1)
+          
+          # Setting this to not fail the workflow while deleting cache key
+          set +e
+          if [ -n "$mostRecentCacheKey" ] && [[ $mostRecentCacheKey == Linux-pr-cache-* ]]; then
+            echo "Deleting the most recent cache key..."
+            gh actions-cache delete $mostRecentCacheKey -R $REPO -B $BRANCH --confirm
+          else
+            echo "No cache keys found."
+          fi
+
+          echo "Done"
+          # The permissions can be fine-tuned in the repository settings under "Settings" > "Actions" > "General" > "Workflow permissions."
+          # Make sure to enable "Read and write permissions" in order to delete the cache key with "secrets.GITHUB_TOKEN". 
+          # Otherwise, the repository owner will need to create a Personal Access Token (PAT) with write permissions, add it as a secret, and specify it as GH_TOKEN.
+
+    permissions:
+      actions: write
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    needs: fetch_all_pull_requests_and_notify_using_condition_and_cron
+    env:
+      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
+    if: always()
+    steps:
+      - name: 'Slack Notification Reminder'
+        run: |
+          payload=$(cat <<-EOF
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Slack Notification to perform Workflow Builder Action"
+                }
+              }
+          EOF
+          )
+          echo "$payload"  # Debugging: Print payload to verify its format
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $WORKFLOW_BUILDER_WEBHOOK || echo "Slack notification failed with status code: $?"
