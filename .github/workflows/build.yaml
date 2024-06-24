@@ -41,6 +41,7 @@ jobs:
           - runtime: windows
             os: windows-latest
             reportName: windows-test-report
+      max-parallel: 1
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || 'false' }}
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
