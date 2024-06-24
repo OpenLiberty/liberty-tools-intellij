@@ -17,9 +17,17 @@ jobs:
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?&state=open&sort=created&direction=desc&per_page=100")
-          
-          # Extract merge_commit_sha values into an array, excluding draft pull requests
-          merge_commit_shas=($(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | .merge_commit_sha'))
+
+          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
+          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+
+          # Print the PR number and corresponding merge commit sha
+          echo "PR number and merge commit sha:"
+          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
+
+          # Extract merge_commit_sha values into an array
+          merge_commit_shas=($(echo "$pr_details" | jq -r '.sha'))
+
           # Create a JSON array string
           shas=$(jq -nc --arg shas "${merge_commit_shas[*]}" '$shas | split(" ")')
           echo "shas=$shas" >> $GITHUB_OUTPUT
