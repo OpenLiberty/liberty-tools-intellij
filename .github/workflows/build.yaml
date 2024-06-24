@@ -3,6 +3,11 @@ name: Build
 on:
   workflow_call:
     inputs:
+      refLsp4ij:
+        description: 'Lsp4ij ref'
+        type: string
+        required: true
+        default: main
       useLocalPlugin:
         description: 'Use lsp4ij locally'
         required: true
@@ -36,10 +41,9 @@ jobs:
           - runtime: windows
             os: windows-latest
             reportName: windows-test-report
-    outputs:
-      shas: ${{ steps.extract.outputs.shas }}
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || 'false' }}
+      REF_LSP4IJ: ${{ inputs.refLsp4ij }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -57,36 +61,13 @@ jobs:
         run: bash ./src/test/resources/ci/scripts/setup.sh
 
       # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
-      - name: Extract merge_commit_shas
-        if: env.USE_LOCAL_PLUGIN == 'true'
-        shell: bash
-        id: extract
-        run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?&state=open&sort=created&direction=desc&per_page=100")
-          
-          # Extract merge_commit_sha values into an array, excluding draft pull requests
-          merge_commit_shas=($(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | .merge_commit_sha'))
-          # Create a JSON array string
-          shas=$(jq -nc --arg shas "${merge_commit_shas[*]}" '$shas | split(" ")')
-          echo "shas=$shas" >> $GITHUB_OUTPUT
-          
-  checkout-repository:
-    needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macOS-latest, windows-latest ]
-        sha: ${{ fromJson(needs.build.outputs.shas) }}
-
-    steps:
       - name: 'Checkout lsp4ij'
         if: env.USE_LOCAL_PLUGIN == 'true'
         uses: actions/checkout@v3
         with:
           repository: redhat-developer/lsp4ij
           path: lsp4ij
-          ref: ${{ matrix.sha }}
+          ref: ${{ env.REF_LSP4IJ }}
       - name: 'Build Lsp4ij'
         if: env.USE_LOCAL_PLUGIN == 'true'
         working-directory: ./lsp4ij
