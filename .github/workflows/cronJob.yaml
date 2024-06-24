@@ -36,6 +36,7 @@ jobs:
     needs: fetch_all_pull_request_shas
     uses: ./.github/workflows/build.yaml
     strategy:
+      fail-fast: false
       matrix:
         sha: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.shas) }}
     with:
