@@ -1,0 +1,45 @@
+name: Cron Job
+
+on:
+  workflow_dispatch:
+  schedule:
+    # The job runs every midnight (UTC time). Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+    - cron: '0 0 * * *'
+
+jobs:
+  fetch_all_pull_request_shas:
+    runs-on: ubuntu-latest
+    outputs:
+      shas: ${{ steps.extract.outputs.shas }}
+    steps:
+      - name: Extract merge_commit_shas
+        shell: bash
+        id: extract
+        run: |
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?&state=open&sort=created&direction=desc&per_page=100")
+
+          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
+          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+
+          # Print the PR number and corresponding merge commit sha
+          echo "PR number and merge commit sha:"
+          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
+
+          # Extract merge_commit_sha values into an array
+          merge_commit_shas=($(echo "$pr_details" | jq -r '.sha'))
+
+          # Create a JSON array string
+          shas=$(jq -nc --arg shas "${merge_commit_shas[*]}" '$shas | split(" ")')
+          echo "shas=$shas" >> $GITHUB_OUTPUT
+
+  call-build-workflow:
+    needs: fetch_all_pull_request_shas
+    uses: ./.github/workflows/build.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        sha: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.shas) }}
+    with:
+      useLocalPlugin: true
+      refLsp4ij: ${{ matrix.sha }}
