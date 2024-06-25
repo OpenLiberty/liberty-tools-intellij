@@ -13,7 +13,8 @@ on:
       useLocalPlugin:
         description: 'Use lsp4ij locally'
         required: true
-        default: 'false'
+        type: boolean
+        default: false
   push:
     branches: '**'
   pull_request:
