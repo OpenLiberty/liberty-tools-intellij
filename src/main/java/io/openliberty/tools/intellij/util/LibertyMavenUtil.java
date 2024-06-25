@@ -252,7 +252,8 @@ public class LibertyMavenUtil {
      * @throws LibertyException
      */
     private static String getCustomMavenPath(Project project, @NotNull MavenHomeType customMavenHome) throws LibertyException {
-        StaticResolvedMavenHomeType resolvedMavenHomeType = getResolvedMavenHomeType(customMavenHome);
+        // If 'customMavenHome' is not an instance of 'StaticResolvedMavenHomeType',it using a fallback method (staticOrBundled) to return default 'BundledMaven3.INSTANCE'.
+        StaticResolvedMavenHomeType resolvedMavenHomeType = staticOrBundled(customMavenHome);
         File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
         // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
@@ -294,20 +295,6 @@ public class LibertyMavenUtil {
             throw new LibertyException(String.format("Could not execute the Maven executable %s. Make sure a valid path is configured " +
                     "inside IntelliJ Maven preferences.", mavenExecutable.getAbsolutePath()), translatedMessage);
         }
-    }
-
-    /**
-     * This method checks if the provided 'MavenHomeType' is an instance of 'StaticResolvedMavenHomeType'.
-     * If it is, it returns the casted object. Otherwise, it uses a fallback method (staticOrBundled) to return default 'BundledMaven3.INSTANCE'
-     * @param customMavenHome the custom MavenHomeType to be resolved
-     * @return the resolved StaticResolvedMavenHomeType
-     */
-    private static StaticResolvedMavenHomeType getResolvedMavenHomeType(MavenHomeType customMavenHome) {
-        if (customMavenHome instanceof StaticResolvedMavenHomeType) {
-            return (StaticResolvedMavenHomeType) customMavenHome;
-        }
-        // If 'customMavenHome' is not an instance of 'StaticResolvedMavenHomeType', return default 'BundledMaven3.INSTANCE'.
-        return staticOrBundled(customMavenHome);
     }
 
     /**
