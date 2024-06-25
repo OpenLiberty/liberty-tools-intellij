@@ -61,7 +61,7 @@ jobs:
         id: fetch_all_pull_requests_using_condition
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}?state=open&sort=created&direction=desc&per_page=100")
+          "${{ env.API_URL }}?state=open&direction=desc&per_page=100")
           
           # Load previous PR data if exists
           if [ -f cache/notified_prs.json ]; then
@@ -97,14 +97,12 @@ jobs:
             echo "Checking PR is new or not --- $previous_pr"
             if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
               draft_status=""
-              echo "------Draft value ---- $pr_draft"
               if [ "$pr_draft" = "true" ]; then
                 draft_status="\n*Draft*: true"
               fi
 
               pr_list="${pr_list}\n*Pull Request* #${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
               notify=true
-              echo "Boolean Value for notify ------- $notify"
             fi
           done
 
@@ -130,7 +128,7 @@ jobs:
           echo "Last run timestamp: $last_run_timestamp"
 
           closed_prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
+          "${{ env.API_URL }}?state=closed&direction=desc&per_page=100")
 
           closed_pr_list=""
 
@@ -225,10 +223,6 @@ jobs:
           }
           EOF
           )
-
-          # Debugging: Print payload to verify its format
-          echo "$payload"
-
           # Send the payload to Slack
           curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
 
@@ -300,5 +294,4 @@ jobs:
               }
           EOF
           )
-          echo "$payload"  # Debugging: Print payload to verify its format
           curl -X POST -H 'Content-type: application/json' --data "$payload" $WORKFLOW_BUILDER_WEBHOOK || echo "Slack notification failed with status code: $?"
