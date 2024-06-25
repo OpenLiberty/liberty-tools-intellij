@@ -33,7 +33,8 @@ jobs:
           shas=$(jq -nc --arg shas "${merge_commit_shas[*]}" '$shas | split(" ")')
           echo "shas=$shas" >> $GITHUB_OUTPUT
 
-  call-build-workflow:
+  # Run the LTI Tests against each open lsp4ij PR
+  call-build-workflow-for-each-merge-commit-sha:
     needs: fetch_all_pull_request_shas
     uses: ./.github/workflows/build.yaml
     strategy:
@@ -43,3 +44,10 @@ jobs:
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.sha }}
+
+  # Run the LTI Tests against lsp4ij main branch
+  call-build-workflow-for-lsp4ij-main-branch:
+    uses: ./.github/workflows/build.yaml
+    with:
+      useLocalPlugin: true
+      refLsp4ij: main
