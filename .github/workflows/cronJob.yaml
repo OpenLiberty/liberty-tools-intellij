@@ -10,11 +10,11 @@ jobs:
   fetch_all_pull_request_shas:
     runs-on: ubuntu-latest
     outputs:
-      shas: ${{ steps.extract.outputs.shas }}
+      pr_details: ${{ steps.extract.outputs.pr_details }}
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
-      - name: Extract merge_commit_shas
+      - name: Extract PR numbers and merge_commit_shas
         shell: bash
         id: extract
         run: |
@@ -28,12 +28,9 @@ jobs:
           echo "PR number and merge commit sha:"
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
 
-          # Extract merge_commit_sha values into an array
-          merge_commit_shas=($(echo "$pr_details" | jq -r '.sha'))
-
-          # Create a JSON array string
-          shas=$(jq -nc --arg shas "${merge_commit_shas[*]}" '$shas | split(" ")')
-          echo "shas=$shas" >> $GITHUB_OUTPUT
+          # Create a JSON array string of PR numbers and SHAs
+          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
+          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PR
   call-build-workflow-for-each-merge-commit-sha:
@@ -42,10 +39,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sha: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.shas) }}
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
-      refLsp4ij: ${{ matrix.sha }}
+      refLsp4ij: ${{ matrix.pr_details.sha }}
+    name: Run LTI tests for PR #${{ matrix.pr_details.number }}
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
@@ -53,3 +51,4 @@ jobs:
     with:
       useLocalPlugin: true
       refLsp4ij: main
+    name: Run LTI tests for Lsp4ij Main branch
