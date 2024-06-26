@@ -11,13 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       shas: ${{ steps.extract.outputs.shas }}
+    env:
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
       - name: Extract merge_commit_shas
         shell: bash
         id: extract
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/redhat-developer/lsp4ij/pulls?&state=open&sort=created&direction=desc&per_page=100")
+          "${{ env.API_URL }}")
 
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')

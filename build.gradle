@@ -11,6 +11,7 @@ sourceCompatibility = 17
 targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
+// To switch to stable version, remove that @nightly and just specify the stable version number alone.
 def lsp4ijVersion = '0.0.2-20240615-013020@nightly'
 
 repositories {
