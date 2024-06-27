@@ -32,7 +32,7 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
-  # Run the LTI Tests against each open lsp4ij PR
+  # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
     needs: fetch_all_pull_request_shas
     uses: ./.github/workflows/build.yaml
