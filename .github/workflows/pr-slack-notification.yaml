@@ -24,7 +24,7 @@ jobs:
         run: |
           gh extension install actions/gh-actions-cache
 
-          # Fetching list of cache keys........
+          # Fetching list of cache keys...
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
           
           # Extract the most recent cache key
@@ -33,12 +33,11 @@ jobs:
           if [ -n "$mostRecentCacheKey" ]; then
             echo "CACHE_KEY=$mostRecentCacheKey" >> $GITHUB_ENV
           else
-            echo "No recent cache key found, generating a new one...."
+            echo "No recent cache key found, generating a new one......"
             echo "CACHE_KEY=${{ runner.os }}-pr-cache-${{ github.run_number }}" >> $GITHUB_ENV
           fi
           
           echo "Done"
-          # 'secrets.GITHUB_TOKEN' is automatically provided by GitHub Actions for each workflow run. You don't need to manually create or manage this token.
 
       - name: Restore cache
         id: cache-restore
@@ -60,9 +59,12 @@ jobs:
       - name: Fetch all opened pull request details using condition
         id: fetch_all_pull_requests_using_condition
         run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          pr_infos=$(curl -s -H "Authorization: token ${{ env.GH_TOKEN }}" \
           "${{ env.API_URL }}?state=open&direction=desc&per_page=100")
           
+          echo "List of Currently Opened PRs: "
+          echo "$pr_infos" | jq '.[] | {number, updated_at, draft}'
+
           # Load previous PR data if exists
           if [ -f cache/notified_prs.json ]; then
             previous_prs=$(cat cache/notified_prs.json)
@@ -90,11 +92,8 @@ jobs:
             pr_data=$(jq -n --arg number "$pr_number" --arg updated_at "$pr_updated_at" '{number: $number, updated_at: $updated_at}')
             new_notified_prs=$(echo "$new_notified_prs" | jq --argjson pr_data "$pr_data" '. += [$pr_data]')
 
-            echo "New Notified PR List------ $new_notified_prs"
-
             # Check if the PR is new or updated
             previous_pr=$(echo "$previous_prs" | jq --arg number "$pr_number" '.[] | select(.number == $number)')
-            echo "Checking PR is new or not --- $previous_pr"
             if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
               draft_status=""
               if [ "$pr_draft" = "true" ]; then
@@ -105,6 +104,9 @@ jobs:
               notify=true
             fi
           done
+          
+          echo "List of PRs that need to be sent to Slack now: "
+          echo "$pr_list"
 
           # Save current PR data for future comparison
           echo "$new_notified_prs" > cache/notified_prs.json
@@ -127,30 +129,16 @@ jobs:
 
           echo "Last run timestamp: $last_run_timestamp"
 
-          closed_prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}?state=closed&direction=desc&per_page=100")
-
-          closed_pr_list=""
-
-          for pr_info in $(echo "$closed_prs" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo "$pr_info" | base64 --decode | jq -r "${1}"
-            }
-
-            pr_number=$(_jq '.number')
-            pr_title=$(_jq '.title')
-            pr_user=$(_jq '.user.login')
-            pr_url=$(_jq '.html_url')
-            pr_closed_at=$(_jq '.closed_at')
-            pr_created_at=$(_jq '.created_at')
-
-            if [[ "$pr_closed_at" > "$last_run_timestamp" ]]; then
-              closed_pr_list="${closed_pr_list}\n*Closed Pull Request* #${pr_number}: ${pr_title}\n*Closed by*: ${pr_user}\n*URL*: ${pr_url}\n*Closed At*: ${pr_closed_at}\n"
-            fi
-          done
+          closed_prs=$(curl -s -H "Authorization: token ${{ env.GH_TOKEN }}" \
+          "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
           
-          echo "Latest Closed PR List ------$closed_pr_list"
-
+          closed_pr_list=$(echo "$closed_prs" | jq -r \
+          --arg last_run "$last_run_timestamp" \
+          '.[] | select(.closed_at > $last_run) | "*Closed Pull Request* #\(.number): \(.title)\n*Closed by*: \(.user.login)\n*URL*: \(.html_url)\n*Closed At*: \(.closed_at)\n"')
+          
+          echo "Closed PR List since last cron job:"
+          echo "$closed_pr_list"
+          
           if [ -n "$closed_pr_list" ]; then
             echo -e "$closed_pr_list" > closed_pr_list.txt
             echo "::set-output name=notify_closed::true"
@@ -266,10 +254,10 @@ jobs:
           fi
 
           echo "Done"
-          # The permissions can be fine-tuned in the repository settings under "Settings" > "Actions" > "General" > "Workflow permissions."
-          # Make sure to enable "Read and write permissions" in order to delete the cache key with "secrets.GITHUB_TOKEN". 
-          # Otherwise, the repository owner will need to create a Personal Access Token (PAT) with write permissions, add it as a secret, and specify it as GH_TOKEN.
 
+    # 'secrets.GITHUB_TOKEN' is automatically provided by GitHub Actions for each workflow run. We don't need to manually create or manage this token.
+    # The below way, the workflow is granting write access to the actions scope of the GITHUB_TOKEN.
+    # If the below specific way is not successful to delete the cache key, then the repository owner will need to create a Personal Access Token (PAT) with write permissions, add it as a secret, and specify the name in GH_TOKEN.
     permissions:
       actions: write
 
