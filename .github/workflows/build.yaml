@@ -20,6 +20,11 @@ on:
         required: true
         type: boolean
         default: false
+      refLsp4ij:
+        description: 'Reference/branch for Lsp4ij checkout'
+        type: string
+        required: true
+        default: main
   push:
     branches: '**'
   pull_request:
