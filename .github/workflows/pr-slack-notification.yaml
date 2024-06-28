@@ -25,6 +25,7 @@ jobs:
           gh extension install actions/gh-actions-cache
 
           # Fetching list of cache keys...
+          # Allowed values are within the limit 1-100 ,If we give 100, only the latest 100 cache keys will be listed. Any older cache keys beyond this limit will not be included in '$cacheKeys'
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
           
           # Extract the most recent cache key
@@ -59,6 +60,7 @@ jobs:
       - name: Fetch all opened pull request details using condition
         id: fetch_all_pull_requests_using_condition
         run: |
+          # The number of results per page is limited to a maximum of 100. We need "pagination", if we require more than this limit, but for open PRs, it will be within the limit 100.
           pr_infos=$(curl -s -H "Authorization: token ${{ env.GH_TOKEN }}" \
           "${{ env.API_URL }}?state=open&direction=desc&per_page=100")
           
@@ -105,7 +107,7 @@ jobs:
             fi
           done
           
-          echo "List of PRs that need to be sent to Slack now: "
+          echo "List of PRs that need to be sent to Slack now:"
           echo "$pr_list"
 
           # Save current PR data for future comparison
@@ -128,7 +130,9 @@ jobs:
           fi
 
           echo "Last run timestamp: $last_run_timestamp"
-
+          
+          
+          # We used 'sort=updated' to fetch list of closed PRs with max limit of 100(Default value). In the future, we expect to have more than 100 closed PRs, so it's better to keep 'sort=updated'.
           closed_prs=$(curl -s -H "Authorization: token ${{ env.GH_TOKEN }}" \
           "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
           
@@ -179,7 +183,7 @@ jobs:
               \"type\": \"section\",
               \"text\": {
                 \"type\": \"mrkdwn\",
-                \"text\": \"$pr_list\"
+                \"text\": $(echo "$pr_list" | jq -sR .)
               }
             }")
           fi
@@ -197,20 +201,17 @@ jobs:
               \"type\": \"section\",
               \"text\": {
                 \"type\": \"mrkdwn\",
-                \"text\": \"$closed_pr_list\"
+                \"text\": $(echo "$closed_pr_list" | jq -sR .)
               }
             }")
           fi
 
           # Construct the payload
-          payload=$(cat <<-EOF
+          payload=$(jq -n --argjson blocks "$(printf '%s\n' "${payload_blocks[@]}" | jq -s '.')" '
           {
-            "blocks": [
-              $(IFS=,; echo "${payload_blocks[*]}")
-            ]
-          }
-          EOF
-          )
+            "blocks": $blocks
+          }')
+
           # Send the payload to Slack
           curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL || echo "Slack notification failed with status code: $?"
 
@@ -218,7 +219,7 @@ jobs:
         run: |
           current_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           echo "$current_timestamp" > cache/last_run_timestamp.txt
-          echo "Current run timestamp: $current_timestamp"
+          echo "Current run timestamp saved: $current_timestamp"
 
       - name: Verify Cache Save
         if: always()
@@ -238,6 +239,7 @@ jobs:
         run: |
 
           # Fetching list of cache keys........
+          # Allowed values are within the limit 1-100
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
           echo "Cache keys-->: $cacheKeys"
 
@@ -270,7 +272,7 @@ jobs:
     steps:
       - name: 'Slack Notification Reminder'
         run: |
-          payload=$(cat <<-EOF
+          payload=$(jq -n '
           {
             "blocks": [
               {
@@ -280,6 +282,6 @@ jobs:
                   "text": "Slack Notification to perform Workflow Builder Action"
                 }
               }
-          EOF
-          )
+            ]
+          }')
           curl -X POST -H 'Content-type: application/json' --data "$payload" $WORKFLOW_BUILDER_WEBHOOK || echo "Slack notification failed with status code: $?"
