@@ -1,0 +1,54 @@
+name: Cron Job
+
+on:
+  workflow_dispatch:
+  schedule:
+    # The job runs every midnight (UTC time). Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+    - cron: '0 0 * * *'
+
+jobs:
+  fetch_all_pull_request_shas:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_details: ${{ steps.extract.outputs.pr_details }}
+    env:
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+    steps:
+      - name: Extract PR numbers and merge_commit_shas
+        shell: bash
+        id: extract
+        run: |
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "${{ env.API_URL }}")
+
+          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
+          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+
+          # Print the PR number and corresponding merge commit sha
+          echo "PR number and merge commit sha:"
+          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
+
+          # Create a JSON array string of PR numbers and SHAs
+          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
+          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+
+  # Run the LTI Tests against each open lsp4ij PRs
+  call-build-workflow-for-each-merge-commit-sha:
+    needs: fetch_all_pull_request_shas
+    uses: ./.github/workflows/build.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
+    with:
+      useLocalPlugin: true
+      refLsp4ij: ${{ matrix.pr_details.sha }}
+    name: Run LTI tests for PR #${{ matrix.pr_details.number }}
+
+  # Run the LTI Tests against lsp4ij main branch
+  call-build-workflow-for-lsp4ij-main-branch:
+    uses: ./.github/workflows/build.yaml
+    with:
+      useLocalPlugin: true
+      refLsp4ij: main
+    name: Run LTI tests for Lsp4ij Main branch
