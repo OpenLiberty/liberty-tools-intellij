@@ -40,9 +40,8 @@ jobs:
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
           
             mergeable_state=$(jq -r '.mergeable_state' <<< "$pr_detail")
-            draft=$(jq -r '.draft' <<< "$pr_detail")
           
-            if [[ "$mergeable_state" != "dirty" && "$draft" == "false" ]]; then
+            if [[ "$mergeable_state" != "dirty" ]]; then
             pr_number=$(jq -r '.number' <<< "$pr_detail")
             pr_sha=$(jq -r '.merge_commit_sha' <<< "$pr_detail")
             valid_prs+=("{\"number\": \"$pr_number\", \"sha\": \"$pr_sha\"}")
@@ -60,7 +59,7 @@ jobs:
           
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
-            echo "::warning file=::All the PRs have Merge Conflicts. So Run LTI tests for PR is Skipped."
+            echo "::warning file=::All the PRs are either drafts or have merge conflicts. Skipping further actions."
             echo "is_empty=true" >> $GITHUB_OUTPUT
           else
             echo "is_empty=false" >> $GITHUB_OUTPUT
