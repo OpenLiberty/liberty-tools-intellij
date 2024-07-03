@@ -230,7 +230,7 @@ public class LibertyGradleUtil {
         } catch (IOException e) {
             throw new LibertyException("Could not get canonical path for gradle wrapper file");
         }
-        return path;
+        return LibertyProjectUtil.includeEscapeToString(path);
     }
 
     /**
