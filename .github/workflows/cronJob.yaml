@@ -59,7 +59,7 @@ jobs:
           
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
-            echo "::warning file=::All the PRs are either drafts or have merge conflicts. Skipping further actions."
+            echo "::warning file=::There are no open PRs, or all the existing PRs are either drafts or have merge conflicts. Skipping further actions."
             echo "is_empty=true" >> $GITHUB_OUTPUT
           else
             echo "is_empty=false" >> $GITHUB_OUTPUT
