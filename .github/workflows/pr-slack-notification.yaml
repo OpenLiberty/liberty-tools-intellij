@@ -115,9 +115,9 @@ jobs:
 
           if [ "$notify" = true ]; then
             echo -e "$pr_list" > pr_list.txt
-            echo "::set-output name=notify::true"
+            echo "notify=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=notify::false"
+            echo "notify=false" >> $GITHUB_ENV
           fi
 
       - name: Fetch closed pull requests since the last run
@@ -145,13 +145,13 @@ jobs:
           
           if [ -n "$closed_pr_list" ]; then
             echo -e "$closed_pr_list" > closed_pr_list.txt
-            echo "::set-output name=notify_closed::true"
+            echo "notify_closed=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=notify_closed::false"
+            echo "notify_closed=false" >> $GITHUB_ENV
           fi      
 
       - name: Send Slack notification for PRs
-        if: success() && (steps.fetch_all_pull_requests_using_condition.outputs.notify == 'true' || steps.fetch_closed_prs.outputs.notify_closed == 'true')
+        if: success() && (${{ env.notify }} == 'true' || ${{ env.notify_closed }} == 'true')
         run: |
           # Initialize PR lists
           pr_list=""
