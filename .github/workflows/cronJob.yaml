@@ -67,8 +67,8 @@ jobs:
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
-    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
     needs: fetch_all_pull_request_shas
+    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
