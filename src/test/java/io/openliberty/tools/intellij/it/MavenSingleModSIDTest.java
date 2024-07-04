@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -61,16 +61,6 @@ public class MavenSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
      * The path to the unit test reports.
      */
     private final Path pathToUTReport = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
-
-    /**
-     * Dev mode configuration start parameters.
-     */
-    private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
-
-    /**
-     * Dev mode configuration custom start parameters for debugging.
-     */
-    private final String DEV_MODE_START_PARAMS_DEBUG = "-DdebugPort=9876";
 
     /**
      * Prepares the environment for test execution.

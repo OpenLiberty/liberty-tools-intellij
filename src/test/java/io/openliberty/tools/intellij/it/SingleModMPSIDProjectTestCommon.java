@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,13 +13,9 @@ import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Map;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -71,7 +67,7 @@ public abstract class SingleModMPSIDProjectTestCommon {
     }
 
     /**
-     * Tests dashboard start/RunTests/stop actions run from the project's drop-down action menu.
+     * Tests dashboard start/stop actions run from the project's drop-down action menu.
      */
     @Test
     @Video
