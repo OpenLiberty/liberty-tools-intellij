@@ -98,6 +98,7 @@ jobs:
             previous_pr=$(echo "$previous_prs" | jq --arg number "$pr_number" '.[] | select(.number == $number)')
             if [ -z "$previous_pr" ] || [ "$(echo "$previous_pr" | jq -r '.updated_at')" != "$pr_updated_at" ]; then
               draft_status=""
+              # Checking the PR draft status to only send 'Draft: true' in the Slack message and avoid sending 'Draft: false'.
               if [ "$pr_draft" = "true" ]; then
                 draft_status="\n*Draft*: true"
               fi
