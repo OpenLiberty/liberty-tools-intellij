@@ -71,8 +71,8 @@ public abstract class SingleModMPSIDProjectTestCommon {
      */
     @Test
     @Video
-    public void testRunTestsActionUsingDropDownMenu() {
-        String testName = "testRunTestsActionUsingDropDownMenu";
+    public void testStartActionUsingDropDownMenu() {
+        String testName = "testStartActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
