@@ -44,9 +44,10 @@ jobs:
             if [[ "$mergeable_state" != "dirty" ]]; then
             pr_number=$(jq -r '.number' <<< "$pr_detail")
             pr_sha=$(jq -r '.merge_commit_sha' <<< "$pr_detail")
-            valid_prs+=("{\"number\": \"$pr_number\", \"sha\": \"$pr_sha\"}")
+            pr_link=$(jq -r '.html_url' <<< "$pr_detail")
+            valid_prs+=("{\"number\": \"$pr_number\", \"sha\": \"$pr_sha\", \"link\": \"$pr_link\"}")
           else
-              echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") has conflicts."
+              echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") has conflicts. See : $(jq -r '.html_url' <<< "$pr_detail")"
           fi
           done
           
