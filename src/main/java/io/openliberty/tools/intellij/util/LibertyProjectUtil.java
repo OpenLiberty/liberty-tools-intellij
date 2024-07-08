@@ -27,7 +27,6 @@ import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
-import org.jetbrains.plugins.terminal.TerminalView;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;

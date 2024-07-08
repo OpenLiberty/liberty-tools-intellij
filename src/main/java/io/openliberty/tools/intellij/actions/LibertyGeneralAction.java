@@ -19,7 +19,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -29,7 +28,6 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
-import org.jetbrains.plugins.terminal.TerminalView;
 
 import java.util.Arrays;
 import java.util.List;
