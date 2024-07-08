@@ -259,7 +259,6 @@ jobs:
           echo "Done"
 
     # 'secrets.GITHUB_TOKEN' is automatically provided by GitHub Actions for each workflow run. We don't need to manually create or manage this token.
-    # The below way, the workflow is granting write access to the actions scope of the GITHUB_TOKEN.
     # Below, the workflow is granting "write" access to the actions scope of the GITHUB_TOKEN. This enables the workflow to be able to delete cache keys.
     # If the "write" permission does not enable the ability to delete the cache keys, then the repository owner will need to create a Personal Access Token (PAT) with write permissions, add it as a secret, and then specify the name in GH_TOKEN.
     permissions:
