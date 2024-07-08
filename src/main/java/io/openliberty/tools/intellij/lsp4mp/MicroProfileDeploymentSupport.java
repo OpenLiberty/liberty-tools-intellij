@@ -11,6 +11,7 @@
 package io.openliberty.tools.intellij.lsp4mp;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -38,7 +39,7 @@ public class MicroProfileDeploymentSupport implements ClasspathResourceChangedMa
     private final Project project;
 
     public static MicroProfileDeploymentSupport getInstance(Project project) {
-        return ServiceManager.getService(project, MicroProfileDeploymentSupport.class);
+        return project.getService(MicroProfileDeploymentSupport.class);
     }
 
     public MicroProfileDeploymentSupport(Project project) {

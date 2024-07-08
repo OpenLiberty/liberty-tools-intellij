@@ -57,7 +57,7 @@ public class ClasspathResourceChangedManager implements Disposable {
 	private final ClasspathResourceChangedListener listener;
 
 	public static ClasspathResourceChangedManager getInstance(Project project) {
-		return ServiceManager.getService(project, ClasspathResourceChangedManager.class);
+		return project.getService(ClasspathResourceChangedManager.class);
 	}
 
 	public interface Listener {
