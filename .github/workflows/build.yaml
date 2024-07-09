@@ -77,7 +77,6 @@ jobs:
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
-          repository: OpenLiberty/Liberty-tools-intellij
           path: liberty-tools-intellij
           ref: ${{ env.REF_LTI_TAG }}
       - name: 'Install required integration test software'
