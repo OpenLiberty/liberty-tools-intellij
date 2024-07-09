@@ -96,8 +96,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags can be added to obtain build results.
-        # tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
-        tag: [ 'main' ]
+        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
@@ -113,8 +112,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags can be added to obtain build results.
-        # tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
-        tag: [ 'main' ]
+        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
     with:
       useLocalPlugin: true
       refLsp4ij: main
