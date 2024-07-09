@@ -117,6 +117,7 @@ jobs:
       useLocalPlugin: true
       refLsp4ij: main
       lsp4ijBranch: main
+      refLTITag: ${{ matrix.tag }}
     name: Run LTI tests for Lsp4ij Main branch
 
   # Send slack notification for build results
