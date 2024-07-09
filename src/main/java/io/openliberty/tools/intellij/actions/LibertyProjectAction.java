@@ -88,7 +88,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         // Resolve project names and add to list
         mavenBuildFiles.forEach(mavenBuildFile -> {
             // resolve project name
-            VirtualFile virtualFile = mavenBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = mavenBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Maven project for build file: %s", mavenBuildFile.getBuildFile()));
             } else {
@@ -103,7 +103,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
 
         });
         gradleBuildFiles.forEach(gradleBuildFile -> {
-            VirtualFile virtualFile = gradleBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = gradleBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Gradle project for build file: %s", gradleBuildFile.getBuildFile()));
             } else {

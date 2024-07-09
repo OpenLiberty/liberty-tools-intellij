@@ -84,12 +84,12 @@ public class LibertyMavenUtil {
      * @throws IOException
      * @throws SAXException
      */
-    public static BuildFile validPom(PsiFile file) throws ParserConfigurationException, IOException, SAXException {
+    public static BuildFile validPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
         BuildFile buildFile = new BuildFile(false, false);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getVirtualFile().getPath());
+        File inputFile = new File(file.getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();

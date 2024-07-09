@@ -9,13 +9,14 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 
 /**
  * Defines a BuildFile object
  */
 public class BuildFile {
-    public PsiFile buildFile;
+    public VirtualFile buildFile;
     public boolean validBuildFile;
     public boolean validContainerVersion;
 
@@ -37,9 +38,9 @@ public class BuildFile {
         this.buildFile = null;
     }
 
-    public PsiFile getBuildFile() { return this.buildFile; }
+    public VirtualFile getBuildFile() { return this.buildFile; }
 
-    public void setBuildFile(PsiFile buildFile) {
+    public void setBuildFile(VirtualFile buildFile) {
         this.buildFile = buildFile;
     }
 

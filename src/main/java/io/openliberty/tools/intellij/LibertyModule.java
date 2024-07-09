@@ -51,7 +51,7 @@ public class LibertyModule {
 
     public LibertyModule(Project project, BuildFile buildFile) {
         this(project);
-        this.buildFile = buildFile.getBuildFile().getVirtualFile();
+        this.buildFile = buildFile.getBuildFile();
         this.name = buildFile.getProjectName();
         this.projectType = buildFile.getProjectType();
         this.validContainerVersion = buildFile.isValidContainerVersion();

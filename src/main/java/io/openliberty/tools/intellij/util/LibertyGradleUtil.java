@@ -91,8 +91,8 @@ public class LibertyGradleUtil {
      * validContainerVersion true if plugin version is valid for dev mode in containers
      * @throws IOException
      */
-    public static BuildFile validBuildGradle(PsiFile file) throws IOException {
-            String buildFile = fileToString(file.getVirtualFile().getPath());
+    public static BuildFile validBuildGradle(VirtualFile file) throws IOException {
+            String buildFile = fileToString(file.getPath());
             if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
 
             // instead of iterating over capture groups in a plugin{}, search directly

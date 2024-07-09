@@ -130,11 +130,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         for (BuildFile buildFile : mavenBuildFiles) {
             // create a new Liberty project
-            PsiFile psiFile = buildFile.getBuildFile();
+            VirtualFile virtualFile = buildFile.getBuildFile();
             String projectName = null;
-            VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
-                LOGGER.error(String.format("Could not resolve current Maven project %s", psiFile));
+                LOGGER.error(String.format("Could not resolve current Maven project %s", virtualFile));
                 break;
             }
             LibertyModuleNode node;
@@ -152,7 +151,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
 
             boolean validContainerVersion = buildFile.isValidContainerVersion();
-            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, psiFile.getVirtualFile(), projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
+            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
             node = new LibertyModuleNode(module);
 
             top.add(node);
@@ -176,9 +175,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         }
 
         for (BuildFile buildFile : gradleBuildFiles) {
-            PsiFile psiFile = buildFile.getBuildFile();
+            VirtualFile virtualFile = buildFile.getBuildFile();
             String projectName = null;
-            VirtualFile virtualFile = psiFile.getVirtualFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve current Gradle project %s", buildFile));
                 break;
