@@ -1,6 +1,7 @@
 name: Cron Job
 
 on:
+  push:
   workflow_dispatch:
   schedule:
     # The job runs at 15:45 UTC every Monday through Friday, which is 9:15 PM IST and 11:45 AM EST.
@@ -94,16 +95,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Existing LTI release tags can be added to obtain build results.
+        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
+      refLTITag: ${{ matrix.tag }}
     name: Running PR
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
     uses: ./.github/workflows/build.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags can be added to obtain build results.
+        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
     with:
       useLocalPlugin: true
       refLsp4ij: main

@@ -17,6 +17,11 @@ on:
         required: true
         type: boolean
         default: false
+      refLTITag:
+        description: 'Reference LTI Tag'
+        type: string
+        required: true
+        default: main
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -26,6 +31,11 @@ on:
         default: false
       refLsp4ij:
         description: 'Reference/branch for Lsp4ij checkout'
+        type: string
+        required: true
+        default: main
+      refLTITag:
+        description: 'Reference LTI Tag'
         type: string
         required: true
         default: main
@@ -55,6 +65,7 @@ jobs:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
       LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch || 'latest' }}
+      REF_LTI_TAG: ${{ inputs.refLTITag }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -66,7 +77,9 @@ jobs:
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v3
         with:
+          repository: OpenLiberty/Liberty-tools-intellij
           path: liberty-tools-intellij
+          ref: ${{ env.REF_LTI_TAG }}
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
