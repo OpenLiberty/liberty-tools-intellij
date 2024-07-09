@@ -11,30 +11,65 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
+      is_empty: ${{ steps.extract.outputs.is_empty }}
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+    name: PR Details
     steps:
       - name: Extract PR numbers and merge_commit_shas
         shell: bash
         id: extract
         run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}")
-
+          # Fetch PR details from the GitHub API
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
+          
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
-          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-
-          # Print the PR number and corresponding merge commit sha
-          echo "PR number and merge commit sha:"
-          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
-
-          # Create a JSON array string of PR numbers and SHAs
-          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
-          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+          pr_numbers=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha} | @base64')          
+          
+          # Array to store PRs that are not drafts and have no merge conflicts
+          declare -a valid_prs=()
+          
+          for pr in $pr_numbers; do
+            # Decode the base64 encoded JSON string
+            pr=$(echo "$pr" | base64 --decode)
+          
+            # Extract PR number
+            number=$(echo "$pr" | jq -r '.number')
+          
+            url="${{ env.API_URL }}/$number"
+            pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          
+            mergeable_state=$(jq -r '.mergeable_state' <<< "$pr_detail")
+          
+            if [[ "$mergeable_state" != "dirty" ]]; then
+            pr_number=$(jq -r '.number' <<< "$pr_detail")
+            pr_sha=$(jq -r '.merge_commit_sha' <<< "$pr_detail")
+            pr_link=$(jq -r '.html_url' <<< "$pr_detail")
+            valid_prs+=("{\"number\": \"$pr_number\", \"sha\": \"$pr_sha\", \"link\": \"$pr_link\"}")
+          else
+              echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") has conflicts. See : $(jq -r '.html_url' <<< "$pr_detail")"
+          fi
+          done
+          
+          # Create a JSON string from the array
+          pr_details_array=$(IFS=,; echo "[${valid_prs[*]}]")
+          # Print Pr number and SHA values
+          echo "$pr_details_array" | jq '.[]'
+          # Set the output for further steps
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          
+          # Check if pr_details_array is empty
+          if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
+            echo "::warning file=::There are no open PRs, or all the existing PRs are either drafts or have merge conflicts. Skipping further actions."
+            echo "is_empty=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_empty=false" >> $GITHUB_OUTPUT
+          fi
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
     needs: fetch_all_pull_request_shas
+    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
@@ -43,7 +78,7 @@ jobs:
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
-    name: Run LTI tests for PR #${{ matrix.pr_details.number }}
+    name: Running PR
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
