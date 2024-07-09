@@ -103,7 +103,8 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: ${{ matrix.tag }}
-    name: Running PR
+    name: Run PR
+
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
@@ -112,13 +113,13 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags can be added to obtain build results.
-        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        tag: [ 'lsp4ij-market-0.0.2-integration' ]
     with:
       useLocalPlugin: true
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Run LTI tests for Lsp4ij Main branch
+    name: Run Lsp4ij Main
 
   # Send slack notification for build results
   call-build-workflow-slack-notification:
