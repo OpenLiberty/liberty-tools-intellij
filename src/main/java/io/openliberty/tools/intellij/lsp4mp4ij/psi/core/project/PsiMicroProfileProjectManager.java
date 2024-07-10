@@ -86,7 +86,7 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 		microprofileProjectListener = new MicroProfileProjectListener();
 		connection = project.getMessageBus().connect(project);
 		connection.subscribe(ClasspathResourceChangedManager.TOPIC, microprofileProjectListener);
-		connection.subscribe(ProjectTopics.MODULES, microprofileProjectListener);
+		connection.subscribe(ModuleListener.TOPIC, microprofileProjectListener);
 	}
 
 	public PsiMicroProfileProject getMicroProfileProject(Module project) {

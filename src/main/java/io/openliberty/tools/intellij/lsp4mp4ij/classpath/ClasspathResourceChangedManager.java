@@ -18,6 +18,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.ModuleListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.util.Pair;
@@ -80,7 +81,7 @@ public class ClasspathResourceChangedManager implements Disposable {
 		// Track update of Psi Java, properties files
 		PsiManager.getInstance(project).addPsiTreeChangeListener(listener, project);
 		// Track modules changes
-		projectConnection.subscribe(ProjectTopics.MODULES, listener);
+		projectConnection.subscribe(ModuleListener.TOPIC, listener);
 		// Track delete, create, update of file
 		appConnection = ApplicationManager.getApplication().getMessageBus().connect(project);
 		appConnection.subscribe(VirtualFileManager.VFS_CHANGES, listener);

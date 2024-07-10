@@ -90,7 +90,7 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
         LibraryTablesRegistrar.getInstance().getLibraryTable(project).addListener(this, project);
         connection = ApplicationManager.getApplication().getMessageBus().connect(project);
         connection.subscribe(VirtualFileManager.VFS_CHANGES, this);
-        project.getMessageBus().connect().subscribe(ProjectTopics.MODULES, this);
+        project.getMessageBus().connect().subscribe(ModuleListener.TOPIC, this);
     }
 
     private void handleLibraryUpdate(Library library) {
