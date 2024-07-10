@@ -9,11 +9,16 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
@@ -23,12 +28,14 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
     /**
      * Single module Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModGradle SIDAPP";
+    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle", "gradle sample").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+
+    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
 
     /**
      * Project port.
@@ -60,7 +67,54 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+        Path oldDirPath = Paths.get(PROJECTS_PATH);
+        Path parentDirPath = oldDirPath.getParent();
+        String newDirName = "gradle-sample";
+        Path newDirPath = parentDirPath.resolve(newDirName);
+
+        // Move all files and directories recursively
+        boolean success = move(oldDirPath.toFile(), newDirPath.toFile());
+        if (success) {
+            // Delete the old directory if it's empty
+//                Files.deleteIfExists(oldDirPath);
+            System.out.println("Directory renamed successfully.");
+        } else {
+            System.err.println("Error renaming directory.");
+        }
+        prepareEnv(newDirPath.toString(), SM_MP_PROJECT_NAME);
+    }
+
+    private static boolean move(File sourceFile, File destFile) {
+        if (sourceFile.isDirectory()) {
+            destFile.mkdirs(); // Create the destination directory if it does not exist
+            for (File file : sourceFile.listFiles()) {
+                if (!move(file, new File(destFile, file.getName()))) {
+                    return false; // Return false if moving any file or directory fails
+                }
+            }
+        } else {
+            try {
+                Files.move(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                return false; // Return false if moving the file fails
+            }
+        }
+        return true; // Return true if moving the directory and all its contents succeeds
+    }
+
+    @AfterAll
+    public static void setupPathToNormal() {
+        Path oldDirPath = Paths.get(PROJECTS_PATH_NEW);
+        String parentDirPathStr = oldDirPath.getParent().toString();
+        String newDirName = "gradle";
+        Path newDirPath = Paths.get(parentDirPathStr, newDirName);
+
+        try {
+            Files.move(oldDirPath, newDirPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Directory renamed successfully.");
+        } catch (IOException e) {
+            System.err.println("Error renaming directory: " + e.getMessage());
+        }
     }
 
     /**
@@ -80,7 +134,7 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
      */
     @Override
     public String getProjectsDirPath() {
-        return PROJECTS_PATH;
+        return PROJECTS_PATH_NEW;
     }
 
     /**
