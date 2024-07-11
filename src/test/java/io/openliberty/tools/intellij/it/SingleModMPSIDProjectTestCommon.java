@@ -69,9 +69,7 @@ public abstract class SingleModMPSIDProjectTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-//        assert getProjectsDirPathNew() != null;
         Path oldDirPath = Path.of(PROJECTS_PATH_NEW);
-//        Path updatePath = oldDirPath.resolve("singleModGradleMP");
         deleteDirectory(oldDirPath.toFile());
         Files.deleteIfExists(oldDirPath);
     }
@@ -81,15 +79,10 @@ public abstract class SingleModMPSIDProjectTestCommon {
         // store all the paths of files and folders present
         // inside directory
         for (File subfile : file.listFiles()) {
-
-            // if it is a subfolder,e.g Rohan and Ritik,
             //  recursively call function to empty subfolder
             if (subfile.isDirectory()) {
                 deleteDirectory(subfile);
             }
-//            TestUtils.sleepAndIgnoreException(60);
-//            TestUtils.sleepAndIgnoreException(60);
-            // delete files and empty subfolders
             subfile.delete();
         }
     }

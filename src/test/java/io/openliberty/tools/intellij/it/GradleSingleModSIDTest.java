@@ -37,8 +37,6 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
 
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
 
-//    private final String PROJECTS_PATH_CHOOSE = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
-
     /**
      * Project port.
      */
@@ -71,19 +69,14 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
     public static void setup() throws IOException {
 
         Path newDirPath = getDirectory(PROJECTS_PATH, "gradle-sample");
-        TestUtils.sleepAndIgnoreException(10);
+        TestUtils.sleepAndIgnoreException(30);
         prepareEnv(newDirPath.toString(), SM_MP_PROJECT_NAME);
     }
 
-//    public static Path setupnew() throws IOException {
-//
-//        return getDirectory(PROJECTS_PATH);
-//    }
 
     public static Path getDirectory(String path,String newDirName) throws IOException {
         Path oldDirPath = Paths.get(path);
         Path parentDirPath = oldDirPath.getParent();
-//        String newDirName = newDirName;
         Path newDirPath = parentDirPath.resolve(newDirName);
 
         // Move all files and directories recursively

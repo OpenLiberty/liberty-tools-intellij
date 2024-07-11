@@ -130,8 +130,6 @@ public class UIBotTestUtils {
         // Specify the project's path. The text field is pre-populated by default.
         DialogFixture newProjectDialog = commonFixture.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(30));
         JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
-        // Clear the text field
-        textField.setText("");
         JButtonFixture okButton = newProjectDialog.getButton("OK");
 
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
