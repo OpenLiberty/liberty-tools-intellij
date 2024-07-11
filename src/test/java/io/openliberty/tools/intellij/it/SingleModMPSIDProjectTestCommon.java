@@ -14,6 +14,10 @@ import com.intellij.remoterobot.RemoteRobot;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 
@@ -34,6 +38,7 @@ public abstract class SingleModMPSIDProjectTestCommon {
      * The remote robot object.
      */
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
+    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
 
     /**
      * Processes actions before each test.
@@ -59,11 +64,34 @@ public abstract class SingleModMPSIDProjectTestCommon {
      * Cleanup.
      */
     @AfterAll
-    public static void cleanup() {
+    public static void cleanup() throws IOException {
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+//        assert getProjectsDirPathNew() != null;
+        Path oldDirPath = Path.of(PROJECTS_PATH_NEW);
+//        Path updatePath = oldDirPath.resolve("singleModGradleMP");
+        deleteDirectory(oldDirPath.toFile());
+        Files.deleteIfExists(oldDirPath);
+    }
+
+    public static void deleteDirectory(File file)
+    {
+        // store all the paths of files and folders present
+        // inside directory
+        for (File subfile : file.listFiles()) {
+
+            // if it is a subfolder,e.g Rohan and Ritik,
+            //  recursively call function to empty subfolder
+            if (subfile.isDirectory()) {
+                deleteDirectory(subfile);
+            }
+//            TestUtils.sleepAndIgnoreException(60);
+//            TestUtils.sleepAndIgnoreException(60);
+            // delete files and empty subfolders
+            subfile.delete();
+        }
     }
 
     /**
@@ -73,7 +101,8 @@ public abstract class SingleModMPSIDProjectTestCommon {
     @Video
     public void testStartActionUsingDropDownMenu() {
         String testName = "testStartActionUsingDropDownMenu";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+//        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+        String absoluteWLPPath = Paths.get(PROJECTS_PATH_NEW, getSmMPProjectName(), getWLPInstallPath()).toString();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -135,6 +164,10 @@ public abstract class SingleModMPSIDProjectTestCommon {
      * @return The projects directory path.
      */
     public abstract String getProjectsDirPath();
+
+//    public static String getProjectsDirPathNew() {
+//        return PROJECTS_PATH_NEW;
+//    }
 
     /**
      * Returns the name of the single module MicroProfile project.

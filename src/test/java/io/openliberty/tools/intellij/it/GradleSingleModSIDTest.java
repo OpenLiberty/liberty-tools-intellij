@@ -37,6 +37,8 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
 
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
 
+//    private final String PROJECTS_PATH_CHOOSE = Paths.get("src", "test", "resources", "projects", "gradle-sample").toAbsolutePath().toString();
+
     /**
      * Project port.
      */
@@ -66,23 +68,57 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
      * Prepares the environment for test execution.
      */
     @BeforeAll
-    public static void setup() {
-        Path oldDirPath = Paths.get(PROJECTS_PATH);
+    public static void setup() throws IOException {
+
+        Path newDirPath = getDirectory(PROJECTS_PATH, "gradle-sample");
+        TestUtils.sleepAndIgnoreException(10);
+        prepareEnv(newDirPath.toString(), SM_MP_PROJECT_NAME);
+    }
+
+//    public static Path setupnew() throws IOException {
+//
+//        return getDirectory(PROJECTS_PATH);
+//    }
+
+    public static Path getDirectory(String path,String newDirName) throws IOException {
+        Path oldDirPath = Paths.get(path);
         Path parentDirPath = oldDirPath.getParent();
-        String newDirName = "gradle-sample";
+//        String newDirName = newDirName;
         Path newDirPath = parentDirPath.resolve(newDirName);
 
         // Move all files and directories recursively
         boolean success = move(oldDirPath.toFile(), newDirPath.toFile());
         if (success) {
             // Delete the old directory if it's empty
-//                Files.deleteIfExists(oldDirPath);
+            File index = new File(oldDirPath.toString());
+            deleteDirectory(index);
+
+//            TestUtils.sleepAndIgnoreException(60);
+            Files.deleteIfExists(oldDirPath);
             System.out.println("Directory renamed successfully.");
         } else {
             System.err.println("Error renaming directory.");
         }
-        prepareEnv(newDirPath.toString(), SM_MP_PROJECT_NAME);
+        return newDirPath;
     }
+
+//    public static void deleteDirectory(File file)
+//    {
+//        // store all the paths of files and folders present
+//        // inside directory
+//        for (File subfile : file.listFiles()) {
+//
+//            // if it is a subfolder,e.g Rohan and Ritik,
+//            //  recursively call function to empty subfolder
+//            if (subfile.isDirectory()) {
+//                deleteDirectory(subfile);
+//            }
+////            TestUtils.sleepAndIgnoreException(60);
+////            TestUtils.sleepAndIgnoreException(60);
+//            // delete files and empty subfolders
+//            subfile.delete();
+//        }
+//    }
 
     private static boolean move(File sourceFile, File destFile) {
         if (sourceFile.isDirectory()) {
@@ -103,18 +139,32 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
     }
 
     @AfterAll
-    public static void setupPathToNormal() {
-        Path oldDirPath = Paths.get(PROJECTS_PATH_NEW);
-        String parentDirPathStr = oldDirPath.getParent().toString();
-        String newDirName = "gradle";
-        Path newDirPath = Paths.get(parentDirPathStr, newDirName);
+    public static void setupPathToNormal() throws IOException {
+//        Path newDirPath = getDirectory(PROJECTS_PATH_NEW, "gradle");
 
-        try {
-            Files.move(oldDirPath, newDirPath, StandardCopyOption.REPLACE_EXISTING);
+        Path oldDirPath = Paths.get(PROJECTS_PATH_NEW);
+        Path parentDirPath = oldDirPath.getParent();
+//        String newDirName = newDirName;
+        Path newDirPath = parentDirPath.resolve("gradle");
+        Path updatePath = oldDirPath.resolve("singleModGradleMP");
+        File index = new File(oldDirPath.toString());
+
+        // Move all files and directories recursively
+        boolean success = move(oldDirPath.toFile(), newDirPath.toFile());
+        if (success) {
+            // Delete the old directory if it's empty
+//            File index = new File(oldDirPath.toString());
+//            deleteDirectory(index);
+//            TestUtils.sleepAndIgnoreException(60);
+//            Files.deleteIfExists(oldDirPath);
             System.out.println("Directory renamed successfully.");
-        } catch (IOException e) {
-            System.err.println("Error renaming directory: " + e.getMessage());
+        } else {
+            System.err.println("Error renaming directory.");
         }
+//         TestUtils.sleepAndIgnoreException(30);
+//        if (updatePath.)
+//        Files.deleteIfExists(updatePath);
+//        Files.deleteIfExists(oldDirPath);
     }
 
     /**
@@ -134,8 +184,13 @@ public class GradleSingleModSIDTest extends SingleModMPSIDProjectTestCommon {
      */
     @Override
     public String getProjectsDirPath() {
-        return PROJECTS_PATH_NEW;
+        return PROJECTS_PATH;
     }
+
+//    @Override
+//    public String getProjectsDirPathNew() {
+//        return PROJECTS_PATH_NEW;
+//    }
 
     /**
      * Returns the name of the single module MicroProfile project.
