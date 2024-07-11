@@ -89,9 +89,9 @@ jobs:
         run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
       - name: 'Archive artifacts'
         if: ${{ runner.os == 'Linux' && !failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-${{ github.sha }}
+          name: liberty-tools-intellij-${{ github.sha }}-${{ env.REF_LSP4IJ }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
