@@ -78,6 +78,7 @@ jobs:
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
+      lsp4ijBranch: PR-${{ matrix.pr_details.number }}
     name: Running PR
 
   # Run the LTI Tests against lsp4ij main branch
@@ -86,4 +87,5 @@ jobs:
     with:
       useLocalPlugin: true
       refLsp4ij: main
+      lsp4ijBranch: main
     name: Run LTI tests for Lsp4ij Main branch
