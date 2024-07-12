@@ -37,7 +37,7 @@ on:
       refLTITag:
         description: 'Reference LTI Tag'
         type: string
-        required: true
+        required: false
         default: main
   push:
     branches: '**'
