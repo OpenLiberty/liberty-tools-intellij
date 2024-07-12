@@ -113,7 +113,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags can be added to obtain build results.
-        tag: []
+        tag: ['']
     with:
       useLocalPlugin: true
       refLsp4ij: main
