@@ -69,25 +69,29 @@ dependencies {
 
     implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.12.0-SNAPSHOT') {
         exclude group: 'org.eclipse.lsp4j'
+        exclude group: 'com.google.code.gson'
     }
     implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1') {
         exclude group: 'org.eclipse.lsp4j'
+        exclude group: 'com.google.code.gson'
     }
     implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.1.2'
     implementation ('io.openliberty.tools:liberty-langserver:2.1.2') {
         exclude group: 'org.eclipse.lsp4j'
+        exclude group: 'com.google.code.gson'
     }
     implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0') {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
+        exclude group: 'com.google.code.gson'
     }
-    //required by lsp4j as the version from IJ is incompatible
-    testImplementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'org.apache.maven:maven-artifact:3.6.3'
 //    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
     //testImplementation group: 'junit', name: 'junit', version: '4.13.1'
-    implementation 'org.apache.maven:maven-artifact:3.6.3'
+    //required by lsp4j as the version from IJ is incompatible
+    testImplementation 'com.google.code.gson:gson:2.8.9'
 
     // Test: basics.
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
