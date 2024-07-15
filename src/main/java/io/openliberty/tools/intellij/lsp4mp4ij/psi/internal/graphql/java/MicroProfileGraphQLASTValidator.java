@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 Red Hat Inc. and others.
+* Copyright (c) 2023, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,7 +16,6 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java;
 
 import java.text.MessageFormat;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiAnnotation;
@@ -37,6 +36,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.MicroProfileGraphQLConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.TypeSystemDirectiveLocation;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import com.intellij.psi.PsiTypes;
 
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
@@ -195,7 +195,7 @@ public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
     private void validateNoVoidReturnedFromOperations(PsiMethod node) {
         // ignore constructors, and non-void methods for now, it's faster than iterating through all annotations
         if (node.getReturnTypeElement() == null ||
-                !PsiType.VOID.equals(node.getReturnType())) {
+                !PsiTypes.voidType().equals(node.getReturnType())) {
             return;
         }
         for (PsiAnnotation annotation : node.getAnnotations()) {
