@@ -54,7 +54,7 @@ jobs:
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
-      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch }}
+      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch || 'latest' }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -96,7 +96,7 @@ jobs:
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-${{ github.sha }}-${{ env.LSP4IJ_BRANCH }}
+          name: liberty-tools-intellij-LTI-main-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
