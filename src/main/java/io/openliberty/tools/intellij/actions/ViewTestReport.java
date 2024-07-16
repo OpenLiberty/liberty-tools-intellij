@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,7 +11,6 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
@@ -86,13 +85,12 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
-                    , LibertyPluginIcons.libertyIcon
-                    , LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist")
-                    , ""
-                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath())
-                    , NotificationType.ERROR
-                    , NotificationListener.URL_OPENING_LISTENER);
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                    LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist"),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath()),
+                    NotificationType.ERROR);
+            notif.setIcon(LibertyPluginIcons.libertyIcon);
+
             Notifications.Bus.notify(notif, project);
             LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;

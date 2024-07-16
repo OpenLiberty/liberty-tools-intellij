@@ -10,7 +10,6 @@
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -157,11 +156,9 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @param errMsg
      */
     protected void notifyError(String errMsg, Project project) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
-                .setTitle(LocalizedResourceUtil.getMessage("liberty.action.cannot.start"))
-                .setIcon(LibertyPluginIcons.libertyIcon)
-                .setSubtitle("")
-                .setListener(NotificationListener.URL_OPENING_LISTENER);
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"), errMsg, NotificationType.WARNING);
+        notif.setIcon(LibertyPluginIcons.libertyIcon);
         Notifications.Bus.notify(notif, project);
     }
 
