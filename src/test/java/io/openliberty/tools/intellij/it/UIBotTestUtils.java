@@ -126,9 +126,8 @@ public class UIBotTestUtils {
             openFixture.click(new Point());
         }
 
-
         // Specify the project's path. The text field is pre-populated by default.
-        DialogFixture newProjectDialog = commonFixture.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(30));
+        DialogFixture newProjectDialog = commonFixture.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(10));
         JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
         JButtonFixture okButton = newProjectDialog.getButton("OK");
 
@@ -147,7 +146,7 @@ public class UIBotTestUtils {
                 () -> textField.getText().equals(projectFullPath));
 
         ComponentFixture projectTree = newProjectDialog.getTree();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(20),
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(1),
                 "Waiting for project tree on the Open \"File or Project\" dialog to show the set project",
                 "The project tree on the \"File or Project\" dialog did not show the set project",

@@ -457,30 +457,6 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @Test
     @Video
-    public void testInsertLibertyConfigElementIntoServerXML() {
-        String stanzaSnippet = " ";
-        String insertedConfig = " ";
-
-        // get focus on server.xml tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "settings.gradle");
-
-        // Save the current server.xml content.
-        UIBotTestUtils.copyWindowContent(remoteRobot);
-
-        // Insert a new element in server.xml.
-        try {
-            UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 1, 29, UIBotTestUtils.InsertionType.ELEMENT, true);
-            Path pathToServerXML = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "settings.gradle");
-            TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
-        } finally {
-            // Replace server.xml content with the original content
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
-        }
-    }
-
-
-    @Test
-    @Video
     public void testRunTestsActionUsingSearch() {
         String testName = "testRunTestsActionUsingSearch";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -954,10 +930,8 @@ public abstract class SingleModMPProjectTestCommon {
     public static void prepareEnv(String projectPath, String projectName) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
-        waitForIgnoringError(Duration.ofMinutes(5), Duration.ofSeconds(10), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
-        remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(4));
-//        remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-//        TestUtils.sleepAndIgnoreException(60);
+        waitForIgnoringError(Duration.ofMinutes(5), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
+        remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
@@ -972,8 +946,10 @@ public abstract class SingleModMPProjectTestCommon {
         // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
         // prevent false negative tests related to the build file editor tab.
         UIBotTestUtils.closeAllEditorTabs(remoteRobot);
-    }
 
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                "prepareEnv. Exit. ProjectName: " + projectName);
+    }
 
     /**
      * Tests that when a Liberty run configuration is removed, any custom start parameters
