@@ -18,6 +18,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.JBTerminalWidget;
+import com.intellij.terminal.ui.TerminalWidget;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.sun.istack.Nullable;
@@ -26,7 +27,6 @@ import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
-import org.jetbrains.plugins.terminal.TerminalView;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -149,10 +149,13 @@ public class LibertyProjectUtil {
      * @param createWidget  true if a new widget should be created
      * @return ShellTerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget, TerminalView terminalView, ShellTerminalWidget widget) {
+    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
+                                                        TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
         if (widget == null && createWidget) {
             // create a new terminal tab
-            ShellTerminalWidget newTerminal = terminalView.createLocalShellWidget(project.getBasePath(), libertyModule.getName(), true);
+            ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
+                    terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
+                            true, true));
             libertyModule.setShellWidget(newTerminal);
             return newTerminal;
         }
@@ -229,15 +232,16 @@ public class LibertyProjectUtil {
      * exists in the Terminal view.
      *
      * @param libertyModule
-     * @param terminalView
+     * @param terminalToolWindowManager
      * @return ShellTerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalView terminalView) {
+    public static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
         ShellTerminalWidget widget = libertyModule.getShellWidget();
         // check if widget exists in terminal view
         if (widget != null) {
-            for (JBTerminalWidget terminalWidget : terminalView.getWidgets()) {
-                if (widget.equals(terminalWidget)) {
+            for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
+                JBTerminalWidget jbTerminalWidget = JBTerminalWidget.asJediTermWidget(terminalWidget);
+                if (widget.equals(jbTerminalWidget)) {
                     return widget;
                 }
             }

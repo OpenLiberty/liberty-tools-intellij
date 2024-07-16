@@ -97,7 +97,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     String source = isMethod ?
                             Messages.getMessage("AnnotationBooleanMethods", "@" + getSimpleName(annotationName)) :
                             Messages.getMessage("AnnotationBooleanFields", "@" + getSimpleName(annotationName));
-                    if (!type.equals(PsiType.BOOLEAN)) {
+                    if (!type.equals(PsiTypes.booleanType())) {
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -106,10 +106,10 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
                             && !type.getCanonicalText().endsWith(BIG_INTEGER)
                             && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)
-                            && !type.equals(PsiType.BYTE)
-                            && !type.equals(PsiType.SHORT)
-                            && !type.equals(PsiType.INT)
-                            && !type.equals(PsiType.LONG)) {
+                            && !type.equals(PsiTypes.byteType())
+                            && !type.equals(PsiTypes.shortType())
+                            && !type.equals(PsiTypes.intType())
+                            && !type.equals(PsiTypes.longType())) {
                         String source = isMethod ?
                                 Messages.getMessage("AnnotationBigDecimalMethods", "@" + getSimpleName(annotationName)) :
                                 Messages.getMessage("AnnotationBigDecimalFields", "@" + getSimpleName(annotationName));
@@ -138,10 +138,10 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 } else if (matchedAnnotation.equals(MIN) || matchedAnnotation.equals(MAX)) {
                     if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
                             && !type.getCanonicalText().endsWith(BIG_INTEGER)
-                            && !type.equals(PsiType.BYTE)
-                            && !type.equals(PsiType.SHORT)
-                            && !type.equals(PsiType.INT)
-                            && !type.equals(PsiType.LONG)) {
+                            && !type.equals(PsiTypes.byteType())
+                            && !type.equals(PsiTypes.shortType())
+                            && !type.equals(PsiTypes.intType())
+                            && !type.equals(PsiTypes.longType())) {
                         String source = isMethod ?
                                 Messages.getMessage("AnnotationMinMaxMethods", "@" + getSimpleName(annotationName)) :
                                 Messages.getMessage("AnnotationMinMaxFields", "@" + getSimpleName(annotationName));
@@ -152,12 +152,12 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSITIVE_OR_ZERO)) {
                     if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
                             && !type.getCanonicalText().endsWith(BIG_INTEGER)
-                            && !type.equals(PsiType.BYTE)
-                            && !type.equals(PsiType.SHORT)
-                            && !type.equals(PsiType.INT)
-                            && !type.equals(PsiType.LONG)
-                            && !type.equals(PsiType.FLOAT)
-                            && !type.equals(PsiType.DOUBLE)) {
+                            && !type.equals(PsiTypes.byteType())
+                            && !type.equals(PsiTypes.shortType())
+                            && !type.equals(PsiTypes.intType())
+                            && !type.equals(PsiTypes.longType())
+                            && !type.equals(PsiTypes.floatType())
+                            && !type.equals(PsiTypes.doubleType())) {
                         String source = isMethod ?
                                 Messages.getMessage("AnnotationPositiveMethods", "@" + getSimpleName(annotationName)) :
                                 Messages.getMessage("AnnotationPositiveFields", "@" + getSimpleName(annotationName));

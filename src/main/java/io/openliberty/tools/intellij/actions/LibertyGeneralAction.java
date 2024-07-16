@@ -27,7 +27,7 @@ import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-import org.jetbrains.plugins.terminal.TerminalView;
+import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -173,11 +173,11 @@ public abstract class LibertyGeneralAction extends AnAction {
      */
     protected ShellTerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
-        TerminalView terminalView = TerminalView.getInstance(project);
+        TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
         // look for existing terminal tab
-        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalView);
+        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
         // look for creating new terminal tab
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalView, existingWidget);
+        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
         // Set Focus to existing terminal widget
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
