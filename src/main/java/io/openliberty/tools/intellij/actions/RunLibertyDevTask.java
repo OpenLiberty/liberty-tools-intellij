@@ -16,7 +16,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.messages.MessageDialog;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
@@ -107,7 +107,11 @@ public class RunLibertyDevTask extends AnAction {
         if (Constants.GO_TO_ACTION_TRIGGERED.equalsIgnoreCase(e.getPlace())) {
             // prompt user to select action to run
             final String[] libertyActions = Constants.FULL_ACTIONS_MAP.keySet().toArray(new String[0]);
-            final int ret = Messages.showChooseDialog(project, LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.message"), LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.title"), LibertyPluginIcons.libertyIcon_40, libertyActions, libertyActions[0]);
+            MessageDialog dialog = new MessageDialog(project, LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.message"), LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.title"),
+                    libertyActions, 0, LibertyPluginIcons.libertyIcon_40, true);
+            dialog.show();
+            // get the selected action
+            int ret = dialog.getExitCode();
             // ret < 0  the user pressed cancel on the dialog, take no action
             if (ret >= 0) {
                 String selectedAction = libertyActions[ret];

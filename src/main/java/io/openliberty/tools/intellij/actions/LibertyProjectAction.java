@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.messages.MessageDialog;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -47,12 +48,15 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
             final String[] projectNames = buildFileToProjectNames(buildFileList);
-            final int ret = Messages.showChooseDialog(project,
+            MessageDialog dialog = new MessageDialog(project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
-                    LibertyPluginIcons.libertyIcon_40,
                     projectNames,
-                    projectNames[0]);
+                    0,
+                    LibertyPluginIcons.libertyIcon_40, true);
+            dialog.show();
+            // get the selected project
+            int ret = dialog.getExitCode();
             // Execute the action if a project was selected.
             if (ret >= 0 && ret < buildFileList.size()) {
                 BuildFile selectedBuildFile = buildFileList.get(ret);
