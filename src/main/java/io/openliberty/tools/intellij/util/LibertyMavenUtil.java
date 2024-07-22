@@ -13,7 +13,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
@@ -84,12 +83,12 @@ public class LibertyMavenUtil {
      * @throws IOException
      * @throws SAXException
      */
-    public static BuildFile validPom(PsiFile file) throws ParserConfigurationException, IOException, SAXException {
+    public static BuildFile validPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
         BuildFile buildFile = new BuildFile(false, false);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getVirtualFile().getPath());
+        File inputFile = new File(file.getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();

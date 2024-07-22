@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,13 +9,13 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
-import com.intellij.psi.PsiFile;
+import com.intellij.openapi.vfs.VirtualFile;
 
 /**
  * Defines a BuildFile object
  */
 public class BuildFile {
-    public PsiFile buildFile;
+    public VirtualFile buildFile;
     public boolean validBuildFile;
     public boolean validContainerVersion;
 
@@ -37,9 +37,9 @@ public class BuildFile {
         this.buildFile = null;
     }
 
-    public PsiFile getBuildFile() { return this.buildFile; }
+    public VirtualFile getBuildFile() { return this.buildFile; }
 
-    public void setBuildFile(PsiFile buildFile) {
+    public void setBuildFile(VirtualFile buildFile) {
         this.buildFile = buildFile;
     }
 

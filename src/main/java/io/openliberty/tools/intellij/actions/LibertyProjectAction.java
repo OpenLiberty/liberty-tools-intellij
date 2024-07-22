@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -88,7 +88,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         // Resolve project names and add to list
         mavenBuildFiles.forEach(mavenBuildFile -> {
             // resolve project name
-            VirtualFile virtualFile = mavenBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = mavenBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Maven project for build file: %s", mavenBuildFile.getBuildFile()));
             } else {
@@ -103,7 +103,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
 
         });
         gradleBuildFiles.forEach(gradleBuildFile -> {
-            VirtualFile virtualFile = gradleBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = gradleBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Gradle project for build file: %s", gradleBuildFile.getBuildFile()));
             } else {
