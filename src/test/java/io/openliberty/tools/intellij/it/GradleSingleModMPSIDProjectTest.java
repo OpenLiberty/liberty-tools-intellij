@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
@@ -27,9 +28,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     /**
      * Single module Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleMod GradleMP";
+    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
-    private static final String SM_MP_PROJECT_NAME_NEW = "singleModGradleMP";
+    private static final String SM_MP_PROJECT_NAME_NEW = "singleMod GradleMP";
 
     /**
      * The path to the folder containing the test projects.
@@ -61,7 +62,7 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     /**
      * The path to the test report.
      */
-    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html");
+    private final Path TEST_REPORT_PATH = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html");
 
     /**
      * Build file name.
@@ -88,35 +89,59 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @BeforeAll
     public static void setup() throws IOException {
+        copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+        Path pathNew = Path.of(PROJECTS_PATH_NEW);
+        Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
 
-        Path path = getNewDir(PROJECTS_PATH, "gradle sample");
-        Path targetPath = path.resolve(SM_MP_PROJECT_NAME_NEW);
+        Path originalPath = projectDirPath.resolve("settings.gradle");
+        Path originalPathCopy = projectDirPath.resolve("settings-copy.gradle");
 
-        Path originalPath = targetPath.resolve("settings.gradle");
-        Path originalPathCopy = targetPath.resolve("settings-copy.gradle");
-
-        Files.move(originalPath, originalPath.resolveSibling("settings-copy1.gradle"));
+        Files.move(originalPath, originalPath.resolveSibling("settings-duplicate.gradle"));
         Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
 
-        String targetPathString = targetPath.toString();
-        getNewDir(targetPathString, SM_MP_PROJECT_NAME);
+        Path projectDirNewPath = pathNew.resolve(SM_MP_PROJECT_NAME_NEW);
 
-        prepareEnv(String.valueOf(path),SM_MP_PROJECT_NAME);
+        try {
+            Files.move(projectDirPath, projectDirNewPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Directory renamed successfully");
+        } catch (IOException e) {
+            System.err.println("Failed to rename directory: " + e.getMessage());
+        }
+        prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
+    }
+
+    public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
+            throws IOException {
+        Files.walk(Paths.get(sourceDirectoryLocation))
+                .forEach(source -> {
+                    Path destination = Paths.get(destinationDirectoryLocation, source.toString()
+                            .substring(sourceDirectoryLocation.length()));
+                    try {
+                        Files.copy(source, destination);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @AfterAll
     public static void clean() throws IOException {
-        Path path = getNewDir(PROJECTS_PATH_NEW, "gradle");
-        Path targetPath = path.resolve("singleMod GradleMP");
+        File directory = new File(PROJECTS_PATH_NEW);
+        if (deleteDirectory(directory)) {
+            System.out.println("Directory deleted successfully!");
+        } else {
+            System.err.println("Failed to delete directory.");
+        }
+    }
 
-        Path originalPath = targetPath.resolve("settings.gradle");
-        Path originalPathCopy = targetPath.resolve("settings-copy1.gradle");
-
-        Files.move(originalPath, originalPath.resolveSibling("settings-copy.gradle"));
-        Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
-
-        String targetPathString = targetPath.toString();
-        getNewDir(targetPathString, SM_MP_PROJECT_NAME_NEW);
+    public static boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
     }
 
     /**
@@ -146,7 +171,7 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @Override
     public String getSmMPProjectName() {
-        return SM_MP_PROJECT_NAME;
+        return SM_MP_PROJECT_NAME_NEW;
     }
 
     /**

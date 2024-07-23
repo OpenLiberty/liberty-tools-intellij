@@ -16,9 +16,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest.copyDirectory;
+import static io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest.deleteDirectory;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
@@ -91,17 +94,20 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      * Prepares the environment for test execution.
      */
     @BeforeAll
-    public static void setup() {
-        Path path = getNewDir(PROJECTS_PATH, "maven sample");
-        Path targetPath = path.resolve(SM_MP_PROJECT_NAME);
-        prepareEnv(String.valueOf(targetPath), SM_MP_PROJECT_NAME);
+    public static void setup() throws IOException {
+        StepWorker.registerProcessor(new StepLogger());
+        copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+        prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
     }
 
     @AfterAll
-    public static void clean() {
-        Path path = getNewDir(PROJECTS_PATH_NEW, "maven");
-        Path targetPath = path.resolve(SM_MP_PROJECT_NAME);
-        getNewDir(String.valueOf(targetPath), SM_MP_PROJECT_NAME);
+    public static void clean() throws IOException {
+        File directory = new File(PROJECTS_PATH_NEW);
+        if (deleteDirectory(directory)) {
+            System.out.println("Directory deleted successfully!");
+        } else {
+            System.err.println("Failed to delete directory.");
+        }
     }
 
     /**

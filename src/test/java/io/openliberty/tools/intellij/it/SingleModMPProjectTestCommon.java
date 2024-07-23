@@ -16,10 +16,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
@@ -66,38 +63,14 @@ public abstract class SingleModMPProjectTestCommon {
      * Cleanup.
      */
     @AfterAll
-    public static void cleanup() throws IOException {
+    public static void cleanup() {
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-        String PROJECTS_PATH_NEW_GRADLE = Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
-        String PROJECTS_PATH_NEW_MAVEN = Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
-        File oldDirPathGradle = new File(PROJECTS_PATH_NEW_GRADLE);
-        File oldDirPathMaven = new File(PROJECTS_PATH_NEW_MAVEN);
-        if (oldDirPathGradle.exists()) {
-            deleteDirectory(oldDirPathGradle);
-            Files.deleteIfExists(oldDirPathGradle.toPath());
-        }
-        if (oldDirPathMaven.exists()) {
-            deleteDirectory(oldDirPathMaven);
-            Files.deleteIfExists(oldDirPathMaven.toPath());
-        }
-    }
-    public static void deleteDirectory(File file)
-    {
-        // store all the paths of files and folders present
-        // inside directory
-        for (File subfile : file.listFiles()) {
-            //  recursively call function to empty subfolder
-            if (subfile.isDirectory()) {
-                deleteDirectory(subfile);
-            }
-            subfile.delete();
-        }
     }
 
-        /**
+    /**
      * Tests the liberty: View <project build file> action run from the project's pop-up action menu.
      */
     @Test
@@ -930,7 +903,7 @@ public abstract class SingleModMPProjectTestCommon {
     public static void prepareEnv(String projectPath, String projectName) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
-        waitForIgnoringError(Duration.ofMinutes(5), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
+        waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
@@ -1013,22 +986,6 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
-    public static Path getNewDir(String path, String newDirName) {
-        File dir = new File(path);
-        File newDir = null;
-        if (!dir.isDirectory()) {
-            System.err.println("There is no directory @ given path");
-        } else {
-            newDir = new File(dir.getParent() + File.separator + newDirName);
-            boolean success = dir.renameTo(newDir);
-            if (success) {
-                System.out.println("Directory renamed successfully.");
-            } else {
-                System.err.println("Failed to rename directory.");
-            }
-        }
-        return newDir.toPath();
-    }
 
     /**
      * Returns the projects directory path.
