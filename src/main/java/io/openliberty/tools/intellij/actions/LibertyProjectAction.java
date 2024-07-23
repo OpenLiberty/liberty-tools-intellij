@@ -22,9 +22,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);
@@ -47,12 +45,17 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
             final String[] projectNames = buildFileToProjectNames(buildFileList);
-            final int ret = Messages.showChooseDialog(project,
+            final String[] projectPaths = buildFileToProjectPaths(buildFileList);
+            LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
+                    project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40,
                     projectNames,
+                    projectPaths,
                     projectNames[0]);
+            dialog.show();
+            final int ret = dialog.getSelectedIndex();
             // Execute the action if a project was selected.
             if (ret >= 0 && ret < buildFileList.size()) {
                 BuildFile selectedBuildFile = buildFileList.get(ret);
@@ -127,6 +130,15 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             projectNames[i] = list.get(i).getProjectName();
         }
         return projectNames;
+    }
+
+    protected final String[] buildFileToProjectPaths(@NotNull List<BuildFile> list) {
+        final int size = list.size();
+        final String[] projectPaths = new String[size];
+        for (int i = 0; i < size; ++i) {
+            projectPaths[i] = list.get(i).getBuildFile().getPath();
+        }
+        return projectPaths;
     }
 
     protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, ParserConfigurationException, SAXException {
