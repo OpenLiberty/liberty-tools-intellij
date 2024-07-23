@@ -20,9 +20,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest.copyDirectory;
-import static io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest.deleteDirectory;
-
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
  */
@@ -96,14 +93,14 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     @BeforeAll
     public static void setup() throws IOException {
         StepWorker.registerProcessor(new StepLogger());
-        copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+        TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
     }
 
     @AfterAll
     public static void clean() throws IOException {
         File directory = new File(PROJECTS_PATH_NEW);
-        if (deleteDirectory(directory)) {
+        if (TestUtils.deleteDirectory(directory)) {
             System.out.println("Directory deleted successfully!");
         } else {
             System.err.println("Failed to delete directory.");

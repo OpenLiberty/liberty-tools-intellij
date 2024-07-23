@@ -89,7 +89,7 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @BeforeAll
     public static void setup() throws IOException {
-        copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+        TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
         Path pathNew = Path.of(PROJECTS_PATH_NEW);
         Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
 
@@ -110,38 +110,14 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
     }
 
-    public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
-            throws IOException {
-        Files.walk(Paths.get(sourceDirectoryLocation))
-                .forEach(source -> {
-                    Path destination = Paths.get(destinationDirectoryLocation, source.toString()
-                            .substring(sourceDirectoryLocation.length()));
-                    try {
-                        Files.copy(source, destination);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-    }
-
     @AfterAll
     public static void clean() throws IOException {
         File directory = new File(PROJECTS_PATH_NEW);
-        if (deleteDirectory(directory)) {
+        if (TestUtils.deleteDirectory(directory)) {
             System.out.println("Directory deleted successfully!");
         } else {
             System.err.println("Failed to delete directory.");
         }
-    }
-
-    public static boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        return directoryToBeDeleted.delete();
     }
 
     /**

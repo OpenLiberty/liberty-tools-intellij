@@ -461,7 +461,7 @@ public class TestUtils {
      * @param file The directory.
      * @return Returns true if the directory identified by the input path was deleted. False, otherwise.
      */
-    private static boolean deleteDirectory(File file) {
+    public static boolean deleteDirectory(File file) {
         File[] files = file.listFiles();
         if (files != null) {
             for (File value : files) {
@@ -540,5 +540,18 @@ public class TestUtils {
         Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
     }
 
+    public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
+            throws IOException {
+        Files.walk(Paths.get(sourceDirectoryLocation))
+                .forEach(source -> {
+                    Path destination = Paths.get(destinationDirectoryLocation, source.toString()
+                            .substring(sourceDirectoryLocation.length()));
+                    try {
+                        Files.copy(source, destination);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
 
 }
