@@ -6,17 +6,21 @@ on:
       refLsp4ij:
         description: 'Reference/branch for Lsp4ij checkout'
         type: string
-        required: true
+        required: false
         default: main
       lsp4ijBranch:
         description: 'PR number or branch name for Artifact upload'
         type: string
-        required: true
+        required: false
       useLocalPlugin:
         description: 'Use lsp4ij locally'
-        required: true
+        required: false
         type: boolean
         default: false
+    outputs:
+      status:
+        description: "Build Status"
+        value: ${{ jobs.build-status.outputs.status }}
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -112,3 +116,19 @@ jobs:
           name: ${{ matrix.reportName }}
           path: |
             liberty-tools-intellij/build/reports/
+
+  build-status:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.status.outputs.status }}
+    needs: build
+    if: always()
+    steps:
+      - id: status
+        run: |
+          if [ ${{ needs.build.result }} != "success" ]; then
+               echo "status=failed" >> $GITHUB_OUTPUT
+          else
+               echo "status=succeeded" >> $GITHUB_OUTPUT
+          fi
+        shell: bash

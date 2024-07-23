@@ -1,6 +1,7 @@
 name: Cron Job
 
 on:
+  push:
   workflow_dispatch:
   schedule:
     # The job runs every midnight (UTC time). Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
@@ -89,3 +90,27 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
     name: Run LTI tests for Lsp4ij Main branch
+
+  call-build-workflow-slack-notification:
+    runs-on: ubuntu-latest
+    needs: [ call-build-workflow-for-lsp4ij-main-branch, call-build-workflow-for-each-merge-commit-sha ]
+    if: always()
+    steps:
+      - run: |
+          STATUS="succeeded"
+          JOB2_STATUS="${{ needs.call-build-workflow-for-lsp4ij-main-branch.outputs.status }}"
+          JOB3_STATUS="${{ needs.call-build-workflow-for-each-merge-commit-sha.outputs.status }}"
+          
+          echo "Job2 status: $JOB2_STATUS"
+          echo "Job3 status: $JOB3_STATUS"
+          
+          if [ "$JOB3_STATUS" = "failed" ] || [ "$JOB2_STATUS" = "failed" ]; then
+            STATUS="failed"
+          fi
+          
+          echo "Final status: $STATUS"
+          
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"Workflow ${{ github.workflow }} triggered by branch ${{ github.ref }}. Build results: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Status: $STATUS\"}" $SLACK_WEBHOOK_URL
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COPY }}
+    name: Run Slack Notification
