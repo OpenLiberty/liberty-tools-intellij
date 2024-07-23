@@ -17,6 +17,7 @@ import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPrimitiveType;
+import com.intellij.psi.PsiTypes;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -72,7 +73,7 @@ public class PostConstructReturnTypeQuickFix implements IJavaCodeActionParticipa
 
         assert parentType != null;
         ChangeCorrectionProposal proposal = new ModifyReturnTypeProposal(TITLE_MESSAGE, context.getSource().getCompilationUnit(),
-                context.getASTRoot(), parentType, 0, PsiPrimitiveType.VOID);
+                context.getASTRoot(), parentType, 0, PsiTypes.voidType());
         try {
             WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
             toResolve.setEdit(we);

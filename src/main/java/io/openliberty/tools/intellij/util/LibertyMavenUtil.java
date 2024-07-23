@@ -13,10 +13,12 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
+import org.jetbrains.idea.maven.project.MavenHomeType;
 import org.jetbrains.idea.maven.project.MavenWorkspaceSettingsComponent;
+import org.jetbrains.idea.maven.project.StaticResolvedMavenHomeType;
 import org.jetbrains.idea.maven.server.MavenServerConnector;
 import org.jetbrains.idea.maven.server.MavenServerManager;
 import org.jetbrains.idea.maven.utils.MavenUtil;
@@ -34,6 +36,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
+
+import static org.jetbrains.idea.maven.project.MavenHomeKt.staticOrBundled;
 
 public class LibertyMavenUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyMavenUtil.class);
@@ -79,12 +83,12 @@ public class LibertyMavenUtil {
      * @throws IOException
      * @throws SAXException
      */
-    public static BuildFile validPom(PsiFile file) throws ParserConfigurationException, IOException, SAXException {
+    public static BuildFile validPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
         BuildFile buildFile = new BuildFile(false, false);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        File inputFile = new File(file.getVirtualFile().getPath());
+        File inputFile = new File(file.getPath());
         Document doc = builder.parse(inputFile);
 
         doc.getDocumentElement().normalize();
@@ -204,13 +208,13 @@ public class LibertyMavenUtil {
     final static String wrappedMaven = "Use Maven wrapper";
     public static String getMavenSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
-        String mavenHome = mavenSettings.getMavenHome();
-        if (wrappedMaven.equals(mavenHome)) {
+        @NotNull MavenHomeType mavenHomeType = mavenSettings.getMavenHomeType();
+        if (wrappedMaven.equals(mavenHomeType.getTitle())) {
             // it is set to use the wrapper
             return getLocalMavenWrapper(buildFile);
         } else {
             // try to use maven home path defined in the settings
-            return getCustomMavenPath(project, mavenHome);
+            return getCustomMavenPath(project, mavenHomeType);
         }
     }
 
@@ -246,8 +250,11 @@ public class LibertyMavenUtil {
      * @return Maven path to be executed or an exception to display
      * @throws LibertyException
      */
-    private static String getCustomMavenPath(Project project, String customMavenHome) throws LibertyException {
-        File mavenHomeFile = MavenUtil.resolveMavenHomeDirectory(customMavenHome); // when customMavenHome path is invalid it returns null
+    private static String getCustomMavenPath(Project project, @NotNull MavenHomeType customMavenHome) throws LibertyException {
+        // If 'customMavenHome' is not an instance of 'StaticResolvedMavenHomeType',it using a fallback method (staticOrBundled) to return default 'BundledMaven3.INSTANCE'.
+        StaticResolvedMavenHomeType resolvedMavenHomeType = staticOrBundled(customMavenHome);
+        File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
+        // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
             String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
             throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);

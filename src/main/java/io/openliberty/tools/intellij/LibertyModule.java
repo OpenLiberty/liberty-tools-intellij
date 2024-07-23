@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -51,7 +51,7 @@ public class LibertyModule {
 
     public LibertyModule(Project project, BuildFile buildFile) {
         this(project);
-        this.buildFile = buildFile.getBuildFile().getVirtualFile();
+        this.buildFile = buildFile.getBuildFile();
         this.name = buildFile.getProjectName();
         this.projectType = buildFile.getProjectType();
         this.validContainerVersion = buildFile.isValidContainerVersion();

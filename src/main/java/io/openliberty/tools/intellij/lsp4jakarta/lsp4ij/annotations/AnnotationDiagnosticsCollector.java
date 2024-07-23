@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -176,7 +176,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                     DiagnosticSeverity.Error));
                         }
 
-                        if (!method.getReturnType().equals(PsiType.VOID)) {
+                        if (!method.getReturnType().equals(PsiTypes.voidType())) {
                             String diagnosticMessage = Messages.getMessage("MethodMustBeVoid",
                                     "@PostConstruct");
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,

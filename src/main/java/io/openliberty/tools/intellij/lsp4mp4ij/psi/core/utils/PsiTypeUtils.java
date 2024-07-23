@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019, 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -328,6 +328,6 @@ public class PsiTypeUtils {
      * @return
      */
     public static boolean isVoidReturnType(PsiMethod method) {
-        return PsiType.VOID.equals(method.getReturnType());
+        return PsiTypes.voidType().equals(method.getReturnType());
     }
 }
