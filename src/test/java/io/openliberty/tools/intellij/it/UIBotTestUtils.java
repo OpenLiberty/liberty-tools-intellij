@@ -648,7 +648,7 @@ public class UIBotTestUtils {
             throw new RuntimeException("Unable to open file " + fileName, error);
         }
     }
-
+    
     public static void hideTerminalWindow(RemoteRobot remoteRobot) {
         try {
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
@@ -892,7 +892,7 @@ public class UIBotTestUtils {
             throw new RuntimeException("Hover on text: '" + hoverTarget + "' did not trigger a pop-up window to open", error);
         }
     }
-    
+
     public static void jitterCursor(EditorFixture editor, int pointX, int pointY) {
 
         String jitterScript = "const x = %d;" +
