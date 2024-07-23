@@ -111,7 +111,7 @@ public class RunLibertyDevTask extends AnAction {
                     LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.message"), LocalizedResourceUtil.getMessage("liberty.action.selection.dialog.title"),
                     LibertyPluginIcons.libertyIcon_40,
                     libertyActions,
-                    libertyActions,
+                    null,
                     libertyActions[0]);
             dialog.show();
             final int ret = dialog.getSelectedIndex();
