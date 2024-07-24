@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -68,6 +69,24 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+
+        deleteDirectoryIfExists(getGradleProjectSIDDirPath());
+        deleteDirectoryIfExists(getMavenProjectSIDDirPath());
+    }
+
+    private static void deleteDirectoryIfExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (dir.exists()) {
+            TestUtils.deleteDirectory(dir);
+        }
+    }
+
+    private static String getGradleProjectSIDDirPath() {
+        return Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
+    }
+
+    private static String getMavenProjectSIDDirPath() {
+        return Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
     }
 
     /**

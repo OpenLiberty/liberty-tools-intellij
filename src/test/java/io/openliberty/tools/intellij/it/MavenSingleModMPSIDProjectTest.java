@@ -97,16 +97,6 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
     }
 
-    @AfterAll
-    public static void clean() throws IOException {
-        File directory = new File(PROJECTS_PATH_NEW);
-        if (TestUtils.deleteDirectory(directory)) {
-            System.out.println("Directory deleted successfully!");
-        } else {
-            System.err.println("Failed to delete directory.");
-        }
-    }
-
     /**
      * Returns the path where the Liberty server was installed.
      *
