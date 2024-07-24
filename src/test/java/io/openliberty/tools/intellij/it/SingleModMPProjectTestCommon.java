@@ -70,23 +70,9 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
 
+        // Delete the Gradle and Maven project directories with spaces in their names that were created during the environment setup for tests.
         deleteDirectoryIfExists(getGradleProjectSIDDirPath());
         deleteDirectoryIfExists(getMavenProjectSIDDirPath());
-    }
-
-    private static void deleteDirectoryIfExists(String dirPath) {
-        File dir = new File(dirPath);
-        if (dir.exists()) {
-            TestUtils.deleteDirectory(dir);
-        }
-    }
-
-    private static String getGradleProjectSIDDirPath() {
-        return Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
-    }
-
-    private static String getMavenProjectSIDDirPath() {
-        return Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
     }
 
     /**
@@ -1005,6 +991,35 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
+    /**
+     * Deletes the directory specified by dirPath if it exists.
+     *
+     * @param dirPath The path to the directory that may be deleted.
+     */
+    private static void deleteDirectoryIfExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (dir.exists()) {
+            TestUtils.deleteDirectory(dir);
+        }
+    }
+
+    /**
+     * Returns the gradle project directory path with space in directory name
+     *
+     * @return The projects directory path.
+     */
+    private static String getGradleProjectSIDDirPath() {
+        return Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
+    }
+
+    /**
+     * Returns the maven project directory path with space in directory name
+     *
+     * @return The projects directory path.
+     */
+    private static String getMavenProjectSIDDirPath() {
+        return Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
+    }
 
     /**
      * Returns the projects directory path.

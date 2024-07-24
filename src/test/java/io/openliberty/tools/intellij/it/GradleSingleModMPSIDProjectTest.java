@@ -9,11 +9,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
+ * Tests Liberty Tools actions using a single module MicroProfile Gradle project with space in directory and name.
  */
 public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon {
 
@@ -30,6 +28,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
+    /**
+     * Single module Microprofile project name with space.
+     */
     private static final String SM_MP_PROJECT_NAME_NEW = "singleMod GradleMP";
 
     /**
@@ -37,6 +38,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
+    /**
+     * The path to the folder containing the test projects, including directories with spaces.
+     */
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
 
     /**
@@ -89,24 +93,31 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @BeforeAll
     public static void setup() throws IOException {
+        // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
         TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+
         Path pathNew = Path.of(PROJECTS_PATH_NEW);
         Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
 
+        // Define paths for the original and copy of settings.gradle
         Path originalPath = projectDirPath.resolve("settings.gradle");
         Path originalPathCopy = projectDirPath.resolve("settings-copy.gradle");
 
+        // Rename settings.gradle to settings-duplicate.gradle
         Files.move(originalPath, originalPath.resolveSibling("settings-duplicate.gradle"));
+        // Rename settings-copy.gradle to settings.gradle
         Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
 
         Path projectDirNewPath = pathNew.resolve(SM_MP_PROJECT_NAME_NEW);
 
         try {
+            // Rename the project directory to a new name, replacing it if it already exists
             Files.move(projectDirPath, projectDirNewPath, StandardCopyOption.REPLACE_EXISTING);
             System.out.println("Directory renamed successfully");
         } catch (IOException e) {
             System.err.println("Failed to rename directory: " + e.getMessage());
         }
+        // Prepare the environment with the new project path and name
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
     }
 
@@ -121,9 +132,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     }
 
     /**
-     * Returns the projects directory path.
+     * Returns the projects new directory path.
      *
-     * @return The projects directory path.
+     * @return The projects new directory path.
      */
     @Override
     public String getProjectsDirPath() {

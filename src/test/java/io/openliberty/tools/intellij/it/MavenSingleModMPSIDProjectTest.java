@@ -11,11 +11,9 @@ package io.openliberty.tools.intellij.it;
 
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +33,9 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      */
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
 
+    /**
+     * The path to the folder containing the test projects, including directories with spaces.
+     */
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
 
     /**
@@ -93,6 +94,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     @BeforeAll
     public static void setup() throws IOException {
         StepWorker.registerProcessor(new StepLogger());
+        // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
         TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
     }
@@ -108,9 +110,9 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     }
 
     /**
-     * Returns the projects directory path.
+     * Returns the projects new directory path.
      *
-     * @return The projects directory path.
+     * @return The projects new directory path.
      */
     @Override
     public String getProjectsDirPath() {

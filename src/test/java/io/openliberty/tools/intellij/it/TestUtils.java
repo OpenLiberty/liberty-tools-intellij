@@ -540,6 +540,13 @@ public class TestUtils {
         Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
     }
 
+    /**
+     * Copies all files and directories from the source directory to the destination directory.
+     *
+     * @param sourceDirectoryLocation The path to the source directory to copy from.
+     * @param destinationDirectoryLocation The path to the destination directory to copy to.
+     * @throws IOException If an I/O error occurs while copying files.
+     */
     public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
             throws IOException {
         Files.walk(Paths.get(sourceDirectoryLocation))
