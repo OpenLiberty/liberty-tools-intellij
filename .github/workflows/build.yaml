@@ -124,7 +124,8 @@ jobs:
     needs: build
     if: always()
     steps:
-      - id: status
+      - name: Fetch Build Status
+        id: status
         run: |
           if [ ${{ needs.build.result }} != "success" ]; then
                echo "status=failed" >> $GITHUB_OUTPUT

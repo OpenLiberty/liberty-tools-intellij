@@ -96,7 +96,8 @@ jobs:
     needs: [ call-build-workflow-for-lsp4ij-main-branch, call-build-workflow-for-each-merge-commit-sha ]
     if: always()
     steps:
-      - run: |
+      - name: Send Slack Notification
+        run: |
           STATUS="succeeded"
           JOB2_STATUS="${{ needs.call-build-workflow-for-lsp4ij-main-branch.outputs.status }}"
           JOB3_STATUS="${{ needs.call-build-workflow-for-each-merge-commit-sha.outputs.status }}"
