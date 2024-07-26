@@ -44,8 +44,16 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
-            final String[] projectNames = buildFileToProjectNames(buildFileList);
-            final String[] projectPaths = buildFileToProjectPaths(buildFileList);
+            final List<Map<String, String>> projectDetails = buildFilesToProjectDetails(buildFileList);
+            final String[] projectNames = new String[projectDetails.size()];
+            final String[] projectPaths = new String[projectDetails.size()];
+
+            for (int i = 0; i < projectDetails.size(); i++) {
+                Map<String, String> details = projectDetails.get(i);
+                projectNames[i] = details.get("projectName");
+                projectPaths[i] = details.get("projectPath");
+            }
+
             LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
                     project,
                     getChooseDialogMessage(),
@@ -123,22 +131,15 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         return buildFiles;
     }
 
-    protected final String[] buildFileToProjectNames(@NotNull List<BuildFile> list) {
-        final int size = list.size();
-        final String[] projectNames = new String[size];
-        for (int i = 0; i < size; ++i) {
-            projectNames[i] = list.get(i).getProjectName();
+    protected final List<Map<String, String>> buildFilesToProjectDetails(@NotNull List<BuildFile> list) {
+        List<Map<String, String>> projectDetails = new ArrayList<>();
+        for (BuildFile buildFile : list) {
+            Map<String, String> details = new HashMap<>();
+            details.put("projectName", buildFile.getProjectName());
+            details.put("projectPath", buildFile.getBuildFile().getPath());
+            projectDetails.add(details);
         }
-        return projectNames;
-    }
-
-    protected final String[] buildFileToProjectPaths(@NotNull List<BuildFile> list) {
-        final int size = list.size();
-        final String[] projectPaths = new String[size];
-        for (int i = 0; i < size; ++i) {
-            projectPaths[i] = list.get(i).getBuildFile().getPath();
-        }
-        return projectPaths;
+        return projectDetails;
     }
 
     protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, ParserConfigurationException, SAXException {
