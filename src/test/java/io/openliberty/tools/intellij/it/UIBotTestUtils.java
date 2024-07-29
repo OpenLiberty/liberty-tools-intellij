@@ -1762,6 +1762,22 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Wait for the indexing message to disappear
+     */
+    public static void waitForIndexingToStop(RemoteRobot remoteRobot, int waitTime) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        // The Inline progress panel might contain a TextPanel object with text: 'Indexing JDK 17' or other indexing tasks
+        String xPath = "//div[@class='InlineProgressPanel']";
+        Locator progressPanelLocator = byXpath(xPath);
+        JLabelFixture progressPanelFixture = projectFrame.find(JLabelFixture.class, progressPanelLocator, Duration.ofSeconds(10));
+
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(waitTime),
+                Duration.ofSeconds(1),
+                "Waiting for indexing message to disappear e.g. Indexing Java 17...",
+                "Indexing did not appear in the Liberty tool window",
+                () -> progressPanelFixture.findAllText().isEmpty());
+    }
+    /**
      * Returns a concatenated string of all text found in a ComponentFixture object.
      *
      * @param componentFixture The ComponentFixture object.
