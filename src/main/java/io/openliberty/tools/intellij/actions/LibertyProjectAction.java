@@ -44,24 +44,21 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
-            final List<Map<String, String>> projectDetails = buildFilesToProjectDetails(buildFileList);
-            final String[] projectNames = new String[projectDetails.size()];
-            final String[] projectPaths = new String[projectDetails.size()];
-
-            for (int i = 0; i < projectDetails.size(); i++) {
-                Map<String, String> details = projectDetails.get(i);
-                projectNames[i] = details.get("projectName");
-                projectPaths[i] = details.get("projectPath");
-            }
+            String[] projectName = buildFileList.stream()
+                    .map(BuildFile::getProjectName)
+                    .toArray(String[]::new);
+            String[] projectPath = buildFileList.stream()
+                    .map(buildFile -> buildFile.getBuildFile().getPath())
+                    .toArray(String[]::new);
 
             LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
                     project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40,
-                    projectNames,
-                    projectPaths,
-                    projectNames[0]);
+                    projectName,
+                    projectPath,
+                    projectName[0]);
             dialog.show();
             final int ret = dialog.getSelectedIndex();
             // Execute the action if a project was selected.
@@ -131,16 +128,6 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         return buildFiles;
     }
 
-    protected final List<Map<String, String>> buildFilesToProjectDetails(@NotNull List<BuildFile> list) {
-        List<Map<String, String>> projectDetails = new ArrayList<>();
-        for (BuildFile buildFile : list) {
-            Map<String, String> details = new HashMap<>();
-            details.put("projectName", buildFile.getProjectName());
-            details.put("projectPath", buildFile.getBuildFile().getPath());
-            projectDetails.add(details);
-        }
-        return projectDetails;
-    }
 
     protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, ParserConfigurationException, SAXException {
         return LibertyProjectUtil.getGradleBuildFiles(project);
