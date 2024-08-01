@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.it;
 
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -97,6 +98,11 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
         TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
+    }
+
+    @AfterAll
+    public static void cleanup() {
+        deleteDirectoryIfExists(PROJECTS_PATH_NEW);
     }
 
     /**

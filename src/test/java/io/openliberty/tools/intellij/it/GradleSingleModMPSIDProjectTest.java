@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -119,6 +120,11 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         }
         // Prepare the environment with the new project path and name
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
+    }
+
+    @AfterAll
+    public static void cleanup() {
+        deleteDirectoryIfExists(PROJECTS_PATH_NEW);
     }
 
     /**

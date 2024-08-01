@@ -471,6 +471,13 @@ public class TestUtils {
         return file.delete();
     }
 
+//    public static void deleteDirectoryIfExists(String dirPath) {
+//        File dir = new File(dirPath);
+//        if (dir.exists()) {
+//            TestUtils.deleteDirectory(dir);
+//        }
+//    }
+
     /**
      * Prints a formatted message to STDOUT.
      *

@@ -71,8 +71,8 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
 
         // Delete the Gradle and Maven project directories with spaces in their names that were created during the environment setup for tests.
-        deleteDirectoryIfExists(getGradleProjectSIDDirPath());
-        deleteDirectoryIfExists(getMavenProjectSIDDirPath());
+//        deleteDirectoryIfExists(getGradleProjectSIDDirPath());
+//        deleteDirectoryIfExists(getMavenProjectSIDDirPath());
     }
 
     /**
@@ -996,7 +996,7 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @param dirPath The path to the directory that may be deleted.
      */
-    private static void deleteDirectoryIfExists(String dirPath) {
+    public static void deleteDirectoryIfExists(String dirPath) {
         File dir = new File(dirPath);
         if (dir.exists()) {
             TestUtils.deleteDirectory(dir);
