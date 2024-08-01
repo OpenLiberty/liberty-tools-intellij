@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);
@@ -44,12 +45,8 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
-            String[] projectName = buildFileList.stream()
-                    .map(BuildFile::getProjectName)
-                    .toArray(String[]::new);
-            String[] projectPath = buildFileList.stream()
-                    .map(buildFile -> buildFile.getBuildFile().getPath())
-                    .toArray(String[]::new);
+            String[] projectName = extractBuildFileAttributes(buildFileList, BuildFile::getProjectName);
+            String[] projectPath = extractBuildFileAttributes(buildFileList, buildFile -> buildFile.getBuildFile().getPath());
 
             LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
                     project,
@@ -75,6 +72,12 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40);
         }
+    }
+
+    public String[] extractBuildFileAttributes(List<BuildFile> buildFileList, Function<BuildFile, String> filter) {
+        return buildFileList.stream()
+                .map(filter)
+                .toArray(String[]::new);
     }
 
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
