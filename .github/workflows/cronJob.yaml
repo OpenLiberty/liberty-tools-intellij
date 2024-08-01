@@ -56,7 +56,7 @@ jobs:
               attempts=$((attempts + 1))
             done
           
-            if [[ "$mergeable" = "null" ]]; then
+            if [[ "$mergeable" == "null" ]]; then
               echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") still has Mergeable value of 'null' after $max_attempts attempts."
             fi
             if [[ "$mergeable" != "false" ]]; then
