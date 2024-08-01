@@ -17,10 +17,6 @@ on:
         required: true
         type: boolean
         default: false
-    outputs:
-      status:
-        description: "Build Status"
-        value: ${{ jobs.build-status.outputs.status }}
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -116,20 +112,3 @@ jobs:
           name: ${{ matrix.reportName }}
           path: |
             liberty-tools-intellij/build/reports/
-
-  build-status:
-    runs-on: ubuntu-latest
-    outputs:
-      status: ${{ steps.status.outputs.status }}
-    needs: build
-    if: always()
-    steps:
-      - name: Fetch Build Status
-        id: status
-        run: |
-          if [ ${{ needs.build.result }} != "success" ]; then
-               echo "status=failed" >> $GITHUB_OUTPUT
-          else
-               echo "status=succeeded" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
