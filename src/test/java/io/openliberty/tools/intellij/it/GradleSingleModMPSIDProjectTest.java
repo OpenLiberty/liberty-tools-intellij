@@ -122,8 +122,12 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
     }
 
+    /**
+     * Cleanup includes deleting the created project path.
+     */
     @AfterAll
     public static void cleanup() {
+        closeProjectView();
         deleteDirectoryIfExists(PROJECTS_PATH_NEW);
     }
 

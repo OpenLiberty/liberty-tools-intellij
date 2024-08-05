@@ -65,14 +65,17 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @AfterAll
     public static void cleanup() {
+        closeProjectView();
+    }
+
+    /**
+     * Close project.
+     */
+    protected static void closeProjectView() {
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-
-        // Delete the Gradle and Maven project directories with spaces in their names that were created during the environment setup for tests.
-//        deleteDirectoryIfExists(getGradleProjectSIDDirPath());
-//        deleteDirectoryIfExists(getMavenProjectSIDDirPath());
     }
 
     /**
@@ -1001,24 +1004,6 @@ public abstract class SingleModMPProjectTestCommon {
         if (dir.exists()) {
             TestUtils.deleteDirectory(dir);
         }
-    }
-
-    /**
-     * Returns the gradle project directory path with space in directory name
-     *
-     * @return The projects directory path.
-     */
-    private static String getGradleProjectSIDDirPath() {
-        return Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
-    }
-
-    /**
-     * Returns the maven project directory path with space in directory name
-     *
-     * @return The projects directory path.
-     */
-    private static String getMavenProjectSIDDirPath() {
-        return Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
     }
 
     /**
