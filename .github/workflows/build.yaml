@@ -69,13 +69,13 @@ jobs:
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
-        uses: al-cheb/configure-pagefile-action@v1.2
+        uses: al-cheb/configure-pagefile-action@v1.4
         with:
           minimum-size: 8GB
           maximum-size: 10GB
           disk-root: "C:"
       - name: 'Checkout liberty-tools-intellij'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: liberty-tools-intellij
           ref: ${{ env.REF_LTI_TAG }}
@@ -86,7 +86,7 @@ jobs:
       # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
       - name: 'Checkout lsp4ij'
         if: ${{ inputs.useLocalPlugin == true }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: redhat-developer/lsp4ij
           path: lsp4ij
@@ -115,12 +115,13 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: 'Run UI integration tests'
+        id: run_tests
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}
+          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG != '' && env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
           path: |
             liberty-tools-intellij/build/reports/
