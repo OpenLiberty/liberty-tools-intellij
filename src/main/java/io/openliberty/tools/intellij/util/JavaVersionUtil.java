@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,7 +10,6 @@
 package io.openliberty.tools.intellij.util;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
@@ -55,11 +54,11 @@ public class JavaVersionUtil {
     }
 
     private static void notifyError(String errMsg, Project project) {
-        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID, errMsg, NotificationType.WARNING)
-                .setTitle(LocalizedResourceUtil.getMessage("java.runtime.error.message"))
-                .setIcon(LibertyPluginIcons.libertyIcon)
-                .setSubtitle("")
-                .setListener(NotificationListener.URL_OPENING_LISTENER);
+
+        Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                LocalizedResourceUtil.getMessage("java.runtime.error.message"),
+                errMsg, NotificationType.WARNING);
+        notif.setIcon(LibertyPluginIcons.libertyIcon);
         Notifications.Bus.notify(notif, project);
     }
 
