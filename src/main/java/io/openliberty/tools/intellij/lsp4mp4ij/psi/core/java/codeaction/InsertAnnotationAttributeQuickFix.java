@@ -83,7 +83,11 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
 		try {
 			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+		} catch (ProcessCanceledException e) {
+			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
+			//TODO delete block when minimum required version is 2024.2
+			throw e;
+		} catch (IndexNotReadyException | CancellationException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e);
