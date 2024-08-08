@@ -27,6 +27,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -51,7 +53,7 @@ public class LibertyMavenUtil {
      * @throws SAXException
      */
     public static String getProjectNameFromPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory factory = newDocumentBuilderFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
         File inputFile = new File(file.getPath());
@@ -85,7 +87,7 @@ public class LibertyMavenUtil {
      */
     public static BuildFile validPom(VirtualFile file) throws ParserConfigurationException, IOException, SAXException {
         BuildFile buildFile = new BuildFile(false, false);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory factory = newDocumentBuilderFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
         File inputFile = new File(file.getPath());
@@ -343,5 +345,19 @@ public class LibertyMavenUtil {
             }
         }
         return null;
+    }
+
+    private static DocumentBuilderFactory newDocumentBuilderFactory() {
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
+        try {
+            // This property is required to be recognized by the JDK implementation.
+            // Setting this property would only fail if the JDK is broken. Returning
+            // the factory from within the "finally" block prevents any exception
+            // from being thrown from this method.
+            factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        }
+        finally {
+            return factory;
+        }
     }
 }
