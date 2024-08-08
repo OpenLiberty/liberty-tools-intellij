@@ -121,6 +121,6 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.reportName }}
+          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
           path: |
             liberty-tools-intellij/build/reports/
