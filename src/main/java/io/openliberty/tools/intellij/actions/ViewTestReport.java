@@ -13,6 +13,7 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ViewTestReport extends LibertyGeneralAction {
+    protected static final Logger LOGGER = Logger.getInstance(ViewTestReport.class);
 
     /**
      * Returns the name of the action command being processed.
@@ -64,7 +66,7 @@ public class ViewTestReport extends LibertyGeneralAction {
         try {
             testReportDest = getTestReportDestination(buildFile);
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            LOGGER.debug(ioException);
         }
 
         if (testReportDest != null) {
@@ -73,7 +75,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                 try {
                     testReportFile = findCustomTestReport(parentFile);
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    LOGGER.debug(ioException);
                 }
             }
         }
@@ -150,7 +152,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                 return customTestReports.get(0);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.debug(e);
         }
 
         return null;
