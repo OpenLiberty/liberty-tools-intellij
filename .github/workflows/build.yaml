@@ -122,6 +122,6 @@ jobs:
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG != '' && env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
+          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
           path: |
             liberty-tools-intellij/build/reports/
