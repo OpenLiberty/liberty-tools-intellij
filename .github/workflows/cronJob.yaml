@@ -94,21 +94,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
-    name: Running PR
+      refLTITag: ${{ matrix.tag }}
+    name: Run PR
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
     uses: ./.github/workflows/build.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'lsp4ij-market-0.0.2-integration' ]
     with:
       useLocalPlugin: true
       refLsp4ij: main
       lsp4ijBranch: main
-    name: Run LTI tests for Lsp4ij Main branch
+      refLTITag: ${{ matrix.tag }}
+    name: Run Lsp4ij Main
 
   # Send slack notification for build results
   call-build-workflow-slack-notification:

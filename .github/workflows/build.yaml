@@ -17,6 +17,11 @@ on:
         required: true
         type: boolean
         default: false
+      refLTITag:
+        description: 'Reference LTI Tag/Branch'
+        type: string
+        required: true
+        default: main
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -28,6 +33,11 @@ on:
         description: 'Reference/branch for Lsp4ij checkout'
         type: string
         required: true
+        default: main
+      refLTITag:
+        description: 'Reference LTI Tag/Branch'
+        type: string
+        required: false
         default: main
   push:
     branches: '**'
@@ -54,7 +64,8 @@ jobs:
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
-      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch || 'latest' }}
+      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch || 'default' }}
+      REF_LTI_TAG: ${{ inputs.refLTITag }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -67,6 +78,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: liberty-tools-intellij
+          ref: ${{ env.REF_LTI_TAG }}
       - name: 'Install required integration test software'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
@@ -96,7 +108,7 @@ jobs:
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-LTI-main-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
