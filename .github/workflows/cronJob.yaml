@@ -1,6 +1,7 @@
 name: Cron Job
 
 on:
+  push:
   workflow_dispatch:
   schedule:
     # The job runs at 15:45 UTC every Monday through Friday, which is 9:15 PM IST and 11:45 AM EST.
@@ -95,7 +96,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'lsp4ij-market-0.0.2-integration' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        tag: [ 'lsp4ij-market-0.0.2-integration', 'main', 'v0.0.0.1' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
@@ -111,7 +112,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'lsp4ij-market-0.0.2-integration' ]
+        tag: [ 'lsp4ij-market-0.0.2-integration', 'main', 'v0.0.0.1' ]
     with:
       useLocalPlugin: true
       refLsp4ij: main
@@ -139,5 +140,5 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"Workflow ${{ github.workflow }} triggered by branch *${{ github.ref }}*. Build results: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Status: *$STATUS*\"}" $SLACK_WEBHOOK_URL
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COPY }}
     name: Run Slack Notification
