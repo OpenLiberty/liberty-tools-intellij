@@ -229,7 +229,10 @@ public class LibertyGradleUtil {
         } catch (IOException e) {
             throw new LibertyException("Could not get canonical path for gradle wrapper file");
         }
-        return path;
+        String cmd = LibertyProjectUtil.includeEscapeToString(path);
+        if (SystemInfo.isWindows)
+            cmd = "cmd /K " + cmd; // In Windows, "cmd /K" is used to execute a command
+        return cmd;
     }
 
     /**
