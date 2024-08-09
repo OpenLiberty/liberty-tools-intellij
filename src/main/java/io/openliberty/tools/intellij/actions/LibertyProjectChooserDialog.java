@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -30,14 +30,16 @@ public class LibertyProjectChooserDialog extends MessageDialog {
                                        @NlsContexts.DialogTitle String title,
                                        @Nullable Icon icon,
                                        String[] values,
-                                       String[] tooltips,
+                                       @Nullable String[] tooltips,
                                        @NlsSafe String initialValue) {
         super(message, title, new String[]{Messages.getOkButton(), Messages.getCancelButton()}, 0, icon);
         myComboBox.setModel(new DefaultComboBoxModel<>(values));
         myComboBox.setSelectedItem(initialValue);
-        ComboboxToolTipRenderer renderer = new ComboboxToolTipRenderer();
-        renderer.setTooltips(List.of(tooltips));
-        myComboBox.setRenderer(renderer);
+        if (tooltips != null) {
+            ComboboxToolTipRenderer renderer = new ComboboxToolTipRenderer();
+            renderer.setTooltips(List.of(tooltips));
+            myComboBox.setRenderer(renderer);
+        }
     }
 
     @Override
