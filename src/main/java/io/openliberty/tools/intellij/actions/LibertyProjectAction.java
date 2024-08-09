@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);
@@ -44,22 +45,17 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
-            List<Map.Entry<String, String>> attributesList = extractBuildFileAttributes(buildFileList);
-            String[] projectNames = attributesList.stream()
-                    .map(Map.Entry::getKey)
-                    .toArray(String[]::new);
-            String[] projectPaths = attributesList.stream()
-                    .map(Map.Entry::getValue)
-                    .toArray(String[]::new);
+            String[] projectName = extractBuildFileAttributes(buildFileList, BuildFile::getProjectName);
+            String[] projectPath = extractBuildFileAttributes(buildFileList, buildFile -> buildFile.getBuildFile().getPath());
 
             LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
                     project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40,
-                    projectNames,
-                    projectPaths,
-                    projectNames[0]);
+                    projectName,
+                    projectPath,
+                    projectName[0]);
             dialog.show();
             final int ret = dialog.getSelectedIndex();
             // Execute the action if a project was selected.
@@ -78,14 +74,10 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
     }
 
-    public List<Map.Entry<String, String>> extractBuildFileAttributes(List<BuildFile> buildFileList) {
-        List<Map.Entry<String, String>> attributesList = new ArrayList<>();
-        for (BuildFile buildFile : buildFileList) {
-            String projectName = buildFile.getProjectName();
-            String projectPath = buildFile.getBuildFile().getPath();
-            attributesList.add(new AbstractMap.SimpleEntry<>(projectName, projectPath));
-        }
-        return attributesList;
+    public String[] extractBuildFileAttributes(List<BuildFile> buildFileList, Function<BuildFile, String> filter) {
+        return buildFileList.stream()
+                .map(filter)
+                .toArray(String[]::new);
     }
 
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
