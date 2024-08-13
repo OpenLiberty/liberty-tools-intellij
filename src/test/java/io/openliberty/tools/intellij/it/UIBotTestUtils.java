@@ -1762,12 +1762,45 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Look for the indexing message and if it is found wait up to 10 minutes for it to stop.
+     */
+    public static void waitForIndexing(RemoteRobot remoteRobot) {
+        String xPath = "//div[@class='InlineProgressPanel']";
+        boolean needToWait = waitForIndexingToStart(remoteRobot, xPath, 5);
+        if (needToWait) {
+            waitForIndexingToStop(remoteRobot, xPath, 600);
+        }
+    }
+
+    /**
+     * Wait for the indexing message to appear. If it appears return true. If it does not appear
+     * in the time specified we will assume indexing is not going to happen.
+     */
+    public static boolean waitForIndexingToStart(RemoteRobot remoteRobot, String xPath, int waitTime) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        // If indexing is needed the Inline Progress panel will contain a TextPanel object with text: 'Indexing JDK 17' or other names
+        Locator progressPanelLocator = byXpath(xPath);
+        JLabelFixture progressPanelFixture = projectFrame.find(JLabelFixture.class, progressPanelLocator, Duration.ofSeconds(10));
+
+        List<RemoteText> l = progressPanelFixture.findAllText();
+        try {
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(waitTime),
+                    Duration.ofSeconds(1),
+                    "Waiting for indexing message to appear e.g. Indexing Java 17...",
+                    "Indexing did not appear in the Liberty tool window",
+                    () -> !progressPanelFixture.findAllText().isEmpty());
+        } catch (Exception e) {
+            // Did not find the indexing message, just continue
+        }
+        return !progressPanelFixture.findAllText().isEmpty(); // not empty means it is running
+    }
+
+    /**
      * Wait for the indexing message to disappear
      */
-    public static void waitForIndexingToStop(RemoteRobot remoteRobot, int waitTime) {
+    public static void waitForIndexingToStop(RemoteRobot remoteRobot, String xPath, int waitTime) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         // The Inline progress panel might contain a TextPanel object with text: 'Indexing JDK 17' or other indexing tasks
-        String xPath = "//div[@class='InlineProgressPanel']";
         Locator progressPanelLocator = byXpath(xPath);
         JLabelFixture progressPanelFixture = projectFrame.find(JLabelFixture.class, progressPanelLocator, Duration.ofSeconds(10));
 
