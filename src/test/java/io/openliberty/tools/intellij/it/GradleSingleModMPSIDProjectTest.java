@@ -93,33 +93,36 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      * Prepares the environment for test execution.
      */
     @BeforeAll
-    public static void setup() throws IOException {
-        // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
-        TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
-
-        Path pathNew = Path.of(PROJECTS_PATH_NEW);
-        Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
-
-        // Define paths for the original and copy of settings.gradle
-        Path originalPath = projectDirPath.resolve("settings.gradle");
-        Path originalPathCopy = projectDirPath.resolve("settings-copy.gradle");
-
-        // Rename settings.gradle to settings-duplicate.gradle
-        Files.move(originalPath, originalPath.resolveSibling("settings-duplicate.gradle"));
-        // Rename settings-copy.gradle to settings.gradle
-        Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
-
-        Path projectDirNewPath = pathNew.resolve(SM_MP_PROJECT_NAME_NEW);
-
+    public static void setup() {
         try {
+            // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
+            TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+
+            Path pathNew = Path.of(PROJECTS_PATH_NEW);
+            Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
+
+            // Define paths for the original and copy of settings.gradle
+            Path originalPath = projectDirPath.resolve("settings.gradle");
+            Path originalPathCopy = projectDirPath.resolve("settings-copy.gradle");
+
+            // Rename settings.gradle to settings-duplicate.gradle
+            Files.move(originalPath, originalPath.resolveSibling("settings-duplicate.gradle"));
+            // Rename settings-copy.gradle to settings.gradle
+            Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
+
+            Path projectDirNewPath = pathNew.resolve(SM_MP_PROJECT_NAME_NEW);
+
             // Rename the project directory to a new name, replacing it if it already exists
             Files.move(projectDirPath, projectDirNewPath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("Directory renamed successfully");
+
+            // Prepare the environment with the new project path and name
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
+
         } catch (IOException e) {
-            System.err.println("Failed to rename directory: " + e.getMessage());
+            System.err.println("Setup failed: " + e.getMessage());
+            e.printStackTrace();
+            Assertions.fail("Test setup failed due to an IOException: " + e.getMessage());
         }
-        // Prepare the environment with the new project path and name
-        prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
     }
 
     /**
@@ -127,8 +130,11 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @AfterAll
     public static void cleanup() {
-        closeProjectView();
-        deleteDirectoryIfExists(PROJECTS_PATH_NEW);
+        try {
+            closeProjectView();
+        } finally {
+            deleteDirectoryIfExists(PROJECTS_PATH_NEW);
+        }
     }
 
     /**

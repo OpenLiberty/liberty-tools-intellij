@@ -93,11 +93,17 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      * Prepares the environment for test execution.
      */
     @BeforeAll
-    public static void setup() throws IOException {
-        StepWorker.registerProcessor(new StepLogger());
-        // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
-        TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
-        prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
+    public static void setup() {
+        try {
+            StepWorker.registerProcessor(new StepLogger());
+            // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
+            TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
+        } catch (IOException e) {
+            System.err.println("Setup failed: " + e.getMessage());
+            e.printStackTrace();
+            Assertions.fail("Test setup failed due to an IOException: " + e.getMessage());
+        }
     }
 
     /**
@@ -105,8 +111,11 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      */
     @AfterAll
     public static void cleanup() {
-        closeProjectView();
-        deleteDirectoryIfExists(PROJECTS_PATH_NEW);
+        try {
+            closeProjectView();
+        } finally {
+            deleteDirectoryIfExists(PROJECTS_PATH_NEW);
+        }
     }
 
     /**
