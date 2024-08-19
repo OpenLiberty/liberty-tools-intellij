@@ -42,7 +42,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main, lsp4ij-market-0.0.2-integration ]
+    branches: [ main, lsp4ij-market-0.3.0-integration ]
 
 jobs:
   build:
