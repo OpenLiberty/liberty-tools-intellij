@@ -1382,6 +1382,8 @@ public class UIBotTestUtils {
 
         // get the text from the quickfix popup
         quickFixPopup.findText(contains(quickfixChooserString)).click();
+        // After you click IntelliJ can chug for a while before the edit is rendered
+        TestUtils.sleepAndIgnoreException(5);
 
         // Save the file.
         if (remoteRobot.isMac()) {
