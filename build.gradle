@@ -12,7 +12,7 @@ targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
 // To switch to nightly version, add @nightly to the version number.
-def lsp4ijVersion = '0.3.0'
+def lsp4ijVersion = '0.4.0'
 
 repositories {
     mavenCentral()
@@ -111,7 +111,7 @@ dependencies {
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     // define jars to grab locally (if falling back to mavenLocal() repo)
-    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0:uber') {
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.12.0-SNAPSHOT:uber') {
         transitive = false
     }
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1:uber') {
@@ -143,7 +143,7 @@ runIde {
 
 intellij {
     // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2024.1.3'
+    version = '2024.1.6'
 
     def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
             file("../lsp4ij/build/distributions/LSP4IJ/") :
