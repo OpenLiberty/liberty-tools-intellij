@@ -13,6 +13,7 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModJakartaLSTestCommon {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
@@ -65,8 +66,10 @@ public abstract class SingleModJakartaLSTestCommon {
      * Tests Jakarta Language Server code snippet support in a Java source file
      */
     @Test
+    @Order(2)
     @Video
     public void testInsertJakartaCodeSnippetIntoJavaPart() {
+
         String snippetStr = "res";
         String snippetChooser = "class";
         String insertedCode = "public String methodname() {";
@@ -95,6 +98,7 @@ public abstract class SingleModJakartaLSTestCommon {
      * Tests Jakarta Language Server diagnostic support in a Java source file
      */
     @Test
+    @Order(3)
     @Video
     public void testJakartaDiagnosticsInJavaPart() {
         String publicString = "public Response getProperties() {";
@@ -173,7 +177,7 @@ public abstract class SingleModJakartaLSTestCommon {
      * @param projectName The name of the project being used.
      */
 
-    public static void prepareEnv(String projectPath, String projectName) {
+    public void prepareEnv(String projectPath, String projectName) {
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
 
