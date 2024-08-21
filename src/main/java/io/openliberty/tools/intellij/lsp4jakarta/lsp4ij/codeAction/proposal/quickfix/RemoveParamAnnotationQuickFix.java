@@ -100,7 +100,7 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List &&
                  data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
              annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
-             paramIndex = (Integer) data.getExtendedDataEntry(INDEX_KEY);
+             paramIndex = ((Number) data.getExtendedDataEntry(INDEX_KEY)).intValue();
          } else {
              LOGGER.log(Level.WARNING, "The CodeActionResolveData was corrupted somewhere in the LSP layer. Unable to resolve code action.");
              return null;
