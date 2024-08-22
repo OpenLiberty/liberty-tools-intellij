@@ -472,11 +472,13 @@ public class UIBotTestUtils {
         for (int i = 0; i < maxRetries; i++) {
             try {
                 error = null;
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openProjectView try to FIND() project frame w/10s wait");
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getContentComboLabel("Project", "5");
                 break;
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The project view is closed. Open it.
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "openProjectView ready to click on Project");
                 clickOnWindowPaneStripeButton(remoteRobot, "Project");
                 break;
             } catch (Exception e) {
@@ -538,6 +540,7 @@ public class UIBotTestUtils {
                 "Waiting for the " + StripeButtonName + " button on the main window pane stripe to be enabled",
                 "The " + StripeButtonName + " button on then main window pane stripe is not enabled",
                 () -> projectFrame.isComponentEnabled(wpStripeButton));
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "clickOnWindowPaneStripeButton call click() on button called Project");
         wpStripeButton.click();
     }
 
@@ -1805,7 +1808,7 @@ public class UIBotTestUtils {
         Locator progressPanelLocator = byXpath(xPath);
         JLabelFixture progressPanelFixture = projectFrame.find(JLabelFixture.class, progressPanelLocator, Duration.ofSeconds(10));
 
-        List<RemoteText> l = progressPanelFixture.findAllText();
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "waitForIndexingToStart before, all text in InlineProgressPanel:"+progressPanelFixture.findAllText().isEmpty());
         try {
             RepeatUtilsKt.waitFor(Duration.ofSeconds(waitTime),
                     Duration.ofSeconds(1),
@@ -1815,6 +1818,7 @@ public class UIBotTestUtils {
         } catch (Exception e) {
             // Did not find the indexing message, just continue
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "waitForIndexingToStart after waiting, all text in InlineProgressPanel:"+progressPanelFixture.findAllText().isEmpty());
         return !progressPanelFixture.findAllText().isEmpty(); // not empty means it is running
     }
 
@@ -1827,11 +1831,13 @@ public class UIBotTestUtils {
         Locator progressPanelLocator = byXpath(xPath);
         JLabelFixture progressPanelFixture = projectFrame.find(JLabelFixture.class, progressPanelLocator, Duration.ofSeconds(10));
 
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "waitForIndexingToStop before, all text in InlineProgressPanel:"+progressPanelFixture.findAllText().isEmpty());
         RepeatUtilsKt.waitFor(Duration.ofSeconds(waitTime),
                 Duration.ofSeconds(1),
                 "Waiting for indexing message to disappear e.g. Indexing Java 17...",
                 "Indexing did not appear in the Liberty tool window",
                 () -> progressPanelFixture.findAllText().isEmpty());
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "waitForIndexingToStop after, all text in InlineProgressPanel:"+progressPanelFixture.findAllText().isEmpty());
     }
     /**
      * Returns a concatenated string of all text found in a ComponentFixture object.
