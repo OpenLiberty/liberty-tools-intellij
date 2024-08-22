@@ -98,7 +98,7 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          int paramIndex;
 
          if (data.getExtendedDataEntry(ANNOTATION_TO_REMOVE) instanceof List &&
-                 data.getExtendedDataEntry(INDEX_KEY) instanceof Integer) {
+                 data.getExtendedDataEntry(INDEX_KEY) instanceof Number) {
              annotationsToRemove = (List<String>) data.getExtendedDataEntry(ANNOTATION_TO_REMOVE);
              paramIndex = ((Number) data.getExtendedDataEntry(INDEX_KEY)).intValue();
          } else {
