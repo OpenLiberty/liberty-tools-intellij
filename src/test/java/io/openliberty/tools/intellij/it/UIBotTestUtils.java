@@ -540,7 +540,7 @@ public class UIBotTestUtils {
                 "Waiting for the " + StripeButtonName + " button on the main window pane stripe to be enabled",
                 "The " + StripeButtonName + " button on then main window pane stripe is not enabled",
                 () -> projectFrame.isComponentEnabled(wpStripeButton));
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "clickOnWindowPaneStripeButton call click() on button called Project");
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "clickOnWindowPaneStripeButton call click() on button called "+StripeButtonName);
         wpStripeButton.click();
     }
 

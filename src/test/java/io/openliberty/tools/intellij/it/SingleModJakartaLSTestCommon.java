@@ -183,6 +183,8 @@ public abstract class SingleModJakartaLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Jakarta prepare env. after openProjectView, calling waitForIndexing");
+
         // IntelliJ does not start building and indexing until the project is open in the UI
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
