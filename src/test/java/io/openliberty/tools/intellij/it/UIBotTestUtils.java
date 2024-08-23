@@ -467,6 +467,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void openProjectView(RemoteRobot remoteRobot) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openProjectView Entry");
         int maxRetries = 6;
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
@@ -492,6 +493,7 @@ public class UIBotTestUtils {
         if (error != null) {
             throw new RuntimeException("Unable to open the project tool window.", error);
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openProjectView Exit");
     }
 
     /**
@@ -1788,11 +1790,13 @@ public class UIBotTestUtils {
      * Look for the indexing message and if it is found wait up to 10 minutes for it to stop.
      */
     public static void waitForIndexing(RemoteRobot remoteRobot) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.waitForIndexing Entry");
         String xPath = "//div[@class='InlineProgressPanel']";
         boolean needToWait = waitForIndexingToStart(remoteRobot, xPath, 60);
         if (needToWait) {
             waitForIndexingToStop(remoteRobot, xPath, 600);
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.waitForIndexing Exit");
     }
 
     /**
@@ -2286,7 +2290,7 @@ public class UIBotTestUtils {
         }
 
         Locator locator = byXpath("//div[contains(@myvisibleactions, 'Get')]//div[contains(@myaction.key, 'action.Stop.text')]");
-        ActionButtonFixture stopButton = projectFrame.actionButton(locator, Duration.ofSeconds(5));
+        ActionButtonFixture stopButton = projectFrame.actionButton(locator, Duration.ofSeconds(60));
         stopButton.click();
     }
 

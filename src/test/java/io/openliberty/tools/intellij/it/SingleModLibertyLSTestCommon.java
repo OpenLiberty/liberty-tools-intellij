@@ -141,6 +141,7 @@ public abstract class SingleModLibertyLSTestCommon {
         // Insert a new element in server.xml.
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, true);
+            TestUtils.sleepAndIgnoreException(2); // wait for editor to update
             Path pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
