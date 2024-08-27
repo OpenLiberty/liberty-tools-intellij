@@ -93,11 +93,11 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 	private static final String[] ANNOTATION_NAMES = { CONNECTOR_ANNOTATION, INCOMING_ANNOTATION, OUTGOING_ANNOTATION,
 	CHANNEL_ANNOTATION};
 
-	private static enum Direction {
+	private enum Direction {
 		INCOMING, OUTGOING, INCOMING_AND_OUTGOING;
 	}
 
-	private static enum MessageType {
+	private enum MessageType {
 		INCOMING, OUTGOING, CONNECTOR;
 	}
 
@@ -132,11 +132,12 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 				// public double process(int priceInUsd) {
 				processIncomingChannel(psiElement, mprmAnnotation, context);
 				break;
-			case CHANNEL_ANNOTATION:
+			case CHANNEL_ANNOTATION: //Used for both incoming and outgoing channels
 				// @Inject
 				// @Channel("prices")
 				// Emitter<double> pricesEmitter;
-				if (isAnnotatingEmitterObject(psiElement)) {
+				if (isChannelField(psiElement)) {
+					processIncomingChannel(psiElement, mprmAnnotation, context);
 					processOutgoingChannel(psiElement, mprmAnnotation, context);
 				}
 				break;
@@ -151,16 +152,8 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 		}
 	}
 
-	private static boolean isAnnotatingEmitterObject(PsiElement element) {
-		if (!(element instanceof PsiField)) {
-			return false;
-		}
-		PsiField field = (PsiField) element;
-		String typeSignature = PsiTypeUtils.getResolvedTypeName(field);
-		if (typeSignature == null) {
-			return false;
-		}
-		return typeSignature.startsWith(EMITTER_CLASS);
+	private static boolean isChannelField(PsiElement element) {
+		return element instanceof PsiField;
 	}
 
 	/**
@@ -210,11 +203,9 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 		String sourceType = getSourceType(javaElement);
 		String sourceMethod = null;
 		String sourceField = null;
-		if (javaElement instanceof PsiMethod) {
-			PsiMethod method = (PsiMethod) javaElement;
+		if (javaElement instanceof PsiMethod method) {
 			sourceMethod = getSourceMethod(method);
-		} else if (javaElement instanceof PsiField) {
-			PsiField field = (PsiField) javaElement;
+		} else if (javaElement instanceof PsiField field) {
 			sourceField = getSourceField(field);
 		}
 		boolean binary = isBinary(javaElement);
@@ -252,11 +243,10 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 				processConnectorAttribute(connectorName, connectorAttributeAnnotation, sourceType, binary, context);
 			} else if (isMatchAnnotation(connectorAttributeAnnotation, CONNECTOR_ATTRIBUTES_ANNOTATION)) {
 				for (PsiNameValuePair pair : connectorAttributeAnnotation.getParameterList().getAttributes()) {
-					if (pair.getValue() instanceof PsiArrayInitializerMemberValue) {
-						PsiArrayInitializerMemberValue connectorAttributeAnnotations = (PsiArrayInitializerMemberValue) pair.getValue();
+					if (pair.getValue() instanceof PsiArrayInitializerMemberValue connectorAttributeAnnotations) {
 						for (Object annotation : connectorAttributeAnnotations.getInitializers()) {
-							if (annotation instanceof PsiAnnotation) {
-								processConnectorAttribute(connectorName, (PsiAnnotation) annotation, sourceType, binary,
+							if (annotation instanceof PsiAnnotation psiAnnotation) {
+								processConnectorAttribute(connectorName, psiAnnotation, sourceType, binary,
 										context);
 							}
 						}
@@ -354,12 +344,10 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 		if (StringUtils.isEmpty(connectorAttributeType)) {
 			return null;
 		}
-		switch (connectorAttributeType) {
-			case "string":
-				return "java.lang.String";
-			default:
-				return connectorAttributeType;
+		if (connectorAttributeType.equals("string")) {
+			return "java.lang.String";
 		}
+		return connectorAttributeType;
 	}
 
 	private static String getMPMessagingName(MessageType messageType, boolean dynamic, String connectorOrChannelName,
