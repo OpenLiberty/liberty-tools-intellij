@@ -556,7 +556,7 @@ public class TestUtils {
                     try {
                         Files.copy(source, destination);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException("Failed to copy file: " + source + " to " + destination, e);
                     }
                 });
     }
