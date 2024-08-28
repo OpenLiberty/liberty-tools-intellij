@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019, 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,8 +11,6 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtilCore;
@@ -266,35 +264,13 @@ public class PsiTypeUtils {
         return getRootDirectory(PsiTreeUtil.getParentOfType(element, PsiFile.class));
     }
 
-    public static VirtualFile getRootDirectory(PsiFile file) {
+    public static @Nullable VirtualFile getRootDirectory(PsiFile file) {
         ProjectFileIndex index = ProjectFileIndex.getInstance(file.getProject());
         VirtualFile directory = index.getSourceRootForFile(file.getVirtualFile());
         if (directory == null) {
             directory = index.getClassRootForFile(file.getVirtualFile());
         }
         return directory;
-    }
-
-    public static String getLocation(Project project, VirtualFile directory) {
-        String location = null;
-        Module module = ProjectFileIndex.getInstance(project).getModuleForFile(directory);
-        if (module != null) {
-            VirtualFile[] roots = ModuleRootManager.getInstance(module).getContentRoots();
-            if (roots.length > 0) {
-                VirtualFile moduleRoot = roots[0]; // choose any
-                String path = VfsUtilCore.getRelativePath(directory, moduleRoot);
-                if (path != null) {
-                    location = '/' + module.getName() + '/' + path;
-                }
-            }
-        }
-        if (location == null) {
-            location = directory.getPath();
-        }
-        if (location.endsWith("!/")) {
-            location = location.substring(0, location.length() - 2);
-        }
-        return location;
     }
 
     public static boolean overlaps(TextRange typeRange, TextRange methodRange) {
@@ -328,6 +304,6 @@ public class PsiTypeUtils {
      * @return
      */
     public static boolean isVoidReturnType(PsiMethod method) {
-        return PsiType.VOID.equals(method.getReturnType());
+        return PsiTypes.voidType().equals(method.getReturnType());
     }
 }

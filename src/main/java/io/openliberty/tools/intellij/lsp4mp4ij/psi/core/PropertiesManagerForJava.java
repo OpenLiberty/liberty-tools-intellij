@@ -126,7 +126,8 @@ public final class PropertiesManagerForJava {
             }
             JavaCodeLensContext context = new JavaCodeLensContext(uri, typeRoot, utils, module, params);
             List<IJavaCodeLensParticipant> definitions = IJavaCodeLensParticipant.EP_NAME.getExtensionList()
-                    .stream().filter(definition -> definition.isAdaptedForCodeLens(context, monitor))
+                    .stream()
+                    .filter(definition -> definition.isAdaptedForCodeLens(context, monitor))
                     .collect(Collectors.toList());
             if (definitions.isEmpty()) {
                 return;
@@ -194,7 +195,8 @@ public final class PropertiesManagerForJava {
                     // Collect all adapted definition participant
                     JavaDefinitionContext context = new JavaDefinitionContext(uri, typeRoot, utils, module,
                             hyperlinkedElement, hyperlinkedPosition);
-                    List<IJavaDefinitionParticipant> definitions = IJavaDefinitionParticipant.EP_NAME.extensions()
+                    List<IJavaDefinitionParticipant> definitions = IJavaDefinitionParticipant.EP_NAME.getExtensionList()
+                            .stream()
                             .filter(definition -> definition.isAdaptedForDefinition(context))
                             .toList();
                     if (definitions.isEmpty()) {

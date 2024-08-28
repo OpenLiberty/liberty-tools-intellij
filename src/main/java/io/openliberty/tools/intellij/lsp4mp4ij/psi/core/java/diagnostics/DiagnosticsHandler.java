@@ -72,7 +72,8 @@ public final class DiagnosticsHandler {
             DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
                 // Collect all adapted diagnostic definitions
                 JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
-                List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.extensions()
+                List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
+                        .stream()
                         .filter(definition -> group.equals(definition.getGroup()))
                         .filter(definition -> definition.isAdaptedForDiagnostics(context))
                         .toList();
