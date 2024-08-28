@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2024 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -23,7 +23,7 @@ import org.eclipse.lsp4j.Hover;
  */
 public interface IJavaHoverParticipant {
 
-	public static final ExtensionPointName<IJavaHoverParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaHoverParticipant");
+	ExtensionPointName<IJavaHoverParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaHoverParticipant");
 
 	/**
 	 * Returns true if hover must be collected for the given context and false

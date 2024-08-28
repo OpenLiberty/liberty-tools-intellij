@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public interface IJavaDiagnosticsParticipant {
-	public static final ExtensionPointName<IJavaDiagnosticsParticipant> EP_NAME =
+	ExtensionPointName<IJavaDiagnosticsParticipant> EP_NAME =
 			ExtensionPointName.create("open-liberty.intellij.javaDiagnosticsParticipant");
 	/**
 	 * Returns true if diagnostics must be collected for the given context and false
