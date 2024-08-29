@@ -72,7 +72,8 @@ public final class CompletionHandler {
                 List<CompletionItem> completionItems = new ArrayList<>();
                 JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
 
-                List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.extensions()
+                List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.getExtensionList()
+                        .stream()
                         .filter(definition -> group.equals(definition.getGroup()))
                         .filter(completion -> completion.isAdaptedForCompletion(completionContext))
                         .collect(Collectors.toList());

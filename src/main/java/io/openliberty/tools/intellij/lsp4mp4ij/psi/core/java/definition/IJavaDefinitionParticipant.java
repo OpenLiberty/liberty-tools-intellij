@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,7 +25,7 @@ import java.util.List;
  *
  */
 public interface IJavaDefinitionParticipant {
-	public static final ExtensionPointName<IJavaDefinitionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaDefinitionParticipant");
+	ExtensionPointName<IJavaDefinitionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaDefinitionParticipant");
 
 	/**
 	 * Returns true if definition must be collected for the given context and false

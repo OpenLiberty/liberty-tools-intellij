@@ -14,6 +14,7 @@ import com.intellij.lang.jvm.JvmParameter;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -24,6 +25,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLe
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.CompletionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.JavaDefinitionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.JavaHoverContext;
@@ -124,7 +126,8 @@ public final class PropertiesManagerForJava {
             }
             JavaCodeLensContext context = new JavaCodeLensContext(uri, typeRoot, utils, module, params);
             List<IJavaCodeLensParticipant> definitions = IJavaCodeLensParticipant.EP_NAME.getExtensionList()
-                    .stream().filter(definition -> definition.isAdaptedForCodeLens(context, monitor))
+                    .stream()
+                    .filter(definition -> definition.isAdaptedForCodeLens(context, monitor))
                     .collect(Collectors.toList());
             if (definitions.isEmpty()) {
                 return;
@@ -192,7 +195,8 @@ public final class PropertiesManagerForJava {
                     // Collect all adapted definition participant
                     JavaDefinitionContext context = new JavaDefinitionContext(uri, typeRoot, utils, module,
                             hyperlinkedElement, hyperlinkedPosition);
-                    List<IJavaDefinitionParticipant> definitions = IJavaDefinitionParticipant.EP_NAME.extensions()
+                    List<IJavaDefinitionParticipant> definitions = IJavaDefinitionParticipant.EP_NAME.getExtensionList()
+                            .stream()
                             .filter(definition -> definition.isAdaptedForDefinition(context))
                             .toList();
                     if (definitions.isEmpty()) {
@@ -385,5 +389,45 @@ public final class PropertiesManagerForJava {
         return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () -> {
             return codeActionHandler.resolveCodeAction(unresolved, utils);
         });
+    }
+
+    /**
+     * Returns the workspace symbols for the given java project.
+     *
+     * @param projectUri the uri of the java project
+     * @param utils      the JDT utils
+     * @param monitor    the progress monitor
+     * @return the workspace symbols for the given java project
+     */
+    public List<SymbolInformation> workspaceSymbols(String projectUri, IPsiUtils utils, ProgressIndicator monitor) {
+        List<SymbolInformation> symbols = new ArrayList<>();
+        Module module = getModule(projectUri, utils);
+        if (module != null) {
+            collectWorkspaceSymbols(module, utils, symbols, monitor);
+        }
+        return symbols;
+    }
+
+    private static @Nullable Module getModule(String uri, IPsiUtils utils) {
+        Module[] modules = ModuleManager.getInstance(utils.getProject()).getModules();
+        for (Module module : modules) {
+            if (uri.equals(module.getName())) {
+                return module;
+            }
+        }
+        return null;
+    }
+
+    private void collectWorkspaceSymbols(Module project, IPsiUtils utils, List<SymbolInformation> symbols,
+                                         ProgressIndicator monitor) {
+        if (monitor.isCanceled()) {
+            return;
+        }
+
+        List<IJavaWorkspaceSymbolsParticipant> definitions = IJavaWorkspaceSymbolsParticipant.EP_NAME.getExtensionList();
+        if (definitions.isEmpty()) {
+            return;
+        }
+        definitions.forEach(definition -> definition.collectSymbols(project, utils, symbols, monitor));
     }
 }

@@ -24,7 +24,7 @@ import org.eclipse.lsp4j.CompletionItem;
  * @author datho7561
  */
 public interface IJavaCompletionParticipant {
-	public static final ExtensionPointName<IJavaCompletionParticipant> EP_NAME =
+	 ExtensionPointName<IJavaCompletionParticipant> EP_NAME =
 			ExtensionPointName.create("open-liberty.intellij.javaCompletionParticipant");
 
 	/**

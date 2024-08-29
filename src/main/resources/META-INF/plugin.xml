@@ -55,6 +55,8 @@
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
         <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
+        <extensionPoint name="javaWorkspaceSymbolsParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
@@ -216,6 +218,7 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
+        <javaWorkspaceSymbolsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsWorkspaceSymbolParticipant" />
 
         <!-- Jakarta Code Action Participants -->
 
