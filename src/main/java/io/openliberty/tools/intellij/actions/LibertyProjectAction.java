@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,9 +22,8 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 
 public abstract class LibertyProjectAction extends LibertyGeneralAction {
     private static final Logger LOGGER = Logger.getInstance(LibertyProjectAction.class);
@@ -46,13 +45,19 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         }
         List<BuildFile> buildFileList = getBuildFileList(project);
         if (!buildFileList.isEmpty()) {
-            final String[] projectNames = buildFileToProjectNames(buildFileList);
-            final int ret = Messages.showChooseDialog(project,
+            String[] projectName = extractBuildFileAttributes(buildFileList, BuildFile::getProjectName);
+            String[] projectPath = extractBuildFileAttributes(buildFileList, buildFile -> buildFile.getBuildFile().getPath());
+
+            LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
+                    project,
                     getChooseDialogMessage(),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40,
-                    projectNames,
-                    projectNames[0]);
+                    projectName,
+                    projectPath,
+                    projectName[0]);
+            dialog.show();
+            final int ret = dialog.getSelectedIndex();
             // Execute the action if a project was selected.
             if (ret >= 0 && ret < buildFileList.size()) {
                 BuildFile selectedBuildFile = buildFileList.get(ret);
@@ -67,6 +72,12 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40);
         }
+    }
+
+    public String[] extractBuildFileAttributes(List<BuildFile> buildFileList, Function<BuildFile, String> filter) {
+        return buildFileList.stream()
+                .map(filter)
+                .toArray(String[]::new);
     }
 
     /* Returns an aggregated list containing info for all Maven and Gradle build files. */
@@ -88,7 +99,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         // Resolve project names and add to list
         mavenBuildFiles.forEach(mavenBuildFile -> {
             // resolve project name
-            VirtualFile virtualFile = mavenBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = mavenBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Maven project for build file: %s", mavenBuildFile.getBuildFile()));
             } else {
@@ -103,7 +114,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
 
         });
         gradleBuildFiles.forEach(gradleBuildFile -> {
-            VirtualFile virtualFile = gradleBuildFile.getBuildFile().getVirtualFile();
+            VirtualFile virtualFile = gradleBuildFile.getBuildFile();
             if (virtualFile == null) {
                 LOGGER.error(String.format("Could not resolve Gradle project for build file: %s", gradleBuildFile.getBuildFile()));
             } else {
@@ -120,14 +131,6 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         return buildFiles;
     }
 
-    protected final String[] buildFileToProjectNames(@NotNull List<BuildFile> list) {
-        final int size = list.size();
-        final String[] projectNames = new String[size];
-        for (int i = 0; i < size; ++i) {
-            projectNames[i] = list.get(i).getProjectName();
-        }
-        return projectNames;
-    }
 
     protected ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, ParserConfigurationException, SAXException {
         return LibertyProjectUtil.getGradleBuildFiles(project);

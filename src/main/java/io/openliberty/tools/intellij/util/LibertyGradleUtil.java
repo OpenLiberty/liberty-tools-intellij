@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,7 +13,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -91,8 +90,8 @@ public class LibertyGradleUtil {
      * validContainerVersion true if plugin version is valid for dev mode in containers
      * @throws IOException
      */
-    public static BuildFile validBuildGradle(PsiFile file) throws IOException {
-            String buildFile = fileToString(file.getVirtualFile().getPath());
+    public static BuildFile validBuildGradle(VirtualFile file) throws IOException {
+            String buildFile = fileToString(file.getPath());
             if (buildFile.isEmpty()) { return (new BuildFile(false, false)); }
 
             // instead of iterating over capture groups in a plugin{}, search directly
@@ -234,7 +233,7 @@ public class LibertyGradleUtil {
     }
 
     /**
-     * Get the custom Gradle path from Built Tools in IntelliJ
+     * Get the custom Gradle path from Build Tools in IntelliJ
      *
      * @param customGradleHome the custom Gradle Home
      * @return Graddle path to be executed or an exception to display
@@ -246,20 +245,21 @@ public class LibertyGradleUtil {
         // and consequently, it will return null. For this reason, we need to use ./bin/gradle in order to execute gradle.
         String gradle = SystemInfo.isWindows ? "gradle.bat" : "gradle";
         File gradleExecutable = new File(new File(gradleHomeFile.getAbsolutePath(), "bin"), gradle);
-        if (gradleExecutable.exists()) {
-            if (gradleExecutable.canExecute()) {
-                String additionalCMD = SystemInfo.isWindows ? "cmd /K " : ""; // without it, a new terminal window is opened
-                return additionalCMD + LibertyProjectUtil.includeEscapeToString(gradleExecutable.getAbsolutePath());
-            } else {
-                String translatedMessage = LocalizedResourceUtil.getMessage("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
-                throw new LibertyException(String.format("Could not execute Gradle from %s because the process does not "+
-                        "have permission to execute it. Consider giving executable permission for the Gradle executable or " +
-                        "configure IntelliJ to use the Gradle wrapper.", gradleExecutable.getAbsolutePath()), translatedMessage);
-            }
-        } else {
+        if (!gradleExecutable.exists()) {
             String translatedMessage = LocalizedResourceUtil.getMessage("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
             throw new LibertyException(String.format("Could not execute the Gradle executable %s. Make sure a valid path is configured " +
                     "inside IntelliJ Gradle preferences.", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
+        if (!gradleExecutable.canExecute()) {
+            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(String.format("Could not execute Gradle from %s because the process does not " +
+                    "have permission to execute it. Consider giving executable permission for the Gradle executable or " +
+                    "configure IntelliJ to use the Gradle wrapper.", gradleExecutable.getAbsolutePath()), translatedMessage);
+        }
+        String cmd = LibertyProjectUtil.includeEscapeToString(gradleExecutable.getAbsolutePath());
+        if (SystemInfo.isWindows) {
+            cmd = "cmd /K " + cmd; // without this, a new terminal window is opened
+        }
+        return cmd;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat, Inc.
+ * Copyright (c) 2023, 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,7 +11,6 @@
 package io.openliberty.tools.intellij.lsp4mp;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -39,7 +38,7 @@ public class MicroProfileDeploymentSupport implements ClasspathResourceChangedMa
     private final Project project;
 
     public static MicroProfileDeploymentSupport getInstance(Project project) {
-        return ServiceManager.getService(project, MicroProfileDeploymentSupport.class);
+        return project.getService(MicroProfileDeploymentSupport.class);
     }
 
     public MicroProfileDeploymentSupport(Project project) {
