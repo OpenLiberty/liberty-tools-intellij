@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,9 +11,9 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ViewTestReport extends LibertyGeneralAction {
+    protected static final Logger LOGGER = Logger.getInstance(ViewTestReport.class);
 
     /**
      * Returns the name of the action command being processed.
@@ -65,7 +66,7 @@ public class ViewTestReport extends LibertyGeneralAction {
         try {
             testReportDest = getTestReportDestination(buildFile);
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            LOGGER.debug(ioException);
         }
 
         if (testReportDest != null) {
@@ -74,7 +75,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                 try {
                     testReportFile = findCustomTestReport(parentFile);
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    LOGGER.debug(ioException);
                 }
             }
         }
@@ -86,13 +87,12 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID
-                    , LibertyPluginIcons.libertyIcon
-                    , LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist")
-                    , ""
-                    , LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath())
-                    , NotificationType.ERROR
-                    , NotificationListener.URL_OPENING_LISTENER);
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                    LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist"),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath()),
+                    NotificationType.ERROR);
+            notif.setIcon(LibertyPluginIcons.libertyIcon);
+
             Notifications.Bus.notify(notif, project);
             LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;
@@ -152,7 +152,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                 return customTestReports.get(0);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.debug(e);
         }
 
         return null;

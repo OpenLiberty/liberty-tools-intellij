@@ -330,7 +330,7 @@ public final class PropertiesManagerForJava {
                     // Collect all adapted hover participant
                     JavaHoverContext context = new JavaHoverContext(uri, typeRoot, utils, module, hoverElement, hoverPosition,
                             documentFormat, surroundEqualsWithSpaces);
-                    List<IJavaHoverParticipant> definitions = IJavaHoverParticipant.EP_NAME.extensions()
+                    List<IJavaHoverParticipant> definitions = IJavaHoverParticipant.EP_NAME.getExtensionList().stream()
                             .filter(definition -> definition.isAdaptedForHover(context)).collect(Collectors.toList());
                     if (definitions.isEmpty()) {
                         return;

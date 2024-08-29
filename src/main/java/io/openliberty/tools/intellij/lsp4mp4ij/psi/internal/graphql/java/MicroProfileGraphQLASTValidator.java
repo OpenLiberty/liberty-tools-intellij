@@ -14,7 +14,6 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java;
 
 
-
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
@@ -26,10 +25,11 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.TypeSystemDi
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.jetbrains.annotations.NotNull;
 
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
-import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
+
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
+import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
 
 /**
  * Diagnostics for microprofile-graphql.

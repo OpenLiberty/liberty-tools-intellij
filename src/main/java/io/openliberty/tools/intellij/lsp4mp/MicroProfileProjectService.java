@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,7 +10,6 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp;
 
-import com.intellij.ProjectTopics;
 import com.intellij.json.JsonFileType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
@@ -91,7 +90,7 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
         LibraryTablesRegistrar.getInstance().getLibraryTable(project).addListener(this, project);
         connection = ApplicationManager.getApplication().getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
         connection.subscribe(VirtualFileManager.VFS_CHANGES, this);
-        project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project)).subscribe(ProjectTopics.MODULES, this);
+        project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project)).subscribe(ModuleListener.TOPIC, this);
     }
 
     private void handleLibraryUpdate(Library library) {
