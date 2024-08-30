@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -64,6 +65,13 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @AfterAll
     public static void cleanup() {
+        closeProjectView();
+    }
+
+    /**
+     * Close project.
+     */
+    protected static void closeProjectView() {
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -986,6 +994,17 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
+    /**
+     * Deletes the directory specified by dirPath if it exists.
+     *
+     * @param dirPath The path to the directory that may be deleted.
+     */
+    public static void deleteDirectoryIfExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (dir.exists()) {
+            TestUtils.deleteDirectory(dir);
+        }
+    }
 
     /**
      * Returns the projects directory path.
