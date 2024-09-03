@@ -219,7 +219,8 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
-        <javaWorkspaceSymbolsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsWorkspaceSymbolParticipant" />
+        <!-- Evaluate and test workspace/symbols support before enabling. -->
+        <!-- <javaWorkspaceSymbolsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsWorkspaceSymbolParticipant" /> -->
 
         <!-- Jakarta Code Action Participants -->
 
