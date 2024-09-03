@@ -26,7 +26,8 @@ import java.util.List;
  */
 public interface IJavaWorkspaceSymbolsParticipant {
 
-    ExtensionPointName<IJavaWorkspaceSymbolsParticipant> EP_NAME = ExtensionPointName.create("com.redhat.devtools.intellij.quarkus.javaWorkspaceSymbolsParticipant");
+    ExtensionPointName<IJavaWorkspaceSymbolsParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaWorkspaceSymbolsParticipant");
+
 
     /**
      * Fill in <code>symbols</code> with workspace symbols of the given project.
