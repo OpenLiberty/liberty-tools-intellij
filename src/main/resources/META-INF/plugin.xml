@@ -55,8 +55,9 @@
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
         <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
-        <extensionPoint name="javaWorkspaceSymbolsParticipant"
-                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant"/>
+        <!-- Evaluate and test workspace/symbols support before enabling. -->
+        <!-- <extensionPoint name="javaWorkspaceSymbolsParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant"/> -->
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
