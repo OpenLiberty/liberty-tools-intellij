@@ -16,10 +16,13 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.lsp4ij.JSONUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava;
+import com.redhat.devtools.lsp4ij.client.CoalesceByKey;
+import com.redhat.devtools.lsp4ij.client.IndexAwareLanguageClient;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,9 +35,6 @@ import org.eclipse.lsp4mp.commons.JavaFileInfo;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaFileInfoParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
-import org.eclipse.lsp4mp.commons.utils.JSONUtility;
-import org.microshed.lsp4ij.client.CoalesceByKey;
-import org.microshed.lsp4ij.client.IndexAwareLanguageClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public final class JakartaLanguageClient extends IndexAwareLanguageClient implem
     final IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     final var coalesceBy = new CoalesceByKey("jakarta/java/resolveCodeAction");
     return runAsBackground("Computing Java resolve code actions", monitor -> {
-      final CodeActionResolveData data = JSONUtility.toModel(codeAction.getData(), CodeActionResolveData.class);
+      final CodeActionResolveData data = JSONUtils.toModel(codeAction.getData(), CodeActionResolveData.class);
       codeAction.setData(data);
       return PropertiesManagerForJakarta.getInstance().resolveCodeAction(codeAction, utils);
     }, coalesceBy);

@@ -15,7 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
-import org.microshed.lsp4ij.client.LanguageClientImpl;
+import com.redhat.devtools.lsp4ij.client.LanguageClientImpl;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lemminx.customservice.XMLLanguageClientAPI;
 import org.slf4j.Logger;

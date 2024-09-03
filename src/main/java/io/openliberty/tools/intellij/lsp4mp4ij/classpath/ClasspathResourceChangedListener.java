@@ -29,7 +29,7 @@ import com.intellij.psi.PsiTreeChangeAdapter;
 import com.intellij.psi.PsiTreeChangeEvent;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager;
 import org.jetbrains.annotations.NotNull;
-import org.microshed.lsp4ij.LSPIJUtils;
+import com.redhat.devtools.lsp4ij.LSPIJUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,7 +17,7 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Paths;
 
-@DisabledOnOs({OS.WINDOWS})
+
 public class GradleSingleModMPLSTest extends SingleModMPLSTestCommon {
 
     /**

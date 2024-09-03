@@ -24,8 +24,9 @@ import org.eclipse.lsp4j.CompletionItem;
  * @author datho7561
  */
 public interface IJavaCompletionParticipant {
-	// Not used in liberty-tools-intellij:
-	// public static final ExtensionPointName<IJavaCompletionParticipant> EP_NAME = ExtensionPointName.create("open-liberty.intellij.javaCompletionParticipant");
+        // The extension point in Liberty Tools is provided by JavaCompletionDefinition which extends this interface to support filtering for multiple language servers, specifically MicroProfile and Jakarta EE.
+	// ExtensionPointName<IJavaCompletionParticipant> EP_NAME =
+	//		ExtensionPointName.create("open-liberty.intellij.javaCompletionParticipant");
 
 	/**
 	 * Returns true if this completion feature should be active in this context, and false otherwise
