@@ -24,8 +24,9 @@ import java.util.List;
  *
  */
 public interface IJavaDiagnosticsParticipant {
-	ExtensionPointName<IJavaDiagnosticsParticipant> EP_NAME =
-			ExtensionPointName.create("open-liberty.intellij.javaDiagnosticsParticipant");
+	// The extension point in Liberty Tools is provided by JavaDiagnosticsDefinition which extends this interface to support filtering for multiple language servers, specifically MicroProfile and Jakarta EE.
+	// ExtensionPointName<IJavaDiagnosticsParticipant> EP_NAME =
+	//		ExtensionPointName.create("open-liberty.intellij.javaDiagnosticsParticipant");
 	/**
 	 * Returns true if diagnostics must be collected for the given context and false
 	 * otherwise.
