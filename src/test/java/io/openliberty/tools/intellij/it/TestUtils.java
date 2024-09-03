@@ -370,11 +370,12 @@ public class TestUtils {
     }
 
     /**
-     * Validates that the test report represented by the input path exists.
+     * Validates that one of the test reports represented by the input paths exists.
      *
-     * @param pathToTestReport The path to the report.
+     * @param pathToTestReport34 The path to the report for maven-surefire-report-plugin 3.4 or earlier
+     * @param pathToTestReport35 The path to the report for maven-surefire-report-plugin 3.5 or later
      */
-    public static void validateTestReportExists(Path pathToTestReport) {
+    public static void validateTestReportExists(Path pathToTestReport34, Path pathToTestReport35) {
         int retryCountLimit = 100;
         int retryIntervalSecs = 1;
         int retryCount = 0;
@@ -382,7 +383,7 @@ public class TestUtils {
         while (retryCount < retryCountLimit) {
             retryCount++;
 
-            boolean fileExists = fileExists(pathToTestReport.toAbsolutePath());
+            boolean fileExists = fileExists(pathToTestReport34.toAbsolutePath()) || fileExists(pathToTestReport35.toAbsolutePath());
             if (!fileExists) {
                 try {
                     Thread.sleep(retryIntervalSecs * 1000);
@@ -393,7 +394,7 @@ public class TestUtils {
                 return;
             }
         }
-        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport + " file to be created.");
+        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport34 + " or " + pathToTestReport35 + " file to be created.");
     }
 
     /**
