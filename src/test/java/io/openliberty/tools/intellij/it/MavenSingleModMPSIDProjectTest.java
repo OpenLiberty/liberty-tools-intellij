@@ -68,16 +68,17 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      * Action command to open the build file.
      */
     private final String BUILD_FILE_OPEN_CMD = "Liberty: View pom.xml";
+    /**
+     * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
+     */
+    private final Path pathToITReport34 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
+    private final Path pathToITReport35 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "reports", "failsafe.html");
 
     /**
-     * The path to the integration test reports.
+     * The paths to the unit test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToITReport = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
-
-    /**
-     * The path to the unit test reports.
-     */
-    private final Path pathToUTReport = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
+    private final Path pathToUTReport34 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
+    private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
     /**
      * Dev mode configuration start parameters.
@@ -225,11 +226,15 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      */
     @Override
     public void deleteTestReports() {
-        boolean itReportDeleted = TestUtils.deleteFile(pathToITReport);
-        Assertions.assertTrue(itReportDeleted, () -> "Test report file: " + pathToITReport + " was not be deleted.");
+        boolean itReportDeleted = TestUtils.deleteFile(pathToITReport34);
+        Assertions.assertTrue(itReportDeleted, () -> "Test report file: " + pathToITReport34 + " was not be deleted.");
+        itReportDeleted = TestUtils.deleteFile(pathToITReport35);
+        Assertions.assertTrue(itReportDeleted, () -> "Test report file: " + pathToITReport35 + " was not be deleted.");
 
-        boolean utReportDeleted = TestUtils.deleteFile(pathToUTReport);
-        Assertions.assertTrue(utReportDeleted, () -> "Test report file: " + pathToUTReport + " was not be deleted.");
+        boolean utReportDeleted = TestUtils.deleteFile(pathToUTReport34);
+        Assertions.assertTrue(utReportDeleted, () -> "Test report file: " + pathToUTReport34 + " was not be deleted.");
+        utReportDeleted = TestUtils.deleteFile(pathToUTReport35);
+        Assertions.assertTrue(utReportDeleted, () -> "Test report file: " + pathToUTReport35 + " was not be deleted.");
     }
 
     /**
@@ -237,7 +242,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(pathToITReport);
-        TestUtils.validateTestReportExists(pathToUTReport);
+        TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
+        TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
     }
 }
