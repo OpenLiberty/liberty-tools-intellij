@@ -123,11 +123,11 @@ After you finish running your application tests, you can access the produced tes
 
 To view the integration test report for Maven-built applications, select the **View integration test report** action for your application in the Liberty tool window.
 
-This action looks for the integration test report at the `target/site/failsafe-report.html` default location if Liberty dev mode used report plugin v3.4 or earlier or `target/reports/failsafe.html` otherwise.
+This action looks for the integration test report at two default locations: `target/reports/failsafe.html` and `target/site/failsafe-report.html`.
 
 To view the unit test report for Maven-built applications, select the **View unit test report** action for your application in the Liberty tool window.
 
-This action looks for the unit test report at the `target/site/surefire-report.html` default location if Liberty dev mode used report plugin v3.4 or earlier or `target/reports/surefire.html` otherwise.
+This action looks for the unit test report at two default locations: `target/reports/surefire.html` and `target/site/surefire-report.html`.
 
 ### Gradle-built applications
 

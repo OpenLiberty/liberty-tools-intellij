@@ -199,6 +199,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @Override
     public void validateTestReportsExist() {
+        //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
         TestUtils.validateTestReportExists(TEST_REPORT_PATH, TEST_REPORT_PATH);
     }
 }
