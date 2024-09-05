@@ -11,12 +11,12 @@ jobs:
 
     env:
       REPO: ${{ github.repository }}
-      BRANCH: Fix-warning-pr-slack-#937
+      BRANCH: main
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COPY }}
-      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK_COPY }}
-      NO_PR_WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.NO_PR_WORKFLOW_BUILDER_WEBHOOK_COPY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.WORKFLOW_BUILDER_WEBHOOK }}
+      NO_PR_WORKFLOW_BUILDER_WEBHOOK: ${{ secrets.NO_PR_WORKFLOW_BUILDER_WEBHOOK }}
 
     steps:
       - name: Checkout repository
