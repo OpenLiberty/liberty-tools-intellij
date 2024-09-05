@@ -11,7 +11,7 @@ jobs:
 
     env:
       REPO: ${{ github.repository }}
-      BRANCH: main
+      BRANCH: Fix-warning-pr-slack-#937
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COPY }}
