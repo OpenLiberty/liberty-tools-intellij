@@ -253,6 +253,6 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(TEST_REPORT_PATH);
+        TestUtils.validateTestReportExists(TEST_REPORT_PATH, TEST_REPORT_PATH);
     }
 }
