@@ -127,17 +127,26 @@ jobs:
     steps:
       - name: Send Slack Notification
         run: |
-          STATUS="failure"
+          STATUS="Failure"
           JOB_STATUS_MAIN="${{ needs.call-build-workflow-for-lsp4ij-main-branch.result }}"
           JOB_STATUS_PR="${{ needs.call-build-workflow-for-each-merge-commit-sha.result }}"
-
-          if [[ "$JOB_STATUS_MAIN" == "success" ]] && [[ "$JOB_STATUS_PR" = "success" ]]; then
-            STATUS="success"
+          if [[ "$JOB_STATUS_MAIN" == "success" ]] && [[ "$JOB_STATUS_PR" == "success" ]]; then
+            STATUS="Success"
           fi
-
           echo "Final status: $STATUS"
+          payload=$(jq -n \
+            --arg status "$STATUS" \
+            --arg branch "${{ github.ref }}" \
+            --arg build_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            '
+            {
+              "Status": $status,
+              "Branch": $branch,
+              "Build_url": $build_url
+            }')
+          
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$NOTIFY_BUILD_RESULT" || echo "Slack notification failed with status code: $?"
 
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"Workflow ${{ github.workflow }} triggered by branch *${{ github.ref }}*. Build results: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Status: *$STATUS*\"}" $SLACK_WEBHOOK_URL
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          NOTIFY_BUILD_RESULT: ${{ secrets.NOTIFY_BUILD_RESULT }}
     name: Run Slack Notification
