@@ -3,9 +3,9 @@ name: Cron Job
 on:
   workflow_dispatch:
   schedule:
-    # The job runs at 15:45 UTC every Monday through Friday, which is 9:15 PM IST and 11:45 AM EST.
+    # The job runs at 9:30 AM UTC every Monday through Friday, which is 3:00 PM IST and 4:30 AM EST.
     # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
-    - cron: '45 15 * * 1-5'
+    - cron: '30 9 * * 1-5'
 
 jobs:
   fetch_all_pull_request_shas:
