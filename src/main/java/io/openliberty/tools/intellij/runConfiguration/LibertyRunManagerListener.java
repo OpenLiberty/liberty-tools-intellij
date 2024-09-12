@@ -28,7 +28,8 @@ public class LibertyRunManagerListener implements RunManagerListener {
     protected static Logger LOGGER = Logger.getInstance(LibertyRunManagerListener.class);
 
     /**
-     * When a Liberty run configuration is removed, clear custom start parameters from Liberty module
+     * When a Liberty run configuration is removed, clear custom start parameters and run in container
+     * from Liberty module
      *
      * @param settings
      */
