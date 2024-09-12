@@ -43,6 +43,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
                 if (libertyModule != null && libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
                     libertyModule.setCustomStartParams(""); // clear the custom params
                 }
+                libertyModule.setRunInContainer(false);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
             }
