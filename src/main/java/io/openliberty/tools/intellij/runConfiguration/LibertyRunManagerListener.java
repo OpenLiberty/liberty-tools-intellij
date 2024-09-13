@@ -42,7 +42,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
                 VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 LibertyModule libertyModule = libertyModules.getLibertyModule(vBuildFile);
                 if (libertyModule != null) {
-                    libertyModule.setRunInContainer(false); // clear the run in container checkbox
+                    libertyModule.setRunInContainer(false); // clear the run in container setting for the Liberty module.
                     if (libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
                         libertyModule.setCustomStartParams(""); // clear the custom params
                     }
