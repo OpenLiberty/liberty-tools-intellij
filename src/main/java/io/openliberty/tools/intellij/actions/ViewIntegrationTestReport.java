@@ -53,21 +53,22 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
         // Dev mode runs the tests and it may have selected a report generator that uses one location and filename or another depending on the version number
         // Maven plugin maven-surefire-report-plugin v3.5 and above use this location and filename
+        String reportNameNo1 = "", reportNameNo2 = "";
         File failsafeReportFile = getReportFile(parentFile, "reports", "failsafe.html");
-        List<String> reportNames = new ArrayList<>();
-        reportNames.add(parentFile.toNioPath().relativize(failsafeReportFile.toPath()).toString());
+        reportNameNo1 = parentFile.toNioPath().relativize(failsafeReportFile.toPath()).toString();
         VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
         if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
             // Maven plugin maven-surefire-report-plugin v3.4 and below use this location and filename
             failsafeReportFile = getReportFile(parentFile, "site", "failsafe-report.html");
-            reportNames.add(parentFile.toNioPath().relativize(failsafeReportFile.toPath()).toString());
+            reportNameNo2 = parentFile.toNioPath().relativize(failsafeReportFile.toPath()).toString();
             failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
         }
 
         if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
+            String displayNames = reportNameNo1 + " or " + reportNameNo2;
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                     LocalizedResourceUtil.getMessage("integration.test.report.does.not.exist.notification.title"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", reportNames),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", displayNames),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
             Notifications.Bus.notify(notif, project);
