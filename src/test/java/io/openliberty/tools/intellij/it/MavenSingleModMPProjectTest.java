@@ -90,6 +90,8 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     @BeforeAll
     public static void setup() {
         StepWorker.registerProcessor(new StepLogger());
+        // Clear the cache to force the download of the Maven report plugin. It is not specified in the test case so the latest will be used (3.5.0 or later)
+        TestUtils.clearMavenPluginCache();
         prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
@@ -213,10 +215,17 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
     /**
      * Validates that test reports were generated.
+     * Since no specific report generator was chosen in the pom the
+     * latest report generator should be used (3.5 or later, see setup()).
+     *
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
-        TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
+        TestUtils.validateTestReportExists(pathToITReport34.toFile(), pathToITReport35.toFile());
+        TestUtils.validateTestReportExists(pathToUTReport34.toFile(), pathToUTReport35.toFile());
+        Assertions.assertTrue(pathToITReport35.toFile().exists(), "Integration test report missing: " + pathToITReport35);
+        Assertions.assertTrue(pathToUTReport35.toFile().exists(), "Unit test report missing: " + pathToUTReport35);
+        Assertions.assertFalse(pathToITReport34.toFile().exists(), "Integration test report should not be generated: " + pathToITReport34);
+        Assertions.assertFalse(pathToUTReport34.toFile().exists(), "Unit test report should not be generated: " + pathToUTReport34);
     }
 }
