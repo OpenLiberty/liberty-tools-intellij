@@ -87,9 +87,10 @@ public class ViewTestReport extends LibertyGeneralAction {
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
+            String displayName = parentFile.toNioPath().relativize(testReportFile.toPath()).toString();
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                     LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", testReportFile.getAbsolutePath()),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", displayName),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 

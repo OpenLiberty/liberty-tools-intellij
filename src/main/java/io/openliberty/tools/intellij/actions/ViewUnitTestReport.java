@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ViewUnitTestReport extends LibertyGeneralAction {
@@ -53,17 +54,20 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
         // Dev mode runs the tests and it may have selected a report generator that uses one location or another depending on the version number
         // Maven plugin maven-surefire-report-plugin v3.5 and above use this location
         File surefireReportFile = getReportFile(parentFile, "reports", "surefire.html");
+        List<String> reportNames = new ArrayList<>();
+        reportNames.add(parentFile.toNioPath().relativize(surefireReportFile.toPath()).toString());
         VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             // Maven plugin maven-surefire-report-plugin v3.4 and below use this location
             surefireReportFile = getReportFile(parentFile,"site", "surefire-report.html");
+            reportNames.add(parentFile.toNioPath().relativize(surefireReportFile.toPath()).toString());
             surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
         }
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                     LocalizedResourceUtil.getMessage("unit.test.report.does.not.exist"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", surefireReportFile.getAbsolutePath()),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", reportNames),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
