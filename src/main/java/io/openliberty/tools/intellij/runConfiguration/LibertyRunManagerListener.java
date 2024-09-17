@@ -28,7 +28,8 @@ public class LibertyRunManagerListener implements RunManagerListener {
     protected static Logger LOGGER = Logger.getInstance(LibertyRunManagerListener.class);
 
     /**
-     * When a Liberty run configuration is removed, clear custom start parameters from Liberty module
+     * When a Liberty run configuration is removed, clear custom start parameters and run in container
+     * from Liberty module
      *
      * @param settings
      */
@@ -41,7 +42,8 @@ public class LibertyRunManagerListener implements RunManagerListener {
                 VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 LibertyModule libertyModule = libertyModules.getLibertyModule(vBuildFile);
                 if (libertyModule != null && libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
-                    libertyModule.setCustomStartParams(""); // clear the custom params
+                        libertyModule.setRunInContainer(false); // clear the run in container setting for the Liberty module.
+                        libertyModule.setCustomStartParams(""); // clear the custom params
                 }
             } catch (Exception e) {
                 LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
