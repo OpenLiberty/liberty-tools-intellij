@@ -18,7 +18,9 @@
     <depends>com.intellij.properties</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
-    <idea-version since-build="232" until-build="241.*"/>
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <idea-version since-build="241" until-build="241.*"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
@@ -53,6 +55,9 @@
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
         <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
+        <!-- Evaluate and test workspace/symbols support before enabling. -->
+        <!-- <extensionPoint name="javaWorkspaceSymbolsParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant"/> -->
     </extensionPoints>
 
     <extensions defaultExtensionNs="open-liberty.intellij">
@@ -214,6 +219,8 @@
         <javaCodeActionParticipant kind="source"
                                    group="mp"
                                    implementationClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java.MicroProfileGenerateOpenAPIOperation"/>
+        <!-- Evaluate and test workspace/symbols support before enabling. -->
+        <!-- <javaWorkspaceSymbolsParticipant implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.jaxrs.java.JaxRsWorkspaceSymbolParticipant" /> -->
 
         <!-- Jakarta Code Action Participants -->
 
@@ -527,9 +534,6 @@
                 icon="AllIcons.FileTypes.Config"/>
 
     </actions>
-    <!-- Point to LSP4IJ xml -->
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp4ij.xml"
-                xpointer="xpointer(/idea-plugin/*)"/>
     <!-- Point to LSP xml -->
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml"
                 xpointer="xpointer(/idea-plugin/*)"/>

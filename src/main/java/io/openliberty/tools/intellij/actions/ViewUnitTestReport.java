@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -48,8 +49,16 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
 
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
-        File surefireReportFile = Paths.get(parentFile.getPath(), "target", "site", "surefire-report.html").normalize().toAbsolutePath().toFile();
+
+        // Dev mode runs the tests and it may have selected a report generator that uses one location or another depending on the version number
+        // Maven plugin maven-surefire-report-plugin v3.5 and above use this location
+        File surefireReportFile = getReportFile(parentFile, "reports", "surefire.html");
         VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
+        if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
+            // Maven plugin maven-surefire-report-plugin v3.4 and below use this location
+            surefireReportFile = getReportFile(parentFile,"site", "surefire-report.html");
+            surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
+        }
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
@@ -67,4 +76,8 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
         BrowserUtil.browse(surefireReportVirtualFile.getUrl());
     }
 
+    @NotNull
+    private File getReportFile(VirtualFile parentFile, String dir, String filename) {
+        return Paths.get(parentFile.getPath(), "target", dir, filename).normalize().toAbsolutePath().toFile();
+    }
 }

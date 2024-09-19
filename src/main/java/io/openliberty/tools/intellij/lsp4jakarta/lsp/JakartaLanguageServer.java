@@ -14,9 +14,10 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
-import org.microshed.lsp4ij.server.ProcessStreamConnectionProvider;
+import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public class JakartaLanguageServer extends ProcessStreamConnectionProvider {
     }
 
     @Override
-    public Object getInitializationOptions(URI rootUri) {
+    public Object getInitializationOptions(VirtualFile rootUri) {
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> extendedClientCapabilities = new HashMap<>();
         extendedClientCapabilities.put("shouldLanguageServerExitOnShutdown", Boolean.TRUE);

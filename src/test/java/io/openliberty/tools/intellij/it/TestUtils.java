@@ -370,11 +370,12 @@ public class TestUtils {
     }
 
     /**
-     * Validates that the test report represented by the input path exists.
+     * Validates that one of the test reports represented by the input paths exists.
      *
-     * @param pathToTestReport The path to the report.
+     * @param pathToTestReport34 The path to the report for maven-surefire-report-plugin 3.4 or earlier
+     * @param pathToTestReport35 The path to the report for maven-surefire-report-plugin 3.5 or later
      */
-    public static void validateTestReportExists(Path pathToTestReport) {
+    public static void validateTestReportExists(Path pathToTestReport34, Path pathToTestReport35) {
         int retryCountLimit = 100;
         int retryIntervalSecs = 1;
         int retryCount = 0;
@@ -382,7 +383,7 @@ public class TestUtils {
         while (retryCount < retryCountLimit) {
             retryCount++;
 
-            boolean fileExists = fileExists(pathToTestReport.toAbsolutePath());
+            boolean fileExists = fileExists(pathToTestReport34.toAbsolutePath()) || fileExists(pathToTestReport35.toAbsolutePath());
             if (!fileExists) {
                 try {
                     Thread.sleep(retryIntervalSecs * 1000);
@@ -393,7 +394,7 @@ public class TestUtils {
                 return;
             }
         }
-        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport + " file to be created.");
+        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport34 + " or " + pathToTestReport35 + " file to be created.");
     }
 
     /**
@@ -461,7 +462,7 @@ public class TestUtils {
      * @param file The directory.
      * @return Returns true if the directory identified by the input path was deleted. False, otherwise.
      */
-    private static boolean deleteDirectory(File file) {
+    public static boolean deleteDirectory(File file) {
         File[] files = file.listFiles();
         if (files != null) {
             for (File value : files) {
@@ -540,5 +541,25 @@ public class TestUtils {
         Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
     }
 
+    /**
+     * Copies all files and directories from the source directory to the destination directory.
+     *
+     * @param sourceDirectoryLocation The path to the source directory to copy from.
+     * @param destinationDirectoryLocation The path to the destination directory to copy to.
+     * @throws IOException If an I/O error occurs while copying files.
+     */
+    public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
+            throws IOException {
+        Files.walk(Paths.get(sourceDirectoryLocation))
+                .forEach(source -> {
+                    Path destination = Paths.get(destinationDirectoryLocation, source.toString()
+                            .substring(sourceDirectoryLocation.length()));
+                    try {
+                        Files.copy(source, destination);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to copy file: " + source + " to " + destination, e);
+                    }
+                });
+    }
 
 }

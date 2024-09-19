@@ -27,7 +27,6 @@ public class LibertyModule {
     private boolean validContainerVersion;
 
     private String customStartParams;
-    // FIXME not currently being used, need to enable runInContainer checkbox in LibertyRunConfiguration see https://github.com/OpenLiberty/liberty-tools-intellij/issues/160
     private boolean runInContainer;
 
     private boolean debugMode;

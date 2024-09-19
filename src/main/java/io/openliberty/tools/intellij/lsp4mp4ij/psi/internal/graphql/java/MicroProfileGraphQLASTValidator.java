@@ -14,21 +14,8 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.java;
 
 
-import java.text.MessageFormat;
-import java.util.logging.Logger;
-
 import com.intellij.openapi.module.Module;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiAnnotationMemberValue;
-import com.intellij.psi.PsiArrayInitializerMemberValue;
-import com.intellij.psi.PsiArrayType;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiEnumConstant;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiJvmModifiersOwner;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
@@ -36,19 +23,22 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.MicroProfileGraphQLConstants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.graphql.TypeSystemDirectiveLocation;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import com.intellij.psi.PsiTypes;
+import org.jetbrains.annotations.NotNull;
+
+import java.text.MessageFormat;
+import java.util.logging.Logger;
 
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
 
 /**
  * Diagnostics for microprofile-graphql.
- *
+ * <p>
  * TODO: We currently don't check directives on input/output objects and their properties, because
  * it's not trivial to determine whether a class is used as an input, or an output, or both. That
  * will possibly require building the whole GraphQL schema on-the-fly, which might be too expensive.
  *
- * @see https://download.eclipse.org/microprofile/microprofile-graphql-1.0/microprofile-graphql.html
+ * @see <a href="https://download.eclipse.org/microprofile/microprofile-graphql-1.0/microprofile-graphql.html">MicroProfile GraphQL</a>
  */
 public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
 
@@ -78,7 +68,7 @@ public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
     }
 
     @Override
-    public void visitMethod(PsiMethod node) {
+    public void visitMethod(@NotNull PsiMethod node) {
         validateDirectivesOnMethod(node);
         if(!allowsVoidReturnFromOperations) {
             validateNoVoidReturnedFromOperations(node);
@@ -87,7 +77,7 @@ public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
     }
 
     @Override
-    public void visitClass(PsiClass node) {
+    public void visitClass(@NotNull PsiClass node) {
         validateDirectivesOnClass(node);
         super.visitClass(node);
     }
@@ -194,12 +184,11 @@ public class MicroProfileGraphQLASTValidator extends JavaASTValidator {
 
     private void validateNoVoidReturnedFromOperations(PsiMethod node) {
         // ignore constructors, and non-void methods for now, it's faster than iterating through all annotations
-        if (node.getReturnTypeElement() == null ||
-                !PsiTypes.voidType().equals(node.getReturnType())) {
+        if (node.getReturnTypeElement() == null || !PsiTypeUtils.isVoidReturnType(node)) {
             return;
         }
         for (PsiAnnotation annotation : node.getAnnotations()) {
-            if (isMatchAnnotation(annotation, MicroProfileGraphQLConstants.QUERY_ANNOTATION) ) {
+            if (isMatchAnnotation(annotation, MicroProfileGraphQLConstants.QUERY_ANNOTATION)) {
                 super.addDiagnostic(NO_VOID_MESSAGE, //
                         MicroProfileGraphQLConstants.DIAGNOSTIC_SOURCE, //
                         node.getReturnTypeElement(), //

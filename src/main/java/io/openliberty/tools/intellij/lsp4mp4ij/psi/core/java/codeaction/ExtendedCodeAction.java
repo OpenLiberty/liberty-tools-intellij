@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.microshed.lsp4ij.internal.StringUtils;
+import com.redhat.devtools.lsp4ij.internal.StringUtils;
 import org.eclipse.lsp4j.CodeAction;
 
 /**

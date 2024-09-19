@@ -86,3 +86,5 @@ Add localized strings in `src/main/resources/messages/LibertyBundles_{locale}.pr
    ```java
    String message = LocalizedResourceUtil.getMessage("my.message.key.with.params", param1, param2);
       ```
+### Test Videos
+To record videos for all tests, not just the failed ones, you can create a `video.properties` file in the `src/test/resources` directory and add `video.save.mode=ALL` to that file.

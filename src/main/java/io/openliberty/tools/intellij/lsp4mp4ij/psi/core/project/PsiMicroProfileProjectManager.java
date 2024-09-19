@@ -19,6 +19,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
+import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -83,7 +84,7 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 	private PsiMicroProfileProjectManager(Project project) {
 		this.project = project;
 		microprofileProjectListener = new MicroProfileProjectListener();
-		connection = project.getMessageBus().connect(project);
+		connection = project.getMessageBus().connect(LibertyToolPluginDisposable.getInstance(project));
 		connection.subscribe(ClasspathResourceChangedManager.TOPIC, microprofileProjectListener);
 		connection.subscribe(ModuleListener.TOPIC, microprofileProjectListener);
 	}

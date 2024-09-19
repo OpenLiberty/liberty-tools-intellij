@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,16 +11,18 @@ package io.openliberty.tools.intellij.it;
 
 import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Maven project.
+ * Tests Liberty Tools actions using a single module MicroProfile Maven project with space in directory name.
  */
-public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
+public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon {
 
     /**
      * Single module Microprofile project name.
@@ -31,6 +33,11 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * The path to the folder containing the test projects.
      */
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+
+    /**
+     * The path to the folder containing the test projects, including directories with spaces.
+     */
+    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
 
     /**
      * Project port.
@@ -61,18 +68,17 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      * Action command to open the build file.
      */
     private final String BUILD_FILE_OPEN_CMD = "Liberty: View pom.xml";
-
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToITReport34 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
-    private final Path pathToITReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "failsafe.html");
+    private final Path pathToITReport34 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
+    private final Path pathToITReport35 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "reports", "failsafe.html");
 
     /**
      * The paths to the unit test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToUTReport34 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
-    private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
+    private final Path pathToUTReport34 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
+    private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
     /**
      * Dev mode configuration start parameters.
@@ -89,8 +95,28 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        StepWorker.registerProcessor(new StepLogger());
-        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+        try {
+            StepWorker.registerProcessor(new StepLogger());
+            // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
+            TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
+        } catch (IOException e) {
+            System.err.println("Setup failed: " + e.getMessage());
+            e.printStackTrace();
+            Assertions.fail("Test setup failed due to an IOException: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Cleanup includes deleting the created project path.
+     */
+    @AfterAll
+    public static void cleanup() {
+        try {
+            closeProjectView();
+        } finally {
+            deleteDirectoryIfExists(PROJECTS_PATH_NEW);
+        }
     }
 
     /**
@@ -104,13 +130,13 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     /**
-     * Returns the projects directory path.
+     * Returns the projects new directory path.
      *
-     * @return The projects directory path.
+     * @return The projects new directory path.
      */
     @Override
     public String getProjectsDirPath() {
-        return PROJECTS_PATH;
+        return PROJECTS_PATH_NEW;
     }
 
     /**

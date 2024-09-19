@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -48,9 +49,16 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
-        File failsafeReportFile = Paths.get(parentFile.getPath(), "target", "site", "failsafe-report.html").normalize().toAbsolutePath().toFile();
-        VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
 
+        // Dev mode runs the tests and it may have selected a report generator that uses one location and filename or another depending on the version number
+        // Maven plugin maven-surefire-report-plugin v3.5 and above use this location and filename
+        File failsafeReportFile = getReportFile(parentFile, "reports", "failsafe.html");
+        VirtualFile failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
+        if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
+            // Maven plugin maven-surefire-report-plugin v3.4 and below use this location and filename
+            failsafeReportFile = getReportFile(parentFile, "site", "failsafe-report.html");
+            failsafeReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(failsafeReportFile);
+        }
 
         if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
@@ -58,7 +66,6 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
                     LocalizedResourceUtil.getMessage("test.report.does.not.exist", failsafeReportFile.getAbsolutePath()),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
-
             Notifications.Bus.notify(notif, project);
             LOGGER.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
             return;
@@ -66,6 +73,11 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
         // open test report in browser
         BrowserUtil.browse(failsafeReportVirtualFile.getUrl());
+    }
+
+    @NotNull
+    private File getReportFile(VirtualFile parentFile, String dir, String filename) {
+        return Paths.get(parentFile.getPath(), "target", dir, filename).normalize().toAbsolutePath().toFile();
     }
 
 }

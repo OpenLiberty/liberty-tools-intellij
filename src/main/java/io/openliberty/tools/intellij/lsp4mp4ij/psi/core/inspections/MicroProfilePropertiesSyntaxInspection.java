@@ -13,7 +13,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections;
 
-import org.microshed.lsp4ij.inspections.AbstractDelegateInspection;
+import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspection;
 
 /**
  * Dummy inspection for property syntax errors in Microprofile properties files
