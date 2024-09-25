@@ -12,6 +12,7 @@ The build.yaml workflow is triggered by the following events:
 - Pull Request: Triggered on pull requests to specific branches.
 - Workflow Call: Allows triggering this workflow from other workflows. The cronJob workflow (cronJob.yaml file) triggers this workflow.
 - Workflow Dispatch: Allows manual triggering of the workflow with customizable inputs.
+
   <img alt="Workflow-dispatch" height="300" src="images/Workflow-dispatch.png" width="300"/>
  
 To manually trigger the workflow, refer [here](#manually-trigger-workflow)
@@ -210,7 +211,9 @@ If you want to use the version of lsp4ij specified in the build.gradle file, the
 
 
 For example, if you want to trigger the Build Workflow using the `main` branch of the Liberty Tools IntelliJ repository and version `0.5.0` of `lsp4ij`, while also using the `main` branch of LTI, you would configure it as follows:
+
 <img alt="Example" height="300" src="images/example-manually-trigger.png" width="300"/>
+
 # How to specify LTI tags or branches in CI-CD builds
 
 The **LTI Tags/Branches** must be specified in two locations within the `cronJob.yaml` file.
