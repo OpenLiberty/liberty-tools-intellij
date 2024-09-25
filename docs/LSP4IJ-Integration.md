@@ -21,13 +21,13 @@ To manually trigger the workflow, refer [here](#manually-trigger-workflow)
 
 #### Workflow Call and Workflow Dispatch Inputs
 
-- refLsp4ij (string, required): Merge commit SHA values or branch for checking out the lsp4ij repository. Default is main branch.
+- `refLsp4ij` (string, required): Merge commit SHA values or branch for checking out the lsp4ij repository. Default is main branch.
 
-- lsp4ijBranch (string, required): PR number or branch name for artifact upload. 
+- `lsp4ijBranch` (string, required): PR number or branch name for artifact upload. 
 
-- useLocalPlugin (boolean, required): Whether to use a locally built LSP4IJ plugin or LSP4IJ from the marketplace. The default is false, which means use LSP4IJ from the marketplace.
+- `useLocalPlugin` (boolean, required): Whether to use a locally built LSP4IJ plugin or LSP4IJ from the marketplace. The default is false, which means use LSP4IJ from the marketplace.
 
-- refLTITag (string, required): Reference LTI Tag/Branch. Default is main.
+- `refLTITag` (string, required): Reference LTI Tag/Branch. Default is main.
 
 ## Jobs
 
@@ -52,6 +52,7 @@ The matrix strategy supports running on multiple operating systems:
    - Runs a setup script to install necessary software for integration testing.
    
 _**Steps 4-6 will execute only if useLocalPlugin == true**_
+
 4. Checkout Lsp4ij (Conditional)
    - Checks out the lsp4ij repository . This step happens only when the cron job is running or when we want to manually run the workflow with LSP4IJ PRs.
 
@@ -76,13 +77,13 @@ _**Steps 4-6 will execute only if useLocalPlugin == true**_
 
 ### Environment Variables
 
-- USE_LOCAL_PLUGIN: Set to the value of useLocalPlugin input or defaults to false.
+- `USE_LOCAL_PLUGIN`: Set to the value of useLocalPlugin input or defaults to false.
 
-- REF_LSP4IJ: Set to the value of refLsp4ij input.
+- `REF_LSP4IJ`: Set to the value of refLsp4ij input.
 
-- LSP4IJ_BRANCH: Set to the value of lsp4ijBranch input or defaults to 'default'.
+- `LSP4IJ_BRANCH`: Set to the value of lsp4ijBranch input or defaults to 'default'.
 
-- REF_LTI_TAG: Set to the value of refLTITag input.
+- `REF_LTI_TAG`: Set to the value of refLTITag input.
 
 ### Artifacts
 
@@ -119,25 +120,25 @@ This GitHub Actions workflow is designed to automate the following tasks:
 
 ### Outputs
 
-- pr_details: JSON array of valid PR details.
+- `pr_details`: JSON array of valid PR details.
 
-- is_empty: Boolean indicating if there are no valid PRs.
+- `is_empty`: Boolean indicating if there are no valid PRs.
 
 ### Inputs
 
-- refLTITag - A matrix which can include values for LTI tags that specify the LTI versions and also the main branch, allowing the build to run against each version of LTI and the main branch of LTI.
+- `refLTITag` - A matrix which can include values for LTI tags that specify the LTI versions and also the main branch, allowing the build to run against each version of LTI and the main branch of LTI.
 
-- refLsp4ij -  SHA of the PR to be checked out for the build. Can be set to main to run against the LSP4IJ main branch.
+- `refLsp4ij` -  SHA of the PR to be checked out for the build. Can be set to main to run against the LSP4IJ main branch.
 
-- useLocalPlugin - Boolean for whether to use a locally built LSP4IJ plugin or the LSP4IJ plugin from the marketplace. Default is false, so it uses the marketplace version.
+- `useLocalPlugin` - Boolean for whether to use a locally built LSP4IJ plugin or the LSP4IJ plugin from the marketplace. Default is false, so it uses the marketplace version.
 
-- lsp4ijBranch - Branch or version of LSP4IJ which was used in the build. It is displayed in the artifact name. It can be an LSP4IJ PR number or the value of ‘main’, which means the LSP4IJ ‘main’ branch. The default value is 'default', which means the LSP4IJ used in the build was the latest version in the marketplace.
+- `lsp4ijBranch` - Branch or version of LSP4IJ which was used in the build. It is displayed in the artifact name. It can be an LSP4IJ PR number or the value of ‘main’, which means the LSP4IJ ‘main’ branch. The default value is 'default', which means the LSP4IJ used in the build was the latest version in the marketplace.
 
 Below are artifact names resulting from cron job builds. All of the builds ran with the LTI main branch. The first two artifacts come from builds using LSP4IJ PRs. The third artifact comes from a build using the LSP4IJ main branch.
 ![Artifacts](images/Artifact-names.png)
 
 ### Environment Variable:
-- SLACK_WEBHOOK_URL: URL of the Slack webhook for sending notifications.
+- `SLACK_WEBHOOK_URL`: URL of the Slack webhook for sending notifications.
 
 ### Jobs
 
