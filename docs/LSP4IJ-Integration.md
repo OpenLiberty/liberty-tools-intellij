@@ -13,8 +13,9 @@ The build.yaml workflow is triggered by the following events:
 - Workflow Call: Allows triggering this workflow from other workflows. The cronJob workflow (cronJob.yaml file) triggers this workflow.
 - Workflow Dispatch: Allows manual triggering of the workflow with customizable inputs.
 
-  <img alt="Workflow-dispatch" height="300" src="images/Workflow-dispatch.png" width="300"/>
- 
+
+  <img alt="Workflow-dispatch" height="300" src="images/Workflow-dispatch.png" width="300" style="display: block; margin: 0 auto;"/>
+
 To manually trigger the workflow, refer [here](#manually-trigger-workflow)
 
 ### Inputs
@@ -191,7 +192,7 @@ Build run against all 3 OS.
 
 Here the output of Job PR details gives the list of PRs in LSP4IJ filtering out drafts and PRs with merge conflicts.It will look like below:
 
-<img alt="Pr-details" height="300" src="images/Pr-details.png" width="400"/>
+<img alt="Pr-details" height="350" src="images/Pr-details.png" width="400" style="display: block; margin: 0 auto;"/>
 
 The job **Run Lsp4ij Main** is the build which run against the lsp4ij main branch by checking out lsp4ij main branch. The job **Run PR** run by checking out the merge commit SHAs of each PR listed in the job PR details. We can see the PR number against which it is run in the bracket, followed by the merge commit SHA. After all the above jobs are completed, **Run Slack Notification** job runs and we get the Build results as slack notification.
 
@@ -206,14 +207,14 @@ Lsp4ij Nighlty build can be downloaded from - [Marketplace](https://plugins.jetb
 
 ## Manually Trigger Workflow
 To manually trigger the build.yaml workflow , navigate to the [Actions](https://github.com/OpenLiberty/liberty-tools-intellij/actions) tab in the OpenLiberty/liberty-tools-intellij repository. On the left side of the page, select Build Workflow under All workflows. You'll see a message stating, This workflow has a workflow_dispatch event trigger. To the right, there will be a Run workflow button. You can choose the branch from which to run the workflow.
-<img alt="Manually-trigger" height="300" src="images/manually-trigger.png" width="300"/>
+<img alt="Manually-trigger" height="300" src="images/manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
 If you want to use the version of lsp4ij specified in the build.gradle file, there's no need to check the box labeled Use lsp4ij locally. However, if you want to check out a different tag, merge commit SHA, or specific branch of lsp4ij, you can check the box and specify the branch in the provided field. Additionally, you can specify the tag or branch of liberty-tools-intellij to be used.
 
 
 For example, if you want to trigger the Build Workflow using the `main` branch of the Liberty Tools IntelliJ repository and version `0.5.0` of `lsp4ij`, while also using the `main` branch of LTI, you would configure it as follows:
 
-<img alt="Example" height="300" src="images/example-manually-trigger.png" width="300"/>
+<img alt="Example" height="300" src="images/example-manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
 # How to specify LTI tags or branches in CI-CD builds
 
