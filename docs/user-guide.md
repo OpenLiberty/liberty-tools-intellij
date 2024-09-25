@@ -7,6 +7,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
     - [Software requirements](#software-requirements)
     - [Application requirements](#application-requirements)
     - [Settings](#settings)
+- [Manually install specific release of the LSP4IJ plugin from the Marketplace](#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace)
 - [Open the Liberty tool window](#open-the-liberty-tool-window)
 - [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
     - [Use the Liberty tool window](#use-the-liberty-tool-window)
