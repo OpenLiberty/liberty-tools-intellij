@@ -1,3 +1,18 @@
+# LSP4IJ Continuous Integration
+
+This guide offers a detailed explanation of the CI setup for LSP4IJ integration, including automated integration and testing with Liberty Tools for IntelliJ. It ensures continuous feedback and provides early warnings when issues arise, allowing us to address them promptly.
+
+- [Workflow of normal build.yaml execution.](#workflow-of-normal-buildyaml-execution)
+    - [Overview](#overview)
+- [Cron Job builds](#cron-job-builds)
+    - [Results from the Cron Job](#results-from-the-cron-job)
+- [Testing against a Specific Version of LSP4IJ](#testing-against-a-specific-version-of-lsp4ij)
+    - [Manually Trigger Workflow](#manually-trigger-workflow)
+- [How to specify LTI tags or branches in CI-CD builds](#how-to-specify-lti-tags-or-branches-in-ci-cd-builds)
+- [How to get Slack notifications for LSP4IJ PRs](#how-to-get-slack-notifications-for-lsp4ij-prs)
+- [Sending build results to the Slack channel](#sending-build-results-to-the-slack-channel)
+
+
 # Workflow of normal build.yaml execution.
 
 ## Overview
