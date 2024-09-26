@@ -14,7 +14,7 @@ Liberty Tools for IntelliJ IDEA is an IntelliJ IDEA plugin for developing cloud-
 
 Liberty Tools for IntelliJ includes LSP4IJ, an external plugin dependency that is automatically installed with LTI. LSP4IJ is a free and open-source Language Server Protocol (LSP) client developed by Red Hat, enabling seamless language server integration.
 
-Users who wish to change the version of LSP4IJ installed along with LTI can refer to this resource [here](docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace).
+If you wish to change the version of LSP4IJ installed along with Liberty Tools, you can refer to the documentation [here](docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace).
 
 ![Liberty Tools Extension](docs/images/liberty-tool-window-view.png)
 

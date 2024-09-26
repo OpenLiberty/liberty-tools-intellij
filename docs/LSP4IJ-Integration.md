@@ -1,6 +1,6 @@
 # LSP4IJ Continuous Integration
 
-This guide offers a detailed explanation of the CI setup for LSP4IJ integration, including automated integration and testing with Liberty Tools for IntelliJ. It ensures continuous feedback and provides early warnings when issues arise, allowing us to address them promptly.
+This guide offers a detailed explanation of the Continuous Integration (CI) setup for LSP4IJ integration, including automated integration and testing with Liberty Tools for IntelliJ (LTI). It ensures continuous feedback and provides early warnings when issues arise, allowing developers to address them promptly.
 
 - [Workflow of normal build.yaml execution.](#workflow-of-normal-buildyaml-execution)
     - [Overview](#overview)
@@ -31,7 +31,7 @@ The build.yaml workflow is triggered by the following events:
 
   <img alt="Workflow-dispatch" height="300" src="images/Workflow-dispatch.png" width="300" style="display: block; margin: 0 auto;"/>
 
-To manually trigger the workflow, refer [here](#manually-trigger-workflow)
+To manually trigger the workflow, refer to the [Manually Trigger Workflow](#manually-trigger-workflow) section.
 
 ### Inputs
 
@@ -202,10 +202,10 @@ Below are artifact names resulting from cron job builds. All of the builds ran w
 
 **Example of a Cron Job Output** - [Here](https://github.com/OpenLiberty/liberty-tools-intellij/actions/runs/11011078568The) 
 
-Build run against all 3 OS.
+Each build runs on Linux, Mac, and Windows.
 ![Result](images/result-cron-job.png)
 
-Here the output of Job PR details gives the list of PRs in LSP4IJ filtering out drafts and PRs with merge conflicts.It will look like below:
+Below, the output of job **PR details** gives the list of PRs in the LSP4IJ repo and displays warnings for PRs that are drafts or have merge conflicts.
 
 <img alt="Pr-details" height="350" src="images/Pr-details.png" width="400" style="display: block; margin: 0 auto;"/>
 
@@ -213,12 +213,12 @@ The job **Run Lsp4ij Main** is the build which run against the lsp4ij main branc
 
 # Testing against a Specific Version of LSP4IJ
 
-In order to run the LTI build against a particular version of LSP4IJ (stable or nightly) we can set the version in the build.gradle file.
+In order to run the LTI build against a particular version of LSP4IJ (stable or nightly), the version can be set in the build.gradle file.
 
 ![Version](images/version.png)
 
 To run with a nightly version (For example: 0.4.0-20240813-173701 ), change the line `def lsp4ijVersion = '0.3.0'` to `def lsp4ijVersion = '0.4.0-20240813-173701@nightly'`. Make sure to add **@nightly** to the version number while testing with nightly versions. For stable versions, just specify the version number.
-Lsp4ij Nighlty build can be downloaded from - [Marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions/nightly)
+LSP4IJ nightly builds can be downloaded from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions/nightly)
 
 ## Manually Trigger Workflow
 To manually trigger the build.yaml workflow , navigate to the [Actions](https://github.com/OpenLiberty/liberty-tools-intellij/actions) tab in the OpenLiberty/liberty-tools-intellij repository. On the left side of the page, select Build Workflow under All workflows. You'll see a message stating, This workflow has a workflow_dispatch event trigger. To the right, there will be a Run workflow button. You can choose the branch from which to run the workflow.
@@ -227,7 +227,7 @@ To manually trigger the build.yaml workflow , navigate to the [Actions](https://
 If you want to use the version of lsp4ij specified in the build.gradle file, there's no need to check the box labeled Use lsp4ij locally. However, if you want to check out a different tag, merge commit SHA, or specific branch of lsp4ij, you can check the box and specify the branch in the provided field. Additionally, you can specify the tag or branch of liberty-tools-intellij to be used.
 
 
-For example, if you want to trigger the Build Workflow using the `main` branch of the Liberty Tools IntelliJ repository and version `0.5.0` of `lsp4ij`, while also using the `main` branch of LTI, you would configure it as follows:
+For example, if you want to trigger the Build Workflow from the `main` branch of the LTI repository and build against version `0.5.0` of LSP4IJ and the `main` branch of LTI, you would configure it as follows:
 
 <img alt="Example" height="300" src="images/example-manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
