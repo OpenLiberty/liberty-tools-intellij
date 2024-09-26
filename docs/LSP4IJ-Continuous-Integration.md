@@ -4,7 +4,18 @@ This guide offers a detailed explanation of the Continuous Integration (CI) setu
 
 - [Workflow of normal build.yaml execution.](#workflow-of-normal-buildyaml-execution)
     - [Overview](#overview)
+      - [Workflow Triggers](#workflow-triggers)
+      - [Inputs](#inputs)
+    - [Jobs](#jobs)
+      - [Build Job](#build-job)
+      - [Environment Variables](#environment-variables)
+      - [Artifacts](#artifacts)
 - [Cron Job builds](#cron-job-builds)
+    - [Trigger](#trigger)
+    - [Outputs](#outputs)
+    - [Inputs](#inputs)
+    - [Environment Variable](#environment-variable)
+    - [Jobs](#jobs-1)
     - [Results from the Cron Job](#results-from-the-cron-job)
 - [Testing against a Specific Version of LSP4IJ](#testing-against-a-specific-version-of-lsp4ij)
     - [Manually Trigger Workflow](#manually-trigger-workflow)
@@ -71,22 +82,16 @@ _**Steps 4-6 will execute only if useLocalPlugin == true**_
 
 4. Checkout Lsp4ij (Conditional)
    - Checks out the lsp4ij repository . This step happens only when the cron job is running or when we want to manually run the workflow with LSP4IJ PRs.
-
 5. Build Lsp4ij (Conditional)
     - Builds the LSP4IJ plugin
-
 6. Unzip Lsp4ij File (Conditional)
    - Unzips the LSP4IJ build artifact
-
 7. Build Liberty-Tools-Intellij
    - Builds the liberty-tools-intellij project, optionally using the locally built LSP4IJ plugin. Otherwise, it uses the LSP4IJ plugin from the marketplace.
-
 8. Archive Artifacts (Linux Only)
    - Archives the build artifacts and stores them as a GitHub Actions artifact with a retention period of 7 days.
-
 9. Run UI Integration Tests
    - Executes integration tests using a specified script.
-
 10. Archive Test Logs and Reports (On Failure)
     - Archives test logs, videos and reports if the tests fail.
       By default, videos are only saved for failed tests. To save all the test videos, use the configuration specified [here](https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/DEVELOPING.md#test-videos) 
@@ -94,11 +99,8 @@ _**Steps 4-6 will execute only if useLocalPlugin == true**_
 ### Environment Variables
 
 - `USE_LOCAL_PLUGIN`: Set to the value of useLocalPlugin input or defaults to false.
-
 - `REF_LSP4IJ`: Set to the value of refLsp4ij input.
-
 - `LSP4IJ_BRANCH`: Set to the value of lsp4ijBranch input or defaults to 'default'.
-
 - `REF_LTI_TAG`: Set to the value of refLTITag input.
 
 ### Artifacts
@@ -137,17 +139,13 @@ This GitHub Actions workflow is designed to automate the following tasks:
 ### Outputs
 
 - `pr_details`: JSON array of valid PR details.
-
 - `is_empty`: Boolean indicating if there are no valid PRs.
 
 ### Inputs
 
 - `refLTITag` - A matrix which can include values for LTI tags that specify the LTI versions and also the main branch, allowing the build to run against each version of LTI and the main branch of LTI.
-
 - `refLsp4ij` -  SHA of the PR to be checked out for the build. Can be set to main to run against the LSP4IJ main branch.
-
 - `useLocalPlugin` - Boolean for whether to use a locally built LSP4IJ plugin or the LSP4IJ plugin from the marketplace. Default is false, so it uses the marketplace version.
-
 - `lsp4ijBranch` - Branch or version of LSP4IJ which was used in the build. It is displayed in the artifact name. It can be an LSP4IJ PR number or the value of ‘main’, which means the LSP4IJ ‘main’ branch. The default value is 'default', which means the LSP4IJ used in the build was the latest version in the marketplace.
 
 Below are artifact names resulting from cron job builds. All of the builds ran with the LTI main branch. The first two artifacts come from builds using LSP4IJ PRs. The third artifact comes from a build using the LSP4IJ main branch.
@@ -203,13 +201,19 @@ Below are artifact names resulting from cron job builds. All of the builds ran w
 **Example of a Cron Job Output** - [Here](https://github.com/OpenLiberty/liberty-tools-intellij/actions/runs/11011078568The) 
 
 Each build runs on Linux, Mac, and Windows.
-![Result](images/result-cron-job.png)
-
-Below, the output of job **PR details** gives the list of PRs in the LSP4IJ repo and displays warnings for PRs that are drafts or have merge conflicts.
+There are 4 jobs in the build. The first job, **PR details**, outputs a list of PRs in the LSP4IJ repository and displays warnings for any PRs that are either drafts or have merge conflicts.
 
 <img alt="Pr-details" height="350" src="images/Pr-details.png" width="400" style="display: block; margin: 0 auto;"/>
 
-The job **Run Lsp4ij Main** is the build which run against the lsp4ij main branch by checking out lsp4ij main branch. The job **Run PR** run by checking out the merge commit SHAs of each PR listed in the job PR details. We can see the PR number against which it is run in the bracket, followed by the merge commit SHA. After all the above jobs are completed, **Run Slack Notification** job runs and we get the Build results as slack notification.
+The next job **Run Lsp4ij Main** is the build which runs against the LSP4IJ main branch by checking out the LSP4IJ main branch. The job **Run PR** runs by checking out the merge commit SHAs of each PR listed in the job **PR details**. We can see the LSP4IJ PR number against which it is run in the bracket, followed by the merge commit SHA. After the above three jobs are completed, **Run Slack Notification** job runs and we get the Build results as slack notification.
+
+![Result](images/result-cron-job.png)
+
+In the Annotations section, we get the details of the failed tests and also warnings of PRs with merge conflict.
+
+![Warnings](images/Warnings-PR.png)
+
+![Build-failed](images/Build-failed.png)
 
 # Testing against a Specific Version of LSP4IJ
 
