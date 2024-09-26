@@ -861,7 +861,6 @@ org.eclipse.xtend:org.eclipse.xtend.lib.macro | https://repo1.maven.org/maven2/o
 org.eclipse.xtext:org.eclipse.xtext.xbase.lib | https://repo1.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.28.0/org.eclipse.xtext.xbase.lib-2.28.0-sources.jar
 io.openliberty.tools:liberty-langserver | https://mvnrepository.com/artifact/io.openliberty.tools/liberty-langserver/2.1.1
 io.openliberty.tools:liberty-langserver-lemminx | https://mvnrepository.com/artifact/io.openliberty.tools/liberty-langserver-lemminx/2.1.1
-org.microshed:lsp4ij | https://github.com/MicroShed/lsp4ij
 
 END OF ECLIPSE PUBLIC LICENSE, VERSION 2 NOTICES AND INFORMATION
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '24.0.9-SNAPSHOT'
+version '24.0.9'
 
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -188,6 +188,26 @@ tasks {
 
 patchPluginXml {
     changeNotes = """
+        <h2> 24.0.9 </h2>
+        <p>Version 24.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.9 requires IntelliJ IDEA version 2024.1.* ONLY and a minimum of Java 17.</p>
+        Notable changes:
+        <ul>
+        <li> Liberty Tools has now adopted the Red Hat LSP4IJ plugin as a dependency to provide the core framework for each of the LSP clients. It is available in the <a href="https://plugins.jetbrains.com/plugin/23257-lsp4ij">JetBrains Marketplace</a>.
+        <li> Updates to use newer versions of IntelliJ APIs and remove usage of deprecated APIs.
+        <li> Fix for LSP4Jakarta quick fix key names being displayed instead of the quick fix descriptions.
+        <li> Fix for Liberty Start action failing when there is a space in the project directory.
+        <li> Fix to find test reports in the new default location that the Maven Surefire Report Plugin creates reports in as of version 3.5.0. Liberty Tools will also find test reports in the old default location.
+        <li> Fix via LSP4IJ 0.5.0 to allow for case-insensitive filtering while using completion in server.env and bootstrap.properties.
+        <li> Resolved multiple language client issues that were present in previous Liberty Tools releases by adopting the Red Hat LSP4IJ plugin.
+        <li> Updated the LSP4Jakarta client to prepare it for adoption of a future LSP4Jakarta release that will provide support for just-in-time resolution of code actions.
+        <li> Updated <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> version to 0.12.0. Refer to the following release tag:
+          <ul>
+            <li>https://github.com/eclipse/lsp4mp/releases/tag/0.12.0
+          </ul>
+        </ul>
+        <p>Note: You may observe slow performance when editing your server.xml file when invoking completion or hover. It is possible you may receive a "No documentation found" message on hover. If observed, please report your experience on this GitHub issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/687.</p>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/24.0.6...24.0.9">commit log</a> for the full set of changes since the previous release.
+        <br>
         <h2> 24.0.6 </h2>
         <p>Version 24.0.6 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.6 requires IntelliJ IDEA version 2023.2.*, 2023.3.*, or 2024.1.* and a minimum of Java 17.</p>
         Notable changes:
