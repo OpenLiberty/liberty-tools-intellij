@@ -61,6 +61,10 @@ To debug the LemMinX Language Server in IntelliJ, complete the following steps.
 
 For more information, see the [LSP console user guide](https://github.com/redhat-developer/lsp4ij/blob/main/docs/UserGuide.md#lsp-console)
 
+### Continuous Integration of LSP4IJ
+
+For details on the Continuous Integration (CI) setup for LSP4IJ integration, refer to the [LSP4IJ Continuous Integration user guide.](docs/LSP4IJ-Continuous-Integration.md) 
+
 ## Localization
 
 ### LibertyBundles.properties
