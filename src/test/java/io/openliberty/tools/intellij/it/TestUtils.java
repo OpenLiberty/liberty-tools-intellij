@@ -8,7 +8,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -370,31 +372,35 @@ public class TestUtils {
     }
 
     /**
-     * Validates that one of the test reports represented by the input paths exists.
+     * Validates that one of the test reports represented by the input directories exists.
+     * Wait 100s for one of the directories to be created.
      *
-     * @param pathToTestReport34 The path to the report for maven-surefire-report-plugin 3.4 or earlier
-     * @param pathToTestReport35 The path to the report for maven-surefire-report-plugin 3.5 or later
+     * @param dirs directories where test reports may be found
+     * @return the first directory created or throw an exception if none are created
      */
-    public static void validateTestReportExists(Path pathToTestReport34, Path pathToTestReport35) {
+    public static File validateTestReportExists(File... dirs) {
+        if (dirs.length <= 0) {
+            return null;
+        }
         int retryCountLimit = 100;
         int retryIntervalSecs = 1;
         int retryCount = 0;
 
         while (retryCount < retryCountLimit) {
             retryCount++;
+            Optional<File> found = Arrays.stream(dirs).filter(File::exists).findFirst();
 
-            boolean fileExists = fileExists(pathToTestReport34.toAbsolutePath()) || fileExists(pathToTestReport35.toAbsolutePath());
-            if (!fileExists) {
+            if (!found.isPresent()) {
                 try {
                     Thread.sleep(retryIntervalSecs * 1000);
                 } catch (Exception e) {
                     e.printStackTrace(System.out);
                 }
             } else {
-                return;
+                return found.get();
             }
         }
-        throw new IllegalStateException("Timed out waiting for test report: " + pathToTestReport34 + " or " + pathToTestReport35 + " file to be created.");
+        throw new IllegalStateException("Timed out waiting for test report: " + dirs[0] + " file to be created.");
     }
 
     /**
@@ -470,6 +476,18 @@ public class TestUtils {
             }
         }
         return file.delete();
+    }
+
+    /**
+     * Delete the directory that contains the resources for Maven plugins.
+     * If you try to use Maven the resources will be downloaded.
+     *
+     * @return true if the operation is successful
+     * @throws IOException
+     */
+    public static boolean clearMavenPluginCache() {
+        Path pathToBeDeleted = Paths.get(System.getProperty("user.home"), ".m2/repository/org/apache/maven/plugins");
+        return TestUtils.deleteDirectory(pathToBeDeleted.toFile());
     }
 
     /**
