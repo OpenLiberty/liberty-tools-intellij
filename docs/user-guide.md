@@ -7,6 +7,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
     - [Software requirements](#software-requirements)
     - [Application requirements](#application-requirements)
     - [Settings](#settings)
+- [Manually install specific release of the LSP4IJ plugin from the Marketplace](#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace)
 - [Open the Liberty tool window](#open-the-liberty-tool-window)
 - [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
     - [Use the Liberty tool window](#use-the-liberty-tool-window)
@@ -49,6 +50,25 @@ Liberty Tools for IntelliJ IDEA honors the following settings:
 
 #### Environment Variables:
 - The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
+
+## Manually install specific release of the LSP4IJ plugin from the Marketplace
+
+When installing the Liberty Tools for IntelliJ plugin, the latest version of LSP4IJ from the JetBrains marketplace will be installed by default.
+
+If you prefer to use an older version of LSP4IJ (e.g., the specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the [JetBrains marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions).
+
+
+Steps to install an older version of LSP4IJ:
+1. Go to the Plugins tab in the IDE Settings and uninstall the latest version.
+
+2. Download the desired version from the provided link above; it will be saved as a zip file.
+
+3. Reopen the IDE settings and navigate to the Plugins section.
+
+4. Click the gear icon, then select "Install Plugin from Disk," and choose the downloaded zip file.
+   <img alt="Install Plugin from disk" height="300" src="images/LSP4IJ-Install Plugin from disk.png" width="350"/>
+
+5. Confirm by clicking OK, then apply the changes. If prompted, restart your IDE.
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.
