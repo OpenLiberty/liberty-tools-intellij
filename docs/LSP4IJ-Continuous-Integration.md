@@ -188,7 +188,7 @@ There are four jobs in the build. The first job, **PR details**, outputs a list 
 
 <img alt="Pr-details" height="350" src="images/Pr-details.png" width="400" style="display: block; margin: 0 auto;"/>
 
-The next job, **Run Lsp4ij Main**, is the build which runs against the LSP4IJ main branch by checking out the LSP4IJ main branch. The job **Run PR** runs by checking out the merge commit SHAs of each PR listed in the job **PR details**. The LSP4IJ PR number against which the job is run is displayed in the bracket, followed by the merge commit SHA. After the above three jobs are completed, the **Run Slack Notification** job runs and the Build results are sent as slack notification.
+The next job, **Run Lsp4ij Main**, is the build which runs against the LSP4IJ main branch by checking out the LSP4IJ main branch. The job **Run PR** runs by checking out the merge commit SHAs of each PR listed in the job **PR details**. The LSP4IJ PR number against which the job is run is displayed in the bracket, followed by the merge commit SHA. After the first three jobs are completed, the **Run Slack Notification** job sends the build results as a Slack notification.
 
 ![Result](images/result-cron-job.png)
 

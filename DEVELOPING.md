@@ -8,6 +8,8 @@
     - [Debugging LemMinX langauge server with the Liberty LemMinX extension](#debugging-lemminx-language-server-with-the-liberty-lemminx-extension)
   - [Build Eclipse LSP4Jakarta locally](#build-eclipse-lsp4jakarta-locally)
   - [Build Eclipse LSP4MP locally](#build-eclipse-lsp4mp-locally)
+  - [Monitoring language server messages](#monitoring-language-server-messages)
+  - [Continuous Integration of LSP4IJ](#continuous-integration-of-lsp4ij)
 - [Localization](#localization)
   - [LibertyBundles.properties](#libertybundlesproperties)
   - [Source code](#source-code)
