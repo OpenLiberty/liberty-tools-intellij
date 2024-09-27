@@ -49,11 +49,8 @@ To manually trigger the workflow, refer to the [Manually Trigger Workflow](#manu
 #### Workflow Call and Workflow Dispatch Inputs
 
 - `refLsp4ij` (string, required): Merge commit SHA values or branch for checking out the lsp4ij repository. Default is main branch.
-
-- `lsp4ijBranch` (string, required): PR number or branch name for artifact upload. 
-
+- `lsp4ijBranch` (string, required): PR number or branch name for artifact upload.
 - `useLocalPlugin` (boolean, required): Whether to use a locally built LSP4IJ plugin or LSP4IJ from the marketplace. The default is false, which means use LSP4IJ from the marketplace.
-
 - `refLTITag` (string, required): Reference LTI Tag/Branch. Default is main.
 
 ## Jobs
@@ -64,9 +61,7 @@ To manually trigger the workflow, refer to the [Manually Trigger Workflow](#manu
 
 The matrix strategy supports running on multiple operating systems:
 - Linux (ubuntu-latest)
-
 - macOS (macOS-latest)
-
 - Windows (windows-latest)
 
 **Steps**
@@ -159,41 +154,29 @@ Below are artifact names resulting from cron job builds. All of the builds ran w
 **fetch_all_pull_request_shas:**
 
 - Fetches PR details using the GitHub API.
-
 - Extracts PR numbers and merge commit SHAs.
-
 - Retries up to 5 times if mergeability is null, with a 5-second delay between attempts.
-
 - Collects valid PR details and stores them in a JSON array.
-
 - Checks mergeability status and collects PRs that are mergeable.
-
 - Determines if there are no valid PRs and sets the is_empty output accordingly.
 
 **call-build-workflow-for-each-merge-commit-sha:**
 
 - Triggers a build workflow (.github/workflows/build.yaml) for each merge commit SHA from a valid PR that does not have merge conflicts.
-
 - Depends on fetch_all_pull_request_shas. Runs only if is_empty is false.
-
 - Sets the value of useLocalPlugin to true so that the build workflow uses a local build of LSP4IJ and not LSP4IJ from the marketplace.
 
 **call-build-workflow-for-lsp4ij-main-branch:**
 
 - Runs the build workflow for the LSP4IJ main branch.
-
 - refLsp4ij: Set to “main” to run the build using the LSP4IJ main branch.
 
 **call-build-workflow-slack-notification:**
 
 - Runs on “ubuntu-latest”.
-
 - Determines the final status based on the results of the build jobs.
-
 - Sends a Slack notification with the workflow status and build results.
-
 - Depends on both call-build-workflow-for-each-merge-commit-sha and call-build-workflow-for-lsp4ij-main-branch.
-
 - Always runs regardless of previous job results.
 
 ## Results from the Cron Job
