@@ -55,7 +55,7 @@ Liberty Tools for IntelliJ IDEA honors the following settings:
 
 When installing the Liberty Tools for IntelliJ plugin, the latest version of LSP4IJ from the JetBrains marketplace will be installed by default.
 
-If you prefer to use an older version of LSP4IJ (e.g., the specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the JetBrains marketplace. Link to download a specific LSP4IJ version - https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions
+If you prefer to use an older version of LSP4IJ (e.g., the specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the [JetBrains marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions).
 
 
 Steps to install an older version of LSP4IJ:

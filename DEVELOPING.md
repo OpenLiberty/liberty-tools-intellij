@@ -63,7 +63,7 @@ For more information, see the [LSP console user guide](https://github.com/redhat
 
 ### Continuous Integration of LSP4IJ
 
-For details on the Continuous Integration (CI) setup for LSP4IJ integration, refer to the [LSP4IJ Continuous Integration user guide.](docs/LSP4IJ-Continuous-Integration.md) 
+For details on the Continuous Integration (CI) setup for LSP4IJ integration, refer to the [LSP4IJ Continuous Integration documentation.](docs/LSP4IJ-Continuous-Integration.md) 
 
 ## Localization
 

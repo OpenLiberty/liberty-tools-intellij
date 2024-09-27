@@ -184,15 +184,15 @@ Below are artifact names resulting from cron job builds. All of the builds ran w
 **Example of a Cron Job Output** - [Here](https://github.com/OpenLiberty/liberty-tools-intellij/actions/runs/11011078568The) 
 
 Each build runs on Linux, Mac, and Windows.
-There are 4 jobs in the build. The first job, **PR details**, outputs a list of PRs in the LSP4IJ repository and displays warnings for any PRs that are either drafts or have merge conflicts.
+There are four jobs in the build. The first job, **PR details**, outputs a list of PRs in the LSP4IJ repository and displays warnings for any PRs that are either drafts or have merge conflicts.
 
 <img alt="Pr-details" height="350" src="images/Pr-details.png" width="400" style="display: block; margin: 0 auto;"/>
 
-The next job **Run Lsp4ij Main** is the build which runs against the LSP4IJ main branch by checking out the LSP4IJ main branch. The job **Run PR** runs by checking out the merge commit SHAs of each PR listed in the job **PR details**. We can see the LSP4IJ PR number against which it is run in the bracket, followed by the merge commit SHA. After the above three jobs are completed, **Run Slack Notification** job runs and we get the Build results as slack notification.
+The next job, **Run Lsp4ij Main**, is the build which runs against the LSP4IJ main branch by checking out the LSP4IJ main branch. The job **Run PR** runs by checking out the merge commit SHAs of each PR listed in the job **PR details**. The LSP4IJ PR number against which the job is run is displayed in the bracket, followed by the merge commit SHA. After the above three jobs are completed, the **Run Slack Notification** job runs and the Build results are sent as slack notification.
 
 ![Result](images/result-cron-job.png)
 
-In the Annotations section, we get the details of the failed tests and also warnings of PRs with merge conflict.
+The Annotations section contains errors that show the details of the failed builds and also warnings that show PRs with merge conflicts.
 
 ![Warnings](images/Warnings-PR.png)
 
@@ -205,7 +205,7 @@ In order to run the LTI build against a particular version of LSP4IJ (stable or 
 ![Version](images/version.png)
 
 To run with a nightly version (For example: 0.4.0-20240813-173701 ), change the line `def lsp4ijVersion = '0.3.0'` to `def lsp4ijVersion = '0.4.0-20240813-173701@nightly'`. Make sure to add **@nightly** to the version number while testing with nightly versions. For stable versions, just specify the version number.
-LSP4IJ nightly builds can be downloaded from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions/nightly)
+LSP4IJ nightly builds can be downloaded from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions/nightly).
 
 ## Manually Trigger Workflow
 To manually trigger the build.yaml workflow , navigate to the [Actions](https://github.com/OpenLiberty/liberty-tools-intellij/actions) tab in the OpenLiberty/liberty-tools-intellij repository. On the left side of the page, select Build Workflow under All workflows. You'll see a message stating, This workflow has a workflow_dispatch event trigger. To the right, there will be a Run workflow button. You can choose the branch from which to run the workflow.
