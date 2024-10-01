@@ -12,7 +12,7 @@ targetCompatibility = 17
 
 def remoteRobotVersion = "0.11.18"
 // To switch to nightly version, append "@nightly" to the version number (i.e. 0.4.1-20240828-013108@nightly)
-def lsp4ijVersion = '0.6.0-20240927-013153@nightly'
+def lsp4ijVersion = '0.6.0-20241001-013210@nightly'
 
 repositories {
     mavenCentral()
