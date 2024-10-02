@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Quick fix for the ResourceMethodMultipleEntityParams diagnostic in
@@ -110,8 +111,10 @@ public class ResourceMethodMultipleEntityParamsQuickFix implements IJavaCodeActi
         final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
         String title = toResolve.getTitle();
         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
-        Integer currentEntityParamIndex = (Integer) data.getExtendedDataEntry(ENTITY_PARAM_INDEX_KEY);
-        List<Integer> entityParamIndexes = (List<Integer>) data.getExtendedDataEntry(ENTITY_PARAM_INDEXES_KEY);
+        Integer currentEntityParamIndex = ((Number) data.getExtendedDataEntry(ENTITY_PARAM_INDEX_KEY)).intValue();
+        List<Integer> entityParamIndexes =
+                ((List<Number>) data.getExtendedDataEntry(ENTITY_PARAM_INDEXES_KEY)).
+                        stream().map(x -> Integer.valueOf(x.intValue())).collect(Collectors.toList());
 
         assert parentMethod != null;
         final PsiParameter[] parameters = parentMethod.getParameterList().getParameters();
