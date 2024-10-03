@@ -335,7 +335,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippet, envCfgNameChooserSnippet, incorrectValue, false);
-            // Close and reopen the server.env file as a workaround for the issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/945. Remove the two lines below once the root cause of the failure is fixed.
+            //TODO: Close and reopen the server.env file as a workaround for the issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/945. Remove the two lines below once the root cause of the failure is fixed.
             UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.env", "5");
             UIBotTestUtils.openFile(remoteRobot, projectName, "server.env", projectName, "src", "main", "liberty", "config");
             //move cursor to hover point
