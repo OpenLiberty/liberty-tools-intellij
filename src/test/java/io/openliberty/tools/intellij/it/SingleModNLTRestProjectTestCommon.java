@@ -226,6 +226,8 @@ public abstract class SingleModNLTRestProjectTestCommon {
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
+        // IntelliJ does not start building and indexing until the project is open in the UI
+        UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
 
         // Wait for indexing to complete. Once indexing completes and Liberty Tools to take control

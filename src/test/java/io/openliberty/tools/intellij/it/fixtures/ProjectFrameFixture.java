@@ -76,7 +76,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public ComponentFixture getActionMenuItem(String... xpathVars) {
         String text = xpathVars[0];
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(16),
                 Duration.ofSeconds(1),
                 "Waiting for menu items containing the " + text + " text",
                 "Menu items containing the " + text + " text were not found",
