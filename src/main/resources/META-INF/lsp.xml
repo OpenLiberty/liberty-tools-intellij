@@ -24,9 +24,9 @@
                 ]]>
             </description>
         </server>
-        <languageMapping language="Properties" serverId="lsp4mp"
+        <languageMapping language="Properties" serverId="lsp4mp" languageId="microprofile-properties"
                          documentMatcher="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileMatcher"/>
-        <languageMapping language="JAVA" serverId="lsp4mp"/>
+        <languageMapping language="JAVA" serverId="lsp4mp" languageId="java"/>
 
         <!-- LemMinX LS with Liberty LemMinX ext -->
         <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
