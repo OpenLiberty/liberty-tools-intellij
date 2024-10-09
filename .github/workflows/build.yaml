@@ -29,6 +29,11 @@ on:
         required: true
         type: boolean
         default: false
+      lsp4ijPrNumber:
+        description: 'If you checked this, please make sure to enter only the LSP4IJ PR number below.'
+        required: true
+        type: boolean
+        default: false
       refLsp4ij:
         description: 'Reference/branch for Lsp4ij checkout'
         type: string
@@ -45,7 +50,40 @@ on:
     branches: [ main ]
 
 jobs:
+  fetch_merge_commit_sha_from_lsp4ij_PR:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_details: ${{ steps.extract.outputs.pr_details }}
+      checkout_name: ${{ steps.extract.outputs.checkout_name }}
+    env:
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+      REF_LSP4IJ: ${{ inputs.refLsp4ij }}
+      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch }}
+    name: Fetch Commit SHA ${{ inputs.refLsp4ij || '' }}
+    steps:
+      - name: Extract Merge Commit SHA
+        shell: bash
+        id: extract
+        run: |
+          pr_details="${{ env.REF_LSP4IJ }}"
+          checkout_name="${{ env.LSP4IJ_BRANCH }}"
+
+          if [ "${{ inputs.lsp4ijPrNumber }}" == "true" ]; then
+            url="${{ env.API_URL }}/${{ env.REF_LSP4IJ }}"
+            pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+            pr_details=$(jq -r '.merge_commit_sha' <<< "$pr_detail" | xargs)
+            echo "Merge commit SHA of PR ${{ env.REF_LSP4IJ }}: $pr_details"
+            checkout_name="${{ env.REF_LSP4IJ }}"
+          else
+            [ -z "$pr_details" ] && echo "No LSP4IJ checkout found. Using default case." || echo "Merge Commit SHA/Branch Name/Tag : $pr_details"
+          fi
+
+          # Set output for further steps
+          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+          echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
+
   build:
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -63,8 +101,8 @@ jobs:
             reportName: windows-test-report
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
-      REF_LSP4IJ: ${{ inputs.refLsp4ij }}
-      LSP4IJ_BRANCH: ${{ inputs.lsp4ijBranch || 'default' }}
+      REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
       REF_LTI_TAG: ${{ inputs.refLTITag }}
     steps:
       - name: Configure pagefile
@@ -108,7 +146,7 @@ jobs:
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
@@ -122,6 +160,6 @@ jobs:
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
+          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             liberty-tools-intellij/build/reports/
