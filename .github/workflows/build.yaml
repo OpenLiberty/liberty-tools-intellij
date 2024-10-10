@@ -77,12 +77,10 @@ jobs:
           elif [ -z "$checkout_name" ]; then
             echo "Merge Commit SHA/Branch Name/Tag : $pr_details"
             checkout_name="${{ env.REF_LSP4IJ }}"
+          elif [ -z "$pr_details" ]; then
+            echo "No LSP4IJ checkout found. Using default case."
           else
-            if [ -z "$pr_details" ]; then
-              echo "No LSP4IJ checkout found. Using default case."
-            else
-              echo "Merge Commit SHA/Branch Name/Tag : $pr_details"
-            fi
+            echo "Merge Commit SHA/Branch Name/Tag : $pr_details"
           fi
 
           # Set output for further steps
