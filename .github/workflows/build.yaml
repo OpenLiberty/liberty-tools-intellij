@@ -30,7 +30,7 @@ on:
         type: boolean
         default: false
       lsp4ijPrNumber:
-        description: 'If you checked this, please make sure to enter only the LSP4IJ PR number below.'
+        description: 'If you checked this, please make sure to enter only the LSP4IJ PR number below'
         required: true
         type: boolean
         default: false
