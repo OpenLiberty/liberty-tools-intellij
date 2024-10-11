@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -156,7 +156,11 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 		String methodReturnTypeString;
 		try {
 			methodReturnTypeString = methodReturnType.getCanonicalText();
-		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
+		} catch (ProcessCanceledException e) {
+			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
+			//TODO delete block when minimum required version is 2024.2
+			throw e;
+		} catch (IndexNotReadyException | CancellationException e) {
 			throw e;
 		} catch (Exception e) {
 			throw e;
