@@ -18,6 +18,10 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
@@ -1004,6 +1008,15 @@ public abstract class SingleModMPProjectTestCommon {
         if (dir.exists()) {
             TestUtils.deleteDirectory(dir);
         }
+    }
+
+    protected static void replaceString(String str, String replacement, File file) throws IOException {
+        Path path = file.toPath();
+        Charset charset = StandardCharsets.UTF_8;
+        String content = new String(Files.readAllBytes(path), charset);
+
+        content = content.replaceAll(str, replacement);
+        Files.write(path, content.getBytes(charset));
     }
 
     /**
