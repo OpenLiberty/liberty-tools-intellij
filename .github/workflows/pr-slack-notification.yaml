@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Fetch recent cache
         run: |
@@ -44,7 +44,7 @@ jobs:
 
       - name: Restore cache
         id: cache-restore
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: cache
           key: ${{ env.CACHE_KEY }}
@@ -233,7 +233,7 @@ jobs:
 
       - name: Save cache
         if: always()
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: cache
           key: ${{ runner.os }}-pr-cache-${{ github.run_number }}
