@@ -74,6 +74,12 @@
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
                 <version>3.10.3</version>
+                <!-- To Suppress the signature verification warnings -->
+                <configuration>
+                    <features>
+                        <verify>skip</verify>
+                    </features>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
