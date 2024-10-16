@@ -179,10 +179,10 @@ public abstract class SingleModJakartaLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        UIBotTestUtils.openLibertyToolWindow(remoteRobot);
-        UIBotTestUtils.validateImportedProjectShowsInLTW(remoteRobot, projectName);
-        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
+        // IntelliJ does not start building and indexing until the project is open in the UI
         UIBotTestUtils.waitForIndexing(remoteRobot);
+        UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
+        UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
 
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
