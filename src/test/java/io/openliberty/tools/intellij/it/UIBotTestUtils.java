@@ -476,11 +476,13 @@ public class UIBotTestUtils {
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
+                TestUtils.sleepAndIgnoreException(10);
                 error = null;
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getContentComboLabel("Project", "5");
                 break;
             } catch (WaitForConditionTimeoutException wfcte) {
+                TestUtils.sleepAndIgnoreException(5);
                 // The project view is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Project");
                 break;
