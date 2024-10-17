@@ -427,6 +427,7 @@ public class UIBotTestUtils {
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
+                TestUtils.sleepAndIgnoreException(10);
                 error = null;
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getBaseLabel("Liberty", "5");
@@ -434,6 +435,7 @@ public class UIBotTestUtils {
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The Liberty tool window is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
+                TestUtils.sleepAndIgnoreException(5);
                 break;
             } catch (Exception e) {
                 // The project frame may hang for a bit while loading/processing work. Retry.
@@ -482,9 +484,9 @@ public class UIBotTestUtils {
                 projectFrame.getContentComboLabel("Project", "5");
                 break;
             } catch (WaitForConditionTimeoutException wfcte) {
-                TestUtils.sleepAndIgnoreException(5);
                 // The project view is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Project");
+                TestUtils.sleepAndIgnoreException(5);
                 break;
             } catch (Exception e) {
                 // The project frame may hang for a bit while loading/processing work. Retry.
