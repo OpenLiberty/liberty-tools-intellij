@@ -336,6 +336,10 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippet, envCfgNameChooserSnippet, incorrectValue, false);
+            //Close and reopen the server.env file as a workaround for the issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/945. 
+            //TODO: Remove the two lines below once the root cause of issue 945 is fixed.
+            UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.env", "5");
+            UIBotTestUtils.openFile(remoteRobot, projectName, "server.env", projectName, "src", "main", "liberty", "config");
             //move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "NONE", "server.env", UIBotTestUtils.PopupType.DIAGNOSTIC);
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
