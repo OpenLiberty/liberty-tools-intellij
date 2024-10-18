@@ -18,16 +18,12 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsColle
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCollector {
-
-    private static final Logger log = LoggerFactory.getLogger(PersistenceMapKeyDiagnosticsCollector.class);
 
     public PersistenceMapKeyDiagnosticsCollector() {
         super();
