@@ -59,17 +59,10 @@ public class BeanValidationConstants {
     public static final String INSTANT = "java.time.Instant";
     public static final String CALENDAR = "java.util.Calendar";
     public static final String DATE = "java.util.Date";
-    public static final String BOOLEAN = "Boolean";
-    public static final String CHAR_SEQUENCE = "CharSequence";
-    public static final String STRING = "String";
-    public static final String DOUBLE = "Double";
-    public static final String FLOAT = "Float";
-    public static final String LONG = "Long";
-    public static final String INTEGER = "Integer";
-    public static final String SHORT = "Short";
-    public static final String BYTE = "Byte";
-    public static final String BIG_INTEGER = "BigInteger";
-    public static final String BIG_DECIMAL = "BigDecimal";
+    public static final String CHAR_SEQUENCE = "java.lang.CharSequence";
+    public static final String STRING = "java.lang.String";
+    public static final String BIG_INTEGER = "java.math.BigInteger";
+    public static final String BIG_DECIMAL = "java.math.BigDecimal";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-bean-validation";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";
