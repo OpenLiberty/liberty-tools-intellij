@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ManagedBeanConstants {
+    /* Annotation Constants */
     public static final String PRODUCES_FQ_NAME = "jakarta.enterprise.inject.Produces";
     public static final String INJECT_FQ_NAME = "jakarta.inject.Inject";
     public static final String DISPOSES_FQ_NAME = "jakarta.enterprise.inject.Disposes";
