@@ -118,11 +118,20 @@ public abstract class SingleModMPLSTestCommon {
         try {
             // validate @Liveness no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), livenessString);
+            TestUtils.sleepAndIgnoreException(1);
 
-            //there should be a diagnostic - move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            String foundHoverData = null;
+            int maxWait = 60, delay = 5; // in some cases it can take 35s for the diagnostic to appear
+            for (int i = 0; i <= maxWait; i += delay) {
+                //there should be a diagnostic - move cursor to hover point
+                UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
 
-            String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+                foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+                if (!foundHoverData.isBlank()) {
+                    break;
+                }
+                TestUtils.sleepAndIgnoreException(delay);
+            }
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
 
         } finally {
