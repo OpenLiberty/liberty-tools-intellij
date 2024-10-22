@@ -14,8 +14,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -26,13 +24,13 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCode
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ImplementInterfaceProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,17 +76,17 @@ public class FilterImplementationQuickFix implements IJavaCodeActionParticipant 
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
                 context.getCompilationUnit(), parentType, context.getASTRoot(),
                 "jakarta.servlet.Filter", 0, context.getSource().getCompilationUnit());
-        try {
-            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-            toResolve.setEdit(we);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to filter implementation", e);
+
+        Boolean success = ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                    toResolve.setEdit(we);
+                    return true;
+                },
+                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to filter implementation", e)
+        );
+        if (success == null || !success) {
+            System.out.println("An error occurred during the code action resolution.");
         }
         return toResolve;
     }

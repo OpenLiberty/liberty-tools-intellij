@@ -21,6 +21,7 @@ import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.Diagnostic;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,16 +67,15 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public void beginDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            getInstance().beginDiagnostics(context);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
+        Boolean success = ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    getInstance().beginDiagnostics(context);
+                    return true;
+                },
+                e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
+        );
+        if (success == null || !success) {
+            System.out.println("An error occurred");
         }
     }
 
@@ -98,16 +98,15 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public void endDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            getInstance().endDiagnostics(context);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
+        Boolean success = ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    getInstance().endDiagnostics(context);
+                    return true;
+                },
+                e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
+        );
+        if (success == null || !success) {
+            System.out.println("An error occurred");
         }
     }
 

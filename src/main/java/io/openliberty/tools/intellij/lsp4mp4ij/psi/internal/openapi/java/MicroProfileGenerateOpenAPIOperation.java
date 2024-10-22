@@ -14,8 +14,6 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.java;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -26,6 +24,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCode
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.openapi.MicroProfileOpenAPIConstants;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -35,7 +34,8 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.CancellationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generate OpenAPI annotations by the "Source" kind code action.
@@ -46,6 +46,8 @@ import java.util.concurrent.CancellationException;
 public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionParticipant {
 
 	private final static String MESSAGE = "Generate OpenAPI Annotations for ''{0}''";
+
+	private static final Logger LOGGER = Logger.getLogger(MicroProfileGenerateOpenAPIOperation.class.getName());
 
 	private final static String TYPE_NAME_KEY = "type";
 
@@ -123,15 +125,15 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 				typeDeclaration, MicroProfileOpenAPIConstants.OPERATION_ANNOTATION, 0,
 				context.getSource().getCompilationUnit());
 
-		try {
-			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-		} catch (ProcessCanceledException e) {
-			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-			//TODO delete block when minimum required version is 2024.2
-			throw e;
-		} catch (IndexNotReadyException | CancellationException e) {
-			throw e;
-		} catch (Exception e) {
+		Boolean success = ExceptionUtil.executeWithExceptionHandling(
+				() -> {
+					toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+					return true;
+				},
+				e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e)
+		);
+		if (success == null || !success) {
+			System.out.println("An error occurred during the code action resolution.");
 		}
 
 		return toResolve;
