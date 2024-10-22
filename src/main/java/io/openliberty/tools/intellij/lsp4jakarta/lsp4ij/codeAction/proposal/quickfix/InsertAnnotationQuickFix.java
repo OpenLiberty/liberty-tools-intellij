@@ -98,7 +98,7 @@ public abstract class InsertAnnotationQuickFix implements IJavaCodeActionPartici
                     toResolve.setEdit(we);
                     return true;
                 },
-                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e)
+                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action " + label, e)
         );
         if (success == null || !success) {
             System.out.println("An error occurred during the code action resolution.");
