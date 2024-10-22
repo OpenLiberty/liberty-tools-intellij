@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * Returns the list of recognised defining annotations applied to a
@@ -33,19 +34,28 @@ import java.util.Collections;
  */
 public class AnnotationUtil {
     public static List<String> getScopeAnnotations(PsiClass type, Set<String> scopes) {
+        return executeWithExceptionHandling(() ->
+                        // Construct a stream of only the annotations applied to the type that are also
+                        // recognised annotations found in scopes.
+                        Arrays.stream(type.getAnnotations())
+                                .map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
+                                .filter(scopes::contains)
+                                .distinct()
+                                .collect(Collectors.toList()),
+                Collections::emptyList
+        );
+    }
+
+    private static <T> T executeWithExceptionHandling(Supplier<T> action, Supplier<T> fallback) {
         try {
-            // Construct a stream of only the annotations applied to the type that are also
-            // recognised annotations found in scopes.
-            return Arrays.stream(type.getAnnotations()).map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
-                    .filter(scopes::contains).distinct().collect(Collectors.toList());
+            return action.get();
         } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
+            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multi-catch to keep backward compatibility
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
         } catch (Exception e) {
-            return Collections.<String>emptyList();
+            return fallback.get(); // Return fallback value
         }
     }
 }
