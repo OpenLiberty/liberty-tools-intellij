@@ -1,0 +1,17 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="org.jetbrains.idea.maven" revision="2024.3+629"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="/Users/dessina/.gradle/caches/transforms-4/b3380e8f4bc06a99a56a9c4bf350fcee/transformed/ideaIC-2024.3/plugins/maven" type="directory" conf="default"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="com.intellij.properties" rev="243.21565.193+431"/>
+    <dependency org="bundledPlugin" name="org.jetbrains.idea.reposearch" rev="243.21565.193+395"/>
+    <dependency org="bundledPlugin" name="org.jetbrains.idea.maven.model" rev="243.21565.193+929"/>
+    <dependency org="bundledPlugin" name="org.jetbrains.idea.maven.server.api" rev="243.21565.193+493"/>
+    <dependency org="bundledPlugin" name="org.intellij.groovy" rev="243.21565.193+620"/>
+    <dependency org="bundledPlugin" name="com.jetbrains.performancePlugin" rev="243.21565.193+390"/>
+  </dependencies>
+</ivy-module>
