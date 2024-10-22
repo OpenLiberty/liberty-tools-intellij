@@ -12,8 +12,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -24,13 +22,13 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.Remo
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.*;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,17 +110,16 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
                 final RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(name, context.getSource().getCompilationUnit(),
                         context.getASTRoot(), parentType, 0, Collections.singletonList(annotationToRemove.get()), isFormatRequired);
 
-                try {
-                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                    toResolve.setEdit(we);
-                } catch (ProcessCanceledException e) {
-                    //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-                    //TODO delete block when minimum required version is 2024.2
-                    throw e;
-                } catch (IndexNotReadyException | CancellationException e) {
-                    throw e;
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove constraint annotation", e);
+                Boolean success = ExceptionUtil.executeWithExceptionHandling(
+                        () -> {
+                            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                            toResolve.setEdit(we);
+                            return true;
+                        },
+                        e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove constraint annotation", e)
+                );
+                if (success == null || !success) {
+                    System.out.println("An error occurred during the code action resolution.");
                 }
             }
         }
@@ -139,17 +136,16 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
                 context.getASTRoot(), parentType, 0, modifierListOwner.getModifierList(), Collections.emptyList(),
                 Collections.singletonList("static"));
 
-        try {
-            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-            toResolve.setEdit(we);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove static modifier", e);
+        Boolean success = ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                    toResolve.setEdit(we);
+                    return true;
+                },
+                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove static modifier", e)
+        );
+        if (success == null || !success) {
+            System.out.println("An error occurred during the code action resolution.");
         }
     }
 
