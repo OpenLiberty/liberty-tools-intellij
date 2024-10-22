@@ -13,13 +13,13 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
+
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.InsertAnnotationAttributeProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
@@ -27,11 +27,10 @@ import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,16 +80,16 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 		String name = getLabel(attributeName);
 		ChangeCorrectionProposal proposal = new InsertAnnotationAttributeProposal(name, context.getCompilationUnit(),
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
-		try {
-			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-		} catch (ProcessCanceledException e) {
-			//Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-			//TODO delete block when minimum required version is 2024.2
-			throw e;
-		} catch (IndexNotReadyException | CancellationException e) {
-			throw e;
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e);
+
+		Boolean success = ExceptionUtil.executeWithExceptionHandling(
+				() -> {
+					toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+					return true;
+				},
+				e -> LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e)
+		);
+		if (success == null || !success) {
+			System.out.println("An error occurred during the code action resolution.");
 		}
 		return toResolve;
 	}
