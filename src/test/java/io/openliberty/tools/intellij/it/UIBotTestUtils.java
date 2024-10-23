@@ -1104,6 +1104,7 @@ public class UIBotTestUtils {
                 keyboard.enter();
 
                 keyboard.enterText(configNameSnippet);
+                TestUtils.sleepAndIgnoreException(5);
 
                 // Narrow down the config name completion suggestions in the pop-up window that is automatically
                 // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
@@ -1123,6 +1124,7 @@ public class UIBotTestUtils {
                 keyboard.hotKey(VK_END);
 
                 keyboard.enterText(configValueSnippet);
+                TestUtils.sleepAndIgnoreException(5);
 
                 if (completeWithPopup) {
                     // Select the appropriate value completion suggestion in the pop-up window that is automatically
