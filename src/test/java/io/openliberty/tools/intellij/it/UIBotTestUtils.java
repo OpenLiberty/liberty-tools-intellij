@@ -2498,4 +2498,27 @@ public class UIBotTestUtils {
             okButton.click();
         }
     }
+
+    /**
+     * Closes Terminal.
+     */
+    public static void closeTerminalTabs(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            ProjectFrameFixture.rightClickOnTerminalTab(projectFrame);
+            ProjectFrameFixture.clickMenuOption(projectFrame, "action.CloseAllNotifications.text");
+
+            while (true) {
+                ComponentFixture terminateButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@accessiblename='Terminate']"));
+                if (terminateButton.callJs("component.isEnabled();", false)) {
+                    terminateButton.click();
+                    // Optionally add a small delay here if needed
+                } else {
+                    break; // Exit loop if no enabled "Terminate" button is found
+                }
+            }
+        } catch (WaitForConditionTimeoutException e) {
+            // The Terminal tab is most likely closed.
+        }
+    }
 }

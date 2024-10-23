@@ -11,17 +11,22 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.utils.Keyboard;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 /**
@@ -34,6 +39,11 @@ public abstract class SingleModMPProjectTestCommon {
      * information to find UI components.
      */
     public static final String REMOTE_BOT_URL = "http://localhost:8082";
+
+    /**
+     * To clean the terminal.
+     */
+    private boolean shouldCleanupTerminal = true;
 
     /**
      * The remote robot object.
@@ -58,6 +68,7 @@ public abstract class SingleModMPProjectTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        cleanAndResetTerminal();
     }
 
     /**
@@ -84,6 +95,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testOpenBuildFileActionUsingPopUpMenu() {
+        shouldCleanupTerminal = false;
         String editorTabName = getBuildFileName() + " (" + getSmMPProjectName() + ")";
 
         // Close the editor tab if it was previously opened.
@@ -672,6 +684,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testMultipleConfigEditHistory() {
+        shouldCleanupTerminal = false;
         String testName = "testMultipleConfigEditHistory";
 
         // The path of the project build file expected in the configuration. This path constant for this test.
@@ -1005,6 +1018,67 @@ public abstract class SingleModMPProjectTestCommon {
         if (dir.exists()) {
             TestUtils.deleteDirectory(dir);
         }
+    }
+
+    /**
+     * Clean project.
+     */
+    public void stopTerminal() {
+        if (!shouldCleanupTerminal) {
+            return;
+        }
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+
+        terminal.rightClick();
+        ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
+        openFixtureNewTab.click(new Point());
+
+        // Perform clean
+        String projectName = getSmMPProjectName();
+        if ("singleModMavenMP".equalsIgnoreCase(projectName)) {
+            keyboard.enterText("mvn liberty:stop");
+
+        } else if ("singleModGradleMP".equalsIgnoreCase(projectName) || "singleMod GradleMP".equalsIgnoreCase(projectName)) {
+            keyboard.enterText("gradle libertyStop");
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(5);
+    }
+
+    /**
+     * Stop the Server.
+     */
+    public void cleanTerminal() {
+        if (!shouldCleanupTerminal) {
+            return;
+        }
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        // Perform clean
+        String projectName = getSmMPProjectName();
+        if ("singleModMavenMP".equalsIgnoreCase(projectName)) {
+            keyboard.enterText("mvn clean");
+            keyboard.enter();
+        } else if ("singleModGradleMP".equalsIgnoreCase(projectName) || "singleMod GradleMP".equalsIgnoreCase(projectName)) {
+            keyboard.enterText("gradle clean");
+            keyboard.enter();
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(5);
+    }
+
+    /**
+     * Cleans up and resets the terminal.
+     */
+    public void cleanAndResetTerminal() {
+        stopTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+        UIBotTestUtils.openTerminalWindow(remoteRobot);
+        cleanTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
     }
 
     /**
