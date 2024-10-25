@@ -480,7 +480,7 @@ public class UIBotTestUtils {
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
-                TestUtils.sleepAndIgnoreException(10);
+                TestUtils.sleepAndIgnoreException(10); // wait for UI to be rendered before searching for a button
                 error = null;
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getContentComboLabel("Project", "5");
@@ -488,6 +488,8 @@ public class UIBotTestUtils {
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The project view is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Project");
+                // After clicking it can take seconds for the window to open on a slow cloud machine.
+                // Important since this is in a loop and you may click twice if there is no sleep.
                 TestUtils.sleepAndIgnoreException(5);
                 break;
             } catch (Exception e) {
