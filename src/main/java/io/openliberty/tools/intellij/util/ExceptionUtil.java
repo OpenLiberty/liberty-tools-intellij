@@ -15,6 +15,12 @@ import com.intellij.openapi.project.IndexNotReadyException;
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ExceptionUtil {
 
@@ -31,5 +37,19 @@ public class ExceptionUtil {
             logger.accept(e);
             return null; // Return null to indicate failure
         }
+    }
+
+    public static void executeWithWorkspaceEditHandling(JavaCodeActionResolveContext context, ChangeCorrectionProposal proposal, CodeAction toResolve, Logger logger, String logMessage) {
+        ExceptionUtil.executeWithExceptionHandling(
+            () -> {
+                int a =10;
+                int b = 0;
+                int c = a / b;
+                WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
+                toResolve.setEdit(we);
+                return true;
+            },
+            e -> logger.log(Level.WARNING, logMessage, e)
+        );
     }
 }

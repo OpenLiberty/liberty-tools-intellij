@@ -34,7 +34,6 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -83,16 +82,7 @@ public class ImplementHealthCheckQuickFix implements IJavaCodeActionParticipant 
 					context.getASTRoot(), MicroProfileHealthConstants.HEALTH_CHECK_INTERFACE, 0,
 					context.getSource().getCompilationUnit());
 
-			Boolean success = ExceptionUtil.executeWithExceptionHandling(
-					() -> {
-						toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-						return true;
-					},
-					e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit to make the class implement @HealthCheck", e)
-			);
-			if (success == null || !success) {
-				System.out.println("An error occurred during the code action resolution.");
-			}
+			ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit to make the class implement @HealthCheck");
 		}
 		return context.getUnresolved();
 	}

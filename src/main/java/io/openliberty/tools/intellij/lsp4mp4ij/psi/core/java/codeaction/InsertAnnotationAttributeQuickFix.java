@@ -31,7 +31,6 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -81,16 +80,7 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 		ChangeCorrectionProposal proposal = new InsertAnnotationAttributeProposal(name, context.getCompilationUnit(),
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
 
-		Boolean success = ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-					return true;
-				},
-				e -> LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e)
-		);
-		if (success == null || !success) {
-			System.out.println("An error occurred during the code action resolution.");
-		}
+		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to resolve code action edit for inserting an attribute value");
 		return toResolve;
 	}
 

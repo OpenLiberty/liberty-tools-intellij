@@ -28,11 +28,9 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -94,17 +92,7 @@ public class HttpServletQuickFix implements IJavaCodeActionParticipant {
                 context.getSource().getCompilationUnit(), parentType,
                 "jakarta.servlet.http.HttpServlet", 0);
 
-        Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                () -> {
-                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                    toResolve.setEdit(we);
-                    return true;
-                },
-                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class.", e)
-        );
-        if (success == null || !success) {
-            System.out.println("An error occurred during the code action resolution.");
-        }
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action to extend the HttpServlet class.");
         return toResolve;
     }
 

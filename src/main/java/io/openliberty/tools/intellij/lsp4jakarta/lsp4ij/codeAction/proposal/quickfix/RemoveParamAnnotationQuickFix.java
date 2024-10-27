@@ -23,7 +23,6 @@
  import io.openliberty.tools.intellij.util.ExceptionUtil;
  import org.eclipse.lsp4j.CodeAction;
  import org.eclipse.lsp4j.Diagnostic;
- import org.eclipse.lsp4j.WorkspaceEdit;
  import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
  import java.util.*;
@@ -120,17 +119,7 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
          RemoveAnnotationsProposal proposal = new RemoveAnnotationsProposal(label, context.getSource().getCompilationUnit(),
                  context.getASTRoot(), parentType, 0, psiAnnotationsToRemove);
 
-         Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                 () -> {
-                     WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                     toResolve.setEdit(we);
-                     return true;
-                 },
-                 e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to extend the HttpServlet class", e)
-         );
-         if (success == null || !success) {
-             System.out.println("An error occurred during the code action resolution.");
-         }
+         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action to extend the HttpServlet class");
          return toResolve;
      }
 

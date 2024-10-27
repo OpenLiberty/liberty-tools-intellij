@@ -35,7 +35,6 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -100,16 +99,7 @@ public class ApplicationScopedAnnotationMissingQuickFix implements IJavaCodeActi
 				context.getASTRoot(), parentType, 0, addAnnotation, context.getSource().getCompilationUnit(),
 				REMOVE_ANNOTATION_NAMES);
 
-		Boolean success = ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-					return true;
-				},
-				e -> LOGGER.log(Level.WARNING, "Failed to create workspace edit to replace bean scope annotation", e)
-		);
-		if (success == null || !success) {
-			System.out.println("An error occurred during the code action resolution.");
-		}
+		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Failed to create workspace edit to replace bean scope annotation");
 
 		return toResolve;
 	}

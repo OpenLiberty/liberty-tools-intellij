@@ -26,10 +26,8 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -89,17 +87,7 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
                 context.getASTRoot(), parentType, 0, context.getSource().getCompilationUnit(),
                 annotations);
 
-        Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                () -> {
-                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                    toResolve.setEdit(we);
-                    return true;
-                },
-                e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e)
-        );
-        if (success == null || !success) {
-            System.out.println("An error occurred during the code action resolution.");
-        }
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         return toResolve;
     }
 

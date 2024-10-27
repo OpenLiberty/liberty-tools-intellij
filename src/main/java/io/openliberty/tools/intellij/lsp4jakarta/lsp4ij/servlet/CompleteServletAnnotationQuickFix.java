@@ -28,14 +28,12 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -100,17 +98,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, attributesToAdd);
 
-            Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                    () -> {
-                        WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                        toResolve.setEdit(we);
-                        return true;
-                    },
-                    e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e)
-            );
-            if (success == null || !success) {
-                System.out.println("An error occurred during the code action resolution.");
-            }
+            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         }
         if (diagnosticCode.equals(ServletConstants.DIAGNOSTIC_CODE_DUPLICATE_ATTRIBUTES)) {
             node = context.getCoveringNode();
@@ -123,17 +111,7 @@ public class CompleteServletAnnotationQuickFix extends InsertAnnotationMissingQu
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
 
-            Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                    () -> {
-                        WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                        toResolve.setEdit(we);
-                        return true;
-                    },
-                    e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e)
-            );
-            if (success == null || !success) {
-                System.out.println("An error occurred during the code action resolution.");
-            }
+            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         }
 
         return toResolve;

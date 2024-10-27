@@ -74,9 +74,6 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 },
                 e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
         );
-        if (success == null || !success) {
-            System.out.println("An error occurred");
-        }
     }
 
     @Override
@@ -105,9 +102,6 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 },
                 e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
         );
-        if (success == null || !success) {
-            System.out.println("An error occurred");
-        }
     }
 
     public @Nullable String getGroup() {

@@ -28,12 +28,10 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -101,16 +99,7 @@ public class NoResourcePublicConstructorQuickFix implements IJavaCodeActionParti
     }
 
     public void convertWorkspaceEdit(ChangeCorrectionProposal proposal, String warningMessage, JavaCodeActionResolveContext context) {
-        Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                () -> {
-                    WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                    context.getUnresolved().setEdit(we);
-                    return true;
-                },
-                e -> LOGGER.log(Level.WARNING, warningMessage, e)
-        );
-        if (success == null || !success) {
-            System.out.println("An error occurred during the code action resolution.");
-        }
+        final CodeAction toResolve = context.getUnresolved();
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, warningMessage);
     }
 }
