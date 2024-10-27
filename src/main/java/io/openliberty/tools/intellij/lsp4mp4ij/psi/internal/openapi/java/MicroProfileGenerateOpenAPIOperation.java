@@ -34,7 +34,6 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -125,17 +124,7 @@ public class MicroProfileGenerateOpenAPIOperation implements IJavaCodeActionPart
 				typeDeclaration, MicroProfileOpenAPIConstants.OPERATION_ANNOTATION, 0,
 				context.getSource().getCompilationUnit());
 
-		Boolean success = ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-					return true;
-				},
-				e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action", e)
-		);
-		if (success == null || !success) {
-			System.out.println("An error occurred during the code action resolution.");
-		}
-
+		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action");
 		return toResolve;
 	}
 

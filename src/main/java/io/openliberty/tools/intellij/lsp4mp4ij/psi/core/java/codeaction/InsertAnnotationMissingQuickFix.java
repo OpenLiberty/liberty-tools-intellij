@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.intellij.psi.PsiClass;
@@ -33,7 +32,6 @@ import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import org.eclipse.lsp4mp.commons.codeaction.ICodeActionId;
 
@@ -101,17 +99,7 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
 				context.getASTRoot(), parentType, 0, context.getSource().getCompilationUnit(),
 				resolveAnnotationsArray);
 
-		Boolean success = ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-					toResolve.setEdit(we);
-					return true;
-				},
-				e -> LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to insert missing annotation", e)
-		);
-		if (success == null || !success) {
-			System.out.println("An error occurred during the code action resolution.");
-		}
+		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action to insert missing annotation");
 
 		return toResolve;
 	}
