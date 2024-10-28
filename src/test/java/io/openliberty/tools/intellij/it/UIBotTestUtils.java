@@ -1625,7 +1625,7 @@ public class UIBotTestUtils {
                 JTextFieldFixture searchField = projectFrame.textField(JTextFieldFixture.Companion.byType(), Duration.ofSeconds(10));
                 searchField.click();
                 searchField.setText(action);
-                TestUtils.sleepAndIgnoreException(1); // allow search time to resolve
+                TestUtils.sleepAndIgnoreException(10); // allow search time to resolve, 10s for slow machines
 
                 // Wait for the desired action to show in the search output frame and click on it.
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(20),
