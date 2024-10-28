@@ -2512,7 +2512,7 @@ public class UIBotTestUtils {
                 ComponentFixture terminateButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@accessiblename='Terminate']"));
                 if (terminateButton.callJs("component.isEnabled();", false)) {
                     terminateButton.click();
-                    // Optionally add a small delay here if needed
+                    TestUtils.sleepAndIgnoreException(10);
                 } else {
                     break; // Exit loop if no enabled "Terminate" button is found
                 }

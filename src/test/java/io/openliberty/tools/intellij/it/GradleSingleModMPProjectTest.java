@@ -61,6 +61,11 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final String BUILD_FILE_NAME = "build.gradle";
 
     /**
+     * Build Category.
+     */
+    private final BuildType BUILD_CATEGORY = BuildType.GRADLE_TYPE;
+
+    /**
      * Action command to open the build file.
      */
     private final String BUILD_FILE_OPEN_CMD = "Liberty: View Gradle config";
@@ -201,5 +206,13 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
         TestUtils.validateTestReportExists(TEST_REPORT_PATH, TEST_REPORT_PATH);
+    }
+
+    /**
+     * Returns the build type category (either MAVEN_TYPE or GRADLE_TYPE)
+     */
+    @Override
+    public BuildType getBuildCategory() {
+        return BUILD_CATEGORY;
     }
 }

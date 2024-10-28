@@ -58,6 +58,11 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final String BUILD_FILE_NAME = "pom.xml";
 
     /**
+     * Build Category.
+     */
+    private final BuildType BUILD_CATEGORY = BuildType.MAVEN_TYPE;
+
+    /**
      * Action command to open the build file.
      */
     private final String BUILD_FILE_OPEN_CMD = "Liberty: View pom.xml";
@@ -218,5 +223,13 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
+    }
+
+    /**
+     * Returns the build type category (either MAVEN_TYPE or GRADLE_TYPE)
+     */
+    @Override
+    public BuildType getBuildCategory() {
+        return BUILD_CATEGORY;
     }
 }

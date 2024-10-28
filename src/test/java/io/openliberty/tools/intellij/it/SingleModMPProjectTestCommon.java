@@ -46,6 +46,13 @@ public abstract class SingleModMPProjectTestCommon {
     private boolean shouldCleanupTerminal = true;
 
     /**
+     * Supported build types.
+     */
+    public enum BuildType {
+        MAVEN_TYPE, GRADLE_TYPE
+    }
+
+    /**
      * The remote robot object.
      */
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
@@ -67,7 +74,9 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @AfterEach
     public void afterEach(TestInfo info) {
-        cleanAndResetTerminal();
+        if (shouldCleanupTerminal) {
+            cleanAndResetTerminal();
+        }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
     }
 
@@ -1024,9 +1033,6 @@ public abstract class SingleModMPProjectTestCommon {
      * Clean project.
      */
     public void stopTerminal() {
-        if (!shouldCleanupTerminal) {
-            return;
-        }
 
         Keyboard keyboard = new Keyboard(remoteRobot);
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -1036,38 +1042,33 @@ public abstract class SingleModMPProjectTestCommon {
         ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
         openFixtureNewTab.click(new Point());
 
-        // Perform clean
-        String projectName = getSmMPProjectName();
-        if ("singleModMavenMP".equalsIgnoreCase(projectName)) {
-            keyboard.enterText("mvn liberty:stop");
+        // Perform Stop Action
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw liberty:stop");
 
-        } else if ("singleModGradleMP".equalsIgnoreCase(projectName) || "singleMod GradleMP".equalsIgnoreCase(projectName)) {
-            keyboard.enterText("gradle libertyStop");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew libertyStop");
         }
         keyboard.enter();
-        TestUtils.sleepAndIgnoreException(5);
+        TestUtils.sleepAndIgnoreException(10);
     }
 
     /**
      * Stop the Server.
      */
     public void cleanTerminal() {
-        if (!shouldCleanupTerminal) {
-            return;
-        }
 
         Keyboard keyboard = new Keyboard(remoteRobot);
         // Perform clean
-        String projectName = getSmMPProjectName();
-        if ("singleModMavenMP".equalsIgnoreCase(projectName)) {
-            keyboard.enterText("mvn clean");
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw clean");
             keyboard.enter();
-        } else if ("singleModGradleMP".equalsIgnoreCase(projectName) || "singleMod GradleMP".equalsIgnoreCase(projectName)) {
-            keyboard.enterText("gradle clean");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew clean");
             keyboard.enter();
         }
         keyboard.enter();
-        TestUtils.sleepAndIgnoreException(5);
+        TestUtils.sleepAndIgnoreException(10);
     }
 
     /**
@@ -1162,4 +1163,9 @@ public abstract class SingleModMPProjectTestCommon {
      * Validates that test reports were generated.
      */
     public abstract void validateTestReportsExist();
+
+    /**
+     * Returns Build Category
+     */
+    public abstract BuildType getBuildCategory();
 }
