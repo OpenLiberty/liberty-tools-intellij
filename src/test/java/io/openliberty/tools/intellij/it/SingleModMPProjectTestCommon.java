@@ -19,7 +19,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import java.awt.*;
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
