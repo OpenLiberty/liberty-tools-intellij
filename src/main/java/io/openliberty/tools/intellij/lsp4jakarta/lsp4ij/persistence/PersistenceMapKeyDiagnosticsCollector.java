@@ -82,7 +82,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
                     DiagnosticSeverity.Error));
         }
-        // If we have multiple MapKeyJoinColumn annotations on a single method or property we must
+        // If we have multiple MapKeyJoinColumn annotations on a single field or property we must
         // ensure each has a name and referencedColumnName
         if (mapKeyJoinCols.size() > 1) {
             validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, fieldOrProperty, unit, diagnostics);
