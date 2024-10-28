@@ -75,8 +75,8 @@ dependencies {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.2-SNAPSHOT'
-    implementation ('io.openliberty.tools:liberty-langserver:2.2-SNAPSHOT') {
+    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.2'
+    implementation ('io.openliberty.tools:liberty-langserver:2.2') {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
@@ -117,10 +117,10 @@ dependencies {
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1:uber') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.2-SNAPSHOT:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.2:jar-with-dependencies') {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:2.2-SNAPSHOT:jar-with-dependencies') {
+    lsp('io.openliberty.tools:liberty-langserver:2.2:jar-with-dependencies') {
         transitive = false
     }
     lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0:jar-with-dependencies') {
