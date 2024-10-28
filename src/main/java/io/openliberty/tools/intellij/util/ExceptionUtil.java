@@ -40,11 +40,8 @@ public class ExceptionUtil {
     }
 
     public static void executeWithWorkspaceEditHandling(JavaCodeActionResolveContext context, ChangeCorrectionProposal proposal, CodeAction toResolve, Logger logger, String logMessage) {
-        ExceptionUtil.executeWithExceptionHandling(
+        executeWithExceptionHandling(
             () -> {
-                int a =10;
-                int b = 0;
-                int c = a / b;
                 WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
                 toResolve.setEdit(we);
                 return true;
