@@ -192,18 +192,15 @@ test {
     }
 }
 
-tasks {
-    // Disabling buildSearchableOptions, which runs as part of the buildPlugin task.
-    // this is to buildSearchableOptions to workaround the "Only one instance of IDEA can be run at a time" problem.
-    // Per documentation: https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#the-development-instance-sandbox-directory
-    buildSearchableOptions {
-        enabled = false
-    }
-}
-
-patchPluginXml {
-    changeNotes = """
-        <h2> 24.0.9 </h2>
+intellijPlatform {
+    buildSearchableOptions = false
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            untilBuild = providers.gradleProperty("pluginUntilBuild")
+        }
+        changeNotes = """
+         <h2> 24.0.9 </h2>
         <p>Version 24.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.9 requires IntelliJ IDEA version 2024.1.* ONLY and a minimum of Java 17.</p>
         Notable changes:
         <ul>
@@ -341,5 +338,6 @@ patchPluginXml {
         <li> First preview release
         </ul>
         """
-    version project.version
+        version project.version
+    }
 }
