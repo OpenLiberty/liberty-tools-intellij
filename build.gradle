@@ -8,7 +8,6 @@ group 'io.openliberty.tools'
 version '24.0.9'
 
 allprojects {
-    apply plugin: 'java'
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
     tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
