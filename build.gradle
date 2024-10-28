@@ -159,7 +159,12 @@ task copyDeps(type: Copy) {
 }
 
 runIde {
-    jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
+    jvmArgumentProviders.add({
+        [
+                "--add-exports",
+                "java.base/jdk.internal.vm=ALL-UNNAMED",
+        ]
+    } as CommandLineArgumentProvider)
 }
 
 downloadRobotServerPlugin {
