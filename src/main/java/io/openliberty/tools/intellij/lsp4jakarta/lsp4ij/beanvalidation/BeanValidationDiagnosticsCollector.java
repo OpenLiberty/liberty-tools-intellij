@@ -103,9 +103,9 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     }
                 } else if (matchedAnnotation.equals(DECIMAL_MAX) || matchedAnnotation.equals(DECIMAL_MIN)
                         || matchedAnnotation.equals(DIGITS)) {
-                    if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
-                            && !type.getCanonicalText().endsWith(BIG_INTEGER)
-                            && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)
+                    if (!type.getCanonicalText().equals(BIG_DECIMAL)
+                            && !type.getCanonicalText().equals(BIG_INTEGER)
+                            && !type.getCanonicalText().equals(CHAR_SEQUENCE)
                             && !type.equals(PsiTypes.byteType())
                             && !type.equals(PsiTypes.shortType())
                             && !type.equals(PsiTypes.intType())
@@ -136,8 +136,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 } else if (matchedAnnotation.equals(MIN) || matchedAnnotation.equals(MAX)) {
-                    if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
-                            && !type.getCanonicalText().endsWith(BIG_INTEGER)
+                    if (!type.getCanonicalText().equals(BIG_DECIMAL)
+                            && !type.getCanonicalText().equals(BIG_INTEGER)
                             && !type.equals(PsiTypes.byteType())
                             && !type.equals(PsiTypes.shortType())
                             && !type.equals(PsiTypes.intType())
@@ -150,8 +150,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     }
                 } else if (matchedAnnotation.equals(NEGATIVE) || matchedAnnotation.equals(NEGATIVE_OR_ZERO)
                         || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSITIVE_OR_ZERO)) {
-                    if (!type.getCanonicalText().endsWith(BIG_DECIMAL)
-                            && !type.getCanonicalText().endsWith(BIG_INTEGER)
+                    if (!type.getCanonicalText().equals(BIG_DECIMAL)
+                            && !type.getCanonicalText().equals(BIG_INTEGER)
                             && !type.equals(PsiTypes.byteType())
                             && !type.equals(PsiTypes.shortType())
                             && !type.equals(PsiTypes.intType())
@@ -199,8 +199,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     }
 
     private void checkStringOnly(PsiElement element, List<Diagnostic> diagnostics, String annotationName, boolean isMethod, PsiType type) {
-        if (!type.getCanonicalText().endsWith(STRING)
-                && !type.getCanonicalText().endsWith(CHAR_SEQUENCE)) {
+        if (!type.getCanonicalText().equals(STRING)
+                && !type.getCanonicalText().equals(CHAR_SEQUENCE)) {
             String source = isMethod ?
                     Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
                     Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
