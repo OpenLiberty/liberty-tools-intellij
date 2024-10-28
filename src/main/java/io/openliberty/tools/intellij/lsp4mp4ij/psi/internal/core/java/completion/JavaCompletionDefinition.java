@@ -54,7 +54,6 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
             return getInstance().isAdaptedForCompletion(context);
         } catch (ProcessCanceledException e) {
             //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
@@ -71,7 +70,6 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
             return getInstance().collectCompletionItems(context);
         } catch (ProcessCanceledException e) {
             //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;

@@ -55,7 +55,6 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
             return getInstance().isAdaptedForDiagnostics(context);
         } catch (ProcessCanceledException e) {
             //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
@@ -67,12 +66,12 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public void beginDiagnostics(JavaDiagnosticsContext context) {
-        Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                () -> {
-                    getInstance().beginDiagnostics(context);
-                    return true;
-                },
-                e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
+        ExceptionUtil.executeWithExceptionHandling(
+            () -> {
+                getInstance().beginDiagnostics(context);
+                return true;
+            },
+            e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
         );
     }
 
@@ -83,7 +82,6 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
             return diagnostics != null ? diagnostics : Collections.emptyList();
         } catch (ProcessCanceledException e) {
             //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            //TODO delete block when minimum required version is 2024.2
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
@@ -95,12 +93,12 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public void endDiagnostics(JavaDiagnosticsContext context) {
-        Boolean success = ExceptionUtil.executeWithExceptionHandling(
-                () -> {
-                    getInstance().endDiagnostics(context);
-                    return true;
-                },
-                e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
+        ExceptionUtil.executeWithExceptionHandling(
+            () -> {
+                getInstance().endDiagnostics(context);
+                return true;
+            },
+            e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
         );
     }
 

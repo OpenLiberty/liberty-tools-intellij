@@ -153,11 +153,11 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	private void validateAsynchronousAnnotation(PsiMethod node, PsiAnnotation annotation) {
 		// Use lambda expression to avoid code duplication
 		String methodReturnTypeString = ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					PsiType methodReturnType = node.getReturnType();
-					return methodReturnType.getCanonicalText();
-				},
-				e -> LOGGER.log(Level.WARNING, "An error occurred", e)
+			() -> {
+				PsiType methodReturnType = node.getReturnType();
+				return methodReturnType.getCanonicalText();
+			},
+			e -> LOGGER.log(Level.WARNING, "An error occurred", e)
 		);
 
 		if ((!isAllowedReturnTypeForAsynchronousAnnotation(methodReturnTypeString))) {
