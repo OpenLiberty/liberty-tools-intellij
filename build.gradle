@@ -47,7 +47,9 @@ repositories {
     maven {
         url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
     }
-
+    intellijPlatform {
+        defaultRepositories()
+    }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -64,7 +66,7 @@ configurations {
     // Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = javaVersion
         }
     }
 }
@@ -101,7 +103,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:241.15989.150') {
+    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:242.23726.103') {
         transitive = false
     }
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -133,6 +135,21 @@ dependencies {
     implementation files(new File(buildDir, 'server')) {
         builtBy 'copyDeps'
     }
+    intellijPlatform {
+        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+        bundledPlugins providers.gradleProperty("platformBundledPlugins").orElse("").get().split(',').toList()
+
+        def lsp4ij = providers.gradleProperty('useLocal') && providers.gradleProperty('useLocal') == 'true' ?
+                file("../lsp4ij/build/distributions/LSP4IJ/") :
+                'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
+        plugins lsp4ij
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
+
+        testFramework TestFrameworkType.Platform.INSTANCE
+        testFramework TestFrameworkType.Plugin.Java.INSTANCE
+    }
 }
 
 task copyDeps(type: Copy) {
@@ -143,17 +160,6 @@ task copyDeps(type: Copy) {
 
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
-}
-
-intellij {
-    // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2024.1.6'
-
-    def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
-            file("../lsp4ij/build/distributions/LSP4IJ/") :
-            'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
-    updateSinceUntilBuild = false
 }
 
 downloadRobotServerPlugin {
