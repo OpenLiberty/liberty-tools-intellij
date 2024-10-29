@@ -1,4 +1,4 @@
-/** Copyright (c) 2022, 2023 IBM Corporation and others.
+/** Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -58,7 +58,6 @@ public class WebSocketConstants {
     public static final String CLIENT_ENDPOINT_ANNOTATION = "jakarta.websocket.ClientEndpoint";
 
     // Superclass
-    public static final String ENDPOINT_SUPERCLASS = "Endpoint";
     public static final String FQ_ENDPOINT_SUPERCLASS = "jakarta.websocket.Endpoint";
     public static final String IS_SUPERCLASS = "isSuperclass";
 
