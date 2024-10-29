@@ -19,7 +19,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class WebSocketConstants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-websocket";
@@ -83,8 +82,6 @@ public class WebSocketConstants {
     public static final String PONGMESSAGE_CLASS_SHORT = "PongMessage";
     public static final Set<String> LONG_MESSAGE_CLASSES = new HashSet<>(
             Arrays.asList(STRING_CLASS_LONG, READER_CLASS_LONG, BYTEBUFFER_CLASS_LONG, INPUTSTREAM_CLASS_LONG, PONGMESSAGE_CLASS_LONG));
-    public static final Set<String> SHORT_MESSAGE_CLASSES = new HashSet<>(
-            Arrays.asList(STRING_CLASS_SHORT, READER_CLASS_SHORT, BYTEBUFFER_CLASS_SHORT, INPUTSTREAM_CLASS_SHORT, PONGMESSAGE_CLASS_SHORT));
     public static final String SESSION_CLASS = "jakarta.websocket.Session";
 
     /* Annotations */
