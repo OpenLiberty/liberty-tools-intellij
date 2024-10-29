@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation, Ankush Sharma and others.
+ * Copyright (c) 2020, 2024 IBM Corporation, Ankush Sharma and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -37,80 +37,55 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            PsiClass[] alltypes;
-            PsiAnnotation[] allAnnotations;
-
-            alltypes = unit.getClasses();
+            PsiClass[] alltypes = unit.getClasses();
             PsiMethod[] methods;
             PsiField[] fields;
 
             for (PsiClass type : alltypes) {
                 methods = type.getMethods();
                 for (PsiMethod method : methods) {
-                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
-                    boolean hasMapKeyAnnotation = false;
-                    boolean hasMapKeyClassAnnotation = false;
-                    allAnnotations = method.getAnnotations();
-                    for (PsiAnnotation annotation : allAnnotations) {
-                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                                PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
-                        if (matchedAnnotation != null) {
-                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation))
-                                hasMapKeyAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
-                                hasMapKeyClassAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
-                                mapKeyJoinCols.add(annotation);
-                            }
-                        }
-                    }
-                    if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
-                        // A single field cannot have the same
-                        diagnostics.add(createDiagnostic(method, unit,
-                                Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
-                                PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
-                                DiagnosticSeverity.Error));
-                    }
-                    // If we have multiple MapKeyJoinColumn annotations on a single method we must
-                    // ensure each has a name and referencedColumnName
-                    if (mapKeyJoinCols.size() > 1) {
-                        validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, method, unit, diagnostics);
-                    }
+                    collectDiagnostics(unit, diagnostics, type, method);
                 }
-
                 // Go through each field to ensure they do not have both MapKey and MapKeyColumn
                 // Annotations
                 fields = type.getFields();
                 for (PsiField field : fields) {
-                    List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
-                    boolean hasMapKeyAnnotation = false;
-                    boolean hasMapKeyClassAnnotation = false;
-                    allAnnotations = field.getAnnotations();
-                    for (PsiAnnotation annotation : allAnnotations) {
-                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                                PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
-                        if (matchedAnnotation != null) {
-                            if (PersistenceConstants.MAPKEY.equals(matchedAnnotation))
-                                hasMapKeyAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
-                                hasMapKeyClassAnnotation = true;
-                            else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
-                                mapKeyJoinCols.add(annotation);
-                            }
-                        }
-                    }
-                    if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
-                        // A single field cannot have the same
-                        diagnostics.add(createDiagnostic(field, unit,
-                                Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
-                                PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
-                                DiagnosticSeverity.Error));
-                    }
-                    if (mapKeyJoinCols.size() > 1) {
-                        validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, field, unit, diagnostics);
-                    }
+                    collectDiagnostics(unit, diagnostics, type, field);
                 }
             }
+        }
+    }
+
+    private void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                    PsiClass type, PsiJvmModifiersOwner fieldOrProperty) {
+        List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
+        boolean hasMapKeyAnnotation = false;
+        boolean hasMapKeyClassAnnotation = false;
+        PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
+        for (PsiAnnotation annotation : allAnnotations) {
+            String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
+            if (matchedAnnotation != null) {
+                if (PersistenceConstants.MAPKEY.equals(matchedAnnotation))
+                    hasMapKeyAnnotation = true;
+                else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
+                    hasMapKeyClassAnnotation = true;
+                else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
+                    mapKeyJoinCols.add(annotation);
+                }
+            }
+        }
+        if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
+            // A single field or property cannot have the same
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                    Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
+                    DiagnosticSeverity.Error));
+        }
+        // If we have multiple MapKeyJoinColumn annotations on a single field or property we must
+        // ensure each has a name and referencedColumnName
+        if (mapKeyJoinCols.size() > 1) {
+            validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, fieldOrProperty, unit, diagnostics);
         }
     }
 
@@ -131,4 +106,5 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES, null, DiagnosticSeverity.Error));
             }
         });
-    }}
+    }
+}
