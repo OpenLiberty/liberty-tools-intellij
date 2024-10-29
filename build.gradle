@@ -67,7 +67,7 @@ configurations {
 
 dependencies {
 
-    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.12.0') {
+    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.13.0') {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
@@ -80,7 +80,7 @@ dependencies {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0') {
+    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2-SNAPSHOT') {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
@@ -111,7 +111,7 @@ dependencies {
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     // define jars to grab locally (if falling back to mavenLocal() repo)
-    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.12.0:uber') {
+    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.13.0:uber') {
         transitive = false
     }
     lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1:uber') {
@@ -123,7 +123,7 @@ dependencies {
     lsp('io.openliberty.tools:liberty-langserver:2.2:jar-with-dependencies') {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.0:jar-with-dependencies') {
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2-SNAPSHOT:jar-with-dependencies') {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {
