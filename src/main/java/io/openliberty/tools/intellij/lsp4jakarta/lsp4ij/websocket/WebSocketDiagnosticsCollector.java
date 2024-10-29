@@ -325,8 +325,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
      * @return if valueClass is a wrapper object
      */
     private boolean isWrapper(String valueClass) {
-        return WebSocketConstants.WRAPPER_OBJS.contains(valueClass)
-                || WebSocketConstants.RAW_WRAPPER_OBJS.contains(valueClass);
+        return WebSocketConstants.RAW_WRAPPER_OBJS.contains(valueClass);
     }
 
     /**

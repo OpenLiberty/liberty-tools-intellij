@@ -63,6 +63,14 @@ public class WebSocketConstants {
 
     public static final String[] WS_ANNOTATION_CLASS = { SERVER_ENDPOINT_ANNOTATION, CLIENT_ENDPOINT_ANNOTATION };
 
+    public static final String BOOLEAN = "java.lang.Boolean";
+    public static final String INTEGER = "java.lang.Integer";
+    public static final String LONG = "java.lang.Long";
+    public static final String DOUBLE = "java.lang.Double";
+    public static final String FLOAT = "java.lang.Float";
+    public static final String CHARACTER = "java.lang.Character";
+    public static final String BYTE = "java.lang.Byte";
+    public static final String SHORT = "java.lang.Short";
     public static final String STRING_CLASS_LONG = "java.lang.String";
     public static final String STRING_CLASS_SHORT = "String";
     public static final String READER_CLASS_LONG = "java.io.Reader";
@@ -101,9 +109,7 @@ public class WebSocketConstants {
             Arrays.asList("CloseReason", "Session"));
 
     public static final Set<String> RAW_WRAPPER_OBJS = new HashSet<>(
-            Arrays.asList("String", "Boolean", "Integer", "Long", "Double", "Float"));
-    public static final Set<String> WRAPPER_OBJS = RAW_WRAPPER_OBJS.stream().map(raw -> "java.lang.".concat(raw))
-            .collect(Collectors.toSet());
+            Arrays.asList(BOOLEAN, INTEGER, LONG, DOUBLE, FLOAT, CHARACTER, BYTE, SHORT, STRING_CLASS_LONG));
 
     // Enums
     public enum MESSAGE_FORMAT {
