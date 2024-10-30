@@ -165,7 +165,7 @@ public class DebugModeHandler {
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 360; // seconds to wait for Liberty dev mode to start. It can take 4-5 minutes during testing.
+        int retryLimit = getDebuggerTimeoutInSeconds();
         int retryInc = 3; // time to wait after each try
 
         // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
@@ -214,6 +214,25 @@ public class DebugModeHandler {
             TimeUnit.SECONDS.sleep(retryInc);
         }
         throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
+    }
+
+    /**
+     * Check an environment variable to see if the user specifies a timeout to use for the debugger.
+     * This is not an exposed environment variable, it is only used for testing.
+     */
+    private int getDebuggerTimeoutInSeconds() {
+        // Number of seconds to wait for Liberty dev mode to start. Note that Gradle can take a while
+        // to get going so we default to 3 minutes. During testing it can take even longer, 4-5 minutes.
+        int defaultTimeout = 180;
+        String userSpecifiedTimeout = System.getenv("LIBERTY_TOOLS_INTELLIJ_DEBUGGER_TIMEOUT");
+        if (userSpecifiedTimeout != null) {
+            try {
+                return Integer.parseInt(userSpecifiedTimeout);
+            } catch (NumberFormatException n) {
+                // return the default below
+            }
+        }
+        return defaultTimeout;
     }
 
     /**
