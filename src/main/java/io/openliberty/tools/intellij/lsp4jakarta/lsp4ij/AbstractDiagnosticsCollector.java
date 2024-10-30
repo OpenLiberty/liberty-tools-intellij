@@ -127,14 +127,19 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         false otherwise.
      */
     protected static boolean isMatchedAnnotation(PsiClass unit, PsiAnnotation annotation, String annotationFQName) {
+        // Get the qualified name of the annotation element
         String elementName = annotation.getQualifiedName();
+
+        // Preliminary check to ensure elementName ends with the expected suffix
         if (nameEndsWith(annotationFQName, elementName) && unit != null) {
-            // For performance reason, we check if the import of annotation name is
-            // declared
+
+            // Check if the annotation is directly imported in the file for performance
             if (isImportedJavaElement(unit, annotationFQName))
                 return true;
-            // only check fully qualified annotations
+
+            // Check if the fully qualified names match when import is not available
             if (annotationFQName.equals(elementName)) {
+                // Resolve the annotation reference to check its fully qualified name
                 PsiReference ref = annotation.getReference();
                 PsiElement def = ref.resolve();
                 if (def instanceof PsiAnnotation) {
@@ -143,7 +148,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                 }
             }
         }
-        return false;
+        return false; // Return false if no match is found
     }
 
     /**
