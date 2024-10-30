@@ -1045,7 +1045,6 @@ public abstract class SingleModMPProjectTestCommon {
         // Perform Stop Action
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
             keyboard.enterText("./mvnw liberty:stop");
-
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew libertyStop");
         } else {
@@ -1064,10 +1063,8 @@ public abstract class SingleModMPProjectTestCommon {
         // Perform clean
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
             keyboard.enterText("./mvnw clean");
-            keyboard.enter();
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew clean");
-            keyboard.enter();
         } else {
             TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
         }
