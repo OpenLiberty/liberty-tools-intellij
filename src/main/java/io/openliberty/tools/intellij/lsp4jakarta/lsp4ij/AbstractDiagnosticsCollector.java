@@ -157,18 +157,24 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         element name and false otherwise.
      */
     protected static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
-        if (nameEndsWith(javaElementFQName, javaElementName)) {
-            // For performance reason, we check if the import of annotation name is
-            // declared
-            if (isImportedJavaElement(type, javaElementFQName))
-                return true;
-            // only check fully qualified java element
-            if (javaElementFQName.equals(javaElementName)) {
-                JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
-                Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
-                return (o != null);
-            }
+        // Quick check if the fully qualified name ends with the element's simple name
+        if (!nameEndsWith(javaElementFQName, javaElementName)) {
+            return false; // If not, return early for efficiency
         }
+
+        // Check if the element is directly imported for performance
+        if (isImportedJavaElement(type, javaElementFQName)) {
+            return true; // Early return if the import is present
+        }
+
+        //  Confirm the element name matches the fully qualified name
+        if (javaElementFQName.equals(javaElementName)) {
+            // Use JavaPsiFacade to locate the class by its fully qualified name
+            JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
+            return facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject())) != null;
+        }
+
+        // Return false if no match is found
         return false;
     }
 
