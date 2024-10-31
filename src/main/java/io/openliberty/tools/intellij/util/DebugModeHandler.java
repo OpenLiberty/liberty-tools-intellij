@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -165,7 +165,8 @@ public class DebugModeHandler {
      */
     private String waitForSocketActivation(ProgressIndicator monitor, LibertyModule libertyModule, String host, int debugPort) throws Exception {
         byte[] handshakeString = "JDWP-Handshake".getBytes(StandardCharsets.US_ASCII);
-        int retryLimit = 60; // wait up to 3 minutes for dev mode to start (polling rate 20 per minute, 3s)
+        int retryLimit = getDebuggerTimeoutInSeconds();
+        int retryInc = 3; // time to wait after each try
 
         // Retrieve the location of the server.env in the liberty installation at the default location (wpl/usr/servers/<serverName>).
         Path serverEnvPath = getServerEnvPath(libertyModule);
@@ -173,7 +174,7 @@ public class DebugModeHandler {
         boolean cleanStart = serverEnvPath == null;
         Path serverEnvBakPath = null;
 
-        for (int retryCount = 0; retryCount < retryLimit; retryCount++) {
+        for (int retryCount = 0; retryCount < retryLimit; retryCount+=retryInc) {
             // check if cancelled
             if (monitor.isCanceled()) {
                 return null;
@@ -210,9 +211,28 @@ public class DebugModeHandler {
                     LOGGER.trace(String.format("ConnectException waiting for runtime to start on port %d", debugPort));
                 }
             }
-            TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(retryInc);
         }
         throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
+    }
+
+    /**
+     * Check an environment variable to see if the user specifies a timeout to use for the debugger.
+     * This is not an exposed environment variable, it is only used for testing.
+     */
+    private int getDebuggerTimeoutInSeconds() {
+        // Number of seconds to wait for Liberty dev mode to start. Note that Gradle can take a while
+        // to get going so we default to 3 minutes. During testing it can take even longer, 4-5 minutes.
+        int defaultTimeout = 180;
+        String userSpecifiedTimeout = System.getenv("LIBERTY_TOOLS_INTELLIJ_DEBUGGER_TIMEOUT");
+        if (userSpecifiedTimeout != null) {
+            try {
+                return Integer.parseInt(userSpecifiedTimeout);
+            } catch (NumberFormatException n) {
+                // return the default below
+            }
+        }
+        return defaultTimeout;
     }
 
     /**
