@@ -15,18 +15,16 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.completion;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.IJavaCompletionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.JavaCompletionContext;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CompletionItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,34 +48,20 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
 
     @Override
     public boolean isAdaptedForCompletion(JavaCompletionContext context) {
-        try {
-            return getInstance().isAdaptedForCompletion(context);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCompletion", e);
-            return false;
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> getInstance().isAdaptedForCompletion(context),
+                () -> false,  // Fallback value in case of exception
+                e -> LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCompletion", e)
+        );
     }
 
     @Override
     public List<? extends CompletionItem> collectCompletionItems(JavaCompletionContext context) {
-        try {
-            return getInstance().collectCompletionItems(context);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling collectCompletionItems", e);
-            return Collections.emptyList();
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> getInstance().collectCompletionItems(context),
+                Collections::emptyList,  // Fallback value in case of exception
+                e -> LOGGER.log(Level.WARNING, "Error while calling collectCompletionItems", e)
+        );
     }
 
     public @Nullable String getGroup() {
