@@ -20,6 +20,8 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,8 @@ import java.util.regex.Pattern;
  */
 public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
+    private static final Logger log = LoggerFactory.getLogger(AnnotationDiagnosticsCollector.class);
+
     public AnnotationDiagnosticsCollector() {
         super();
     }
@@ -54,7 +58,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     protected String getDiagnosticSource() {
         return AnnotationConstants.DIAGNOSTIC_SOURCE;
     }
-
+    
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
@@ -69,47 +73,27 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             PsiPackage psiPackage = JavaPsiFacade.getInstance(unit.getProject())
                     .findPackage(unit.getPackageName());
             if (psiPackage != null) {
-                PsiAnnotation[] pkgAnnotations = psiPackage.getAnnotations();
-                for (PsiAnnotation annotation : pkgAnnotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
-                        annotatables.add(new Tuple.Two<>(annotation, psiPackage));
-                }
+                processAnnotations(psiPackage, annotatables, validAnnotations);
             }
 
             PsiClass[] types = unit.getClasses();
             for (PsiClass type : types) {
                 // Type
-                PsiAnnotation[] annotations = type.getAnnotations();
-                for (PsiAnnotation annotation : annotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
-                        annotatables.add(new Tuple.Two<>(annotation, type));
-                }
+                processAnnotations(type, annotatables, validTypeAnnotations);
                 // Method
                 PsiMethod[] methods = type.getMethods();
                 for (PsiMethod method : methods) {
-                    annotations = method.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validMethodAnnotations))
-                            annotatables.add(new Tuple.Two<>(annotation, method));
-                    }
+                    processAnnotations(method, annotatables, validMethodAnnotations);
                     // method parameters
                     PsiParameter[] parameters = method.getParameterList().getParameters();
                     for (PsiParameter parameter : parameters) {
-                        annotations = parameter.getAnnotations();
-                        for (PsiAnnotation annotation : annotations) {
-                            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
-                                annotatables.add(new Tuple.Two<>(annotation, parameter));
-                        }
+                        processAnnotations(parameter, annotatables, validAnnotations);
                     }
                 }
                 // Field
                 PsiField[] fields = type.getFields();
                 for (PsiField field : fields) {
-                    annotations = field.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
-                            annotatables.add(new Tuple.Two<>(annotation, field));
-                    }
+                    processAnnotations(field, annotatables, validTypeAnnotations);
                 }
             }
 
@@ -221,6 +205,16 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                     }
                 }
             }
+        }
+    }
+
+    private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
+                                    ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables,
+                                    String[] validAnnotations) {
+        PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        for (PsiAnnotation annotation : annotations) {
+            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                annotatables.add(new Tuple.Two<>(annotation, psiModifierOwner));
         }
     }
 
