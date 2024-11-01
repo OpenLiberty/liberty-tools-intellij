@@ -71,25 +71,23 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().beginDiagnostics(context);
                 return true;
             },
+                null,
             e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
         );
     }
 
     @Override
     public List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
-            return diagnostics != null ? diagnostics : Collections.emptyList();
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
-            return Collections.emptyList();
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
+                    return diagnostics != null ? diagnostics : Collections.emptyList();
+                },
+                Collections::emptyList,
+                e -> LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e)
+        );
     }
+
 
     @Override
     public void endDiagnostics(JavaDiagnosticsContext context) {
@@ -98,6 +96,7 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().endDiagnostics(context);
                 return true;
             },
+                null,
             e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
         );
     }
