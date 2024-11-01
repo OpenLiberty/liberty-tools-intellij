@@ -157,6 +157,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 				PsiType methodReturnType = node.getReturnType();
 				return methodReturnType.getCanonicalText();
 			},
+				null,
 			e -> LOGGER.log(Level.WARNING, "An error occurred", e)
 		);
 

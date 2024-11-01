@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 public class ExceptionUtil {
 
-    public static <T> T executeWithExceptionHandling(Supplier<T> action, Consumer<Exception> logger) {
+    public static <T> T executeWithExceptionHandling(Supplier<T> action, Supplier<T> fallback, Consumer<Exception> logger) {
         try {
             return action.get();
         } catch (ProcessCanceledException e) {
@@ -33,9 +33,8 @@ public class ExceptionUtil {
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
         } catch (Exception e) {
-            // Log the exception using the provided logger
             logger.accept(e);
-            return null; // Return null to indicate failure
+            return fallback.get(); // Return the fallback value in case of failure
         }
     }
 
@@ -46,6 +45,7 @@ public class ExceptionUtil {
                 toResolve.setEdit(we);
                 return true;
             },
+                null,
             e -> logger.log(Level.WARNING, logMessage, e)
         );
     }
