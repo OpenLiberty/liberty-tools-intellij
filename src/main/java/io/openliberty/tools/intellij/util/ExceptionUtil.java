@@ -29,6 +29,7 @@ public class ExceptionUtil {
             return action.get();
         } catch (ProcessCanceledException e) {
             //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multi-catch to keep backward compatibility
+            //TODO delete block when minimum required version is 2024.2
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
