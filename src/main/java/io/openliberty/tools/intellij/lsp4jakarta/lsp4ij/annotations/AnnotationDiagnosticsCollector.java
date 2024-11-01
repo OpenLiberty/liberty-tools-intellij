@@ -20,8 +20,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +45,6 @@ import java.util.regex.Pattern;
  *
  */
 public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector {
-
-    private static final Logger log = LoggerFactory.getLogger(AnnotationDiagnosticsCollector.class);
 
     private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
     private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
