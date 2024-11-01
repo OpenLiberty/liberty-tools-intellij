@@ -12,17 +12,16 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 /**
  * Returns the list of recognised defining annotations applied to a
@@ -33,29 +32,16 @@ import java.util.function.Supplier;
  * @return list of recognised defining annotations applied to a class
  */
 public class AnnotationUtil {
+    private static final Logger LOGGER = Logger.getLogger(AnnotationUtil.class.getName());
     public static List<String> getScopeAnnotations(PsiClass type, Set<String> scopes) {
-        return executeWithExceptionHandling(() ->
-                        // Construct a stream of only the annotations applied to the type that are also
-                        // recognised annotations found in scopes.
-                        Arrays.stream(type.getAnnotations())
-                                .map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
-                                .filter(scopes::contains)
-                                .distinct()
-                                .collect(Collectors.toList()),
-                Collections::emptyList
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> Arrays.stream(type.getAnnotations())
+                        .map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
+                        .filter(scopes::contains)
+                        .distinct()
+                        .collect(Collectors.toList()),
+                Collections::emptyList,  // Fallback value in case of exception
+                e -> LOGGER.log(Level.WARNING, "Error while calling getScopeAnnotations", e)
         );
-    }
-
-    private static <T> T executeWithExceptionHandling(Supplier<T> action, Supplier<T> fallback) {
-        try {
-            return action.get();
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multi-catch to keep backward compatibility
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            return fallback.get(); // Return fallback value
-        }
     }
 }

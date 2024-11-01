@@ -51,17 +51,11 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            return getInstance().isAdaptedForDiagnostics(context);
-        } catch (ProcessCanceledException e) {
-            //Since 2024.2 ProcessCanceledException extends CancellationException so we can't use multicatch to keep backward compatibility
-            throw e;
-        } catch (IndexNotReadyException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e);
-            return false;
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> getInstance().isAdaptedForDiagnostics(context),
+                () -> false,  // Fallback value in case of exception
+                e -> LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e)
+        );
     }
 
     @Override
