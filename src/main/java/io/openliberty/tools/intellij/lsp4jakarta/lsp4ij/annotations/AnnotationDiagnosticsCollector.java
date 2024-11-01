@@ -50,6 +50,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
 
     private static final Logger log = LoggerFactory.getLogger(AnnotationDiagnosticsCollector.class);
 
+    private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
+    private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME };
+    private static final String[] VALID_METHOD_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME };
+
     public AnnotationDiagnosticsCollector() {
         super();
     }
@@ -58,42 +65,36 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     protected String getDiagnosticSource() {
         return AnnotationConstants.DIAGNOSTIC_SOURCE;
     }
-    
+
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
             ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables = new ArrayList<Tuple.Two<PsiAnnotation, PsiElement>>();
-            String[] validAnnotations = { AnnotationConstants.GENERATED_FQ_NAME };
-            String[] validTypeAnnotations = { AnnotationConstants.GENERATED_FQ_NAME,
-                    AnnotationConstants.RESOURCE_FQ_NAME };
-            String[] validMethodAnnotations = { AnnotationConstants.GENERATED_FQ_NAME,
-                    AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
-                    AnnotationConstants.RESOURCE_FQ_NAME };
 
             PsiPackage psiPackage = JavaPsiFacade.getInstance(unit.getProject())
                     .findPackage(unit.getPackageName());
             if (psiPackage != null) {
-                processAnnotations(psiPackage, annotatables, validAnnotations);
+                processAnnotations(psiPackage, annotatables, VALID_ANNOTATIONS);
             }
 
             PsiClass[] types = unit.getClasses();
             for (PsiClass type : types) {
                 // Type
-                processAnnotations(type, annotatables, validTypeAnnotations);
+                processAnnotations(type, annotatables, VALID_TYPE_ANNOTATIONS);
                 // Method
                 PsiMethod[] methods = type.getMethods();
                 for (PsiMethod method : methods) {
-                    processAnnotations(method, annotatables, validMethodAnnotations);
+                    processAnnotations(method, annotatables, VALID_METHOD_ANNOTATIONS);
                     // method parameters
                     PsiParameter[] parameters = method.getParameterList().getParameters();
                     for (PsiParameter parameter : parameters) {
-                        processAnnotations(parameter, annotatables, validAnnotations);
+                        processAnnotations(parameter, annotatables, VALID_ANNOTATIONS);
                     }
                 }
                 // Field
                 PsiField[] fields = type.getFields();
                 for (PsiField field : fields) {
-                    processAnnotations(field, annotatables, validTypeAnnotations);
+                    processAnnotations(field, annotatables, VALID_TYPE_ANNOTATIONS);
                 }
             }
 
