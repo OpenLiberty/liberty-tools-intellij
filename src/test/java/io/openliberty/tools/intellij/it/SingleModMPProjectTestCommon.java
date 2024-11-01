@@ -10,9 +10,11 @@
 package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.utils.Keyboard;
+import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
@@ -33,6 +35,8 @@ import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
  * Holds common tests that use a single module MicroProfile project.
  */
 public abstract class SingleModMPProjectTestCommon {
+
+    private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -1048,7 +1052,8 @@ public abstract class SingleModMPProjectTestCommon {
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew libertyStop");
         } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            LOGGER.warn("Invalid build type specified.");
+            return;
         }
         keyboard.enter();
         TestUtils.sleepAndIgnoreException(10);
@@ -1066,7 +1071,8 @@ public abstract class SingleModMPProjectTestCommon {
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew clean");
         } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            LOGGER.warn("Invalid build type specified.");
+            return;
         }
         keyboard.enter();
         TestUtils.sleepAndIgnoreException(10);
