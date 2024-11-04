@@ -67,9 +67,6 @@ public class WebSocketConstants {
     public static final String LONG = "java.lang.Long";
     public static final String DOUBLE = "java.lang.Double";
     public static final String FLOAT = "java.lang.Float";
-    public static final String CHARACTER = "java.lang.Character";
-    public static final String BYTE = "java.lang.Byte";
-    public static final String SHORT = "java.lang.Short";
     public static final String STRING_CLASS_LONG = "java.lang.String";
     public static final String STRING_CLASS_SHORT = "String";
     public static final String READER_CLASS_LONG = "java.io.Reader";
@@ -106,7 +103,7 @@ public class WebSocketConstants {
             Arrays.asList("CloseReason", "Session"));
 
     public static final Set<String> RAW_WRAPPER_OBJS = new HashSet<>(
-            Arrays.asList(BOOLEAN, INTEGER, LONG, DOUBLE, FLOAT, CHARACTER, BYTE, SHORT, STRING_CLASS_LONG));
+            Arrays.asList(STRING_CLASS_LONG, BOOLEAN, INTEGER, LONG, DOUBLE, FLOAT ));
 
     // Enums
     public enum MESSAGE_FORMAT {
