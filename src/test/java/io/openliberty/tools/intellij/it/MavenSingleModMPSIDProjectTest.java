@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,14 +98,34 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     public static void setup() {
         try {
             StepWorker.registerProcessor(new StepLogger());
-            // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
+            // Copy the test case to a different path so I can test the directory name and modify the test case
             TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
+            // Clear the cache to force the download of the Maven report plugin specified in the test case
+            TestUtils.clearMavenPluginCache();
+            // Force Maven report generator 3.4 to generate the report in the old location
+            setupReportGenerator();
             prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
             e.printStackTrace();
             Assertions.fail("Test setup failed due to an IOException: " + e.getMessage());
         }
+    }
+
+    /**
+     * Modify the pom.xml file of the project to specify the Maven Surefire report generator version 3.4.0
+     *
+     * @throws IOException
+     */
+    private static void setupReportGenerator() throws IOException {
+        File pomFile = Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "pom.xml").toFile();
+        String oldStr = "<!-- Test report insertion point, do not remove -->";
+        String newStr = "    <plugin>\n" +
+                "      <groupId>org.apache.maven.plugins</groupId>\n" +
+                "      <artifactId>maven-surefire-report-plugin</artifactId>\n" +
+                "      <version>3.4.0</version>\n" +
+                "    </plugin>";
+        replaceString(oldStr, newStr, pomFile);
     }
 
     /**
@@ -239,10 +260,17 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
 
     /**
      * Validates that test reports were generated.
+     * Since a specific report generator was chosen in the pom
+     * the specified report generator should be used (3.4.0).
+     *
      */
     @Override
     public void validateTestReportsExist() {
-        TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
-        TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
+        TestUtils.validateTestReportExists(pathToITReport34.toFile(), pathToITReport35.toFile());
+        TestUtils.validateTestReportExists(pathToUTReport34.toFile(), pathToUTReport35.toFile());
+        Assertions.assertTrue(pathToITReport34.toFile().exists(), "Integration test report missing: " + pathToITReport34);
+        Assertions.assertTrue(pathToUTReport34.toFile().exists(), "Unit test report missing: " + pathToUTReport34);
+        Assertions.assertFalse(pathToITReport35.toFile().exists(), "Integration test report should not be generated: " + pathToITReport35);
+        Assertions.assertFalse(pathToUTReport35.toFile().exists(), "Unit test report should not be generated: " + pathToUTReport35);
     }
 }
