@@ -14,6 +14,7 @@ import com.intellij.openapi.project.IndexNotReadyException;
 
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
 
 public class ExceptionUtil {
 
-    public static <T> T executeWithExceptionHandling(Supplier<T> action, Supplier<T> fallback, Consumer<Exception> logger) {
+    public static <T> T executeWithExceptionHandling(Supplier<T> action, Function<Exception, T> fallback) {
         try {
             return action.get();
         } catch (ProcessCanceledException e) {
@@ -34,8 +35,8 @@ public class ExceptionUtil {
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
         } catch (Exception e) {
-            logger.accept(e);
-            return fallback.get(); // Return the fallback value in case of failure
+            // Invoke the fallback function with the exception to generate a safe return value.
+            return fallback.apply(e);
         }
     }
 
@@ -46,8 +47,10 @@ public class ExceptionUtil {
                 toResolve.setEdit(we);
                 return true;
             },
-            () -> null,  // Fallback value supplier in case of exception
-            e -> logger.log(Level.WARNING, logMessage, e)
+            e -> {
+                logger.log(Level.WARNING, logMessage, e);
+                return null;
+            }
         );
     }
 }

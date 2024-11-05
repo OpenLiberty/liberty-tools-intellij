@@ -40,8 +40,10 @@ public class AnnotationUtil {
                         .filter(scopes::contains)
                         .distinct()
                         .collect(Collectors.toList()),
-                Collections::emptyList,  // Fallback value in case of exception
-                e -> LOGGER.log(Level.WARNING, "Error while calling getScopeAnnotations", e)
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling getScopeAnnotations", e);
+                    return Collections.<String>emptyList();
+                }
         );
     }
 }

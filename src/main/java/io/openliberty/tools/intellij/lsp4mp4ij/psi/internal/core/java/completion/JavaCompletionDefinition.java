@@ -50,8 +50,10 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
     public boolean isAdaptedForCompletion(JavaCompletionContext context) {
         return ExceptionUtil.executeWithExceptionHandling(
                 () -> getInstance().isAdaptedForCompletion(context),
-                () -> false,  // Fallback value in case of exception
-                e -> LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCompletion", e)
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling isAdaptedForCompletion", e);
+                    return false;
+                }
         );
     }
 
@@ -59,8 +61,10 @@ public final class JavaCompletionDefinition extends BaseKeyedLazyInstance<IJavaC
     public List<? extends CompletionItem> collectCompletionItems(JavaCompletionContext context) {
         return ExceptionUtil.executeWithExceptionHandling(
                 () -> getInstance().collectCompletionItems(context),
-                Collections::emptyList,  // Fallback value in case of exception
-                e -> LOGGER.log(Level.WARNING, "Error while calling collectCompletionItems", e)
+                e ->  {
+                    LOGGER.log(Level.WARNING, "Error while calling collectCompletionItems", e);
+                    return Collections.emptyList();
+                }
         );
     }
 
