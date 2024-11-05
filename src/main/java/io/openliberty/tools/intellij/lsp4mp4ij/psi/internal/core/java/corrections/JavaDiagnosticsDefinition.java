@@ -65,7 +65,7 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().beginDiagnostics(context);
                 return true;
             },
-                null,
+            () -> null,  // Fallback value supplier in case of exception
             e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
         );
     }
@@ -90,7 +90,7 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().endDiagnostics(context);
                 return true;
             },
-                null,
+            () -> null,  // Fallback value supplier in case of exception
             e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
         );
     }
