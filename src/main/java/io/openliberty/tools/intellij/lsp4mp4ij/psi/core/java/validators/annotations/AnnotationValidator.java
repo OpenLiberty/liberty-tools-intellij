@@ -96,8 +96,10 @@ public class AnnotationValidator {
 					}
 					return rule.validate(value);
 				},
-				() -> null,  // Fallback value supplier in case of exception
-				e -> LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e)
+				e -> {
+					LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+					return null;
+				}
 		);
 	}
 

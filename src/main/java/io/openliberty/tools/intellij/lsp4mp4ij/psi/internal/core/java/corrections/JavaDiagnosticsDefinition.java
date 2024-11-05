@@ -53,8 +53,10 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
     public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
         return ExceptionUtil.executeWithExceptionHandling(
                 () -> getInstance().isAdaptedForDiagnostics(context),
-                () -> false,  // Fallback value in case of exception
-                e -> LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e)
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e);
+                    return false;
+                }
         );
     }
 
@@ -65,8 +67,10 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().beginDiagnostics(context);
                 return true;
             },
-            () -> null,  // Fallback value supplier in case of exception
-            e -> LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e)
+            e -> {
+                LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
+                return null;
+            }
         );
     }
 
@@ -77,8 +81,10 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                     List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
                     return diagnostics != null ? diagnostics : Collections.emptyList();
                 },
-                Collections::emptyList,
-                e -> LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e)
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
+                    return Collections.emptyList();
+                }
         );
     }
 
@@ -90,8 +96,10 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
                 getInstance().endDiagnostics(context);
                 return true;
             },
-            () -> null,  // Fallback value supplier in case of exception
-            e -> LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e)
+            e -> {
+                LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
+                return null;
+            }
         );
     }
 
