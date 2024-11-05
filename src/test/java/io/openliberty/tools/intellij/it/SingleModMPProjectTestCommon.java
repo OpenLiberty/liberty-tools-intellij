@@ -22,6 +22,7 @@ import org.junit.jupiter.api.condition.OS;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
@@ -56,6 +57,206 @@ public abstract class SingleModMPProjectTestCommon {
      * The remote robot object.
      */
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
+
+    /**
+     * Single module Microprofile project name.
+     */
+    private static String smMpProjectName = null;
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private static String projectsPath = null;
+
+    /**
+     * Project port.
+     */
+    private static int smMpProjectPort = 0;
+
+    /**
+     * Project resource URI.
+     */
+    private static String smMpProjectResUri = null;
+
+    /**
+     * Project response.
+     */
+    private static String smMpProjectOutput = null;
+
+    /**
+     * Relative location of the WLP installation.
+     */
+    private static String wlpInstallPath = null;
+
+    /**
+     * The path to the test report.
+     */
+    private static Path testReportPath = null;
+
+    /**
+     * Build file name.
+     */
+    private static String buildFileName = null;
+
+    /**
+     * Action command to open the build file.
+     */
+    private static String buildFileOpenCmd = null;
+
+    /**
+     * Dev mode configuration start parameters.
+     */
+    private static String devModeStartParams = null;
+
+    /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private static String devModeStartParamsDebug = null;
+
+    /**
+     * Build Category.
+     */
+    private static BuildType buildCategory = null;
+
+    /**
+     * Returns the path where the Liberty server was installed.
+     *
+     * @return The path where the Liberty server was installed.
+     */
+    public static String getWLPInstallPath() {
+        return wlpInstallPath;
+    }
+    public static void setWLPInstallPath(String path) {
+        wlpInstallPath = path;
+    }
+
+    /**
+     * Sets the path where the Liberty server stores test reports.
+     *
+     */
+    public static void setTestReportPath(Path path) {
+        testReportPath = path;
+    }
+
+    /**
+     * Returns the projects directory path.
+     *
+     * @return The projects directory path.
+     */
+    public static String getProjectsDirPath() {
+        return projectsPath;
+    }
+    public static void setProjectsDirPath(String path) {
+        projectsPath = path;
+    }
+
+    /**
+     * Returns the name of the single module MicroProfile project.
+     *
+     * @return The name of the single module MicroProfile project.
+     */
+    public static String getSmMPProjectName() {
+        return smMpProjectName;
+    }
+    public static void setSmMPProjectName(String name) {
+        smMpProjectName = name;
+    }
+
+    /**
+     * Returns the expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     *
+     * @return The expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     */
+    public static String getSmMPProjOutput() {
+        return smMpProjectOutput;
+    }
+    public static void setSmMPProjOutput(String s) {
+        smMpProjectOutput = s;
+    }
+
+    /**
+     * Returns the port number associated with the single module MicroProfile project.
+     *
+     * @return The port number associated with the single module MicroProfile project.
+     */
+    public static int getSmMpProjPort() {
+        return smMpProjectPort;
+    }
+    public static void setSmMpProjPort(int port) {
+        smMpProjectPort = port;
+    }
+
+    /**
+     * Return the Resource URI associated with the single module MicroProfile project.
+     *
+     * @return The Resource URI associated with the single module MicroProfile project.
+     */
+    public static String getSmMpProjResURI() {
+        return smMpProjectResUri;
+    }
+    public static void setSmMpProjResURI(String uri) {
+        smMpProjectResUri = uri;
+    }
+
+    /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    public static String getBuildFileName() {
+        return buildFileName;
+    }
+    public static void setBuildFileName(String name) {
+        buildFileName = name;
+    }
+
+    /**
+     * Returns the name of the custom action command used to open the build file.
+     *
+     * @return The name of the custom action command used to open the build file.
+     */
+    public static String getBuildFileOpenCommand() {
+        return buildFileOpenCmd;
+    }
+    public static void setBuildFileOpenCommand(String command) {
+        buildFileOpenCmd = command;
+    }
+
+    /**
+     * Returns the custom start parameters to be used to start dev mode.
+     *
+     * @return The custom start parameters to be used to start dev mode.
+     */
+    public static String getStartParams() {
+        return devModeStartParams;
+    }
+    public static void setStartParams(String params) {
+        devModeStartParams = params;
+    }
+
+    /**
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
+     */
+    public static String getStartParamsDebugPort() {
+        return devModeStartParamsDebug;
+    }
+    public static void setStartParamsDebugPort(String params) {
+        devModeStartParamsDebug = params;
+    }
+
+    /**
+     * Returns Build Category
+     */
+    public static BuildType getBuildCategory() {
+        return buildCategory;
+    };
+    public static void setBuildCategory(BuildType type) {
+        buildCategory = type;
+    };
 
     /**
      * Processes actions before each test.
@@ -1086,89 +1287,19 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Returns the projects directory path.
-     *
-     * @return The projects directory path.
-     */
-    public abstract String getProjectsDirPath();
-
-    /**
-     * Returns the name of the single module MicroProfile project.
-     *
-     * @return The name of the single module MicroProfile project.
-     */
-    public abstract String getSmMPProjectName();
-
-    /**
-     * Returns the expected HTTP response payload associated with the single module
-     * MicroProfile project.
-     *
-     * @return The expected HTTP response payload associated with the single module
-     * MicroProfile project.
-     */
-    public abstract String getSmMPProjOutput();
-
-    /**
-     * Returns the port number associated with the single module MicroProfile project.
-     *
-     * @return The port number associated with the single module MicroProfile project.
-     */
-    public abstract int getSmMpProjPort();
-
-    /**
-     * Return the Resource URI associated with the single module MicroProfile project.
-     *
-     * @return The Resource URI associated with the single module MicroProfile project.
-     */
-    public abstract String getSmMpProjResURI();
-
-    /**
-     * Returns the path where the Liberty server was installed.
-     *
-     * @return The path where the Liberty server was installed.
-     */
-    public abstract String getWLPInstallPath();
-
-    /**
-     * Returns the name of the build file used by the project.
-     *
-     * @return The name of the build file used by the project.
-     */
-    public abstract String getBuildFileName();
-
-    /**
-     * Returns the name of the custom action command used to open the build file.
-     *
-     * @return The name of the custom action command used to open the build file.
-     */
-    public abstract String getBuildFileOpenCommand();
-
-    /**
-     * Returns the custom start parameters to be used to start dev mode.
-     *
-     * @return The custom start parameters to be used to start dev mode.
-     */
-    public abstract String getStartParams();
-
-    /**
-     * Returns the custom start parameters to be used to start dev mode.
-     *
-     * @return The custom start parameters to be used to start dev mode.
-     */
-    public abstract String getStartParamsDebugPort();
-
-    /**
      * Deletes test reports.
      */
-    public abstract void deleteTestReports();
+    public void deleteTestReports() {
+        boolean testReportDeleted = TestUtils.deleteFile(testReportPath);
+        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + testReportPath + " was not be deleted.");
+    }
 
     /**
      * Validates that test reports were generated.
      */
-    public abstract void validateTestReportsExist();
 
-    /**
-     * Returns Build Category
-     */
-    public abstract BuildType getBuildCategory();
+    public void validateTestReportsExist() {
+        //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
+        TestUtils.validateTestReportExists(testReportPath, testReportPath);
+    }
 }
