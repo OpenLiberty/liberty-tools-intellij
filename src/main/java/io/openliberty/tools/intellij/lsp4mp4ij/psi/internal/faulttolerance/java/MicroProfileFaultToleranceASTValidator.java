@@ -159,7 +159,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 			},
 			e -> {
 				LOGGER.log(Level.WARNING, "An error occurred", e);
-                return null;
+				return null;
             }
 		);
 
