@@ -46,7 +46,7 @@ public class ExceptionUtil {
                 toResolve.setEdit(we);
                 return true;
             },
-                null,
+            () -> null,  // Fallback value supplier in case of exception
             e -> logger.log(Level.WARNING, logMessage, e)
         );
     }
