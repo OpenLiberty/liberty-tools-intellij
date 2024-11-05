@@ -35,6 +35,8 @@ public class AnnotationUtil {
     private static final Logger LOGGER = Logger.getLogger(AnnotationUtil.class.getName());
     public static List<String> getScopeAnnotations(PsiClass type, Set<String> scopes) {
         return ExceptionUtil.executeWithExceptionHandling(
+                // Construct a stream of only the annotations applied to the type that are also
+                // recognised annotations found in scopes.
                 () -> Arrays.stream(type.getAnnotations())
                         .map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
                         .filter(scopes::contains)
