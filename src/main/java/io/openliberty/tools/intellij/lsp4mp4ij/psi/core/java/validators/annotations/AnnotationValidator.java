@@ -90,16 +90,16 @@ public class AnnotationValidator {
 	 */
 	public String validate(String value, AnnotationAttributeRule rule) {
 		return ExceptionUtil.executeWithExceptionHandling(
-				() -> {
-					if (rule == null) {
-						return null;
-					}
-					return rule.validate(value);
-				},
-				e -> {
-					LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+			() -> {
+				if (rule == null) {
 					return null;
 				}
+				return rule.validate(value);
+			},
+			e -> {
+				LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+				return null;
+			}
 		);
 	}
 
