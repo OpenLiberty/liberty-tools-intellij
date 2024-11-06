@@ -25,8 +25,7 @@ public class WebSocketConstants {
 
     public static final DiagnosticSeverity ERROR = DiagnosticSeverity.Error;
     public static final DiagnosticSeverity WARNING = DiagnosticSeverity.Warning;
-
-    public static final String DIAGNOSTIC_ERR_MSG = "Cannot calculate WebSocket diagnostics";
+    
 
     public static final String PATHPARAM_ANNOTATION = "jakarta.websocket.server.PathParam";
 
