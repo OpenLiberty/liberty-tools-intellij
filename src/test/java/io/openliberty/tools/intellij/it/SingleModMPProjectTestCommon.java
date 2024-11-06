@@ -818,7 +818,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Disabled
     public void testStartInContainerActionUsingPlayToolbarButton() {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
+        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true, 3);
