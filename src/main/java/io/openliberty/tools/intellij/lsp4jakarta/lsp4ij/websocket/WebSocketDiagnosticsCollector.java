@@ -188,9 +188,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                             if (typeName != null
                                     && WebSocketConstants.LONG_MESSAGE_CLASSES.contains(typeName)) {
-                                WebSocketConstants.MESSAGE_FORMAT messageFormat = typeName != null
-                                        ? getMessageFormat(typeName, true)
-                                        : getMessageFormat(typeName, false);
+                                WebSocketConstants.MESSAGE_FORMAT messageFormat = getMessageFormat(typeName);
                                 switch (messageFormat) {
                                     case TEXT:
                                         if (onMessageTextUsed != null) {
@@ -370,37 +368,15 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         }
         return false;
     }
-    private WebSocketConstants.MESSAGE_FORMAT getMessageFormat(String typeName, boolean longName) {
-        if (longName) {
-            switch (typeName) {
-                case WebSocketConstants.STRING_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-                case WebSocketConstants.READER_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-                case WebSocketConstants.BYTEBUFFER_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-                case WebSocketConstants.INPUTSTREAM_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-                case WebSocketConstants.PONGMESSAGE_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.PONG;
-                default:
-                    throw new IllegalArgumentException("Invalid message format type");
-            }
-        }
-        switch (typeName) {
-            case WebSocketConstants.STRING_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-            case WebSocketConstants.READER_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-            case WebSocketConstants.BYTEBUFFER_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-            case WebSocketConstants.INPUTSTREAM_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-            case WebSocketConstants.PONGMESSAGE_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.PONG;
-            default:
-                throw new IllegalArgumentException("Invalid message format type");
-        }
+    private WebSocketConstants.MESSAGE_FORMAT getMessageFormat(String typeName) {
+        return switch (typeName) {
+            case WebSocketConstants.STRING_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.TEXT;
+            case WebSocketConstants.READER_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.TEXT;
+            case WebSocketConstants.BYTEBUFFER_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.BINARY;
+            case WebSocketConstants.INPUTSTREAM_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.BINARY;
+            case WebSocketConstants.PONGMESSAGE_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.PONG;
+            default -> throw new IllegalArgumentException("Invalid message format type");
+        };
     }
 
     private String createParamTypeDiagMsg(Set<String> methodParamOptTypes, String methodAnnotTarget) {
