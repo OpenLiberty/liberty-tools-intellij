@@ -68,15 +68,10 @@ public class WebSocketConstants {
     public static final String DOUBLE = "java.lang.Double";
     public static final String FLOAT = "java.lang.Float";
     public static final String STRING_CLASS_LONG = "java.lang.String";
-    public static final String STRING_CLASS_SHORT = "String";
     public static final String READER_CLASS_LONG = "java.io.Reader";
-    public static final String READER_CLASS_SHORT = "Reader";
     public static final String BYTEBUFFER_CLASS_LONG = "java.nio.ByteBuffer";
-    public static final String BYTEBUFFER_CLASS_SHORT = "ByteBuffer";
     public static final String INPUTSTREAM_CLASS_LONG = "java.io.InputStream";
-    public static final String INPUTSTREAM_CLASS_SHORT = "InputStream";
     public static final String PONGMESSAGE_CLASS_LONG = "jakarta.websocket.PongMessage";
-    public static final String PONGMESSAGE_CLASS_SHORT = "PongMessage";
     public static final Set<String> LONG_MESSAGE_CLASSES = new HashSet<>(
             Arrays.asList(STRING_CLASS_LONG, READER_CLASS_LONG, BYTEBUFFER_CLASS_LONG, INPUTSTREAM_CLASS_LONG, PONGMESSAGE_CLASS_LONG));
     public static final String SESSION_CLASS = "jakarta.websocket.Session";
