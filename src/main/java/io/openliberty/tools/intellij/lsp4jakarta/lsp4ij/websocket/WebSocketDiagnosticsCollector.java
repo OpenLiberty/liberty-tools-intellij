@@ -76,7 +76,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         PsiMethod[] allMethods = type.getMethods();
         for (PsiMethod method : allMethods) {
             PsiAnnotation[] allAnnotations = method.getAnnotations();
-            Set<String> specialParamTypes = null, rawSpecialParamTypes = null;
+            Set<String> specialParamTypes = null;
 
             for (PsiAnnotation annotation : allAnnotations) {
                 String annotationName = annotation.getQualifiedName();
@@ -84,11 +84,9 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                 if (isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_OPEN)) {
                     specialParamTypes = WebSocketConstants.ON_OPEN_PARAM_OPT_TYPES;
-                    rawSpecialParamTypes = WebSocketConstants.RAW_ON_OPEN_PARAM_OPT_TYPES;
                     diagnosticCode = WebSocketConstants.DIAGNOSTIC_CODE_ON_OPEN_INVALID_PARAMS;
                 } else if (isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_CLOSE)) {
                     specialParamTypes = WebSocketConstants.ON_CLOSE_PARAM_OPT_TYPES;
-                    rawSpecialParamTypes = WebSocketConstants.RAW_ON_CLOSE_PARAM_OPT_TYPES;
                     diagnosticCode = WebSocketConstants.DIAGNOSTIC_CODE_ON_CLOSE_INVALID_PARAMS;
                 }
                 if (diagnosticCode != null) {
