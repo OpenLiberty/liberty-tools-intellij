@@ -88,13 +88,9 @@ public class WebSocketConstants {
     // For OnOpen annotation
     public static final Set<String> ON_OPEN_PARAM_OPT_TYPES = new HashSet<>(
             Arrays.asList("jakarta.websocket.EndpointConfig", SESSION_CLASS));
-    public static final Set<String> RAW_ON_OPEN_PARAM_OPT_TYPES = new HashSet<>(
-            Arrays.asList("EndpointConfig", "Session"));
 
     public static final Set<String> ON_CLOSE_PARAM_OPT_TYPES = new HashSet<>(
             Arrays.asList("jakarta.websocket.CloseReason", SESSION_CLASS));
-    public static final Set<String> RAW_ON_CLOSE_PARAM_OPT_TYPES = new HashSet<>(
-            Arrays.asList("CloseReason", "Session"));
 
     public static final Set<String> RAW_WRAPPER_OBJS = new HashSet<>(
             Arrays.asList(STRING_CLASS_LONG, BOOLEAN, INTEGER, LONG, DOUBLE, FLOAT ));
