@@ -81,7 +81,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
+        final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName.substring(annotationName.lastIndexOf('.') + 1));
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(ANNOTATION_NAME, annotationName);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
