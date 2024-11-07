@@ -36,7 +36,7 @@ public class ExceptionUtil {
      * @param <T>     the type of result expected from the action
      * @return        the result of the action or the fallback value in case of an exception
      */
-    public static <T> T executeWithExceptionHandling(Supplier<T> action, Function<Exception, T> fallback) {
+    public static <T> T executeWithExceptionHandling(Supplier<T> action, Function<RuntimeException, T> fallback) {
         try {
             return action.get();
         } catch (ProcessCanceledException e) {
@@ -45,7 +45,7 @@ public class ExceptionUtil {
             throw e;
         } catch (IndexNotReadyException | CancellationException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // Invoke the fallback function with the exception to generate a safe return value.
             return fallback.apply(e);
         }
