@@ -20,16 +20,16 @@ public class IncorrectResourceAnnotation {
 
 }
 
-@random.test.pkg.onResource(name = "aa")
+@random.test.pkg.on.Resource(name = "aa")
 class PostDoctoralStudent {
 
     private Integer studentId;
 
 
-	@random.test.pkg.onResource(shareable = true)
+	@random.test.pkg.on.Resource(shareable = true)
     private boolean isHappy;
 
-	@random.test.pkg.onResource
+	@random.test.pkg.on.Resource
     private boolean isSad;
 
 
