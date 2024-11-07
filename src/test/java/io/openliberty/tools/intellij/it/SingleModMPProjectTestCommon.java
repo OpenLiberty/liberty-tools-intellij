@@ -1249,7 +1249,7 @@ public abstract class SingleModMPProjectTestCommon {
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew libertyStop");
         } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
             return;
         }
         keyboard.enter();
@@ -1268,7 +1268,7 @@ public abstract class SingleModMPProjectTestCommon {
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew clean");
         } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
             return;
         }
         keyboard.enter();
