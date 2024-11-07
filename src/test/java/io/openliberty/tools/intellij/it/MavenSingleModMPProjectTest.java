@@ -23,6 +23,16 @@ import java.nio.file.Paths;
 public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
     /**
+     * Single module Microprofile project name.
+     */
+    private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+
+    /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
     private final Path pathToITReport34 = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "target", "site", "failsafe-report.html");
@@ -39,9 +49,14 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        setSmMPProjectName("singleModMavenMP");
+        StepWorker.registerProcessor(new StepLogger());
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+    }
+
+    MavenSingleModMPProjectTest() {
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
-        setProjectsDirPath(Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString());
+        setProjectsDirPath(PROJECTS_PATH);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
@@ -51,11 +66,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setBuildFileOpenCommand("Liberty: View pom.xml");
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
-
-        StepWorker.registerProcessor(new StepLogger());
-        prepareEnv(getProjectsDirPath(), getSmMPProjectName());
     }
-
     /**
      * Deletes test reports.
      */

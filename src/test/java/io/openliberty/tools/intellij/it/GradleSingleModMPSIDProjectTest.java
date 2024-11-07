@@ -50,16 +50,6 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     @BeforeAll
     public static void setup() {
         try {
-            setBuildCategory(BuildType.GRADLE_TYPE);
-            setSmMpProjPort(9080);
-            setSmMpProjResURI("api/resource");
-            setSmMPProjOutput("Hello! Welcome to Open Liberty");
-            setWLPInstallPath("build");
-            setBuildFileName("build.gradle");
-            setBuildFileOpenCommand("Liberty: View Gradle config");
-            setStartParams("--hotTests");
-            setStartParamsDebugPort("--libertyDebugPort=9876");
-
             // Copy the directory to allow renaming.
             TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
 
@@ -80,13 +70,8 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
             // Rename the project directory to a new name, replacing it if it already exists
             Files.move(projectDirPath, projectDirNewPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // set the new locations
-            setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
-            setProjectsDirPath(PROJECTS_PATH_NEW);
-            setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html"));
-
             // Prepare the environment with the new project path and name
-            prepareEnv(getProjectsDirPath(), getSmMPProjectName());
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
 
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
@@ -105,5 +90,21 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         } finally {
             deleteDirectoryIfExists(PROJECTS_PATH_NEW);
         }
+    }
+
+    GradleSingleModMPSIDProjectTest() {
+        // set the new locations for the test, not the original locations
+        setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
+        setProjectsDirPath(PROJECTS_PATH_NEW);
+        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html"));
+        setBuildCategory(BuildType.GRADLE_TYPE);
+        setSmMpProjPort(9080);
+        setSmMpProjResURI("api/resource");
+        setSmMPProjOutput("Hello! Welcome to Open Liberty");
+        setWLPInstallPath("build");
+        setBuildFileName("build.gradle");
+        setBuildFileOpenCommand("Liberty: View Gradle config");
+        setStartParams("--hotTests");
+        setStartParamsDebugPort("--libertyDebugPort=9876");
     }
 }

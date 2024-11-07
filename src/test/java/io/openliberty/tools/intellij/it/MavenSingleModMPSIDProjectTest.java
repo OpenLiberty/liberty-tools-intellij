@@ -57,26 +57,11 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     @BeforeAll
     public static void setup() {
         try {
-            setSmMPProjectName(SM_MP_PROJECT_NAME);
-            setBuildCategory(BuildType.MAVEN_TYPE);
-            setSmMpProjPort(9080);
-            setSmMpProjResURI("api/resource");
-            setSmMPProjOutput("Hello! Welcome to Open Liberty");
-            setWLPInstallPath(Paths.get("target", "liberty").toString());
-            setBuildFileName("pom.xml");
-            setBuildFileOpenCommand("Liberty: View pom.xml");
-            setStartParams("-DhotTests=true");
-            setStartParamsDebugPort("-DdebugPort=9876");
-
             StepWorker.registerProcessor(new StepLogger());
             // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
             TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
 
-            // set the new locations
-            setProjectsDirPath(PROJECTS_PATH_NEW);
-            setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
-
-            prepareEnv(getProjectsDirPath(), getSmMPProjectName());
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
             e.printStackTrace();
@@ -94,6 +79,22 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         } finally {
             deleteDirectoryIfExists(PROJECTS_PATH_NEW);
         }
+    }
+
+    MavenSingleModMPSIDProjectTest() {
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
+        // set the new locations for the test, not the original locations
+        setProjectsDirPath(PROJECTS_PATH_NEW);
+        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
+        setBuildCategory(BuildType.MAVEN_TYPE);
+        setSmMpProjPort(9080);
+        setSmMpProjResURI("api/resource");
+        setSmMPProjOutput("Hello! Welcome to Open Liberty");
+        setWLPInstallPath(Paths.get("target", "liberty").toString());
+        setBuildFileName("pom.xml");
+        setBuildFileOpenCommand("Liberty: View pom.xml");
+        setStartParams("-DhotTests=true");
+        setStartParamsDebugPort("-DdebugPort=9876");
     }
 
     /**

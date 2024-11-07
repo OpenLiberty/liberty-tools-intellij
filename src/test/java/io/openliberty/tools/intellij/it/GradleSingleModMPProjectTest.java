@@ -17,15 +17,28 @@ import java.nio.file.Paths;
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
  */
 public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
+    /**
+     * Single module Microprofile project name.
+     */
+    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
     public static void setup() {
-        setSmMPProjectName("singleModGradleMP");
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+    }
+
+    GradleSingleModMPProjectTest() {
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
+        setProjectsDirPath(PROJECTS_PATH);
         setBuildCategory(BuildType.GRADLE_TYPE);
-        setProjectsDirPath(Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString());
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
@@ -35,7 +48,5 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setBuildFileOpenCommand("Liberty: View Gradle config");
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
-
-        prepareEnv(getProjectsDirPath(), getSmMPProjectName());
     }
 }

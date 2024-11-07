@@ -61,72 +61,72 @@ public abstract class SingleModMPProjectTestCommon {
     /**
      * Single module Microprofile project name.
      */
-    private static String smMpProjectName = null;
+    private String smMpProjectName = null;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static String projectsPath = null;
+    private String projectsPath = null;
 
     /**
      * Project port.
      */
-    private static int smMpProjectPort = 0;
+    private int smMpProjectPort = 0;
 
     /**
      * Project resource URI.
      */
-    private static String smMpProjectResUri = null;
+    private String smMpProjectResUri = null;
 
     /**
      * Project response.
      */
-    private static String smMpProjectOutput = null;
+    private String smMpProjectOutput = null;
 
     /**
      * Relative location of the WLP installation.
      */
-    private static String wlpInstallPath = null;
+    private String wlpInstallPath = null;
 
     /**
      * The path to the test report.
      */
-    private static Path testReportPath = null;
+    private Path testReportPath = null;
 
     /**
      * Build file name.
      */
-    private static String buildFileName = null;
+    private String buildFileName = null;
 
     /**
      * Action command to open the build file.
      */
-    private static String buildFileOpenCmd = null;
+    private String buildFileOpenCmd = null;
 
     /**
      * Dev mode configuration start parameters.
      */
-    private static String devModeStartParams = null;
+    private String devModeStartParams = null;
 
     /**
      * Dev mode configuration custom start parameters for debugging.
      */
-    private static String devModeStartParamsDebug = null;
+    private String devModeStartParamsDebug = null;
 
     /**
      * Build Category.
      */
-    private static BuildType buildCategory = null;
+    private BuildType buildCategory = null;
 
     /**
      * Returns the path where the Liberty server was installed.
      *
      * @return The path where the Liberty server was installed.
      */
-    public static String getWLPInstallPath() {
+    public String getWLPInstallPath() {
         return wlpInstallPath;
     }
-    public static void setWLPInstallPath(String path) {
+    public void setWLPInstallPath(String path) {
         wlpInstallPath = path;
     }
 
@@ -134,7 +134,7 @@ public abstract class SingleModMPProjectTestCommon {
      * Sets the path where the Liberty server stores test reports.
      *
      */
-    public static void setTestReportPath(Path path) {
+    public void setTestReportPath(Path path) {
         testReportPath = path;
     }
 
@@ -143,10 +143,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The projects directory path.
      */
-    public static String getProjectsDirPath() {
+    public String getProjectsDirPath() {
         return projectsPath;
     }
-    public static void setProjectsDirPath(String path) {
+    public void setProjectsDirPath(String path) {
         projectsPath = path;
     }
 
@@ -155,10 +155,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The name of the single module MicroProfile project.
      */
-    public static String getSmMPProjectName() {
+    public String getSmMPProjectName() {
         return smMpProjectName;
     }
-    public static void setSmMPProjectName(String name) {
+    public void setSmMPProjectName(String name) {
         smMpProjectName = name;
     }
 
@@ -169,10 +169,10 @@ public abstract class SingleModMPProjectTestCommon {
      * @return The expected HTTP response payload associated with the single module
      * MicroProfile project.
      */
-    public static String getSmMPProjOutput() {
+    public String getSmMPProjOutput() {
         return smMpProjectOutput;
     }
-    public static void setSmMPProjOutput(String s) {
+    public void setSmMPProjOutput(String s) {
         smMpProjectOutput = s;
     }
 
@@ -181,10 +181,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The port number associated with the single module MicroProfile project.
      */
-    public static int getSmMpProjPort() {
+    public int getSmMpProjPort() {
         return smMpProjectPort;
     }
-    public static void setSmMpProjPort(int port) {
+    public void setSmMpProjPort(int port) {
         smMpProjectPort = port;
     }
 
@@ -193,10 +193,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The Resource URI associated with the single module MicroProfile project.
      */
-    public static String getSmMpProjResURI() {
+    public String getSmMpProjResURI() {
         return smMpProjectResUri;
     }
-    public static void setSmMpProjResURI(String uri) {
+    public void setSmMpProjResURI(String uri) {
         smMpProjectResUri = uri;
     }
 
@@ -205,10 +205,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The name of the build file used by the project.
      */
-    public static String getBuildFileName() {
+    public String getBuildFileName() {
         return buildFileName;
     }
-    public static void setBuildFileName(String name) {
+    public void setBuildFileName(String name) {
         buildFileName = name;
     }
 
@@ -217,10 +217,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The name of the custom action command used to open the build file.
      */
-    public static String getBuildFileOpenCommand() {
+    public String getBuildFileOpenCommand() {
         return buildFileOpenCmd;
     }
-    public static void setBuildFileOpenCommand(String command) {
+    public void setBuildFileOpenCommand(String command) {
         buildFileOpenCmd = command;
     }
 
@@ -229,10 +229,10 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The custom start parameters to be used to start dev mode.
      */
-    public static String getStartParams() {
+    public String getStartParams() {
         return devModeStartParams;
     }
-    public static void setStartParams(String params) {
+    public void setStartParams(String params) {
         devModeStartParams = params;
     }
 
@@ -241,20 +241,20 @@ public abstract class SingleModMPProjectTestCommon {
      *
      * @return The custom start parameters for debugging to start dev mode.
      */
-    public static String getStartParamsDebugPort() {
+    public String getStartParamsDebugPort() {
         return devModeStartParamsDebug;
     }
-    public static void setStartParamsDebugPort(String params) {
+    public void setStartParamsDebugPort(String params) {
         devModeStartParamsDebug = params;
     }
 
     /**
      * Returns Build Category
      */
-    public static BuildType getBuildCategory() {
+    public BuildType getBuildCategory() {
         return buildCategory;
     };
-    public static void setBuildCategory(BuildType type) {
+    public void setBuildCategory(BuildType type) {
         buildCategory = type;
     };
 
