@@ -59,4 +59,25 @@ public class GeneratedAnnotationTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 
+    @Test
+    public void testIncorrectGeneratedAnnotation() throws Exception {
+        // Set up the module and file where a non-Jakarta Generated annotation is used
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // The file path to a Java file that includes an incorrectly qualified Generated annotation
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) +
+                        "/src/main/java/io/openliberty/sample/jakarta/annotations/IncorrectGeneratedAnnotation.java"
+        );
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        // Adding a test to ensure no diagnostics are triggered for any non-matching annotation or import path similar to "jakarta.annotation.Generated"
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Ensure no diagnostics are generated for any annotation or import that is not exactly "jakarta.annotation.Generated"
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
