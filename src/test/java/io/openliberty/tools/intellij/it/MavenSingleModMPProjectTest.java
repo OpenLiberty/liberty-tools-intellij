@@ -35,14 +35,14 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToITReport34 = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "target", "site", "failsafe-report.html");
-    private final Path pathToITReport35 = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "target", "reports", "failsafe.html");
+    private final Path pathToITReport34 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
+    private final Path pathToITReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "failsafe.html");
 
     /**
      * The paths to the unit test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToUTReport34 = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "target", "site", "surefire-report.html");
-    private final Path pathToUTReport35 = Paths.get(getProjectsDirPath(), getSmMPProjectName(), "target", "reports", "surefire.html");
+    private final Path pathToUTReport34 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
+    private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
     /**
      * Prepares the environment for test execution.
@@ -54,9 +54,9 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     MavenSingleModMPProjectTest() {
+        setProjectsDirPath(PROJECTS_PATH);
         setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
-        setProjectsDirPath(PROJECTS_PATH);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");

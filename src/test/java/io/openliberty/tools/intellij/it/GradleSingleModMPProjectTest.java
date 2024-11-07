@@ -36,8 +36,8 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     }
 
     GradleSingleModMPProjectTest() {
-        setSmMPProjectName(SM_MP_PROJECT_NAME);
         setProjectsDirPath(PROJECTS_PATH);
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.GRADLE_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");

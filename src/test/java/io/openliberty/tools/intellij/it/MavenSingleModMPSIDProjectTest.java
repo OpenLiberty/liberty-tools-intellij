@@ -60,7 +60,6 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
             StepWorker.registerProcessor(new StepLogger());
             // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
             TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
-
             prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
@@ -82,10 +81,10 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     }
 
     MavenSingleModMPSIDProjectTest() {
-        setSmMPProjectName(SM_MP_PROJECT_NAME);
         // set the new locations for the test, not the original locations
         setProjectsDirPath(PROJECTS_PATH_NEW);
         setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");

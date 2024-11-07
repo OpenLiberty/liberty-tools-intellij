@@ -30,14 +30,14 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
-     * The path to the folder containing the test projects.
-     */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
-
-    /**
      * Single module Microprofile project name with space.
      */
     private static final String SM_MP_PROJECT_NAME_NEW = "singleMod GradleMP";
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
      * The path to the folder containing the test projects, including directories with spaces.
@@ -94,9 +94,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
 
     GradleSingleModMPSIDProjectTest() {
         // set the new locations for the test, not the original locations
-        setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
         setProjectsDirPath(PROJECTS_PATH_NEW);
         setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html"));
+        setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
         setBuildCategory(BuildType.GRADLE_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");

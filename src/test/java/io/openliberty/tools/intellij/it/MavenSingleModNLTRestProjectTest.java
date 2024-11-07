@@ -37,8 +37,8 @@ public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTes
     }
 
     MavenSingleModNLTRestProjectTest() {
-        setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
         setProjectsDirPath(PROJECTS_PATH);
+        setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
         setBuildFileName("pom.xml");
         setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "maven").toAbsolutePath().toString());
     }

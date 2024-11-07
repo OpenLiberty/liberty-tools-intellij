@@ -44,6 +44,7 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
         setBuildFileName("build.gradle");
         setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "gradle").toAbsolutePath().toString());
     }
+
     /**
      * Tests:
      * - Refresh button on Liberty tool window toolbar.
