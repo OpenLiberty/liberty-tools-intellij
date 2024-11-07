@@ -21,18 +21,29 @@ import java.nio.file.Paths;
 public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTestCommon {
 
     /**
+     * The path to the folder containing the test projects.
+     */
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+
+    /**
+     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
+     */
+    private static final String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
+
+    /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
     public static void setup() {
-        setSmNLTRestProjectName("singleModGradleRESTNoLTXmlCfg");
-        setProjectsDirPath(Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString());
-        setBuildFileName("build.gradle");
-        setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "gradle").toAbsolutePath().toString());
-
-        prepareEnv(getProjectsDirPath(), getSmNLTRestProjectName());
+        prepareEnv(PROJECTS_PATH, SM_NLT_REST_PROJECT_NAME);
     }
 
+    GradleSingleModNLTRestProjectTest() {
+        setProjectsDirPath(PROJECTS_PATH);
+        setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
+        setBuildFileName("build.gradle");
+        setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "gradle").toAbsolutePath().toString());
+    }
     /**
      * Tests:
      * - Refresh button on Liberty tool window toolbar.

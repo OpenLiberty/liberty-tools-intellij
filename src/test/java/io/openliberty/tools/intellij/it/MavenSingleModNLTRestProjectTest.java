@@ -19,15 +19,27 @@ import java.nio.file.Paths;
 public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTestCommon {
 
     /**
+     * The path to the folder containing the test projects.
+     */
+    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+
+    /**
+     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
+     */
+    private static final String SM_NLT_REST_PROJECT_NAME = "singleModMavenRESTNoLTXmlCfg";
+
+    /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
     public static void setup() {
-        setSmNLTRestProjectName("singleModMavenRESTNoLTXmlCfg");
-        setProjectsDirPath(Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString());
+        prepareEnv(PROJECTS_PATH, SM_NLT_REST_PROJECT_NAME);
+    }
+
+    MavenSingleModNLTRestProjectTest() {
+        setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
+        setProjectsDirPath(PROJECTS_PATH);
         setBuildFileName("pom.xml");
         setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "maven").toAbsolutePath().toString());
-
-        prepareEnv(getProjectsDirPath(), getSmNLTRestProjectName());
     }
 }

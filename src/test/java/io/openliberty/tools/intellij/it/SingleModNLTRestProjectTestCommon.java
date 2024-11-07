@@ -42,22 +42,22 @@ public abstract class SingleModNLTRestProjectTestCommon {
     /**
      * The path to the folder containing helper test files.
      */
-    public static String helperFilesPath = null;
+    public String helperFilesPath = null;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static String projectsPath = null;
+    private String projectsPath = null;
 
     /**
      * Single module REST project that lacks the configuration to be recognized by Liberty tools.
      */
-    private static String smNLTRestProjectName = null;
+    private String smNLTRestProjectName = null;
 
     /**
      * Build file name.
      */
-    private static String buildFileName = null;
+    private String buildFileName = null;
 
     /**
      * Processes actions before each test.
@@ -95,10 +95,10 @@ public abstract class SingleModNLTRestProjectTestCommon {
      *
      * @return The directory path containing helper files.
      */
-    public static String getHelperFilesDirPath() {
+    public String getHelperFilesDirPath() {
         return helperFilesPath;
     }
-    public static void setHelperFilesDirPath(String path) {
+    public void setHelperFilesDirPath(String path) {
         helperFilesPath = path;
     }
 
@@ -107,10 +107,10 @@ public abstract class SingleModNLTRestProjectTestCommon {
      *
      * @return The projects directory path.
      */
-    public static String getProjectsDirPath() {
+    public String getProjectsDirPath() {
         return projectsPath;
     }
-    public static void setProjectsDirPath(String path) {
+    public void setProjectsDirPath(String path) {
         projectsPath = path;
     }
 
@@ -123,10 +123,10 @@ public abstract class SingleModNLTRestProjectTestCommon {
      * @return The name of the single module REST project that does not meet the
      * requirements needed to automatically show in the Liberty tool window.
      */
-    public static String getSmNLTRestProjectName() {
+    public String getSmNLTRestProjectName() {
         return smNLTRestProjectName;
     }
-    public static void setSmNLTRestProjectName(String name) {
+    public void setSmNLTRestProjectName(String name) {
         smNLTRestProjectName = name;
     }
 
@@ -135,10 +135,10 @@ public abstract class SingleModNLTRestProjectTestCommon {
      *
      * @return The name of the build file used by the project.
      */
-    public static String getBuildFileName() {
+    public String getBuildFileName() {
         return buildFileName;
     }
-    public static void setBuildFileName(String name) {
+    public void setBuildFileName(String name) {
         buildFileName = name;
     }
 
