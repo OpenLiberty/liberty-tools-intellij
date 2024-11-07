@@ -69,7 +69,7 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
             },
             e -> {
                 LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
-                return null;
+                return false;
             }
         );
     }
@@ -98,7 +98,7 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
             },
             e -> {
                 LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
-                return null;
+                return false;
             }
         );
     }
