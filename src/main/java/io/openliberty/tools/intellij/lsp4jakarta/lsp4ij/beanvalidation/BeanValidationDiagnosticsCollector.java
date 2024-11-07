@@ -35,40 +35,34 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     }
 
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
-
         if (unit != null) {
             PsiClass[] alltypes;
             PsiField[] allFields;
-            PsiAnnotation[] annotations;
             PsiMethod[] allMethods;
 
             alltypes = unit.getClasses();
             for (PsiClass type : alltypes) {
                 allFields = type.getFields();
                 for (PsiField field : allFields) {
-                    annotations = field.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                                SET_OF_ANNOTATIONS.toArray(new String[0]));
-                        if (matchedAnnotation != null) {
-                            validAnnotation(field, annotation, matchedAnnotation, diagnostics);
-                        }
-                    }
+                    processAnnotations(field, type, diagnostics);
                 }
                 allMethods = type.getMethods();
                 for (PsiMethod method : allMethods) {
-                    annotations = method.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                                SET_OF_ANNOTATIONS.toArray(new String[0]));
-                        if (matchedAnnotation != null) {
-                            validAnnotation(method, annotation, matchedAnnotation, diagnostics);
-                        }
-                    }
+                    processAnnotations(method, type, diagnostics);
                 }
             }
         }
+    }
 
+    private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner, PsiClass type, List<Diagnostic> diagnostics) {
+        PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        for (PsiAnnotation annotation : annotations) {
+            String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    SET_OF_ANNOTATIONS.toArray(new String[0]));
+            if (matchedAnnotation != null) {
+                validAnnotation(psiModifierOwner, annotation, matchedAnnotation, diagnostics);
+            }
+        }
     }
 
     private void validAnnotation(PsiElement element, PsiAnnotation annotation, String matchedAnnotation,
