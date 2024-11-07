@@ -69,7 +69,7 @@ public class ExceptionUtil {
             },
             e -> {
                 logger.log(Level.WARNING, logMessage, e);
-                return null;
+                return false;
             }
         );
     }
