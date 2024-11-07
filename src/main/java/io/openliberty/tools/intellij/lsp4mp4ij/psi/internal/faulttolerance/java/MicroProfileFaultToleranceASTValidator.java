@@ -159,7 +159,7 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 			},
 			e -> {
 				LOGGER.log(Level.WARNING, "An error occurred", e);
-				throw new RuntimeException("Failed to validate asynchronous annotation", e);
+				throw e;
             }
 		);
 
