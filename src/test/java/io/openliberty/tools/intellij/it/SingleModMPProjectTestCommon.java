@@ -11,17 +11,22 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.utils.Keyboard;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 /**
@@ -34,6 +39,18 @@ public abstract class SingleModMPProjectTestCommon {
      * information to find UI components.
      */
     public static final String REMOTE_BOT_URL = "http://localhost:8082";
+
+    /**
+     * To clean the terminal.
+     */
+    private boolean shouldCleanupTerminal = true;
+
+    /**
+     * Supported build types.
+     */
+    public enum BuildType {
+        MAVEN_TYPE, GRADLE_TYPE
+    }
 
     /**
      * The remote robot object.
@@ -57,6 +74,9 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @AfterEach
     public void afterEach(TestInfo info) {
+        if (shouldCleanupTerminal) {
+            cleanAndResetTerminal();
+        }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
     }
 
@@ -84,6 +104,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testOpenBuildFileActionUsingPopUpMenu() {
+        shouldCleanupTerminal = false;
         String editorTabName = getBuildFileName() + " (" + getSmMPProjectName() + ")";
 
         // Close the editor tab if it was previously opened.
@@ -672,6 +693,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testMultipleConfigEditHistory() {
+        shouldCleanupTerminal = false;
         String testName = "testMultipleConfigEditHistory";
 
         // The path of the project build file expected in the configuration. This path constant for this test.
@@ -1008,6 +1030,62 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Clean project.
+     */
+    public void stopTerminal() {
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+
+        terminal.rightClick();
+        ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
+        openFixtureNewTab.click(new Point());
+
+        // Perform Stop Action
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw liberty:stop");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew libertyStop");
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            return;
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(10);
+    }
+
+    /**
+     * Stop the Server.
+     */
+    public void cleanTerminal() {
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        // Perform clean
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw clean");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew clean");
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,  "Invalid build type specified");
+            return;
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(10);
+    }
+
+    /**
+     * Cleans up and resets the terminal.
+     */
+    public void cleanAndResetTerminal() {
+        stopTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+        UIBotTestUtils.openTerminalWindow(remoteRobot);
+        cleanTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+    }
+
+    /**
      * Returns the projects directory path.
      *
      * @return The projects directory path.
@@ -1088,4 +1166,9 @@ public abstract class SingleModMPProjectTestCommon {
      * Validates that test reports were generated.
      */
     public abstract void validateTestReportsExist();
+
+    /**
+     * Returns Build Category
+     */
+    public abstract BuildType getBuildCategory();
 }
