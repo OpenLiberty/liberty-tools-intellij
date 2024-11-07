@@ -80,9 +80,9 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
     private String getLabel(PsiParameter parameter,List<String> annotationsToRemove) {
         final StringBuilder sb = new StringBuilder();
         // Java annotations in comma delimited list, assume that is ok.
-        sb.append("'@").append(getShortName(annotationsToRemove.get(0))).append("'");
+        sb.append("@").append(getShortName(annotationsToRemove.get(0)));
         for (int j = 1; j < annotationsToRemove.size(); ++j) {
-            sb.append(", '@").append(getShortName(annotationsToRemove.get(j))).append("'");
+            sb.append(", @").append(getShortName(annotationsToRemove.get(j)));
         }
         return Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
     }
