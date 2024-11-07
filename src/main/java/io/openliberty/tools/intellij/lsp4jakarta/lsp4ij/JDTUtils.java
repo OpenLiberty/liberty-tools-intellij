@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat, Inc.
+ * Copyright (c) 2016, 2024 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -28,10 +28,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JDTUtils {
     // Percent encoding obtained from: https://en.wikipedia.org/wiki/Percent-encoding#Reserved_characters
     private static final String LEVEL1_URI_REGEX = "(?:\\/(?:(?:\\{(\\w|-|%20|%21|%23|%24|%25|%26|%27|%28|%29|%2A|%2B|%2C|%2F|%3A|%3B|%3D|%3F|%40|%5B|%5D)+\\})|(?:(\\w|%20|%21|%23|%24|%25|%26|%27|%28|%29|%2A|%2B|%2C|%2F|%3A|%3B|%3D|%3F|%40|%5B|%5D)+)))*\\/?";
+
+    // Unmodifiable list of accessor prefixes
+    private static final List<String> ACCESSOR_PREFIXES = List.of("get", "set", "is");
 
     /**
      * Check if a URI starts with a leading slash.
@@ -66,11 +70,8 @@ public class JDTUtils {
     public static List<PsiMethod> getFieldAccessors(PsiJavaFile unit, PsiField field) {
         List<PsiMethod> accessors = new ArrayList<PsiMethod>();
         String fieldName = field.getName();
-        fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        List<String> accessorNames = new ArrayList<String>();
-        accessorNames.add("get" + fieldName);
-        accessorNames.add("set" + fieldName);
-        accessorNames.add("is" + fieldName);
+        String accessorSuffix = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        List<String> accessorNames = ACCESSOR_PREFIXES.stream().map(s -> s + accessorSuffix).collect(Collectors.toList());
 
         for (PsiClass type : unit.getClasses()) {
             for (PsiMethod method : type.getMethods()) {
