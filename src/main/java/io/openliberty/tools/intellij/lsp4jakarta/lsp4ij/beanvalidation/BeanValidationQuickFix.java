@@ -81,7 +81,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName.substring(annotationName.lastIndexOf('.') + 1));
+        final String name = Messages.getMessage("RemoveConstraintAnnotation", getSimpleName(annotationName));
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(ANNOTATION_NAME, annotationName);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
@@ -149,6 +149,17 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
 
         final String name = Messages.getMessage("RemoveStaticModifier");
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+    }
+
+    /**
+     * Returns simple name for the given fully qualified name.
+     */
+    protected static String getSimpleName(String fqName) {
+        int idx = fqName.lastIndexOf('.');
+        if (idx != -1 && idx != fqName.length() - 1) {
+            return fqName.substring(idx + 1);
+        }
+        return fqName;
     }
 }
 
