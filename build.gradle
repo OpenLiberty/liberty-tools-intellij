@@ -146,7 +146,7 @@ dependencies {
 
         testFramework TestFrameworkType.Platform.INSTANCE
         testFramework TestFrameworkType.Plugin.Java.INSTANCE
-        testFramework TestFrameworkType.Plugin.Ma
+        testFramework TestFrameworkType.Plugin.Maven.INSTANCE
     }
 }
 
