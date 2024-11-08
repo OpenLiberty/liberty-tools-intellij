@@ -14,8 +14,6 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
@@ -27,17 +25,15 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -102,14 +98,8 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
             String name = toResolve.getTitle();
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, attributesToAdd);
-            try {
-                WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                toResolve.setEdit(we);
-            } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-                throw e;
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
-            }
+
+            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         }
 
         if (diagnosticCode.equals(ServletConstants.DIAGNOSTIC_CODE_FILTER_DUPLICATE_ATTRIBUTES)) {
@@ -122,14 +112,8 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
             String name = toResolve.getTitle();
             ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(name, context.getSource().getCompilationUnit(),
                     context.getASTRoot(), parentType, annotationNode, 0, annotation, new ArrayList<String>(), attributesToRemove);
-            try {
-                WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-                toResolve.setEdit(we);
-            } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-                throw e;
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
-            }
+
+            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         }
         return toResolve;
     }

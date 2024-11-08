@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021 Red Hat Inc. and others.
+* Copyright (c) 2021, 2024 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotat
 import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -88,17 +89,18 @@ public class AnnotationValidator {
 	 * @return the error message of the validation result of the attribute value and null otherwise.
 	 */
 	public String validate(String value, AnnotationAttributeRule rule) {
-		try {
-			if (rule == null) {
+		return ExceptionUtil.executeWithExceptionHandling(
+			() -> {
+				if (rule == null) {
+					return null;
+				}
+				return rule.validate(value);
+			},
+			e -> {
+				LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
 				return null;
 			}
-			return rule.validate(value);
-		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-			throw e;
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
-			return null;
-		}
+		);
 	}
 
 	/**

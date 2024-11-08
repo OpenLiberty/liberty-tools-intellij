@@ -14,8 +14,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
@@ -25,13 +23,11 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCode
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.InsertAnnotationProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 
 import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -90,14 +86,8 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
         ChangeCorrectionProposal proposal = new InsertAnnotationProposal(name, context.getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, context.getSource().getCompilationUnit(),
                 annotations);
-        try {
-            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-            toResolve.setEdit(we);
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action.", e);
-        }
+
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action.");
         return toResolve;
     }
 

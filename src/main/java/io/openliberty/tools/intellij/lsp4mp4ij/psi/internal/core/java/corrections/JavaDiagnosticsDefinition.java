@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,6 +21,7 @@ import com.intellij.serviceContainer.BaseKeyedLazyInstance;
 import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.Diagnostic;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,49 +51,56 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
 
     @Override
     public boolean isAdaptedForDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            return getInstance().isAdaptedForDiagnostics(context);
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e);
-            return false;
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> getInstance().isAdaptedForDiagnostics(context),
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling isAdaptedForDiagnostics", e);
+                    return false;
+                }
+        );
     }
 
     @Override
     public void beginDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            getInstance().beginDiagnostics(context);
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
-        }
+        ExceptionUtil.executeWithExceptionHandling(
+            () -> {
+                getInstance().beginDiagnostics(context);
+                return true;
+            },
+            e -> {
+                LOGGER.log(Level.WARNING, "Error while calling beginDiagnostics", e);
+                return false;
+            }
+        );
     }
 
     @Override
     public List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
-            return diagnostics != null ? diagnostics : Collections.emptyList();
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
-            return Collections.emptyList();
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                () -> {
+                    List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
+                    return diagnostics != null ? diagnostics : Collections.emptyList();
+                },
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
+                    return Collections.emptyList();
+                }
+        );
     }
+
 
     @Override
     public void endDiagnostics(JavaDiagnosticsContext context) {
-        try {
-            getInstance().endDiagnostics(context);
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
-        }
+        ExceptionUtil.executeWithExceptionHandling(
+            () -> {
+                getInstance().endDiagnostics(context);
+                return true;
+            },
+            e -> {
+                LOGGER.log(Level.WARNING, "Error while calling endDiagnostics", e);
+                return false;
+            }
+        );
     }
 
     public @Nullable String getGroup() {

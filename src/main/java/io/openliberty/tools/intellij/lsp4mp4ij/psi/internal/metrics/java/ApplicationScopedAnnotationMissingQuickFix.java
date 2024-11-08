@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,8 +13,6 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.java;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
@@ -28,6 +26,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposa
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ReplaceAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.metrics.MicroProfileMetricsConstants;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
@@ -36,8 +35,6 @@ import org.eclipse.lsp4mp.commons.codeaction.MicroProfileCodeActionId;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -101,13 +98,8 @@ public class ApplicationScopedAnnotationMissingQuickFix implements IJavaCodeActi
 		ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(name, context.getCompilationUnit(),
 				context.getASTRoot(), parentType, 0, addAnnotation, context.getSource().getCompilationUnit(),
 				REMOVE_ANNOTATION_NAMES);
-		try {
-			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
-		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-			throw e;
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Failed to create workspace edit to replace bean scope annotation", e);
-		}
+
+		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Failed to create workspace edit to replace bean scope annotation");
 
 		return toResolve;
 	}

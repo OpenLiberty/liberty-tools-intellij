@@ -14,8 +14,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -30,9 +28,9 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCod
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.HashMap;
@@ -41,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -117,14 +113,7 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         ChangeCorrectionProposal proposal = new DeleteAnnotationProposal(name, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, declaringNode, resolveAnnotationsArray);
 
-        try {
-            WorkspaceEdit we = context.convertToWorkspaceEdit(proposal);
-            toResolve.setEdit(we);
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to create workspace edit for code action to remove annotation", e);
-        }
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action to remove annotation");
         return toResolve;
     }
 
