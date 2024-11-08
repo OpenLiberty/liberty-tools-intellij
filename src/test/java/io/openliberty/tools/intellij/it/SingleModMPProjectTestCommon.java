@@ -782,7 +782,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -815,7 +814,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingPlayToolbarButton() {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -847,7 +845,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -880,7 +877,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingSearch() {
         String testName = "testStartInContainerActionUsingSearch";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
