@@ -20,8 +20,6 @@
     <depends>com.intellij.gradle</depends>
     <depends>com.redhat.devtools.lsp4ij</depends>
 
-    <idea-version since-build="241" until-build="241.*"/>
-
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" id="Liberty" icon="/icons/OL_logo_13.svg"
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
