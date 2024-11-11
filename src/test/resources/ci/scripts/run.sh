@@ -177,8 +177,7 @@ main() {
     fi
 
     # Retry the tests if they fail with a SocketTimeoutException up to three times
-    retry=3;
-    while [ $retry -ge 1 ]; do
+    for retry in {1..3}; do
         startIDE();
         # Run the tests
         echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
@@ -189,11 +188,11 @@ main() {
         grep -i "SocketTimeoutException" "$workingDir"/build/junit.out
         rc=$?
         if [ "$rc" -ne 0 ]; then
-            # rc=1 means the string was not found
+            # rc=1 means the exception string was not found
             break
         fi
-        retry=`$retry + 1`
     done
+
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${rc}."
