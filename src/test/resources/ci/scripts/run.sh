@@ -178,7 +178,7 @@ main() {
 
     # Retry the tests if they fail with a SocketTimeoutException up to three times
     for retry in {1..3}; do
-        startIDE();
+        startIDE
         # Run the tests
         echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
