@@ -182,10 +182,10 @@ main() {
         # Run the tests
         echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$workingDir"/build/junit.out
+        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$currentLoc"/build/junit.out
         testRC=$?
         set +o pipefail # reset this option
-        grep -i "SocketTimeoutException" "$workingDir"/build/junit.out
+        grep -i "SocketTimeoutException" "$currentLoc"/build/junit.out
         rc=$?
         if [ "$rc" -ne 0 ]; then
             # rc=1 means the exception string was not found
