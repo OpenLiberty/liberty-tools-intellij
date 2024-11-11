@@ -65,8 +65,8 @@ public class ManagedBeanTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
         String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.*;\n\n" +
-                "@RequestScoped\npublic class ManagedBean<T> {\n    " +
-                "@Dependent\n    public int a;\n\n\n    " +
+                "@Dependent\npublic class ManagedBean<T> {\n    " +
+                "public int a;\n\n\n    " +
                 "public ManagedBean() {\n        this.a = 10;\n    }\n}\n";
         String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.*;\n\n" +
