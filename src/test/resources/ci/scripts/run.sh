@@ -113,6 +113,29 @@ gatherDebugData() {
     gatherResourceUsageData
 }
 
+# Start the IDE and wait for it to initialize. If the IDE takes too long this routine
+# will exit the script with error code 12.
+startIDE() {
+      # Start the IDE.
+      echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
+      # Have liberty tools debugger wait 480s for Maven or Gradle dev mode to start
+      export LIBERTY_TOOLS_INTELLIJ_DEBUGGER_TIMEOUT=480
+      ./gradlew runIdeForUiTests -PuseLocal=$USE_LOCAL_PLUGIN --info  > remoteServer.log  2>&1 &
+
+      # Wait for the IDE to come up.
+      echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."
+      callLivenessEndpoint=(curl -s http://localhost:8082)
+      count=1
+      while ! ${callLivenessEndpoint[@]} | grep -qF 'Welcome to IntelliJ IDEA'; do
+          if [ $count -eq 24 ]; then
+              echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE Welcome Page to start. Output:"
+              exit 12
+          fi
+          count=`expr $count + 1`
+          echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
+      done
+}
+
 # Runs UI tests and collects debug data.
 main() {
     echo -e "\n$(${currentTime[@]}): INFO: Gathering environment and resource usage data prior to test run..."
@@ -153,32 +176,26 @@ main() {
         exit 11
     fi
 
-    # Start the IDE.
-    echo -e "\n$(${currentTime[@]}): INFO: Starting the IntelliJ IDE..."
-    # Have liberty tools debugger wait 480s for Maven or Gradle dev mode to start
-    export LIBERTY_TOOLS_INTELLIJ_DEBUGGER_TIMEOUT=480
-    ./gradlew runIdeForUiTests -PuseLocal=$USE_LOCAL_PLUGIN --info  > remoteServer.log  2>&1 &
-
-    # Wait for the IDE to come up.
-    echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."
-    callLivenessEndpoint=(curl -s http://localhost:8082)
-    count=1
-    while ! ${callLivenessEndpoint[@]} | grep -qF 'Welcome to IntelliJ IDEA'; do
-        if [ $count -eq 24 ]; then
-            echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE Welcome Page to start. Output:"
-            exit 12
+    # Retry the tests if they fail with a SocketTimeoutException up to three times
+    retry=3;
+    while [ $retry -ge 1 ]; do
+        startIDE();
+        # Run the tests
+        echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
+        set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
+        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$workingDir"/build/junit.out
+        testRC=$?
+        set +o pipefail # reset this option
+        grep -i "SocketTimeoutException" "$workingDir"/build/junit.out
+        rc=$?
+        if [ "$rc" -ne 0 ]; then
+            # rc=1 means the string was not found
+            break
         fi
-        count=`expr $count + 1`
-        echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
+        retry=`$retry + 1`
     done
-
-    # Run the tests
-    echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
-    ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN
-
     # If there were any errors, gather some debug data before exiting.
-    rc=$?
-    if [ "$rc" -ne 0 ]; then
+    if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${rc}."
         gatherDebugData "$currentLoc"
         exit -1
