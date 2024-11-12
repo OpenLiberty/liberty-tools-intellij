@@ -176,27 +176,26 @@ main() {
         exit 11
     fi
 
-    # Retry the tests if they fail with a SocketTimeoutException up to three times
-    for retry in {1..3}; do
-        startIDE
-        # Run the tests
-        echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
-        set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$currentLoc"/build/junit.out
-        testRC=$?
-        set +o pipefail # reset this option
-        grep -i "SocketTimeoutException" "$currentLoc"/build/junit.out
-        rc=$?
-        if [ "$rc" -ne 0 ]; then
-            # rc=1 means the exception string was not found
-            break
-        fi
-    done
+    JUNIT_OUTPUT_TXT="$currentLoc"/build/junit.out
+    startIDE
+    # Run the tests
+    echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
+    set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
+    ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
+    testRC=$?
+    set +o pipefail # reset this option
 
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${$testRC}."
         gatherDebugData "$currentLoc"
+        grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT"
+        rc=$?
+        if [ "$rc" -eq 0 ]; then
+            # rc=0 means the exception string *was* found
+            # This exit code detected in build script
+            exit 23
+        fi
         exit -1
     fi
 }
