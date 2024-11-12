@@ -195,7 +195,7 @@ main() {
 
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then
-        echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${rc}."
+        echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${$testRC}."
         gatherDebugData "$currentLoc"
         exit -1
     fi
