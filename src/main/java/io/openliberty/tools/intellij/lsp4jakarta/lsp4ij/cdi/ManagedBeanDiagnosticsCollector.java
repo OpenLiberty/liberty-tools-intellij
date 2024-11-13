@@ -80,7 +80,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 if (isManagedBean
                         && field.hasModifierProperty(PsiModifier.PUBLIC)
                         && !field.hasModifierProperty(PsiModifier.STATIC)
-                        && (fieldScopes.size() != 1 || !fieldScopes.get(0).equals(DEPENDENT_FQ_NAME))) {
+                        && !managedBeanAnnotations.contains(DEPENDENT_FQ_NAME)) {
                     diagnostics.add(createDiagnostic(field, unit,
                             Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null,
