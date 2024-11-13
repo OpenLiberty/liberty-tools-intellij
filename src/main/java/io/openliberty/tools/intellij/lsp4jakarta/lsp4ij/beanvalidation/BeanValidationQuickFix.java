@@ -16,6 +16,7 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
@@ -81,7 +82,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", annotationName);
+        final String name = Messages.getMessage("RemoveConstraintAnnotation", AbstractDiagnosticsCollector.getSimpleName(annotationName));
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(ANNOTATION_NAME, annotationName);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
@@ -150,6 +151,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
         final String name = Messages.getMessage("RemoveStaticModifier");
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
     }
+
 }
 
 
