@@ -77,6 +77,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**

@@ -117,12 +117,7 @@ jobs:
       - name: 'Run UI integration tests'
         id: run_tests
         working-directory: ./liberty-tools-intellij
-        run: |
-          bash ./src/test/resources/ci/scripts/run.sh
-          rc="$?"
-          if [[ "$rc" == "23" ]]; then
-            bash ./src/test/resources/ci/scripts/run.sh
-          fi
+        run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4

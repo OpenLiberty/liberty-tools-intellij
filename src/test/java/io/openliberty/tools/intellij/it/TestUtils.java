@@ -562,4 +562,41 @@ public class TestUtils {
                 });
     }
 
+    /**
+     * Test to see if there has been a fatal error and JUnit should be stopped.
+     * This searches the output of this JUnit run for SocketTimeoutException which
+     * has been identified as a fatal error and occurs during the Mac tests.
+     * It is set up as a static reader so that we do not reread the whole file
+     * after each test.
+     */
+    final static String outputFile = System.getenv("JUNIT_OUTPUT_TXT");
+    final static BufferedReader reader;
+
+    static {
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void detectFatalError() {
+        try {
+            // Flush our output and then wait briefly for the process running 'tee' to flush output to the
+            // file that the buffered reader is reading.
+            System.out.flush();
+            Thread.sleep(10);
+            // Continue reading the existing reader
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("SocketTimeoutException")) {
+                    System.exit(23);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

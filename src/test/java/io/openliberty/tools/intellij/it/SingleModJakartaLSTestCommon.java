@@ -16,9 +16,13 @@ import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Scanner;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -53,6 +57,7 @@ public abstract class SingleModJakartaLSTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**

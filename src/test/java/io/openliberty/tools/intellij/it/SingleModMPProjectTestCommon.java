@@ -279,6 +279,7 @@ public abstract class SingleModMPProjectTestCommon {
             cleanAndResetTerminal();
         }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**
