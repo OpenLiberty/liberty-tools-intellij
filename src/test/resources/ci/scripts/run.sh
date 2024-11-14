@@ -134,6 +134,8 @@ startIDE() {
           count=`expr $count + 1`
           echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
       done
+      IDE_PID=$(ps -ef | grep -i idea.main | grep -v grep | awk '{print $2}')
+      echo -e "\n$(${currentTime[@]}): INFO: the Intellij IDE pid:" + $IDE_PID
 }
 
 # Runs UI tests and collects debug data.
@@ -186,6 +188,10 @@ main() {
         ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
         testRC=$?
         set +o pipefail # reset this option
+
+        ROBOT_PID=$(ps -ef | grep -i idea.main | grep -v grep | grep -v $IDE_PID | awk '{print $2}')
+        echo -e "\n$(${currentTime[@]}): INFO: the Intellij robot pid:" + $ROBOT_PID
+        # Look for the unrecoverable error
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT"
         rc=$?
         if [ "$rc" -ne 0 ]; then
@@ -193,6 +199,8 @@ main() {
             # In this case it is a regular error so we break out of the loop and report the error.
             break
         fi
+        kill -9 $IDE_PID $ROBOT_PID
+        sleep 5 # Wait a few moments for them to shutdown
     done
 
     # If there were any errors, gather some debug data before exiting.
