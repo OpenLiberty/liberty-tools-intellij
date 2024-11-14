@@ -189,7 +189,7 @@ main() {
         testRC=$?
         set +o pipefail # reset this option
 
-        ROBOT_PID=$(ps -ef | grep -i "Gradle Test Executor" | grep -v grep | awk '{print $2}')
+        ROBOT_PID=$(ps -ef | grep -i "org.gradle.wrapper.GradleWrapperMain test" | grep -v grep | awk '{print $2}')
         echo -e "\n$(${currentTime[@]}): INFO: the Intellij robot pid:" + $ROBOT_PID
         # Look for the unrecoverable error
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT"
