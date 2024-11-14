@@ -126,24 +126,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @return true if the given annotation matches the given annotation name and
      *         false otherwise.
      */
-    protected static boolean isMatchedAnnotation(PsiClass unit, PsiAnnotation annotation, String annotationFQName) {
+    protected static boolean isMatchedAnnotation(PsiAnnotation annotation, String annotationFQName) {
         String elementName = annotation.getQualifiedName();
-        if (nameEndsWith(annotationFQName, elementName) && unit != null) {
-            // For performance reason, we check if the import of annotation name is
-            // declared
-            if (isImportedJavaElement(unit, annotationFQName))
-                return true;
-            // only check fully qualified annotations
-            if (annotationFQName.equals(elementName)) {
-                PsiReference ref = annotation.getReference();
-                PsiElement def = ref.resolve();
-                if (def instanceof PsiAnnotation) {
-                    String fqName = ((PsiAnnotation)def).getQualifiedName();
-                    return fqName.equals(annotationFQName);
-                }
-            }
-        }
-        return false;
+        return annotationFQName.equals(elementName);
     }
 
     /**
@@ -157,17 +142,10 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         element name and false otherwise.
      */
     protected static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
-        if (nameEndsWith(javaElementFQName, javaElementName)) {
-            // For performance reason, we check if the import of annotation name is
-            // declared
-            if (isImportedJavaElement(type, javaElementFQName))
-                return true;
-            // only check fully qualified java element
-            if (javaElementFQName.equals(javaElementName)) {
-                JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
-                Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
-                return (o != null);
-            }
+        if (javaElementFQName.equals(javaElementName)) {
+            JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
+            Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
+            return (o != null);
         }
         return false;
     }
