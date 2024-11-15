@@ -75,7 +75,7 @@ jobs:
             echo "Merge commit SHA of PR ${{ env.REF_LSP4IJ }}: $pr_details"
             checkout_name="${{ env.REF_LSP4IJ }}"
             if [[ "$pr_details" == "null" ]]; then
-              echo "::warning file=::The merge commit SHA of the entered PR is null. Please try again later or use a different PR number."
+              echo "::warning file=::The merge commit SHA of the entered PR is 'null'. Please try again later or use a different PR number."
             fi
           elif [ -z "$pr_details" ]; then
             echo "No LSP4IJ checkout found. Using default case."
