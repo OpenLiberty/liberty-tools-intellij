@@ -35,7 +35,7 @@ on:
         type: boolean
         default: false
       refLsp4ij:
-        description: 'Reference/branch for Lsp4ij checkout'
+        description: 'Reference/branch/PR for LSP4IJ checkout'
         type: string
         required: true
         default: main
