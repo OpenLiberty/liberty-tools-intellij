@@ -224,7 +224,7 @@ If you want to check out LSP4IJ based on a PR number, you can check the box labe
 
 For example, if you want to trigger the Build Workflow from a branch of the LTI repository and build against LSP4IJ PR number `500` while using the `main` branch of LTI, you would configure it as follows:
 
-<img alt="Example" height="300" src="images/Allow-developer-to-input-PR-number.png" width="300" style="display: block; margin: 0 auto;"/>
+<img alt="Example" height="400" src="images/Allow-developer-to-input-PR-number.png" width="300" style="display: block; margin: 0 auto;"/>
 
 # How to specify LTI tags or branches in CI-CD builds
 
