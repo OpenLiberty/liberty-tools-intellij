@@ -30,7 +30,7 @@ on:
         type: boolean
         default: false
       lsp4ijPrNumber:
-        description: 'Run build with an LSP4IJ PR. Make sure to enter the LSP4IJ PR number in the \"Reference/branch/PR for LSP4IJ checkout\" input box.'
+        description: 'Run build with an LSP4IJ PR. Make sure to enter the LSP4IJ PR number in the "Reference/branch/PR for LSP4IJ checkout" input box.'
         required: true
         type: boolean
         default: false
