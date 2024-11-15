@@ -189,8 +189,6 @@ main() {
         testRC=$?
         set +o pipefail # reset this option
 
-        ROBOT_PID=$(ps -ef | grep -i "org.gradle.wrapper.GradleWrapperMain test" | grep -v grep | awk '{print $2}')
-        echo -e "\n$(${currentTime[@]}): INFO: the Intellij robot pid:" + $ROBOT_PID
         # Look for the unrecoverable error
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT"
         rc=$?
@@ -199,8 +197,9 @@ main() {
             # In this case it is a regular error so we break out of the loop and report the error.
             break
         fi
-        kill -9 $IDE_PID $ROBOT_PID
-        sleep 5 # Wait a few moments for them to shutdown
+        # Shutdown the IDE so that we can retry with a new one
+        kill -9 $IDE_PID
+        sleep 10 # Wait a few moments for IDE to shutdown
     done
 
     # If there were any errors, gather some debug data before exiting.
