@@ -218,7 +218,7 @@ For example, if you want to trigger the Build Workflow from the `main` branch of
 
 <img alt="Example" height="300" src="images/example-manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
-If you want to check out LSP4IJ based on a PR number, you can check the box labeled `If you checked this, please make sure to enter only the LSP4IJ PR number below` and specify the PR number in the provided text field labeled `Reference/branch for LSP4IJ checkout`. Additionally, you can specify the tag or branch of the `liberty-tools-intellij` repository to be used. 
+If you want to check out LSP4IJ based on a PR number, you can check the box labeled `Run build with an LSP4IJ PR.` and specify the PR number in the provided text field labeled `Reference/branch/PR for LSP4IJ checkout`. Additionally, you can specify the tag or branch of the `liberty-tools-intellij` repository to be used. 
 
 > NOTE: Make sure to enable the checkbox labeled `Use lsp4ij locally` as well for this case.
 
