@@ -24,10 +24,7 @@ import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JDTUtils {
@@ -70,7 +67,9 @@ public class JDTUtils {
     public static List<PsiMethod> getFieldAccessors(PsiJavaFile unit, PsiField field) {
         List<PsiMethod> accessors = new ArrayList<PsiMethod>();
         String fieldName = field.getName();
-        String accessorSuffix = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        // Use Locale.ROOT to avoid the "Turkish locale bug".
+        // See: https://github.com/OpenLiberty/liberty-tools-intellij/issues/1092
+        String accessorSuffix = fieldName.substring(0, 1).toUpperCase(Locale.ROOT) + fieldName.substring(1);
         List<String> accessorNames = ACCESSOR_PREFIXES.stream().map(s -> s + accessorSuffix).collect(Collectors.toList());
 
         for (PsiClass type : unit.getClasses()) {
