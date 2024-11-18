@@ -151,54 +151,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
-     * Returns true if the given Java class imports the given Java element and false
-     * otherwise.
-     * Must handle "import pkg.MyClass" and "import pkg.*"
-     *
-     * @param unit              Java class.
-     * @param javaElementFQName given Java element fully qualified name.
-     * @return true if the Java class imports the given Java element and false
-     *         otherwise.
-     */
-    protected static boolean isImportedJavaElement(PsiClass unit, String javaElementFQName) {
-        return isImportedJavaElement(unit, new String[] { javaElementFQName });
-    }
-
-    protected static boolean isImportedJavaElement(PsiClass unit, String[] javaElementFQNames) {
-        PsiFile file = unit.getContainingFile();
-        if (file instanceof PsiJavaFile) {
-            PsiJavaFile jFile = (PsiJavaFile) file;
-            PsiClass[] importClasses = jFile.getSingleClassImports(true);
-            for (PsiClass c : importClasses) {
-                for (String name : javaElementFQNames) {
-                    if (name.equals(c.getQualifiedName())) {
-                        return true;
-                    }
-                }
-            }
-            PsiElement[] importOnDemand = jFile.getOnDemandImports(false, true);
-            for (PsiElement e : importOnDemand) {
-                // should be class or package
-                if (e instanceof PsiClass) {
-                    for (String name : javaElementFQNames) {
-                        if (name.equals(((PsiClass) e).getQualifiedName())) {
-                            return true;
-                        }
-                    }
-                }
-                if (e instanceof PsiPackage) {
-                    for (String name : javaElementFQNames) {
-                        if (name.startsWith(((PsiPackage) e).getQualifiedName())) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns true if the given Java class implements one of the given interfaces
      * and false otherwise.
      *
