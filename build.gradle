@@ -1,18 +1,22 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.17.3'
-    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
+    id 'org.jetbrains.intellij.platform' version '2.1.0'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.20'
 }
 
 group 'io.openliberty.tools'
 version '24.0.9'
 
-sourceCompatibility = 17
-targetCompatibility = 17
-
-def remoteRobotVersion = "0.11.18"
+def remoteRobotVersion = "0.11.23"
 // To switch to nightly version, append "@nightly" to the version number (i.e. 0.4.1-20240828-013108@nightly)
 def lsp4ijVersion = '0.7.0'
+
+allprojects {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+}
 
 repositories {
     mavenCentral()
@@ -43,7 +47,9 @@ repositories {
     maven {
         url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
     }
-
+    intellijPlatform {
+        defaultRepositories()
+    }
     mavenLocal() // TODO remove once Liberty LS is publicly available
 }
 
@@ -60,7 +66,7 @@ configurations {
     // Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = javaVersion
         }
     }
 }
@@ -97,9 +103,7 @@ dependencies {
     testImplementation 'com.intellij.remoterobot:remote-robot:' + remoteRobotVersion
     testImplementation 'com.intellij.remoterobot:remote-fixtures:' + remoteRobotVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation('com.jetbrains.intellij.maven:maven-test-framework:241.15989.150') {
-        transitive = false
-    }
+
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
 
@@ -129,8 +133,24 @@ dependencies {
     implementation files(new File(buildDir, 'server')) {
         builtBy 'copyDeps'
     }
-}
+    intellijPlatform {
+        // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+        bundledPlugins providers.gradleProperty("platformBundledPlugins").orElse("").get().split(',').toList()
 
+        def lsp4ij = providers.gradleProperty('useLocal') && providers.gradleProperty('useLocal') == 'true' ?
+                file("../lsp4ij/build/distributions/LSP4IJ/") :
+                'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
+        plugins lsp4ij
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
+
+        testFramework TestFrameworkType.Platform.INSTANCE
+        testFramework TestFrameworkType.Plugin.Java.INSTANCE
+        testFramework TestFrameworkType.Plugin.Maven.INSTANCE
+    }
+}
 task copyDeps(type: Copy) {
     from configurations.lsp
     into new File(buildDir, 'server/server')
@@ -138,20 +158,22 @@ task copyDeps(type: Copy) {
 }
 
 runIde {
-    jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
+    jvmArgumentProviders.add({
+        [
+                "--add-exports",
+                "java.base/jdk.internal.vm=ALL-UNNAMED",
+        ]
+    } as CommandLineArgumentProvider)
 }
 
-intellij {
-    // For a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    version = '2024.1.6'
+test {
+    useJUnitPlatform()
 
-    def lsp4ij = project.hasProperty('useLocal') && project.property('useLocal') == 'true' ?
-            file("../lsp4ij/build/distributions/LSP4IJ/") :
-            'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
-    plugins = ['java', 'maven', 'gradle-java', 'properties', 'terminal', 'org.jetbrains.idea.maven', 'com.intellij.gradle', lsp4ij]
-    updateSinceUntilBuild = false
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
 }
-
 downloadRobotServerPlugin {
     version.set(remoteRobotVersion)
 }
@@ -168,27 +190,15 @@ runIdeForUiTests {
     systemProperty "apple.laf.useScreenMenuBar", "false"
 }
 
-test {
-    useJUnitPlatform()
-
-    testLogging {
-        showStandardStreams = true
-        exceptionFormat = 'full'
-    }
-}
-
-tasks {
-    // Disabling buildSearchableOptions, which runs as part of the buildPlugin task.
-    // this is to buildSearchableOptions to workaround the "Only one instance of IDEA can be run at a time" problem.
-    // Per documentation: https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#the-development-instance-sandbox-directory
-    buildSearchableOptions {
-        enabled = false
-    }
-}
-
-patchPluginXml {
-    changeNotes = """
-        <h2> 24.0.9 </h2>
+intellijPlatform {
+    buildSearchableOptions = false
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            untilBuild = providers.gradleProperty("pluginUntilBuild")
+        }
+        changeNotes = """
+         <h2> 24.0.9 </h2>
         <p>Version 24.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.9 requires IntelliJ IDEA version 2024.1.* ONLY and a minimum of Java 17.</p>
         Notable changes:
         <ul>
@@ -326,5 +336,6 @@ patchPluginXml {
         <li> First preview release
         </ul>
         """
-    version project.version
+        version project.version
+    }
 }
