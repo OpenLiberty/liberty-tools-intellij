@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 plugins {
     id 'java'
     id 'org.jetbrains.intellij.platform' version '2.1.0'
@@ -160,6 +161,7 @@ task copyDeps(type: Copy) {
 intellijPlatformTesting.runIde {
     runIdeLocally {
         version = providers.gradleProperty("runIdeUiversion")
+        type = IntelliJPlatformType.IntellijIdeaCommunity
         task {
             // Java version for this task is set to Java 21
             javaLauncher = javaToolchains.launcherFor {
@@ -187,6 +189,7 @@ test {
 intellijPlatformTesting.runIde {
     runIdeForUiTests {
         version = providers.gradleProperty("runIdeUiversion")
+        type = IntelliJPlatformType.IntellijIdeaCommunity
         task {
             // Java version for this task is set to Java 21
             javaLauncher = javaToolchains.launcherFor {
