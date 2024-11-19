@@ -157,13 +157,22 @@ task copyDeps(type: Copy) {
     rename '^(.*)(-[0-9]+[.[0-9]+]+(-SNAPSHOT)?)(.*)$', '$1$4'
 }
 
-runIde {
-    jvmArgumentProviders.add({
-        [
-                "--add-exports",
-                "java.base/jdk.internal.vm=ALL-UNNAMED",
-        ]
-    } as CommandLineArgumentProvider)
+intellijPlatformTesting.runIde {
+    runIdeLocally {
+        version = providers.gradleProperty("runIdeUiversion")
+        task {
+            // Java version for this task is set to Java 21
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+            jvmArgumentProviders.add({
+                [
+                        "--add-exports",
+                        "java.base/jdk.internal.vm=ALL-UNNAMED"
+                ]
+            } as CommandLineArgumentProvider)
+        }
+    }
 }
 
 test {
