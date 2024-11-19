@@ -177,7 +177,12 @@ test {
 
 intellijPlatformTesting.runIde {
     runIdeForUiTests {
+        version = providers.gradleProperty("runIdeUiversion")
         task {
+            // Java version for this task is set to Java 21
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
             jvmArgumentProviders.add({
                 [
                         "-Drobot-server.port=8082",
