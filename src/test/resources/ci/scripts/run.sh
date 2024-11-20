@@ -192,14 +192,14 @@ main() {
     ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
     testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
     set +o pipefail # reset this option
-    grep -iq "finished with non-zero exit value 23" "$JUNIT_OUTPUT_TXT" && testRC=23
+    grep -iq "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
     if [ "$testRC" -eq 23 ]; then
         # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
         kill -1 $IDE_PID # SIGHUP (hang up the phone)
         sleep 5
         kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
         sleep 5
-        ps -f $IDE_PID # display whether it is still there in the log
+        ps -f $IDE_PID # display whether the process is still there
     fi
 
     # If there were any errors, gather some debug data before exiting.
