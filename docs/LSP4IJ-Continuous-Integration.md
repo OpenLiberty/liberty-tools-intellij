@@ -40,7 +40,7 @@ The build.yaml workflow is triggered by the following events:
 - Workflow Dispatch: Allows manual triggering of the workflow with customizable inputs.
 
 
-  <img alt="Workflow-dispatch" height="300" src="images/Workflow-dispatch.png" width="300" style="display: block; margin: 0 auto;"/>
+  <img alt="Workflow-dispatch" height="400" src="images/Workflow-dispatch.png" width="300" style="display: block; margin: 0 auto;"/>
 
 To manually trigger the workflow, refer to the [Manually Trigger Workflow](#manually-trigger-workflow) section.
 
