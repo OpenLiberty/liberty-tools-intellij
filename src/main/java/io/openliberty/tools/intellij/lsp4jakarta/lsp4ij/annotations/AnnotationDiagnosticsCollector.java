@@ -97,9 +97,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             for (Tuple.Two<PsiAnnotation, PsiElement> annotatable : annotatables) {
                 PsiAnnotation annotation = annotatable.getFirst();
                 PsiElement element = annotatable.getSecond();
-                PsiClass topLevel = PsiUtil.getTopLevelClass(element);
 
-                if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
+                if (isMatchedAnnotation(annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
                     for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
                         // If date element exists and is non-empty, it must follow ISO 8601 format.
                         if (pair.getAttributeName().equals("date")) {
@@ -115,7 +114,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                             }
                         }
                     }
-                } else if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
                     if (element instanceof PsiClass) {
                         PsiClass type = (PsiClass) element;
                         Boolean nameEmpty = true;
@@ -146,7 +145,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         }
                     }
                 }
-                if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
+                if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
                         if (method.getParameters().length != 0) {
@@ -173,7 +172,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                     DiagnosticSeverity.Warning));
                         }
                     }
-                } else if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
                         if (method.getParameters().length != 0) {
