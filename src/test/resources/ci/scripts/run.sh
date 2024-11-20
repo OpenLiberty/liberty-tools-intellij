@@ -83,8 +83,8 @@ gatherDebugData() {
     fi
 
     echo -e "DEBUG: Gathering IDE JUnit logs...\n"
-    if [ -f "$workingDir/junit.out" ]; then
-        cp "$workingDir"/junit.out "$workingDir"/build/reports/.
+    if [ -f "$workingDir/build/junit.out" ]; then
+        cp "$workingDir"/build/junit.out "$workingDir"/build/reports/.
     fi
 
     echo -e "DEBUG: Gathering videos...\n"
