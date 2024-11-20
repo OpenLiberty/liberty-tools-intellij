@@ -209,7 +209,7 @@ LSP4IJ nightly builds can be downloaded from the [JetBrains Marketplace](https:/
 
 ## Manually Trigger Workflow
 To manually trigger the build.yaml workflow , navigate to the [Actions](https://github.com/OpenLiberty/liberty-tools-intellij/actions) tab in the OpenLiberty/liberty-tools-intellij repository. On the left side of the page, select Build Workflow under All workflows. You'll see a message stating, This workflow has a workflow_dispatch event trigger. To the right, there will be a Run workflow button. You can choose the branch from which to run the workflow.
-<img alt="Manually-trigger" height="300" src="images/manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
+<img alt="Manually-trigger" height="350" src="images/manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
 If you want to use the version of lsp4ij specified in the build.gradle file, there's no need to check the box labeled Use lsp4ij locally. However, if you want to check out a different tag, merge commit SHA, or specific branch of lsp4ij, you can check the box and specify the branch in the provided field. Additionally, you can specify the tag or branch of liberty-tools-intellij to be used.
 
