@@ -163,10 +163,6 @@ intellijPlatformTesting.runIde {
         version = providers.gradleProperty("runIdeUiversion")
         type = IntelliJPlatformType.IntellijIdeaCommunity
         task {
-            // Java version for this task is set to Java 21
-            javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(21)
-            }
             jvmArgumentProviders.add({
                 [
                         "--add-exports",
@@ -191,10 +187,6 @@ intellijPlatformTesting.runIde {
         version = providers.gradleProperty("runIdeUiversion")
         type = IntelliJPlatformType.IntellijIdeaCommunity
         task {
-            // Java version for this task is set to Java 21
-            javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(21)
-            }
             jvmArgumentProviders.add({
                 [
                         "-Drobot-server.port=8082",
