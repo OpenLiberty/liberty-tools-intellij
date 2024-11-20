@@ -195,11 +195,15 @@ main() {
     grep -iq "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
     if [ "$testRC" -eq 23 ]; then
         # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
-        kill -1 $IDE_PID # SIGHUP (hang up the phone)
-        sleep 5
-        kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
-        sleep 5
-        ps -f $IDE_PID # display whether the process is still there
+        if [[ $OS == "MINGW64_NT"* ]]; then
+            stop-process -name idea64
+        else
+            kill -1 $IDE_PID # SIGHUP (hang up the phone)
+            sleep 5
+            kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
+            sleep 5
+            ps -f $IDE_PID # display whether the process is still there
+        fi
     fi
 
     # If there were any errors, gather some debug data before exiting.
