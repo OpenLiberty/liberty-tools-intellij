@@ -582,14 +582,16 @@ public class TestUtils {
     final static BufferedReader reader;
 
     static {
+        BufferedReader reader1;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
+            reader1 = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            reader1 = null;
         }
+        reader = reader1;
     }
 
-    public static void detectFatalError() {
+    public static synchronized void detectFatalError() {
         try {
             // Flush our output and then wait briefly for the process running 'tee' to flush output to the
             // file that the buffered reader is reading.
@@ -599,12 +601,10 @@ public class TestUtils {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 if (line.contains("SocketTimeoutException")) {
-                    System.exit(23);
+                    System.exit(1);
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException | NullPointerException e) {
             throw new RuntimeException(e);
         }
     }
