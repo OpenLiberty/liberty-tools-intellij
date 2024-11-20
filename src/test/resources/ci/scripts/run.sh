@@ -134,6 +134,7 @@ startIDE() {
     while ! ${callLivenessEndpoint[@]} | grep -qF 'Welcome to IntelliJ IDEA'; do
         if [ $count -eq 24 ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE Welcome Page to start. Output:"
+            gatherDebugData $(pwd)
             exit 12
         fi
         count=`expr $count + 1`
@@ -189,8 +190,17 @@ main() {
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
     set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
     ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
-    testRC=$?
+    testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
     set +o pipefail # reset this option
+    grep -iq "finished with non-zero exit value 23" "$JUNIT_OUTPUT_TXT" && testRC=23
+    if [ "$testRC" -eq 23 ]; then
+        # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
+        kill -1 $IDE_PID # SIGHUP (hang up the phone)
+        sleep 5
+        kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
+        sleep 5
+        ps -f $IDE_PID # display whether it is still there in the log
+    fi
 
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then
