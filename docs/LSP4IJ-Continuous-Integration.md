@@ -216,7 +216,7 @@ If you want to use the version of lsp4ij specified in the build.gradle file, the
 
 For example, if you want to trigger the Build Workflow from the `main` branch of the LTI repository and build against version `0.5.0` of LSP4IJ and the `main` branch of LTI, you would configure it as follows:
 
-<img alt="Example" height="300" src="images/example-manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
+<img alt="Example" height="400" src="images/example-manually-trigger.png" width="300" style="display: block; margin: 0 auto;"/>
 
 If you want to check out LSP4IJ based on a PR number, you can check the box labeled `Run build with an LSP4IJ PR.` and specify the PR number in the provided text field labeled `Reference/branch/PR for LSP4IJ checkout`. Additionally, you can specify the tag or branch of the `liberty-tools-intellij` repository to be used. 
 
