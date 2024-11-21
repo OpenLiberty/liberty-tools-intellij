@@ -202,6 +202,9 @@ main() {
         # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
         if [[ $OS == "MINGW64_NT"* ]]; then
             kill -n 1 $IDE_PID
+            sleep 5
+            kill -n 9 $IDE_PID
+            sleep 5
             ps -ef # display all user processes
         else
             kill -1 $IDE_PID # SIGHUP (hang up the phone)
