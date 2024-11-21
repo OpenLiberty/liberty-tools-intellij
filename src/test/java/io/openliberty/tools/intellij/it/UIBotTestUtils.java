@@ -2533,4 +2533,17 @@ public class UIBotTestUtils {
             // The Terminal tab is most likely closed.
         }
     }
+
+    public static void findWelcomeFrame(RemoteRobot remoteRobot) {
+        try {
+            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
+        } catch (WaitForConditionTimeoutException e) {
+            // If the welcome frame is not found then there is a project loaded.
+            // Close the editor files and close the project to get back to the welcome frame.
+            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+            UIBotTestUtils.closeProjectView(remoteRobot);
+            UIBotTestUtils.closeProjectFrame(remoteRobot);
+            UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+        }
+    }
 }

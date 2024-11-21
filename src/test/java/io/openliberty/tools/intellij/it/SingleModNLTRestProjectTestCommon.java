@@ -296,7 +296,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
         waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
-        remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
+        UIBotTestUtils.findWelcomeFrame(remoteRobot);
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         // IntelliJ does not start building and indexing until the Project View is open
