@@ -190,30 +190,35 @@ main() {
     fi
 
     export JUNIT_OUTPUT_TXT="$currentLoc"/build/junit.out
-    startIDE
-    # Run the tests
-    echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
-    set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
-    ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
-    testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
-    set +o pipefail # reset this option
-    grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
-    if [ "$testRC" -eq 23 ]; then
-        # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
-        if [[ $OS == "MINGW64_NT"* ]]; then
-            kill -n 1 $IDE_PID
-            sleep 5
-            kill -n 9 $IDE_PID
-            sleep 5
-            ps -ef # display all user processes
+    for restartCount in {1..5}; do
+        startIDE
+        # Run the tests
+        echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
+        set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
+        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
+        testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
+        set +o pipefail # reset this option
+        grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
+        if [ "$testRC" -eq 23 ]; then
+            # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
+            if [[ $OS == "MINGW64_NT"* ]]; then
+                kill -n 1 $IDE_PID
+                sleep 5
+                kill -n 9 $IDE_PID
+                sleep 5
+                ps -ef # display all user processes
+            else
+                kill -1 $IDE_PID # SIGHUP (hang up the phone)
+                sleep 5
+                kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
+                sleep 5
+                ps -f $IDE_PID # display whether the process is still there
+            fi
         else
-            kill -1 $IDE_PID # SIGHUP (hang up the phone)
-            sleep 5
-            kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
-            sleep 5
-            ps -f $IDE_PID # display whether the process is still there
+            # Success or failure, if it is not SocketTimeoutException then exit and report results
+            break;
         fi
-    fi
+    done
 
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then
