@@ -140,7 +140,12 @@ startIDE() {
         count=`expr $count + 1`
         echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
     done
-    IDE_PID=$(ps -ef | grep -i idea.main | grep -v grep | awk '{print $2}')
+    if [[ $OS == "MINGW64_NT"* ]]; then
+        # On Windows ps -ef only shows the processes for the current user (i.e. 3-4 processes)
+        IDE_PID=$(ps -ef | grep -i java | awk '{print $2}')
+    else
+        IDE_PID=$(ps -ef | grep -i idea.main | grep -v grep | awk '{print $2}')
+    fi
     echo -e "\n$(${currentTime[@]}): INFO: the Intellij IDE pid:" + $IDE_PID
 }
 
@@ -192,11 +197,12 @@ main() {
     ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
     testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
     set +o pipefail # reset this option
-    grep -iq "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
+    grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
     if [ "$testRC" -eq 23 ]; then
         # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
         if [[ $OS == "MINGW64_NT"* ]]; then
-            stop-process -name idea64
+            kill -n 1 $IDE_PID
+            ps -ef # display all user processes
         else
             kill -1 $IDE_PID # SIGHUP (hang up the phone)
             sleep 5
