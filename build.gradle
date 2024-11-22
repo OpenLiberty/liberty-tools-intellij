@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 plugins {
     id 'java'
     id 'org.jetbrains.intellij.platform' version '2.1.0'
@@ -157,13 +158,19 @@ task copyDeps(type: Copy) {
     rename '^(.*)(-[0-9]+[.[0-9]+]+(-SNAPSHOT)?)(.*)$', '$1$4'
 }
 
-runIde {
-    jvmArgumentProviders.add({
-        [
-                "--add-exports",
-                "java.base/jdk.internal.vm=ALL-UNNAMED",
-        ]
-    } as CommandLineArgumentProvider)
+intellijPlatformTesting.runIde {
+    runIdeLocally {
+        version = providers.gradleProperty("ideTargetVersion")
+        type = IntelliJPlatformType.IntellijIdeaCommunity
+        task {
+            jvmArgumentProviders.add({
+                [
+                        "--add-exports",
+                        "java.base/jdk.internal.vm=ALL-UNNAMED"
+                ]
+            } as CommandLineArgumentProvider)
+        }
+    }
 }
 
 test {
@@ -177,6 +184,8 @@ test {
 
 intellijPlatformTesting.runIde {
     runIdeForUiTests {
+        version = providers.gradleProperty("ideTargetVersion")
+        type = IntelliJPlatformType.IntellijIdeaCommunity
         task {
             jvmArgumentProviders.add({
                 [

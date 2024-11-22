@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="liberty-tools-intellij [runIde]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="liberty-tools-intellij [runIdeLocally]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="runIde" />
+          <option value="runIdeLocally" />
         </list>
       </option>
       <option name="vmOptions" />
