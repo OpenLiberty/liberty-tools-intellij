@@ -2432,7 +2432,7 @@ public class UIBotTestUtils {
     public static boolean inWelcomeFrame(RemoteRobot remoteRobot) {
         boolean inWelcomeFrame = false;
         try {
-            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(2));
+            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(5));
             inWelcomeFrame = true;
         } catch (Exception e) {
             // Not in welcome frame.
@@ -2450,7 +2450,7 @@ public class UIBotTestUtils {
     public static boolean inProjectFrame(RemoteRobot remoteRobot) {
         boolean inProjectFrame = false;
         try {
-            remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
+            remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(5));
             inProjectFrame = true;
         } catch (Exception e) {
             // Not in project frame.
@@ -2543,6 +2543,7 @@ public class UIBotTestUtils {
             UIBotTestUtils.closeAllEditorTabs(remoteRobot);
             UIBotTestUtils.closeProjectView(remoteRobot);
             UIBotTestUtils.closeProjectFrame(remoteRobot);
+            TestUtils.sleepAndIgnoreException(30); // takes about 15s to render the whole Welcome page including the Open button on Mac.
             UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
         }
     }
