@@ -80,7 +80,7 @@ dependencies {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2-SNAPSHOT') {
+    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2') {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
@@ -123,7 +123,7 @@ dependencies {
     lsp('io.openliberty.tools:liberty-langserver:2.2:jar-with-dependencies') {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2-SNAPSHOT:jar-with-dependencies') {
+    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:0.2.2:jar-with-dependencies') {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {
