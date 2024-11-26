@@ -190,6 +190,9 @@ main() {
     fi
 
     export JUNIT_OUTPUT_TXT="$currentLoc"/build/junit.out
+    # Run the tests up to 5 times. "SocketTimeoutException" seems to be rare so hopefully 5
+    # repetitions are enough. Also a failure takes about 1 hour and the github time limit is
+    # 6 hours so it is unlikely we could run more than 5 times in one build.
     for restartCount in {1..5}; do
         startIDE
         # Run the tests
