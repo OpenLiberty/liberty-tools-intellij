@@ -14,7 +14,7 @@ import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
-import com.intellij.ui.HyperlinkLabel;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -184,7 +184,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String text = xpathVars[0];
         String waitTime = xpathVars[1];
         return find(ComponentFixture.class,
-                byXpath("//div[@class='StripeButton' and @text='" + text + "']"),
+                byXpath("//div[@tooltiptext='" + text + "']"),
                 Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
@@ -197,7 +197,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     public ComponentFixture getSETabLabel(String... xpathVars) {
         String text = xpathVars[0];
         return find(ComponentFixture.class,
-                byXpath("//div[@class='SETabLabel' and @text='" + text + "']"),
+                byXpath("//div[@text='" + text + "']"),
                 Duration.ofSeconds(10));
     }
 
@@ -256,7 +256,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
      */
     public ContainerFixture getDiagnosticPane() {
-        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(5));
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JRootPane']"), Duration.ofSeconds(5));
     }
 
     /**
@@ -324,7 +324,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @return The ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
-        return find(ContainerFixture.class, byXpath("//div[@class='RunConfigurationsComboBoxButton']"), Duration.ofSeconds(5));
+        return find(ContainerFixture.class, byXpath("//div[@class='ActionButtonWithText']"), Duration.ofSeconds(5));
     }
 
     /**
@@ -335,5 +335,37 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public boolean isComponentEnabled(ComponentFixture component) {
         return component.callJs("component.isEnabled();", false);
+    }
+    /**
+     *
+     * Clicks on the "Main Menu" and performs two actions in the subsequent menu popups.
+     * The method first clicks the main menu, then locates and interacts with two successive menu items.
+     * If any menu or action cannot be found within the timeout period, an error message is logged.
+     *
+     * @param remoteRobot the instance used to interact with the UI.
+     * @param firstAction the text of the first action to be selected in the first menu.
+     *
+     */
+    public void clickOnMainMenuList(RemoteRobot remoteRobot, String firstAction) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            ComponentFixture mainMenu = projectFrame.getStripeButton("Main Menu", "10");
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                    Duration.ofSeconds(1),
+                    "Waiting for the main menu button on the window items",
+                    "The  main menu item is not enabled",
+                    () -> projectFrame.isComponentEnabled(mainMenu));
+            mainMenu.click();
+            ComponentFixture firstMenuPopup = projectFrame.find(ComponentFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                    Duration.ofSeconds(1),
+                    "Waiting for the "+firstAction+" action menu on the main window pane to be enabled",
+                    "The "+firstAction+" action menu on then main window pane is not enabled",
+                    () -> projectFrame.isComponentEnabled(firstMenuPopup));
+            firstMenuPopup.findText(firstAction).click();
+
+        } catch (WaitForConditionTimeoutException e) {
+            System.err.println("ERROR: Timeout while trying to find or interact with menu items.");
+        }
     }
 }
