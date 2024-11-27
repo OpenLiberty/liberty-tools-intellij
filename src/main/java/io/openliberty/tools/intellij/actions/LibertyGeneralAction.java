@@ -55,7 +55,7 @@ public abstract class LibertyGeneralAction extends AnAction {
 
         // Obtain the liberty module associated to the current action.
         LibertyModule libertyModule = null;
-        VirtualFile buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+        VirtualFile buildFile = e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
         if (buildFile != null) {
             // The action is being driven from the project drop-down tree menu or from the project context menu.
             libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);

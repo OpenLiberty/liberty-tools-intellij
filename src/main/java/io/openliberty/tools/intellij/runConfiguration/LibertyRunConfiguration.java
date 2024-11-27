@@ -143,7 +143,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             if (CommonDataKeys.PROJECT.is(dataId)) {
                 return libertyModule.getProject();
             }
-            if (Constants.LIBERTY_BUILD_FILE.equals(dataId)) {
+            if (Constants.LIBERTY_BUILD_FILE.getName().equals(dataId)) {
                 return libertyModule.getBuildFile();
             }
             return null;

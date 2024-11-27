@@ -9,6 +9,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.actionSystem.DataKey;
+import com.intellij.openapi.vfs.VirtualFile;
+
 import java.util.*;
 
 public final class Constants {
@@ -46,7 +49,7 @@ public final class Constants {
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
-    public static final String LIBERTY_BUILD_FILE = "LIBERTY_BUILD_FILE";
+    public static final DataKey<VirtualFile> LIBERTY_BUILD_FILE = DataKey.create("LIBERTY_BUILD_FILE");
     public static final String LIBERTY_PROJECT_NAME = "LIBERTY_PROJECT_NAME";
     public static final String LIBERTY_PROJECT_TYPE = "LIBERTY_PROJECT_TYPE";
     public static final String LIBERTY_PROJECT_MAP = "LIBERTY_PROJECT_MAP";
