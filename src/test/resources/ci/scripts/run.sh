@@ -134,12 +134,18 @@ startIDE() {
     while ! ${callLivenessEndpoint[@]} | grep -qF 'Welcome to IntelliJ IDEA'; do
         if [ $count -eq 24 ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE Welcome Page to start. Output:"
+            gatherDebugData $(pwd)
             exit 12
         fi
         count=`expr $count + 1`
         echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
     done
-    IDE_PID=$(ps -ef | grep -i idea.main | grep -v grep | awk '{print $2}')
+    if [[ $OS == "MINGW64_NT"* ]]; then
+        # On Windows ps -ef only shows the processes for the current user (i.e. 3-4 processes)
+        IDE_PID=$(ps -ef | grep -i java | awk '{print $2}')
+    else
+        IDE_PID=$(ps -ef | grep -i idea.main | grep -v grep | awk '{print $2}')
+    fi
     echo -e "\n$(${currentTime[@]}): INFO: the Intellij IDE pid:" + $IDE_PID
 }
 
@@ -189,8 +195,25 @@ main() {
     echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
     set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
     ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
-    testRC=$?
+    testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
     set +o pipefail # reset this option
+    grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
+    if [ "$testRC" -eq 23 ]; then
+        # rc = 23 means SocketTimeoutException detected, kill the IDE and try again
+        if [[ $OS == "MINGW64_NT"* ]]; then
+            kill -n 1 $IDE_PID
+            sleep 5
+            kill -n 9 $IDE_PID
+            sleep 5
+            ps -ef # display all user processes
+        else
+            kill -1 $IDE_PID # SIGHUP (hang up the phone)
+            sleep 5
+            kill -9 $IDE_PID # SIGKILL, in case the SIGHUP did not work
+            sleep 5
+            ps -f $IDE_PID # display whether the process is still there
+        fi
+    fi
 
     # If there were any errors, gather some debug data before exiting.
     if [ "$testRC" -ne 0 ]; then

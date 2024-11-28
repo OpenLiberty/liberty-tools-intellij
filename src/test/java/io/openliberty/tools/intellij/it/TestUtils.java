@@ -576,7 +576,7 @@ public class TestUtils {
      * This searches the output of this JUnit run for SocketTimeoutException which
      * has been identified as a fatal error and occurs during the Mac tests.
      */
-    public static synchronized void detectFatalError() {
+    public static void detectFatalError() {
         final String outputFile = System.getenv("JUNIT_OUTPUT_TXT");
         try {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
