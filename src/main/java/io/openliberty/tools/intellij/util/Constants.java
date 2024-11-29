@@ -49,7 +49,8 @@ public final class Constants {
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
-    public static final DataKey<VirtualFile> LIBERTY_BUILD_FILE = DataKey.create("LIBERTY_BUILD_FILE");
+    // Using DataKey instead of a string because the getData(String) method is deprecated starting with intellij 2024.2
+    public static final DataKey<VirtualFile> LIBERTY_BUILD_FILE_DATAKEY = DataKey.create("LIBERTY_BUILD_FILE");
     public static final String LIBERTY_PROJECT_NAME = "LIBERTY_PROJECT_NAME";
     public static final String LIBERTY_PROJECT_TYPE = "LIBERTY_PROJECT_TYPE";
     public static final String LIBERTY_PROJECT_MAP = "LIBERTY_PROJECT_MAP";

@@ -28,7 +28,7 @@ public class TreeDataProvider implements DataProvider {
     @Nullable
     @Override
     public Object getData(@NotNull String dataId) {
-        if (dataId.equals(Constants.LIBERTY_BUILD_FILE.getName())) {
+        if (dataId.equals(Constants.LIBERTY_BUILD_FILE_DATAKEY.getName())) {
             return this.currentFile;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_NAME)) {
             return this.projectName;
