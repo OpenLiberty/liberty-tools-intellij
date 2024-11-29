@@ -41,6 +41,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -236,6 +237,33 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
                 LibertyModuleNode parentNode = (LibertyModuleNode) treeNode.getParent();
                 treeDataProvider.saveData(parentNode.getFilePath(), parentNode.getName(), parentNode.getProjectType());
+            }
+        });
+
+        tree.addMouseMotionListener(new MouseMotionAdapter() {
+            private String currentTooltipText = null;
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                super.mouseMoved(e);
+
+                TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+                if (path == null ) {
+                    if (currentTooltipText != null) {
+                        tree.setToolTipText(null);
+                        currentTooltipText = null;
+                    }
+                } else {
+                    Object node = path.getLastPathComponent();
+                    if (node instanceof LibertyModuleNode) {
+                        LibertyModuleNode libertyNode = (LibertyModuleNode) node;
+                        String tooltipText = libertyNode.getFilePath().getPath();
+                        if (!tooltipText.equals(currentTooltipText)) {
+                            tree.setToolTipText(tooltipText);
+                            currentTooltipText = tooltipText;
+                        }
+                    }
+                }
             }
         });
 
