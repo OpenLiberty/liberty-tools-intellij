@@ -57,8 +57,6 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-        // if (CHECK_CODE_ACTIONS) {
         // test associated quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\n" +
@@ -69,7 +67,6 @@ public class JakartaServletTest extends BaseJakartaTest {
         TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-        // }
     }
 
     @Test
@@ -237,8 +234,7 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-//        if (CHECK_CODE_ACTIONS) {
+
             // test associated quick-fix code action
             JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
             String newText = "package io.openliberty.sample.jakarta.servlet;" +
@@ -249,7 +245,6 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementFilter' implement 'Filter'", d, te);
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-//        }
     }
 
     @Test
@@ -269,8 +264,6 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-//        if (CHECK_CODE_ACTIONS) {
         // test associated quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
 
@@ -318,5 +311,4 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3, ca4, ca5, ca6, ca7);
     }
-//    }
 }
