@@ -234,13 +234,12 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-
-            // test associated quick-fix code action
-            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            String newText = "package io.openliberty.sample.jakarta.servlet;" +
-                    "\n\nimport jakarta.servlet.Filter;\nimport jakarta.servlet.annotation.WebFilter;" +
-                    "\n\n@WebFilter(urlPatterns = {\"/filter\"})\npublic class DontImplementFilter implements " +
-                    "Filter {\n\n}";
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.servlet;" +
+                "\n\nimport jakarta.servlet.Filter;\nimport jakarta.servlet.annotation.WebFilter;" +
+                "\n\n@WebFilter(urlPatterns = {\"/filter\"})\npublic class DontImplementFilter implements " +
+                "Filter {\n\n}";
         TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
 
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementFilter' implement 'Filter'", d, te);
