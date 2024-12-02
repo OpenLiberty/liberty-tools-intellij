@@ -55,7 +55,10 @@ public abstract class LibertyGeneralAction extends AnAction {
 
         // Obtain the liberty module associated to the current action.
         LibertyModule libertyModule = null;
-        VirtualFile buildFile = (VirtualFile) e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE);
+        //Using DataKey instead of a string because the getData(String) method is deprecated
+        // and does not work as expected in IntelliJ 2024.2 and later versions.
+        // This ensures compatibility and proper retrieval of the build file across all supported versions.
+        VirtualFile buildFile = e.getDataContext().getData(Constants.LIBERTY_BUILD_FILE_DATAKEY);
         if (buildFile != null) {
             // The action is being driven from the project drop-down tree menu or from the project context menu.
             libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);

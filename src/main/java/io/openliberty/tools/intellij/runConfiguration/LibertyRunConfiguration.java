@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation.
+ * Copyright (c) 2022, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -143,7 +143,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
             if (CommonDataKeys.PROJECT.is(dataId)) {
                 return libertyModule.getProject();
             }
-            if (Constants.LIBERTY_BUILD_FILE.equals(dataId)) {
+            if (Constants.LIBERTY_BUILD_FILE_DATAKEY.getName().equals(dataId)) {
                 return libertyModule.getBuildFile();
             }
             return null;
