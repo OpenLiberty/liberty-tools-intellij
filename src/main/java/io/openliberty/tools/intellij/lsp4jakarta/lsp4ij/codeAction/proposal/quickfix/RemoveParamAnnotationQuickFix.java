@@ -32,6 +32,8 @@
  import java.util.logging.Logger;
  import java.util.logging.Level;
 
+ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
+
  /**
   * QuickFix for removing parameter annotations
   */
@@ -80,9 +82,9 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
     private String getLabel(PsiParameter parameter,List<String> annotationsToRemove) {
         final StringBuilder sb = new StringBuilder();
         // Java annotations in comma delimited list, assume that is ok.
-        sb.append("@").append(getShortName(annotationsToRemove.get(0)));
+        sb.append("@").append(getSimpleName(annotationsToRemove.get(0)));
         for (int j = 1; j < annotationsToRemove.size(); ++j) {
-            sb.append(", @").append(getShortName(annotationsToRemove.get(j)));
+            sb.append(", @").append(getSimpleName(annotationsToRemove.get(j)));
         }
         return Messages.getMessage("RemoveTheModifierFromParameter", sb.toString(), parameter.getName().toString());
     }
@@ -134,13 +136,5 @@ public abstract class RemoveParamAnnotationQuickFix implements IJavaCodeActionPa
 
     protected PsiClass getBinding(PsiElement node) {
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
-    }
-
-    protected static String getShortName(String qualifiedName) {
-        final int i = qualifiedName.lastIndexOf('.');
-        if (i != -1) {
-            return qualifiedName.substring(i+1);
-        }
-        return qualifiedName;
     }
 }
