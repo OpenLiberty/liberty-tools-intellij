@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the 
  * terms of the Eclipse Public License v. 2.0 which is available at 
@@ -76,7 +76,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         PsiMethod[] allMethods = type.getMethods();
         for (PsiMethod method : allMethods) {
             PsiAnnotation[] allAnnotations = method.getAnnotations();
-            Set<String> specialParamTypes = null, rawSpecialParamTypes = null;
+            Set<String> specialParamTypes = null;
 
             for (PsiAnnotation annotation : allAnnotations) {
                 String annotationName = annotation.getQualifiedName();
@@ -84,11 +84,9 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                 if (isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_OPEN)) {
                     specialParamTypes = WebSocketConstants.ON_OPEN_PARAM_OPT_TYPES;
-                    rawSpecialParamTypes = WebSocketConstants.RAW_ON_OPEN_PARAM_OPT_TYPES;
                     diagnosticCode = WebSocketConstants.DIAGNOSTIC_CODE_ON_OPEN_INVALID_PARAMS;
                 } else if (isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_CLOSE)) {
                     specialParamTypes = WebSocketConstants.ON_CLOSE_PARAM_OPT_TYPES;
-                    rawSpecialParamTypes = WebSocketConstants.RAW_ON_CLOSE_PARAM_OPT_TYPES;
                     diagnosticCode = WebSocketConstants.DIAGNOSTIC_CODE_ON_CLOSE_INVALID_PARAMS;
                 }
                 if (diagnosticCode != null) {
@@ -188,9 +186,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                             if (typeName != null
                                     && WebSocketConstants.LONG_MESSAGE_CLASSES.contains(typeName)) {
-                                WebSocketConstants.MESSAGE_FORMAT messageFormat = typeName != null
-                                        ? getMessageFormat(typeName, true)
-                                        : getMessageFormat(typeName, false);
+                                WebSocketConstants.MESSAGE_FORMAT messageFormat = getMessageFormat(typeName);
                                 switch (messageFormat) {
                                     case TEXT:
                                         if (onMessageTextUsed != null) {
@@ -325,8 +321,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
      * @return if valueClass is a wrapper object
      */
     private boolean isWrapper(String valueClass) {
-        return WebSocketConstants.WRAPPER_OBJS.contains(valueClass)
-                || WebSocketConstants.RAW_WRAPPER_OBJS.contains(valueClass);
+        return WebSocketConstants.RAW_WRAPPER_OBJS.contains(valueClass);
     }
 
     /**
@@ -371,37 +366,15 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         }
         return false;
     }
-    private WebSocketConstants.MESSAGE_FORMAT getMessageFormat(String typeName, boolean longName) {
-        if (longName) {
-            switch (typeName) {
-                case WebSocketConstants.STRING_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-                case WebSocketConstants.READER_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-                case WebSocketConstants.BYTEBUFFER_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-                case WebSocketConstants.INPUTSTREAM_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-                case WebSocketConstants.PONGMESSAGE_CLASS_LONG:
-                    return WebSocketConstants.MESSAGE_FORMAT.PONG;
-                default:
-                    throw new IllegalArgumentException("Invalid message format type");
-            }
-        }
-        switch (typeName) {
-            case WebSocketConstants.STRING_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-            case WebSocketConstants.READER_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.TEXT;
-            case WebSocketConstants.BYTEBUFFER_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-            case WebSocketConstants.INPUTSTREAM_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.BINARY;
-            case WebSocketConstants.PONGMESSAGE_CLASS_SHORT:
-                return WebSocketConstants.MESSAGE_FORMAT.PONG;
-            default:
-                throw new IllegalArgumentException("Invalid message format type");
-        }
+    private WebSocketConstants.MESSAGE_FORMAT getMessageFormat(String typeName) {
+        return switch (typeName) {
+            case WebSocketConstants.STRING_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.TEXT;
+            case WebSocketConstants.READER_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.TEXT;
+            case WebSocketConstants.BYTEBUFFER_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.BINARY;
+            case WebSocketConstants.INPUTSTREAM_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.BINARY;
+            case WebSocketConstants.PONGMESSAGE_CLASS_LONG -> WebSocketConstants.MESSAGE_FORMAT.PONG;
+            default -> throw new IllegalArgumentException("Invalid message format type");
+        };
     }
 
     private String createParamTypeDiagMsg(Set<String> methodParamOptTypes, String methodAnnotTarget) {

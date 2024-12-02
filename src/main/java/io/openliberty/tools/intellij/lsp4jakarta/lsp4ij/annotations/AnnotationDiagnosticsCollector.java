@@ -46,6 +46,13 @@ import java.util.regex.Pattern;
  */
 public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
+    private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
+    private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME };
+    private static final String[] VALID_METHOD_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME };
+
     public AnnotationDiagnosticsCollector() {
         super();
     }
@@ -59,66 +66,39 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
             ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables = new ArrayList<Tuple.Two<PsiAnnotation, PsiElement>>();
-            String[] validAnnotations = { AnnotationConstants.GENERATED_FQ_NAME };
-            String[] validTypeAnnotations = { AnnotationConstants.GENERATED_FQ_NAME,
-                    AnnotationConstants.RESOURCE_FQ_NAME };
-            String[] validMethodAnnotations = { AnnotationConstants.GENERATED_FQ_NAME,
-                    AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
-                    AnnotationConstants.RESOURCE_FQ_NAME };
 
             PsiPackage psiPackage = JavaPsiFacade.getInstance(unit.getProject())
                     .findPackage(unit.getPackageName());
             if (psiPackage != null) {
-                PsiAnnotation[] pkgAnnotations = psiPackage.getAnnotations();
-                for (PsiAnnotation annotation : pkgAnnotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
-                        annotatables.add(new Tuple.Two<>(annotation, psiPackage));
-                }
+                processAnnotations(psiPackage, annotatables, VALID_ANNOTATIONS);
             }
 
             PsiClass[] types = unit.getClasses();
             for (PsiClass type : types) {
                 // Type
-                PsiAnnotation[] annotations = type.getAnnotations();
-                for (PsiAnnotation annotation : annotations) {
-                    if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
-                        annotatables.add(new Tuple.Two<>(annotation, type));
-                }
+                processAnnotations(type, annotatables, VALID_TYPE_ANNOTATIONS);
                 // Method
                 PsiMethod[] methods = type.getMethods();
                 for (PsiMethod method : methods) {
-                    annotations = method.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validMethodAnnotations))
-                            annotatables.add(new Tuple.Two<>(annotation, method));
-                    }
+                    processAnnotations(method, annotatables, VALID_METHOD_ANNOTATIONS);
                     // method parameters
                     PsiParameter[] parameters = method.getParameterList().getParameters();
                     for (PsiParameter parameter : parameters) {
-                        annotations = parameter.getAnnotations();
-                        for (PsiAnnotation annotation : annotations) {
-                            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
-                                annotatables.add(new Tuple.Two<>(annotation, parameter));
-                        }
+                        processAnnotations(parameter, annotatables, VALID_ANNOTATIONS);
                     }
                 }
                 // Field
                 PsiField[] fields = type.getFields();
                 for (PsiField field : fields) {
-                    annotations = field.getAnnotations();
-                    for (PsiAnnotation annotation : annotations) {
-                        if (isValidAnnotation(annotation.getQualifiedName(), validTypeAnnotations))
-                            annotatables.add(new Tuple.Two<>(annotation, field));
-                    }
+                    processAnnotations(field, annotatables, VALID_TYPE_ANNOTATIONS);
                 }
             }
 
             for (Tuple.Two<PsiAnnotation, PsiElement> annotatable : annotatables) {
                 PsiAnnotation annotation = annotatable.getFirst();
                 PsiElement element = annotatable.getSecond();
-                PsiClass topLevel = PsiUtil.getTopLevelClass(element);
 
-                if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
+                if (isMatchedAnnotation(annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
                     for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
                         // If date element exists and is non-empty, it must follow ISO 8601 format.
                         if (pair.getAttributeName().equals("date")) {
@@ -134,7 +114,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                             }
                         }
                     }
-                } else if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
                     if (element instanceof PsiClass) {
                         PsiClass type = (PsiClass) element;
                         Boolean nameEmpty = true;
@@ -165,7 +145,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         }
                     }
                 }
-                if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
+                if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
                         if (method.getParameters().length != 0) {
@@ -192,7 +172,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                     DiagnosticSeverity.Warning));
                         }
                     }
-                } else if (isMatchedAnnotation(topLevel, annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
                         if (method.getParameters().length != 0) {
@@ -224,10 +204,20 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         }
     }
 
+    private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
+                                    ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables,
+                                    String[] validAnnotations) {
+        PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        for (PsiAnnotation annotation : annotations) {
+            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                annotatables.add(new Tuple.Two<>(annotation, psiModifierOwner));
+        }
+    }
+
     private static boolean isValidAnnotation(String annotationName, String[] validAnnotations) {
         if (annotationName != null) {
             for (String fqName : validAnnotations) {
-                if (fqName.endsWith(annotationName)) {
+                if (fqName.equals(annotationName)) {
                     return true;
                 }
             }

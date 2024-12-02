@@ -33,36 +33,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
 
     /**
-     * Project port.
-     */
-    private final int SM_MP_PROJECT_PORT = 9080;
-
-    /**
-     * Project resource URI.
-     */
-    private final String SM_MP_PROJECT_RES_URI = "api/resource";
-
-    /**
-     * Project response.
-     */
-    private final String SM_MP_PROJECT_OUTPUT = "Hello! Welcome to Open Liberty";
-
-    /**
-     * Relative location of the WLP installation.
-     */
-    private final String WLP_INSTALL_PATH = Paths.get("target", "liberty").toString();
-
-    /**
-     * Build file name.
-     */
-    private final String BUILD_FILE_NAME = "pom.xml";
-
-    /**
-     * Action command to open the build file.
-     */
-    private final String BUILD_FILE_OPEN_CMD = "Liberty: View pom.xml";
-
-    /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
     private final Path pathToITReport34 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
@@ -75,16 +45,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
     /**
-     * Dev mode configuration start parameters.
-     */
-    private final String DEV_MODE_START_PARAMS = "-DhotTests=true";
-
-    /**
-     * Dev mode configuration custom start parameters for debugging.
-     */
-    private final String DEV_MODE_START_PARAMS_DEBUG = "-DdebugPort=9876";
-
-    /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
@@ -93,108 +53,20 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
-    /**
-     * Returns the path where the Liberty server was installed.
-     *
-     * @return The path where the Liberty server was installed.
-     */
-    @Override
-    public String getWLPInstallPath() {
-        return WLP_INSTALL_PATH;
+    MavenSingleModMPProjectTest() {
+        setProjectsDirPath(PROJECTS_PATH);
+        setSmMPProjectName(SM_MP_PROJECT_NAME);
+        setBuildCategory(BuildType.MAVEN_TYPE);
+        setSmMpProjPort(9080);
+        setSmMpProjResURI("api/resource");
+        setSmMPProjOutput("Hello! Welcome to Open Liberty");
+        setWLPInstallPath(Paths.get("target", "liberty").toString());
+        setTestReportPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), "build", "reports", "tests", "test", "index.html"));
+        setBuildFileName("pom.xml");
+        setBuildFileOpenCommand("Liberty: View pom.xml");
+        setStartParams("-DhotTests=true");
+        setStartParamsDebugPort("-DdebugPort=9876");
     }
-
-    /**
-     * Returns the projects directory path.
-     *
-     * @return The projects directory path.
-     */
-    @Override
-    public String getProjectsDirPath() {
-        return PROJECTS_PATH;
-    }
-
-    /**
-     * Returns the name of the single module MicroProfile project.
-     *
-     * @return The name of the single module MicroProfile project.
-     */
-    @Override
-    public String getSmMPProjectName() {
-        return SM_MP_PROJECT_NAME;
-    }
-
-    /**
-     * Returns the expected HTTP response payload associated with the single module
-     * MicroProfile project.
-     *
-     * @return The expected HTTP response payload associated with the single module
-     * MicroProfile project.
-     */
-    @Override
-    public String getSmMPProjOutput() {
-        return SM_MP_PROJECT_OUTPUT;
-    }
-
-    /**
-     * Returns the port number associated with the single module MicroProfile project.
-     *
-     * @return The port number associated with the single module MicroProfile project.
-     */
-    @Override
-    public int getSmMpProjPort() {
-        return SM_MP_PROJECT_PORT;
-    }
-
-    /**
-     * Return the Resource URI associated with the single module MicroProfile project.
-     *
-     * @return The Resource URI associated with the single module MicroProfile project.
-     */
-    @Override
-    public String getSmMpProjResURI() {
-        return SM_MP_PROJECT_RES_URI;
-    }
-
-    /**
-     * Returns the name of the build file used by the project.
-     *
-     * @return The name of the build file used by the project.
-     */
-    @Override
-    public String getBuildFileName() {
-        return BUILD_FILE_NAME;
-    }
-
-    /**
-     * Returns the name of the custom action command used to open the build file.
-     *
-     * @return The name of the custom action command used to open the build file.
-     */
-    @Override
-    public String getBuildFileOpenCommand() {
-        return BUILD_FILE_OPEN_CMD;
-    }
-
-    /**
-     * Returns the custom start parameters to be used to start dev mode.
-     *
-     * @return The custom start parameters to be used to start dev mode.
-     */
-    @Override
-    public String getStartParams() {
-        return DEV_MODE_START_PARAMS;
-    }
-
-    /**
-     * Returns the custom start parameters for debugging to start dev mode.
-     *
-     * @return The custom start parameters for debugging to start dev mode.
-     */
-    @Override
-    public String getStartParamsDebugPort() {
-        return DEV_MODE_START_PARAMS_DEBUG;
-    }
-
     /**
      * Deletes test reports.
      */

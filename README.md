@@ -12,7 +12,7 @@
 
 Liberty Tools for IntelliJ IDEA is an IntelliJ IDEA plugin for developing cloud-native Java applications with [Open Liberty](https://openliberty.io/) and [WebSphere Liberty](https://www.ibm.com/products/websphere-liberty). Iterate fast with Liberty dev mode, code with assistance for MicroProfile and Jakarta EE APIs, and easily edit Liberty configuration files.
 
-Liberty Tools for IntelliJ includes LSP4IJ, an external plugin dependency that is automatically installed with Liberty Tools. LSP4IJ is a free and open-source Language Server Protocol (LSP) client developed by Red Hat, enabling seamless language server integration.
+Liberty Tools for IntelliJ includes [LSP4IJ](https://github.com/redhat-developer/lsp4ij), an external plugin dependency that is automatically installed with Liberty Tools. LSP4IJ is a free and open-source Language Server Protocol (LSP) client developed by Red Hat, enabling seamless language server integration.
 
 If you wish to change the version of LSP4IJ installed along with Liberty Tools, you can refer to the documentation [here](docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace).
 
@@ -100,7 +100,8 @@ The following actions are available when you select a project in the Liberty Too
 If you experience a problem with this plugin you might be asked to collect language server messages to assist in problem determination. Follow these steps:
 1. Click the **Language Servers** tool window in the IntelliJ IDE to show the **LSP Consoles**.
 2. Select the language server you need to monitor and then select **Trace:** **verbose**.
-3. Perform the actions that demonstrate the issue and messages will appear in the console. Click a message and select all the text in the console, for example, Ctrl-A on Windows or Cmd-A on MacOS. Copy the text and paste it into a message to send to the developer who is assisting you with the issue.
+3. Save the configuration.
+4. Perform the actions that demonstrate the issue and messages will appear in the console. Click a message and select all the text in the console, for example, Ctrl-A on Windows or Cmd-A on MacOS. Copy the text and paste it into a message to send to the developer who is assisting you with the issue.
 
 
 ## Requirements
