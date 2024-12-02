@@ -34,6 +34,8 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
+
 /**
  * QuickFix for inserting annotations.
  * Reused from https://github.com/eclipse/lsp4mp/blob/6f2d700a88a3262e39cc2ba04beedb429e162246/microprofile.jdt/org.eclipse.lsp4mp.jdt.core/src/main/java/org/eclipse/lsp4mp/jdt/core/java/codeaction/InsertAnnotationMissingQuickFix.java
@@ -139,7 +141,7 @@ public abstract class InsertAnnotationMissingQuickFix implements IJavaCodeAction
         StringBuilder list = new StringBuilder();
         for (int i = 0; i < annotations.length; i++) {
             String annotation = annotations[i];
-            String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
+            String annotationName = getSimpleName(annotation);
             if (i > 0) {
                 list.append(", "); // assume comma list is ok: @A, @B, @C
             }
