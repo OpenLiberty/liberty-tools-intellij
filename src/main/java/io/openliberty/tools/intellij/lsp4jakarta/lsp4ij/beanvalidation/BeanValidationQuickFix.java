@@ -33,6 +33,8 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
+
 /**
  * Quickfix for fixing {@link BeanValidationConstants#DIAGNOSTIC_CODE_STATIC} error by either action
  * 1. Removing constraint annotation on static field or method
@@ -81,7 +83,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", JDTUtils.getSimpleName(annotationName));
+        final String name = Messages.getMessage("RemoveConstraintAnnotation", getSimpleName(annotationName));
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(ANNOTATION_NAME, annotationName);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));

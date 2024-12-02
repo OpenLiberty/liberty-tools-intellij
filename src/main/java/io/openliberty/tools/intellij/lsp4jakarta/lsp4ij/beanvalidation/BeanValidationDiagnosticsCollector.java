@@ -15,11 +15,11 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants.*;
 
 import java.util.List;
@@ -90,8 +90,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 
                 if (matchedAnnotation.equals(ASSERT_FALSE) || matchedAnnotation.equals(ASSERT_TRUE)) {
                     String source = isMethod ?
-                            Messages.getMessage("AnnotationBooleanMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                            Messages.getMessage("AnnotationBooleanFields", "@" + JDTUtils.getSimpleName(annotationName));
+                            Messages.getMessage("AnnotationBooleanMethods", "@" + getSimpleName(annotationName)) :
+                            Messages.getMessage("AnnotationBooleanFields", "@" + getSimpleName(annotationName));
                     if (!type.equals(PsiTypes.booleanType())) {
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
@@ -106,8 +106,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiTypes.intType())
                             && !type.equals(PsiTypes.longType())) {
                         String source = isMethod ?
-                                Messages.getMessage("AnnotationBigDecimalMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationBigDecimalFields", "@" + JDTUtils.getSimpleName(annotationName));
+                                Messages.getMessage("AnnotationBigDecimalMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationBigDecimalFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), source,
                                 DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -125,8 +125,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             SET_OF_DATE_TYPES.toArray(new String[0]));
                     if (dataTypeFQName == null) {
                         String source = isMethod ?
-                                Messages.getMessage("AnnotationDateMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationDateFields", "@" + JDTUtils.getSimpleName(annotationName));
+                                Messages.getMessage("AnnotationDateMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationDateFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -138,8 +138,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiTypes.intType())
                             && !type.equals(PsiTypes.longType())) {
                         String source = isMethod ?
-                                Messages.getMessage("AnnotationMinMaxMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationMinMaxFields", "@" + JDTUtils.getSimpleName(annotationName));
+                                Messages.getMessage("AnnotationMinMaxMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationMinMaxFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -154,8 +154,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                             && !type.equals(PsiTypes.floatType())
                             && !type.equals(PsiTypes.doubleType())) {
                         String source = isMethod ?
-                                Messages.getMessage("AnnotationPositiveMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                                Messages.getMessage("AnnotationPositiveFields", "@" + JDTUtils.getSimpleName(annotationName));
+                                Messages.getMessage("AnnotationPositiveMethods", "@" + getSimpleName(annotationName)) :
+                                Messages.getMessage("AnnotationPositiveFields", "@" + getSimpleName(annotationName));
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -197,8 +197,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         if (!type.getCanonicalText().equals(STRING)
                 && !type.getCanonicalText().equals(CHAR_SEQUENCE)) {
             String source = isMethod ?
-                    Messages.getMessage("AnnotationStringMethods", "@" + JDTUtils.getSimpleName(annotationName)) :
-                    Messages.getMessage("AnnotationStringFields", "@" + JDTUtils.getSimpleName(annotationName));
+                    Messages.getMessage("AnnotationStringMethods", "@" + getSimpleName(annotationName)) :
+                    Messages.getMessage("AnnotationStringFields", "@" + getSimpleName(annotationName));
             diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                     source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
         }

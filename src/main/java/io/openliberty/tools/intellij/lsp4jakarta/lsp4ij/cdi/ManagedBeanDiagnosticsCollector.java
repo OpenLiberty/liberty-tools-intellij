@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -29,6 +28,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
@@ -333,7 +333,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                         INVALID_INJECT_PARAMS_FQ);
                 for (String annotation : paramScopes) {
-                    invalidAnnotations.add("@" + JDTUtils.getSimpleName(annotation));
+                    invalidAnnotations.add("@" + getSimpleName(annotation));
                 }
             }
 
