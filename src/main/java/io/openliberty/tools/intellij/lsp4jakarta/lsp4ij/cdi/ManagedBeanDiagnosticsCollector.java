@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -333,7 +333,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                         INVALID_INJECT_PARAMS_FQ);
                 for (String annotation : paramScopes) {
-                    invalidAnnotations.add("@" + getSimpleName(annotation));
+                    invalidAnnotations.add("@" + JDTUtils.getSimpleName(annotation));
                 }
             }
 

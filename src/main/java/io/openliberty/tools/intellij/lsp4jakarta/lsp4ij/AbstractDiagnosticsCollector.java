@@ -232,20 +232,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
-     * Returns simple name for the given fully qualified name.
-     *
-     * @param fqName a fully qualified name or simple name
-     * @return simple name for given fully qualified name
-     */
-    public static String getSimpleName(String fqName) {
-        int idx = fqName.lastIndexOf('.');
-        if (idx != -1 && idx != fqName.length() - 1) {
-            return fqName.substring(idx + 1);
-        }
-        return fqName;
-    }
-
-    /**
      * Returns true if the given method is a constructor and false otherwise.
      *
      * @param m method

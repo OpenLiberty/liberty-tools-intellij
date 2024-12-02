@@ -109,4 +109,18 @@ public class JDTUtils {
                                               String quickFixMessage, String participantId) {
         return createCodeAction(context, diagnostic, quickFixMessage, participantId, null);
     }
+
+    /**
+     * Returns simple name for the given fully qualified name.
+     *
+     * @param fqName a fully qualified name or simple name
+     * @return simple name for given fully qualified name
+     */
+    public static String getSimpleName(String fqName) {
+        int idx = fqName.lastIndexOf('.');
+        if (idx != -1 && idx != fqName.length() - 1) {
+            return fqName.substring(idx + 1);
+        }
+        return fqName;
+    }
 }
