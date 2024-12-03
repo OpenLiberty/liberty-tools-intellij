@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
@@ -313,7 +314,9 @@ public class LibertyMavenUtil {
         File[] files = mavenHomeBootAsFile.listFiles();
         if (files != null) {
             for (File file : files) {
-                if (file.getName().contains("classworlds") && file.getName().toLowerCase().endsWith(".jar")) {
+                // Use Locale.ROOT to avoid the "Turkish locale bug".
+                // See: https://github.com/OpenLiberty/liberty-tools-intellij/issues/1092
+                if (file.getName().contains("classworlds") && file.getName().toLowerCase(Locale.ROOT).endsWith(".jar")) {
                     return file.getAbsolutePath();
                 }
             }

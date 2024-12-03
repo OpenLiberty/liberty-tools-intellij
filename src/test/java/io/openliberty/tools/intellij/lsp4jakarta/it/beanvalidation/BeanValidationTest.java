@@ -183,7 +183,7 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         TextEdit te = te(0, 0, 64, 1, newText);
-        CodeAction ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d1, te);
+        CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
 
@@ -215,7 +215,7 @@ public class BeanValidationTest extends BaseJakartaTest {
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d19);
         TextEdit te1 = te(0, 0, 64, 1, newText6);
         TextEdit te2 = te(0, 0, 64, 1, newText7);
-        CodeAction ca1 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d19, te1);
+        CodeAction ca1 = ca(uri, "Remove constraint annotation AssertTrue from element", d19, te1);
         CodeAction ca2 = ca(uri, "Remove static modifier from element", d19, te2);
 
         assertJavaCodeAction(codeActionParams2, utils, ca1, ca2);
@@ -250,7 +250,7 @@ public class BeanValidationTest extends BaseJakartaTest {
         JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d20);
         TextEdit te3 = te(0, 0, 64, 1, newText8);
         TextEdit te4 = te(0, 0, 64, 1, newText9);
-        CodeAction ca3 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.Past from element", d20, te3);
+        CodeAction ca3 = ca(uri, "Remove constraint annotation Past from element", d20, te3);
         CodeAction ca4 = ca(uri, "Remove static modifier from element", d20, te4);
 
         assertJavaCodeAction(codeActionParams3, utils, ca3, ca4);
@@ -271,7 +271,7 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d18);
         TextEdit te5 = te(0, 0, 64, 1, newText10);
-        CodeAction ca5 = ca(uri, "Remove constraint annotation jakarta.validation.constraints.PositiveOrZero from element", d1, te5);
+        CodeAction ca5 = ca(uri, "Remove constraint annotation PositiveOrZero from element", d1, te5);
 
         assertJavaCodeAction(codeActionParams4, utils, ca5);
     }
@@ -316,7 +316,7 @@ public class BeanValidationTest extends BaseJakartaTest {
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         TextEdit te = te(0, 0, 34, 1, newText1);
         TextEdit te2 = te(0, 0, 34, 1, newText2);
-        CodeAction ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d1, te);
+        CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
         CodeAction ca2 = ca(uri, "Remove static modifier from element", d1, te2);
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);
@@ -331,7 +331,7 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         codeActionParams = createCodeActionParams(uri, d2);
         te = te(0, 0, 34, 1, newText3);
-        ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertTrue from element", d2, te);
+        ca = ca(uri, "Remove constraint annotation AssertTrue from element", d2, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
 
@@ -355,7 +355,7 @@ public class BeanValidationTest extends BaseJakartaTest {
         codeActionParams = createCodeActionParams(uri, d3);
         te = te(0, 0, 34, 1, newText4);
         te2 = te(0, 0, 34, 1, newText5);
-        ca = ca(uri, "Remove constraint annotation jakarta.validation.constraints.AssertFalse from element", d3, te);
+        ca = ca(uri, "Remove constraint annotation AssertFalse from element", d3, te);
         ca2 = ca(uri, "Remove static modifier from element", d3, te2);
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);

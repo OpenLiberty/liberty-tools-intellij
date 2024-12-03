@@ -10,7 +10,6 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp;
 
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
@@ -27,7 +26,6 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
-import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.ConcurrencyUtil;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
@@ -38,7 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -133,7 +130,4 @@ public class MicroProfileProjectService implements LibraryTable.Listener, BulkFi
         return null;
     }
 
-    private static VirtualFile createJSONSchemaFile(String name) throws IOException {
-        return new LightVirtualFile(name + "-schema.json", JsonFileType.INSTANCE, "");
-    }
 }

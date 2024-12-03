@@ -218,6 +218,24 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
+     * Right-clicks on the terminal tab.
+     */
+    public static void rightClickOnTerminalTab(ProjectFrameFixture projectFrame) {
+        String terminalLabelXPath = "//div[@class='TabPanel'][.//div[@class='BaseLabel']]//div[@text='Terminal:']";
+        ComponentFixture terminalLabel = projectFrame.getActionButton(terminalLabelXPath, "10");
+        terminalLabel.rightClick();
+    }
+
+    /**
+     * Clicks on a menu option based on the text key provided.
+     */
+    public static void clickMenuOption(ProjectFrameFixture projectFrame, String textKey) {
+        String optionXPath = String.format("//div[contains(@text.key, '%s')]", textKey);
+        ComponentFixture option = projectFrame.getActionButton(optionXPath, "10");
+        option.click();
+    }
+
+    /**
      * Return the ComponentFixture object associated with the InplaceButton class.
      *
      * @param xpathVars The Locator custom variables: name, waitTime(seconds)

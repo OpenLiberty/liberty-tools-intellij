@@ -427,6 +427,7 @@ public class UIBotTestUtils {
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
+                TestUtils.sleepAndIgnoreException(10); // wait for UI to be rendered before searching for a button
                 error = null;
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getBaseLabel("Liberty", "5");
@@ -434,6 +435,9 @@ public class UIBotTestUtils {
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The Liberty tool window is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
+                // After clicking it can take seconds for the window to open on a slow cloud machine.
+                // Important since this is in a loop and you may click twice if there is no sleep.
+                TestUtils.sleepAndIgnoreException(5);
                 break;
             } catch (Exception e) {
                 // The project frame may hang for a bit while loading/processing work. Retry.
@@ -476,6 +480,7 @@ public class UIBotTestUtils {
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
+                TestUtils.sleepAndIgnoreException(10); // wait for UI to be rendered before searching for a button
                 error = null;
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
                 projectFrame.getContentComboLabel("Project", "5");
@@ -483,6 +488,9 @@ public class UIBotTestUtils {
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The project view is closed. Open it.
                 clickOnWindowPaneStripeButton(remoteRobot, "Project");
+                // After clicking it can take seconds for the window to open on a slow cloud machine.
+                // Important since this is in a loop and you may click twice if there is no sleep.
+                TestUtils.sleepAndIgnoreException(5);
                 break;
             } catch (Exception e) {
                 // The project frame may hang for a bit while loading/processing work. Retry.
@@ -1104,6 +1112,8 @@ public class UIBotTestUtils {
                 keyboard.enter();
 
                 keyboard.enterText(configNameSnippet);
+                // After typing it can take 1 or 2s for IntelliJ to render diagnostics etc. Must wait before continuing.
+                TestUtils.sleepAndIgnoreException(5);
 
                 // Narrow down the config name completion suggestions in the pop-up window that is automatically
                 // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
@@ -1123,6 +1133,8 @@ public class UIBotTestUtils {
                 keyboard.hotKey(VK_END);
 
                 keyboard.enterText(configValueSnippet);
+                // After typing it can take 1 or 2s for IntelliJ to render diagnostics etc. Must wait before continuing.
+                TestUtils.sleepAndIgnoreException(5);
 
                 if (completeWithPopup) {
                     // Select the appropriate value completion suggestion in the pop-up window that is automatically
@@ -1625,7 +1637,7 @@ public class UIBotTestUtils {
                 JTextFieldFixture searchField = projectFrame.textField(JTextFieldFixture.Companion.byType(), Duration.ofSeconds(10));
                 searchField.click();
                 searchField.setText(action);
-                TestUtils.sleepAndIgnoreException(1); // allow search time to resolve
+                TestUtils.sleepAndIgnoreException(10); // allow search time to resolve, 10s for slow machines
 
                 // Wait for the desired action to show in the search output frame and click on it.
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(20),
@@ -2420,7 +2432,7 @@ public class UIBotTestUtils {
     public static boolean inWelcomeFrame(RemoteRobot remoteRobot) {
         boolean inWelcomeFrame = false;
         try {
-            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(2));
+            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(5));
             inWelcomeFrame = true;
         } catch (Exception e) {
             // Not in welcome frame.
@@ -2438,7 +2450,7 @@ public class UIBotTestUtils {
     public static boolean inProjectFrame(RemoteRobot remoteRobot) {
         boolean inProjectFrame = false;
         try {
-            remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(2));
+            remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(5));
             inProjectFrame = true;
         } catch (Exception e) {
             // Not in project frame.
@@ -2496,6 +2508,43 @@ public class UIBotTestUtils {
                     "The OK button on the error dialog was not enabled",
                     okButton::isEnabled);
             okButton.click();
+        }
+    }
+
+    /**
+     * Closes Terminal.
+     */
+    public static void closeTerminalTabs(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            ProjectFrameFixture.rightClickOnTerminalTab(projectFrame);
+            ProjectFrameFixture.clickMenuOption(projectFrame, "action.CloseAllNotifications.text");
+
+            while (true) {
+                ComponentFixture terminateButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@accessiblename='Terminate']"));
+                if (terminateButton.callJs("component.isEnabled();", false)) {
+                    terminateButton.click();
+                    TestUtils.sleepAndIgnoreException(10);
+                } else {
+                    break; // Exit loop if no enabled "Terminate" button is found
+                }
+            }
+        } catch (WaitForConditionTimeoutException e) {
+            // The Terminal tab is most likely closed.
+        }
+    }
+
+    public static void findWelcomeFrame(RemoteRobot remoteRobot) {
+        try {
+            remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
+        } catch (WaitForConditionTimeoutException e) {
+            // If the welcome frame is not found then there is a project loaded.
+            // Close the editor files and close the project to get back to the welcome frame.
+            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+            UIBotTestUtils.closeProjectView(remoteRobot);
+            UIBotTestUtils.closeProjectFrame(remoteRobot);
+            TestUtils.sleepAndIgnoreException(30); // takes about 15s to render the whole Welcome page including the Open button on Mac.
+            UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
         }
     }
 }
