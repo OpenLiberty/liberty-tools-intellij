@@ -201,6 +201,7 @@ intellijPlatformTesting.runIde {
                         "-Dapple.laf.useScreenMenuBar=false",
                 ]
             } as CommandLineArgumentProvider)
+            systemProperty("ide.native.launcher", "true")
         }
         plugins {
             robotServerPlugin(remoteRobotVersion)
