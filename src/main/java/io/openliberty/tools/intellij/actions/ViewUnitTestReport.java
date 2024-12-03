@@ -64,10 +64,9 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
         }
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
-            String displayNames = reportNameNo1 + " or " + reportNameNo2;
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                     LocalizedResourceUtil.getMessage("unit.test.report.does.not.exist"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", displayNames),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
