@@ -50,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        runtime: [ linux, mac, windows, linux1, windows1, linux2, windows2 ]
         include:
           - runtime: linux
             os: ubuntu-latest
@@ -61,6 +61,18 @@ jobs:
           - runtime: windows
             os: windows-latest
             reportName: windows-test-report
+          - runtime: linux1
+            os: ubuntu-latest
+            reportName: linux-test-report1
+          - runtime: windows1
+            os: windows-latest
+            reportName: windows-test-report1
+          - runtime: linux2
+            os: ubuntu-latest
+            reportName: linux-test-report2
+          - runtime: windows2
+            os: windows-latest
+            reportName: windows-test-report2
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
@@ -108,7 +120,7 @@ jobs:
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH }}-${{ matrix.runtime }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
