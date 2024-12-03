@@ -200,6 +200,7 @@ intellijPlatformTesting.runIde {
                         "-Dide.mac.file.chooser.native=false",
                         "-DjbScreenMenuBar.enabled=false",
                         "-Dapple.laf.useScreenMenuBar=false",
+                        "-Dide.native.launcher=true",
                 ]
             } as CommandLineArgumentProvider)
             systemProperty("ide.native.launcher", "true")
