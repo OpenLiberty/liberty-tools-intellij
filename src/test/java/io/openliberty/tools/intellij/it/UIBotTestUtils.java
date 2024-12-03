@@ -1866,6 +1866,7 @@ public class UIBotTestUtils {
         ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
         runMenu.moveMouse();
         ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations…");
+        editCfgsMenuEntry.click();
 
         // Find the Run/Debug Configurations dialog.
         DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
