@@ -208,7 +208,7 @@ public class UIBotTestUtils {
      */
     public static void closeProjectFrame(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        // maximize windows os intellij ide to avoid failures accessing menu
+        // minimize windows os intellij ide to avoid failures accessing menu
         if (remoteRobot.isWin()) {
             minimizeWindow(remoteRobot);
         }
