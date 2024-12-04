@@ -1693,7 +1693,8 @@ public class UIBotTestUtils {
             }
         }
 
-        // Report the last error if there is one.
+        // Report the last error if there is one and avoid throwing a RuntimeException for the "Close All Tabs" action,
+        // as it is not always necessary for at least one tab to be open in the Editor Window in certain cases.
         if (error != null && !action.equals("Close All Tabs")) {
             throw new RuntimeException("Failed to run the " + action + " action using the search everywhere option", error);
         }
