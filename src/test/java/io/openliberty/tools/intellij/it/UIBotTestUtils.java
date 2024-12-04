@@ -553,7 +553,6 @@ public class UIBotTestUtils {
         wpStripeButton.click();
     }
 
-
     /**
      * Clicks on the expand action button on the Liberty tool window.
      *
@@ -754,7 +753,6 @@ public class UIBotTestUtils {
             closeAllTabsFixture.click();
         }
     }
-
 
     /**
      * Click on the Problems tab to open the Problems View
