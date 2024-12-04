@@ -41,6 +41,7 @@ git commit -s
 This project follows Eclipse standard Java language [coding conventions](https://wiki.eclipse.org/Coding_Conventions).
 
 Please note:
+ - all PRs must be approved by two reviewers before being merged
  - all PRs must have passing builds
 
 ### Developing
