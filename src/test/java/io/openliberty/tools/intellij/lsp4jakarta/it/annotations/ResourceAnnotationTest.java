@@ -26,7 +26,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,8 +59,6 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
 
-        //TODO: uncomment this if condition, once refactoring is done for all the quick fixes.
-//        if (CHECK_CODE_ACTIONS) {
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;" +
                 "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation " +
@@ -92,6 +89,5 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         TextEdit te1 = te(0, 0, 45, 0, newText);
         CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
-//        }
     }
 }

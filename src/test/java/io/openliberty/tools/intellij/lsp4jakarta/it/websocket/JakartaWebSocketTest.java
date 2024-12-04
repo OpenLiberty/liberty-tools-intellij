@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -71,8 +70,6 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         );
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        //TODO: uncomment this if condition, once refactoring is done for all the quick fixes.
-//        if (CHECK_CODE_ACTIONS) {
         // Expected code actions
         JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport java.io.IOException;" +
@@ -91,7 +88,6 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         TextEdit te = te(0, 0, 28, 0, newText);
         CodeAction ca = ca(uri, "Insert @jakarta.websocket.server.PathParam", d1, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
-//        }
     }
 
     @Test

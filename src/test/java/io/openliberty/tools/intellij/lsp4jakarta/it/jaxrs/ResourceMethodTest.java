@@ -91,7 +91,6 @@ public class ResourceMethodTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //if (CHECK_CODE_ACTIONS) {
         // Test for quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
         String newText1 = "/*******************************************************************************\n" +
@@ -131,7 +130,6 @@ public class ResourceMethodTest extends BaseJakartaTest {
         CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam2", d, te2);
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
-        //}
     }
 
 }

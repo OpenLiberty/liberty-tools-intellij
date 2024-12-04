@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -174,8 +173,6 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8);
 
-        //TODO: Uncomment this line of code once all the quickfix changes are done.
-//        if (CHECK_CODE_ACTIONS) {
         // Test code actions
         // Quick fix for the field "id"
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
@@ -440,6 +437,5 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         TextEdit te8 = JakartaForJavaAssert.te(0, 0, 77, 1, newText);
         CodeAction ca8 = JakartaForJavaAssert.ca(uri, "Remove @JsonbAnnotation", d6, te8);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams5, utils, ca8);
-//        }
     }
 }

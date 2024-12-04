@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -57,8 +56,6 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-        // if (CHECK_CODE_ACTIONS) {
         // test associated quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\n" +
@@ -69,7 +66,6 @@ public class JakartaServletTest extends BaseJakartaTest {
         TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontExtendHttpServlet' extend 'HttpServlet'", d, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-        // }
     }
 
     @Test
@@ -237,19 +233,16 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-//        if (CHECK_CODE_ACTIONS) {
-            // test associated quick-fix code action
-            JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
-            String newText = "package io.openliberty.sample.jakarta.servlet;" +
-                    "\n\nimport jakarta.servlet.Filter;\nimport jakarta.servlet.annotation.WebFilter;" +
-                    "\n\n@WebFilter(urlPatterns = {\"/filter\"})\npublic class DontImplementFilter implements " +
-                    "Filter {\n\n}";
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.servlet;" +
+                "\n\nimport jakarta.servlet.Filter;\nimport jakarta.servlet.annotation.WebFilter;" +
+                "\n\n@WebFilter(urlPatterns = {\"/filter\"})\npublic class DontImplementFilter implements " +
+                "Filter {\n\n}";
         TextEdit te = JakartaForJavaAssert.te(0, 0, 7, 1, newText);
 
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DontImplementFilter' implement 'Filter'", d, te);
             JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
-//        }
     }
 
     @Test
@@ -269,8 +262,6 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        //TODO: this condition will be enabled when all quickfixes are refactored.
-//        if (CHECK_CODE_ACTIONS) {
         // test associated quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
 
@@ -318,5 +309,4 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3, ca4, ca5, ca6, ca7);
     }
-//    }
 }

@@ -28,7 +28,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -119,8 +118,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
 
-        //TODO: Uncomment this line of code once all the quickfix changes are done.
-//        if (CHECK_CODE_ACTIONS) {
         // Assert for the diagnostic d1
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport java.util.Collections;" +
@@ -187,7 +184,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
         CodeAction ca5 = ca(uri, "Remove @RequestScoped", d3, te5);
         CodeAction ca6 = ca(uri, "Remove @ApplicationScoped", d3, te6);
         assertJavaCodeAction(codeActionParams3, utils, ca6, ca5);
-//        }
     }
 
     @Test
