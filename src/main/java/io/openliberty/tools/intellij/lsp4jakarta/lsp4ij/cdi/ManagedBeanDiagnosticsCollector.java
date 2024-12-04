@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
@@ -29,6 +28,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {

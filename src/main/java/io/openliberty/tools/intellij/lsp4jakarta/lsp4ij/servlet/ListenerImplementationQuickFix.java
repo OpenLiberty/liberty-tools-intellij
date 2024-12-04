@@ -40,6 +40,8 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
+
 /**
  * QuickFix for fixing HttpServlet extension error by providing the code actions
  * which implements IJavaCodeActionParticipant
@@ -115,7 +117,7 @@ public class ListenerImplementationQuickFix implements IJavaCodeActionParticipan
     }
 
     private static String getLabel(String fqAnnotation, PsiClass parentType) {
-        String annotationName = fqAnnotation.substring(fqAnnotation.lastIndexOf('.') + 1, fqAnnotation.length());
+        String annotationName = getSimpleName(fqAnnotation);
         return Messages.getMessage("LetClassImplement", parentType.getName(), annotationName);
     }
 }

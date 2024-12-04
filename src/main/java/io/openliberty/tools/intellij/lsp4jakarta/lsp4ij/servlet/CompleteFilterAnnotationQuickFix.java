@@ -40,6 +40,8 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
+
 /**
  * QuickFix for fixing {@link ServletConstants#DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE} error
  * and {@link ServletConstants#DIAGNOSTIC_CODE_FILTER_MISSING_ATTRIBUTE} error
@@ -168,7 +170,7 @@ public class CompleteFilterAnnotationQuickFix extends InsertAnnotationMissingQui
     }
 
     private static String getLabel(String annotation, String attribute, String labelType) {
-        String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
+        String annotationName = getSimpleName(annotation);
         annotationName = "@" + annotationName;
         if (labelType.equals("Remove")) {
             return Messages.getMessage("RemoveTheAttributeFrom", attribute, annotationName);

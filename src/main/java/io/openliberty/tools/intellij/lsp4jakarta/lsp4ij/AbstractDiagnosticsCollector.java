@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -229,20 +229,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         // e.g. 'jakarta.validation.constraints.DecimalMin' should NOT end with 'Min'
         // here
         return fqName.equals(name) || fqName.endsWith("." + name);
-    }
-
-    /**
-     * Returns simple name for the given fully qualified name.
-     *
-     * @param fqName a fully qualified name or simple name
-     * @return simple name for given fully qualified name
-     */
-    public static String getSimpleName(String fqName) {
-        int idx = fqName.lastIndexOf('.');
-        if (idx != -1 && idx != fqName.length() - 1) {
-            return fqName.substring(idx + 1);
-        }
-        return fqName;
     }
 
     /**

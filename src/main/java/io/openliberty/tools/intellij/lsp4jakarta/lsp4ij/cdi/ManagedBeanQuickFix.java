@@ -38,6 +38,7 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.SCOPE_FQ_NAMES;
 
 public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
@@ -88,7 +89,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
     }
 
     private static String getLabel(String annotation) {
-        String annotationName = annotation.substring(annotation.lastIndexOf('.') + 1, annotation.length());
+        String annotationName = getSimpleName(annotation);
         return Messages.getMessage("ReplaceCurrentScope", "@" + annotationName);
     }
 

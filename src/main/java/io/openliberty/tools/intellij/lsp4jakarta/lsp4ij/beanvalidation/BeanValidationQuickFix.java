@@ -16,7 +16,6 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
@@ -33,6 +32,8 @@ import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 
 /**
  * Quickfix for fixing {@link BeanValidationConstants#DIAGNOSTIC_CODE_STATIC} error by either action
@@ -82,7 +83,7 @@ public class BeanValidationQuickFix implements IJavaCodeActionParticipant {
     private void removeConstraintAnnotationsCodeActions(Diagnostic diagnostic, JavaCodeActionContext context, List<CodeAction> codeActions) {
 
         final String annotationName = diagnostic.getData().toString().replace("\"", "");
-        final String name = Messages.getMessage("RemoveConstraintAnnotation", AbstractDiagnosticsCollector.getSimpleName(annotationName));
+        final String name = Messages.getMessage("RemoveConstraintAnnotation", getSimpleName(annotationName));
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(ANNOTATION_NAME, annotationName);
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
