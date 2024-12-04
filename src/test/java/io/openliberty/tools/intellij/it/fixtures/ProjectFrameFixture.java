@@ -180,7 +180,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @param xpathVars The Locator custom variables: text, waitTime(secs)
      * @return The ComponentFixture object associated with the SquareStripeButton class.
      */
-    public ComponentFixture getSquareStripeButton(String... xpathVars) {
+    public ComponentFixture getStripeButton(String... xpathVars) {
         String squareStripeButton = xpathVars[0];
         String waitTime = xpathVars[1];
         return find(ComponentFixture.class,

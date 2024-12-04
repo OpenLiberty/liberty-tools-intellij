@@ -177,7 +177,7 @@ public class UIBotTestUtils {
         // as content is displayed. This, has an effect on the location of the items on the frame.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
-        ComponentFixture wpStripeButton = projectFrame.getSquareStripeButton("Liberty", "60");
+        ComponentFixture wpStripeButton = projectFrame.getStripeButton("Liberty", "60");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
                 Duration.ofSeconds(1),
                 "Waiting for the Liberty button on the main window pane stripe to be enabled",
@@ -537,6 +537,24 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Clicks on the specified tool window pane stripe.
+     *
+     * @param remoteRobot      The RemoteRobot instance.
+     * @param StripeButtonName The name of the window pane stripe button.
+     */
+    public static void clickOnWindowPaneSquareStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture wpStripeButton = projectFrame.getStripeButton(StripeButtonName, "10");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                Duration.ofSeconds(1),
+                "Waiting for the " + StripeButtonName + " button on the main window pane stripe to be enabled",
+                "The " + StripeButtonName + " button on then main window pane stripe is not enabled",
+                () -> projectFrame.isComponentEnabled(wpStripeButton));
+        wpStripeButton.click();
+    }
+
+
+    /**
      * Clicks on the expand action button on the Liberty tool window.
      *
      * @param remoteRobot The RemoteRobot instance.
@@ -715,6 +733,28 @@ public class UIBotTestUtils {
                     () -> getEditorTabCloseButton(remoteRobot, editorTabName, "1") == null);
         }
     }
+
+    /**
+     * Closes all opened editor tabs.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void closeAllEditorTabs(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture windowMenuEntry = projectFrame.getActionMenu("Window", "10");
+        windowMenuEntry.click();
+
+        // Click on Editor Tabs in the menu.
+        ComponentFixture editorTabsFixture = projectFrame.getChildActionMenu("Window", "Editor Tabs");
+        editorTabsFixture.click();
+
+        // Click on Close Project in the menu.
+        ComponentFixture closeAllTabsFixture = projectFrame.getChildActionMenuItem("Window", "Close All Tabs");
+        if (closeAllTabsFixture.callJs("component.isEnabled();", false)) {
+            closeAllTabsFixture.click();
+        }
+    }
+
 
     /**
      * Click on the Problems tab to open the Problems View
@@ -2274,7 +2314,7 @@ public class UIBotTestUtils {
             projectFrame.getBaseLabel("Debug", "5");
         } catch (WaitForConditionTimeoutException wfcte) {
             // The debug tab is not opened for some reason. Open it.
-            ComponentFixture debugStripe = projectFrame.getSquareStripeButton("Debug", "10");
+            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug", "10");
             debugStripe.click();
         }
 
@@ -2587,22 +2627,5 @@ public class UIBotTestUtils {
         Keyboard keyboard = new Keyboard(remoteRobot);
         keyboard.hotKey(VK_WINDOWS, VK_DOWN);
         keyboard.enter();
-    }
-
-    /**
-     * Clicks on the specified tool window pane stripe.
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     * @param SquareStripeButtonName The name of the window pane Square stripe button.
-     */
-    public static void clickOnWindowPaneSquareStripeButton(RemoteRobot remoteRobot, String SquareStripeButtonName) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture wpSquareStripeButton = projectFrame.getSquareStripeButton(SquareStripeButtonName, "10");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
-                Duration.ofSeconds(1),
-                "Waiting for the " + SquareStripeButtonName + " button on the main window pane stripe to be enabled",
-                "The " + SquareStripeButtonName + " button on then main window pane stripe is not enabled",
-                () -> projectFrame.isComponentEnabled(wpSquareStripeButton));
-        wpSquareStripeButton.click();
     }
 }
