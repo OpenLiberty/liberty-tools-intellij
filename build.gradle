@@ -170,6 +170,7 @@ intellijPlatformTesting.runIde {
                         "java.base/jdk.internal.vm=ALL-UNNAMED"
                 ]
             } as CommandLineArgumentProvider)
+            systemProperty("ide.native.launcher", "true")
         }
     }
 }
