@@ -208,7 +208,10 @@ public class UIBotTestUtils {
      */
     public static void closeProjectFrame(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        minimizeWindow(remoteRobot);
+        // maximize windows os intellij ide to avoid failures accessing menu
+        if (remoteRobot.isWin()) {
+            minimizeWindow(remoteRobot);
+        }
         clickOnMainMenu(remoteRobot);
         // Click on File on the Menu bar.
         ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
@@ -472,7 +475,10 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void openProjectView(RemoteRobot remoteRobot) {
-        maximizeWindow(remoteRobot);
+        // maximize windows os intellij ide to avoid failures accessing menu
+        if (remoteRobot.isWin()) {
+            maximizeWindow(remoteRobot);
+        }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openProjectView Entry");
         int maxRetries = 6;
         Exception error = null;
