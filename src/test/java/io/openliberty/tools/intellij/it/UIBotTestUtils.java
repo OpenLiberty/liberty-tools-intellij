@@ -434,7 +434,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The Liberty tool window is closed. Open it.
-                clickOnWindowPaneSquareStripeButton(remoteRobot, "Liberty");
+                clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
                 // After clicking it can take seconds for the window to open on a slow cloud machine.
                 // Important since this is in a loop and you may click twice if there is no sleep.
                 TestUtils.sleepAndIgnoreException(5);
@@ -463,7 +463,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         try {
             projectFrame.getBaseLabel("Liberty", "2");
-            clickOnWindowPaneSquareStripeButton(remoteRobot, "Liberty");
+            clickOnWindowPaneStripeButton(remoteRobot, "Liberty");
         } catch (WaitForConditionTimeoutException e) {
             // The Liberty tool window is already closed. Nothing to do.
         }
@@ -491,7 +491,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wfcte) {
                 // The project view is closed. Open it.
-                clickOnWindowPaneSquareStripeButton(remoteRobot, "Project");
+                clickOnWindowPaneStripeButton(remoteRobot, "Project");
                 // After clicking it can take seconds for the window to open on a slow cloud machine.
                 // Important since this is in a loop and you may click twice if there is no sleep.
                 TestUtils.sleepAndIgnoreException(5);
@@ -521,7 +521,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         try {
             projectFrame.getContentComboLabel("Project", "2");
-            clickOnWindowPaneSquareStripeButton(remoteRobot, "Project");
+            clickOnWindowPaneStripeButton(remoteRobot, "Project");
         } catch (WaitForConditionTimeoutException e) {
             // Project view is already closed. Nothing to do.
         }
@@ -538,7 +538,7 @@ public class UIBotTestUtils {
             projectFrame.getBaseLabel("Terminal", "5");
         } catch (WaitForConditionTimeoutException e) {
             // The Liberty tool window is closed. Open it.
-            clickOnWindowPaneSquareStripeButton(remoteRobot, "Terminal");
+            clickOnWindowPaneStripeButton(remoteRobot, "Terminal");
         }
     }
 
@@ -548,7 +548,7 @@ public class UIBotTestUtils {
      * @param remoteRobot      The RemoteRobot instance.
      * @param StripeButtonName The name of the window pane stripe button.
      */
-    public static void clickOnWindowPaneSquareStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
+    public static void clickOnWindowPaneStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         ComponentFixture wpStripeButton = projectFrame.getStripeButton(StripeButtonName, "10");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(30),

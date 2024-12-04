@@ -337,9 +337,9 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     * Returns the ContainerFixture object associated with the ActionButtonWithText class.
      *
-     * @return The ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     * @return The ContainerFixture object associated with the ActionButtonWithText class.
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
         return find(ContainerFixture.class, byXpath("//div[@class='ActionButtonWithText']"), Duration.ofSeconds(5));
