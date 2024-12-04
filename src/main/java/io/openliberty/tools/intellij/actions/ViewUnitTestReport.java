@@ -52,18 +52,21 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
 
         // Dev mode runs the tests and it may have selected a report generator that uses one location or another depending on the version number
         // Maven plugin maven-surefire-report-plugin v3.5 and above use this location
+        String reportNameNo1 = "", reportNameNo2 = "";
         File surefireReportFile = getReportFile(parentFile, "reports", "surefire.html");
+        reportNameNo1 = parentFile.toNioPath().relativize(surefireReportFile.toPath()).toString();
         VirtualFile surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             // Maven plugin maven-surefire-report-plugin v3.4 and below use this location
             surefireReportFile = getReportFile(parentFile,"site", "surefire-report.html");
+            reportNameNo2 = parentFile.toNioPath().relativize(surefireReportFile.toPath()).toString();
             surefireReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(surefireReportFile);
         }
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
                     LocalizedResourceUtil.getMessage("unit.test.report.does.not.exist"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", surefireReportFile.getAbsolutePath()),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
