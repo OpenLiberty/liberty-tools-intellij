@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class UIBotTestUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(UIBotTestUtils.class);
-
     /**
      * Print destination types.
      */
