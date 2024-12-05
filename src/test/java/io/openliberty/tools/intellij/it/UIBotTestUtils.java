@@ -208,7 +208,7 @@ public class UIBotTestUtils {
      */
     public static void closeProjectFrame(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        // minimize windows os intellij ide to avoid failures accessing menu
+        // minimize windows os intellij ide to default state
         if (remoteRobot.isWin()) {
             minimizeWindow(remoteRobot);
         }
@@ -1693,8 +1693,14 @@ public class UIBotTestUtils {
             }
         }
 
-        // Report the last error if there is one and avoid throwing a RuntimeException for the "Close All Tabs" action,
-        // as it is not always necessary for at least one tab to be open in the Editor Window in certain cases.
+        /*
+         * We throw a RuntimeException with error only if the action is not "Close All Tabs" .The "Close All Tabs" action
+         * is used as part of the cleanup process in the @AfterAll-annotated method within the SingleModMPProjectTestCommon class.
+         *
+         * When running individual tests in this class, it is not always guaranteed that at least one file tab will be open in the Editor Window.
+         * If we are not specify a condition check for "Close All Tabs" action when no file tabs are open, the runActionFromSearchEverywherePanel method
+         * will throw a RuntimeException, causing the test to fail.
+         */
         if (error != null && !action.equals("Close All Tabs")) {
             throw new RuntimeException("Failed to run the " + action + " action using the search everywhere option", error);
         }
@@ -2572,7 +2578,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void clickOnMainMenu(RemoteRobot remoteRobot) {
-        String fileName = "Main Menu";
+        String mainMenuButton = "Main Menu";
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         try {
@@ -2581,7 +2587,7 @@ public class UIBotTestUtils {
             ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
             actionButton.click();
             // Clicking on the Main Menu
-            String xPathMainMenu = "//div[@accessiblename='" + fileName + "' and @class='ActionButton']";
+            String xPathMainMenu = "//div[@accessiblename='" + mainMenuButton + "' and @class='ActionButton']";
             ComponentFixture actionButtonMainMenu = projectFrame.getActionButton(xPathMainMenu, "10");
             actionButtonMainMenu.click();
 
