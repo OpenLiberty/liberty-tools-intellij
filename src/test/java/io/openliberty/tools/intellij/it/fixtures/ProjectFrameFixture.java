@@ -379,7 +379,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @param actions      the sequence of actions to be performed in the menu hierarchy.
      */
     public void clickOnMainMenuWithActions(RemoteRobot remoteRobot, String... actions) {
-        boolean actionPerformed = false; // Flag to indicate success
+        boolean actionPerformed = false;
 
         for (int attempt = 0; attempt < 5; attempt++) {
             try {
@@ -404,14 +404,12 @@ public class ProjectFrameFixture extends CommonContainerFixture {
                     }
 
                     TestUtils.sleepAndIgnoreException(3);
-
-                    // Find the next menu popup for further actions
                     if (i < actions.length - 1) {
                         currentMenuPopup = currentMenuPopup.get(0).findAll(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
                     }
                 }
-                actionPerformed = true; // Mark as successful
-                break; // Exit loop if successful
+                actionPerformed = true;
+                break;
             } catch (WaitForConditionTimeoutException e) {
                 System.err.println("Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items.");
             } catch (Exception e) {

@@ -1445,7 +1445,6 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void copyWindowContent(RemoteRobot remoteRobot) {
-        // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         if (remoteRobot.isMac()) {
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Select All");
@@ -1474,7 +1473,7 @@ public class UIBotTestUtils {
      */
     public static void clearWindowContent(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        // Select the content.
+
         if (remoteRobot.isMac()) {
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Select All");
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Delete");
@@ -1510,7 +1509,6 @@ public class UIBotTestUtils {
         if (homeCursor) {
             goToLineAndColumn(remoteRobot, new Keyboard(remoteRobot), 1, 1);
         }
-        // Select the content.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         if (remoteRobot.isMac()) {
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Select All");
@@ -2173,14 +2171,38 @@ public class UIBotTestUtils {
     public static void selectConfigUsingToolbar(RemoteRobot remoteRobot, String cfgName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         ComponentFixture cfgSelectBox = projectFrame.getRunConfigurationsComboBoxButton();
-        cfgSelectBox.click();
-        ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
-        List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
-        for (RemoteText cfg : configs) {
-            if (cfg.getText().equals(cfgName)) {
-                cfg.click();
-                break;
+
+        boolean configFound = false;
+        int retryCount = 0;
+        int maxRetries = 5;
+
+        while (!configFound && retryCount < maxRetries) {
+            cfgSelectBox.click();
+
+            ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
+            List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
+
+            if (configs != null && !configs.isEmpty()) {
+                for (RemoteText cfg : configs) {
+                    if (cfg.getText().equals(cfgName)) {
+                        cfg.click();
+                        configFound = true;
+                        break;
+                    }
+                }
             }
+            if (!configFound) {
+                retryCount++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Thread interrupted while waiting for configuration list", e);
+                }
+            }
+        }
+        if (!configFound) {
+            throw new RuntimeException("Configuration '" + cfgName + "' not found after " + maxRetries + " attempts.");
         }
     }
 
