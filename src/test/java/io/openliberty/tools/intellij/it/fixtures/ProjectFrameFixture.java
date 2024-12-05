@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -175,16 +175,16 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ComponentFixture object associated with the StripeButton class.
+     * Returns the ComponentFixture object associated with the SquareStripeButton class.
      *
      * @param xpathVars The Locator custom variables: text, waitTime(secs)
-     * @return The ComponentFixture object associated with the StripeButton class.
+     * @return The ComponentFixture object associated with the SquareStripeButton class.
      */
     public ComponentFixture getStripeButton(String... xpathVars) {
-        String text = xpathVars[0];
+        String squareStripeButton = xpathVars[0];
         String waitTime = xpathVars[1];
         return find(ComponentFixture.class,
-                byXpath("//div[@class='StripeButton' and @text='" + text + "']"),
+                byXpath("//div[@accessiblename='" + squareStripeButton + "' and @class='SquareStripeButton']"),
                 Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
@@ -197,7 +197,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     public ComponentFixture getSETabLabel(String... xpathVars) {
         String text = xpathVars[0];
         return find(ComponentFixture.class,
-                byXpath("//div[@class='SETabLabel' and @text='" + text + "']"),
+                byXpath("//div[@class='JLabel' and @text='" + text + "']"),
                 Duration.ofSeconds(10));
     }
 
@@ -274,7 +274,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @return The ContainerFixture object associated with the DocumentationHintEditorPane pop-up window.
      */
     public ContainerFixture getDiagnosticPane() {
-        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JEditorPane']"), Duration.ofSeconds(5));
+        return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='JBHtmlPane']"), Duration.ofSeconds(5));
     }
 
     /**
@@ -337,12 +337,12 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     * Returns the ContainerFixture object associated with the ActionButtonWithText class.
      *
-     * @return The ContainerFixture object associated with the RunConfigurationsComboBoxButton class.
+     * @return The ContainerFixture object associated with the ActionButtonWithText class.
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
-        return find(ContainerFixture.class, byXpath("//div[@class='RunConfigurationsComboBoxButton']"), Duration.ofSeconds(5));
+        return find(ContainerFixture.class, byXpath("//div[@class='ActionButtonWithText']"), Duration.ofSeconds(5));
     }
 
     /**
