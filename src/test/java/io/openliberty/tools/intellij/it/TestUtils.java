@@ -577,6 +577,10 @@ public class TestUtils {
      */
     public static void detectFatalError() {
         final String outputFile = System.getenv("JUNIT_OUTPUT_TXT");
+        if (outputFile == null) {
+            System.err.println("ERROR: Environment variable 'JUNIT_OUTPUT_TXT' is not set.");
+            return; // Exit the method gracefully or handle the missing file scenario
+        }
         try {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
             // Flush our output and then wait briefly for the process running 'tee' to flush output to the
