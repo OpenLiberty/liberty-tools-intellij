@@ -223,7 +223,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * Right-clicks on the terminal tab.
      */
     public static void rightClickOnTerminalTab(ProjectFrameFixture projectFrame) {
-        String terminalLabelXPath = "//div[@class='TabPanel'][.//div[@class='BaseLabel']]//div[@text='Terminal:']";
+        String terminalLabelXPath = "//div[@class='TabPanel'][.//div[@class='BaseLabel']]//div[@text='Terminal']";
         ComponentFixture terminalLabel = projectFrame.getActionButton(terminalLabelXPath, "10");
         terminalLabel.rightClick();
     }
