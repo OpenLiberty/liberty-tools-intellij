@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '24.0.9'
+version '24.0.12-SNAPSHOT'
 
 sourceCompatibility = 17
 targetCompatibility = 17
