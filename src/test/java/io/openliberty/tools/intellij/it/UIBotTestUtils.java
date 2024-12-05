@@ -22,8 +22,6 @@ import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.assertj.swing.core.MouseButton;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
