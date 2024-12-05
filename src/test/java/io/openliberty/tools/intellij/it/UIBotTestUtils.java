@@ -124,14 +124,16 @@ public class UIBotTestUtils {
             // From the project frame.
             ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
             commonFixture = projectFrame;
-
+            String openAction = null;
             if (remoteRobot.isMac()) {
-                handleMenuBasedOnVersion(remoteRobot, "File", "Open...", "Open…");
+                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
+                projectFrame.clickOnMainMenuWithActions(remoteRobot, "File", openAction);
             } else {
                 clickOnMainMenu(remoteRobot);
                 ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
                 fileMenuEntry.moveMouse();
-                ComponentFixture openFixture = projectFrame.getActionMenuItem("Open...");
+                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
+                ComponentFixture openFixture = projectFrame.getActionMenuItem(openAction);
                 openFixture.click(new Point());
             }
         }
@@ -1451,6 +1453,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         if (remoteRobot.isMac()) {
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Select All");
+            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Copy");
         }
         else {
             clickOnMainMenu(remoteRobot);
@@ -1458,13 +1461,7 @@ public class UIBotTestUtils {
             editMenuEntry.moveMouse();
             ComponentFixture slectAllEntry = projectFrame.getActionMenuItem("Select All");
             slectAllEntry.click();
-        }
 
-        // Copy the content.
-        if (remoteRobot.isMac()) {
-            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Edit", "Copy");
-        }
-        else {
             clickOnMainMenu(remoteRobot);
             ComponentFixture editMenuEntryNew = projectFrame.getActionMenu("Edit", "10");
             editMenuEntryNew.moveMouse();
@@ -1938,14 +1935,17 @@ public class UIBotTestUtils {
      */
     public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        String editConfigurationAction= null;
         if (remoteRobot.isMac()) {
-            handleMenuBasedOnVersion(remoteRobot, "Run", "Edit Configurations...", "Edit Configurations…");
+            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
+            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", editConfigurationAction);
         }
         else {
             clickOnMainMenu(remoteRobot);
             ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
             runMenu.moveMouse();
-            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations…");
+            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
+            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem(editConfigurationAction);
             editCfgsMenuEntry.click();
         }
 
@@ -2198,10 +2198,12 @@ public class UIBotTestUtils {
      */
     public static void selectConfigUsingMenu(RemoteRobot remoteRobot, String cfgName, ExecMode execMode) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        String debugOrRunAction = null;
         if (remoteRobot.isMac()) {
             for (int attempt = 0; attempt < 5; attempt++) { // Retry up to 5 times
                 try {
-                    handleMenuBasedOnVersion(remoteRobot, "Run", execMode == ExecMode.DEBUG ? "Debug..." : "Run...", execMode == ExecMode.DEBUG ? "Debug…" : "Run…");
+                    debugOrRunAction = handleMenuBasedOnVersion(remoteRobot,  execMode == ExecMode.DEBUG ? "Debug..." : "Run...", execMode == ExecMode.DEBUG ? "Debug…" : "Run…");
+                    projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", debugOrRunAction);
                     // Exit loop if successful
                     break;
                 } catch (WaitForConditionTimeoutException e) {
@@ -2219,9 +2221,11 @@ public class UIBotTestUtils {
             clickOnMainMenu(remoteRobot);
             ComponentFixture menuOption = projectFrame.getActionMenu("Run", "10");
             menuOption.moveMouse();
-            ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem("Run…");
+            debugOrRunAction= handleMenuBasedOnVersion(remoteRobot, "Run...", "Run…");
+            ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem(debugOrRunAction);
             if (execMode == ExecMode.DEBUG) {
-                menuCfgExecOption = projectFrame.getActionMenuItem("Debug…");
+                debugOrRunAction = handleMenuBasedOnVersion(remoteRobot, "Debug...", "Debug…");
+                menuCfgExecOption = projectFrame.getActionMenuItem(debugOrRunAction);
             }
 
             menuCfgExecOption.click();
@@ -2271,14 +2275,17 @@ public class UIBotTestUtils {
      */
     public static void deleteLibertyRunConfigurations(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        String editConfigurationAction = null;
         if (remoteRobot.isMac()) {
-            handleMenuBasedOnVersion(remoteRobot, "Run", "Edit Configurations...", "Edit Configurations…");
+            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
+            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", editConfigurationAction);
         }
         else {
             clickOnMainMenu(remoteRobot);
             ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
             runMenu.moveMouse();
-            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations…");
+            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
+            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem(editConfigurationAction);
             editCfgsMenuEntry.click();
         }
 
@@ -2702,12 +2709,11 @@ public class UIBotTestUtils {
      * Handles version-specific menu actions based on the IntelliJ IDEA version.
      *
      * @param remoteRobot        Instance of the RemoteRobot to interact with the IntelliJ UI.
-     * @param menuAction1        The name of the menu item (e.g., "Run").
      * @param menuAction2024_2   The submenu option for IntelliJ version 2024.2.
      * @param menuAction2024_3   The submenu option for IntelliJ version 2024.3.
      * @throws UnsupportedOperationException if the IntelliJ version is not supported.
      */
-    public static void handleMenuBasedOnVersion(RemoteRobot remoteRobot, String menuAction1, String menuAction2024_2, String menuAction2024_3) {
+    public static String handleMenuBasedOnVersion(RemoteRobot remoteRobot, String menuAction2024_2, String menuAction2024_3) {
         // Using Remote robot's javascript API Retrieve the IntelliJ version
         String intellijVersion = remoteRobot.callJs("com.intellij.openapi.application.ApplicationInfo.getInstance().getFullVersion();");
 
@@ -2721,9 +2727,7 @@ public class UIBotTestUtils {
             throw new UnsupportedOperationException("Unsupported IntelliJ version: " + intellijVersion);
         }
 
-        // Perform the menu navigation ny locating project frame using the determined submenu option.
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        projectFrame.clickOnMainMenuWithActions(remoteRobot, menuAction1, menuAction2);
+        return menuAction2;
     }
 
 }

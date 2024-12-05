@@ -294,7 +294,9 @@ public abstract class SingleModMPProjectTestCommon {
      */
     protected static void closeProjectView() {
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        if (!remoteRobot.isMac()) {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -1136,7 +1138,9 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.findWelcomeFrame(remoteRobot);
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        if (!remoteRobot.isMac()) {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
