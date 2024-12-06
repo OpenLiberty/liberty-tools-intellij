@@ -14,7 +14,9 @@ import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.intellij.ui.HyperlinkLabel;
+import io.openliberty.tools.intellij.it.TestUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -221,7 +223,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * Right-clicks on the terminal tab.
      */
     public static void rightClickOnTerminalTab(ProjectFrameFixture projectFrame) {
-        String terminalLabelXPath = "//div[@class='TabPanel'][.//div[@class='BaseLabel']]//div[@text='Terminal:']";
+        String terminalLabelXPath = "//div[@class='TabPanel'][.//div[@class='BaseLabel']]//div[@text='Terminal']";
         ComponentFixture terminalLabel = projectFrame.getActionButton(terminalLabelXPath, "10");
         terminalLabel.rightClick();
     }
@@ -353,5 +355,70 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public boolean isComponentEnabled(ComponentFixture component) {
         return component.callJs("component.isEnabled();", false);
+    }
+    /**
+     * Attempts to find and click the "Main Menu" button in the project frame.
+     * If the button is not found within the timeout, an error message is logged.
+     * @param remoteRobot the instance used to interact with the UI.
+     *
+     */
+    public void clickOnMainMenu(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        try {
+            var menuButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@tooltiptext='Main Menu']"), Duration.ofSeconds(30));
+            menuButton.click();
+        } catch (WaitForConditionTimeoutException e) {
+            System.err.println("ERROR: Main menu button not found within the given timeout.");
+
+        }
+    }
+    /**
+     * Clicks on the main menu and navigates through a sequence of menu actions.
+     *
+     * @param remoteRobot the instance used to interact with the UI.
+     * @param actions      the sequence of actions to be performed in the menu hierarchy.
+     */
+    public void clickOnMainMenuWithActions(RemoteRobot remoteRobot, String... actions) {
+        boolean actionPerformed = false;
+
+        for (int attempt = 0; attempt < 5; attempt++) {
+            try {
+                clickOnMainMenu(remoteRobot);
+
+                List<ContainerFixture> currentMenuPopup = findAll(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
+                for (int i = 0; i < actions.length; i++) {
+                    // Wait for the menu to be displayed
+                    List<ContainerFixture> finalCurrentMenuPopup = currentMenuPopup;
+                    RepeatUtilsKt.waitFor(
+                            Duration.ofSeconds(30),
+                            Duration.ofSeconds(1),
+                            "Waiting for menu " + (i + 1) + " to get displayed",
+                            "Timeout while trying to find or interact with menu " + (i + 1) + " items.",
+                            () -> !finalCurrentMenuPopup.isEmpty());
+
+                    // Move the mouse or click on the desired menu item
+                    if (i < actions.length - 1) {
+                        currentMenuPopup.get(0).findText(actions[i]).moveMouse();
+                    } else {
+                        currentMenuPopup.get(0).findText(actions[i]).click();
+                    }
+
+                    TestUtils.sleepAndIgnoreException(3);
+                    if (i < actions.length - 1) {
+                        currentMenuPopup = currentMenuPopup.get(0).findAll(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
+                    }
+                }
+                actionPerformed = true;
+                break;
+            } catch (WaitForConditionTimeoutException e) {
+                System.err.println("Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items.");
+            } catch (Exception e) {
+                System.err.println("Attempt " + (attempt + 1) + " failed: " + e.getMessage());
+            }
+        }
+
+        if (!actionPerformed) {
+            throw new IllegalStateException("Failed to perform the menu actions after multiple attempts.");
+        }
     }
 }

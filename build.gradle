@@ -17,7 +17,11 @@ def lsp4ijVersion = '0.7.0'
 allprojects {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
-    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.fork = true
+        options.forkOptions.memoryMaximumSize = "2g"
+    }
 }
 
 repositories {
