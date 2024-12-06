@@ -215,11 +215,13 @@ public class UIBotTestUtils {
      */
     public static void closeProjectFrame(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        // minimize windows os intellij ide to default state
+
         if (remoteRobot.isMac()) {
+            // Click on File on the Menu bar.
             projectFrame.clickOnMainMenuWithActions(remoteRobot, "File", "Close Project");
         }
         else {
+            // minimize windows os intellij ide to default state
             if (remoteRobot.isWin()) {
                 minimizeWindow(remoteRobot);
             }
