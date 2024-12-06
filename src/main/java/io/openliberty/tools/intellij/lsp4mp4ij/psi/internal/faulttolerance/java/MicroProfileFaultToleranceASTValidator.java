@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,13 +14,12 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidator;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.text.MessageFormat;
@@ -31,7 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -152,15 +151,18 @@ public class MicroProfileFaultToleranceASTValidator extends JavaASTValidator {
 	 * @param annotation The @Asynchronous annotation
 	 */
 	private void validateAsynchronousAnnotation(PsiMethod node, PsiAnnotation annotation) {
-		PsiType methodReturnType = node.getReturnType();
-		String methodReturnTypeString;
-		try {
-			methodReturnTypeString = methodReturnType.getCanonicalText();
-		} catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-			throw e;
-		} catch (Exception e) {
-			throw e;
-		}
+		// Use lambda expression to avoid code duplication
+		String methodReturnTypeString = ExceptionUtil.executeWithExceptionHandling(
+			() -> {
+				PsiType methodReturnType = node.getReturnType();
+				return methodReturnType.getCanonicalText();
+			},
+			e -> {
+				LOGGER.log(Level.WARNING, "An error occurred", e);
+				throw e;
+            }
+		);
+
 		if ((!isAllowedReturnTypeForAsynchronousAnnotation(methodReturnTypeString))) {
 			String allowedTypes = allowedReturnTypesForAsynchronousAnnotation.stream()
 					.collect(Collectors.joining("', '", "'", "'"));

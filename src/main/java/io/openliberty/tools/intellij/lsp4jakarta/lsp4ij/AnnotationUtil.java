@@ -1,4 +1,4 @@
-/* Copyright (c) 2022 IBM Corporation, Lidia Ataupillco Ramos and others.
+/* Copyright (c) 2022, 2024 IBM Corporation, Lidia Ataupillco Ramos and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,14 +12,14 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.PsiClass;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Collections;
 
@@ -32,16 +32,20 @@ import java.util.Collections;
  * @return list of recognised defining annotations applied to a class
  */
 public class AnnotationUtil {
+    private static final Logger LOGGER = Logger.getLogger(AnnotationUtil.class.getName());
     public static List<String> getScopeAnnotations(PsiClass type, Set<String> scopes) {
-        try {
-            // Construct a stream of only the annotations applied to the type that are also
-            // recognised annotations found in scopes.
-            return Arrays.stream(type.getAnnotations()).map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
-                    .filter(scopes::contains).distinct().collect(Collectors.toList());
-        } catch (IndexNotReadyException | ProcessCanceledException | CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            return Collections.<String>emptyList();
-        }
+        return ExceptionUtil.executeWithExceptionHandling(
+                // Construct a stream of only the annotations applied to the type that are also
+                // recognised annotations found in scopes.
+                () -> Arrays.stream(type.getAnnotations())
+                        .map(annotation -> annotation.getNameReferenceElement().getQualifiedName())
+                        .filter(scopes::contains)
+                        .distinct()
+                        .collect(Collectors.toList()),
+                e -> {
+                    LOGGER.log(Level.WARNING, "Error while calling getScopeAnnotations", e);
+                    return Collections.<String>emptyList();
+                }
+        );
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -28,7 +28,7 @@ public class TreeDataProvider implements DataProvider {
     @Nullable
     @Override
     public Object getData(@NotNull String dataId) {
-        if (dataId.equals(Constants.LIBERTY_BUILD_FILE)) {
+        if (dataId.equals(Constants.LIBERTY_BUILD_FILE_DATAKEY.getName())) {
             return this.currentFile;
         } else if (dataId.equals(Constants.LIBERTY_PROJECT_NAME)) {
             return this.projectName;

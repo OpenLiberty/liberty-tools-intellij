@@ -293,6 +293,10 @@ public abstract class SingleModMPProjectTestCommon {
      * Close project.
      */
     protected static void closeProjectView() {
+        if (!remoteRobot.isMac()) {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -320,7 +324,7 @@ public abstract class SingleModMPProjectTestCommon {
                 "Editor tab with the name of " + editorTabName + " could not be found.");
 
         // Close the editor tab.
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "10");
+        UIBotTestUtils.rightClickCloseOnFileTab(remoteRobot, editorTabName);
     }
 
     /**
@@ -1134,6 +1138,9 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.findWelcomeFrame(remoteRobot);
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
+        if (!remoteRobot.isMac()) {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
@@ -1146,7 +1153,12 @@ public abstract class SingleModMPProjectTestCommon {
         // Closing the build file editor here prevents it from opening automatically when the project
         // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
         // prevent false negative tests related to the build file editor tab.
-        UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+        if (remoteRobot.isMac()) {
+            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+        }
+        else {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+        }
 
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Exit. ProjectName: " + projectName);

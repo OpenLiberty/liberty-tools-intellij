@@ -20,7 +20,7 @@ This extension is built using the [gradle-intellij-plugin](https://github.com/Je
 
 1. Clone this repository: `git clone git@github.com:OpenLiberty/liberty-tools-intellij.git`
 2. Import this repository as a Gradle project in IntelliJ IDEA 
-3. Run `./gradlew runIde --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
+3. Run `./gradlew runIdeLocally --stacktrace`. A new IntelliJ IDEA window will launch with the Liberty Tools plugin installed to it. You can connect the IntelliJ IDEA debugger to this process to debug the plugin.
 
    OR  
 
@@ -38,7 +38,7 @@ Liberty Tools for IntelliJ consumes the [Liberty Config Language Server](https:/
 
 #### Debugging LemMinX Language Server
 To debug the LemMinX Language Server in IntelliJ, complete the following steps.
-1. Start Liberty Tools for IntelliJ by creating an IntelliJ debug configuration for the `./gradlew runIde command`.
+1. Start Liberty Tools for IntelliJ by creating an IntelliJ debug configuration for the `./gradlew runIdeLocally command`.
 2. Create a new debug configuration: _Remote JVM Debug_ --> specify _localhost_, port _1054_ and command line arguments `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:1054`
 3. In `io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServer.LibertyXmlServer()` replace the line ` params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1054,quiet=y");` with  `params.add("-agentlib:jdwp=transport=dt_socket,server=y,address=1054");`.
 4. Start the debug configuration created in step 2. You can now step through the LemMinX LS code now with the IntelliJ debugger.

@@ -279,7 +279,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
                         menu.setDataContext(() -> SimpleDataContext.builder()
                                 .add(CommonDataKeys.PROJECT, libertyNode.getProject())
-                                .add(DataKey.create(Constants.LIBERTY_BUILD_FILE), libertyNode.getFilePath()).build());
+                                .add(Constants.LIBERTY_BUILD_FILE_DATAKEY, libertyNode.getFilePath()).build());
 
                         menu.getComponent().show(comp, x, y);
                     }
