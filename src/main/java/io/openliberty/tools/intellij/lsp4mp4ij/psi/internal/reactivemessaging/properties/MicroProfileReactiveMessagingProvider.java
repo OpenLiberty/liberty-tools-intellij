@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4mp.commons.metadata.ItemHint;
 import org.eclipse.lsp4mp.commons.metadata.ValueHint;
 
+import java.util.Locale;
+
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.getAnnotationMemberValue;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils.isMatchAnnotation;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils.*;
@@ -353,7 +355,9 @@ public class MicroProfileReactiveMessagingProvider extends AbstractAnnotationTyp
 											 String attributeName) {
 		StringBuilder propertyName = new StringBuilder("mp.messaging");
 		propertyName.append('.');
-		propertyName.append(messageType.name().toLowerCase());
+		// Use Locale.ROOT to avoid the "Turkish locale bug".
+		// See: https://github.com/OpenLiberty/liberty-tools-intellij/issues/1092
+		propertyName.append(messageType.name().toLowerCase(Locale.ROOT));
 		propertyName.append('.');
 		if (dynamic) {
 			propertyName.append("${");

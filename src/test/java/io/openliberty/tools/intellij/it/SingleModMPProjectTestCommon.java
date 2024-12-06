@@ -11,17 +11,23 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.utils.Keyboard;
+import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 /**
@@ -36,9 +42,221 @@ public abstract class SingleModMPProjectTestCommon {
     public static final String REMOTE_BOT_URL = "http://localhost:8082";
 
     /**
+     * To clean the terminal.
+     */
+    private boolean shouldCleanupTerminal = true;
+
+    /**
+     * Supported build types.
+     */
+    public enum BuildType {
+        MAVEN_TYPE, GRADLE_TYPE
+    }
+
+    /**
      * The remote robot object.
      */
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
+
+    /**
+     * Single module Microprofile project name.
+     */
+    private String smMpProjectName = null;
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private String projectsPath = null;
+
+    /**
+     * Project port.
+     */
+    private int smMpProjectPort = 0;
+
+    /**
+     * Project resource URI.
+     */
+    private String smMpProjectResUri = null;
+
+    /**
+     * Project response.
+     */
+    private String smMpProjectOutput = null;
+
+    /**
+     * Relative location of the WLP installation.
+     */
+    private String wlpInstallPath = null;
+
+    /**
+     * The path to the test report.
+     */
+    private Path testReportPath = null;
+
+    /**
+     * Build file name.
+     */
+    private String buildFileName = null;
+
+    /**
+     * Action command to open the build file.
+     */
+    private String buildFileOpenCmd = null;
+
+    /**
+     * Dev mode configuration start parameters.
+     */
+    private String devModeStartParams = null;
+
+    /**
+     * Dev mode configuration custom start parameters for debugging.
+     */
+    private String devModeStartParamsDebug = null;
+
+    /**
+     * Build Category.
+     */
+    private BuildType buildCategory = null;
+
+    /**
+     * Returns the path where the Liberty server was installed.
+     *
+     * @return The path where the Liberty server was installed.
+     */
+    public String getWLPInstallPath() {
+        return wlpInstallPath;
+    }
+    public void setWLPInstallPath(String path) {
+        wlpInstallPath = path;
+    }
+
+    /**
+     * Sets the path where the Liberty server stores test reports.
+     *
+     */
+    public void setTestReportPath(Path path) {
+        testReportPath = path;
+    }
+
+    /**
+     * Returns the projects directory path.
+     *
+     * @return The projects directory path.
+     */
+    public String getProjectsDirPath() {
+        return projectsPath;
+    }
+    public void setProjectsDirPath(String path) {
+        projectsPath = path;
+    }
+
+    /**
+     * Returns the name of the single module MicroProfile project.
+     *
+     * @return The name of the single module MicroProfile project.
+     */
+    public String getSmMPProjectName() {
+        return smMpProjectName;
+    }
+    public void setSmMPProjectName(String name) {
+        smMpProjectName = name;
+    }
+
+    /**
+     * Returns the expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     *
+     * @return The expected HTTP response payload associated with the single module
+     * MicroProfile project.
+     */
+    public String getSmMPProjOutput() {
+        return smMpProjectOutput;
+    }
+    public void setSmMPProjOutput(String s) {
+        smMpProjectOutput = s;
+    }
+
+    /**
+     * Returns the port number associated with the single module MicroProfile project.
+     *
+     * @return The port number associated with the single module MicroProfile project.
+     */
+    public int getSmMpProjPort() {
+        return smMpProjectPort;
+    }
+    public void setSmMpProjPort(int port) {
+        smMpProjectPort = port;
+    }
+
+    /**
+     * Return the Resource URI associated with the single module MicroProfile project.
+     *
+     * @return The Resource URI associated with the single module MicroProfile project.
+     */
+    public String getSmMpProjResURI() {
+        return smMpProjectResUri;
+    }
+    public void setSmMpProjResURI(String uri) {
+        smMpProjectResUri = uri;
+    }
+
+    /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    public String getBuildFileName() {
+        return buildFileName;
+    }
+    public void setBuildFileName(String name) {
+        buildFileName = name;
+    }
+
+    /**
+     * Returns the name of the custom action command used to open the build file.
+     *
+     * @return The name of the custom action command used to open the build file.
+     */
+    public String getBuildFileOpenCommand() {
+        return buildFileOpenCmd;
+    }
+    public void setBuildFileOpenCommand(String command) {
+        buildFileOpenCmd = command;
+    }
+
+    /**
+     * Returns the custom start parameters to be used to start dev mode.
+     *
+     * @return The custom start parameters to be used to start dev mode.
+     */
+    public String getStartParams() {
+        return devModeStartParams;
+    }
+    public void setStartParams(String params) {
+        devModeStartParams = params;
+    }
+
+    /**
+     * Returns the custom start parameters for debugging to start dev mode.
+     *
+     * @return The custom start parameters for debugging to start dev mode.
+     */
+    public String getStartParamsDebugPort() {
+        return devModeStartParamsDebug;
+    }
+    public void setStartParamsDebugPort(String params) {
+        devModeStartParamsDebug = params;
+    }
+
+    /**
+     * Returns Build Category
+     */
+    public BuildType getBuildCategory() {
+        return buildCategory;
+    };
+    public void setBuildCategory(BuildType type) {
+        buildCategory = type;
+    };
 
     /**
      * Processes actions before each test.
@@ -57,7 +275,11 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @AfterEach
     public void afterEach(TestInfo info) {
+        if (shouldCleanupTerminal) {
+            cleanAndResetTerminal();
+        }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**
@@ -84,6 +306,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testOpenBuildFileActionUsingPopUpMenu() {
+        shouldCleanupTerminal = false;
         String editorTabName = getBuildFileName() + " (" + getSmMPProjectName() + ")";
 
         // Close the editor tab if it was previously opened.
@@ -672,6 +895,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     public void testMultipleConfigEditHistory() {
+        shouldCleanupTerminal = false;
         String testName = "testMultipleConfigEditHistory";
 
         // The path of the project build file expected in the configuration. This path constant for this test.
@@ -782,7 +1006,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -815,10 +1038,9 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingPlayToolbarButton() {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
-        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
+        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", true, 3);
@@ -847,7 +1069,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -880,7 +1101,6 @@ public abstract class SingleModMPProjectTestCommon {
     @Test
     @Video
     @EnabledOnOs({OS.LINUX})
-    @Disabled
     public void testStartInContainerActionUsingSearch() {
         String testName = "testStartInContainerActionUsingSearch";
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
@@ -915,7 +1135,7 @@ public abstract class SingleModMPProjectTestCommon {
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        // IntelliJ does not start building and indexing until the project is open in the UI
+        // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
         UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, projectName);
@@ -1008,84 +1228,75 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Returns the projects directory path.
-     *
-     * @return The projects directory path.
+     * Clean project.
      */
-    public abstract String getProjectsDirPath();
+    public void stopTerminal() {
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        ComponentFixture terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+
+        terminal.rightClick();
+        ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
+        openFixtureNewTab.click(new Point());
+
+        // Perform Stop Action
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw liberty:stop");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew libertyStop");
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
+            return;
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(10);
+    }
 
     /**
-     * Returns the name of the single module MicroProfile project.
-     *
-     * @return The name of the single module MicroProfile project.
+     * Stop the Server.
      */
-    public abstract String getSmMPProjectName();
+    public void cleanTerminal() {
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        // Perform clean
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            keyboard.enterText("./mvnw clean");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            keyboard.enterText("./gradlew clean");
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
+            return;
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(10);
+    }
 
     /**
-     * Returns the expected HTTP response payload associated with the single module
-     * MicroProfile project.
-     *
-     * @return The expected HTTP response payload associated with the single module
-     * MicroProfile project.
+     * Cleans up and resets the terminal.
      */
-    public abstract String getSmMPProjOutput();
-
-    /**
-     * Returns the port number associated with the single module MicroProfile project.
-     *
-     * @return The port number associated with the single module MicroProfile project.
-     */
-    public abstract int getSmMpProjPort();
-
-    /**
-     * Return the Resource URI associated with the single module MicroProfile project.
-     *
-     * @return The Resource URI associated with the single module MicroProfile project.
-     */
-    public abstract String getSmMpProjResURI();
-
-    /**
-     * Returns the path where the Liberty server was installed.
-     *
-     * @return The path where the Liberty server was installed.
-     */
-    public abstract String getWLPInstallPath();
-
-    /**
-     * Returns the name of the build file used by the project.
-     *
-     * @return The name of the build file used by the project.
-     */
-    public abstract String getBuildFileName();
-
-    /**
-     * Returns the name of the custom action command used to open the build file.
-     *
-     * @return The name of the custom action command used to open the build file.
-     */
-    public abstract String getBuildFileOpenCommand();
-
-    /**
-     * Returns the custom start parameters to be used to start dev mode.
-     *
-     * @return The custom start parameters to be used to start dev mode.
-     */
-    public abstract String getStartParams();
-
-    /**
-     * Returns the custom start parameters to be used to start dev mode.
-     *
-     * @return The custom start parameters to be used to start dev mode.
-     */
-    public abstract String getStartParamsDebugPort();
+    public void cleanAndResetTerminal() {
+        stopTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+        UIBotTestUtils.openTerminalWindow(remoteRobot);
+        cleanTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+    }
 
     /**
      * Deletes test reports.
      */
-    public abstract void deleteTestReports();
+    public void deleteTestReports() {
+        boolean testReportDeleted = TestUtils.deleteFile(testReportPath);
+        Assertions.assertTrue(testReportDeleted, () -> "Test report file: " + testReportPath + " was not be deleted.");
+    }
 
     /**
      * Validates that test reports were generated.
      */
-    public abstract void validateTestReportsExist();
+
+    public void validateTestReportsExist() {
+        //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
+        TestUtils.validateTestReportExists(testReportPath, testReportPath);
+    }
 }

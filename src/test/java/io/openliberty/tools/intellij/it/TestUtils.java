@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2023, 2024 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
 import org.junit.jupiter.api.Assertions;
@@ -562,4 +571,28 @@ public class TestUtils {
                 });
     }
 
+    /**
+     * Test to see if there has been a fatal error and JUnit should be stopped.
+     * This searches the output of this JUnit run for SocketTimeoutException which
+     * has been identified as a fatal error and occurs during the Mac tests.
+     */
+    public static synchronized void detectFatalError() {
+        final String outputFile = System.getenv("JUNIT_OUTPUT_TXT");
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(outputFile)));
+            // Flush our output and then wait briefly for the process running 'tee' to flush output to the
+            // file that the buffered reader is reading.
+            System.out.flush();
+            Thread.sleep(10);
+            // Continue reading the existing reader
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("SocketTimeoutException")) {
+                    System.exit(1);
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

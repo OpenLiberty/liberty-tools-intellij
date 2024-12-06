@@ -1,0 +1,10 @@
+<ivy-module version="2.0">
+  <info organisation="bundledModule" module="intellij.platform.ide.newUiOnboarding" revision="243.21565.193+48"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="/Users/dessina/.gradle/caches/transforms-4/b3380e8f4bc06a99a56a9c4bf350fcee/transformed/ideaIC-2024.3/lib/modules/intellij.platform.ide.newUiOnboarding.jar" type="jar" conf="default"/>
+  </publications>
+  <dependencies/>
+</ivy-module>

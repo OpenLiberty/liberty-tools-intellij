@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2023 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
@@ -44,6 +53,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**
@@ -391,7 +401,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        // IntelliJ does not start building and indexing until the project is open in the UI
+        // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);

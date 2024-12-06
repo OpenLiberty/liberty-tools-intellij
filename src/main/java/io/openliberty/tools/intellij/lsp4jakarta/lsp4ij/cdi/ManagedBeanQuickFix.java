@@ -15,8 +15,10 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiModifierListOwner;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.InsertAnnotationMissingQuickFix;
@@ -65,7 +67,7 @@ public class ManagedBeanQuickFix extends InsertAnnotationMissingQuickFix {
         final CodeAction toResolve = context.getUnresolved();
         String name = toResolve.getTitle();
         PsiElement node = context.getCoveringNode();
-        PsiModifierListOwner parentType = getBinding(node);
+        PsiModifierListOwner parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
         ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(name, context.getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, ADD_ANNOTATION, context.getSource().getCompilationUnit(),
                 REMOVE_ANNOTATION_NAMES);

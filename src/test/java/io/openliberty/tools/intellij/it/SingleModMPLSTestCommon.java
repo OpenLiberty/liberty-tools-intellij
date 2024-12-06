@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2023 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
@@ -45,6 +54,7 @@ public abstract class SingleModMPLSTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**
@@ -118,11 +128,20 @@ public abstract class SingleModMPLSTestCommon {
         try {
             // validate @Liveness no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), livenessString);
+            TestUtils.sleepAndIgnoreException(1);
 
-            //there should be a diagnostic - move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            String foundHoverData = null;
+            int maxWait = 60, delay = 5; // in some cases it can take 35s for the diagnostic to appear
+            for (int i = 0; i <= maxWait; i += delay) {
+                //there should be a diagnostic - move cursor to hover point
+                UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
 
-            String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+                foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+                if (!foundHoverData.isBlank()) {
+                    break;
+                }
+                TestUtils.sleepAndIgnoreException(delay);
+            }
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
 
         } finally {
@@ -313,7 +332,7 @@ public abstract class SingleModMPLSTestCommon {
 
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        // IntelliJ does not start building and indexing until the project is open in the UI
+        // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);

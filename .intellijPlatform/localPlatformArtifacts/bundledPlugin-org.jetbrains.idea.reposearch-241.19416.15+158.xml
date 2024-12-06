@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="org.jetbrains.idea.reposearch" revision="241.19416.15+158"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="/Users/dessina/.gradle/caches/transforms-4/1c3a61afd6334132264532cc62397ef1/transformed/ideaIC-2024.1.7/plugins/repository-search" type="directory" conf="default"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="org.jetbrains.idea.maven.model" rev="241.19416.15+886"/>
+  </dependencies>
+</ivy-module>

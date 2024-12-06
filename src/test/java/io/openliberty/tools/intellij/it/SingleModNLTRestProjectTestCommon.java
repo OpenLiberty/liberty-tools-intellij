@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2024 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -40,6 +40,26 @@ public abstract class SingleModNLTRestProjectTestCommon {
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTE_BOT_URL);
 
     /**
+     * The path to the folder containing helper test files.
+     */
+    public String helperFilesPath = null;
+
+    /**
+     * The path to the folder containing the test projects.
+     */
+    private String projectsPath = null;
+
+    /**
+     * Single module REST project that lacks the configuration to be recognized by Liberty tools.
+     */
+    private String smNLTRestProjectName = null;
+
+    /**
+     * Build file name.
+     */
+    private String buildFileName = null;
+
+    /**
      * Processes actions before each test.
      *
      * @param info Test information.
@@ -57,6 +77,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @AfterEach
     public void afterEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Exit");
+        TestUtils.detectFatalError();
     }
 
     /**
@@ -68,6 +89,58 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+    }
+
+    /**
+     * Returns the directory path containing helper files.
+     *
+     * @return The directory path containing helper files.
+     */
+    public String getHelperFilesDirPath() {
+        return helperFilesPath;
+    }
+    public void setHelperFilesDirPath(String path) {
+        helperFilesPath = path;
+    }
+
+    /**
+     * Returns the projects directory path.
+     *
+     * @return The projects directory path.
+     */
+    public String getProjectsDirPath() {
+        return projectsPath;
+    }
+    public void setProjectsDirPath(String path) {
+        projectsPath = path;
+    }
+
+    /**
+     * Returns the name of the single module REST project that does not meet
+     * the requirements needed to automatically show in the Liberty tool window.
+     * This project's Liberty config file does not the expected name and the
+     * build file does not have any Liberty plugin related entries.
+     *
+     * @return The name of the single module REST project that does not meet the
+     * requirements needed to automatically show in the Liberty tool window.
+     */
+    public String getSmNLTRestProjectName() {
+        return smNLTRestProjectName;
+    }
+    public void setSmNLTRestProjectName(String name) {
+        smNLTRestProjectName = name;
+    }
+
+    /**
+     * Returns the name of the build file used by the project.
+     *
+     * @return The name of the build file used by the project.
+     */
+    public String getBuildFileName() {
+        return buildFileName;
+    }
+    public void setBuildFileName(String name) {
+        buildFileName = name;
     }
 
     /**
@@ -226,7 +299,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         remoteRobot.find(WelcomeFrameFixture.class, Duration.ofMinutes(2));
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
-        // IntelliJ does not start building and indexing until the project is open in the UI
+        // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
 
@@ -238,36 +311,4 @@ public abstract class SingleModNLTRestProjectTestCommon {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
                 "prepareEnv. Exit. ProjectName: " + projectName);
     }
-
-    /**
-     * Returns the directory path containing helper files.
-     *
-     * @return The directory path containing helper files.
-     */
-    public abstract String getHelperFilesDirPath();
-
-    /**
-     * Returns the projects directory path.
-     *
-     * @return The projects directory path.
-     */
-    public abstract String getProjectsDirPath();
-
-    /**
-     * Returns the name of the single module REST project that does not meet
-     * the requirements needed to automatically show in the Liberty tool window.
-     * This project's Liberty config file does not have the expected default name,
-     * and the build file does not have any Liberty plugin related entries.
-     *
-     * @return The name of the single module REST project that does not meet the
-     * requirements needed to automatically show in the Liberty tool window.
-     */
-    public abstract String getSmNLTRestProjectName();
-
-    /**
-     * Returns the name of the build file used by the project.
-     *
-     * @return The name of the build file used by the project.
-     */
-    public abstract String getBuildFileName();
 }
