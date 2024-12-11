@@ -222,7 +222,27 @@ intellijPlatform {
             untilBuild = providers.gradleProperty("pluginUntilBuild")
         }
         changeNotes = """
-         <h2> 24.0.9 </h2>
+        <h2> 24.0.12 </h2>
+        <p>Version 24.0.12 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.12 requires IntelliJ IDEA version 2024.1.*, 2024.2.*, or 2024.3.* and a minimum of Java 17.</p>
+        Notable changes:
+        <ul>
+        <li> Added support for IntelliJ IDEA 2024.2 and its successive fix releases, as well as IntelliJ IDEA 2024.3 and its successive fix releases.
+        <li> Fixed issues with matching fully qualified class names for LSP4Jakarta diagnostics.
+        <li> Updated the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.2, which adds support for versionless features in server configuration and includes several bug fixes. For more information regarding changes for version 2.2, refer to the release notes:
+          <ul>
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.2
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.2
+          </ul>
+        <li> Updated the <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.2, which includes performance improvements for quick fixes and bug fixes. For more information regarding changes for version 0.2.2, refer to the release notes: https://github.com/eclipse/lsp4jakarta/releases/tag/0.2.2.
+        <li> Updated the <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> version to 0.13.0. Refer to the release tag: https://github.com/eclipse-lsp4mp/lsp4mp/releases/tag/0.13.2.
+        <li> Liberty Tools version 24.0.12 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.8.1. For more information regarding changes for version 0.8.1, refer to the release notes: https://github.com/redhat-developer/lsp4ij/releases/tag/0.8.1.
+          <ul>
+            <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide.
+          </ul>
+        <p>Note: You may observe slow performance when editing your server.xml file when invoking completion or hover. It is possible you may receive a "No documentation found" message on hover. If observed, please report your experience on this GitHub issue: https://github.com/OpenLiberty/liberty-tools-intellij/issues/687.</p>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/24.0.9...24.0.12">commit log</a> for the full set of changes since the previous release.
+        <br>
+        <h2> 24.0.9 </h2>
         <p>Version 24.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.9 requires IntelliJ IDEA version 2024.1.* ONLY and a minimum of Java 17.</p>
         Notable changes:
         <ul>
