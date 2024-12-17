@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import io.openliberty.tools.intellij.util.Constants;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.*;
@@ -541,7 +542,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", Constants.SERVER_ENV);
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
