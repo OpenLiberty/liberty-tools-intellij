@@ -13,6 +13,7 @@ import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
+import io.openliberty.tools.intellij.util.Constants;
 import org.junit.jupiter.api.*;
 
 import java.nio.file.Path;
@@ -64,10 +65,10 @@ public abstract class SingleModMPLSTestCommon {
         projectFrame.findText("META-INF").doubleClick();
         projectFrame.findText("resources").doubleClick();
 
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "ServiceLiveHealthCheck.java", "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "microprofile-config.properties", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, Constants.MPG_PROPERTIES, "5");
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, Constants.COMPACT_MODE, 3);
         }
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -85,7 +86,7 @@ public abstract class SingleModMPLSTestCommon {
         String insertedCode = "public class ServiceLiveHealthCheck implements HealthCheck {";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -95,8 +96,8 @@ public abstract class SingleModMPLSTestCommon {
 
         // Insert a code snippet into java part
         try {
-            UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, "ServiceLiveHealthCheck.java", snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health","ServiceLiveHealthCheck.java");
+            UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, snippetStr, snippetChooser);
+            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health",Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         } finally {
             // Replace modified content with the original content
@@ -116,14 +117,14 @@ public abstract class SingleModMPLSTestCommon {
         String expectedHoverData = "The class `io.openliberty.mp.sample.health.ServiceLiveHealthCheck` implementing the HealthCheck interface should use the @Liveness, @Readiness or @Health annotation.";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Delete the liveness annotation
-        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, "ServiceLiveHealthCheck.java", livenessString);
-        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", "ServiceLiveHealthCheck.java");
+        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, livenessString);
+        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         try {
             // validate @Liveness no longer found in java part
@@ -134,7 +135,7 @@ public abstract class SingleModMPLSTestCommon {
             int maxWait = 60, delay = 5; // in some cases it can take 35s for the diagnostic to appear
             for (int i = 0; i <= maxWait; i += delay) {
                 //there should be a diagnostic - move cursor to hover point
-                UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
+                UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, UIBotTestUtils.PopupType.DIAGNOSTIC);
 
                 foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
                 if (!foundHoverData.isBlank()) {
@@ -162,21 +163,21 @@ public abstract class SingleModMPLSTestCommon {
         String mainQuickFixActionStr  = "Generate OpenAPI Annotations for 'ServiceLiveHealthCheck'";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Delete the liveness annotation
-        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot,"ServiceLiveHealthCheck.java", livenessString);
-        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", "ServiceLiveHealthCheck.java");
+        UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot,Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, livenessString);
+        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "health", Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         try {
             // validate @Liveness no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), livenessString);
 
             //there should be a diagnostic - move cursor to hover point
-            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "ServiceLiveHealthCheck.java", quickfixChooserString);
+            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, Constants.SERVICE_LIVE_HEALTH_CHECK_JAVA, quickfixChooserString);
 
             // trigger and use the quickfix popup attached to the diagnostic
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
@@ -201,14 +202,14 @@ public abstract class SingleModMPLSTestCommon {
         String expectedMpCfgPropertiesString = "mp.health.disable-default-procedures=true";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.MPG_PROPERTIES);
 
         // Save the current microprofile-config.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
-            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", "microprofile-config.properties");
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, Constants.MPG_PROPERTIES, cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
+            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, "src", "main", "resources", "META-INF", Constants.MPG_PROPERTIES);
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified microprofile-config.properties with the original content
@@ -231,7 +232,7 @@ public abstract class SingleModMPLSTestCommon {
                 "java.lang.StringValue: http://localhost:9081/data/client/service";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "microprofile-config.properties", UIBotTestUtils.PopupType.DOCUMENTATION);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, Constants.MPG_PROPERTIES, UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // if the LS has not yet poulated the popup, re-get the popup data
@@ -261,16 +262,16 @@ public abstract class SingleModMPLSTestCommon {
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.MPG_PROPERTIES);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, Constants.MPG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, "microprofile-config.properties", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, Constants.MPG_PROPERTIES, UIBotTestUtils.PopupType.DIAGNOSTIC);
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
@@ -294,19 +295,19 @@ public abstract class SingleModMPLSTestCommon {
         String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
-        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
+        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", Constants.MPG_PROPERTIES);
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, Constants.MPG_PROPERTIES);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, Constants.MPG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, "microprofile-config.properties", quickfixChooserString);
+            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, Constants.MPG_PROPERTIES, quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
             TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
@@ -332,7 +333,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, Constants.COMPACT_MODE, 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
@@ -344,7 +345,7 @@ public abstract class SingleModMPLSTestCommon {
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
 
         UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
-        UIBotTestUtils.openFile(remoteRobot, projectName, "microprofile-config.properties", projectName, "src", "main", "resources", "META-INF");
+        UIBotTestUtils.openFile(remoteRobot, projectName, Constants.MPG_PROPERTIES, projectName, "src", "main", "resources", "META-INF");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
