@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import io.openliberty.tools.intellij.util.Constants;
 import org.junit.jupiter.api.*;
 
 import java.nio.file.Files;
@@ -85,7 +86,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @AfterAll
     public static void cleanup() {
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, Constants.COMPACT_MODE, 3);
         }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
@@ -194,8 +195,8 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Copy a valid server.xml file to this project's src/main/liberty/config directory.
-        Path validServerXml = Paths.get(getHelperFilesDirPath(), "server.xml");
-        Path destination = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), "src", "main", "liberty", "config", "server.xml");
+        Path validServerXml = Paths.get(getHelperFilesDirPath(), Constants.SERVER_XML);
+        Path destination = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), "src", "main", "liberty", "config", Constants.SERVER_XML);
 
         try {
             Files.copy(validServerXml, destination, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
@@ -302,7 +303,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, Constants.COMPACT_MODE, 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
