@@ -13,6 +13,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
+import com.intellij.remoterobot.search.locators.Locators;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
@@ -2721,24 +2722,62 @@ public class UIBotTestUtils {
     /**
      * Maximizes the Intellij ProjectFrame window in Windows.
      *
+     * This method simulates pressing the Windows key + Up arrow to maximize the window,
+     * but only if the window is not already maximized.
+     *
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void maximizeWindow(RemoteRobot remoteRobot) {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.hotKey(VK_WINDOWS, VK_UP);
-        keyboard.enter();
+        if (!isFullScreen(remoteRobot)) {
+            Keyboard keyboard = new Keyboard(remoteRobot);
+            keyboard.hotKey(VK_WINDOWS, VK_UP);
+            keyboard.enter();
+        }
     }
 
     /**
      * Minimizes the Intellij ProjectFrame window in Windows.
      *
+     * This method simulates pressing the Windows key + Down arrow to minimize the window,
+     * but only if the window is currently maximized.
+     *
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void minimizeWindow(RemoteRobot remoteRobot) {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.hotKey(VK_WINDOWS, VK_DOWN);
-        keyboard.enter();
+        if (isFullScreen(remoteRobot)) {
+            Keyboard keyboard = new Keyboard(remoteRobot);
+            keyboard.hotKey(VK_WINDOWS, VK_DOWN);
+            keyboard.enter();
+        }
     }
+
+    /**
+     * Determines if the IntelliJ window is currently full screen.
+     *
+     * This method checks the size of the IntelliJ window against the screen size to
+     * decide if the window is maximized or not. If the window's width or height is
+     * greater than or equal to the screen size, it is considered full screen.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @return true if the IntelliJ window is full screen, false otherwise.
+     */
+    public static boolean isFullScreen(RemoteRobot remoteRobot) {
+        // Locate the IntelliJ IDEA main window
+        ComponentFixture mainWindow = remoteRobot.find(
+                ComponentFixture.class,
+                Locators.byXpath("//div[@class='IdeFrameImpl']")
+        );
+
+        // Get the screen size
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Get the current dimensions (height and width) of the IntelliJ window.
+        int intellijWindowHeight = mainWindow.getRemoteComponent().getHeight();
+        int intellijWindowWidth = mainWindow.getRemoteComponent().getWidth();
+
+        return intellijWindowWidth >= screenSize.width || intellijWindowHeight >= screenSize.height;
+    }
+
     /**
      * Handles version-specific menu actions based on the IntelliJ IDEA version.
      *
