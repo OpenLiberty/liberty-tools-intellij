@@ -1119,7 +1119,7 @@ public class UIBotTestUtils {
         }
         String configValueSnippetUpperCase = configValueSnippet.toUpperCase();
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 10; i++) {
             error = null;
             try {
                 editorNew.click();
