@@ -190,6 +190,63 @@ public abstract class SingleModLibertyLSTestCommon {
     }
 
     /**
+     * Tests Liberty-LS support in server.env for
+     * providing completion suggestions in lowercase letters.
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoServerEnvForLowerCase() {
+        String envCfgSnippetLowerCase = "wlp_logging_con";
+        String envCfgNameChooserSnippet = "FORMAT";
+        String envCfgValueSnippet = "sim";
+        String expectedServerEnvString = "WLP_LOGGING_CONSOLE_FORMAT=SIMPLE";
+
+        // get focus on server.env tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Save the current server.env content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippetLowerCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
+            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
+            TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
+    /**
+     * Tests Liberty-LS support in server.env for providing completion
+     * suggestions in a mix of uppercase and lowercase letters.
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoServerEnvForMixOfCases() {
+        String envCfgSnippetMixCase = "wLp_LOgginG_coN";
+        String envCfgNameChooserSnippet = "FORMAT";
+        String envCfgValueSnippet = "sIM";
+        String expectedServerEnvString = "WLP_LOGGING_CONSOLE_FORMAT=SIMPLE";
+
+        // get focus on server.env tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Save the current server.env content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippetMixCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
+            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
+            TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
+    }
+
+    /**
      * Tests liberty-ls type ahead support in bootstrap.properties for a
      * Liberty Server Configuration booststrap.properties entry
      */
@@ -215,6 +272,65 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
+
+    }
+
+    /**
+     * Tests Liberty-LS support in bootstrap.properties for
+     * providing completion suggestions in capital case letters.
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoBootstrapPropsForCapitalCase() {
+        String configNameSnippetUpperCase = "COM.IBM.WS.LOGGING.CON";
+        String configNameChooserSnippet = "format";
+        String configValueSnippet = "tba";
+        String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippetUpperCase, configNameChooserSnippet, configValueSnippet, true);
+            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
+            TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
+    }
+
+    /**
+     * Tests Liberty-LS support in bootstrap.properties for providing completion
+     * suggestions in a mix of uppercase and lowercase letters.
+     */
+    @Test
+    @Video
+    public void testInsertLibertyConfigIntoBootstrapPropsForMixOfCases() {
+        String configNameSnippetMixCase = "CoM.Ibm.wS.LoGginG.cON";
+        String configNameChooserSnippet = "format";
+        String configValueSnippet = "Tba";
+        String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        try {
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippetMixCase, configNameChooserSnippet, configValueSnippet, true);
+            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
+            TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
+        } finally {
+            // Replace server.xml content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+
     }
 
     /**
