@@ -95,3 +95,7 @@ All translatable text should be included in the message file(s). Message paramet
 
 ### Test Videos
 To record videos for all tests, not just the failed ones, you can create a `video.properties` file in the `src/test/resources` directory and add `video.save.mode=ALL` to that file.
+### Handling Out of Memory Errors in Build or Tests
+If you encounter an "OutOfMemoryError" during compilation or running tests, it may be due to insufficient heap space for the Java process. To resolve this:
+1. Open the `build.gradle` file.
+2. Increase the `memoryMaximumSize` in the `JavaCompile` task. For example: `tasks.withType(JavaCompile) { options.forkOptions.memoryMaximumSize = "4g" // Increase to 4GB or more if needed }`
