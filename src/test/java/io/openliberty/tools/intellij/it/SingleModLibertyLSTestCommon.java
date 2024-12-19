@@ -243,7 +243,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -272,7 +271,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -301,7 +299,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -330,7 +327,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -402,7 +398,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -440,8 +435,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
         }
-
-
     }
 
     /**
@@ -472,7 +465,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
@@ -503,7 +495,6 @@ public abstract class SingleModLibertyLSTestCommon {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
-
     }
 
     /**
