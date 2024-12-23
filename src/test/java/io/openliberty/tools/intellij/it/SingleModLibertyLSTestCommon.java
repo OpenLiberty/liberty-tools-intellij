@@ -11,13 +11,17 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.utils.Keyboard;
+import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import static java.awt.event.KeyEvent.*;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -186,6 +190,46 @@ public abstract class SingleModLibertyLSTestCommon {
         } finally {
             // Replace server.xml content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
+    /**
+     Test to Ensure that relevant completion values (e.g., SIMPLE, ADVANCED)
+     * are displayed and prioritized at the top of the list.
+     */
+    @Test
+    @Video
+    public void testCompletionValuesInServerEnv() {
+        String envCfgKeySnippet = "WLP_LOGGING_CONSOLE_FORMAT=";  // Property key
+        String[] expectedCompletionValues = {"DEV", "JSON", "SIMPLE", "TBASIC"};  // Expected completion values
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
+
+        // get focus on server.env tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Delete the current server.env content.
+        UIBotTestUtils.clearWindowContent(remoteRobot);
+
+        // Type the property key
+        keyboard.enterText(envCfgKeySnippet);
+
+        // Trigger code completion
+        keyboard.hotKey(VK_CONTROL, VK_SPACE);
+
+        // Wait for the completion suggestion pop-up window to display the expected values
+        ComponentFixture completionPopupWindow = projectFrame.getLookupList();
+
+        // Check if all expected completion values are available in the pop-up
+        for (String expectedValue : expectedCompletionValues) {
+            // Wait for each expected value to appear in the completion suggestion pop-up window
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for text " + expectedValue + " to appear in the completion suggestion pop-up window",
+                    "Text " + expectedValue + " did not appear in the completion suggestion pop-up window",
+                    () -> completionPopupWindow.hasText(expectedValue));
+
         }
     }
 
