@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.it.fixtures;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
@@ -327,6 +328,26 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public ContainerFixture getLookupList() {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='LookupList']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Returns the position of the specified text within the completion suggestion pop-up window.
+     *
+     * @param text The text to search for in the suggestion list.
+     */
+    public static int findTextPosition(RemoteRobot remoteRobot, String text) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        // Wait for the completion suggestion pop-up window to display the expected values
+        ComponentFixture completionPopupWindow = projectFrame.getLookupList();
+
+        List<RemoteText> allData = completionPopupWindow.getData().getAll();
+        for (int i = 0; i < allData.size(); i++) {
+            if (allData.get(i).getText().equals(text)) {
+                return i;
+            }
+        }
+        return -1; // Return -1 if the text is not found
     }
 
     /**

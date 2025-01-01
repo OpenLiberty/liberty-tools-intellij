@@ -11,10 +11,8 @@ package io.openliberty.tools.intellij.it;
 
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
 import com.intellij.remoterobot.utils.Keyboard;
-import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
@@ -204,10 +202,12 @@ public abstract class SingleModLibertyLSTestCommon {
         String[] expectedCompletionValues = {"DEV", "JSON", "SIMPLE", "TBASIC"};  // Expected completion values
 
         Keyboard keyboard = new Keyboard(remoteRobot);
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
 
-        // get focus on server.env tab prior to copy
+        // Get focus on server.env tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+
+        // Save the current server.env content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Delete the current server.env content.
         UIBotTestUtils.clearWindowContent(remoteRobot);
@@ -218,18 +218,20 @@ public abstract class SingleModLibertyLSTestCommon {
         // Trigger code completion
         keyboard.hotKey(VK_CONTROL, VK_SPACE);
 
-        // Wait for the completion suggestion pop-up window to display the expected values
-        ComponentFixture completionPopupWindow = projectFrame.getLookupList();
+        try {
+            // Check if the expected value appears in the top of the completion pop-up
+            for (String expectedValue : expectedCompletionValues) {
+                int position = ProjectFrameFixture.findTextPosition(remoteRobot, expectedValue);
 
-        // Check if all expected completion values are available in the pop-up
-        for (String expectedValue : expectedCompletionValues) {
-            // Wait for each expected value to appear in the completion suggestion pop-up window
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                    Duration.ofSeconds(1),
-                    "Waiting for text " + expectedValue + " to appear in the completion suggestion pop-up window",
-                    "Text " + expectedValue + " did not appear in the completion suggestion pop-up window",
-                    () -> completionPopupWindow.hasText(expectedValue));
-
+                // Verify that the position is within the top 4 positions
+                Assertions.assertTrue(position != -1,
+                        "Text '" + expectedValue + "' did not appear in the completion suggestion pop-up window.");
+                Assertions.assertTrue(position >= 0 && position <= 3,
+                        "Text '" + expectedValue + "' is at position " + position + " and is not in the top 4.");
+            }
+        } finally {
+            // Replace server.env content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
     }
 
