@@ -21,7 +21,9 @@ import io.openliberty.tools.intellij.it.TestUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
@@ -331,23 +333,23 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the position of the specified text within the completion suggestion pop-up window.
+     * Retrieves a map of text and their positions from the completion suggestion pop-up in IntelliJ IDEA.
      *
-     * @param text The text to search for in the suggestion list.
+     * @return a map where keys are suggestion texts and values are their positions.
      */
-    public static int findTextPosition(RemoteRobot remoteRobot, String text) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
+    public static Map<String, Integer> findAllTextPositions(RemoteRobot remoteRobot) {
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         // Wait for the completion suggestion pop-up window to display the expected values
         ComponentFixture completionPopupWindow = projectFrame.getLookupList();
-
         List<RemoteText> allData = completionPopupWindow.getData().getAll();
+        Map<String, Integer> textPositionMap = new HashMap<>();
+        // Populate the map with text and their respective positions
         for (int i = 0; i < allData.size(); i++) {
-            if (allData.get(i).getText().equals(text)) {
-                return i;
-            }
+            textPositionMap.put(allData.get(i).getText(), i);
         }
-        return -1; // Return -1 if the text is not found
+        return textPositionMap; // Return the map with all text positions
     }
 
     /**

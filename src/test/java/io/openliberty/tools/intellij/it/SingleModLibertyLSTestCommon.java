@@ -19,6 +19,8 @@ import org.junit.jupiter.api.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Map;
+
 import static java.awt.event.KeyEvent.*;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -220,11 +222,13 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             // Check if the expected value appears in the top of the completion pop-up
-            for (String expectedValue : expectedCompletionValues) {
-                int position = ProjectFrameFixture.findTextPosition(remoteRobot, expectedValue);
+            Map<String, Integer> textPositions = ProjectFrameFixture.findAllTextPositions(remoteRobot);
 
+            // Verify each expected value's position
+            for (String expectedValue : expectedCompletionValues) {
+                Integer position = textPositions.get(expectedValue);
                 // Verify that the position is within the top 4 positions
-                Assertions.assertTrue(position != -1,
+                Assertions.assertNotNull(position,
                         "Text '" + expectedValue + "' did not appear in the completion suggestion pop-up window.");
                 Assertions.assertTrue(position >= 0 && position <= 3,
                         "Text '" + expectedValue + "' is at position " + position + " and is not in the top 4.");
