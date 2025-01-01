@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -1094,12 +1094,12 @@ public class UIBotTestUtils {
      * Inserts a configuration name value pair into a config file via text typing
      * and popup menu completion (if required)
      *
-     * @param remoteRobot              The RemoteRobot instance.
-     * @param fileName                 The string path to the config file
-     * @param configNameSnippetCaseSpecific        the portion of the name to type
-     * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
-     * @param configValueSnippet       the value to type into keyboard - could be a snippet or a whole word
-     * @param completeWithPopup        use popup to complete value selection or type in an entire provided value string
+     * @param remoteRobot                   The RemoteRobot instance.
+     * @param fileName                      The string path to the config file
+     * @param configNameSnippetCaseSpecific the portion of the name to type
+     * @param configNameChooserSnippet      the portion of the name to use for selecting from popup menu
+     * @param configValueSnippet            the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup             use popup to complete value selection or type in an entire provided value string
      */
     public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String fileName, String configNameSnippetCaseSpecific, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
