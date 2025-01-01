@@ -195,7 +195,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
     /**
      Test to Ensure that relevant completion values (e.g., SIMPLE, ADVANCED)
-     * are displayed and prioritized at the top of the list.
+     * are displayed and prioritized at the top of the list in server.env.
      */
     @Test
     @Video
@@ -227,7 +227,7 @@ public abstract class SingleModLibertyLSTestCommon {
             // Verify each expected value's position
             for (String expectedValue : expectedCompletionValues) {
                 Integer position = textPositions.get(expectedValue);
-                // Verify that the position is within the top 4 positions
+                // Verify that the expected value is within the top 4 positions
                 Assertions.assertNotNull(position,
                         "Text '" + expectedValue + "' did not appear in the completion suggestion pop-up window.");
                 Assertions.assertTrue(position >= 0 && position <= 3,
@@ -235,6 +235,52 @@ public abstract class SingleModLibertyLSTestCommon {
             }
         } finally {
             // Replace server.env content with the original content
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
+    /**
+     Test to Ensure that relevant completion values (e.g., AUDIT, ERROR)
+     * are displayed and prioritized at the top of the list in bootstrap.properties.
+     */
+    @Test
+    @Video
+    public void testCompletionValuesInBootstrapProperties() {
+        String envCfgKeySnippet = "com.ibm.ws.logging.console.log.level=";  // Property key
+        String[] expectedCompletionValues = {"AUDIT", "ERROR", "INFO", "OFF", "WARNING"};  // Expected completion values
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        // get focus on bootstrap.properties tab prior to copy
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+
+        // Save the current bootstrap.properties content.
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+
+        // Delete the current bootstrap.properties content.
+        UIBotTestUtils.clearWindowContent(remoteRobot);
+
+        // Type the property key
+        keyboard.enterText(envCfgKeySnippet);
+
+        // Trigger code completion
+        keyboard.hotKey(VK_CONTROL, VK_SPACE);
+
+        try {
+            // Check if the expected value appears in the top of the completion pop-up
+            Map<String, Integer> textPositions = ProjectFrameFixture.findAllTextPositions(remoteRobot);
+
+            // Verify each expected value's position
+            for (String expectedValue : expectedCompletionValues) {
+                Integer position = textPositions.get(expectedValue);
+                // Verify that the expected value is within the top 5 positions
+                Assertions.assertNotNull(position,
+                        "Text '" + expectedValue + "' did not appear in the completion suggestion pop-up window.");
+                Assertions.assertTrue(position >= 0 && position <= 4,
+                        "Text '" + expectedValue + "' is at position " + position + " and is not in the top 5.");
+            }
+        } finally {
+            // Replace bootstrap.properties content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
         }
     }
