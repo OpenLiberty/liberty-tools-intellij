@@ -163,11 +163,12 @@ public abstract class SingleModLibertyLSTestCommon {
 
     /**
      * Tests liberty-ls type ahead support in server.env for a
-     * Liberty Server Configuration Stanza
+     * Liberty Server Configuration Stanza and
+     * providing completion suggestions in uppercase letters.
      */
     @Test
     @Video
-    public void testInsertLibertyConfigIntoServerEnv() {
+    public void testInsertLibertyConfigIntoServerEnvForCapitalCase() {
         String envCfgSnippet = "WLP_LOGGING_CON";
         String envCfgNameChooserSnippet = "FORMAT";
         String envCfgValueSnippet = "SIM";
@@ -247,11 +248,12 @@ public abstract class SingleModLibertyLSTestCommon {
 
     /**
      * Tests liberty-ls type ahead support in bootstrap.properties for a
-     * Liberty Server Configuration booststrap.properties entry
+     * Liberty Server Configuration bootstrap.properties entry and
+     * providing completion suggestions in lowercase letters.
      */
     @Test
     @Video
-    public void testInsertLibertyConfigIntoBootstrapProps() {
+    public void testInsertLibertyConfigIntoBootstrapPropsForLowerCase() {
         String configNameSnippet = "com.ibm.ws.logging.con";
         String configNameChooserSnippet = "format";
         String configValueSnippet = "TBA";
