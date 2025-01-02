@@ -17,6 +17,7 @@ import com.intellij.maven.testFramework.MavenImportingTestCase;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.LanguageLevelProjectExtension;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -115,8 +116,11 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
      */
     protected Module createMavenModule(String name, String xml) throws Exception {
         Module module = getTestFixture().getModule();
-        File moduleDir = new File(module.getModuleFilePath()).getParentFile();
-        VirtualFile pomFile = createPomFile(LocalFileSystem.getInstance().findFileByIoFile(moduleDir), xml);
+        VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
+        if (moduleDir == null) {
+            throw new IllegalStateException("Module directory could not be determined.");
+        }
+        VirtualFile pomFile = createPomFile(moduleDir, xml);
         importProjects(pomFile);
         Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
         if (modules.length > 0) {
