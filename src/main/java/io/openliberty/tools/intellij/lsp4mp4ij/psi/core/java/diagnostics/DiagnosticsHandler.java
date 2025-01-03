@@ -79,7 +79,7 @@ public final class DiagnosticsHandler {
                         .filter(definition -> definition.isAdaptedForDiagnostics(context))
                         .toList();
                 if (definitions.isEmpty()) {
-                    return;
+                    return null; // Explicit return for Callable<Void>
                 }
 
                 // Begin, collect, end participants
@@ -91,6 +91,7 @@ public final class DiagnosticsHandler {
                     }
                 });
                 definitions.forEach(definition -> definition.endDiagnostics(context));
+                return null; // Explicit return for Callable<Void>
             }).inSmartMode(project).executeSynchronously();
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
