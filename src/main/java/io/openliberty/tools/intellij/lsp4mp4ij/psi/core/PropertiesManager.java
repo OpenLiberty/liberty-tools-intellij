@@ -10,9 +10,11 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
@@ -219,7 +221,8 @@ public class PropertiesManager {
     }
 
     public Location findPropertyLocation(Module module, String sourceType, String sourceField, String sourceMethod, IPsiUtils utils) {
-        return DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
+        Project project = module.getProject();
+        return ReadAction.nonBlocking(() -> {
             PsiMember fieldOrMethod = findDeclaredProperty(module, sourceType, sourceField, sourceMethod, utils);
             if (fieldOrMethod != null) {
                 PsiFile classFile = fieldOrMethod.getContainingFile();
@@ -232,7 +235,8 @@ public class PropertiesManager {
                 return utils.toLocation(fieldOrMethod);
             }
             return null;
-        });
+        }).inSmartMode(project)
+          .executeSynchronously();
     }
 
     /**
