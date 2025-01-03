@@ -235,8 +235,7 @@ public class PropertiesManager {
                 return utils.toLocation(fieldOrMethod);
             }
             return null;
-        }).inSmartMode(project)
-          .executeSynchronously();
+        }).inSmartMode(project).executeSynchronously();
     }
 
     /**
