@@ -13,8 +13,10 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.PsiFile;
@@ -69,7 +71,8 @@ public final class DiagnosticsHandler {
 
         try {
             Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
-            DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
+            Project project = module.getProject();
+            ReadAction.nonBlocking(() -> {
                 // Collect all adapted diagnostic definitions
                 JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
                 List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
@@ -90,7 +93,8 @@ public final class DiagnosticsHandler {
                     }
                 });
                 definitions.forEach(definition -> definition.endDiagnostics(context));
-            });
+            }).inSmartMode(project)
+                    .executeSynchronously();
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
