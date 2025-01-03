@@ -11,18 +11,17 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
 import org.eclipse.lsp4mp.commons.ProjectLabelInfoEntry;
+import com.intellij.openapi.application.NonBlockingReadAction;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,7 +96,11 @@ public class ProjectLabelManager {
 			if (module == null) {
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}
-			return DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> getProjectLabelInfo(module, params.getTypes(), utils));
+			//return DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> getProjectLabelInfo(module, params.getTypes(), utils));
+			Project project = module.getProject();
+			return ReadAction.nonBlocking(() -> getProjectLabelInfo(module, params.getTypes(), utils))
+					.inSmartMode(project)
+					.executeSynchronously();
 		} catch (IOException e) {
 			return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 		}
