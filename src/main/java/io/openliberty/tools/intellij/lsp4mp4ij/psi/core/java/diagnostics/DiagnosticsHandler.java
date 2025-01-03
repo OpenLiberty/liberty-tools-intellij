@@ -93,8 +93,7 @@ public final class DiagnosticsHandler {
                     }
                 });
                 definitions.forEach(definition -> definition.endDiagnostics(context));
-            }).inSmartMode(project)
-                    .executeSynchronously();
+            }).inSmartMode(project).executeSynchronously();
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
