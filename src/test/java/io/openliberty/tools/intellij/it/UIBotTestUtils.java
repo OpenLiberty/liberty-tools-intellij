@@ -1109,15 +1109,15 @@ public class UIBotTestUtils {
 
         String configNameSnippet = "";
         if (fileName.equals("server.env")) {
-            configNameSnippet = configNameSnippetCaseSpecific.toUpperCase();
+            configNameSnippet = configNameSnippetCaseSpecific.toUpperCase(java.util.Locale.ROOT);
         }
         else if (fileName.equals("bootstrap.properties")) {
-            configNameSnippet = configNameSnippetCaseSpecific.toLowerCase();
+            configNameSnippet = configNameSnippetCaseSpecific.toLowerCase(java.util.Locale.ROOT);
         }
         else {
             configNameSnippet = configNameSnippetCaseSpecific;
         }
-        String configValueSnippetUpperCase = configValueSnippet.toUpperCase();
+        String configValueSnippetUpperCase = configValueSnippet.toUpperCase(java.util.Locale.ROOT);
 
         for (int i = 0; i < 10; i++) {
             error = null;
