@@ -58,12 +58,6 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
-    protected Module createJavaModule(final String name) throws Exception {
-        ModuleFixture moduleFixture = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture();
-        moduleFixture.setUp();
-        Module module = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture().getModule();
-        return module;
-    }
 
     private static AtomicInteger counter = new AtomicInteger(0);
 
