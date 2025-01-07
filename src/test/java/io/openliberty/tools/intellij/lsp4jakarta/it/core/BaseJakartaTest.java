@@ -58,7 +58,6 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
-
     private static AtomicInteger counter = new AtomicInteger(0);
 
     /**
