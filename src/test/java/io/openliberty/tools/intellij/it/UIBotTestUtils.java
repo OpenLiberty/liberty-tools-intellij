@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -1094,18 +1094,30 @@ public class UIBotTestUtils {
      * Inserts a configuration name value pair into a config file via text typing
      * and popup menu completion (if required)
      *
-     * @param remoteRobot              The RemoteRobot instance.
-     * @param fileName                 The string path to the config file
-     * @param configNameSnippet        the portion of the name to type
-     * @param configNameChooserSnippet the portion of the name to use for selecting from popup menu
-     * @param configValueSnippet       the value to type into keyboard - could be a snippet or a whole word
-     * @param completeWithPopup        use popup to complete value selection or type in an entire provided value string
+     * @param remoteRobot                   The RemoteRobot instance.
+     * @param fileName                      The string path to the config file
+     * @param configNameSnippetCaseSpecific the portion of the name to type
+     * @param configNameChooserSnippet      the portion of the name to use for selecting from popup menu
+     * @param configValueSnippet            the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup             use popup to complete value selection or type in an entire provided value string
      */
-    public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
+    public static void insertConfigIntoConfigFile(RemoteRobot remoteRobot, String fileName, String configNameSnippetCaseSpecific, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
         Exception error = null;
+
+        String configNameSnippet = "";
+        if (fileName.equals("server.env")) {
+            configNameSnippet = configNameSnippetCaseSpecific.toUpperCase(java.util.Locale.ROOT);
+        }
+        else if (fileName.equals("bootstrap.properties")) {
+            configNameSnippet = configNameSnippetCaseSpecific.toLowerCase(java.util.Locale.ROOT);
+        }
+        else {
+            configNameSnippet = configNameSnippetCaseSpecific;
+        }
+        String configValueSnippetUpperCase = configValueSnippet.toUpperCase(java.util.Locale.ROOT);
 
         for (int i = 0; i < 10; i++) {
             error = null;
@@ -1118,7 +1130,7 @@ public class UIBotTestUtils {
                 keyboard.hotKey(VK_CONTROL, VK_END);
                 keyboard.enter();
 
-                keyboard.enterText(configNameSnippet);
+                keyboard.enterText(configNameSnippetCaseSpecific);
                 // After typing it can take 1 or 2s for IntelliJ to render diagnostics etc. Must wait before continuing.
                 TestUtils.sleepAndIgnoreException(5);
 
@@ -1126,11 +1138,12 @@ public class UIBotTestUtils {
                 // opened as text is typed based on the value of configNameSnippet. Avoid hitting ctrl + space as it has the side effect of selecting
                 // and entry automatically if the completion suggestion windows has one entry only.
                 ComponentFixture namePopupWindow = projectFrame.getLookupList();
+                String finalConfigNameSnippet = configNameSnippet;
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                         Duration.ofSeconds(1),
                         "Waiting for text " + configNameSnippet + " to appear in the completion suggestion pop-up window",
                         "Text " + configNameSnippet + " did not appear in the completion suggestion pop-up window",
-                        () -> namePopupWindow.hasText(configNameSnippet));
+                        () -> namePopupWindow.hasText(finalConfigNameSnippet));
 
                 // now choose the specific item based on the chooser string
                 namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
@@ -1150,11 +1163,11 @@ public class UIBotTestUtils {
                     ComponentFixture valuePopupWindow = projectFrame.getLookupList();
                     RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
                             Duration.ofSeconds(1),
-                            "Waiting for text " + configValueSnippet + " to appear in the completion suggestion pop-up window",
-                            "Text " + configValueSnippet + " did not appear in the completion suggestion pop-up window",
-                            () -> valuePopupWindow.hasText(configValueSnippet));
+                            "Waiting for text " + configValueSnippetUpperCase + " to appear in the completion suggestion pop-up window",
+                            "Text " + configValueSnippetUpperCase + " did not appear in the completion suggestion pop-up window",
+                            () -> valuePopupWindow.hasText(configValueSnippetUpperCase));
 
-                    valuePopupWindow.findText(contains(configValueSnippet)).doubleClick();
+                    valuePopupWindow.findText(contains(configValueSnippetUpperCase)).doubleClick();
                 }
                 // let the auto-save function of intellij save the file before testing it
                 if (remoteRobot.isMac()) {
@@ -1175,7 +1188,7 @@ public class UIBotTestUtils {
 
         // Report the last error if there is one.
         if (error != null) {
-            throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + configNameSnippet, error);
+            throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + configNameSnippetCaseSpecific, error);
         }
     }
 
