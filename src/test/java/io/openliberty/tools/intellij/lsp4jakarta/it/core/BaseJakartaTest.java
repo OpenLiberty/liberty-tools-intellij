@@ -107,26 +107,4 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         return modules.get(modules.size() - 1);
     }
 
-    /**
-     * Create a new module into the test project from existing in memory POM.
-     *
-     * @param name the new module name
-     * @param xml the project POM
-     * @return the created module
-     */
-    protected Module createMavenModule(String name, String xml) throws Exception {
-        Module module = getTestFixture().getModule();
-        VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
-        if (moduleDir == null) {
-            throw new IllegalStateException("Module directory could not be determined.");
-        }
-        VirtualFile pomFile = createPomFile(moduleDir, xml);
-        importProjects(pomFile);
-        Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
-        if (modules.length > 0) {
-            module = modules[modules.length - 1];
-            setupJdkForModule(module.getName());
-        }
-        return module;
-    }
 }
