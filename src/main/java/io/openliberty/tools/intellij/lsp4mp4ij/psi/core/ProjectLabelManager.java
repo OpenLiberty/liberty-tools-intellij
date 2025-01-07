@@ -95,10 +95,7 @@ public class ProjectLabelManager {
 			if (module == null) {
 				return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 			}
-			Project project = module.getProject();
-			return ReadAction.nonBlocking(() -> getProjectLabelInfo(module, params.getTypes(), utils))
-					.inSmartMode(project)
-					.executeSynchronously();
+			return getProjectLabelInfo(module, params.getTypes(), utils);
 		} catch (IOException e) {
 			return ProjectLabelInfoEntry.EMPTY_PROJECT_INFO;
 		}
