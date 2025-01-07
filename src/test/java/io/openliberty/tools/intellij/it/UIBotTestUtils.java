@@ -2188,6 +2188,10 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         ComponentFixture cfgSelectBox = projectFrame.getRunConfigurationsComboBoxButton();
 
+        // Click on the Liberty toolbar to give it focus.
+        ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
+        libertyTWBar.click();
+
         boolean configFound = false;
         int retryCount = 0;
         int maxRetries = 5;
