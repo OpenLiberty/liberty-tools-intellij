@@ -21,7 +21,8 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_CONTROL;
+import static java.awt.event.KeyEvent.VK_SPACE;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
