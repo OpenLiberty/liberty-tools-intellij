@@ -69,30 +69,23 @@ public final class DiagnosticsHandler {
 
         try {
             Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
-            Project project = module.getProject();
-            ReadAction.nonBlocking(() -> {
-                // Collect all adapted diagnostic definitions
-                JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
-                List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
-                        .stream()
-                        .filter(definition -> group.equals(definition.getGroup()))
-                        .filter(definition -> definition.isAdaptedForDiagnostics(context))
-                        .toList();
-                if (definitions.isEmpty()) {
-                    return null; // Explicit return for Callable<Void>
-                }
+            // Collect all adapted diagnostic definitions
+            JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
+            List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
+                    .stream()
+                    .filter(definition -> group.equals(definition.getGroup()))
+                    .filter(definition -> definition.isAdaptedForDiagnostics(context))
+                    .toList();
 
-                // Begin, collect, end participants
-                definitions.forEach(definition -> definition.beginDiagnostics(context));
-                definitions.forEach(definition -> {
-                    List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
-                    if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
-                        diagnostics.addAll(collectedDiagnostics);
-                    }
-                });
-                definitions.forEach(definition -> definition.endDiagnostics(context));
-                return null; // Explicit return for Callable<Void>
-            }).inSmartMode(project).executeSynchronously();
+            // Begin, collect, end participants
+            definitions.forEach(definition -> definition.beginDiagnostics(context));
+            definitions.forEach(definition -> {
+                List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
+                if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
+                    diagnostics.addAll(collectedDiagnostics);
+                }
+            });
+            definitions.forEach(definition -> definition.endDiagnostics(context));
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
