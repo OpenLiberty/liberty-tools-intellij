@@ -44,38 +44,45 @@ public class LibertyModules {
         return instance;
     }
 
+    public boolean isEmpty() {
+        return libertyModules.isEmpty();
+    }
     /**
      * Scan the project for the modules that are Liberty apps.
      * @return null if there are no Liberty modules
      */
     public LibertyModules scanLibertyModules(Project project) {
         synchronized (libertyModules) {
-            removeForProject(project);
-            ArrayList<BuildFile> mavenBuildFiles;
-            ArrayList<BuildFile> gradleBuildFiles;
-            HashMap<String, ArrayList<Object>> projectMap = new HashMap<>();
+            removeForProject(project); // remove previous data, if any
+
+            ArrayList<BuildFile> buildFiles = new ArrayList<>();
             try {
-                mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
-                gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
+                buildFiles.addAll(LibertyProjectUtil.getMavenBuildFiles(project));
+                buildFiles.addAll(LibertyProjectUtil.getGradleBuildFiles(project));
             } catch (IOException | SAXException | ParserConfigurationException e) {
                 LOGGER.warn("Could not find Liberty Maven or Gradle projects in workspace", e);
                 return null;
             }
 
-            if (mavenBuildFiles.isEmpty() && gradleBuildFiles.isEmpty()) {
-                return null;
-            }
-
-            for (BuildFile buildFile : mavenBuildFiles) {
-                // create a new Liberty project
+            for (BuildFile buildFile : buildFiles) {
+                // create a new Liberty Module object for this project
                 VirtualFile virtualFile = buildFile.getBuildFile();
                 String projectName = null;
                 if (virtualFile == null) {
-                    LOGGER.error(String.format("Could not resolve current Maven project %s", virtualFile));
+                    LOGGER.error(String.format("Could not resolve current project %s", virtualFile));
                     break;
                 }
+                if (virtualFile.getName().equals("pom.xml")) {
+                    buildFile.setProjectType(Constants.LIBERTY_MAVEN_PROJECT);
+                } else {
+                    buildFile.setProjectType(Constants.LIBERTY_GRADLE_PROJECT);
+                }
                 try {
-                    projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
+                    if (buildFile.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                        projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
+                    } else {
+                        projectName = LibertyGradleUtil.getProjectName(virtualFile);
+                    }
                 } catch (Exception e) {
                     LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
                 }
@@ -88,32 +95,7 @@ public class LibertyModules {
                 }
 
                 boolean validContainerVersion = buildFile.isValidContainerVersion();
-                addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
-            }
-
-            for (BuildFile buildFile : gradleBuildFiles) {
-                VirtualFile virtualFile = buildFile.getBuildFile();
-                String projectName = null;
-                if (virtualFile == null) {
-                    LOGGER.error(String.format("Could not resolve current Gradle project %s", buildFile));
-                    break;
-                }
-                LibertyModuleNode node;
-                try {
-                    projectName = LibertyGradleUtil.getProjectName(virtualFile);
-                } catch (Exception e) {
-                    LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
-                }
-                if (projectName == null) {
-                    if (virtualFile.getParent() != null) {
-                        projectName = virtualFile.getParent().getName();
-                    } else {
-                        projectName = project.getName();
-                    }
-                }
-
-                boolean validContainerVersion = buildFile.isValidContainerVersion();
-                addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion));
+                addLibertyModule(new LibertyModule(project, virtualFile, projectName, buildFile.getProjectType(), validContainerVersion));
             }
         }
         return getInstance();
