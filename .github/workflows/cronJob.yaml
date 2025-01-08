@@ -95,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        tag: [ 'main', '24.0.9', '24.0.12' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
@@ -111,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9' ]
+        tag: [ 'main', '24.0.9', '24.0.12' ]
     with:
       useLocalPlugin: true
       refLsp4ij: main
