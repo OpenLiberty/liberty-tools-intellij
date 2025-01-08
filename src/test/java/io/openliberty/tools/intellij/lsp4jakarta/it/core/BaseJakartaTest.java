@@ -58,13 +58,6 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
-    protected Module createJavaModule(final String name) throws Exception {
-        ModuleFixture moduleFixture = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture();
-        moduleFixture.setUp();
-        Module module = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class).getFixture().getModule();
-        return module;
-    }
-
     private static AtomicInteger counter = new AtomicInteger(0);
 
     /**
@@ -106,23 +99,4 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         return modules.get(modules.size() - 1);
     }
 
-    /**
-     * Create a new module into the test project from existing in memory POM.
-     *
-     * @param name the new module name
-     * @param xml the project POM
-     * @return the created module
-     */
-    protected Module createMavenModule(String name, String xml) throws Exception {
-        Module module = getTestFixture().getModule();
-        File moduleDir = new File(module.getModuleFilePath()).getParentFile();
-        VirtualFile pomFile = createPomFile(LocalFileSystem.getInstance().findFileByIoFile(moduleDir), xml);
-        importProjects(pomFile);
-        Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
-        if (modules.length > 0) {
-            module = modules[modules.length - 1];
-            setupJdkForModule(module.getName());
-        }
-        return module;
-    }
 }
