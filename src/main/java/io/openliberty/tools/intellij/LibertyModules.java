@@ -72,11 +72,6 @@ public class LibertyModules {
                     LOGGER.error(String.format("Could not resolve current project %s", virtualFile));
                     break;
                 }
-                if (virtualFile.getName().equals("pom.xml")) {
-                    buildFile.setProjectType(Constants.LIBERTY_MAVEN_PROJECT);
-                } else {
-                    buildFile.setProjectType(Constants.LIBERTY_GRADLE_PROJECT);
-                }
                 try {
                     if (buildFile.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
                         projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);

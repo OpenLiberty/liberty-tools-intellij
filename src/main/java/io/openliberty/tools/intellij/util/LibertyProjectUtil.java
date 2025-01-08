@@ -199,6 +199,7 @@ public class LibertyProjectUtil {
                     // check if valid pom.xml, or if part of Liberty project
                     if (filter.matches(project, buildFile, mavenFile)) {
                         buildFile.setBuildFile(mavenFile);
+                        buildFile.setProjectType(buildFileType);
                         buildFiles.add(buildFile);
                     }
                 }
@@ -212,6 +213,7 @@ public class LibertyProjectUtil {
                         // check if valid build.gradle, or if part of Liberty project
                         if (filter.matches(project, buildFile, gradleFile)) {
                             buildFile.setBuildFile(gradleFile);
+                            buildFile.setProjectType(buildFileType);
                             buildFiles.add(buildFile);
                         }
                     } catch (Exception e) {
