@@ -44,7 +44,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
 
     public LibertyRunConfiguration(Project project, ConfigurationFactory factory, String name) {
         super(name, getRunConfigurationModule(project), factory);
-        this.libertyModules = LibertyModules.getInstance();
+        this.libertyModules = LibertyModules.getInstance().scanLibertyModules(project);
     }
 
     @NotNull

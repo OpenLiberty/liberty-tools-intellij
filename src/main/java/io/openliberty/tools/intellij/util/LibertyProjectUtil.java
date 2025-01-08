@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,8 +11,10 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.search.FilenameIndex;
@@ -33,6 +35,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
@@ -182,36 +187,53 @@ public class LibertyProjectUtil {
         }
     }
 
-    // returns valid build files for the current project
+    // Search the filename index to find valid build files (Maven and Gradle) for the current project
     private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType, BuildFileFilter filter) throws ParserConfigurationException, SAXException, IOException {
         ArrayList<BuildFile> buildFiles = new ArrayList<BuildFile>();
 
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            Collection<VirtualFile> mavenFiles = FilenameIndex.getVirtualFilesByName("pom.xml", GlobalSearchScope.projectScope(project));
-            for (VirtualFile mavenFile : mavenFiles) {
-                BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
-                // check if valid pom.xml, or if part of Liberty project
-                if (filter.matches(project, buildFile, mavenFile)) {
-                    buildFile.setBuildFile(mavenFile);
-                    buildFiles.add(buildFile);
+            Collection<VirtualFile> mavenFiles = readIndex(project, "pom.xml");
+            if (mavenFiles != null) {
+                for (VirtualFile mavenFile : mavenFiles) {
+                    BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
+                    // check if valid pom.xml, or if part of Liberty project
+                    if (filter.matches(project, buildFile, mavenFile)) {
+                        buildFile.setBuildFile(mavenFile);
+                        buildFiles.add(buildFile);
+                    }
                 }
             }
         } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            Collection<VirtualFile> gradleFiles = FilenameIndex.getVirtualFilesByName("build.gradle", GlobalSearchScope.projectScope(project));
-            for (VirtualFile gradleFile : gradleFiles) {
-                try {
-                    BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
-                    // check if valid build.gradle, or if part of Liberty project
-                    if (filter.matches(project, buildFile, gradleFile)) {
-                        buildFile.setBuildFile(gradleFile);
-                        buildFiles.add(buildFile);
+            Collection<VirtualFile> gradleFiles = readIndex(project, "build.gradle");
+            if (gradleFiles != null) {
+                for (VirtualFile gradleFile : gradleFiles) {
+                    try {
+                        BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
+                        // check if valid build.gradle, or if part of Liberty project
+                        if (filter.matches(project, buildFile, gradleFile)) {
+                            buildFile.setBuildFile(gradleFile);
+                            buildFiles.add(buildFile);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error(String.format("Error parsing build.gradle %s", gradleFile), e.getMessage());
                     }
-                } catch (Exception e) {
-                    LOGGER.error(String.format("Error parsing build.gradle %s", gradleFile), e.getMessage());
                 }
             }
         }
         return buildFiles;
+    }
+
+    // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue
+    // and in a runReadAction() to handle the read action required problem.
+    private static Collection<VirtualFile> readIndex(Project project, String name) {
+        try {
+            Computable<Collection<VirtualFile>> virtualFilesComputation = () -> FilenameIndex.getVirtualFilesByName(name, GlobalSearchScope.projectScope(project));
+            Callable<Collection<VirtualFile>> readAction = () -> ApplicationManager.getApplication().runReadAction(virtualFilesComputation);
+            Future<Collection<VirtualFile>> filesFuture = ApplicationManager.getApplication().executeOnPooledThread(readAction);
+            return filesFuture.get();
+        } catch (ExecutionException | InterruptedException e) {
+            return null;
+        }
     }
 
     /**
