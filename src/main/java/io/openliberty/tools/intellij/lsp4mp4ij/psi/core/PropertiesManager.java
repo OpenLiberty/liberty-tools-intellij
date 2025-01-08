@@ -10,10 +10,8 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
