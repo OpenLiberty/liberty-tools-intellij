@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,10 +10,15 @@
 
 package io.openliberty.tools.intellij;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.util.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -21,6 +26,7 @@ import java.util.*;
  * Singleton to save the Liberty modules in the open project
  */
 public class LibertyModules {
+    private final static Logger LOGGER = Logger.getInstance(LibertyModules.class);
 
     private static LibertyModules instance = null;
 
@@ -36,6 +42,81 @@ public class LibertyModules {
             instance = new LibertyModules();
         }
         return instance;
+    }
+
+    /**
+     * Scan the project for the modules that are Liberty apps.
+     * @return null if there are no Liberty modules
+     */
+    public LibertyModules scanLibertyModules(Project project) {
+        synchronized (libertyModules) {
+            removeForProject(project);
+            ArrayList<BuildFile> mavenBuildFiles;
+            ArrayList<BuildFile> gradleBuildFiles;
+            HashMap<String, ArrayList<Object>> projectMap = new HashMap<>();
+            try {
+                mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
+                gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                LOGGER.warn("Could not find Liberty Maven or Gradle projects in workspace", e);
+                return null;
+            }
+
+            if (mavenBuildFiles.isEmpty() && gradleBuildFiles.isEmpty()) {
+                return null;
+            }
+
+            for (BuildFile buildFile : mavenBuildFiles) {
+                // create a new Liberty project
+                VirtualFile virtualFile = buildFile.getBuildFile();
+                String projectName = null;
+                if (virtualFile == null) {
+                    LOGGER.error(String.format("Could not resolve current Maven project %s", virtualFile));
+                    break;
+                }
+                try {
+                    projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
+                } catch (Exception e) {
+                    LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
+                }
+                if (projectName == null) {
+                    if (virtualFile.getParent() != null) {
+                        projectName = virtualFile.getParent().getName();
+                    } else {
+                        projectName = project.getName();
+                    }
+                }
+
+                boolean validContainerVersion = buildFile.isValidContainerVersion();
+                addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
+            }
+
+            for (BuildFile buildFile : gradleBuildFiles) {
+                VirtualFile virtualFile = buildFile.getBuildFile();
+                String projectName = null;
+                if (virtualFile == null) {
+                    LOGGER.error(String.format("Could not resolve current Gradle project %s", buildFile));
+                    break;
+                }
+                LibertyModuleNode node;
+                try {
+                    projectName = LibertyGradleUtil.getProjectName(virtualFile);
+                } catch (Exception e) {
+                    LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
+                }
+                if (projectName == null) {
+                    if (virtualFile.getParent() != null) {
+                        projectName = virtualFile.getParent().getName();
+                    } else {
+                        projectName = project.getName();
+                    }
+                }
+
+                boolean validContainerVersion = buildFile.isValidContainerVersion();
+                addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion));
+            }
+        }
+        return getInstance();
     }
 
     /**
@@ -99,6 +180,24 @@ public class LibertyModules {
             });
         }
         return sBuildFiles;
+    }
+
+    /**
+     * Returns all Liberty modules for the given project
+     *
+     * @param project
+     * @return Liberty modules for the given project
+     */
+    public List<LibertyModule> getLibertyModules(Project project) {
+        ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
+        synchronized (libertyModules) {
+            libertyModules.values().forEach(libertyModule -> {
+                if (project.equals(libertyModule.getProject())) {
+                    supportedLibertyModules.add(libertyModule);
+                }
+            });
+        }
+        return supportedLibertyModules;
     }
 
     /**

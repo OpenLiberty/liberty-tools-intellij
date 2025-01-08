@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation.
+ * Copyright (c) 2022, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -39,7 +39,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     protected static Logger LOGGER = Logger.getInstance(LibertyRunConfiguration.class);
 
     private final LibertyModules libertyModules;
-    private LibertyModule libertyModule;
     @NonNls
     private static final String RUN_IN_CONTAINER_TAG = "RUN_IN_CONTAINER";
 
@@ -117,6 +116,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     @Nullable
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
+        LibertyModule libertyModule;
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
         } catch (NullPointerException e) {
