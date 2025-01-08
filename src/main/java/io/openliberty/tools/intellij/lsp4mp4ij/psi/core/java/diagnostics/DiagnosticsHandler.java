@@ -13,9 +13,7 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.PsiFile;
