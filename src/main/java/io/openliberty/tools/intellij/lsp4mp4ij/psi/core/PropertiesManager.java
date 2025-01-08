@@ -220,21 +220,18 @@ public class PropertiesManager {
     }
 
     public Location findPropertyLocation(Module module, String sourceType, String sourceField, String sourceMethod, IPsiUtils utils) {
-        Project project = module.getProject();
-        return ReadAction.nonBlocking(() -> {
-            PsiMember fieldOrMethod = findDeclaredProperty(module, sourceType, sourceField, sourceMethod, utils);
-            if (fieldOrMethod != null) {
-                PsiFile classFile = fieldOrMethod.getContainingFile();
-                if (classFile != null) {
-                    // Try to download source if required
-                    if (utils != null) {
-                        utils.discoverSource(classFile);
-                    }
+        PsiMember fieldOrMethod = findDeclaredProperty(module, sourceType, sourceField, sourceMethod, utils);
+        if (fieldOrMethod != null) {
+            PsiFile classFile = fieldOrMethod.getContainingFile();
+            if (classFile != null) {
+                // Try to download source if required
+                if (utils != null) {
+                    utils.discoverSource(classFile);
                 }
-                return utils.toLocation(fieldOrMethod);
             }
-            return null;
-        }).inSmartMode(project).executeSynchronously();
+            return utils.toLocation(fieldOrMethod);
+        }
+        return null;
     }
 
     /**
