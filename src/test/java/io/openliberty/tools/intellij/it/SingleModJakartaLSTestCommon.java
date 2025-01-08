@@ -92,7 +92,7 @@ public abstract class SingleModJakartaLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, ItConstants.SYSTEM_RESOURCE_JAVA, snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", ItConstants.SYSTEM_RESOURCE_JAVA);
+            Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_JAVA);
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
@@ -110,7 +110,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
         String expectedHoverData = "Only public methods can be exposed as resource methods";
-        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.SYSTEM_RESOURCE_2_JAVA);
@@ -145,7 +145,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
-        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
         String quickfixChooserString = "Make method public";
 
         // get focus on file tab prior to copy
@@ -199,10 +199,10 @@ public abstract class SingleModJakartaLSTestCommon {
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
-        projTree.expand(projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
+        projTree.expand(projectName, ItConstants.SYSTEM_DIR_PATH);
 
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, projectName, ItConstants.SYSTEM_DIR_PATH);
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, projectName, ItConstants.SYSTEM_DIR_PATH);
 
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
