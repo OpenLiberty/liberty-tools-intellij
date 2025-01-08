@@ -28,7 +28,7 @@ public class TestUtils {
     /**
      * WLP messages.log path.
      */
-    public static final Path WLP_MSGLOG_PATH = Paths.get("wlp", "usr", "servers", "defaultServer", "logs", "messages.log");
+    public static final Path WLP_MSGLOG_PATH = Paths.get(ItConstants.DEFAULT_SERVER_PATH, "logs", "messages.log");
 
     /**
      * Liberty server stopped message:
@@ -542,7 +542,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", ItConstants.SERVER_ENV);
+        Path serverEnvPath = Paths.get(absoluteWLPPath, ItConstants.DEFAULT_SERVER_PATH, ItConstants.SERVER_ENV);
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
