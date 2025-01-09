@@ -44,6 +44,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
 
     public LibertyRunConfiguration(Project project, ConfigurationFactory factory, String name) {
         super(name, getRunConfigurationModule(project), factory);
+        // Find Liberty modules here to populate config field called "build file" and avoid NPE
         this.libertyModules = LibertyModules.getInstance().scanLibertyModules(project);
     }
 
