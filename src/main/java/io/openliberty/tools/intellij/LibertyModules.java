@@ -58,10 +58,13 @@ public class LibertyModules {
             ArrayList<BuildFile> buildFiles = new ArrayList<>();
             try {
                 buildFiles.addAll(LibertyProjectUtil.getMavenBuildFiles(project));
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                LOGGER.error("I/O error or error parsing Liberty Maven projects in workspace", e);
+            }
+            try { // search for Gradle files even if Maven files experience error
                 buildFiles.addAll(LibertyProjectUtil.getGradleBuildFiles(project));
             } catch (IOException | SAXException | ParserConfigurationException e) {
-                LOGGER.warn("Could not find Liberty Maven or Gradle projects in workspace", e);
-                return null;
+                LOGGER.error("I/O error or error parsing Liberty Gradle projects in workspace", e);
             }
 
             for (BuildFile buildFile : buildFiles) {
