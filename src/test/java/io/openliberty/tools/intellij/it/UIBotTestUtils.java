@@ -437,6 +437,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void openLibertyToolWindow(RemoteRobot remoteRobot) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openLibertyToolWindow Entry");
         int maxRetries = 6;
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
@@ -466,6 +467,7 @@ public class UIBotTestUtils {
         if (error != null) {
             throw new RuntimeException("Unable to open the Liberty tool window.", error);
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openLibertyToolWindow Exit");
     }
 
     /**
