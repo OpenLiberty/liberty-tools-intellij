@@ -60,7 +60,7 @@ If you prefer to use an older version of LSP4IJ (e.g., a specific version that w
 | Liberty Tools version | LSP4IJ version(s) tested   |
 |-----------------------|----------------------------|
 | 24.0.9                | 0.5.0, 0.6.0, 0.7.0, 0.8.1 |
-| 24.0.12               | 0.8.1                      |
+| 24.0.12               | 0.8.1, 0.9.0               |
 
 
 Steps to install an older version of LSP4IJ:
