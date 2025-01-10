@@ -527,10 +527,10 @@ public abstract class SingleModLibertyLSTestCommon {
     /**
      * Helper method to test completion values in a specified file.
      *
-     * @param fileName               the name of the file to focus on
-     * @param propertyKeySnippet     the property key snippet to type
+     * @param fileName                 the name of the file to focus on
+     * @param propertyKeySnippet       the property key snippet to type
      * @param expectedCompletionValues the expected completion values
-     * @param maxPosition            the maximum position for the completion values
+     * @param maxPosition              the maximum position for the completion values
      */
     public void runCompletionTest(String fileName, String propertyKeySnippet, String[] expectedCompletionValues, int maxPosition) {
         Keyboard keyboard = new Keyboard(remoteRobot);
