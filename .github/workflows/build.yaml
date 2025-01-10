@@ -101,7 +101,8 @@ jobs:
           - runtime: linux
             os: ubuntu-latest
             reportName: linux-test-report
-            # Adding a check on macOS and Windows to identify refLTITag is equal to 24.0.9 , The value of 'excludeFromBuild' is use to run the steps
+            # Adding a check on macOS and Windows to verify if 'refLTITag' is equal to '24.0.9'. The value of 'excludeFromBuild' is used to determine whether the steps below need to be executed.
+            # This 'excludeFromBuild' variable can be removed once the '24.0.9' version is removed from the 'tag' array of the cron job build.
           - runtime: mac
             os: macOS-latest
             reportName: mac-test-report
