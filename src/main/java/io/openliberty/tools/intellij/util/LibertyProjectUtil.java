@@ -189,40 +189,34 @@ public class LibertyProjectUtil {
 
     // Search the filename index to find valid build files (Maven and Gradle) for the current project
     private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType, BuildFileFilter filter) throws ParserConfigurationException, SAXException, IOException {
-        ArrayList<BuildFile> buildFiles = new ArrayList<BuildFile>();
-
+        ArrayList<BuildFile> collectedBuildFiles = new ArrayList<BuildFile>();
+        Collection<VirtualFile> indexedVFiles;
         if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
-            Collection<VirtualFile> mavenFiles = readIndex(project, "pom.xml");
-            if (mavenFiles != null) {
-                for (VirtualFile mavenFile : mavenFiles) {
-                    BuildFile buildFile = LibertyMavenUtil.validPom(mavenFile);
-                    // check if valid pom.xml, or if part of Liberty project
-                    if (filter.matches(project, buildFile, mavenFile)) {
-                        buildFile.setBuildFile(mavenFile);
+            indexedVFiles = readIndex(project, "pom.xml");
+        } else {
+            indexedVFiles = readIndex(project, "build.gradle");
+        }
+        if (indexedVFiles != null) {
+            for (VirtualFile vFile : indexedVFiles) {
+                try {
+                    BuildFile buildFile;
+                    if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                        buildFile = LibertyMavenUtil.validPom(vFile);
+                    } else {
+                        buildFile = LibertyGradleUtil.validBuildGradle(vFile);
+                    }
+                    // check if valid pom.xml or build.gradle, or if part of Liberty project
+                    if (filter.matches(project, buildFile, vFile)) {
+                        buildFile.setBuildFile(vFile);
                         buildFile.setProjectType(buildFileType);
-                        buildFiles.add(buildFile);
+                        collectedBuildFiles.add(buildFile);
                     }
-                }
-            }
-        } else if (buildFileType.equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            Collection<VirtualFile> gradleFiles = readIndex(project, "build.gradle");
-            if (gradleFiles != null) {
-                for (VirtualFile gradleFile : gradleFiles) {
-                    try {
-                        BuildFile buildFile = LibertyGradleUtil.validBuildGradle(gradleFile);
-                        // check if valid build.gradle, or if part of Liberty project
-                        if (filter.matches(project, buildFile, gradleFile)) {
-                            buildFile.setBuildFile(gradleFile);
-                            buildFile.setProjectType(buildFileType);
-                            buildFiles.add(buildFile);
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error(String.format("Error parsing build.gradle %s", gradleFile), e.getMessage());
-                    }
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Error parsing build file %s", vFile), e.getMessage());
                 }
             }
         }
-        return buildFiles;
+        return collectedBuildFiles;
     }
 
     // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue
