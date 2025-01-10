@@ -20,6 +20,10 @@ allprojects {
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
         options.fork = true
+        // Increase Java heap size to avoid OutOfMemoryError during compilation or tests.
+        // This setting addresses issues where the JVM runs out of memory, particularly during
+        // large builds or tests. The '2g' value specifies a maximum heap size of 2GB
+        // (-Xmx2g), which should be enough to prevent memory exhaustion in most cases.
         options.forkOptions.memoryMaximumSize = "2g"
     }
 }
