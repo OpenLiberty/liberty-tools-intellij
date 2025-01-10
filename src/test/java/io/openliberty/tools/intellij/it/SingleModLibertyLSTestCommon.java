@@ -532,7 +532,7 @@ public abstract class SingleModLibertyLSTestCommon {
      * @param expectedCompletionValues the expected completion values
      * @param maxPosition              the maximum position for the completion values
      */
-    public void runCompletionTest(String fileName, String propertyKeySnippet, String[] expectedCompletionValues, int maxPosition) {
+    private void runCompletionTest(String fileName, String propertyKeySnippet, String[] expectedCompletionValues, int maxPosition) {
         Keyboard keyboard = new Keyboard(remoteRobot);
 
         // Get focus on the specified file tab prior to copy
