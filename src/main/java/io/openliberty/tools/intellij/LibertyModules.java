@@ -44,9 +44,6 @@ public class LibertyModules {
         return instance;
     }
 
-    public boolean isEmpty() {
-        return libertyModules.isEmpty();
-    }
     /**
      * Scan the project for the modules that are Liberty apps.
      * @return null if there are no Liberty modules

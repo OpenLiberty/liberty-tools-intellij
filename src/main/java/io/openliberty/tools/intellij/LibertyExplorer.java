@@ -103,7 +103,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
         LibertyModules libertyModules = LibertyModules.getInstance().scanLibertyModules(project);
-        if (libertyModules.isEmpty()) {
+        // This singleton may contain entries from old projects if you close a project and open another
+        if (libertyModules.getLibertyModules(project).isEmpty()) {
             return null;
         }
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
