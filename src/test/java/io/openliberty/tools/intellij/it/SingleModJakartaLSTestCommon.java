@@ -201,8 +201,8 @@ public abstract class SingleModJakartaLSTestCommon {
         // must be expanded here before trying to open specific files
         projTree.expand(projectName, ItConstants.SYSTEM_DIR_PATH);
 
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, projectName, ItConstants.SYSTEM_DIR_PATH);
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, projectName, ItConstants.SYSTEM_DIR_PATH);
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
 
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
