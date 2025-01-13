@@ -9,8 +9,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it.Utils;
 
-import java.nio.file.Paths;
-
 public class ItConstants {
 
     /**
