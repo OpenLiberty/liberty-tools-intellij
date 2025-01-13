@@ -344,8 +344,8 @@ public abstract class SingleModMPLSTestCommon {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
 
-        UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, ItConstants.HEALTH_DIR_PATH);
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPG_PROPERTIES, projectName, ItConstants.META_INF_DIR_PATH);
+        UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPG_PROPERTIES, projectName, "src", "main", "resources", "META-INF");
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
