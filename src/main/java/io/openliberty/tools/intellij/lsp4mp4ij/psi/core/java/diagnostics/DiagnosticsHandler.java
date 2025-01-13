@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v20.html
@@ -14,7 +14,6 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.PsiFile;
@@ -32,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class DiagnosticsHandler {
 
@@ -69,28 +67,23 @@ public final class DiagnosticsHandler {
 
         try {
             Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
-            DumbService.getInstance(module.getProject()).runReadActionInSmartMode(() -> {
-                // Collect all adapted diagnostic definitions
-                JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
-                List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
-                        .stream()
-                        .filter(definition -> group.equals(definition.getGroup()))
-                        .filter(definition -> definition.isAdaptedForDiagnostics(context))
-                        .toList();
-                if (definitions.isEmpty()) {
-                    return;
-                }
+            // Collect all adapted diagnostic definitions
+            JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
+            List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
+                    .stream()
+                    .filter(definition -> group.equals(definition.getGroup()))
+                    .filter(definition -> definition.isAdaptedForDiagnostics(context))
+                    .toList();
 
-                // Begin, collect, end participants
-                definitions.forEach(definition -> definition.beginDiagnostics(context));
-                definitions.forEach(definition -> {
-                    List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
-                    if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
-                        diagnostics.addAll(collectedDiagnostics);
-                    }
-                });
-                definitions.forEach(definition -> definition.endDiagnostics(context));
+            // Begin, collect, end participants
+            definitions.forEach(definition -> definition.beginDiagnostics(context));
+            definitions.forEach(definition -> {
+                List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
+                if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
+                    diagnostics.addAll(collectedDiagnostics);
+                }
             });
+            definitions.forEach(definition -> definition.endDiagnostics(context));
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
