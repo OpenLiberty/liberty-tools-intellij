@@ -97,14 +97,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macOS-latest, windows-latest ]
+        # Adding a check to verify if 'refLTITag' is equal to '24.0.9'.
+        # This code can be removed once the '24.0.9' version is removed from the 'tag' array in the cron job build, and the previous code can be added back.
         is24.0.9:
           - ${{ inputs.refLTITag == '24.0.9' }}
+        # Adding a check on macOS and Windows to verify if 'is24.0.9' is equal to 'true'. The value of 'is24.0.9' is used to determine whether the job need to be executed.
         exclude:
           - is24.0.9: true
             os: windows-latest
           - is24.0.9: true
             os: macOS-latest
-
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
