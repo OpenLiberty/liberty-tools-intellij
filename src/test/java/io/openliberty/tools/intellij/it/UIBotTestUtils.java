@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -2243,9 +2243,9 @@ public class UIBotTestUtils {
                     // Exit loop if successful
                     break;
                 } catch (WaitForConditionTimeoutException e) {
-                    System.err.println("Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items.");
+                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items. Retrying...");
                 } catch (Exception e) {
-                    System.err.println("Attempt " + (attempt + 1) + " failed: " + e.getMessage());
+                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Attempt " + (attempt + 1) + " failed: " + e.getMessage() + " Retrying...");
                 }
 
                 if (attempt == 4) { // If the last attempt fails
