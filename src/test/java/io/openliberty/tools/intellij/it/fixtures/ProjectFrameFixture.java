@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.it.fixtures;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.fixtures.dataExtractor.RemoteText;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
@@ -20,7 +21,9 @@ import io.openliberty.tools.intellij.it.TestUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
@@ -327,6 +330,26 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public ContainerFixture getLookupList() {
         return find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='LookupList']"), Duration.ofSeconds(10));
+    }
+
+    /**
+     * Retrieves a map of text and their positions from the completion suggestion pop-up in IntelliJ IDEA.
+     *
+     * @return a map where keys are suggestion texts and values are their positions.
+     */
+
+    public static Map<String, Integer> findAllTextPositions(RemoteRobot remoteRobot) {
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        // Wait for the completion suggestion pop-up window to display the expected values
+        ComponentFixture completionPopupWindow = projectFrame.getLookupList();
+        List<RemoteText> allData = completionPopupWindow.getData().getAll();
+        Map<String, Integer> textPositionMap = new HashMap<>();
+        // Populate the map with text and their respective positions
+        for (int i = 0; i < allData.size(); i++) {
+            textPositionMap.put(allData.get(i).getText(), i);
+        }
+        return textPositionMap; // Return the map with all text positions
     }
 
     /**
