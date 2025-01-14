@@ -22,6 +22,7 @@ This guide offers a detailed explanation of the Continuous Integration (CI) setu
 - [How to specify LTI tags or branches in CI-CD builds](#how-to-specify-lti-tags-or-branches-in-ci-cd-builds)
 - [How to get Slack notifications for LSP4IJ PRs](#how-to-get-slack-notifications-for-lsp4ij-prs)
 - [Sending build results to the Slack channel](#sending-build-results-to-the-slack-channel)
+- [How to specify an LTI tag to limit OS in CI-CD Cron Job builds](#how-to-specify-an-lti-tag-to-limit-os-in-ci-cd-cron-job-builds)
 
 
 # Workflow of normal build.yaml execution.
@@ -192,6 +193,8 @@ The next job, **Run Lsp4ij Main**, is the build which runs against the LSP4IJ ma
 
 ![Result](images/result-cron-job.png)
 
+The **OS** against which the job **build** is running is displayed in the bracket along with `true` or `false`. Value `true` means the job is currently running under the **LTI** tag, which is preventing other OS from running the builds. This means the screenshot above shows that there is no run for both **Windows** and **Mac** for LTI version `24.0.9`. Value `false` means the job is running under the **LTI** tag or the **main** branch, which is not limiting other **OS** from running the builds. You can see jobs under the **main** branch and **24.0.12** tag.
+
 The Annotations section contains errors that show the details of the failed builds and also warnings that show PRs with merge conflicts.
 
 ![Warnings](images/Warnings-PR.png)
@@ -316,3 +319,22 @@ By following these steps, this job ensures that a notification is sent to Slack 
 ### This is how the slack message shows the build status
 
 ![Build Results in Slack](images/build-results-slack-view.png)
+
+# How to specify an LTI tag to limit OS in CI-CD Cron Job builds
+
+In order to limit the **OS** to run the builds against the **LTI** Tag, the **LTI** Tag must be specified in one location within the **build.yaml** file. This is used in the `build` job. There is a variable `excludeLTITag` under the `matrix` that is used to check the **LTI** Tag and confirm that the exact one is coming from the Cron Job call.
+
+![specify LTI tag to limit os](images/specify-LTI-tag-to-limit-os.png)
+
+There is no need to update the code each time. That means, If we remove `24.0.9` from the **LTI** tags in the **cronJob.yaml** file, there is no need to modify anything in the **build.yaml** file. The variable `excludeLTITag` will calculate its value and will return `false` always since it not there in **LTI** tag. This ensures it works as expected for both **normal** and **cron job** builds.
+In the future, if there is a need to limit the LTI tag `24.0.12` to Linux only, the only change required in the **build.yaml** file is to update `24.0.9` to `24.0.12`.
+For cases where the **LTI** tag `24.0.12` should be limited to **macOS** only, the exclude section can be updated as follows:
+```java
+exclude:
+    - excludeLTITag: true
+      os: ubuntu-latest
+    - excludeLTITag: true
+      os: windows-latest
+```
+
+> Note: Whatever we are currently running for normal builds will continue to work as expected, even after removing the specified excludeLTITag from the LTI tag array in the cron job build.
