@@ -45,13 +45,22 @@ public class LibertyModules {
     }
 
     /**
-     * Scan the project for the modules that are Liberty apps.
-     * @return null if there are no Liberty modules
+     * Remove existing data and scan the project for the modules that are Liberty apps.
+     * @return this singleton, the list will be empty if there are no Liberty modules
      */
     public LibertyModules scanLibertyModules(Project project) {
         synchronized (libertyModules) {
             removeForProject(project); // remove previous data, if any
+            return rescanLibertyModules(project);
+        }
+    }
 
+    /**
+     * Scan the project for the modules that are Liberty apps and update any existing entries.
+     * @return this singleton, the list will be empty if there are no Liberty modules
+     */
+    public LibertyModules rescanLibertyModules(Project project) {
+        synchronized (libertyModules) {
             ArrayList<BuildFile> buildFiles = new ArrayList<>();
             try {
                 buildFiles.addAll(LibertyProjectUtil.getMavenBuildFiles(project));
