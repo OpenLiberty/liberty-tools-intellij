@@ -332,9 +332,11 @@ For cases where the **LTI** tag `24.0.12` should be limited to **macOS** only, t
 ```java
 exclude:
     - excludeLTITag: true
-      os: ubuntu-latest
-    - excludeLTITag: true
-      os: windows-latest
+      runtime:
+        name: linux
+    - excludeLTITag: true 
+      runtime
+        name: windows
 ```
 
 > Note: Whatever we are currently running for normal builds will continue to work as expected, even after removing the specified excludeLTITag from the LTI tag array in the cron job build.
