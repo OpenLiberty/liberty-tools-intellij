@@ -193,7 +193,7 @@ The next job, **Run Lsp4ij Main**, is the build which runs against the LSP4IJ ma
 
 ![Result](images/result-cron-job.png)
 
-The **OS** against which the job **build** is running is displayed in the bracket along with `true` or `false`. Value `true` means the job is currently running under the **LTI** tag, which is preventing other OS from running the builds. This means the screenshot above shows that there is no run for both **Windows** and **Mac** for LTI version `24.0.9`. Value `false` means the job is running under the **LTI** tag or the **main** branch, which is not limiting other **OS** from running the builds. You can see jobs under the **main** branch and **24.0.12** tag.
+The `runtime` name against which the job `build` is running is displayed in brackets, along with either `true` or `false`. Value `true` means the job is currently running under the **LTI** tag, which is preventing other **OS** from running the builds. This means the screenshot above shows that there is no run for both **Windows** and **Mac** for LTI version `24.0.9`. Value `false` means the job is running under the **LTI** tag or the **main** branch, which is not limiting other **OS** from running the builds. You can see jobs under the **main** branch and **24.0.12** tag.
 
 The Annotations section contains errors that show the details of the failed builds and also warnings that show PRs with merge conflicts.
 

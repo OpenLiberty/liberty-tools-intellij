@@ -92,7 +92,7 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    name: build ( ${{ matrix.os.name }}, ${{ matrix.excludeLTITag }} )
+    name: build ( ${{ matrix.runtime.name }}, ${{ matrix.excludeLTITag }} )
     runs-on: ${{ matrix.runtime.os }}
     strategy:
       fail-fast: false
