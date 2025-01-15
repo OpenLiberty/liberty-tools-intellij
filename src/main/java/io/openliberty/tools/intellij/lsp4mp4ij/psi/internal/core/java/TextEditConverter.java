@@ -61,10 +61,4 @@ public class TextEditConverter {
 		converted.add(te);
 		return converted;
 	}
-
-	public TextDocumentEdit convertToTextDocumentEdit(int version) {
-		VersionedTextDocumentIdentifier identifier = new VersionedTextDocumentIdentifier(version);
-		identifier.setUri(uri);
-		return new TextDocumentEdit(identifier, this.convert());
-	}
 }
