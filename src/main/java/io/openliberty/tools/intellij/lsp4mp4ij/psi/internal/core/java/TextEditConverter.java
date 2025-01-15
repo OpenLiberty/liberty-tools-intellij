@@ -36,18 +36,15 @@ public class TextEditConverter {
 	protected PsiFile compilationUnit;
 	protected List<org.eclipse.lsp4j.TextEdit> converted;
 
-	private final String uri;
-
 	private final IPsiUtils utils;
 
-	public TextEditConverter(PsiFile unit, Change edit, String uri, IPsiUtils utils) {
+	public TextEditConverter(PsiFile unit, Change edit, IPsiUtils utils) {
 		this.source = edit;
 		this.converted = new ArrayList<>();
 		if (unit == null) {
 			throw new IllegalArgumentException("Compilation unit can not be null");
 		}
 		this.compilationUnit = unit;
-		this.uri = uri;
 		this.utils = utils;
 	}
 
