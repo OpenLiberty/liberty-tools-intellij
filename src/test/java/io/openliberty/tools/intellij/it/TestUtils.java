@@ -28,7 +28,7 @@ public class TestUtils {
     /**
      * WLP messages.log path.
      */
-    public static final Path WLP_MSGLOG_PATH = Paths.get(ItConstants.DEFAULT_SERVER_PATH, "logs", "messages.log");
+    public static final Path WLP_MSGLOG_PATH = Paths.get(ItConstants.MESSAGES_LOG_PATH, "messages.log");
 
     /**
      * Liberty server stopped message:
