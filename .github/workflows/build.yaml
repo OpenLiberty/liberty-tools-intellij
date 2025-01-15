@@ -46,7 +46,7 @@ on:
 
 jobs:
   build:
-    name: build ( ${{ matrix.os.name }}, ${{ matrix.excludeLTITag }} )
+    name: build ( ${{ matrix.runtime.name }}, ${{ matrix.excludeLTITag }} )
     runs-on: ${{ matrix.runtime.os }}
     strategy:
       fail-fast: false
