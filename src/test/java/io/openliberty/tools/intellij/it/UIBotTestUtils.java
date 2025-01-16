@@ -438,6 +438,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void openLibertyToolWindow(RemoteRobot remoteRobot) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openLibertyToolWindow Entry");
         int maxRetries = 6;
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
@@ -467,6 +468,7 @@ public class UIBotTestUtils {
         if (error != null) {
             throw new RuntimeException("Unable to open the Liberty tool window.", error);
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openLibertyToolWindow Exit");
     }
 
     /**
@@ -2255,9 +2257,9 @@ public class UIBotTestUtils {
                     // Exit loop if successful
                     break;
                 } catch (WaitForConditionTimeoutException e) {
-                    System.err.println("Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items.");
+                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Attempt " + (attempt + 1) + " failed: Timeout while trying to find or interact with menu items. Retrying...");
                 } catch (Exception e) {
-                    System.err.println("Attempt " + (attempt + 1) + " failed: " + e.getMessage());
+                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Attempt " + (attempt + 1) + " failed: " + e.getMessage() + " Retrying...");
                 }
 
                 if (attempt == 4) { // If the last attempt fails
