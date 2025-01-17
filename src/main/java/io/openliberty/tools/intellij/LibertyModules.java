@@ -112,19 +112,21 @@ public class LibertyModules {
      * @param module LibertyModule
      */
     public LibertyModule addLibertyModule(LibertyModule module) {
-        if (libertyModules.containsKey(module.getBuildFile())) {
-            // Update existing Liberty project, projectType module, name and validContainerVersion
-            // Do not update the build file (key), debugMode, shellWidget or customStartParams since
-            // they may modify saved run configs.
-            LibertyModule existing = libertyModules.get(module.getBuildFile());
-            existing.setProject(module.getProject());
-            existing.setProjectType(module.getProjectType());
-            existing.setName(module.getName());
-            existing.setValidContainerVersion(module.isValidContainerVersion());
-        } else {
-            libertyModules.put(module.getBuildFile(), module);
+        synchronized (libertyModules) {
+            if (libertyModules.containsKey(module.getBuildFile())) {
+                // Update existing Liberty project, projectType module, name and validContainerVersion
+                // Do not update the build file (key), debugMode, shellWidget or customStartParams since
+                // they may modify saved run configs.
+                LibertyModule existing = libertyModules.get(module.getBuildFile());
+                existing.setProject(module.getProject());
+                existing.setProjectType(module.getProjectType());
+                existing.setName(module.getName());
+                existing.setValidContainerVersion(module.isValidContainerVersion());
+            } else {
+                libertyModules.put(module.getBuildFile(), module);
+            }
+            return libertyModules.get(module.getBuildFile());
         }
-        return libertyModules.get(module.getBuildFile());
     }
 
     /**
