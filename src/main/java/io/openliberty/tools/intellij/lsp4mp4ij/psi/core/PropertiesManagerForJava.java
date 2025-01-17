@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat, Inc.
+ * Copyright (c) 2020, 2025 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -399,8 +399,8 @@ public final class PropertiesManagerForJava {
      * @param monitor    the progress monitor
      * @return the workspace symbols for the given java project
      */
-    public List<SymbolInformation> workspaceSymbols(String projectUri, IPsiUtils utils, ProgressIndicator monitor) {
-        List<SymbolInformation> symbols = new ArrayList<>();
+    public List<WorkspaceSymbol> workspaceSymbols(String projectUri, IPsiUtils utils, ProgressIndicator monitor) {
+        List<WorkspaceSymbol> symbols = new ArrayList<>();
         Module module = getModule(projectUri, utils);
         if (module != null) {
             collectWorkspaceSymbols(module, utils, symbols, monitor);
@@ -418,7 +418,7 @@ public final class PropertiesManagerForJava {
         return null;
     }
 
-    private void collectWorkspaceSymbols(Module project, IPsiUtils utils, List<SymbolInformation> symbols,
+    private void collectWorkspaceSymbols(Module project, IPsiUtils utils, List<WorkspaceSymbol> symbols,
                                          ProgressIndicator monitor) {
         if (monitor.isCanceled()) {
             return;
