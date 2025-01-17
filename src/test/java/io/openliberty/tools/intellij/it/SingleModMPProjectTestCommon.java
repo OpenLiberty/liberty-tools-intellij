@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.utils.Keyboard;
+import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -294,8 +295,8 @@ public abstract class SingleModMPProjectTestCommon {
      */
     protected static void closeProjectView() {
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.CLOSE_ALL_TABS, 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.COMPACT_MODE, 3);
         }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
@@ -1139,7 +1140,7 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.COMPACT_MODE, 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
@@ -1157,7 +1158,7 @@ public abstract class SingleModMPProjectTestCommon {
             UIBotTestUtils.closeAllEditorTabs(remoteRobot);
         }
         else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.CLOSE_ALL_TABS, 3);
         }
 
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,

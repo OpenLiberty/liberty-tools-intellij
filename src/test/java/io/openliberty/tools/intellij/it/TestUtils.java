@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
+import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.*;
@@ -17,7 +18,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Test utilities.
@@ -27,7 +30,7 @@ public class TestUtils {
     /**
      * WLP messages.log path.
      */
-    public static final Path WLP_MSGLOG_PATH = Paths.get("wlp", "usr", "servers", "defaultServer", "logs", "messages.log");
+    public static final Path WLP_MSGLOG_PATH = Paths.get(String.join(File.separator, ItConstants.MESSAGES_LOG_PATH), "messages.log");
 
     /**
      * Liberty server stopped message:
@@ -541,7 +544,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        Path serverEnvPath = Paths.get(absoluteWLPPath, String.join(File.separator, ItConstants.DEFAULT_SERVER_PATH), ItConstants.SERVER_ENV);
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
@@ -597,5 +600,10 @@ public class TestUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String[] combinePath(String projectName, String[] pathArray) {
+        return Stream.concat(Stream.of(projectName), Arrays.stream(pathArray))
+                .toArray(String[]::new);
     }
 }
