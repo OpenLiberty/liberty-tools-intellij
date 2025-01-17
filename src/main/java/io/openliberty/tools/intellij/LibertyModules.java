@@ -102,7 +102,7 @@ public class LibertyModules {
                 addLibertyModule(new LibertyModule(project, virtualFile, projectName, buildFile.getProjectType(), validContainerVersion));
             }
         }
-        return getInstance();
+        return this;
     }
 
     /**
