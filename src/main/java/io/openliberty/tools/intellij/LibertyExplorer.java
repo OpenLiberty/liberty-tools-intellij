@@ -130,10 +130,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
             node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
-            if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+            if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                 node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
                 node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
-            } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
+            } else {
                 node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
             }
         }
@@ -168,7 +168,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     Object node = path.getLastPathComponent();
                     if (node instanceof LibertyModuleNode libertyNode) {
                         final DefaultActionGroup group = new DefaultActionGroup();
-                        if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                        if (libertyNode.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                             AnAction viewPomXml = ActionManager.getInstance().getAction(Constants.VIEW_POM_XML_ACTION_ID);
                             group.add(viewPomXml);
                             AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
@@ -176,7 +176,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                             AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
                             group.add(viewUnitTestReport);
                             group.addSeparator();
-                        } else if (libertyNode.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
+                        } else {
                             AnAction viewGradleConfig = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_CONFIG_ACTION_ID);
                             group.add(viewGradleConfig);
                             AnAction viewTestReport = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);

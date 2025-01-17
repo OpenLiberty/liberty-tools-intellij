@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -110,8 +110,8 @@ public abstract class LibertyGeneralAction extends AnAction {
             return;
         }
 
-        String projectType = libertyModule.getProjectType();
-        if (projectType == null || (!projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) && !projectType.equals(Constants.LIBERTY_GRADLE_PROJECT))) {
+        Constants.ProjectType projectType = libertyModule.getProjectType();
+        if (projectType == null) {
             String msg = LocalizedResourceUtil.getMessage("liberty.project.type.invalid", actionCmd, libertyModule.getName());
             notifyError(msg, project);
             LOGGER.warn(msg);
@@ -122,8 +122,8 @@ public abstract class LibertyGeneralAction extends AnAction {
     }
 
     /* Returns project type(s) applicable to this action. */
-    protected List<String> getSupportedProjectTypes() {
-        return Arrays.asList(Constants.LIBERTY_MAVEN_PROJECT, Constants.LIBERTY_GRADLE_PROJECT);
+    protected List<Constants.ProjectType> getSupportedProjectTypes() {
+        return Arrays.asList(Constants.ProjectType.LIBERTY_MAVEN_PROJECT, Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
     }
 
     protected final String[] toProjectNames(@NotNull List<LibertyModule> list) {

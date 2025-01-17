@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -48,8 +48,8 @@ public class ViewTestReport extends LibertyGeneralAction {
     }
 
     @Override
-    protected List<String> getSupportedProjectTypes() {
-        return List.of(Constants.LIBERTY_GRADLE_PROJECT);
+    protected List<Constants.ProjectType> getSupportedProjectTypes() {
+        return List.of(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
     }
 
     @Override

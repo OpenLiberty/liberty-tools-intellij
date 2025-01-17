@@ -82,7 +82,7 @@ public class LibertyModules {
                     break;
                 }
                 try {
-                    if (buildFile.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                    if (buildFile.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                         projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
                     } else {
                         projectName = LibertyGradleUtil.getProjectName(virtualFile);
@@ -194,7 +194,7 @@ public class LibertyModules {
      * @param projectTypes
      * @return Liberty modules with the given project type(s)
      */
-    public List<LibertyModule> getLibertyModules(Project project, List<String> projectTypes) {
+    public List<LibertyModule> getLibertyModules(Project project, List<Constants.ProjectType> projectTypes) {
         ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,8 +17,10 @@ import java.util.*;
 public final class Constants {
     public static final int REQUIRED_JAVA_VERSION = 17;
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
-    public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
-    public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
+    public enum ProjectType {
+        LIBERTY_GRADLE_PROJECT,
+        LIBERTY_MAVEN_PROJECT;
+    }
 
     public static final String LIBERTY_MAVEN_START_CMD = " io.openliberty.tools:liberty-maven-plugin:dev ";
     public static final String LIBERTY_MAVEN_START_CONTAINER_CMD = " io.openliberty.tools:liberty-maven-plugin:devc ";
