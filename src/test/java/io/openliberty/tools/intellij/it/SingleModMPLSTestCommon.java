@@ -16,6 +16,7 @@ import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -214,8 +215,7 @@ public abstract class SingleModMPLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPG_PROPERTIES, cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
-            String metaInfDirPath = Arrays.stream(ItConstants.META_INF_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
-            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, metaInfDirPath, ItConstants.MPG_PROPERTIES);
+            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPG_PROPERTIES);
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified microprofile-config.properties with the original content
@@ -301,8 +301,7 @@ public abstract class SingleModMPLSTestCommon {
         String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
-        String metaInfDirPath = Arrays.stream(ItConstants.META_INF_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
-        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, metaInfDirPath, ItConstants.MPG_PROPERTIES);
+        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPG_PROPERTIES);
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPG_PROPERTIES);
