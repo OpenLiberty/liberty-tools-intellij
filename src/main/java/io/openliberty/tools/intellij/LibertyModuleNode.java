@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,7 +35,7 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
         return libertyModule.getProject();
     }
 
-    public String getProjectType() {
+    public Constants.ProjectType getProjectType() {
         return libertyModule.getProjectType();
     }
 
@@ -44,10 +44,10 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
     }
 
     public boolean isGradleProjectType() {
-        return libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT);
+        return libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
     }
 
     public boolean isMavenProjectType() {
-        return libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT);
+        return libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT);
     }
 }

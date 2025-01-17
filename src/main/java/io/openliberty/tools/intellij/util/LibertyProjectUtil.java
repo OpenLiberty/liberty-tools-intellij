@@ -95,7 +95,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.LIST);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_GRADLE_PROJECT, BuildFileFilter.LIST);
     }
 
     /**
@@ -104,7 +104,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.LIST);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_MAVEN_PROJECT, BuildFileFilter.LIST);
     }
 
     /**
@@ -113,7 +113,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getAddableGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.ADDABLE);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_GRADLE_PROJECT, BuildFileFilter.ADDABLE);
     }
 
     /**
@@ -122,7 +122,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getAddableMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.ADDABLE);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_MAVEN_PROJECT, BuildFileFilter.ADDABLE);
     }
 
     /**
@@ -131,7 +131,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getRemovableGradleBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_GRADLE_PROJECT, BuildFileFilter.REMOVABLE);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_GRADLE_PROJECT, BuildFileFilter.REMOVABLE);
     }
 
     /**
@@ -140,7 +140,7 @@ public class LibertyProjectUtil {
      * @return ArrayList of BuildFiles
      */
     public static ArrayList<BuildFile> getRemovableMavenBuildFiles(Project project) throws IOException, SAXException, ParserConfigurationException {
-        return getBuildFiles(project, Constants.LIBERTY_MAVEN_PROJECT, BuildFileFilter.REMOVABLE);
+        return getBuildFiles(project, Constants.ProjectType.LIBERTY_MAVEN_PROJECT, BuildFileFilter.REMOVABLE);
     }
 
     /**
@@ -188,10 +188,10 @@ public class LibertyProjectUtil {
     }
 
     // Search the filename index to find valid build files (Maven and Gradle) for the current project
-    private static ArrayList<BuildFile> getBuildFiles(Project project, String buildFileType, BuildFileFilter filter) throws ParserConfigurationException, SAXException, IOException {
+    private static ArrayList<BuildFile> getBuildFiles(Project project, Constants.ProjectType buildFileType, BuildFileFilter filter) {
         ArrayList<BuildFile> collectedBuildFiles = new ArrayList<BuildFile>();
         Collection<VirtualFile> indexedVFiles;
-        if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+        if (buildFileType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
             indexedVFiles = readIndex(project, "pom.xml");
         } else {
             indexedVFiles = readIndex(project, "build.gradle");
@@ -200,7 +200,7 @@ public class LibertyProjectUtil {
             for (VirtualFile vFile : indexedVFiles) {
                 try {
                     BuildFile buildFile;
-                    if (buildFileType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                    if (buildFileType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                         buildFile = LibertyMavenUtil.validPom(vFile);
                     } else {
                         buildFile = LibertyGradleUtil.validBuildGradle(vFile);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,7 +35,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        String projectType = libertyModule.getProjectType();
+        Constants.ProjectType projectType = libertyModule.getProjectType();
         String projectName = project.getName();
 
         String startCmd = null;
@@ -43,7 +43,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         DebugModeHandler debugHandler = new DebugModeHandler();
         String buildSettingsCmd;
         try {
-            if(projectType.equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+            if(projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                 buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
             } else {
                 buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile);
@@ -56,13 +56,13 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
-        String start = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
-        String startInContainer = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+        String start = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
+        String startInContainer = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
         startCmd = libertyModule.runInContainer() ? startInContainer : start;
         startCmd += libertyModule.getCustomStartParams();
         if (libertyModule.isDebugMode()) {
             try {
-                String debugParam = projectType.equals(Constants.LIBERTY_MAVEN_PROJECT) ? Constants.LIBERTY_MAVEN_DEBUG_PARAM : Constants.LIBERTY_GRADLE_DEBUG_PARAM;
+                String debugParam = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? Constants.LIBERTY_MAVEN_DEBUG_PARAM : Constants.LIBERTY_GRADLE_DEBUG_PARAM;
                 debugPort = debugHandler.getDebugPort(libertyModule);
                 String debugStr = debugParam + debugPort;
                 // do not append if debug port is already specified as part of start command
