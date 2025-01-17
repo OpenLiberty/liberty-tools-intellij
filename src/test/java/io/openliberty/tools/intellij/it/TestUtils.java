@@ -18,7 +18,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Test utilities.
@@ -28,7 +30,7 @@ public class TestUtils {
     /**
      * WLP messages.log path.
      */
-    public static final Path WLP_MSGLOG_PATH = Paths.get(ItConstants.MESSAGES_LOG_PATH, "messages.log");
+    public static final Path WLP_MSGLOG_PATH = Paths.get(String.join(File.separator, ItConstants.MESSAGES_LOG_PATH), "messages.log");
 
     /**
      * Liberty server stopped message:
@@ -542,7 +544,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, ItConstants.DEFAULT_SERVER_PATH, ItConstants.SERVER_ENV);
+        Path serverEnvPath = Paths.get(absoluteWLPPath, String.join(File.separator, ItConstants.DEFAULT_SERVER_PATH), ItConstants.SERVER_ENV);
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
@@ -598,5 +600,10 @@ public class TestUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String[] combinePath(String projectName, String[] pathArray) {
+        return Stream.concat(Stream.of(projectName), Arrays.stream(pathArray))
+                .toArray(String[]::new);
     }
 }

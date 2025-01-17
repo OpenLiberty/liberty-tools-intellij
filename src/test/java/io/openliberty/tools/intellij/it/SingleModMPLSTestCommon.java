@@ -19,6 +19,8 @@ import org.junit.jupiter.api.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -97,7 +99,8 @@ public abstract class SingleModMPLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA, snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.HEALTH_DIR_PATH, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
+            String healthDirPath = Arrays.stream(ItConstants.HEALTH_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
+            Path pathToSrc = Paths.get(projectsPath, projectName, healthDirPath, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         } finally {
             // Replace modified content with the original content
@@ -124,7 +127,8 @@ public abstract class SingleModMPLSTestCommon {
 
         // Delete the liveness annotation
         UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA, livenessString);
-        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.HEALTH_DIR_PATH, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
+        String healthDirPath = Arrays.stream(ItConstants.HEALTH_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
+        Path pathToSrc = Paths.get(projectsPath, projectName, healthDirPath, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         try {
             // validate @Liveness no longer found in java part
@@ -170,7 +174,8 @@ public abstract class SingleModMPLSTestCommon {
 
         // Delete the liveness annotation
         UIBotTestUtils.selectAndDeleteTextInJavaPart(remoteRobot,ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA, livenessString);
-        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.HEALTH_DIR_PATH, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
+        String healthDirPath = Arrays.stream(ItConstants.HEALTH_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
+        Path pathToSrc = Paths.get(projectsPath, projectName, healthDirPath, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA);
 
         try {
             // validate @Liveness no longer found in java part
@@ -209,7 +214,8 @@ public abstract class SingleModMPLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPG_PROPERTIES, cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
-            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, ItConstants.META_INF_DIR_PATH, ItConstants.MPG_PROPERTIES);
+            String metaInfDirPath = Arrays.stream(ItConstants.META_INF_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
+            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, metaInfDirPath, ItConstants.MPG_PROPERTIES);
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified microprofile-config.properties with the original content
@@ -295,7 +301,8 @@ public abstract class SingleModMPLSTestCommon {
         String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
-        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,ItConstants.META_INF_DIR_PATH, ItConstants.MPG_PROPERTIES);
+        String metaInfDirPath = Arrays.stream(ItConstants.META_INF_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
+        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, metaInfDirPath, ItConstants.MPG_PROPERTIES);
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPG_PROPERTIES);
@@ -344,8 +351,8 @@ public abstract class SingleModMPLSTestCommon {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
 
-        UIBotTestUtils.openFile(remoteRobot, projectName, "ServiceLiveHealthCheck", projectName, "src", "main", "java", "io.openliberty.mp.sample", "health");
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPG_PROPERTIES, projectName, "src", "main", "resources", "META-INF");
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVICE_LIVEHEALTH_CHECK, TestUtils.combinePath(projectName, ItConstants.HEALTH_DIR_PATH));
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPG_PROPERTIES, TestUtils.combinePath(projectName, ItConstants.META_INF_DIR_PATH));
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
