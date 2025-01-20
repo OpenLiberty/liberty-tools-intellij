@@ -28,7 +28,9 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +114,12 @@ public class JaxRsWorkspaceSymbolParticipant implements IJavaWorkspaceSymbolsPar
 		Location location = new Location(methodInfo.getDocumentUri(), r);
 
 		StringBuilder nameBuilder = new StringBuilder("@");
-		URL url = new URL(methodInfo.getUrl());
+		URL url;
+		try {
+			url = new URI(methodInfo.getUrl()).toURL();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 		String path = url.getPath();
 		nameBuilder.append(path);
 		nameBuilder.append(": ");
