@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.utils.Keyboard;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -1242,11 +1243,15 @@ public abstract class SingleModMPProjectTestCommon {
      * Clean project.
      */
     public void stopTerminal() {
-
         Keyboard keyboard = new Keyboard(remoteRobot);
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
-
+        ProjectFrameFixture projectFrame;
+        ComponentFixture terminal;
+        try {
+            projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+        } catch (WaitForConditionTimeoutException w) {
+            return; // there is no terminal with a Liberty to stop
+        }
         terminal.rightClick();
         ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
         openFixtureNewTab.click(new Point());
@@ -1268,7 +1273,6 @@ public abstract class SingleModMPProjectTestCommon {
      * Stop the Server.
      */
     public void cleanTerminal() {
-
         Keyboard keyboard = new Keyboard(remoteRobot);
         // Perform clean
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
