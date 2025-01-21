@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
-public class MavenSingleModLSP4JakartaTest extends SingleModLSP4JakartaTestCommon {
+public class MavenSingleModLSP4JakartaTest extends SingleModJakartaLSTestCommon {
 
     /**
      * Application Name

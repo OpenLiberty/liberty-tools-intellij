@@ -70,37 +70,6 @@ public abstract class SingleModLSP4JakartaTestCommon {
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
     }
 
-    @Test
-    @Video
-    public void testCompleteFilterAnnotationQuickFix() {
-        String sourceString = "@WebFilter()";
-        String replacementString = "@WebFilter(servletNames=\"\")";
-        String flaggedString = "WebFilter";
-
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-
-        projTree.expand(projectName, "src", "main", "java", "io.openliberty.sample.jakarta", "servlet");
-        UIBotTestUtils.openFile(remoteRobot, projectName, "InvalidWebFilter", projectName, "src", "main", "java", "io.openliberty.sample.jakarta", "servlet");
-
-        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "sample", "jakarta", "servlet", "InvalidWebFilter.java");
-        String quickfixChooserString = "Add the 'servletNames' attribute to @WebFilter";
-
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "InvalidWebFilter.java");
-        UIBotTestUtils.copyWindowContent(remoteRobot);
-        //UIBotTestUtils.selectAndModifyTextInJavaPart(remoteRobot, "InvalidWebFilter.java", sourceString, replacementString);
-
-        try {
-            //TestUtils.validateStringNotInFile(pathToSrc.toString(), sourceString);
-            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "InvalidWebFilter.java", quickfixChooserString);
-            UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
-            TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), sourceString);
-        }
-        finally {
-            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
-        }
-    }
-
     /**
      * Prepares the environment to run the tests.
      *
