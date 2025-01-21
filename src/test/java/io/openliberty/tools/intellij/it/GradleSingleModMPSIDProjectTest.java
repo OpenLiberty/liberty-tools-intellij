@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation.
+ * Copyright (c) 2024, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,12 +25,12 @@ import java.nio.file.StandardCopyOption;
 public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon {
 
     /**
-     * Single module Microprofile project name.
+     * Single module Microprofile project name specified in file settings.gradle.
      */
     private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
 
     /**
-     * Single module Microprofile project name with space.
+     * Project name of Microprofile single module in file settings-copy.gradle.
      */
     private static final String SM_MP_PROJECT_NAME_NEW = "singleMod GradleMP";
 
