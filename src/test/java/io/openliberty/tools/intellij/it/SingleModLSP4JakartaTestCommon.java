@@ -9,14 +9,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
-import com.intellij.remoterobot.fixtures.JTreeFixture;
-import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
