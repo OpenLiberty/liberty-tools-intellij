@@ -27,10 +27,6 @@ import java.util.stream.Stream;
  */
 public class TestUtils {
 
-    /**
-     * WLP messages.log path.
-     */
-    public static final Path WLP_MSGLOG_PATH = Paths.get(String.join(File.separator, ItConstants.MESSAGES_LOG_PATH), "messages.log");
 
     /**
      * Liberty server stopped message:
@@ -63,7 +59,7 @@ public class TestUtils {
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnNoStop) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
         Exception error = null;
@@ -171,7 +167,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -277,7 +273,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStopped: Timed out while waiting for project under URL: " + projUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -519,7 +515,7 @@ public class TestUtils {
      */
     public static boolean isServerStopNeeded(String wlpInstallPath) {
         boolean stopServer = false;
-        Path msgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString());
+        Path msgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH);
         if (fileExists(msgLogPath)) {
             try {
                 // The file maybe an old log. For now, check for the message indicating
@@ -544,7 +540,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, String.join(File.separator, ItConstants.DEFAULT_SERVER_PATH), ItConstants.SERVER_ENV);
+        Path serverEnvPath = Paths.get(absoluteWLPPath, ItConstants.DEFAULT_SERVER_PATH, ItConstants.SERVER_ENV);
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port

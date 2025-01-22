@@ -17,7 +17,6 @@ import com.intellij.remoterobot.utils.Keyboard;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -132,7 +131,7 @@ public abstract class SingleModLibertyLSTestCommon {
         // Insert a new element in server.xml.
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE, true);
-            Path pathToServerXML = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_XML);
+            Path pathToServerXML = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_XML);
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedFeature);
         } finally {
             // Replace server.xml content with the original content
@@ -160,7 +159,7 @@ public abstract class SingleModLibertyLSTestCommon {
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, true);
             TestUtils.sleepAndIgnoreException(2); // wait for editor to update
-            Path pathToServerXML = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_XML);
+            Path pathToServerXML = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_XML);
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
@@ -189,7 +188,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, ItConstants.SERVER_ENV, envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet, true);
-            Path pathToServerEnv = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_ENV);
+            Path pathToServerEnv = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_ENV);
             TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
             // Replace server.xml content with the original content
@@ -274,7 +273,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, ItConstants.BOOTSTRAP_PROPERTIES, configNameSnippet, configNameChooserSnippet, configValueSnippet, true);
-            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.BOOTSTRAP_PROPERTIES);
+            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.BOOTSTRAP_PROPERTIES);
             TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
             // Replace server.xml content with the original content
@@ -407,7 +406,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_XML);
+        pathToServerXML = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_XML);
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.SERVER_XML);
@@ -443,7 +442,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_XML);
+        pathToServerXML = Paths.get(projectsPath, projectName, ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_XML);
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.SERVER_XML);
@@ -593,16 +592,18 @@ public abstract class SingleModLibertyLSTestCommon {
         // get a JTreeFixture reference to the file project viewer entry
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-        projTree.expand(projectName, String.join(File.separator, ItConstants.CONFIG_DIR_PATH));
+        projTree.expand(projectName, ItConstants.CONFIG_DIR_PATH);
+
+        String[] configDirPath = TestUtils.combinePath(projectName, ItConstants.CONFIG_DIR_PATH_ARR);
 
         // open server.xml file
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVER_XML, TestUtils.combinePath(projectName, ItConstants.CONFIG_DIR_PATH));
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVER_XML, configDirPath);
 
         // open server.env file
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVER_ENV, TestUtils.combinePath(projectName, ItConstants.CONFIG_DIR_PATH));
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVER_ENV, configDirPath);
 
         // open bootstrap.properties file
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.BOOTSTRAP_PROPERTIES, TestUtils.combinePath(projectName, ItConstants.CONFIG_DIR_PATH));
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.BOOTSTRAP_PROPERTIES, configDirPath);
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");

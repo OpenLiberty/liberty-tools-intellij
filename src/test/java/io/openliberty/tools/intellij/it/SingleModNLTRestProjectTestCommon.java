@@ -14,7 +14,6 @@ import com.intellij.remoterobot.RemoteRobot;
 import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -197,7 +196,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
 
         // Copy a valid server.xml file to this project's src/main/liberty/config directory.
         Path validServerXml = Paths.get(getHelperFilesDirPath(), ItConstants.SERVER_XML);
-        Path destination = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), String.join(File.separator, ItConstants.CONFIG_DIR_PATH), ItConstants.SERVER_XML);
+        Path destination = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), ItConstants.CONFIG_DIR_PATH, ItConstants.SERVER_XML);
 
         try {
             Files.copy(validServerXml, destination, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);

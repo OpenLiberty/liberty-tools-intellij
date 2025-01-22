@@ -16,13 +16,9 @@ import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -96,8 +92,7 @@ public abstract class SingleModJakartaLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, ItConstants.SYSTEM_RESOURCE_JAVA, snippetStr, snippetChooser);
-            String systemDirPath = Arrays.stream(ItConstants.SYSTEM_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
-            Path pathToSrc = Paths.get(projectsPath, projectName, systemDirPath, ItConstants.SYSTEM_RESOURCE_JAVA);
+            Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_JAVA);
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
@@ -115,8 +110,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
         String expectedHoverData = "Only public methods can be exposed as resource methods";
-        String systemDirPath = Arrays.stream(ItConstants.SYSTEM_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
-        Path pathToSrc = Paths.get(projectsPath, projectName, systemDirPath, ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.SYSTEM_RESOURCE_2_JAVA);
@@ -151,8 +145,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
-        String systemDirPath = Arrays.stream(ItConstants.SYSTEM_DIR_PATH).map(s -> s.replace(".", "/")).collect(Collectors.joining("/"));
-        Path pathToSrc = Paths.get(projectsPath, projectName, systemDirPath, ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
         String quickfixChooserString = "Make method public";
 
         // get focus on file tab prior to copy
@@ -206,10 +199,11 @@ public abstract class SingleModJakartaLSTestCommon {
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
-        projTree.expand(projectName,  String.join(File.separator, ItConstants.SYSTEM_DIR_PATH));
+        projTree.expand(projectName, ItConstants.SYSTEM_DIR_PATH);
 
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH));
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH));
+        String[] systemDirPath = TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH_ARR);
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, systemDirPath);
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, systemDirPath);
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
