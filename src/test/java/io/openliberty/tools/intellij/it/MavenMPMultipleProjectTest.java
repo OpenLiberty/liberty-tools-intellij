@@ -24,19 +24,38 @@ import java.nio.file.Paths;
 public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
 
     /**
-     * Microprofile project name.
+     * The MicroProfile project name from the multiple projects used for running tests.
      */
     private static final String MP_PROJECT_NAME = "singleModMavenMP";
 
+    /**
+     * The new path of the maven project.
+     */
     private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModMavenMP").toAbsolutePath().toString();
 
+    /**
+     * The path of the folder containing two projects.
+     */
     private static final String MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project").toAbsolutePath().toString();
+
+    /**
+     * The original path to the parent directory that containing the test projects.
+     */
     private static final String MULTIPLE_PROJECTS_PATH_PARENT = Paths.get("src", "test", "resources", "projects").toAbsolutePath().toString();
 
+    /**
+     * The original path of the gradle project.
+     */
     private static final String GRADLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle", "singleModGradleMP").toAbsolutePath().toString();
 
+    /**
+     * The original path of the maven project.
+     */
     private static final String MAVEN_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven", "singleModMavenMP").toAbsolutePath().toString();
 
+    /**
+     * The new path of the gradle project.
+     */
     private static final String GRADLE_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModGradleMP").toAbsolutePath().toString();
 
     /**
