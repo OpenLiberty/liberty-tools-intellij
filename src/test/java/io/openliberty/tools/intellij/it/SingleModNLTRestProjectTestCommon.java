@@ -159,7 +159,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window", 3, false);
 
         // Select project from the 'Add Liberty project' dialog.
-        UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName(), "Add Liberty project", false);
+        UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName(), "Add Liberty project");
 
         try {
             // Validate that the project is displayed in the Liberty tool window.
