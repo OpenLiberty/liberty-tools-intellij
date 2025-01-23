@@ -37,7 +37,7 @@ public class ItConstants {
     public static final String COMPACT_MODE = "Compact Mode";
 
     public static final String SERVICE_LIVE_HEALTH_CHECK_JAVA = "ServiceLiveHealthCheck.java";
-    public static final String MPG_PROPERTIES = "microprofile-config.properties";
+    public static final String MPCFG_PROPERTIES = "microprofile-config.properties";
 
     public static final String CLOSE_ALL_TABS = "Close All Tabs";
 }

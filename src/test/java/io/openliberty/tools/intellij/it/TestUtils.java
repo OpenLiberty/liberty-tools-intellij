@@ -59,7 +59,7 @@ public class TestUtils {
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnNoStop) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = wlpInstallPath + "/" + ItConstants.MESSAGES_LOG_PATH;
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
         Exception error = null;
@@ -167,7 +167,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = wlpInstallPath + "/" + ItConstants.MESSAGES_LOG_PATH;
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -273,7 +273,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStopped: Timed out while waiting for project under URL: " + projUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, ItConstants.MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = wlpInstallPath + "/" + ItConstants.MESSAGES_LOG_PATH;
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);

@@ -67,7 +67,7 @@ public abstract class SingleModMPLSTestCommon {
         projectFrame.findText("resources").doubleClick();
 
         UIBotTestUtils.closeFileEditorTab(remoteRobot, ItConstants.SERVICE_LIVE_HEALTH_CHECK_JAVA, "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, ItConstants.MPG_PROPERTIES, "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, ItConstants.MPCFG_PROPERTIES, "5");
         if (!remoteRobot.isMac()) {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.COMPACT_MODE, 3);
         }
@@ -203,14 +203,14 @@ public abstract class SingleModMPLSTestCommon {
         String expectedMpCfgPropertiesString = "mp.health.disable-default-procedures=true";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPG_PROPERTIES);
+        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPCFG_PROPERTIES);
 
         // Save the current microprofile-config.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPG_PROPERTIES, cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
-            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPG_PROPERTIES);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPCFG_PROPERTIES, cfgSnippet, cfgNameChooserSnippet, cfgValueSnippet, true);
+            Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPCFG_PROPERTIES);
             TestUtils.validateStringInFile(pathToMpCfgProperties.toString(), expectedMpCfgPropertiesString);
         } finally {
             // Replace modified microprofile-config.properties with the original content
@@ -233,7 +233,7 @@ public abstract class SingleModMPLSTestCommon {
                 "java.lang.StringValue: http://localhost:9081/data/client/service";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, ItConstants.MPG_PROPERTIES, UIBotTestUtils.PopupType.DOCUMENTATION);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, ItConstants.MPCFG_PROPERTIES, UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // if the LS has not yet poulated the popup, re-get the popup data
@@ -263,16 +263,16 @@ public abstract class SingleModMPLSTestCommon {
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPG_PROPERTIES);
+        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPCFG_PROPERTIES);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPCFG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, ItConstants.MPG_PROPERTIES, UIBotTestUtils.PopupType.DIAGNOSTIC);
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, ItConstants.MPCFG_PROPERTIES, UIBotTestUtils.PopupType.DIAGNOSTIC);
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
@@ -296,19 +296,19 @@ public abstract class SingleModMPLSTestCommon {
         String correctedValue = "mp.health.disable-default-procedures=true";
         String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
 
-        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPG_PROPERTIES);
+        Path pathToMpCfgProperties = Paths.get(projectsPath, projectName, String.join(File.separator, ItConstants.META_INF_DIR_PATH), ItConstants.MPCFG_PROPERTIES);
 
         // get focus on file tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPG_PROPERTIES);
+        UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.MPCFG_PROPERTIES);
 
         // Save the current content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, ItConstants.MPCFG_PROPERTIES, MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, ItConstants.MPG_PROPERTIES, quickfixChooserString);
+            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, ItConstants.MPCFG_PROPERTIES, quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
             TestUtils.validateStanzaInConfigFile(pathToMpCfgProperties.toString(), correctedValue);
@@ -346,7 +346,7 @@ public abstract class SingleModMPLSTestCommon {
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
 
         UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SERVICE_LIVEHEALTH_CHECK, TestUtils.combinePath(projectName, ItConstants.HEALTH_DIR_PATH_ARR));
-        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPG_PROPERTIES, TestUtils.combinePath(projectName, ItConstants.META_INF_DIR_PATH));
+        UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.MPCFG_PROPERTIES, TestUtils.combinePath(projectName, ItConstants.META_INF_DIR_PATH));
 
         // Removes the build tool window if it is opened. This prevents text to be hidden by it.
         UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
