@@ -1744,6 +1744,7 @@ public class UIBotTestUtils {
                 }
 
                 // If the Liberty: Start... action was selected, make sure the Edit Configuration dialog is displayed.
+                // For multiple projects, an extra dialog appears to select the project before the "Edit Configuration" dialog is displayed.
                 if (action.equals("Liberty: Start...") && !isMultiple) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));

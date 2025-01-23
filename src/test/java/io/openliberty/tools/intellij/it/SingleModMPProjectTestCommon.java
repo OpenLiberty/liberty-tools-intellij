@@ -1447,7 +1447,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Perform Stop Action
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
             // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
-            // Run the tests only in the Maven project, so navigate to the Maven project directory.
+            // Run the multiple project tests only in the Maven project, so navigate to the Maven project directory.
             if (getProjectsDirPath().contains("multiple-project")) {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();
@@ -1471,7 +1471,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Perform clean
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
             // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
-            // Run the tests only in the Maven project, so navigate to the Maven project directory.
+            // Run the multiple project tests only in the Maven project, so navigate to the Maven project directory.
             if (getProjectsDirPath().contains("multiple-project")) {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();

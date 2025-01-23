@@ -29,17 +29,12 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     private static final String MP_PROJECT_NAME = "singleModMavenMP";
 
     /**
-     * The new path of the maven project.
-     */
-    private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModMavenMP").toAbsolutePath().toString();
-
-    /**
      * The path of the folder containing two projects.
      */
     private static final String MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project").toAbsolutePath().toString();
 
     /**
-     * The original path to the parent directory that containing the test projects.
+     * The original path of the parent directory that containing the test projects.
      */
     private static final String MULTIPLE_PROJECTS_PATH_PARENT = Paths.get("src", "test", "resources", "projects").toAbsolutePath().toString();
 
@@ -57,6 +52,11 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
      * The new path of the gradle project.
      */
     private static final String GRADLE_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModGradleMP").toAbsolutePath().toString();
+
+    /**
+     * The new path of the maven project.
+     */
+    private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModMavenMP").toAbsolutePath().toString();
 
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
