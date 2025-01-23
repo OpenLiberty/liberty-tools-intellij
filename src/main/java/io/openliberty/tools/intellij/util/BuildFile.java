@@ -21,7 +21,7 @@ public class BuildFile {
 
     private String projectName;
 
-    public String getProjectType() {
+    public Constants.ProjectType getProjectType() {
         return projectType;
     }
 
@@ -29,14 +29,11 @@ public class BuildFile {
      * Liberty project type must be Gradle or Maven.
      * @param projectType
      */
-    public void setProjectType(String projectType) {
-        if (!Constants.LIBERTY_GRADLE_PROJECT.equals(projectType) && !Constants.LIBERTY_MAVEN_PROJECT.equals(projectType)) {
-            throw new IllegalArgumentException("Only Gradle and Maven project types are supported: " + projectType);
-        }
+    public void setProjectType(Constants.ProjectType projectType) {
         this.projectType = projectType;
     }
 
-    private String projectType;
+    private Constants.ProjectType projectType;
 
     public BuildFile(boolean validBuildFile, boolean validContainerVersion) {
         this.validBuildFile = validBuildFile;

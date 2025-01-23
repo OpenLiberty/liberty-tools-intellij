@@ -82,7 +82,7 @@ public class LibertyModules {
                     break;
                 }
                 try {
-                    if (buildFile.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                    if (buildFile.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                         projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
                     } else {
                         projectName = LibertyGradleUtil.getProjectName(virtualFile);
@@ -102,7 +102,7 @@ public class LibertyModules {
                 addLibertyModule(new LibertyModule(project, virtualFile, projectName, buildFile.getProjectType(), validContainerVersion));
             }
         }
-        return getInstance();
+        return this;
     }
 
     /**
@@ -112,19 +112,21 @@ public class LibertyModules {
      * @param module LibertyModule
      */
     public LibertyModule addLibertyModule(LibertyModule module) {
-        if (libertyModules.containsKey(module.getBuildFile())) {
-            // Update existing Liberty project, projectType module, name and validContainerVersion
-            // Do not update the build file (key), debugMode, shellWidget or customStartParams since
-            // they may modify saved run configs.
-            LibertyModule existing = libertyModules.get(module.getBuildFile());
-            existing.setProject(module.getProject());
-            existing.setProjectType(module.getProjectType());
-            existing.setName(module.getName());
-            existing.setValidContainerVersion(module.isValidContainerVersion());
-        } else {
-            libertyModules.put(module.getBuildFile(), module);
+        synchronized (libertyModules) {
+            if (libertyModules.containsKey(module.getBuildFile())) {
+                // Update existing Liberty project, projectType module, name and validContainerVersion
+                // Do not update the build file (key), debugMode, shellWidget or customStartParams since
+                // they may modify saved run configs.
+                LibertyModule existing = libertyModules.get(module.getBuildFile());
+                existing.setProject(module.getProject());
+                existing.setProjectType(module.getProjectType());
+                existing.setName(module.getName());
+                existing.setValidContainerVersion(module.isValidContainerVersion());
+            } else {
+                libertyModules.put(module.getBuildFile(), module);
+            }
+            return libertyModules.get(module.getBuildFile());
         }
-        return libertyModules.get(module.getBuildFile());
     }
 
     /**
@@ -194,7 +196,7 @@ public class LibertyModules {
      * @param projectTypes
      * @return Liberty modules with the given project type(s)
      */
-    public List<LibertyModule> getLibertyModules(Project project, List<String> projectTypes) {
+    public List<LibertyModule> getLibertyModules(Project project, List<Constants.ProjectType> projectTypes) {
         ArrayList<LibertyModule> supportedLibertyModules = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {

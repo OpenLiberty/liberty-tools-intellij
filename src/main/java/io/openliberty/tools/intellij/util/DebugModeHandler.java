@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation.
+ * Copyright (c) 2022, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -82,7 +82,7 @@ public class DebugModeHandler {
         // 1. Check if debug port was specified as part of start parameters, if so use that port first
         String configParams = libertyModule.getCustomStartParams();
         Matcher m;
-        if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+        if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
             m = MAVEN_DEBUG_REGEX.matcher(configParams);
         } else {
             m = GRADLE_DEBUG_REGEX.matcher(configParams);
@@ -247,13 +247,10 @@ public class DebugModeHandler {
     private Path getServerEnvPath(LibertyModule libertyModule) throws Exception {
         String projectPath = libertyModule.getBuildFile().getParent().getPath();
         Path basePath = null;
-        if (libertyModule.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+        if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
             basePath = Paths.get(projectPath, "target", "liberty", "wlp", "usr", "servers");
-        } else if (libertyModule.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
-            basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
         } else {
-            throw new Exception(String.format("Unexpected project build type: %s. Liberty module %s does not appear to be a Maven or Gradle built project",
-                    libertyModule.getProjectType(), libertyModule.getName()));
+            basePath = Paths.get(projectPath, "build", "wlp", "usr", "servers");
         }
 
         // Make sure the base path exists. If not return null.
