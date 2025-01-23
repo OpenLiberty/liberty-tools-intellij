@@ -528,16 +528,12 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Trigger the start with parameters configuration dialog.
-        if (getProjectTypeIsMutliple()) {
-            // For multiple projects there is an extra dialog appears to select the projects
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, true);
-            // For running individuals test having search everywhere action usage, it's not necessary to get the dialog, So adding this check will prevent the test from failure
-            if (UIBotTestUtils.checkProjectDialog(remoteRobot, "Liberty project")) {
-                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-            }
-        }
-        else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, false);
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, getProjectTypeIsMutliple());
+        // For multiple projects, an additional dialog appears to select the project.
+        // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
+        // Adding this check will prevent the test from failing.
+        if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
         }
 
         // Run the configuration dialog.
@@ -564,13 +560,9 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Validate that the start with params action brings up the configuration previously used.
         try {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, getProjectTypeIsMutliple());
             if (getProjectTypeIsMutliple()) {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, true);
-                // There is no need of check (checkProjectDialog) here, because test already used SearchEverywhere action in this test
                 UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-            }
-            else {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, false);
             }
             Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
@@ -711,16 +703,12 @@ public abstract class SingleModMPProjectTestCommon {
         deleteTestReports();
 
         // Start dev mode.
-        if (getProjectTypeIsMutliple()) {
-            // For multiple projects there is an extra dialog appears to select the projects
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start", 3, true);
-            // For running individuals test having search everywhere action usage, it's not necessary to get the dialog, So adding this check will prevent the test from failure
-            if (UIBotTestUtils.checkProjectDialog(remoteRobot, "Liberty project")) {
-                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-            }
-        }
-        else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start", 3, false);
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start", 3, getProjectTypeIsMutliple());
+        // For multiple projects, an additional dialog appears to select the project.
+        // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
+        // Adding this check will prevent the test from failing.
+        if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
         }
 
         try {
@@ -728,12 +716,9 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // Run the application's tests.
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests", 3, getProjectTypeIsMutliple());
             if (getProjectTypeIsMutliple()) {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests", 3, true);
-                // There is no need of check (checkProjectDialog) here, because test already used SearchEverywhere action in this test
                 UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-            } else {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests", 3, false);
             }
 
             // Validate that the reports were generated.
@@ -1169,16 +1154,12 @@ public abstract class SingleModMPProjectTestCommon {
         String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
         // Start dev mode in a container.
-        if (getProjectTypeIsMutliple()) {
-            // For multiple projects there is an extra dialog appears to select the projects
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3, true);
-            // For running individuals test having search everywhere action usage, it's not necessary to get the dialog, So adding this check will prevent the test from failure
-            if (UIBotTestUtils.checkProjectDialog(remoteRobot, "Liberty project")) {
-                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-            }
-        }
-        else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3, false);
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3, getProjectTypeIsMutliple());
+        // For multiple projects, an additional dialog appears to select the project.
+        // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
+        // Adding this check will prevent the test from failing.
+        if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
         }
 
         try {
@@ -1187,13 +1168,9 @@ public abstract class SingleModMPProjectTestCommon {
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3, getProjectTypeIsMutliple());
                 if (getProjectTypeIsMutliple()) {
-                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3, true);
-                    // There is no need of check (checkProjectDialog) here, because test already used SearchEverywhere action in this test
                     UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
-                }
-                else {
-                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3, false);
                 }
 
                 // Validate that the server stopped.
@@ -1469,7 +1446,8 @@ public abstract class SingleModMPProjectTestCommon {
 
         // Perform Stop Action
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
-            // For multiple project directory the new tab will be open with project directory, so robot add the cd command to change directory to the project directory
+            // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
+            // Run the tests only in the Maven project, so navigate to the Maven project directory.
             if (getProjectsDirPath().contains("multiple-project")) {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();
@@ -1492,7 +1470,8 @@ public abstract class SingleModMPProjectTestCommon {
         Keyboard keyboard = new Keyboard(remoteRobot);
         // Perform clean
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
-            // For multiple project directory the new tab will be open with project directory, so robot add the cd command to change directory to the project directory.
+            // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
+            // Run the tests only in the Maven project, so navigate to the Maven project directory.
             if (getProjectsDirPath().contains("multiple-project")) {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();
