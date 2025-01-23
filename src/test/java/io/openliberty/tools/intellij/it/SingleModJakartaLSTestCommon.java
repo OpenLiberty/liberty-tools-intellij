@@ -92,7 +92,7 @@ public abstract class SingleModJakartaLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, ItConstants.SYSTEM_RESOURCE_JAVA, snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_JAVA);
+            Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, ItConstants.SYSTEM_RESOURCE_PATH));
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
@@ -110,7 +110,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
         String expectedHoverData = "Only public methods can be exposed as resource methods";
-        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, ItConstants.SYSTEM_RESOURCE_2_PATH));
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, ItConstants.SYSTEM_RESOURCE_2_JAVA);
@@ -145,7 +145,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
-        Path pathToSrc = Paths.get(projectsPath, projectName, ItConstants.SYSTEM_DIR_PATH, ItConstants.SYSTEM_RESOURCE_2_JAVA);
+        Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, ItConstants.SYSTEM_RESOURCE_2_PATH));
         String quickfixChooserString = "Make method public";
 
         // get focus on file tab prior to copy
@@ -199,9 +199,9 @@ public abstract class SingleModJakartaLSTestCommon {
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
-        projTree.expand(projectName, ItConstants.SYSTEM_DIR_PATH);
+        projTree.expand(TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH));
 
-        String[] systemDirPath = TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH_ARR);
+        String[] systemDirPath = TestUtils.combinePath(projectName, ItConstants.SYSTEM_DIR_PATH);
         UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE, systemDirPath);
         UIBotTestUtils.openFile(remoteRobot, projectName, ItConstants.SYSTEM_RESOURCE_2, systemDirPath);
 
