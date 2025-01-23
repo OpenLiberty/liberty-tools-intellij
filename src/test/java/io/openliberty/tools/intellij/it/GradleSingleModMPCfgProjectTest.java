@@ -20,7 +20,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Test Liberty Tools creation of a Run/Debug configuration without a null pointer exception.
+ * Test Liberty Tools creation of a Run/Debug configuration without a null pointer exception
+ * using a single module MicroProfile Gradle project.
  */
 public class GradleSingleModMPCfgProjectTest extends SingleModMPProjectCfgTestCommon {
 
@@ -40,7 +41,7 @@ public class GradleSingleModMPCfgProjectTest extends SingleModMPProjectCfgTestCo
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
-     * The path to the folder containing the test projects, including directories with spaces.
+     * The path to the folder containing the copy of the test project.
      */
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gsample2").toAbsolutePath().toString();
 
