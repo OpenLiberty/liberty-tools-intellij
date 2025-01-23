@@ -22,7 +22,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Maven project.
+ * Test Liberty Tools creation of a Run/Debug configuration without a null pointer exception
+ * using a single module MicroProfile Maven project.
  */
 public class MavenSingleModMPCfgProjectTest extends SingleModMPProjectCfgTestCommon {
 
@@ -37,7 +38,7 @@ public class MavenSingleModMPCfgProjectTest extends SingleModMPProjectCfgTestCom
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
 
     /**
-     * The path to the folder containing the test projects, including directories with spaces.
+     * The path to the folder containing the copy of the test project.
      */
     private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "msample2").toAbsolutePath().toString();
 
