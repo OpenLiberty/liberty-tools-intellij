@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation.
+ * Copyright (c) 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,14 +19,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Gradle project with space in directory and name.
+ * Tests Liberty Tools actions using multiple MicroProfile projects: one is a Gradle project, and the other is a Maven project. The tests are executed in the Maven project.
  */
 public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
 
     /**
-     * Single module Microprofile project name.
+     * Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
+    private static final String MP_PROJECT_NAME = "singleModMavenMP";
 
     private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModMavenMP").toAbsolutePath().toString();
 
@@ -42,14 +42,14 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToITReport34 = Paths.get(MULTIPLE_PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
-    private final Path pathToITReport35 = Paths.get(MULTIPLE_PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "failsafe.html");
+    private final Path pathToITReport34 = Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "target", "site", "failsafe-report.html");
+    private final Path pathToITReport35 = Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "target", "reports", "failsafe.html");
 
     /**
      * The paths to the unit test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
      */
-    private final Path pathToUTReport34 = Paths.get(MULTIPLE_PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "site", "surefire-report.html");
-    private final Path pathToUTReport35 = Paths.get(MULTIPLE_PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
+    private final Path pathToUTReport34 = Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "target", "site", "surefire-report.html");
+    private final Path pathToUTReport35 = Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
 
 
@@ -63,6 +63,7 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
             if (theDir.exists()){
                 TestUtils.deleteDirectory(theDir);
             }
+            // Create a parent directory 'multiple-project' for multiple projects
             theDir.mkdirs();
 
             // Copy the directory to allow renaming.
@@ -70,7 +71,7 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
             TestUtils.copyDirectory(MAVEN_PROJECTS_PATH, MAVEN_MULTIPLE_PROJECTS_PATH);
 
             // Prepare the environment with the new project path and name
-            prepareEnv(MULTIPLE_PROJECTS_PATH_PARENT, SM_MP_PROJECT_NAME, true);
+            prepareEnv(MULTIPLE_PROJECTS_PATH_PARENT, MP_PROJECT_NAME, true);
 
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
@@ -94,8 +95,8 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     MavenMPMultipleProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(MULTIPLE_PROJECTS_PATH);
-        setTestReportPath(Paths.get(MULTIPLE_PROJECTS_PATH, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
-        setSmMPProjectName(SM_MP_PROJECT_NAME);
+        setTestReportPath(Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
+        setSmMPProjectName(MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
