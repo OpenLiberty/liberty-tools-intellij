@@ -265,6 +265,7 @@ public class UIBotTestUtils {
                         treeFixture::isShowing);
 
                 List<RemoteText> rts = treeFixture.findAllText();
+                // Add flag variable to confirm that liberty action is choosing exactly the same under the specified project. Otherwise, robot will click on first appearance Liberty action text.
                 boolean flag = false;
                 for (RemoteText rt : rts) {
                     if (projectName.equals(rt.getText())) {
@@ -1787,7 +1788,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The name of the project to select.
      */
-    public static void selectProjectFromAddLibertyProjectDialog(RemoteRobot remoteRobot, String projectName, String dialogTitle) {
+    public static void selectProjectFromDialog(RemoteRobot remoteRobot, String projectName, String dialogTitle) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
                 DialogFixture.byTitle(dialogTitle),
@@ -1807,25 +1808,25 @@ public class UIBotTestUtils {
     }
 
     public static void selectProjectBuildFilePath(RemoteRobot remoteRobot, String buildFilePath) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
-                DialogFixture.byTitle("Run/Debug Configurations"),
-                Duration.ofSeconds(10));
-
-        Locator locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
-        ComboBoxFixture projBldFileBox = addProjectDialog.comboBox(locator, Duration.ofSeconds(10));
-
-        Keyboard keyboard = new Keyboard(remoteRobot);
-
-        projBldFileBox.click();
-
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_C);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_C);
-        }
         try {
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+            DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
+                    DialogFixture.byTitle("Run/Debug Configurations"),
+                    Duration.ofSeconds(10));
+            Locator locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
+            ComboBoxFixture projBldFileBox = addProjectDialog.comboBox(locator, Duration.ofSeconds(10));
+
+            Keyboard keyboard = new Keyboard(remoteRobot);
+
+            projBldFileBox.click();
+
+            if (remoteRobot.isMac()) {
+                keyboard.hotKey(VK_META, VK_C);
+            } else {
+                // linux + windows
+                keyboard.hotKey(VK_CONTROL, VK_C);
+            }
+
             String copiedValue = (String) Toolkit.getDefaultToolkit()
                     .getSystemClipboard()
                     .getData(DataFlavor.stringFlavor);
@@ -1843,6 +1844,7 @@ public class UIBotTestUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Assertions.fail("Failed to select the exact " + buildFilePath + " : " + e.getMessage());
         }
     }
 
@@ -2585,7 +2587,7 @@ public class UIBotTestUtils {
                 case SEARCH:
                     UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries, false);
                     if (isMultiple) {
-                        UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, smMPProjName, "Liberty project");
+                        UIBotTestUtils.selectProjectFromDialog(remoteRobot, smMPProjName, "Liberty project");
                     }
                     break;
                 default:
