@@ -60,7 +60,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
             StepWorker.registerProcessor(new StepLogger());
             // Copy the directory from PROJECTS_PATH to PROJECTS_PATH_NEW
             TestUtils.copyDirectory(PROJECTS_PATH, PROJECTS_PATH_NEW);
-            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME);
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, false);
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
             e.printStackTrace();
@@ -94,6 +94,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         setBuildFileOpenCommand("Liberty: View pom.xml");
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
+        setProjectTypeIsMultiple(false);
     }
 
     /**

@@ -32,7 +32,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME, false);
     }
 
     GradleSingleModMPProjectTest() {
@@ -48,5 +48,6 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setBuildFileOpenCommand("Liberty: View Gradle config");
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
+        setProjectTypeIsMultiple(false);
     }
 }
