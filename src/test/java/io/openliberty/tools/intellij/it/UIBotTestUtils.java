@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -244,7 +245,7 @@ public class UIBotTestUtils {
      * @param action        The action to run
      * @param usePlayButton The indicator that specifies if play button should be used to run the action or not.
      */
-    public static void runLibertyActionFromLTWDropDownMenu(RemoteRobot remoteRobot, String action, boolean usePlayButton, int maxRetries) {
+    public static void runLibertyActionFromLTWDropDownMenu(RemoteRobot remoteRobot, String action, String projectName, boolean usePlayButton, int maxRetries) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the Liberty toolbar to give it focus.
@@ -264,8 +265,12 @@ public class UIBotTestUtils {
                         treeFixture::isShowing);
 
                 List<RemoteText> rts = treeFixture.findAllText();
+                boolean flag = false;
                 for (RemoteText rt : rts) {
-                    if (action.equals(rt.getText())) {
+                    if (projectName.equals(rt.getText())) {
+                        flag = true;
+                    }
+                    if (action.equals(rt.getText()) && flag) {
                         if (usePlayButton) {
                             rt.click();
                             clickOnLibertyTWToolbarPlayButton(remoteRobot);
@@ -1690,7 +1695,7 @@ public class UIBotTestUtils {
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries) {
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries, boolean isMultiple) {
         // Search everywhere UI actions may fail due to UI flickering/indexing on Windows. Retry in case of a failure.
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
@@ -1727,9 +1732,9 @@ public class UIBotTestUtils {
                         Duration.ofSeconds(1),
                         "Waiting for the search to filter and show " + action + " in search output",
                         "The search did not filter or show " + action + " in the search output",
-                        () -> findTextInListOutputPanel(projectFrame, action) != null);
+                        () -> findTextInListOutputPanel(projectFrame, action, true, 0) != null);
 
-                RemoteText foundAction = findTextInListOutputPanel(projectFrame, action);
+                RemoteText foundAction = findTextInListOutputPanel(projectFrame, action, true, 0);
                 if (foundAction != null) {
                     foundAction.click();
                 } else {
@@ -1737,7 +1742,7 @@ public class UIBotTestUtils {
                 }
 
                 // If the Liberty: Start... action was selected, make sure the Edit Configuration dialog is displayed.
-                if (action.equals("Liberty: Start...")) {
+                if (action.equals("Liberty: Start...") && !isMultiple) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));
                 }
@@ -1782,24 +1787,85 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The name of the project to select.
      */
-    public static void selectProjectFromAddLibertyProjectDialog(RemoteRobot remoteRobot, String projectName) {
+    public static void selectProjectFromAddLibertyProjectDialog(RemoteRobot remoteRobot, String projectName, String dialogTitle, boolean isMultiple) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
-                DialogFixture.byTitle("Add Liberty project"),
+                DialogFixture.byTitle(dialogTitle),
                 Duration.ofSeconds(10));
         JButtonFixture jbf = addProjectDialog.getBasicArrowButton();
         jbf.click();
 
-        RemoteText remoteProject = findTextInListOutputPanel(addProjectDialog, projectName);
+        RemoteText remoteProject = findTextInListOutputPanel(addProjectDialog, projectName, false, 0);
         if (remoteProject != null) {
             remoteProject.click();
         } else {
-            fail("Unable to find " + projectName + " in the output list of the Add Liberty project dialog.");
+            fail("Unable to find " + projectName + " in the output list of the " + dialogTitle + " dialog.");
         }
 
         JButtonFixture okButton = addProjectDialog.getButton("OK");
         okButton.click();
     }
+
+    public static void selectProjectFromAddLibertyProjectDialogNew(RemoteRobot remoteRobot, String buildFilePath) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+        DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
+                DialogFixture.byTitle("Run/Debug Configurations"),
+                Duration.ofSeconds(10));
+
+        Locator locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
+        ComboBoxFixture projBldFileBox = addProjectDialog.comboBox(locator, Duration.ofSeconds(10));
+
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        projBldFileBox.click();
+
+        if (remoteRobot.isMac()) {
+            keyboard.hotKey(VK_META, VK_C);
+        } else {
+            // linux + windows
+            keyboard.hotKey(VK_CONTROL, VK_C);
+        }
+        try {
+            String copiedValue = (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .getData(DataFlavor.stringFlavor);
+            System.out.println("Copied Value: " + copiedValue);
+            if (!(copiedValue.equals(buildFilePath))) {
+                System.out.println("-----Inside If loop------");
+
+                List<JListFixture> searchLists = addProjectDialog.jLists(JListFixture.Companion.byType());
+                if (!searchLists.isEmpty()) {
+
+                    System.out.println("-----Iiiiiiiii If loop------");
+                    JListFixture searchList = searchLists.get(1);
+                    System.out.println("searchList: " + searchList);
+                    try {
+                        List<RemoteText> entries = searchList.findAllText();
+                        entries.get(1).click();
+                        System.out.println("Entries: " + entries);
+                    } catch (NoSuchElementException nsee) {
+                        // The list is empty.
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean checkProjectDialog(RemoteRobot remoteRobot, String dialogTitle) {
+        try {
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+            DialogFixture addProject = projectFrame.find(DialogFixture.class,
+                    DialogFixture.byTitle(dialogTitle),
+                    Duration.ofSeconds(10));
+            return addProject.isShowing();
+        } catch (Exception e) {
+            // Log the exception if needed, but return false to indicate the dialog was not found
+            return false;
+        }
+    }
+
 
     /**
      * Selects the specified project from the list of detected projects shown in the 'Remove Liberty project'
@@ -1815,7 +1881,7 @@ public class UIBotTestUtils {
                 Duration.ofSeconds(10));
         removeProjectDialog.getBasicArrowButton().click();
 
-        RemoteText remoteProject = findTextInListOutputPanel(removeProjectDialog, projectName);
+        RemoteText remoteProject = findTextInListOutputPanel(removeProjectDialog, projectName, true, 0);
         if (remoteProject != null) {
             remoteProject.click();
         } else {
@@ -1980,7 +2046,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param cfgName     The name of the new configuration.
      */
-    public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName) {
+    public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName, boolean isMultiple, String buildFilePath) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         String editConfigurationAction= null;
         if (remoteRobot.isMac()) {
@@ -2061,6 +2127,10 @@ public class UIBotTestUtils {
                     "The name of the config did not appear in the text box ",
                     () -> newNameTextField.getText().equals(cfgName));
 
+            if (isMultiple) {
+                UIBotTestUtils.selectProjectFromAddLibertyProjectDialogNew(remoteRobot, buildFilePath);
+            }
+
             // Save the new configuration by clicking on the Apply button.
             JButtonFixture applyButton = addProjectDialog.getButton("Apply");
             RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
@@ -2090,9 +2160,9 @@ public class UIBotTestUtils {
      * @param cfgName     The name of the new configuration.
      * @param startParams The dev mode start parameters.
      */
-    public static void editLibertyConfigUsingEditConfigDialog(RemoteRobot remoteRobot, String cfgName, String startParams) {
+    public static void editLibertyConfigUsingEditConfigDialog(RemoteRobot remoteRobot, String projectName, String cfgName, String startParams) {
         // Display the Liberty Edit Configuration dialog.
-        runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
+        runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", projectName, false, 3);
 
         // Get a hold of the Liberty Edit Configurations dialog.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -2475,18 +2545,57 @@ public class UIBotTestUtils {
      * @return The RemoteText object representing the text found in the list panel, or
      * null if the text was not found.
      */
-    public static RemoteText findTextInListOutputPanel(CommonContainerFixture fixture, String text) {
+    public static RemoteText findTextInListOutputPanel(CommonContainerFixture fixture, String text, boolean exactMatch, int index) {
         RemoteText foundText = null;
 
         List<JListFixture> searchLists = fixture.jLists(JListFixture.Companion.byType());
         if (!searchLists.isEmpty()) {
-            JListFixture searchList = searchLists.get(0);
+            JListFixture searchList = searchLists.get(index);
             try {
                 List<RemoteText> entries = searchList.findAllText();
                 for (RemoteText entry : entries) {
-                    if (entry.getText().equals(text)) {
+                    if ((exactMatch && entry.getText().equals(text)) || (!exactMatch && entry.getText().contains(text))) {
                         foundText = entry;
                     }
+                }
+            } catch (NoSuchElementException nsee) {
+                // The list is empty.
+                return null;
+            }
+        }
+
+        return foundText;
+    }
+
+    public static RemoteText findTextInListOutputPanelNew(
+            CommonContainerFixture fixture, String text, boolean exactMatch) {
+        RemoteText foundText = null;
+        System.out.println("//////// "+text +" /////////");
+
+        List<JListFixture> searchLists = fixture.jLists(JListFixture.Companion.byType());
+        if (!searchLists.isEmpty()) {
+            JListFixture searchList = searchLists.get(1);
+            try {
+                List<RemoteText> entries = searchList.findAllText();
+                System.out.println("////////// "+ entries +"//////////");
+//                searchList.find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']//div[@class='DocumentationHintEditorPane']" ));
+                ContainerFixture component= searchList.getRemoteRobot().find(ContainerFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
+                System.out.println(component.hasText("Documents"));
+//                System.out.println(component.findText("singleModMavenMP"));
+//                List<RemoteText> entries1 = component.findAllText("singleModMavenMP");
+//                String value= entries1.get(0).getText();
+//                System.out.println(value);
+//                boolean valuee= entries1.get(0).getText().contains("Documents");
+//                System.out.println(valuee);
+                for (RemoteText entry : entries) {
+                    boolean valueee= entry.getText().contains("Documents");
+                    System.out.println(valueee);
+                    System.out.println(entry.getText().contains("Documents"));
+                    if ((exactMatch && entry.getText().equals(text)) || (!exactMatch && entry.getText().contains(text))) {
+                        foundText = entry;
+                        System.out.println("//////// Inside if exact match /////////");
+                    }
+                    System.out.println("//////// "+entry.getText() +" /////////");
                 }
             } catch (NoSuchElementException nsee) {
                 // The list is empty.
@@ -2505,22 +2614,25 @@ public class UIBotTestUtils {
      * @param absoluteWLPPath The absolute path of the Liberty installation.
      * @param maxRetries      The maximum amount of attempts to try to stop the server.
      */
-    public static void runStopAction(RemoteRobot remoteRobot, String testName, ActionExecType execType, String absoluteWLPPath, String smMPProjName, int maxRetries) {
+    public static void runStopAction(RemoteRobot remoteRobot, String testName, ActionExecType execType, String absoluteWLPPath, String smMPProjName, int maxRetries, boolean isMultiple) {
         for (int i = 0; i < maxRetries; i++) {
             // Stop dev mode. Any failures during command processing are retried. If there are any
             // failures, this method will exit.
             switch (execType) {
                 case LTWPLAY:
-                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, maxRetries);
+                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", smMPProjName, true, maxRetries);
                     break;
                 case LTWDROPDOWN:
-                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false, maxRetries);
+                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", smMPProjName, false, maxRetries);
                     break;
                 case LTWPOPUP:
                     UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, smMPProjName, "Liberty: Stop", maxRetries);
                     break;
                 case SEARCH:
-                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries);
+                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries, false);
+                    if (isMultiple) {
+                        UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, smMPProjName, "Liberty project", true);
+                    }
                     break;
                 default:
                     fail("An invalid execution type of " + execType + " was requested.");
@@ -2700,7 +2812,7 @@ public class UIBotTestUtils {
                 UIBotTestUtils.closeAllEditorTabs(remoteRobot);
             }
             else {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3, false);
             }
             UIBotTestUtils.closeProjectView(remoteRobot);
             UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -2838,5 +2950,21 @@ public class UIBotTestUtils {
 
         return menuAction2;
     }
+
+    public static void clickOnLoad(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        try {
+            // Clicking on the left toolbar ensures that the Main Menu button is active.
+            String xPath = "//div[@accessiblename='Load all' and @class='JButton']";
+            ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+            actionButton.click();
+            TestUtils.sleepAndIgnoreException(5);
+
+        } catch (WaitForConditionTimeoutException e) {
+            // Main Menu button is not clicked, nothing to do
+        }
+    }
+
 
 }
