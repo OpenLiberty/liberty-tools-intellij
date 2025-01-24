@@ -56,10 +56,15 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
+        // Liberty Explorer (dashboard) Start action and Start... action comes through here
         String start = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
         String startInContainer = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
-        startCmd = libertyModule.runInContainer() ? startInContainer : start;
-        startCmd += libertyModule.getCustomStartParams();
+        if (libertyModule.isCustom()) {
+            startCmd = libertyModule.runInContainer() ? startInContainer : start;
+            startCmd += libertyModule.getCustomStartParams();
+        } else {
+            startCmd = start;
+        }
         if (libertyModule.isDebugMode()) {
             try {
                 String debugParam = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? Constants.LIBERTY_MAVEN_DEBUG_PARAM : Constants.LIBERTY_GRADLE_DEBUG_PARAM;
@@ -81,6 +86,8 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
+        // Reset this flag in the case that we got here via the custom start action
+        libertyModule.setUseCustom(false);
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {

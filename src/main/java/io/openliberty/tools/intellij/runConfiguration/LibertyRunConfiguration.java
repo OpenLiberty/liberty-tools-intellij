@@ -107,7 +107,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     }
 
     /**
-     * Runs when users select "Run" or "Debug" on a Liberty  run configuration
+     * Runs when users select "Run" or "Debug" on a Liberty run configuration
      *
      * @param executor    the execution mode selected by the user (run, debug, profile etc.)
      * @param environment the environment object containing additional settings for executing the configuration.
@@ -126,14 +126,6 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         }
         // run the start dev mode action
         AnAction action = ActionManager.getInstance().getAction(runInContainer() ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
-
-        // set custom start params
-        if (getParams() != null) {
-            libertyModule.setCustomStartParams(getParams());
-        } else {
-            libertyModule.setCustomStartParams("");
-        }
-        libertyModule.setRunInContainer(runInContainer());
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);

@@ -43,13 +43,17 @@ public class LibertyDevStartContainerAction extends LibertyGeneralAction {
             } else {
                 startCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
             }
-            startCmd += libertyModule.getCustomStartParams();
+            if (libertyModule.isCustom()) {
+                startCmd += libertyModule.getCustomStartParams();
+            }
         } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd
             LOGGER.warn(ex.getMessage()); // Logger.error creates an entry on "IDE Internal Errors", which we do not want
             notifyError(ex.getTranslatedMessage(), project);
             return;
         }
+        // Reset this flag in the case that we got here via the custom start action
+        libertyModule.setUseCustom(false);
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,6 +25,7 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Opens the Liberty run config view for the corresponding Liberty module. Creates a new Liberty run config if one does not exist.
@@ -58,20 +59,36 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
                 libertyModuleSettings.add(setting);
             }
         });
-        RunnerAndConfigurationSettings selectedLibertyConfig;
-        if (libertyModuleSettings.isEmpty()) {
+        // If the run config selected in the IntelliJ Run / Debug Configurations combobox is for the Liberty
+        // module corresponding to this run action then use it. Otherwise, if the module was started previously
+        // with this custom start action then use the same run configuration. If there is no associated run
+        // configuration then create a dialog to create a new one.
+        RunnerAndConfigurationSettings selectedLibertyConfig = null;
+        RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
+        if (libertyModuleSettings.contains(selectedConfig)) {
+            // if the selected config is for the Liberty module, use that run config
+            selectedLibertyConfig = selectedConfig;
+            if (selectedLibertyConfig.getConfiguration() instanceof LibertyRunConfiguration newConfig) {
+                // set the custom config in case this is the first time since start up
+                libertyModule.setCustomRunConfig(newConfig);
+                libertyModule.setUseCustom(true);
+            }
+        } else if (libertyModule.getCustomRunConfig() != null) {
+            // if the custom run config is set then we expect to find it in the settings retrieved from RunManager
+            LibertyRunConfiguration customLibertyRunConfig = libertyModule.getCustomRunConfig();
+            Optional<RunnerAndConfigurationSettings> found =
+                libertyModuleSettings.stream().filter(c -> c.getConfiguration().equals(customLibertyRunConfig)).findFirst();
+            if (found.isPresent()) {
+                selectedLibertyConfig = found.get();
+                libertyModule.setUseCustom(true);
+            }
+        }
+        if (selectedLibertyConfig == null) {
             // create new run config
             selectedLibertyConfig = createNewLibertyRunConfig(runManager, libertyModule);
-        } else {
-            // TODO if 1+ run configs, prompt user to select the one they want see https://github.com/OpenLiberty/liberty-tools-intellij/issues/167
-            // 1+ run configs found for the given project
-            RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
-            if (libertyModuleSettings.contains(selectedConfig)) {
-                // if the selected config is for the Liberty module, use that run config
-                selectedLibertyConfig = selectedConfig;
-            } else {
-                // pick first in list run config in list
-                selectedLibertyConfig = libertyModuleSettings.get(0);
+            if (selectedLibertyConfig.getConfiguration() instanceof LibertyRunConfiguration newConfig) {
+                libertyModule.setCustomRunConfig(newConfig);
+                libertyModule.setUseCustom(true);
             }
         }
         // opens run config dialog

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation.
+ * Copyright (c) 2022, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -28,25 +28,23 @@ public class LibertyRunManagerListener implements RunManagerListener {
     protected static Logger LOGGER = Logger.getInstance(LibertyRunManagerListener.class);
 
     /**
-     * When a Liberty run configuration is removed, clear custom start parameters and run in container
+     * When a Liberty run configuration is removed, clear custom run configuration
      * from Liberty module
      *
-     * @param settings
+     * @param settings an IntelliJ run/debug configuration
      */
     @Override
     public void runConfigurationRemoved(@NotNull RunnerAndConfigurationSettings settings) {
-        if (settings.getConfiguration() instanceof LibertyRunConfiguration) {
-            LibertyRunConfiguration runConfig = (LibertyRunConfiguration) settings.getConfiguration();
+        if (settings.getConfiguration() instanceof LibertyRunConfiguration runConfig) {
             LibertyModules libertyModules = LibertyModules.getInstance();
             try {
                 VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
                 LibertyModule libertyModule = libertyModules.getLibertyModule(vBuildFile);
-                if (libertyModule != null && libertyModule.getCustomStartParams().equals(runConfig.getParams())) {
-                        libertyModule.setRunInContainer(false); // clear the run in container setting for the Liberty module.
-                        libertyModule.setCustomStartParams(""); // clear the custom params
+                if (libertyModule != null && libertyModule.getCustomRunConfig().equals(runConfig)) {
+                    libertyModule.setCustomRunConfig(null);
                 }
             } catch (Exception e) {
-                LOGGER.warn(String.format("Unable to clear custom start parameters for Liberty run configuration associated with: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
+                LOGGER.warn(String.format("Unable to clear custom run configuration for Liberty module: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
             }
 
         }
