@@ -17,7 +17,6 @@ import com.intellij.remoterobot.search.locators.Locators;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.intellij.remoterobot.utils.RepeatUtilsKt;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
-import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import io.openliberty.tools.intellij.it.fixtures.DialogFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import io.openliberty.tools.intellij.it.fixtures.WelcomeFrameFixture;
@@ -43,6 +42,7 @@ import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicates
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static java.awt.event.KeyEvent.*;
 import static org.junit.jupiter.api.Assertions.fail;
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
 
 /**
  * UI helper function.
@@ -762,7 +762,7 @@ public class UIBotTestUtils {
      */
     public static void closeAllEditorTabs(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        projectFrame.clickOnMainMenuWithActions(remoteRobot, "Window", "Editor Tabs", ItConstants.CLOSE_ALL_TABS);
+        projectFrame.clickOnMainMenuWithActions(remoteRobot, "Window", "Editor Tabs", CLOSE_ALL_TABS);
     }
 
     /**
@@ -830,7 +830,7 @@ public class UIBotTestUtils {
                 // Find the target text on the editor and move the move to it.
                 editorNew.findText(contains(hoverTarget)).moveMouse();
                 // clear and "lightbulb" icons?
-                if (!hoverFile.equals(ItConstants.SERVER_XML)) {
+                if (!hoverFile.equals(SERVER_XML)) {
                     keyboard.hotKey(VK_ESCAPE);
                 }
 
@@ -1208,7 +1208,7 @@ public class UIBotTestUtils {
     public static void insertStanzaInAppServerXML(RemoteRobot remoteRobot, String stanzaSnippet, int line, int col, InsertionType type, boolean completeWithPopup) {
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-        clickOnFileTab(remoteRobot, ItConstants.SERVER_XML);
+        clickOnFileTab(remoteRobot, SERVER_XML);
         Locator locator = byXpath("//div[@class='EditorCompositePanel']//div[@class='EditorComponentImpl']");
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         editorNew.click();
@@ -1748,7 +1748,7 @@ public class UIBotTestUtils {
          * If we are not specify a condition check for "Close All Tabs" action when no file tabs are open, the runActionFromSearchEverywherePanel method
          * will throw a RuntimeException, causing the test to fail.
          */
-        if (error != null && !action.equals(ItConstants.CLOSE_ALL_TABS)) {
+        if (error != null && !action.equals(CLOSE_ALL_TABS)) {
             throw new RuntimeException("Failed to run the " + action + " action using the search everywhere option", error);
         }
     }
@@ -2678,7 +2678,7 @@ public class UIBotTestUtils {
                 UIBotTestUtils.closeAllEditorTabs(remoteRobot);
             }
             else {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.CLOSE_ALL_TABS, 3);
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, CLOSE_ALL_TABS, 3);
             }
             UIBotTestUtils.closeProjectView(remoteRobot);
             UIBotTestUtils.closeProjectFrame(remoteRobot);

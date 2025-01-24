@@ -13,7 +13,6 @@ import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.utils.Keyboard;
-import io.openliberty.tools.intellij.it.Utils.ItConstants;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -28,6 +27,7 @@ import java.time.Duration;
 import java.util.Map;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 /**
@@ -295,8 +295,8 @@ public abstract class SingleModMPProjectTestCommon {
      */
     protected static void closeProjectView() {
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.CLOSE_ALL_TABS, 3);
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.COMPACT_MODE, 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, CLOSE_ALL_TABS, 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, COMPACT_MODE, 3);
         }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
@@ -1140,7 +1140,7 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.COMPACT_MODE, 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, COMPACT_MODE, 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
@@ -1158,7 +1158,7 @@ public abstract class SingleModMPProjectTestCommon {
             UIBotTestUtils.closeAllEditorTabs(remoteRobot);
         }
         else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, ItConstants.CLOSE_ALL_TABS, 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, CLOSE_ALL_TABS, 3);
         }
 
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
