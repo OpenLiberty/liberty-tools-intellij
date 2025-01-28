@@ -326,7 +326,7 @@ In order to limit the **OS** to run the builds against the **LTI** Tag, the **LT
 
 ![specify LTI tag to limit os](images/specify-LTI-tag-to-limit-os.png)
 
-There is no need to update the code each time. That means, If we remove `24.0.9` from the **LTI** tags in the **cronJob.yaml** file, there is no need to modify anything in the **build.yaml** file. The variable `excludeLTITag` will calculate its value and will return `false` always since it not there in **LTI** tag. This ensures it works as expected for both **normal** and **cron job** builds.
+There is no need to update the code each time. That means, If we remove `24.0.9` from the **LTI** tags in the **cronJob.yaml** file, there is no need to modify anything in the **build.yaml** file. The variable `excludeLTITag` will calculate its value and will return `false` always since it is not there in **LTI** tag. This ensures it works as expected for both **normal** and **cron job** builds.
 In the future, if there is a need to limit the LTI tag `24.0.12` to Linux only, the only change required in the **build.yaml** file is to update `24.0.9` to `24.0.12`.
 For cases where the **LTI** tag `24.0.12` should be limited to **macOS** only, the exclude section can be updated as follows:
 ```java
