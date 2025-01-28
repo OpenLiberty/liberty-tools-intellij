@@ -148,7 +148,7 @@ dependencies {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
         bundledPlugins providers.gradleProperty("platformBundledPlugins").orElse("").get().split(',').toList()
 
-        def lsp4ij = providers.gradleProperty('useLocal') && providers.gradleProperty('useLocal') == 'true' ?
+        def lsp4ij = providers.gradleProperty("useLocal").get() == 'true' ?
                 file("../lsp4ij/build/distributions/LSP4IJ/") :
                 'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
         plugins lsp4ij
