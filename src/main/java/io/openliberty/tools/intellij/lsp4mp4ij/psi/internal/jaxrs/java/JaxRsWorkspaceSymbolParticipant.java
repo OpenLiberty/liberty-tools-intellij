@@ -22,7 +22,11 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsMethodInfo;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.SymbolKind;
+import org.eclipse.lsp4j.WorkspaceSymbol;
+import org.eclipse.lsp4j.WorkspaceSymbolLocation;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.net.MalformedURLException;
