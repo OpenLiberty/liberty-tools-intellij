@@ -149,7 +149,7 @@ dependencies {
         bundledPlugins providers.gradleProperty("platformBundledPlugins").orElse("").get().split(',').toList()
 
         def lsp4ijZip = file("../lsp4ij/build/distributions").listFiles()?.findAll { it.name.endsWith(".zip") }?.first()
-        providers.gradleProperty("useLocal").get() == 'true' && lsp4ijZip ?
+        providers.gradleProperty("useLocal").get() == 'true' ?
                 localPlugin(lsp4ijZip.absolutePath) :
                 plugin('com.redhat.devtools.lsp4ij', lsp4ijVersion)
 
