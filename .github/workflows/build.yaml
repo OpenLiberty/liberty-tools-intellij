@@ -141,11 +141,6 @@ jobs:
         if: ${{ inputs.useLocalPlugin == true }}
         working-directory: ./lsp4ij
         run: bash ./gradlew buildPlugin
-      - name: 'Unzip lsp4ij file'
-        if: ${{ inputs.useLocalPlugin == true }}
-        working-directory: ./lsp4ij/build/distributions
-        run: |
-          unzip -o '*.zip' -d .
 
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
