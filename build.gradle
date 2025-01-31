@@ -144,10 +144,14 @@ dependencies {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
         bundledPlugins providers.gradleProperty("platformBundledPlugins").orElse("").get().split(',').toList()
 
-        def lsp4ij = providers.gradleProperty('useLocal') && providers.gradleProperty('useLocal') == 'true' ?
-                file("../lsp4ij/build/distributions/LSP4IJ/") :
-                'com.redhat.devtools.lsp4ij:' + lsp4ijVersion
-        plugins lsp4ij
+        // Locate the LSP4IJ ZIP file in the distributions directory
+        def lsp4ijZip = file("../lsp4ij/build/distributions").listFiles()?.findAll { it.name.endsWith(".zip") }?.first()
+
+        // If the 'useLocal' Gradle property is set to 'true', use the locally built LSP4IJ plugin;
+        // otherwise, use the specified version in the build.gradle file.
+        providers.gradleProperty("useLocal").get() == 'true' ?
+                localPlugin(lsp4ijZip.absolutePath) :
+                plugin('com.redhat.devtools.lsp4ij', lsp4ijVersion)
         pluginVerifier()
         zipSigner()
         instrumentationTools()
