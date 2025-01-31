@@ -22,6 +22,7 @@ import java.time.Duration;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 import static org.junit.jupiter.api.Assertions.fail;
 import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+import static io.openliberty.tools.intellij.it.TestUtils.*;
 
 /**
  * Holds common tests that use a single module non Liberty Tools compliant REST project.
@@ -196,7 +197,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
 
         // Copy a valid server.xml file to this project's src/main/liberty/config directory.
         Path validServerXml = Paths.get(getHelperFilesDirPath(), SERVER_XML);
-        Path destination = Paths.get(getProjectsDirPath(), TestUtils.combinePath(getSmNLTRestProjectName(), SERVER_XML_PATH));
+        Path destination = Paths.get(getProjectsDirPath(), combinePath(getSmNLTRestProjectName(), buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
 
         try {
             Files.copy(validServerXml, destination, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);

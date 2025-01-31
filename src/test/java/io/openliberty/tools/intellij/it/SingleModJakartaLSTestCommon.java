@@ -21,6 +21,7 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+import static io.openliberty.tools.intellij.it.TestUtils.*;
 
 public abstract class SingleModJakartaLSTestCommon {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
@@ -92,7 +93,7 @@ public abstract class SingleModJakartaLSTestCommon {
         // Insert a code snippet into java part
         try {
             UIBotTestUtils.insertCodeSnippetIntoSourceFile(remoteRobot, SYSTEM_RESOURCE_JAVA, snippetStr, snippetChooser);
-            Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, SYSTEM_RESOURCE_PATH));
+            Path pathToSrc = Paths.get(projectsPath, combinePath(projectName, buildPathArray(SYSTEM_DIR_PATH, SYSTEM_RESOURCE_JAVA)));
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), insertedCode);
         }
         finally {
@@ -110,7 +111,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
         String expectedHoverData = "Only public methods can be exposed as resource methods";
-        Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, SYSTEM_RESOURCE_2_PATH));
+        Path pathToSrc = Paths.get(projectsPath, combinePath(projectName, buildPathArray(SYSTEM_DIR_PATH, SYSTEM_RESOURCE_2_JAVA)));
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, SYSTEM_RESOURCE_2_JAVA);
@@ -145,7 +146,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
-        Path pathToSrc = Paths.get(projectsPath, TestUtils.combinePath(projectName, SYSTEM_RESOURCE_2_PATH));
+        Path pathToSrc = Paths.get(projectsPath, combinePath(projectName, buildPathArray(SYSTEM_DIR_PATH, SYSTEM_RESOURCE_2_JAVA)));
         String quickfixChooserString = "Make method public";
 
         // get focus on file tab prior to copy
@@ -199,9 +200,9 @@ public abstract class SingleModJakartaLSTestCommon {
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
-        projTree.expand(TestUtils.combinePath(projectName, SYSTEM_DIR_PATH));
+        projTree.expand(combinePath(projectName, SYSTEM_DIR_PATH_FOR_EXPAND));
 
-        String[] systemDirPath = TestUtils.combinePath(projectName, SYSTEM_DIR_PATH);
+        String[] systemDirPath = combinePath(projectName, SYSTEM_DIR_PATH_FOR_EXPAND);
         UIBotTestUtils.openFile(remoteRobot, projectName, SYSTEM_RESOURCE, systemDirPath);
         UIBotTestUtils.openFile(remoteRobot, projectName, SYSTEM_RESOURCE_2, systemDirPath);
 

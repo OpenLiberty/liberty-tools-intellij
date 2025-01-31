@@ -60,7 +60,7 @@ public class TestUtils {
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnNoStop) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
         Exception error = null;
@@ -168,7 +168,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -274,7 +274,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStopped: Timed out while waiting for project under URL: " + projUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, MESSAGES_LOG_PATH).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -516,7 +516,7 @@ public class TestUtils {
      */
     public static boolean isServerStopNeeded(String wlpInstallPath) {
         boolean stopServer = false;
-        Path msgLogPath = Paths.get(wlpInstallPath, MESSAGES_LOG_PATH);
+        Path msgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG));
         if (fileExists(msgLogPath)) {
             try {
                 // The file maybe an old log. For now, check for the message indicating
@@ -541,7 +541,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, DEFAULT_SERVER_ENV_PATH);
+        Path serverEnvPath = Paths.get(absoluteWLPPath, buildPathArray(DEFAULT_SERVER_PATH, SERVER_ENV));
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
@@ -604,11 +604,23 @@ public class TestUtils {
      * Combines the project name with a given array of paths.
      *
      * @param projectName the name of the project to prepend
-     * @param pathArray an array of paths to append to the project name
+     * @param pathArray   an array of paths to append to the project name
      * @return a new array with the project name as the first element followed by the original paths
      */
     public static String[] combinePath(String projectName, String[] pathArray) {
         return Stream.concat(Stream.of(projectName), Arrays.stream(pathArray))
+                .toArray(String[]::new);
+    }
+
+    /**
+     * Builds a new array by appending a file name to an existing path array.
+     *
+     * @param path     An array of path segments.
+     * @param fileName The file name to append.
+     * @return A new array containing all elements of `path` followed by `fileName`.
+     */
+    public static String[] buildPathArray(String[] path, String fileName) {
+        return Stream.concat(Stream.of(path), Stream.of(fileName))
                 .toArray(String[]::new);
     }
 }

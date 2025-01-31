@@ -26,6 +26,7 @@ import static java.awt.event.KeyEvent.VK_SPACE;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+import static io.openliberty.tools.intellij.it.TestUtils.*;
 
 public abstract class SingleModLibertyLSTestCommon {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
@@ -131,7 +132,7 @@ public abstract class SingleModLibertyLSTestCommon {
         // Insert a new element in server.xml.
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 18, 40, UIBotTestUtils.InsertionType.FEATURE, true);
-            Path pathToServerXML = Paths.get(projectsPath, TestUtils.combinePath(projectName, SERVER_XML_PATH));
+            Path pathToServerXML = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedFeature);
         } finally {
             // Replace server.xml content with the original content
@@ -159,7 +160,7 @@ public abstract class SingleModLibertyLSTestCommon {
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, true);
             TestUtils.sleepAndIgnoreException(2); // wait for editor to update
-            Path pathToServerXML = Paths.get(projectsPath, TestUtils.combinePath(projectName, SERVER_XML_PATH));
+            Path pathToServerXML = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), insertedConfig);
         } finally {
             // Replace server.xml content with the original content
@@ -188,7 +189,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, SERVER_ENV, envCfgSnippet, envCfgNameChooserSnippet, envCfgValueSnippet, true);
-            Path pathToServerEnv = Paths.get(projectsPath, TestUtils.combinePath(projectName, SERVER_ENV_PATH));
+            Path pathToServerEnv = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_ENV)));
             TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
             // Replace server.xml content with the original content
@@ -273,7 +274,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         try {
             UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, BOOTSTRAP_PROPERTIES, configNameSnippet, configNameChooserSnippet, configValueSnippet, true);
-            Path pathToBootstrapProps = Paths.get(projectsPath, TestUtils.combinePath(projectName, BOOTSTRAP_PROPERTIES_PATH));
+            Path pathToBootstrapProps = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, BOOTSTRAP_PROPERTIES)));
             TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
             // Replace server.xml content with the original content
@@ -406,7 +407,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, TestUtils.combinePath(projectName, SERVER_XML_PATH));
+        pathToServerXML = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, SERVER_XML);
@@ -442,7 +443,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "cvc-datatype-valid.1.2.3: 'wrong' is not a valid value of union type 'booleanType'.";
 
         Path pathToServerXML = null;
-        pathToServerXML = Paths.get(projectsPath, TestUtils.combinePath(projectName, SERVER_XML_PATH));
+        pathToServerXML = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
 
         // get focus on server.xml tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, SERVER_XML);
@@ -592,9 +593,9 @@ public abstract class SingleModLibertyLSTestCommon {
         // get a JTreeFixture reference to the file project viewer entry
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
-        projTree.expand(TestUtils.combinePath(projectName, CONFIG_DIR_PATH));
+        projTree.expand(combinePath(projectName, CONFIG_DIR_PATH));
 
-        String[] configDirPath = TestUtils.combinePath(projectName, CONFIG_DIR_PATH);
+        String[] configDirPath = combinePath(projectName, CONFIG_DIR_PATH);
 
         // open server.xml file
         UIBotTestUtils.openFile(remoteRobot, projectName, SERVER_XML, configDirPath);
