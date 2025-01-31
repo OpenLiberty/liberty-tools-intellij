@@ -15,46 +15,20 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
-public class LibertyDevStartContainerAction extends LibertyGeneralAction {
+public class LibertyDevStartContainerAction extends LibertyDevStartAction {
 
     /**
      * Returns the name of the action command being processed.
      *
      * @return The name of the action command being processed.
      */
+    @Override
     protected String getActionCommandName() {
         return LocalizedResourceUtil.getMessage("start.liberty.dev.container");
     }
 
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
-        Project project = libertyModule.getProject();
-        VirtualFile buildFile = libertyModule.getBuildFile();
-        ShellTerminalWidget widget = getTerminalWidgetWithFocus(true, project, buildFile, getActionCommandName());
-        if (widget == null) {
-            return;
-        }
-
-        Constants.ProjectType projectType = libertyModule.getProjectType();
-        String startCmd;
-        try {
-            if(projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
-                startCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile) + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD;
-            } else {
-                startCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile) + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
-            }
-            if (libertyModule.isCustom()) {
-                startCmd += libertyModule.getCustomStartParams();
-            }
-        } catch (LibertyException ex) {
-            // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd
-            LOGGER.warn(ex.getMessage()); // Logger.error creates an entry on "IDE Internal Errors", which we do not want
-            notifyError(ex.getTranslatedMessage(), project);
-            return;
-        }
-        // Reset this flag in the case that we got here via the custom start action
-        libertyModule.setUseCustom(false);
-        String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
-        LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
+        runInTerminal(libertyModule, true);
     }
 }

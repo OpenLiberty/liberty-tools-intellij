@@ -23,9 +23,7 @@ import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationTyp
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Opens the Liberty run config view for the corresponding Liberty module. Creates a new Liberty run config if one does not exist.
@@ -44,56 +42,50 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
-        VirtualFile buildFile = libertyModule.getBuildFile();
 
-        // open run config
+        // determine which run config is selected in the UI
         RunManager runManager = RunManager.getInstance(project);
         List<RunnerAndConfigurationSettings> libertySettings = runManager.getConfigurationSettingsList(LibertyRunConfigurationType.getInstance());
-        List<RunnerAndConfigurationSettings> libertyModuleSettings = new ArrayList<>();
+        Map<LibertyRunConfiguration, RunnerAndConfigurationSettings> libertyModuleSettings = new HashMap<>();
 
         libertySettings.forEach(setting -> {
-            // find all Liberty run configs associated with this build file
+            // find all Liberty run configs associated with this liberty module
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
             VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
             if (vBuildFile != null && vBuildFile.equals(libertyModule.getBuildFile())) {
-                libertyModuleSettings.add(setting);
+                libertyModuleSettings.put(runConfig, setting);
             }
         });
-        // If the run config selected in the IntelliJ Run / Debug Configurations combobox is for the Liberty
-        // module corresponding to this run action then use it. Otherwise, if the module was started previously
-        // with this custom start action then use the same run configuration. If there is no associated run
-        // configuration then create a dialog to create a new one.
-        RunnerAndConfigurationSettings selectedLibertyConfig = null;
-        RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
-        if (libertyModuleSettings.contains(selectedConfig)) {
-            // if the selected config is for the Liberty module, use that run config
-            selectedLibertyConfig = selectedConfig;
-            if (selectedLibertyConfig.getConfiguration() instanceof LibertyRunConfiguration newConfig) {
-                // set the custom config in case this is the first time since start up
-                libertyModule.setCustomRunConfig(newConfig);
-                libertyModule.setUseCustom(true);
-            }
-        } else if (libertyModule.getCustomRunConfig() != null) {
-            // if the custom run config is set then we expect to find it in the settings retrieved from RunManager
-            LibertyRunConfiguration customLibertyRunConfig = libertyModule.getCustomRunConfig();
-            Optional<RunnerAndConfigurationSettings> found =
-                libertyModuleSettings.stream().filter(c -> c.getConfiguration().equals(customLibertyRunConfig)).findFirst();
-            if (found.isPresent()) {
-                selectedLibertyConfig = found.get();
-                libertyModule.setUseCustom(true);
-            }
-        }
-        if (selectedLibertyConfig == null) {
+        // Select a run configuration based on the following priority
+        // 1) a config is selected in the IntelliJ Run / Debug Configurations combobox
+        // 2) a config was previously used
+        // 3) this is the first time you used this action or you deleted the config you used last time so
+        //    we select another config created for the current module
+        // 4) show a dialog to create a new run/debug configuration
+        RunnerAndConfigurationSettings selectedLibertySettings = null;
+        if (libertyModuleSettings.isEmpty()) {
             // create new run config
-            selectedLibertyConfig = createNewLibertyRunConfig(runManager, libertyModule);
-            if (selectedLibertyConfig.getConfiguration() instanceof LibertyRunConfiguration newConfig) {
-                libertyModule.setCustomRunConfig(newConfig);
-                libertyModule.setUseCustom(true);
+            selectedLibertySettings = createNewLibertyRunConfig(runManager, libertyModule);
+        } else {
+            RunnerAndConfigurationSettings selectedSettings = runManager.getSelectedConfiguration();
+            if (libertyModuleSettings.containsValue(selectedSettings)) {
+                // if the selected config is for the Liberty module, use that run config
+                selectedLibertySettings = selectedSettings;
+            } else if (libertyModule.getCustomRunConfig() != null) {
+                // if the custom run config is set then we expect to find it in the settings retrieved from RunManager
+                selectedLibertySettings = libertyModuleSettings.get(libertyModule.getCustomRunConfig());
+            } else {
+                // pick first run config settings in list
+                selectedLibertySettings = libertyModuleSettings.values().iterator().next();
             }
         }
+        // set up the module for use in LibertyDevStartAction after Run button is pressed in config dialog
+        libertyModule.setCustomRunConfig((LibertyRunConfiguration)selectedLibertySettings.getConfiguration());
+        libertyModule.setUseCustom(true);
+
         // opens run config dialog
-        selectedLibertyConfig.setEditBeforeRun(true);
-        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
+        selectedLibertySettings.setEditBeforeRun(true);
+        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertySettings);
         if (builder != null) {
             ExecutionManager.getInstance(project).restartRunProfile(builder.build());
         }
