@@ -19,7 +19,9 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import java.awt.Point;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,6 +31,8 @@ import java.util.Map;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
+import static io.openliberty.tools.intellij.util.Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
+import static io.openliberty.tools.intellij.util.Constants.LIBERTY_MAVEN_START_CONTAINER_CMD;
 
 /**
  * Holds common tests that use a single module MicroProfile project.
@@ -1127,42 +1131,76 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Prepares the environment to run the tests.
-     *
-     * @param projectPath The path of the project.
-     * @param projectName The name of the project being used.
+     * Tests that when a Liberty run configuration is removed then the Start In Container option
+     * is removed even when the custom parameter string is empty.
+     * 1. Start the server in container
+     * 2. Stop the server
+     * 3. Delete the config (should clear Start in Container setting)
+     * 4. Regular Start action
+     * 5. Stop the server
+     * 6. Grab terminal output and ensure second Start was NOT in container
+     * Notes:
+     * 1. This test is restricted to Linux only because, on other platforms, the docker build process
+     * driven by the Liberty Maven/Gradle plugins take longer than ten minutes. Ten minutes is the
+     * timeout set by the plugins and there is currently no way to extend this timeout through the
+     * Liberty Tools plugin(i.e. set dockerBuildTimeout).
      */
-    public static void prepareEnv(String projectPath, String projectName) {
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
-                "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
-        waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
-        UIBotTestUtils.findWelcomeFrame(remoteRobot);
-        UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
-        UIBotTestUtils.openProjectView(remoteRobot);
-        if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
-        }
-        // IntelliJ does not start building and indexing until the Project View is open
-        UIBotTestUtils.waitForIndexing(remoteRobot);
-        UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
-        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, projectName);
+    @Test
+    @Video
+    @EnabledOnOs({OS.LINUX})
+    public void testStartInContainerParamClearedOnConfigRemoval() {
+        String testName = "testStartInContainerParamClearedOnConfigRemoval";
+        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
 
-        // Close all open editors.
-        // The expansion of the project tree in the Liberty tool window causes the editor tab for
-        // the project's build file to open. That is the result of clicking on the project to give it
-        // focus. The action of clicking on the project causes the build file to be opened automatically.
-        // Closing the build file editor here prevents it from opening automatically when the project
-        // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
-        // prevent false negative tests related to the build file editor tab.
-        if (remoteRobot.isMac()) {
-            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
-        }
-        else {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+        // Remove all existing configurations for a clean state.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Trigger the start with parameters configuration dialog.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", true, 3);
+
+        // Run the configuration dialog with the Run In Container true.
+        UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null, true);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
         }
 
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
-                "prepareEnv. Exit. ProjectName: " + projectName);
+        // Remove all existing configurations for a clean state.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+        terminalClearBuffer();
+
+        // Start dev mode.
+        UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start", true, 3);
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
+        } finally {
+            if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
+                // Stop dev mode.
+                UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
+
+                // Validate that the server stopped.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+            }
+        }
+        String serverConsole = terminalCopyBuffer();
+        if (serverConsole == null || serverConsole.isBlank()) {
+            Assertions.fail("Server output terminal is missing or is empty");
+        }
+        if (serverConsole.contains(LIBERTY_MAVEN_START_CONTAINER_CMD) ||
+           serverConsole.contains(LIBERTY_GRADLE_START_CONTAINER_CMD)) {
+            Assertions.fail("Server started in container when it should not have");
+        }
     }
 
     /**
@@ -1228,19 +1266,107 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Deletes the directory specified by dirPath if it exists.
+     * Prepares the environment to run the tests.
      *
-     * @param dirPath The path to the directory that may be deleted.
+     * @param projectPath The path of the project.
+     * @param projectName The name of the project being used.
      */
-    public static void deleteDirectoryIfExists(String dirPath) {
-        File dir = new File(dirPath);
-        if (dir.exists()) {
-            TestUtils.deleteDirectory(dir);
+    public static void prepareEnv(String projectPath, String projectName) {
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                "prepareEnv. Entry. ProjectPath: " + projectPath + ". ProjectName: " + projectName);
+        waitForIgnoringError(Duration.ofMinutes(4), Duration.ofSeconds(5), "Wait for IDE to start", "IDE did not start", () -> remoteRobot.callJs("true"));
+        UIBotTestUtils.findWelcomeFrame(remoteRobot);
+        UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
+        UIBotTestUtils.openProjectView(remoteRobot);
+        if (!remoteRobot.isMac()) {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+        }
+        // IntelliJ does not start building and indexing until the Project View is open
+        UIBotTestUtils.waitForIndexing(remoteRobot);
+        UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
+        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, projectName);
+
+        // Close all open editors.
+        // The expansion of the project tree in the Liberty tool window causes the editor tab for
+        // the project's build file to open. That is the result of clicking on the project to give it
+        // focus. The action of clicking on the project causes the build file to be opened automatically.
+        // Closing the build file editor here prevents it from opening automatically when the project
+        // in the Liberty tool window is clicked or right-clicked again. This is done on purpose to
+        // prevent false negative tests related to the build file editor tab.
+        if (remoteRobot.isMac()) {
+            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+        }
+        else {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+        }
+
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO,
+                "prepareEnv. Exit. ProjectName: " + projectName);
+    }
+
+    /**
+     * Clear all the text in the terminal and just show the command line prompt.
+     */
+    public void terminalClearBuffer() {
+        ProjectFrameFixture projectFrame;
+        ComponentFixture terminal;
+        try {
+            projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+        } catch (WaitForConditionTimeoutException w) {
+            return; // there is no terminal with a Liberty to stop
+        }
+        terminal.rightClick();
+        ComponentFixture clearMenuItem = projectFrame.getActionMenuItem("Clear Buffer");
+        clearMenuItem.click();
+        TestUtils.sleepAndIgnoreException(1);
+    }
+
+    /**
+     * Copy all the text in the terminal and return it to the caller.
+     * @return empty string in error situations
+     */
+    public String terminalCopyBuffer() {
+        ProjectFrameFixture projectFrame;
+        ComponentFixture terminal;
+        try {
+            projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
+        } catch (WaitForConditionTimeoutException w) {
+            return ""; // there is no terminal with a Liberty to stop
+        }
+        // Select all text in the terminal screen
+        terminal.rightClick();
+        ComponentFixture selectAllMenuItem = projectFrame.getActionMenuItem("Select All");
+        selectAllMenuItem.click();
+        // Copy all text to the clipboard
+        terminal.rightClick();
+        ComponentFixture copyMenuItem = projectFrame.getActionMenuItem("Copy");
+        copyMenuItem.click();
+        // Retrieve the copied value from the system clipboard.
+        try {
+            String copiedValue = (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .getData(DataFlavor.stringFlavor);
+            return copiedValue;
+        } catch (UnsupportedFlavorException | IOException e) {
+            return ""; // shouldn't happen
         }
     }
 
     /**
-     * Clean project.
+     * Cleans up the server and resets the terminal.
+     */
+    public void cleanAndResetTerminal() {
+        stopTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+        UIBotTestUtils.openTerminalWindow(remoteRobot);
+        cleanTerminal();
+        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+    }
+
+    /**
+     * Stop the Server.
      */
     public void stopTerminal() {
         Keyboard keyboard = new Keyboard(remoteRobot);
@@ -1254,7 +1380,7 @@ public abstract class SingleModMPProjectTestCommon {
         }
         terminal.rightClick();
         ComponentFixture openFixtureNewTab = projectFrame.getActionMenuItem("New Tab");
-        openFixtureNewTab.click(new Point());
+        openFixtureNewTab.click();
 
         // Perform Stop Action
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
@@ -1270,7 +1396,7 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Stop the Server.
+     * Clean project.
      */
     public void cleanTerminal() {
         Keyboard keyboard = new Keyboard(remoteRobot);
@@ -1288,14 +1414,15 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Cleans up and resets the terminal.
+     * Deletes the directory specified by dirPath if it exists.
+     *
+     * @param dirPath The path to the directory that may be deleted.
      */
-    public void cleanAndResetTerminal() {
-        stopTerminal();
-        UIBotTestUtils.closeTerminalTabs(remoteRobot);
-        UIBotTestUtils.openTerminalWindow(remoteRobot);
-        cleanTerminal();
-        UIBotTestUtils.closeTerminalTabs(remoteRobot);
+    public static void deleteDirectoryIfExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (dir.exists()) {
+            TestUtils.deleteDirectory(dir);
+        }
     }
 
     /**
@@ -1309,7 +1436,6 @@ public abstract class SingleModMPProjectTestCommon {
     /**
      * Validates that test reports were generated.
      */
-
     public void validateTestReportsExist() {
         //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
         TestUtils.validateTestReportExists(testReportPath, testReportPath);
