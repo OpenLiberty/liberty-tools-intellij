@@ -1162,41 +1162,48 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.runStartParamsConfigDialog(remoteRobot, null, true);
 
         try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
+            // Wait for the project to start.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true, false);
+        } catch (RuntimeException r) {
+            // If server fails to start print the message and finally to try to stop it.
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, r.getMessage());
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
-                // Stop dev mode.
+                // Stop dev mode in container.
                 UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
 
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+                // Wait for the server to stop so we can continue the test.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 40, false);
             }
         }
 
-        // Remove all existing configurations for a clean state.
+        // Remove the configuration added earlier.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
         terminalClearBuffer();
 
-        // Start dev mode.
+        // Start dev mode to see if all the parameters and Run in Container are cleared.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start", true, 3);
 
         try {
-            // Validate that the project started.
-            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true);
+            // Wait for the project to start.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, true, false);
+        } catch (RuntimeException r) {
+            // If server fails to start print the message and finally to try to stop it.
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, r.getMessage());
         } finally {
             if (TestUtils.isServerStopNeeded(absoluteWLPPath)) {
                 // Stop dev mode.
                 UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, 3);
 
-                // Validate that the server stopped.
-                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath);
+                // Wait for the server to stop so we can continue the test.
+                TestUtils.validateLibertyServerStopped(testName, absoluteWLPPath, 40, false);
             }
         }
         String serverConsole = terminalCopyBuffer();
         if (serverConsole == null || serverConsole.isBlank()) {
             Assertions.fail("Server output terminal is missing or is empty");
         }
+        // The second start server should not have used Run in Container because we deleted the config.
         if (serverConsole.contains(LIBERTY_MAVEN_START_CONTAINER_CMD) ||
            serverConsole.contains(LIBERTY_GRADLE_START_CONTAINER_CMD)) {
             Assertions.fail("Server started in container when it should not have");
