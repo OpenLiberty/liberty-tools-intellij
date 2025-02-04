@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
@@ -26,19 +27,17 @@ public class LibertyModule {
     private Constants.ProjectType projectType;
     private String name;
     private boolean validContainerVersion;
-
-    private String customStartParams;
-    private boolean runInContainer;
-
     private boolean debugMode;
     private ShellTerminalWidget shellWidget;
+    private LibertyRunConfiguration customRunConfig;
+    private boolean useCustom;
 
     public LibertyModule(Project project) {
         this.project = project;
-        this.customStartParams = "";
-        this.runInContainer = false;
         this.debugMode = false;
         this.shellWidget = null;
+        this.customRunConfig = null;
+        this.useCustom = false;
     }
 
     public LibertyModule(Project project, VirtualFile buildFile, String name, Constants.ProjectType projectType, boolean validContainerVersion) {
@@ -97,23 +96,34 @@ public class LibertyModule {
         this.project = project;
     }
 
-    public String getCustomStartParams() {
-        return customStartParams;
+    public LibertyRunConfiguration getCustomRunConfig() {
+        return customRunConfig;
     }
 
-    public void setCustomStartParams(String customStartParams) {
-        if (customStartParams == null) {
-            customStartParams = "";
+    public void setCustomRunConfig(LibertyRunConfiguration newCustomRunConfig) {
+        customRunConfig = newCustomRunConfig;
+    }
+
+    public String getCustomStartParams() {
+        if (customRunConfig == null || customRunConfig.getParams() == null) {
+            return "";
         }
-        this.customStartParams = customStartParams;
+        return customRunConfig.getParams();
+    }
+
+    public boolean isCustom() {
+        return useCustom;
+    }
+
+    public void setUseCustom(boolean isCustom) {
+        useCustom = isCustom;
     }
 
     public boolean runInContainer() {
-        return runInContainer;
-    }
-
-    public void setRunInContainer(boolean runInContainer) {
-        this.runInContainer = runInContainer;
+        if (customRunConfig == null) {
+            return false;
+        }
+        return customRunConfig.runInContainer();
     }
 
     public boolean isDebugMode() {

@@ -1575,6 +1575,17 @@ public class UIBotTestUtils {
      * @param startParams The parameters to set in the configuration dialog if it is not null.
      */
     public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams) {
+        runStartParamsConfigDialog(remoteRobot, startParams, null);
+    }
+
+    /**
+     * Runs The Liberty configuration with custom configuration.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param startParams The parameters to set in the configuration dialog if it is not null.
+     * @param runInContainer If not null use the value to set the Run In Container check box
+     */
+    public static void runStartParamsConfigDialog(RemoteRobot remoteRobot, String startParams, Boolean runInContainer) {
         DialogFixture dialog = remoteRobot.find(DialogFixture.class, Duration.ofSeconds(10));
         if (startParams != null) {
             ComponentFixture startParamsTextField = dialog.find(CommonContainerFixture.class, byXpath("//div[@class='EditorTextField']"), Duration.ofSeconds(5));
@@ -1587,19 +1598,29 @@ public class UIBotTestUtils {
                     "Waiting for the start parameters text field on the Liberty config dialog to contain " + startParams,
                     "The start parameters text field on the Liberty config dialog did not contain " + startParams,
                     () -> startParamsTextField.hasText(startParams));
+        }
 
-            // Save the changes made if necessary. If the config is reused, there will be no changes.
-            JButtonFixture applyButton = dialog.getButton("Apply");
-            try {
-                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                        Duration.ofSeconds(1),
-                        "Waiting for the Apply button on the open project dialog to be enabled",
-                        "The Apply button on the open project dialog to be enabled",
-                        applyButton::isEnabled);
-                applyButton.click();
-            } catch (WaitForConditionTimeoutException wfcte) {
-                // Config being re-used
+        if (runInContainer != null) {
+            Locator locator = byXpath("//div[@class='DialogPanel']//div[@class='StateRestoringCheckBox']");
+            JCheckboxFixture checkBox = dialog.checkBox(locator);
+            boolean boxStatus = checkBox.isSelected();
+            if (boxStatus ^ runInContainer) { // xor the two values
+                checkBox.click(); // Change needed, click the check box to toggle
             }
+            TestUtils.sleepAndIgnoreException(1); // allow Apply button to be refreshed
+        }
+
+        // Save the changes made if necessary. If the config is being reused, there will be no changes.
+        JButtonFixture applyButton = dialog.getButton("Apply");
+        try {
+            RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                    Duration.ofSeconds(1),
+                    "Waiting for the Apply button on the open project dialog to be enabled",
+                    "The Apply button on the open project dialog to be enabled",
+                    applyButton::isEnabled);
+            applyButton.click();
+        } catch (WaitForConditionTimeoutException wfcte) {
+            // Apply button remains grey, config being re-used
         }
 
         // Run the configuration.
