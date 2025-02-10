@@ -104,8 +104,13 @@ jobs:
               if [ "$pr_draft" = "true" ]; then
                 draft_status="\n*Draft*: true"
               fi
+          
+              # Prevent Slack from auto-linking issue numbers (e.g., #778) to private channels  
+              # by adding a zero-width space (U+200B) after the `#` symbol.  
+              # This makes the text appear unchanged but prevents unintended Slack formatting.
+              pr_title_cleaned=$(echo "$pr_title" | sed 's/#/#​/g')  # Inserts zero-width space after #
 
-              pr_list="${pr_list}\n*Pull Request* ${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
+              pr_list="${pr_list}\n*Pull Request* ${pr_number}: ${pr_title_cleaned}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
               notify=true
             fi
           done
@@ -142,6 +147,8 @@ jobs:
           closed_pr_list=$(echo "$closed_prs" | jq -r \
           --arg last_run "$last_run_timestamp" \
           '.[] | select(.closed_at > $last_run) | "*Closed Pull Request* \(.number): \(.title)\n*Closed by*: \(.user.login)\n*URL*: \(.html_url)\n*Closed At*: \(.closed_at)\n"')
+          
+          closed_pr_list=$(echo "$closed_pr_list" | sed 's/#/#​/g')  # Inserts zero-width space.
           
           echo "Closed PR List since last cron job:"
           echo "$closed_pr_list"
