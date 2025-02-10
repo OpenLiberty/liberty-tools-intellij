@@ -144,7 +144,7 @@ public abstract class LibertyGeneralAction extends AnAction {
         return toArray(list, item -> String.valueOf(item.getBuildFile().toNioPath()));
     }
 
-    private String[] toArray(@NotNull List<LibertyModule> list, @NotNull Function<? super LibertyModule, ?> mapper) {
+    private String[] toArray(@NotNull List<LibertyModule> list, @NotNull Function<LibertyModule, String> mapper) {
         return list.stream().map(mapper).toArray(String[]::new);
     }
 
