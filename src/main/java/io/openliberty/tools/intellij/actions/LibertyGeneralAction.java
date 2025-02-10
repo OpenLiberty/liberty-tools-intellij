@@ -77,7 +77,7 @@ public abstract class LibertyGeneralAction extends AnAction {
 
                     // tooltip strings will appear when user hovers over one of the projects in the dialog list
                     // they will display the fully qualified path to the build file so that users can
-                    // differntiate in the case of same named application names in the chooser list
+                    // differentiate in the case of same named application names in the chooser list
                     final String[] projectNamesTooltips = toProjectNamesTooltips(libertyModules);
 
                     // Create a Chooser Dialog for multiple projects. User can select which one they
@@ -133,7 +133,7 @@ public abstract class LibertyGeneralAction extends AnAction {
             // same name. get the build dir name where the build file resides to be that differentiator.
             String parentFolderName = item.getBuildFile().getParent().getName();
 
-            // Use the parent folder name as a differntiator - add it to the string entry as
+            // Use the parent folder name as a differentiator - add it to the string entry as
             // part of the project name
             // Entry in list will be of the form: "<app-name> : <buildfile parent folder>"
             return item.getName() + ": " + parentFolderName;
