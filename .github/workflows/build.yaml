@@ -183,4 +183,4 @@ jobs:
         with:
           name: ${{ matrix.runtime.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
-            liberty-tools-intellij/build/reports/
+            liberty-tools-intellij/build/reports/ 
