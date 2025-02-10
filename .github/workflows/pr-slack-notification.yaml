@@ -104,13 +104,8 @@ jobs:
               if [ "$pr_draft" = "true" ]; then
                 draft_status="\n*Draft*: true"
               fi
-          
-              # Prevent Slack from auto-linking issue numbers (e.g., #778) to private channels  
-              # by adding a zero-width space (U+200B) after the `#` symbol.  
-              # This makes the text appear unchanged but prevents unintended Slack formatting.
-              pr_title_cleaned=$(echo "$pr_title" | sed 's/#/#​/g')  # Inserts zero-width space after #
 
-              pr_list="${pr_list}\n*Pull Request* ${pr_number}: ${pr_title_cleaned}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
+              pr_list="${pr_list}\n*Pull Request* ${pr_number}: ${pr_title}\n*Created by*: ${pr_user}\n*URL*: ${pr_url}${draft_status}\n*Created At*: ${pr_created_at}\n*Last Updated At*: ${pr_updated_at}\n"
               notify=true
             fi
           done
@@ -139,7 +134,6 @@ jobs:
 
           echo "Last run timestamp: $last_run_timestamp"
           
-          
           # We used 'sort=updated' to fetch list of closed PRs with max limit of 100(Default value). In the future, we expect to have more than 100 closed PRs, so it's better to keep 'sort=updated'.
           closed_prs=$(curl -s -H "Authorization: token ${{ env.GH_TOKEN }}" \
           "${{ env.API_URL }}?state=closed&sort=updated&direction=desc&per_page=100")
@@ -147,8 +141,6 @@ jobs:
           closed_pr_list=$(echo "$closed_prs" | jq -r \
           --arg last_run "$last_run_timestamp" \
           '.[] | select(.closed_at > $last_run) | "*Closed Pull Request* \(.number): \(.title)\n*Closed by*: \(.user.login)\n*URL*: \(.html_url)\n*Closed At*: \(.closed_at)\n"')
-          
-          closed_pr_list=$(echo "$closed_pr_list" | sed 's/#/#​/g')  # Inserts zero-width space.
           
           echo "Closed PR List since last cron job:"
           echo "$closed_pr_list"
@@ -176,6 +168,12 @@ jobs:
           if [ -f closed_pr_list.txt ]; then
             closed_pr_list=$(cat closed_pr_list.txt)
           fi
+          
+          # Prevent Slack from auto-linking issue numbers (e.g., #778) to private channels  
+          # by adding a zero-width space (U+200B) after the `#` symbol.  
+          # This makes the text appear unchanged but prevents unintended Slack formatting.
+          pr_list=$(echo "$pr_list" | sed 's/#/#​/g')
+          closed_pr_list=$(echo "$closed_pr_list" | sed 's/#/#​/g')
 
           # Initialize payload blocks
           payload_blocks=()
