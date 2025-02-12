@@ -107,7 +107,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     }
 
     /**
-     * Runs when users select "Run" or "Debug" on a Liberty  run configuration
+     * Runs when users select "Run" or "Debug" on a Liberty run configuration
      *
      * @param executor    the execution mode selected by the user (run, debug, profile etc.)
      * @param environment the environment object containing additional settings for executing the configuration.
@@ -120,20 +120,19 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         LibertyModule libertyModule;
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
+            libertyModule.setCustomRunConfig(this);
+            libertyModule.setUseCustom(true);
+            // Previous liberty action may have forced the edit dialog to appear, disable now
+            var config = environment.getRunnerAndConfigurationSettings();
+            if (config != null) {
+                config.setEditBeforeRun(false);
+            }
         } catch (NullPointerException e) {
             LOGGER.error(String.format("Could not resolve the Liberty module associated with build file: %s", getBuildFile()));
             throw new ExecutionException(e);
         }
-        // run the start dev mode action
-        AnAction action = ActionManager.getInstance().getAction(runInContainer() ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
-
-        // set custom start params
-        if (getParams() != null) {
-            libertyModule.setCustomStartParams(getParams());
-        } else {
-            libertyModule.setCustomStartParams("");
-        }
-        libertyModule.setRunInContainer(runInContainer());
+        // run the start dev mode action which also handles runInContainer.
+        AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);
