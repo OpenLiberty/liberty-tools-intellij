@@ -106,6 +106,19 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return new LibertyRunSettingsEditor(getProject());
     }
 
+    @Override
+    public @Nullable String suggestedName() {
+        if (!getName().isEmpty()) {
+            // getName() is @notnull
+            // "Suggest" current name in case the user typed a name
+            return getName();
+        } else if (getModule() != null && !getModule().getName().isEmpty()) {
+            // getModule().getName() is @notnull
+            return getModule().getName();
+        }
+        return super.suggestedName();
+    }
+
     /**
      * Runs when users select "Run" or "Debug" on a Liberty run configuration
      *
