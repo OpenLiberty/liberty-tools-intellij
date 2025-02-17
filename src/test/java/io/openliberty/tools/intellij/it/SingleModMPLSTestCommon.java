@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -67,7 +67,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "ServiceLiveHealthCheck.java", "5");
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "microprofile-config.properties", "5");
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3, false);
         }
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
@@ -332,7 +332,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3, false);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation.
+ * Copyright (c) 2024, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -71,7 +71,7 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
             Files.move(projectDirPath, projectDirNewPath, StandardCopyOption.REPLACE_EXISTING);
 
             // Prepare the environment with the new project path and name
-            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW);
+            prepareEnv(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, false);
 
         } catch (IOException e) {
             System.err.println("Setup failed: " + e.getMessage());
@@ -106,5 +106,6 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         setBuildFileOpenCommand("Liberty: View Gradle config");
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
+        setProjectTypeIsMultiple(false);
     }
 }
