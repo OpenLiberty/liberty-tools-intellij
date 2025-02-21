@@ -57,10 +57,10 @@ When installing the Liberty Tools for IntelliJ plugin, the latest version of LSP
 
 If you prefer to use an older version of LSP4IJ (e.g., a specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the [JetBrains marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions).
 
-| Liberty Tools version | LSP4IJ version(s) tested   |
-|-----------------------|----------------------------|
-| 24.0.9                | 0.5.0, 0.6.0, 0.7.0, 0.8.1 |
-| 24.0.12               | 0.8.1, 0.9.0, 0.10.0       |
+| Liberty Tools version | LSP4IJ version(s) tested     |
+|-----------------------|------------------------------|
+| 24.0.9                | 0.5.0, 0.6.0, 0.7.0, 0.8.1   |
+| 24.0.12               | 0.8.1, 0.9.0, 0.10.0, 0.11.0 |
 
 
 Steps to install an older version of LSP4IJ:
