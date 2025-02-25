@@ -32,7 +32,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
      */
     @BeforeAll
     public static void setup() {
-        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME, false);
+        prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
     GradleSingleModMPProjectTest() {

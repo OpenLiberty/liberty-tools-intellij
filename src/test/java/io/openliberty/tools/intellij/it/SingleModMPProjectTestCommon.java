@@ -1321,6 +1321,10 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
+    public static void prepareEnv(String projectPath, String projectName) {
+        prepareEnv(projectPath, projectName, false);
+    }
+
     /**
      * Prepares the environment to run the tests.
      *
