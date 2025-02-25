@@ -22,7 +22,6 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.TextDocumentEdit;
-import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
@@ -64,7 +63,7 @@ public class ChangeUtil {
 			return;
 		}
 
-		TextEditConverter converter = new TextEditConverter(unit, edit, utils);
+		TextEditConverter converter = new TextEditConverter(unit, edit, uri, utils);
 		if (resourceOperationSupported) {
 			List<Either<TextDocumentEdit, ResourceOperation>> changes = root.getDocumentChanges();
 			if (changes == null) {
@@ -72,9 +71,7 @@ public class ChangeUtil {
 				root.setDocumentChanges(changes);
 			}
 
-			VersionedTextDocumentIdentifier identifier = new VersionedTextDocumentIdentifier(uri, 0);
-			TextDocumentEdit documentEdit = new TextDocumentEdit(identifier, converter.convert());
-			changes.add(Either.forLeft(documentEdit));
+			changes.add(Either.forLeft(converter.convertToTextDocumentEdit(0)));
 		} else {
 
 			Map<String, List<org.eclipse.lsp4j.TextEdit>> changes = root.getChanges();
