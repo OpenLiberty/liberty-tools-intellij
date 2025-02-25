@@ -85,7 +85,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @AfterAll
     public static void cleanup() {
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3, false);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
         }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
@@ -156,7 +156,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Add the project to the Liberty tool window.
-        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window", 3, false);
+        UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window", 3);
 
         // Select project from the 'Add Liberty project' dialog.
         UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmNLTRestProjectName(), "Add Liberty project");
@@ -166,7 +166,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
             UIBotTestUtils.findProjectInLibertyToolWindow(remoteRobot, getSmNLTRestProjectName(), "10");
         } finally {
             // Remove the project from the Liberty tool window.
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window", 3, false);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Remove project from the tool window", 3);
 
             // Select project from the 'Remote Liberty project' dialog.
             UIBotTestUtils.selectProjectFromRemoveLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
@@ -302,7 +302,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3, false);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);

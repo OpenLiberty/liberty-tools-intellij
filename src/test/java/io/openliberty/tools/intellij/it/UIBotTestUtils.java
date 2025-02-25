@@ -1692,6 +1692,10 @@ public class UIBotTestUtils {
         }
     }
 
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries) {
+        runActionFromSearchEverywherePanel(remoteRobot, action, maxRetries, false);
+    }
+
     /**
      * Opens the search everywhere dialog.
      *
@@ -2800,7 +2804,7 @@ public class UIBotTestUtils {
                 UIBotTestUtils.closeAllEditorTabs(remoteRobot);
             }
             else {
-                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3, false);
+                UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
             }
             UIBotTestUtils.closeProjectView(remoteRobot);
             UIBotTestUtils.closeProjectFrame(remoteRobot);
