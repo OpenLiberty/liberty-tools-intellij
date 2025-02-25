@@ -1692,6 +1692,13 @@ public class UIBotTestUtils {
         }
     }
 
+    /**
+     * Runs an action from the Search Everywhere panel with a default value for `isMultiple`.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param action      The action to be executed.
+     * @param maxRetries  The number of retries in case of failure.
+     */
     public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries) {
         runActionFromSearchEverywherePanel(remoteRobot, action, maxRetries, false);
     }
@@ -1785,6 +1792,16 @@ public class UIBotTestUtils {
         if (error != null && !action.equals("Close All Tabs")) {
             throw new RuntimeException("Failed to run the " + action + " action using the search everywhere option", error);
         }
+    }
+
+    /**
+     * Selects the specified project using the default 'Liberty project' dialog title.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param projectName The name of the project to select.
+     */
+    public static void selectProjectFromDialog(RemoteRobot remoteRobot, String projectName) {
+        selectProjectFromDialog(remoteRobot, projectName, "Liberty project");
     }
 
     /**
@@ -2623,7 +2640,7 @@ public class UIBotTestUtils {
                     UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries, isMultiple);
                     // For multiple projects, an additional dialog appears to select the project.
                     if (isMultiple) {
-                        UIBotTestUtils.selectProjectFromDialog(remoteRobot, smMPProjName, "Liberty project");
+                        UIBotTestUtils.selectProjectFromDialog(remoteRobot, smMPProjName);
                     }
                     break;
                 default:

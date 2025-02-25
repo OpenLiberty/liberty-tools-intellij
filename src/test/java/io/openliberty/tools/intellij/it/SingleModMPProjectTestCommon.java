@@ -533,7 +533,7 @@ public abstract class SingleModMPProjectTestCommon {
         // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
         // Adding this check will prevent the test from failing.
         if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
-            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
         }
 
         // Run the configuration dialog.
@@ -562,7 +562,7 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start...", 3, getProjectTypeIsMutliple());
             if (getProjectTypeIsMutliple()) {
-                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
             }
             Map<String, String> cfgEntries = UIBotTestUtils.getOpenedLibertyConfigDataAndCloseOnExit(remoteRobot);
             String activeCfgName = cfgEntries.get(UIBotTestUtils.ConfigEntries.NAME.toString());
@@ -708,7 +708,7 @@ public abstract class SingleModMPProjectTestCommon {
         // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
         // Adding this check will prevent the test from failing.
         if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
-            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
         }
 
         try {
@@ -718,7 +718,7 @@ public abstract class SingleModMPProjectTestCommon {
             // Run the application's tests.
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Run tests", 3, getProjectTypeIsMutliple());
             if (getProjectTypeIsMutliple()) {
-                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+                UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
             }
 
             // Validate that the reports were generated.
@@ -1159,7 +1159,7 @@ public abstract class SingleModMPProjectTestCommon {
         // For running individual test locally, specifically tests involving the "Search Everywhere" action that do not show the dialog to select the project.
         // Adding this check will prevent the test from failing.
         if (getProjectTypeIsMutliple() && UIBotTestUtils.checkProjectDialog(remoteRobot)) {
-            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+            UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
         }
 
         try {
@@ -1170,7 +1170,7 @@ public abstract class SingleModMPProjectTestCommon {
                 // Stop dev mode.
                 UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", 3, getProjectTypeIsMutliple());
                 if (getProjectTypeIsMutliple()) {
-                    UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName(), "Liberty project");
+                    UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmMPProjectName());
                 }
 
                 // Validate that the server stopped.
@@ -1321,6 +1321,13 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
+    /**
+     * Prepares the environment to run the tests.
+     * This method calls the overloaded {@code prepareEnv} method with {@code isMultiple} set to {@code false}.
+     *
+     * @param projectPath The path of the project.
+     * @param projectName The name of the project being used.
+     */
     public static void prepareEnv(String projectPath, String projectName) {
         prepareEnv(projectPath, projectName, false);
     }
