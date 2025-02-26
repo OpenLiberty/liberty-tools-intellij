@@ -13,6 +13,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
+import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
+import static io.openliberty.tools.intellij.util.Constants.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.io.IOException;
@@ -33,17 +35,24 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
 
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
+        runInTerminal(libertyModule, false);
+    }
+
+    protected void runInTerminal(LibertyModule libertyModule, boolean runInContainer) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         Constants.ProjectType projectType = libertyModule.getProjectType();
-        String projectName = project.getName();
+        ShellTerminalWidget widget = getTerminalWidgetWithFocus(true, project, buildFile, getActionCommandName());
+        if (widget == null) {
+            return;
+        }
 
-        String startCmd = null;
+        String startCmd;
         int debugPort = -1;
         DebugModeHandler debugHandler = new DebugModeHandler();
         String buildSettingsCmd;
         try {
-            if(projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+            if(projectType.equals(LIBERTY_MAVEN_PROJECT)) {
                 buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
             } else {
                 buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile);
@@ -56,13 +65,21 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
-        String start = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CMD;
-        String startInContainer = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? buildSettingsCmd + Constants.LIBERTY_MAVEN_START_CONTAINER_CMD : buildSettingsCmd + Constants.LIBERTY_GRADLE_START_CONTAINER_CMD;
-        startCmd = libertyModule.runInContainer() ? startInContainer : start;
-        startCmd += libertyModule.getCustomStartParams();
+        // Handle Liberty Explorer (dashboard) Start action
+        // Also handle Start... action when LibertyRunConfiguration calls this
+        String start = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CMD : LIBERTY_GRADLE_START_CMD);
+        String startInContainer = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CONTAINER_CMD : LIBERTY_GRADLE_START_CONTAINER_CMD);
+        if (runInContainer) {
+            startCmd = startInContainer;
+        } else if (libertyModule.isCustom()) {
+            startCmd = libertyModule.runInContainer() ? startInContainer : start;
+            startCmd += libertyModule.getCustomStartParams();
+        } else {
+            startCmd = start;
+        }
         if (libertyModule.isDebugMode()) {
             try {
-                String debugParam = projectType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? Constants.LIBERTY_MAVEN_DEBUG_PARAM : Constants.LIBERTY_GRADLE_DEBUG_PARAM;
+                String debugParam = projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_DEBUG_PARAM : LIBERTY_GRADLE_DEBUG_PARAM;
                 debugPort = debugHandler.getDebugPort(libertyModule);
                 String debugStr = debugParam + debugPort;
                 // do not append if debug port is already specified as part of start command
@@ -70,17 +87,14 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
                     startCmd += " " + debugParam + debugPort;
                 }
             } catch (IOException e) {
-                String msg = LocalizedResourceUtil.getMessage("liberty.debug.port.unresolved", getActionCommandName(), projectName);
+                String msg = LocalizedResourceUtil.getMessage("liberty.debug.port.unresolved", getActionCommandName(), project.getName());
                 notifyError(msg, project);
                 LOGGER.error(msg);
             }
         }
 
-        ShellTerminalWidget widget = getTerminalWidgetWithFocus(true, project, buildFile, getActionCommandName());
-        if (widget == null) {
-            return;
-        }
-
+        // Do not use the custom parameters in the future unless we get here via the run configuration dialog
+        libertyModule.setUseCustom(false);
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {

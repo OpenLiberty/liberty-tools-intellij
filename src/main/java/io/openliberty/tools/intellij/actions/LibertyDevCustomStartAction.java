@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,8 +23,7 @@ import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationTyp
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Opens the Liberty run config view for the corresponding Liberty module. Creates a new Liberty run config if one does not exist.
@@ -43,40 +42,50 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
-        VirtualFile buildFile = libertyModule.getBuildFile();
 
-        // open run config
+        // determine which run config is selected in the UI
         RunManager runManager = RunManager.getInstance(project);
         List<RunnerAndConfigurationSettings> libertySettings = runManager.getConfigurationSettingsList(LibertyRunConfigurationType.getInstance());
-        List<RunnerAndConfigurationSettings> libertyModuleSettings = new ArrayList<>();
+        Map<LibertyRunConfiguration, RunnerAndConfigurationSettings> libertyModuleSettings = new HashMap<>();
 
         libertySettings.forEach(setting -> {
-            // find all Liberty run configs associated with this build file
+            // find all Liberty run configs associated with this liberty module
             LibertyRunConfiguration runConfig = (LibertyRunConfiguration) setting.getConfiguration();
             VirtualFile vBuildFile = VfsUtil.findFile(Paths.get(runConfig.getBuildFile()), true);
             if (vBuildFile != null && vBuildFile.equals(libertyModule.getBuildFile())) {
-                libertyModuleSettings.add(setting);
+                libertyModuleSettings.put(runConfig, setting);
             }
         });
-        RunnerAndConfigurationSettings selectedLibertyConfig;
+        // Select a run configuration based on the following priority
+        // 1) a config is selected in the IntelliJ Run / Debug Configurations combobox
+        // 2) a config was previously used
+        // 3) this is the first time you used this action or you deleted the config you used last time so
+        //    we select another config created for the current module
+        // 4) show a dialog to create a new run/debug configuration
+        RunnerAndConfigurationSettings selectedLibertySettings = null;
         if (libertyModuleSettings.isEmpty()) {
             // create new run config
-            selectedLibertyConfig = createNewLibertyRunConfig(runManager, libertyModule);
+            selectedLibertySettings = createNewLibertyRunConfig(runManager, libertyModule);
         } else {
-            // TODO if 1+ run configs, prompt user to select the one they want see https://github.com/OpenLiberty/liberty-tools-intellij/issues/167
-            // 1+ run configs found for the given project
-            RunnerAndConfigurationSettings selectedConfig = runManager.getSelectedConfiguration();
-            if (libertyModuleSettings.contains(selectedConfig)) {
+            RunnerAndConfigurationSettings selectedSettings = runManager.getSelectedConfiguration();
+            if (libertyModuleSettings.containsValue(selectedSettings)) {
                 // if the selected config is for the Liberty module, use that run config
-                selectedLibertyConfig = selectedConfig;
+                selectedLibertySettings = selectedSettings;
+            } else if (libertyModule.getCustomRunConfig() != null) {
+                // if the custom run config is set then we expect to find it in the settings retrieved from RunManager
+                selectedLibertySettings = libertyModuleSettings.get(libertyModule.getCustomRunConfig());
             } else {
-                // pick first in list run config in list
-                selectedLibertyConfig = libertyModuleSettings.get(0);
+                // pick first run config settings in list
+                selectedLibertySettings = libertyModuleSettings.values().iterator().next();
             }
         }
+        // set up the module for use in LibertyDevStartAction after Run button is pressed in config dialog
+        libertyModule.setCustomRunConfig((LibertyRunConfiguration)selectedLibertySettings.getConfiguration());
+        libertyModule.setUseCustom(true);
+
         // opens run config dialog
-        selectedLibertyConfig.setEditBeforeRun(true);
-        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertyConfig);
+        selectedLibertySettings.setEditBeforeRun(true);
+        ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(DefaultRunExecutor.getRunExecutorInstance(), selectedLibertySettings);
         if (builder != null) {
             ExecutionManager.getInstance(project).restartRunProfile(builder.build());
         }
