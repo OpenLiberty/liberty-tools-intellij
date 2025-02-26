@@ -21,6 +21,7 @@ import com.intellij.openapi.roots.LanguageLevelProjectExtension;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.java.LanguageLevel;
+import com.intellij.testFramework.IndexingTestUtil;
 import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
 import com.intellij.testFramework.builders.ModuleFixtureBuilder;
 import com.intellij.testFramework.fixtures.*;
@@ -76,15 +77,12 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
             pomFiles.add(pomFile);
 
         }
-        // Make a blocking call to the Kotlin suspend function: importProjectsAsync().
-        BuildersKt.runBlocking(
-                EmptyCoroutineContext.INSTANCE,
-                (scope, continuation) -> importProjectsAsync(pomFiles.toArray(VirtualFile[]::new), continuation)
-        );
+        importProjectsWithErrors(pomFiles.toArray(VirtualFile[]::new));
         Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
         for (Module module : modules) {
             setupJdkForModule(module.getName());
         }
+        IndexingTestUtil.waitUntilIndexesAreReady(project);
         // REVISIT: After calling setupJdkForModule() initialization appears to continue in the background
         // and a may cause a test to intermittently fail if it accesses the module too early. A 10-second wait
         // is hopefully long enough but would be preferable to synchronize on a completion event if one is
