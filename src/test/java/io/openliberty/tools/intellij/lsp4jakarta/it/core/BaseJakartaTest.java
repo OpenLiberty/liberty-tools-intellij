@@ -73,9 +73,7 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
             FileUtils.copyDirectory(projectDir, moduleDir);
             VirtualFile pomFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(moduleDir).findFileByRelativePath("pom.xml");
             pomFiles.add(pomFile);
-
         }
-
         // Calling the non-suspending importProjects method instead of the Kotlin suspending function
         // importProjectsAsync(file: VirtualFile) to prevent blocking unit tests starting from IntelliJ version 2024.2.
         importProjects(pomFiles.toArray(VirtualFile[]::new));
@@ -83,11 +81,9 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         for (Module module : modules) {
             setupJdkForModule(module.getName());
         }
-
         // Starting from IntelliJ 2024.2, indexing runs asynchronously in a background thread, https://plugins.jetbrains.com/docs/intellij/testing-faq.html#how-to-handle-indexing.
         // Use the following method to ensure indexes are fully populated before proceeding.
         IndexingTestUtil.waitUntilIndexesAreReady(project);
-
         // REVISIT: After calling setupJdkForModule() initialization appears to continue in the background
         // and a may cause a test to intermittently fail if it accesses the module too early. A 10-second wait
         // is hopefully long enough but would be preferable to synchronize on a completion event if one is
