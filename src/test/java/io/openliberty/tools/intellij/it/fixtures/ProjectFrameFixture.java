@@ -175,7 +175,7 @@ public class ProjectFrameFixture extends CommonContainerFixture {
         String visibleText = xpathVars[0];
         //return find(JTreeFixture.class, JTreeFixture.Companion.byType(), Duration.ofSeconds(10));
         return find(JTreeFixture.class,
-                byXpath("//div[@class='ProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
+                byXpath("//div[@class='MyProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
                 Duration.ofMinutes(1));
     }
 
