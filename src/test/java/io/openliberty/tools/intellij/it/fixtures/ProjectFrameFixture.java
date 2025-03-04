@@ -171,11 +171,13 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      * @param xpathVars The Locator custom variables: text
      * @return The ComponentFixture object associated with the ProjectViewTree class.
      */
-    public JTreeFixture getProjectViewJTree(String... xpathVars) {
+    public JTreeFixture getProjectViewJTree(RemoteRobot remoteRobot, String... xpathVars) {
         String visibleText = xpathVars[0];
-        //return find(JTreeFixture.class, JTreeFixture.Companion.byType(), Duration.ofSeconds(10));
+        String intellijVersion = remoteRobot.callJs("com.intellij.openapi.application.ApplicationInfo.getInstance().getFullVersion();");
+        String className = intellijVersion.startsWith("2025.1") ? "MyProjectViewTree" : "ProjectViewTree";
+
         return find(JTreeFixture.class,
-                byXpath("//div[@class='MyProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
+                byXpath("//div[@class='" + className + "' and contains(@visible_text, '" + visibleText + "')]"),
                 Duration.ofMinutes(1));
     }
 

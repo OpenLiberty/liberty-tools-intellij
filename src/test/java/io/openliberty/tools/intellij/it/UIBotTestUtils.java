@@ -589,7 +589,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 projTree.findText(fileName).doubleClick();
                 break;
@@ -628,7 +628,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
