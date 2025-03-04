@@ -122,6 +122,20 @@ public class TestUtils {
      * @param wlpInstallPath   The liberty installation relative path.
      */
     public static void validateProjectStarted(String testName, String resourceURI, int port, String expectedResponse, String wlpInstallPath, boolean findConn) {
+        validateProjectStarted(testName, resourceURI, port, expectedResponse, wlpInstallPath, findConn, true);
+    }
+
+    /**
+     * Validates that the project is started.
+     *
+     * @param testName         The name of the test calling this method.
+     * @param resourceURI      The project resource URI.
+     * @param port             The port number to reach the project
+     * @param expectedResponse The expected resource response payload.
+     * @param wlpInstallPath   The liberty installation relative path.
+     * @param failOnNoStart    The test fails and error message and server log are printed
+     */
+    public static void validateProjectStarted(String testName, String resourceURI, int port, String expectedResponse, String wlpInstallPath, boolean findConn, boolean failOnNoStart) {
         printTrace(TraceSevLevel.INFO, testName + ":validateProjectStarted: Entry. Port: " + port + ", resourceURI: " + resourceURI);
 
         int retryCountLimit = 75;
@@ -165,13 +179,17 @@ public class TestUtils {
             }
         }
 
-        // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
-        String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
-        printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
-        String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
-        printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
-        Assertions.fail(msg);
+        if (failOnNoStart) {
+            // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
+            String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
+            printTrace(TraceSevLevel.ERROR, msg);
+            String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
+            String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
+            printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
+            Assertions.fail(msg);
+        } else {
+            throw new RuntimeException(testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.");
+        }
     }
 
     /**

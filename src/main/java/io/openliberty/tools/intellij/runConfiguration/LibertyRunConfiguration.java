@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation.
+ * Copyright (c) 2022, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -39,13 +39,13 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     protected static Logger LOGGER = Logger.getInstance(LibertyRunConfiguration.class);
 
     private final LibertyModules libertyModules;
-    private LibertyModule libertyModule;
     @NonNls
     private static final String RUN_IN_CONTAINER_TAG = "RUN_IN_CONTAINER";
 
     public LibertyRunConfiguration(Project project, ConfigurationFactory factory, String name) {
         super(name, getRunConfigurationModule(project), factory);
-        this.libertyModules = LibertyModules.getInstance();
+        // Find Liberty modules here to populate config field called "build file" and avoid NPE
+        this.libertyModules = LibertyModules.getInstance().rescanLibertyModules(project);
     }
 
     @NotNull
@@ -106,8 +106,21 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         return new LibertyRunSettingsEditor(getProject());
     }
 
+    @Override
+    public @Nullable String suggestedName() {
+        if (!getName().isEmpty()) {
+            // getName() is @notnull
+            // "Suggest" current name in case the user typed a name
+            return getName();
+        } else if (getModule() != null && !getModule().getName().isEmpty()) {
+            // getModule().getName() is @notnull
+            return getModule().getName();
+        }
+        return super.suggestedName();
+    }
+
     /**
-     * Runs when users select "Run" or "Debug" on a Liberty  run configuration
+     * Runs when users select "Run" or "Debug" on a Liberty run configuration
      *
      * @param executor    the execution mode selected by the user (run, debug, profile etc.)
      * @param environment the environment object containing additional settings for executing the configuration.
@@ -117,22 +130,22 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
     @Nullable
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
+        LibertyModule libertyModule;
         try {
             libertyModule = libertyModules.getLibertyProjectFromString(getBuildFile());
+            libertyModule.setCustomRunConfig(this);
+            libertyModule.setUseCustom(true);
+            // Previous liberty action may have forced the edit dialog to appear, disable now
+            var config = environment.getRunnerAndConfigurationSettings();
+            if (config != null) {
+                config.setEditBeforeRun(false);
+            }
         } catch (NullPointerException e) {
             LOGGER.error(String.format("Could not resolve the Liberty module associated with build file: %s", getBuildFile()));
             throw new ExecutionException(e);
         }
-        // run the start dev mode action
-        AnAction action = ActionManager.getInstance().getAction(runInContainer() ? Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID : Constants.LIBERTY_DEV_START_ACTION_ID);
-
-        // set custom start params
-        if (getParams() != null) {
-            libertyModule.setCustomStartParams(getParams());
-        } else {
-            libertyModule.setCustomStartParams("");
-        }
-        libertyModule.setRunInContainer(runInContainer());
+        // run the start dev mode action which also handles runInContainer.
+        AnAction action = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
 
         if (executor.getId().equals(DefaultDebugExecutor.EXECUTOR_ID)) {
             libertyModule.setDebugMode(true);

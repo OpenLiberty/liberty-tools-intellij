@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,7 +20,6 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
@@ -30,18 +29,15 @@ import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
-import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -106,115 +102,40 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
      * @return Tree object of all valid Liberty Gradle and Liberty Maven projects
      */
     public static Tree buildTree(Project project, Color backgroundColor) {
-        LibertyModules libertyModules = LibertyModules.getInstance();
-        // clear all stored Liberty modules for current project
-        libertyModules.removeForProject(project);
+        LibertyModules libertyModules = LibertyModules.getInstance().scanLibertyModules(project);
+        // This singleton may contain entries from old projects if you close a project and open another
+        if (libertyModules.getLibertyModules(project).isEmpty()) {
+            return null;
+        }
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
+        HashMap<String, ArrayList<Object>> projectMap = new HashMap<>();
 
-        ArrayList<BuildFile> mavenBuildFiles;
-        ArrayList<BuildFile> gradleBuildFiles;
-        HashMap<String, ArrayList<Object>> map = new HashMap<>();
-        try {
-            mavenBuildFiles = LibertyProjectUtil.getMavenBuildFiles(project);
-            gradleBuildFiles = LibertyProjectUtil.getGradleBuildFiles(project);
-        } catch (IOException | SAXException | ParserConfigurationException e) {
-            LOGGER.warn("Could not find Liberty Maven or Gradle projects in workspace",
-                    e);
-            return null;
-        }
-
-        if (mavenBuildFiles.isEmpty() && gradleBuildFiles.isEmpty()) {
-            return null;
-        }
-
-        for (BuildFile buildFile : mavenBuildFiles) {
-            // create a new Liberty project
-            VirtualFile virtualFile = buildFile.getBuildFile();
-            String projectName = null;
-            if (virtualFile == null) {
-                LOGGER.error(String.format("Could not resolve current Maven project %s", virtualFile));
-                break;
-            }
-            LibertyModuleNode node;
-            try {
-                projectName = LibertyMavenUtil.getProjectNameFromPom(virtualFile);
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
-            }
-            if (projectName == null) {
-                if (virtualFile.getParent() != null) {
-                    projectName = virtualFile.getParent().getName();
-                } else {
-                    projectName = project.getName();
-                }
-            }
-
-            boolean validContainerVersion = buildFile.isValidContainerVersion();
-            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_MAVEN_PROJECT, validContainerVersion));
-            node = new LibertyModuleNode(module);
+        for (LibertyModule libertyModule : libertyModules.getLibertyModules(project)) {
+            LibertyModuleNode node = new LibertyModuleNode(libertyModule);
 
             top.add(node);
             ArrayList<Object> settings = new ArrayList<Object>();
-            settings.add(virtualFile);
-            settings.add(Constants.LIBERTY_MAVEN_PROJECT);
-            map.put(projectName, settings);
+            settings.add(libertyModule.getBuildFile());
+            settings.add(libertyModule.getProjectType());
+            projectMap.put(libertyModule.getName(), settings);
 
             // ordered to align with IntelliJ's right-click menu
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
-            // check if Liberty Maven Plugin is 3.3-M1+
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, libertyModule));
+            // check if Liberty Maven Plugin is 3.3-M1+ or Liberty Gradle Plugin is 3.1-M1+
             // if version is not specified in pom, assume latest version as downloaded from maven central
+            boolean validContainerVersion = libertyModule.isValidContainerVersion();
             if (validContainerVersion) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
+                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, libertyModule));
             }
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
-            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, module));
-            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, module));
-        }
-
-        for (BuildFile buildFile : gradleBuildFiles) {
-            VirtualFile virtualFile = buildFile.getBuildFile();
-            String projectName = null;
-            if (virtualFile == null) {
-                LOGGER.error(String.format("Could not resolve current Gradle project %s", buildFile));
-                break;
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
+            if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
+                node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
+            } else {
+                node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
             }
-            LibertyModuleNode node;
-            try {
-                projectName = LibertyGradleUtil.getProjectName(virtualFile);
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Could not resolve project name for project %s", virtualFile), e);
-            }
-            if (projectName == null) {
-                if (virtualFile.getParent() != null) {
-                    projectName = virtualFile.getParent().getName();
-                } else {
-                    projectName = project.getName();
-                }
-            }
-
-            boolean validContainerVersion = buildFile.isValidContainerVersion();
-            LibertyModule module = libertyModules.addLibertyModule(new LibertyModule(project, virtualFile, projectName, Constants.LIBERTY_GRADLE_PROJECT, validContainerVersion));
-            node = new LibertyModuleNode(module);
-
-            top.add(node);
-            ArrayList<Object> settings = new ArrayList<Object>();
-            settings.add(virtualFile);
-            settings.add(Constants.LIBERTY_GRADLE_PROJECT);
-            map.put(projectName, settings);
-
-            // ordered to align with IntelliJ's right-click menu
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, module));
-            // check if Liberty Gradle Plugin is 3.1-M1+
-            // TODO: handle version specified in a gradle.settings file
-            if (buildFile.isValidContainerVersion()) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, module));
-            }
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, module));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, module));
-            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, module));
         }
 
         Tree tree = new Tree(top);
@@ -224,7 +145,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         DataManager.registerDataProvider(tree, newDataProvider);
         TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
 
-        treeDataProvider.setProjectMap(map);
+        treeDataProvider.setProjectMap(projectMap);
 
         tree.addTreeSelectionListener(e -> {
             Object node = e.getPath().getLastPathComponent();
@@ -247,7 +168,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                     Object node = path.getLastPathComponent();
                     if (node instanceof LibertyModuleNode libertyNode) {
                         final DefaultActionGroup group = new DefaultActionGroup();
-                        if (libertyNode.getProjectType().equals(Constants.LIBERTY_MAVEN_PROJECT)) {
+                        if (libertyNode.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                             AnAction viewPomXml = ActionManager.getInstance().getAction(Constants.VIEW_POM_XML_ACTION_ID);
                             group.add(viewPomXml);
                             AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
@@ -255,7 +176,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                             AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
                             group.add(viewUnitTestReport);
                             group.addSeparator();
-                        } else if (libertyNode.getProjectType().equals(Constants.LIBERTY_GRADLE_PROJECT)) {
+                        } else {
                             AnAction viewGradleConfig = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_CONFIG_ACTION_ID);
                             group.add(viewGradleConfig);
                             AnAction viewTestReport = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -105,7 +105,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             } else {
                 try {
                     mavenBuildFile.setProjectName(LibertyMavenUtil.getProjectNameFromPom(virtualFile));
-                    mavenBuildFile.setProjectType(Constants.LIBERTY_MAVEN_PROJECT);
+                    mavenBuildFile.setProjectType(Constants.ProjectType.LIBERTY_MAVEN_PROJECT);
                     buildFiles.add(mavenBuildFile);
                 } catch (Exception e) {
                     LOGGER.error(String.format("Could not resolve project name from pom.xml: %s", virtualFile), e.getMessage());
@@ -120,7 +120,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             } else {
                 try {
                     gradleBuildFile.setProjectName(LibertyGradleUtil.getProjectName(virtualFile));
-                    gradleBuildFile.setProjectType(Constants.LIBERTY_GRADLE_PROJECT);
+                    gradleBuildFile.setProjectType(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
                     buildFiles.add(gradleBuildFile);
                 } catch (Exception e) {
                     LOGGER.error(String.format("Could not resolve project name from settings.gradle: %s", virtualFile), e.getMessage());

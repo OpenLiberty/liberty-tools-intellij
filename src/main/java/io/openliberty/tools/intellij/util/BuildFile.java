@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,15 +21,19 @@ public class BuildFile {
 
     private String projectName;
 
-    public String getProjectType() {
+    public Constants.ProjectType getProjectType() {
         return projectType;
     }
 
-    public void setProjectType(String projectType) {
+    /**
+     * Liberty project type must be Gradle or Maven.
+     * @param projectType
+     */
+    public void setProjectType(Constants.ProjectType projectType) {
         this.projectType = projectType;
     }
 
-    private String projectType;
+    private Constants.ProjectType projectType;
 
     public BuildFile(boolean validBuildFile, boolean validContainerVersion) {
         this.validBuildFile = validBuildFile;
@@ -58,6 +62,4 @@ public class BuildFile {
     public void setProjectName(String projectName) {
         this.projectName = projectName;
     }
-
-
 }
