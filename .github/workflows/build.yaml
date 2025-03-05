@@ -141,6 +141,7 @@ jobs:
         if: ${{ inputs.useLocalPlugin == true }}
         working-directory: ./lsp4ij
         run: bash ./gradlew buildPlugin
+      # This step is retained to support the 24.0.9 tag running in the cron job, as it requires an unzipped LSP4IJ.
       - name: 'Unzip lsp4ij file'
         if: ${{ inputs.useLocalPlugin == true }}
         working-directory: ./lsp4ij/build/distributions
