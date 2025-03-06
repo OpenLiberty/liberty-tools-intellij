@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2025 Red Hat Inc. and others.
+* Copyright (c) 2019, 2023 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,10 +21,11 @@ import com.intellij.openapi.roots.LanguageLevelProjectExtension;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.java.LanguageLevel;
-import com.intellij.testFramework.IndexingTestUtil;
 import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
 import com.intellij.testFramework.builders.ModuleFixtureBuilder;
 import com.intellij.testFramework.fixtures.*;
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -73,17 +74,17 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
             FileUtils.copyDirectory(projectDir, moduleDir);
             VirtualFile pomFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(moduleDir).findFileByRelativePath("pom.xml");
             pomFiles.add(pomFile);
+
         }
-        // Calling the non-suspending importProjects method instead of the Kotlin suspending function
-        // importProjectsAsync(file: VirtualFile) to prevent blocking unit tests starting from IntelliJ version 2024.2.
-        importProjects(pomFiles.toArray(VirtualFile[]::new));
+        // Make a blocking call to the Kotlin suspend function: importProjectsAsync().
+        BuildersKt.runBlocking(
+                EmptyCoroutineContext.INSTANCE,
+                (scope, continuation) -> importProjectsAsync(pomFiles.toArray(VirtualFile[]::new), continuation)
+        );
         Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
         for (Module module : modules) {
             setupJdkForModule(module.getName());
         }
-        // Starting from IntelliJ 2024.2, indexing runs asynchronously in a background thread, https://plugins.jetbrains.com/docs/intellij/testing-faq.html#how-to-handle-indexing.
-        // Use the following method to ensure indexes are fully populated before proceeding.
-        IndexingTestUtil.waitUntilIndexesAreReady(project);
         // REVISIT: After calling setupJdkForModule() initialization appears to continue in the background
         // and a may cause a test to intermittently fail if it accesses the module too early. A 10-second wait
         // is hopefully long enough but would be preferable to synchronize on a completion event if one is
