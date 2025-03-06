@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests that use a single module non Liberty Tools compliant REST Gradle project.
  */
@@ -23,12 +25,12 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR).toAbsolutePath().toString();
 
     /**
      * Single module REST project that lacks the configuration to be recognized by Liberty tools.
      */
-    private static final String SM_NLT_REST_PROJECT_NAME = "singleModGradleRESTNoLTXmlCfg";
+    private static final String SM_NLT_REST_PROJECT_NAME = GRADLE_NLT_PROJECT;
 
     /**
      * Prepares the environment for test execution.
@@ -41,8 +43,8 @@ public class GradleSingleModNLTRestProjectTest extends SingleModNLTRestProjectTe
     GradleSingleModNLTRestProjectTest() {
         setProjectsDirPath(PROJECTS_PATH);
         setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
-        setBuildFileName("build.gradle");
-        setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "gradle").toAbsolutePath().toString());
+        setBuildFileName(GRADLE_BUILD_FILE);
+        setHelperFilesDirPath(Paths.get(NLT_GRADLE_PROJECT_PATH).toAbsolutePath().toString());
     }
 
     /**

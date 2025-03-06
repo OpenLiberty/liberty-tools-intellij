@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests that use a single module non Liberty Tools compliant REST Maven project.
  */
@@ -21,12 +23,12 @@ public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTes
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(MAVEN_PROJECT_PATH).toAbsolutePath().toString();
 
     /**
      * Single module REST project that lacks the configuration to be recognized by Liberty tools.
      */
-    private static final String SM_NLT_REST_PROJECT_NAME = "singleModMavenRESTNoLTXmlCfg";
+    private static final String SM_NLT_REST_PROJECT_NAME = MAVEN_NLT_PROJECT;
 
     /**
      * Prepares the environment for test execution.
@@ -39,7 +41,7 @@ public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTes
     MavenSingleModNLTRestProjectTest() {
         setProjectsDirPath(PROJECTS_PATH);
         setSmNLTRestProjectName(SM_NLT_REST_PROJECT_NAME);
-        setBuildFileName("pom.xml");
-        setHelperFilesDirPath(Paths.get("src", "test", "resources", "files", "smNLTRestProject", "maven").toAbsolutePath().toString());
+        setBuildFileName(MAVEN_BUILD_FILE);
+        setHelperFilesDirPath(Paths.get(NLT_MAVEN_PROJECT_PATH).toAbsolutePath().toString());
     }
 }
