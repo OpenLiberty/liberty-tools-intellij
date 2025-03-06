@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests Liberty Tools actions using multiple MicroProfile projects: one is a Gradle project, and the other is a Maven project. The tests are executed in the Maven project.
  */
@@ -26,37 +28,37 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     /**
      * The MicroProfile project name from the multiple projects used for running tests.
      */
-    private static final String MP_PROJECT_NAME = "singleModMavenMP";
+    private static final String MP_PROJECT_NAME = MAVEN_MP_PROJECT;
 
     /**
      * The path of the folder containing two projects.
      */
-    private static final String MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project").toAbsolutePath().toString();
+    private static final String MULTIPLE_PROJECTS_PATH = Paths.get(MULTIPLE_PRO_FOLDER).toAbsolutePath().toString();
 
     /**
      * The original path of the parent directory that containing the test projects.
      */
-    private static final String MULTIPLE_PROJECTS_PATH_PARENT = Paths.get("src", "test", "resources", "projects").toAbsolutePath().toString();
+    private static final String MULTIPLE_PROJECTS_PATH_PARENT = Paths.get(MULTIPLE_TEST_PRO_PATH).toAbsolutePath().toString();
 
     /**
      * The original path of the gradle project.
      */
-    private static final String GRADLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle", "singleModGradleMP").toAbsolutePath().toString();
+    private static final String GRADLE_PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR, GRADLE_MP_PROJECT).toAbsolutePath().toString();
 
     /**
      * The original path of the maven project.
      */
-    private static final String MAVEN_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven", "singleModMavenMP").toAbsolutePath().toString();
+    private static final String MAVEN_PROJECTS_PATH = Paths.get(MAVEN_PROJECT_PATH, MAVEN_MP_PROJECT).toAbsolutePath().toString();
 
     /**
      * The new path of the gradle project.
      */
-    private static final String GRADLE_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModGradleMP").toAbsolutePath().toString();
+    private static final String GRADLE_MULTIPLE_PROJECTS_PATH = Paths.get(MULTIPLE_PRO_FOLDER, GRADLE_MP_PROJECT).toAbsolutePath().toString();
 
     /**
      * The new path of the maven project.
      */
-    private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "multiple-project", "singleModMavenMP").toAbsolutePath().toString();
+    private static final String MAVEN_MULTIPLE_PROJECTS_PATH = Paths.get(MULTIPLE_PRO_FOLDER, MAVEN_MP_PROJECT).toAbsolutePath().toString();
 
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
@@ -114,14 +116,14 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     MavenMPMultipleProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(MULTIPLE_PROJECTS_PATH);
-        setTestReportPath(Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
+        setTestReportPath(Paths.get(MULTIPLE_PROJECTS_PATH, MP_PROJECT_NAME, INDEX_HTML_PATH));
         setSmMPProjectName(MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath(Paths.get("target", "liberty").toString());
-        setBuildFileName("pom.xml");
+        setBuildFileName(MAVEN_BUILD_FILE);
         setBuildFileOpenCommand("Liberty: View pom.xml");
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");

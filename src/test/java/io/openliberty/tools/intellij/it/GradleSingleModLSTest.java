@@ -13,17 +13,19 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
 
     /**
      * Application Name
      */
-    public static String PROJECT_NAME = "singleModGradleMP";
+    public static String PROJECT_NAME = GRADLE_MP_PROJECT;
 
     /**
      * The path to the folder containing the test projects.
      */
-    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    public static String PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR).toAbsolutePath().toString();
 
     /**
      * Application resoruce URL.
