@@ -109,24 +109,16 @@ public class UIBotTestUtils {
 
         remoteRobot.runJs("""
                 importClass(com.intellij.openapi.application.ApplicationManager);
-                importClass(com.intellij.ide.impl.OpenProjectTask);
+                importClass(com.intellij.ide.impl.ProjectUtil);
                 
-                const projectManager = com.intellij.openapi.project.ex.ProjectManagerEx.getInstanceEx();
-                let task;
-                try { 
-                    task = OpenProjectTask.build();
-                } catch(e) {
-                    task = OpenProjectTask.newProject();
-                }
                 const path = new java.io.File("%s").toPath();
+                            const openProject = new Runnable({
+                                run: function() {
+                                    ProjectUtil.openOrImport(path.toString(), null, false);
+                                }
+                            });
                 
-                const openProjectFunction = new Runnable({
-                    run: function() {
-                        projectManager.openProject(path, task);
-                    }
-                });
-                
-                ApplicationManager.getApplication().invokeLater(openProjectFunction);
+                ApplicationManager.getApplication().invokeLater(openProject);
                 """.formatted(projectFullPath));
 
         // Wait for the project frame to open, and make sure a few basic UI items are showing.
