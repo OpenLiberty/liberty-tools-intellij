@@ -92,6 +92,16 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         }
     }
 
+    @Override
+    public String getCustomWLPPath() {
+        return "";
+    }
+
+    @Override
+    public String getTargetDir() {
+        return "";
+    }
+
     GradleSingleModMPSIDProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(PROJECTS_PATH_NEW);

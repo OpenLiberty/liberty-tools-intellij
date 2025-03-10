@@ -152,4 +152,14 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
     }
+
+    @Override
+    public String getCustomWLPPath() {
+        return "";
+    }
+
+    @Override
+    public String getTargetDir() {
+        return "";
+    }
 }
