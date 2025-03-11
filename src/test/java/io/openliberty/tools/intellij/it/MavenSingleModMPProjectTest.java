@@ -80,6 +80,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setBuildDirectory("target");
     }
     /**
      * Deletes test reports.
@@ -104,38 +105,5 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
-    }
-
-    @Override
-    public String getCustomWLPPath() {
-        String wlpPath = "";
-        try {
-            Path configPath = Paths.get(PROJECTS_PATH,SM_MP_PROJECT_NAME, TARGET_DIR, "liberty-plugin-config.xml");
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse(configPath.toString());
-            document.getDocumentElement().normalize();
-
-            NodeList nodeList = document.getElementsByTagName("serverDirectory");
-            if (nodeList.getLength() > 0) {
-                Element element = (Element) nodeList.item(0);
-                String serverDirectory = element.getTextContent();
-
-                /* Trim value starts from /wlp to get the exact custom installation path of server */
-                Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
-                Matcher matcher = pattern.matcher(serverDirectory);
-                wlpPath = (matcher.find()) ? matcher.group(1) : "";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Paths.get(wlpPath).toAbsolutePath().toString();
-    }
-
-    @Override
-    public String getTargetDir() {
-        return TARGET_DIR;
     }
 }

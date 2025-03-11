@@ -18,18 +18,24 @@ import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -128,6 +134,8 @@ public abstract class SingleModMPProjectTestCommon {
      * Check for the single project or multiple projects
      */
     private boolean isMultiple = false;
+
+    private String buildDirectory = null;
 
     /**
      * Returns the path where the Liberty server was installed.
@@ -279,6 +287,13 @@ public abstract class SingleModMPProjectTestCommon {
     }
     public void setProjectTypeIsMultiple(boolean value) {
         isMultiple = value;
+    }
+
+    public String getBuildDirectory() {
+        return buildDirectory;
+    }
+    public void setBuildDirectory(String buildDir) {
+        buildDirectory = buildDir;
     }
 
     /**
@@ -1343,7 +1358,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        deleteBuildDirectory();
+        cleanTerminal();
 
         // Add a new Liberty config.
         String configName = "toolBarCustomDebug-" + getSmMPProjectName();
@@ -1363,6 +1378,7 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+            UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
@@ -1417,7 +1433,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        deleteBuildDirectory();
+        cleanTerminal();
 
         // Add a new Liberty config.
         String configName = "menuCustomDebug-" + getSmMPProjectName();
@@ -1434,6 +1450,7 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+            UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
@@ -1470,7 +1487,7 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     private boolean checkFileExists(String fileName) {
-        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir(), fileName);
+        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
         boolean fileExists = false;
         int maxAttempts = 5;
         int attempts = 0;
@@ -1504,32 +1521,6 @@ public abstract class SingleModMPProjectTestCommon {
             oldFile.renameTo(newFile);
         }
     }
-
-    private void deleteBuildDirectory() {
-        Path folderToDelete = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getTargetDir());
-
-        try {
-            // Recursively delete all files and directories
-            Files.walkFileTree(folderToDelete, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (!file.getFileName().toString().equals(getTargetDir())) {
-                        Files.delete(file);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir); // Delete directory after all its contents are deleted
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Prepares the environment to run the tests.
@@ -1736,7 +1727,31 @@ public abstract class SingleModMPProjectTestCommon {
         TestUtils.validateTestReportExists(testReportPath, testReportPath);
     }
 
-    public abstract String getCustomWLPPath();
+    public String getCustomWLPPath() {
+        String wlpPath = "";
+        try {
+            Path configPath = Paths.get(getProjectsDirPath(),getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml");
 
-    public abstract String getTargetDir();
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(configPath.toString());
+            document.getDocumentElement().normalize();
+
+            NodeList nodeList = document.getElementsByTagName("serverDirectory");
+            if (nodeList.getLength() > 0) {
+                Element element = (Element) nodeList.item(0);
+                String serverDirectory = element.getTextContent();
+
+                /* Trim value starts from /wlp to get the exact custom installation path of server */
+                Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
+                Matcher matcher = pattern.matcher(serverDirectory);
+                wlpPath = (matcher.find()) ? matcher.group(1) : "";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Paths.get(wlpPath).toAbsolutePath().toString();
+    }
+
 }

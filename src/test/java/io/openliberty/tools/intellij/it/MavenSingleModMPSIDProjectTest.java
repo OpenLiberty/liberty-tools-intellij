@@ -95,6 +95,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setBuildDirectory("target");
     }
 
     /**
@@ -120,15 +121,5 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
-    }
-
-    @Override
-    public String getCustomWLPPath() {
-        return "";
-    }
-
-    @Override
-    public String getTargetDir() {
-        return "";
     }
 }
