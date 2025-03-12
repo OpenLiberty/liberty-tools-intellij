@@ -83,20 +83,20 @@ configurations {
 
 dependencies {
 
-    implementation ('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.13.0') {
+    implementation ("org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:$lsp4mpVersion") {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation ('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1') {
+    implementation ("org.eclipse.lemminx:org.eclipse.lemminx:$lemminxVersion") {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation 'io.openliberty.tools:liberty-langserver-lemminx:2.2.1'
-    implementation ('io.openliberty.tools:liberty-langserver:2.2.1') {
+    implementation "io.openliberty.tools:liberty-langserver-lemminx:$lclsLemminxVersion"
+    implementation ("io.openliberty.tools:liberty-langserver:$lclsVersion") {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
     }
-    implementation ('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:' + lsp4JakartaVersion) {
+    implementation ("org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:$lsp4JakartaVersion") {
         exclude group: 'org.eclipse.lsp4mp'
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
@@ -125,19 +125,20 @@ dependencies {
     testImplementation 'com.automation-remarks:video-recorder-junit5:2.0'
 
     // define jars to grab locally (if falling back to mavenLocal() repo)
-    lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.13.0:uber') {
+    lsp("org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:$lsp4mpVersion:uber") {
+        //lsp('org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:' + lsp4mpVersion + ':uber') {
         transitive = false
     }
-    lsp('org.eclipse.lemminx:org.eclipse.lemminx:0.26.1:uber') {
+    lsp("org.eclipse.lemminx:org.eclipse.lemminx:$lemminxVersion:uber") {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver-lemminx:2.2.1:jar-with-dependencies') {
+    lsp("io.openliberty.tools:liberty-langserver-lemminx:$lclsLemminxVersion:jar-with-dependencies") {
         transitive = false
     }
-    lsp('io.openliberty.tools:liberty-langserver:2.2.1:jar-with-dependencies') {
+    lsp("io.openliberty.tools:liberty-langserver:$lclsVersion:jar-with-dependencies") {
         transitive = false
     }
-    lsp('org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:' + lsp4JakartaVersion + ':jar-with-dependencies') {
+    lsp("org.eclipse.lsp4jakarta:org.eclipse.lsp4jakarta.ls:$lsp4JakartaVersion:jar-with-dependencies") {
         transitive = false
     }
     implementation files(new File(buildDir, 'server')) {
