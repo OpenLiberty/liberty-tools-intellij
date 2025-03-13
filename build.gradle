@@ -155,7 +155,7 @@ dependencies {
         // otherwise, use the specified version in the build.gradle file.
         providers.gradleProperty("useLocal").get() == 'true' ?
                 localPlugin(lsp4ijZip.absolutePath) :
-                plugin('com.redhat.devtools.lsp4ij', lsp4ijVersion)
+                plugin("com.redhat.devtools.lsp4ij:$lsp4ijVersion")
 
         pluginVerifier()
         zipSigner()
