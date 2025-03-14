@@ -121,14 +121,15 @@ public abstract class SingleModJakartaLSTestCommon {
             // validate the method signature is no longer set to public
             TestUtils.validateStringNotInFile(pathToSrc.toString(), publicString);
 
-            //there may be a diagnostic for "private" on method signature - move cursor to hover point
+            // there should be a diagnostic for "private" on method signature - move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "SystemResource2.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
 
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
 
-            // if the LS has not yet poulated the popup data, re-get the popup data
+            // if the LS has not yet populated the popup data, re-get the popup data
             for (int i = 0; i<5; i++){
                 if (foundHoverData.contains("method 'getProperties()' is never used")) {
+                    TestUtils.sleepAndIgnoreException(2);
                     UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "SystemResource2.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
                     foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
                 }
@@ -171,7 +172,7 @@ public abstract class SingleModJakartaLSTestCommon {
             // validate public signature no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), publicString);
 
-            //there should be a diagnostic - move cursor to hover point
+            // there should be a diagnostic - move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "SystemResource2.java", quickfixChooserString);
 
             // trigger and use the quickfix popup attached to the diagnostic
