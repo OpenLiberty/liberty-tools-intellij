@@ -18,6 +18,8 @@ import org.junit.jupiter.api.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
@@ -230,11 +232,11 @@ public abstract class SingleModMPLSTestCommon {
                 "considered required, however implementations may have other ways to define these URLs/URIs.Type: " +
                 "java.lang.StringValue: http://localhost:9081/data/client/service";
 
-        //mover cursor to hover point
+        // Move cursor to hover point
         UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "microprofile-config.properties", UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
-        // if the LS has not yet poulated the popup, re-get the popup data
+        // if the LS has not yet populated the popup, re-get the popup data
         for (int i = 0; i<=5; i++){
             if (hoverFoundOutcome.contains("Fetching Documentation...")) {
                 hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
@@ -244,8 +246,38 @@ public abstract class SingleModMPLSTestCommon {
             }
         }
 
-        // Validate that the hover action raised the expected hint text
-        TestUtils.validateHoverData(hoverExpectedOutcome, hoverFoundOutcome);
+        // Navigate through documentation pages
+        Set<String> visitedPages = new HashSet<>();
+        boolean encounteredBlankPage = false;
+        boolean expectedTextFound = false;
+
+        // Start iterating through the pages
+        while (visitedPages.add(hoverFoundOutcome)) {
+
+            // Check if this page is blank
+            if (hoverFoundOutcome.trim().isEmpty()) {
+                encounteredBlankPage = true;
+            }
+
+            // Check if the expected text is found
+            if (hoverFoundOutcome.contains(hoverExpectedOutcome)) {
+                expectedTextFound = true;
+            }
+
+            // Move to the next page
+            UIBotTestUtils.clickOnForwardButton(remoteRobot);
+            hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
+        }
+
+        // If Expected text is not found throw error.
+        if (!expectedTextFound) {
+            throw new AssertionError("Error: Expected hover text not found on any documentation page.");
+        }
+
+        // If any blank page was encountered, throw an error
+        if (encounteredBlankPage) {
+            throw new AssertionError("Error: Encountered a blank hover documentation page during navigation.");
+        }
     }
 
     /**
