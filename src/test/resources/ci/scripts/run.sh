@@ -33,11 +33,21 @@ prefetchDependencies() {
     # Build the product to prime for product dependencies.
     ./gradlew build -x test
 
+    # Identifies Jetbrains plugin install directory
+    local pluginInstallDir
+    pluginInstallDir=$(findJetBrainsPluginDir "liberty-tools-intellij")
+
     # Run through dev mode server install/create and feature installation for the Maven app.
     cd "src/test/resources/projects/maven/singleModMavenMP"
     ./mvnw liberty:install-server -ntp
     ./mvnw liberty:create
     ./mvnw liberty:install-feature -ntp
+
+    # Setup custom wlp install in JetBrains plugin directory
+    configureCustomWlpInstall "$pluginInstallDir"
+
+    # Creates custom pom.xml file corresponding to custom wlp install location
+    createCustomPom "$pluginInstallDir"
 
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"
@@ -46,9 +56,148 @@ prefetchDependencies() {
     ./gradlew libertyCreate
     ./gradlew installFeature
 
+    # Creates custom build.gradle file corresponding to custom wlp install location
+    createCustomBuildGradle "$pluginInstallDir"
+
     # Go back to the working dir.
     cd "$workingDir"
 }
+
+# Configure WLP install path
+configureCustomWlpInstall() {
+    local pluginInstallDir="$1"
+
+    # Define the custom directory inside the plugin
+    local targetDir="$pluginInstallDir/customDir"
+
+    if [ -n "$pluginInstallDir" ]; then
+        copyWlpFolder "target/liberty/wlp" "$targetDir"
+    else
+        echo "JetBrains plugin directory not found."
+    fi
+}
+
+# Copy WLP folder from target/liberty/wlp to plugin install directory
+copyWlpFolder() {
+    local sourceDir="$1"
+    local destinationDir="$2"
+
+    # Ensure the source exists before copying
+    if [ -d "$sourceDir" ]; then
+        mkdir -p "$destinationDir"
+        cp -r "$sourceDir" "$destinationDir"
+        echo "wlp folder copied successfully to $destinationDir"
+    else
+        echo "Source wlp folder does not exist. Make sure Liberty is installed."
+    fi
+}
+
+# Find Jetbrains plugin install directory
+findJetBrainsPluginDir() {
+    local pluginName="$1"
+    local baseDir
+
+    case "$(uname -s)" in
+        Linux)
+            baseDir="$HOME/.local/share/JetBrains"
+            ;;
+        Darwin)
+            baseDir="$HOME/Library/Application Support/JetBrains"
+            ;;
+        CYGWIN*|MINGW32*|MSYS*|MINGW*)
+            baseDir="$APPDATA/JetBrains"
+            ;;
+        *)
+            echo "Unsupported OS"
+            return 1
+            ;;
+    esac
+
+    # Search for the plugin directory
+    local pluginPath
+    pluginPath=$(find "$baseDir" -type d -name "$pluginName" 2>/dev/null | head -n 1)
+
+    echo "$pluginPath"
+}
+
+# Creates custom pom.xml file corresponding to custom wlp install location
+createCustomPom() {
+    local pluginInstallDir="$1"
+    local pomFile="pom.xml"
+    local customPomFile="custom-pom.xml"
+
+    # Navigate to the correct project directory
+    cd "src/test/resources/projects/maven/singleModMavenMP"
+
+    if [ -f "$pomFile" ]; then
+        cp "$pomFile" "$customPomFile"
+
+        # Define paths inside the plugin directory
+        local wlpDir="${pluginInstallDir}/customDir/wlp"
+        local runtimeDir="${pluginInstallDir}/customDir"
+        local userDir="${pluginInstallDir}/customDir/wlp/usr"
+
+        # Process the file correctly
+        awk -v wlp="$wlpDir" -v runtime="$runtimeDir" -v user="$userDir" '
+            BEGIN { insidePlugin = 0; insideConfig = 0; libertyPlugin = 0 }
+
+            /<plugin>/ { insidePlugin = 1 }
+            /<\/plugin>/ { insidePlugin = 0; libertyPlugin = 0 }
+
+            /<groupId>io.openliberty.tools<\/groupId>/ && insidePlugin { libertyPlugin = 1 }
+            /<artifactId>liberty-maven-plugin<\/artifactId>/ && insidePlugin && libertyPlugin { libertyPlugin = 2 }
+
+            /<configuration>/ && libertyPlugin == 2 { insideConfig = 1 }
+            /<\/configuration>/ && libertyPlugin == 2 && insideConfig {
+                print "                    <installDirectory>" wlp "</installDirectory>";
+                print "                    <runtimeInstallDirectory>" runtime "</runtimeInstallDirectory>";
+                print "                    <userDirectory>" user "</userDirectory>";
+                insideConfig = 0
+            }
+
+            { print }
+        ' "$pomFile" > "$customPomFile"
+
+        echo "Custom POM file created: $(pwd)/$customPomFile"
+    else
+        echo "Original pom.xml not found!"
+    fi
+}
+
+# Creates custom build.gradle file corresponding to custom wlp install location
+createCustomBuildGradle() {
+    local pluginInstallDir="$1"
+    local gradleFile="build.gradle"
+    local customGradleFile="custom-build.gradle"
+
+    # Navigate to the correct Gradle project directory
+    cd "src/test/resources/projects/gradle/singleModGradleMP"
+
+    if [ -f "$gradleFile" ]; then
+        cp "$gradleFile" "$customGradleFile"
+
+        # Define paths inside the plugin directory
+        local wlpDir="${pluginInstallDir}/customDir/wlp"
+        local userDir="${pluginInstallDir}/customDir/wlp/usr"
+
+        # Modify the build.gradle file using awk
+        awk -v wlp="$wlpDir" -v user="$userDir" '
+            /ext \{/ {
+                print;
+                print "    installDir = \"" wlp "\"";
+                print "    userDir = \"" user "\"";
+                next;
+            }
+            { print }
+        ' "$gradleFile" > "$customGradleFile"
+
+        echo "Custom build.gradle file created: $(pwd)/$customGradleFile"
+    else
+        echo "Original build.gradle not found!"
+    fi
+}
+
+
 
 # Gathers resource usage information.
 gatherResourceUsageData() {
