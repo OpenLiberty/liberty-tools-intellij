@@ -2976,6 +2976,11 @@ public class UIBotTestUtils {
         TestUtils.sleepAndIgnoreException(5);
     }
 
+    /**
+     * Clicks on the Forward arrow button in the UI if it is available.
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
     public static void clickOnForwardButton(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
