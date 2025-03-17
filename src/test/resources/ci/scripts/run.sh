@@ -197,7 +197,35 @@ createCustomBuildGradle() {
     fi
 }
 
+cleanupCustomWLPDir() {
+    local pluginDir="$1"
+    local targetDir="$pluginDir/customDir"
 
+    if [ -d "$targetDir" ]; then
+        rm -rf "$targetDir"
+        echo "Cleaned up: $targetDir"
+    else
+        echo "No cleanup needed, $targetDir does not exist."
+    fi
+
+    # Remove the custom-pom.xml file
+    local customPomFile="src/test/resources/projects/maven/singleModMavenMP/custom-pom.xml"
+    if [ -f "$customPomFile" ]; then
+        rm "$customPomFile"
+        echo "Deleted custom POM file: $customPomFile"
+    else
+        echo "No custom POM file to delete."
+    fi
+
+    # Remove the custom-build.gradle file
+    local customGradleFile="src/test/resources/projects/gradle/singleModGradleMP/custom-build.gradle"
+    if [ -f "$customGradleFile" ]; then
+        rm "$customGradleFile"
+        echo "Deleted custom build.gradle file: $customGradleFile"
+    else
+        echo "No custom build.gradle file to delete."
+    fi
+}
 
 # Gathers resource usage information.
 gatherResourceUsageData() {
@@ -376,8 +404,12 @@ main() {
     if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${testRC}."
         gatherDebugData "$currentLoc"
+        cleanupCustomWLPDir "$(findJetBrainsPluginDir "liberty-tools-intellij")"
         exit -1
     fi
+
+    # Always clean up the plugin directory before exiting
+    cleanupCustomWLPDir "$(findJetBrainsPluginDir "liberty-tools-intellij")"
 }
 
 main "$@"
