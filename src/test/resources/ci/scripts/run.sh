@@ -59,7 +59,7 @@ prefetchDependencies() {
     cd "$workingDir"
 }
 
-# Configure WLP install path
+# Configure custom WLP install path
 configureCustomWlpInstall() {
     # Define the custom directory inside the user home
     local targetDir="$HOME/customDir"
