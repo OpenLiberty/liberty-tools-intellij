@@ -45,11 +45,6 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     private final Path pathToUTReport35 = Paths.get(PROJECTS_PATH, SM_MP_PROJECT_NAME, "target", "reports", "surefire.html");
 
     /**
-     * Target directory
-     */
-    private final String TARGET_DIR = "target";
-
-    /**
      * Prepares the environment for test execution.
      */
     @BeforeAll
