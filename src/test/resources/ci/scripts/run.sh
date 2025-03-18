@@ -39,15 +39,11 @@ prefetchDependencies() {
     ./mvnw liberty:create
     ./mvnw liberty:install-feature -ntp
 
-    # Identifies Jetbrains plugin install directory
-    local pluginInstallDir
-    pluginInstallDir=$(findJetBrainsPluginDir "liberty-tools-intellij")
-
-    # Setup custom wlp install in JetBrains plugin directory
-    configureCustomWlpInstall "$pluginInstallDir"
+    # Setup custom wlp install in user home directory
+    configureCustomWlpInstall
 
     # Creates custom pom.xml file corresponding to custom wlp install location
-    createCustomPom "$pluginInstallDir" "$workingDir"
+    createCustomPom "$workingDir"
 
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"
@@ -57,7 +53,7 @@ prefetchDependencies() {
     ./gradlew installFeature
 
     # Creates custom build.gradle file corresponding to custom wlp install location
-    createCustomBuildGradle "$pluginInstallDir" "$workingDir"
+    createCustomBuildGradle "$workingDir"
 
     # Go back to the working dir.
     cd "$workingDir"
@@ -65,19 +61,17 @@ prefetchDependencies() {
 
 # Configure WLP install path
 configureCustomWlpInstall() {
-    local pluginInstallDir="$1"
+    # Define the custom directory inside the user home
+    local targetDir="$HOME/customDir"
 
-    # Define the custom directory inside the plugin
-    local targetDir="$pluginInstallDir/customDir"
-
-    if [ -n "$pluginInstallDir" ]; then
+    if [ -n "$HOME" ]; then
         copyWlpFolder "target/liberty/wlp" "$targetDir"
     else
-        echo "JetBrains plugin directory not found."
+        echo "$HOME directory not found."
     fi
 }
 
-# Copy WLP folder from target/liberty/wlp to plugin install directory
+# Copy WLP folder from target/liberty/wlp to custom directory
 copyWlpFolder() {
     local sourceDir="$1"
     local destinationDir="$2"
@@ -92,48 +86,9 @@ copyWlpFolder() {
     fi
 }
 
-# Find Jetbrains plugin install directory
-findJetBrainsPluginDir() {
-    local pluginName="$1"
-    local baseDir
-
-    case "$(uname -s)" in
-        Linux)
-            baseDir="$HOME/.local/share/JetBrains"
-            ;;
-        Darwin)
-            baseDir="$HOME/Library/Application Support/JetBrains"
-            ;;
-        CYGWIN*|MINGW32*|MSYS*|MINGW*)
-            baseDir="$APPDATA/JetBrains"
-            ;;
-        *)
-            echo "Unsupported OS"
-            return 1
-            ;;
-    esac
-
-    # Debugging: Check if the base directory exists
-    if [ ! -d "$baseDir" ]; then
-        echo "Base directory does not exist: $baseDir"
-        return 1
-    fi
-
-    # Debugging: List contents of the directory
-    echo "Listing contents of $baseDir:"
-    ls -al "$baseDir"
-
-    # Search for the plugin directory
-    local pluginPath
-    pluginPath=$(find "$baseDir" -type d -name "$pluginName" 2>/dev/null | head -n 1)
-
-    echo "$pluginPath"
-}
-
 # Creates custom pom.xml file corresponding to custom wlp install location
 createCustomPom() {
-    local pluginInstallDir="$1"
-    local workingDir="$2"
+    local workingDir="$1"
 
     local pomFile="pom.xml"
     local customPomFile="custom-pom.xml"
@@ -145,10 +100,10 @@ createCustomPom() {
     if [ -f "$pomFile" ]; then
         cp "$pomFile" "$customPomFile"
 
-        # Define paths inside the plugin directory
-        local wlpDir="${pluginInstallDir}/customDir/wlp"
-        local runtimeDir="${pluginInstallDir}/customDir"
-        local userDir="${pluginInstallDir}/customDir/wlp/usr"
+        # Define paths inside the user home directory
+        local wlpDir="$HOME/customDir/wlp"
+        local runtimeDir="$HOME/customDir"
+        local userDir="$HOME/customDir/wlp/usr"
 
         # Process the file correctly
         awk -v wlp="$wlpDir" -v runtime="$runtimeDir" -v user="$userDir" '
@@ -179,8 +134,7 @@ createCustomPom() {
 
 # Creates custom build.gradle file corresponding to custom wlp install location
 createCustomBuildGradle() {
-    local pluginInstallDir="$1"
-    local workingDir="$2"
+    local workingDir="$1"
 
     local gradleFile="build.gradle"
     local customGradleFile="custom-build.gradle"
@@ -192,9 +146,9 @@ createCustomBuildGradle() {
     if [ -f "$gradleFile" ]; then
         cp "$gradleFile" "$customGradleFile"
 
-        # Define paths inside the plugin directory
-        local wlpDir="${pluginInstallDir}/customDir/wlp"
-        local userDir="${pluginInstallDir}/customDir/wlp/usr"
+        # Define paths inside the user home directory
+        local wlpDir="$HOME/customDir/wlp"
+        local userDir="$HOME/customDir/wlp/usr"
 
         # Modify the build.gradle file using awk
         awk -v wlp="$wlpDir" -v user="$userDir" '
@@ -214,8 +168,7 @@ createCustomBuildGradle() {
 }
 
 cleanupCustomWLPDir() {
-    local pluginDir="$1"
-    local targetDir="$pluginDir/customDir"
+    local targetDir="$HOME/customDir"
 
     if [ -d "$targetDir" ]; then
         rm -rf "$targetDir"
@@ -420,12 +373,12 @@ main() {
     if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${testRC}."
         gatherDebugData "$currentLoc"
-        cleanupCustomWLPDir "$(findJetBrainsPluginDir "liberty-tools-intellij")"
+        cleanupCustomWLPDir
         exit -1
     fi
 
-    # Always clean up the plugin directory before exiting
-    cleanupCustomWLPDir "$(findJetBrainsPluginDir "liberty-tools-intellij")"
+    # Always clean up the custom wlp directory before exiting
+    cleanupCustomWLPDir
 }
 
 main "$@"
