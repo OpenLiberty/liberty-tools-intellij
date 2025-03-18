@@ -47,7 +47,7 @@ prefetchDependencies() {
     configureCustomWlpInstall "$pluginInstallDir"
 
     # Creates custom pom.xml file corresponding to custom wlp install location
-    createCustomPom "$pluginInstallDir"
+    createCustomPom "$pluginInstallDir" "$workingDir"
 
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"
@@ -57,7 +57,7 @@ prefetchDependencies() {
     ./gradlew installFeature
 
     # Creates custom build.gradle file corresponding to custom wlp install location
-    createCustomBuildGradle "$pluginInstallDir"
+    createCustomBuildGradle "$pluginInstallDir" "$workingDir"
 
     # Go back to the working dir.
     cd "$workingDir"
@@ -123,10 +123,13 @@ findJetBrainsPluginDir() {
 # Creates custom pom.xml file corresponding to custom wlp install location
 createCustomPom() {
     local pluginInstallDir="$1"
+    local workingDir="$2"
+
     local pomFile="pom.xml"
     local customPomFile="custom-pom.xml"
 
     # Navigate to the correct project directory
+    cd "$workingDir"
     cd "src/test/resources/projects/maven/singleModMavenMP"
 
     if [ -f "$pomFile" ]; then
@@ -167,10 +170,13 @@ createCustomPom() {
 # Creates custom build.gradle file corresponding to custom wlp install location
 createCustomBuildGradle() {
     local pluginInstallDir="$1"
+    local workingDir="$2"
+
     local gradleFile="build.gradle"
     local customGradleFile="custom-build.gradle"
 
     # Navigate to the correct Gradle project directory
+    cd "$workingDir"
     cd "src/test/resources/projects/gradle/singleModGradleMP"
 
     if [ -f "$gradleFile" ]; then
