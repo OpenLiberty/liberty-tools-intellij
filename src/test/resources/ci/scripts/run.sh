@@ -33,15 +33,15 @@ prefetchDependencies() {
     # Build the product to prime for product dependencies.
     ./gradlew build -x test
 
-    # Identifies Jetbrains plugin install directory
-    local pluginInstallDir
-    pluginInstallDir=$(findJetBrainsPluginDir "liberty-tools-intellij")
-
     # Run through dev mode server install/create and feature installation for the Maven app.
     cd "src/test/resources/projects/maven/singleModMavenMP"
     ./mvnw liberty:install-server -ntp
     ./mvnw liberty:create
     ./mvnw liberty:install-feature -ntp
+
+    # Identifies Jetbrains plugin install directory
+    local pluginInstallDir
+    pluginInstallDir=$(findJetBrainsPluginDir "liberty-tools-intellij")
 
     # Setup custom wlp install in JetBrains plugin directory
     configureCustomWlpInstall "$pluginInstallDir"
