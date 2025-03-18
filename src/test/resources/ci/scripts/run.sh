@@ -113,6 +113,16 @@ findJetBrainsPluginDir() {
             ;;
     esac
 
+    # Debugging: Check if the base directory exists
+    if [ ! -d "$baseDir" ]; then
+        echo "Base directory does not exist: $baseDir"
+        return 1
+    fi
+
+    # Debugging: List contents of the directory
+    echo "Listing contents of $baseDir:"
+    ls -al "$baseDir"
+
     # Search for the plugin directory
     local pluginPath
     pluginPath=$(find "$baseDir" -type d -name "$pluginName" 2>/dev/null | head -n 1)
