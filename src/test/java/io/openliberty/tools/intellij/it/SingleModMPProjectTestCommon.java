@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
@@ -1732,7 +1733,8 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             Path configPath = Paths.get(getProjectsDirPath(),getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml");
 
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
+            documentBuilderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(configPath.toString());
             document.getDocumentElement().normalize();
