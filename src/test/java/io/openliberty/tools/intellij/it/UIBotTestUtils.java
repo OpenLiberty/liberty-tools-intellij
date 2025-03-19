@@ -829,7 +829,8 @@ public class UIBotTestUtils {
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
+            System.out.println("//////// hover Attempt "+ i +" ------------");
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -865,7 +866,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(20);
+                TestUtils.sleepAndIgnoreException(5);
                 // click on center of editor pane - allow hover to work on next attempt
                 editorNew.click();
             }
@@ -895,7 +896,8 @@ public class UIBotTestUtils {
         Point originPt = new Point(1, 1);
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
+            System.out.println("//////// hover Attempt "+ i +" ------------");
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -930,7 +932,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(2);
+                TestUtils.sleepAndIgnoreException(5);
                 // click on upper left corner of editor pane - allow hover to work on next attempt
                 editorNew.click(originPt);
             }
@@ -1263,7 +1265,12 @@ public class UIBotTestUtils {
                 }
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
-                keyboard.enterText(stanzaSnippet);
+                if (remoteRobot.isWin()) {
+                    keyboard.enterText(stanzaSnippet, 200);
+                }
+                else {
+                    keyboard.enterText(stanzaSnippet);
+                }
 
                 if (completeWithPopup) {
                     // Select the appropriate completion suggestion in the pop-up window that is automatically
