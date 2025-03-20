@@ -1368,6 +1368,11 @@ public abstract class SingleModMPProjectTestCommon {
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
 
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
