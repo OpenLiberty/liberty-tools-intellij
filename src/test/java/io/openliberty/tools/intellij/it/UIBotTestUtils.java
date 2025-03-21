@@ -2443,7 +2443,7 @@ public class UIBotTestUtils {
 
         Locator locator = byXpath("//div[@class='ActionButton' and @myaction='Run (Run selected configuration)']");
         if (execMode == ExecMode.DEBUG) {
-            locator = byXpath("//div[@myicon='debug.svg']");
+            locator = byXpath("//div[@class='ActionButton' and @myicon='debug.svg']");
         }
 
         ActionButtonFixture iconButton = projectFrame.actionButton(locator, Duration.ofSeconds(10));
