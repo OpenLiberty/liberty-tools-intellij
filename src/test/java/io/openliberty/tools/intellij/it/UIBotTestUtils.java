@@ -973,33 +973,33 @@ public class UIBotTestUtils {
         for (int i = 0; i < 10; i++) {
             error = null;
             try {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        // find the location in the file to begin the stanza insertion
-        // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+                Keyboard keyboard = new Keyboard(remoteRobot);
+                // find the location in the file to begin the stanza insertion
+                // since we know this is a new empty file, go to position 1,1
+                goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
-        keyboard.enterText(snippetSubString);
+                keyboard.enterText(snippetSubString);
 
-        // Select the appropriate completion suggestion in the pop-up window that is automatically
-        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-        // and entry automatically if the completion suggestion windows has one entry only.
-        ComponentFixture namePopupWindow = projectFrame.getLookupList();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
-                "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
-                () -> namePopupWindow.hasText(snippetSubString));
+                // Select the appropriate completion suggestion in the pop-up window that is automatically
+                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                // and entry automatically if the completion suggestion windows has one entry only.
+                ComponentFixture namePopupWindow = projectFrame.getLookupList();
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
+                        "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
+                        () -> namePopupWindow.hasText(snippetSubString));
 
-        namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
+                namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
 
-        // let the auto-save function of intellij save the file before testing it
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_S);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_S);
-        }
-        break;
+                // let the auto-save function of intellij save the file before testing it
+                if (remoteRobot.isMac()) {
+                    keyboard.hotKey(VK_META, VK_S);
+                } else {
+                    // linux + windows
+                    keyboard.hotKey(VK_CONTROL, VK_S);
+                }
+                break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
 
