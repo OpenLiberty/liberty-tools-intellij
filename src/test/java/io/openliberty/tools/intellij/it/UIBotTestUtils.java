@@ -830,7 +830,6 @@ public class UIBotTestUtils {
 
         Exception error = null;
         for (int i = 0; i < 15; i++) {
-            System.out.println("//////// hover Attempt "+ i +" ------------");
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -866,7 +865,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(5);
+                TestUtils.sleepAndIgnoreException(10);
                 // click on center of editor pane - allow hover to work on next attempt
                 editorNew.click();
             }
@@ -897,7 +896,6 @@ public class UIBotTestUtils {
 
         Exception error = null;
         for (int i = 0; i < 15; i++) {
-            System.out.println("//////// hover Attempt "+ i +" ------------");
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -1265,6 +1263,7 @@ public class UIBotTestUtils {
                 }
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
+                // In Windows OS, text entry into a file is much faster compared to other operating systems, so adding some delays between each character helps ensure proper LS requests and responses.
                 if (remoteRobot.isWin()) {
                     keyboard.enterText(stanzaSnippet, 200);
                 }
