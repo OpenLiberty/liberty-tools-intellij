@@ -1371,6 +1371,9 @@ public abstract class SingleModMPProjectTestCommon {
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
+        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
+        TestUtils.sleepAndIgnoreException(3);
+
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
@@ -1379,7 +1382,6 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
-            UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
@@ -1443,6 +1445,9 @@ public abstract class SingleModMPProjectTestCommon {
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
 
+        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
+        TestUtils.sleepAndIgnoreException(3);
+
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
@@ -1451,7 +1456,6 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
-            UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
             // Stop the debugger.
             // When the debugger is attached, the debugger window should open automatically.
