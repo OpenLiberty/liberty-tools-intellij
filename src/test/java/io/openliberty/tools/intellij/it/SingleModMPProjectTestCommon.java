@@ -1372,11 +1372,11 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
         UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
-        TestUtils.sleepAndIgnoreException(3);
 
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
 
         try {
@@ -1446,11 +1446,11 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
 
         UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
-        TestUtils.sleepAndIgnoreException(3);
 
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
 
         try {
@@ -1504,7 +1504,7 @@ public abstract class SingleModMPProjectTestCommon {
                 attempts++;
                 if (attempts < maxAttempts) {
                     try {
-                        TestUtils.sleepAndIgnoreException(60);
+                        TestUtils.sleepAndIgnoreException(3);
                     } catch (Exception e) {
                         Thread.currentThread().interrupt(); // Restore interrupted status
                         break;
@@ -1512,6 +1512,7 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "checkFileExists: " + fileName + " exists!");
         return fileExists;
     }
 
