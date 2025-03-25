@@ -1494,7 +1494,7 @@ public abstract class SingleModMPProjectTestCommon {
     private boolean checkFileExists(String fileName) {
         Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
         boolean fileExists = false;
-        int maxAttempts = 5;
+        int maxAttempts = 15;
         int attempts = 0;
 
         while (!fileExists && attempts < maxAttempts) {
@@ -1504,7 +1504,7 @@ public abstract class SingleModMPProjectTestCommon {
                 attempts++;
                 if (attempts < maxAttempts) {
                     try {
-                        TestUtils.sleepAndIgnoreException(3);
+                        TestUtils.sleepAndIgnoreException(5);
                     } catch (Exception e) {
                         Thread.currentThread().interrupt(); // Restore interrupted status
                         break;
@@ -1512,7 +1512,7 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "checkFileExists: " + fileName + " exists!");
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Is file present: " + fileExists);
         return fileExists;
     }
 
@@ -1522,9 +1522,19 @@ public abstract class SingleModMPProjectTestCommon {
         Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
 
         File oldFile = new File(originalBuildFilePath.toString());
-        if(oldFile.exists()) {
-            File newFile = new File(renamedOriginalBuildFilePath.toString());
-            oldFile.renameTo(newFile);
+        File newFile = new File(renamedOriginalBuildFilePath.toString());
+
+        if (oldFile.exists()) {
+            int maxRetries = 5;
+            int retryCount = 0;
+            while (retryCount < maxRetries) {
+                if (oldFile.renameTo(newFile)) {
+                    return;
+                }
+                retryCount++;
+                TestUtils.sleepAndIgnoreException(2);
+            }
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Failed to rename file after " + maxRetries + " attempts: " + original + " -> " + renamed);
         }
     }
 
