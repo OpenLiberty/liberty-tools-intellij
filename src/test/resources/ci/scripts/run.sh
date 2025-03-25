@@ -39,9 +39,6 @@ prefetchDependencies() {
     ./mvnw liberty:create
     ./mvnw liberty:install-feature -ntp
 
-    # Setup custom wlp install in user home directory
-    configureCustomWlpInstall
-
     # Creates custom pom.xml file corresponding to custom wlp install location
     createCustomPom "$workingDir"
 
@@ -55,6 +52,9 @@ prefetchDependencies() {
     # Creates custom build.gradle file corresponding to custom wlp install location
     createCustomBuildGradle "$workingDir"
 
+    # Setup custom wlp install in user home directory
+    configureCustomWlpInstall
+
     # Go back to the working dir.
     cd "$workingDir"
 }
@@ -65,7 +65,7 @@ configureCustomWlpInstall() {
     local targetDir="$HOME/customDir"
 
     if [ -n "$HOME" ]; then
-        copyWlpFolder "target/liberty/wlp" "$targetDir"
+        copyWlpFolder "build/wlp" "$targetDir"
     else
         echo "$HOME directory not found."
     fi

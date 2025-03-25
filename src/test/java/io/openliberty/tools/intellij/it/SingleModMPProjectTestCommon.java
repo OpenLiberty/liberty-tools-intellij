@@ -1529,7 +1529,7 @@ public abstract class SingleModMPProjectTestCommon {
             int retryCount = 0;
             while (retryCount < maxRetries) {
                 if (oldFile.renameTo(newFile)) {
-                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File renamed");
+                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File renamed from " + oldFile + " to " + newFile);
                     return;
                 }
                 retryCount++;
