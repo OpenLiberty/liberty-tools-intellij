@@ -194,7 +194,7 @@ public abstract class SingleModJakartaLSTestCommon {
 
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot,projectName);
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
         // expand project directories that are specific to this test app being used by these testcases
         // must be expanded here before trying to open specific files
