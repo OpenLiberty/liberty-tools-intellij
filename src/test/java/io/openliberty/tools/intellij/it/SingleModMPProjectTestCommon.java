@@ -1359,7 +1359,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        cleanSingleModProject();
+        cleanTerminal();
 
         // Add a new Liberty config.
         String configName = "toolBarCustomDebug-" + getSmMPProjectName();
@@ -1436,7 +1436,7 @@ public abstract class SingleModMPProjectTestCommon {
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        cleanSingleModProject();
+        cleanTerminal();
 
         // Add a new Liberty config.
         String configName = "menuCustomDebug-" + getSmMPProjectName();
@@ -1700,21 +1700,6 @@ public abstract class SingleModMPProjectTestCommon {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();
             }
-            keyboard.enterText("./mvnw clean");
-        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
-            keyboard.enterText("./gradlew clean");
-        } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
-            return;
-        }
-        keyboard.enter();
-        TestUtils.sleepAndIgnoreException(10);
-    }
-
-    public void cleanSingleModProject() {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        // Perform clean
-        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
             keyboard.enterText("./mvnw clean");
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
             keyboard.enterText("./gradlew clean");
