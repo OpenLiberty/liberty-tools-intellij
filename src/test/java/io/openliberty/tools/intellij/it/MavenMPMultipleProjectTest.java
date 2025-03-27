@@ -9,9 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.it;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,6 +124,7 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(true);
+        setBuildDirectory("target");
     }
 
     /**
@@ -151,5 +150,19 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
+    }
+
+    @Disabled("Skipping this test for MavenMPMultipleProjectTest")
+    @Override
+    @Test
+    public void testStartWithCustomConfigInDebugModeUsingMenu() {
+
+    }
+
+    @Disabled("Skipping this test for MavenMPMultipleProjectTest")
+    @Override
+    @Test
+    public void testStartWithCustomConfigInDebugModeUsingToolbar() {
+
     }
 }

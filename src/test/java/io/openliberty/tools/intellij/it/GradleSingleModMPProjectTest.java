@@ -49,5 +49,6 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setBuildDirectory("build");
     }
 }

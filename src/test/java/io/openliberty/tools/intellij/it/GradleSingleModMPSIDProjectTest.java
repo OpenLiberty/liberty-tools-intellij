@@ -107,5 +107,6 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setBuildDirectory("build");
     }
 }
