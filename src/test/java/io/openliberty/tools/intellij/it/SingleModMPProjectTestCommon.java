@@ -1348,6 +1348,7 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @Test
     @Video
+    @EnabledOnOs({OS.WINDOWS})
     public void testStartWithCustomConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
@@ -1744,6 +1745,8 @@ public abstract class SingleModMPProjectTestCommon {
         try {
             Path configPath = Paths.get(getProjectsDirPath(),getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml");
 
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: configPath: " + configPath);
+
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
             documentBuilderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -1755,10 +1758,14 @@ public abstract class SingleModMPProjectTestCommon {
                 Element element = (Element) nodeList.item(0);
                 String serverDirectory = element.getTextContent();
 
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: serverDirectory: " + serverDirectory);
+
                 /* Trim value starts from /wlp to get the exact custom installation path of server */
                 Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
                 Matcher matcher = pattern.matcher(serverDirectory);
                 wlpPath = (matcher.find()) ? matcher.group(1) : "";
+
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: wlpPath: " + wlpPath);
             }
         } catch (Exception e) {
             e.printStackTrace();
