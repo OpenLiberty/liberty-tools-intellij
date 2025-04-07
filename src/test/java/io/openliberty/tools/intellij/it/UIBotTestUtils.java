@@ -830,7 +830,7 @@ public class UIBotTestUtils {
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -866,7 +866,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(20);
+                TestUtils.sleepAndIgnoreException(10);
                 // click on center of editor pane - allow hover to work on next attempt
                 editorNew.click();
             }
@@ -896,7 +896,7 @@ public class UIBotTestUtils {
         Point originPt = new Point(1, 1);
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -931,7 +931,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(2);
+                TestUtils.sleepAndIgnoreException(5);
                 // click on upper left corner of editor pane - allow hover to work on next attempt
                 editorNew.click(originPt);
             }
@@ -974,33 +974,33 @@ public class UIBotTestUtils {
         for (int i = 0; i < 10; i++) {
             error = null;
             try {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        // find the location in the file to begin the stanza insertion
-        // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+                Keyboard keyboard = new Keyboard(remoteRobot);
+                // find the location in the file to begin the stanza insertion
+                // since we know this is a new empty file, go to position 1,1
+                goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
-        keyboard.enterText(snippetSubString);
+                keyboard.enterText(snippetSubString);
 
-        // Select the appropriate completion suggestion in the pop-up window that is automatically
-        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-        // and entry automatically if the completion suggestion windows has one entry only.
-        ComponentFixture namePopupWindow = projectFrame.getLookupList();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
-                "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
-                () -> namePopupWindow.hasText(snippetSubString));
+                // Select the appropriate completion suggestion in the pop-up window that is automatically
+                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                // and entry automatically if the completion suggestion windows has one entry only.
+                ComponentFixture namePopupWindow = projectFrame.getLookupList();
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
+                        "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
+                        () -> namePopupWindow.hasText(snippetSubString));
 
-        namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
+                namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
 
-        // let the auto-save function of intellij save the file before testing it
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_S);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_S);
-        }
-        break;
+                // let the auto-save function of intellij save the file before testing it
+                if (remoteRobot.isMac()) {
+                    keyboard.hotKey(VK_META, VK_S);
+                } else {
+                    // linux + windows
+                    keyboard.hotKey(VK_CONTROL, VK_S);
+                }
+                break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
 
@@ -1264,7 +1264,13 @@ public class UIBotTestUtils {
                 }
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
-                keyboard.enterText(stanzaSnippet);
+                // In Windows OS, text entry into a file is much faster compared to other operating systems, so adding some delays between each character helps ensure proper LS requests and responses.
+                if (remoteRobot.isWin()) {
+                    keyboard.enterText(stanzaSnippet, 200);
+                }
+                else {
+                    keyboard.enterText(stanzaSnippet);
+                }
 
                 if (completeWithPopup) {
                     // Select the appropriate completion suggestion in the pop-up window that is automatically

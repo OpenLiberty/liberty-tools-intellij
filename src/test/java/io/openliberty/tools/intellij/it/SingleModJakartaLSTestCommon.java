@@ -127,6 +127,18 @@ public abstract class SingleModJakartaLSTestCommon {
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, SYSTEM_RESOURCE_2_JAVA, UIBotTestUtils.PopupType.DIAGNOSTIC);
 
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+
+            // if the LS has not yet populated the popup data, re-get the popup data
+            for (int i = 0; i<5; i++){
+                if (foundHoverData.contains("method 'getProperties()' is never used")) {
+                    TestUtils.sleepAndIgnoreException(2);
+                    UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "SystemResource2.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
+                    foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
+                }
+                else {
+                    break;
+                }
+            }
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
             UIBotTestUtils.clickOnFileTab(remoteRobot, SYSTEM_RESOURCE_2_JAVA);
 
