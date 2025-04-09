@@ -43,7 +43,7 @@ public class JakartaLanguageServer extends OSProcessStreamConnectionProvider {
             setCommandLine(new GeneralCommandLine(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
                     lsp4JakartaServerPath.getAbsolutePath(), "-DrunAsync=true")));
         } else {
-            LOGGER.warn(String.format("Unable to start Eclipse LSP4Jakarata. Eclipse LSP4Jakarta server path: %s does not exist"), lsp4JakartaServerPath);
+            LOGGER.warn(String.format("Unable to start Eclipse LSP4Jakarta. Eclipse LSP4Jakarta server path: %s does not exist"), lsp4JakartaServerPath);
         }
     }
 
