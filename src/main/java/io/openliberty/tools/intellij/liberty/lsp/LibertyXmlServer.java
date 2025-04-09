@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2025 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,18 +10,18 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.liberty.lsp;
 
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
 import io.openliberty.tools.intellij.util.Constants;
-import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
  * Start LemMinX language server with Liberty LemMinX ext
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusServer.java
  */
-public class LibertyXmlServer extends ProcessStreamConnectionProvider {
+public class LibertyXmlServer extends OSProcessStreamConnectionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibertyXmlServer.class);
 
     public LibertyXmlServer() {
@@ -51,7 +51,7 @@ public class LibertyXmlServer extends ProcessStreamConnectionProvider {
             params.add("-cp");
             params.add(lemminxServerPath.getAbsolutePath() + File.pathSeparator + libertyServerPath.getAbsolutePath());
             params.add("org.eclipse.lemminx.XMLServerLauncher");
-            setCommands(params);
+            setCommandLine(new GeneralCommandLine(params));
         } else {
             LOGGER.warn(String.format("Unable to start the LemMinX language server. LemMinX server path: %s or Liberty LemMinX extension server path: %s does not exist"), lemminxServerPath, libertyServerPath);
         }
