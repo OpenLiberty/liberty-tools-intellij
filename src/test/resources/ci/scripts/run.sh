@@ -345,7 +345,7 @@ main() {
         echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
         #./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN --tests "io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest.testStartWithCustomConfigInDebugModeUsingToolbar" | tee "$JUNIT_OUTPUT_TXT"
+        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN --tests "io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest.testStartWithCustomConfigInDebugModeUsingToolbar" | tee "$JUNIT_OUTPUT_TXT"
         testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
         set +o pipefail # reset this option
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
