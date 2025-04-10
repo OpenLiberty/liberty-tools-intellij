@@ -42,6 +42,9 @@ prefetchDependencies() {
     # Creates custom pom.xml file corresponding to custom wlp install location
     createCustomPom "$workingDir"
 
+    # Setup custom wlp install in user home directory
+    configureCustomWlpInstallMaven
+
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"
     cd "src/test/resources/projects/gradle/singleModGradleMP"
@@ -53,26 +56,53 @@ prefetchDependencies() {
     createCustomBuildGradle "$workingDir"
 
     # Setup custom wlp install in user home directory
-    configureCustomWlpInstall
+    configureCustomWlpInstallGradle
 
     # Go back to the working dir.
     cd "$workingDir"
 }
 
 # Configure custom WLP install path
-configureCustomWlpInstall() {
+configureCustomWlpInstallMaven() {
     # Define the custom directory inside the user home
     local targetDir="$HOME/customDir"
 
     if [ -n "$HOME" ]; then
-        copyWlpFolder "build/wlp" "$targetDir"
+        copyWlpFolderGradle "target/liberty/wlp" "$targetDir"
     else
         echo "$HOME directory not found."
     fi
 }
 
 # Copy WLP folder from target/liberty/wlp to custom directory
-copyWlpFolder() {
+copyWlpFolderMaven() {
+    local sourceDir="$1"
+    local destinationDir="$2"
+
+    # Ensure the source exists before copying
+    if [ -d "$sourceDir" ]; then
+        mkdir -p "$destinationDir"
+        cp -r "$sourceDir" "$destinationDir"
+        echo "wlp folder copied successfully to $destinationDir"
+    else
+        echo "Source wlp folder does not exist. Make sure Liberty is installed."
+    fi
+}
+
+# Configure custom WLP install path
+configureCustomWlpInstallGradle() {
+    # Define the custom directory inside the user home
+    local targetDir="$HOME/customDir"
+
+    if [ -n "$HOME" ]; then
+        copyWlpFolderGradle "build/wlp" "$targetDir"
+    else
+        echo "$HOME directory not found."
+    fi
+}
+
+# Copy WLP folder from build/wlp to custom directory
+copyWlpFolderGradle() {
     local sourceDir="$1"
     local destinationDir="$2"
 

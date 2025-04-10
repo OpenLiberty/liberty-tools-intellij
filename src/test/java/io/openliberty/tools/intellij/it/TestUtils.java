@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -142,22 +143,36 @@ public class TestUtils {
         int retryIntervalSecs = 5;
         int retryCount = 0;
 
+        // Check port availability before retrying
+        try (ServerSocket ss = new ServerSocket(port)) {
+            printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Port " + port + " is currently FREE before starting loop.");
+        } catch (IOException e) {
+            printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Port " + port + " is IN USE before loop. Possible leftover or parallel process.");
+        }
+
         while (retryCount < retryCountLimit) {
             retryCount++;
+//            printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Attempt #" + retryCount);
 
             HttpURLConnection conn;
             if (findConn) {
+//                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Using findHttpConnection()");
                 conn = findHttpConnection(port, resourceURI);
             } else {
+//                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Using getHttpConnection()");
                 conn = getHttpConnection(port, resourceURI);
             }
 
+//            printTrace(TraceSevLevel.INFO, "TEST-DEBUG: HttpURLConnection object is: " + conn);
+
             if (conn == null) {
+//                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Connection was NULL. Sleeping for " + retryIntervalSecs + " seconds...");
                 TestUtils.sleepAndIgnoreException(retryIntervalSecs);
                 continue;
             }
 
             try {
+                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Connection established, trying to read response...");
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String responseLine;
                 StringBuilder content = new StringBuilder();
@@ -165,32 +180,38 @@ public class TestUtils {
                     content.append(responseLine).append(System.lineSeparator());
                 }
 
+                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Received content: " + content);
+
                 if (!(content.toString().contains(expectedResponse))) {
+                    printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Expected response NOT FOUND. Retrying in " + retryIntervalSecs + " seconds.");
                     Thread.sleep(retryIntervalSecs * 1000);
                     conn.disconnect();
                     continue;
-
                 }
-                printTrace(TraceSevLevel.INFO, testName + ":validateProjectStarted. Exit. The project started successfully.");
 
+                printTrace(TraceSevLevel.INFO, testName + ":validateProjectStarted. Exit. The project started successfully.");
                 return;
+
             } catch (Exception e) {
+                printTrace(TraceSevLevel.INFO, "TEST-DEBUG: Exception during response read: " + e.getMessage());
                 TestUtils.sleepAndIgnoreException(retryIntervalSecs);
             }
         }
 
+        // Final failure block
         if (failOnNoStart) {
-            // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
-            String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
+            String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + " and port " + port + " to become available.";
+            printTrace(TraceSevLevel.ERROR, "TEST-DEBUG: Final failure - timeout reached.");
             printTrace(TraceSevLevel.ERROR, msg);
             String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
             String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
             printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
             Assertions.fail(msg);
         } else {
-            throw new RuntimeException(testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.");
+            throw new RuntimeException(testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + " and port " + port + " to become available.");
         }
     }
+
 
     /**
      * Finds an active connection object.

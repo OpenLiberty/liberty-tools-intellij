@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1354,13 +1356,78 @@ public abstract class SingleModMPProjectTestCommon {
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
         String customWLPPath = "";
 
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), "custom-"+getBuildFileName()));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG-custom-pom-original: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         renameFile(getBuildFileName(), "temp-" + getBuildFileName());
         renameFile("custom-" + getBuildFileName(), getBuildFileName());
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG-current-pom: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         cleanTerminal();
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG6-liberty-plugin-config.xml: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        deleteBuildDirectory();
+
+        /*try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG5-liberty-plugin-config.xml: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        installLibertyDirectory();
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG1-liberty-plugin-config.xml: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        deleteBuildDirectory();
+        // Start dev mode.
+//        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start", 3);
+//        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
+//        UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3, getProjectTypeIsMutliple());
+
+
+//        try {
+//            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+//            for (String line : lines) {
+//                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG2-liberty-plugin-config.xml: " + line);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         // Add a new Liberty config.
         String configName = "toolBarCustomDebug-" + getSmMPProjectName();
@@ -1369,18 +1436,38 @@ public abstract class SingleModMPProjectTestCommon {
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
 
+//        try {
+//            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+//            for (String line : lines) {
+//                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG3-liberty-plugin-config.xml: " + line);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
         UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
+            for (String line : lines) {
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG4-liberty-plugin-config.xml: " + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
             TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
 
         try {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: " + "testName: " + testName + "getSmMpProjResURI(): " + getSmMpProjResURI() + "getSmMpProjPort(): " + getSmMpProjPort() + "getSmMPProjOutput(): " + getSmMPProjOutput() + "customWLPPath: " + customWLPPath);
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
 
@@ -1416,6 +1503,31 @@ public abstract class SingleModMPProjectTestCommon {
         }
         renameFile(getBuildFileName(), "custom-" + getBuildFileName());
         renameFile("temp-" + getBuildFileName(), getBuildFileName());
+    }
+
+    private void deleteBuildDirectory() {
+        Path folderToDelete = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory());
+
+        try {
+            // Recursively delete all files and directories
+            Files.walkFileTree(folderToDelete, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (!file.getFileName().toString().equals(getBuildDirectory())) {
+                        Files.delete(file);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir); // Delete directory after all its contents are deleted
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1689,6 +1801,32 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Install directory
+     */
+    public void installLibertyDirectory() {
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
+            // Run the multiple project tests only in the Maven project, so navigate to the Maven project directory.
+            if (getProjectsDirPath().contains("multiple-project")) {
+                keyboard.enterText("cd singleModMavenMP");
+                keyboard.enter();
+            }
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached liberty:install-server");
+            keyboard.enterText("./mvnw liberty:install-server -ntp");
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLiberty");
+            keyboard.enterText("./gradlew installLiberty");
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
+            return;
+        }
+        keyboard.enter();
+        TestUtils.sleepAndIgnoreException(60);
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLibertyDirectory end");
+    }
+
+    /**
      * Clean project.
      */
     public void cleanTerminal() {
@@ -1761,7 +1899,8 @@ public abstract class SingleModMPProjectTestCommon {
                 TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: serverDirectory: " + serverDirectory);
 
                 /* Trim value starts from /wlp to get the exact custom installation path of server */
-                Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
+                //Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
+                Pattern pattern = Pattern.compile("^(.*?)([\\\\/]wlp)");
                 Matcher matcher = pattern.matcher(serverDirectory);
                 wlpPath = (matcher.find()) ? matcher.group(1) : "";
 
