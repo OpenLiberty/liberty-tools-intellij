@@ -1805,26 +1805,55 @@ public abstract class SingleModMPProjectTestCommon {
      */
     public void installLibertyDirectory() {
         Keyboard keyboard = new Keyboard(remoteRobot);
+
         if (getBuildCategory() == BuildType.MAVEN_TYPE) {
-            // For multiple project, a new tab will open with the project directory. The robot will add the cd command to change the directory to the project directory.
-            // Run the multiple project tests only in the Maven project, so navigate to the Maven project directory.
             if (getProjectsDirPath().contains("multiple-project")) {
                 keyboard.enterText("cd singleModMavenMP");
                 keyboard.enter();
             }
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached liberty:install-server");
+
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Maven commands");
+
+            // Command 1
             keyboard.enterText("./mvnw liberty:install-server -ntp");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30); // optional delay between commands
+
+            // Command 2
+            keyboard.enterText("./mvnw liberty:create -ntp");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 3
+            keyboard.enterText("./mvnw liberty:deploy -ntp");
+            keyboard.enter();
+
         } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLiberty");
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Gradle commands");
+
+            // Command 1
             keyboard.enterText("./gradlew installLiberty");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 2
+            keyboard.enterText("./gradlew create");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 3
+            keyboard.enterText("./gradlew deploy");
+            keyboard.enter();
+
         } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR,  "Invalid build type specified");
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Invalid build type specified");
             return;
         }
-        keyboard.enter();
-        TestUtils.sleepAndIgnoreException(60);
+
+        TestUtils.sleepAndIgnoreException(30);
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLibertyDirectory end");
     }
+
 
     /**
      * Clean project.
