@@ -292,9 +292,17 @@ public abstract class SingleModMPProjectTestCommon {
         isMultiple = value;
     }
 
+    /**
+     * Returns Build Directory
+     */
     public String getBuildDirectory() {
         return buildDirectory;
     }
+
+    /**
+     * Sets Build Directory
+     * @param buildDir
+     */
     public void setBuildDirectory(String buildDir) {
         buildDirectory = buildDir;
     }
@@ -1350,124 +1358,30 @@ public abstract class SingleModMPProjectTestCommon {
      */
     @Test
     @Video
-    @EnabledOnOs({OS.WINDOWS})
     public void testStartWithCustomConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
-        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
         String customWLPPath = "";
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), "custom-"+getBuildFileName()));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG-custom-pom-original: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
-        renameFile("custom-" + getBuildFileName(), getBuildFileName());
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG-current-pom: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        cleanTerminal();
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG6-liberty-plugin-config.xml: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        deleteBuildDirectory();
-
-        /*try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG5-liberty-plugin-config.xml: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-        installLibertyDirectory();
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG1-liberty-plugin-config.xml: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        deleteBuildDirectory();
-        // Start dev mode.
-//        UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start", 3);
-//        String absoluteWLPPath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString();
-//        UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, absoluteWLPPath, getSmMPProjectName(), 3, getProjectTypeIsMutliple());
-
-
-//        try {
-//            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-//            for (String line : lines) {
-//                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG2-liberty-plugin-config.xml: " + line);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         // Add a new Liberty config.
-        String configName = "toolBarCustomDebug-" + getSmMPProjectName();
+        String configName = "toolBarDebug-" + getSmMPProjectName();
         UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName, getProjectTypeIsMutliple(), buildFilePath);
 
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
 
-//        try {
-//            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-//            for (String line : lines) {
-//                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG3-liberty-plugin-config.xml: " + line);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
-        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
-
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml"));
-            for (String line : lines) {
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG4-liberty-plugin-config.xml: " + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         if (fileExists) {
             customWLPPath = getCustomWLPPath();
             TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
-
         try {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: " + "testName: " + testName + "getSmMpProjResURI(): " + getSmMpProjResURI() + "getSmMpProjPort(): " + getSmMpProjPort() + "getSmMPProjOutput(): " + getSmMPProjOutput() + "customWLPPath: " + customWLPPath);
             // Validate that the project started.
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
 
@@ -1501,64 +1415,30 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
-        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
-        renameFile("temp-" + getBuildFileName(), getBuildFileName());
     }
 
-    private void deleteBuildDirectory() {
-        Path folderToDelete = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory());
-
-        try {
-            // Recursively delete all files and directories
-            Files.walkFileTree(folderToDelete, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (!file.getFileName().toString().equals(getBuildDirectory())) {
-                        Files.delete(file);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir); // Delete directory after all its contents are deleted
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Tests:
      * - Creating a new Liberty tools configuration.
-     * - Using custom WLP installation path
      * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
      */
     @Test
     @Video
     public void testStartWithCustomConfigInDebugModeUsingMenu() {
         String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
-        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
         String customWLPPath = "";
-
-        renameFile(getBuildFileName(), "temp-" + getBuildFileName());
-        renameFile("custom-" + getBuildFileName(), getBuildFileName());
+        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
-        cleanTerminal();
-
         // Add a new Liberty config.
-        String configName = "menuCustomDebug-" + getSmMPProjectName();
+        String configName = "menuDebug-" + getSmMPProjectName();
         UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName, getProjectTypeIsMutliple(), buildFilePath);
 
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
-
-        UIBotTestUtils.expandLibertyToolWindowProjectTree(remoteRobot, getSmMPProjectName());
 
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
@@ -1600,8 +1480,6 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
-        renameFile(getBuildFileName(), "custom-" + getBuildFileName());
-        renameFile("temp-" + getBuildFileName(), getBuildFileName());
     }
 
     private boolean checkFileExists(String fileName) {
@@ -1622,29 +1500,6 @@ public abstract class SingleModMPProjectTestCommon {
         }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File Path: " + filePath + ". Is file present: " + fileExists);
         return fileExists;
-    }
-
-
-    private void renameFile(String original, String renamed) {
-        Path originalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), original);
-        Path renamedOriginalBuildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), renamed);
-
-        File oldFile = new File(originalBuildFilePath.toString());
-        File newFile = new File(renamedOriginalBuildFilePath.toString());
-
-        if (oldFile.exists()) {
-            int maxRetries = 5;
-            int retryCount = 0;
-            while (retryCount < maxRetries) {
-                if (oldFile.renameTo(newFile)) {
-                    TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File renamed from " + oldFile + " to " + newFile);
-                    return;
-                }
-                retryCount++;
-                TestUtils.sleepAndIgnoreException(2);
-            }
-            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Failed to rename file after " + maxRetries + " attempts: " + original + " -> " + renamed);
-        }
     }
 
     /**

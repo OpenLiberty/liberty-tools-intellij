@@ -40,7 +40,7 @@ prefetchDependencies() {
     ./mvnw liberty:install-feature -ntp
 
     # Creates custom pom.xml file corresponding to custom wlp install location
-    createCustomPom "$workingDir"
+    #createCustomPom "$workingDir"
 
     # Setup custom wlp install in user home directory
     configureCustomWlpInstallMaven
@@ -53,10 +53,24 @@ prefetchDependencies() {
     ./gradlew installFeature
 
     # Creates custom build.gradle file corresponding to custom wlp install location
-    createCustomBuildGradle "$workingDir"
+    #createCustomBuildGradle "$workingDir"
 
     # Setup custom wlp install in user home directory
-    configureCustomWlpInstallGradle
+    #configureCustomWlpInstallGradle
+
+    # Run through dev mode server install/create and feature installation for the Maven custom WLP install app.
+    cd "$workingDir"
+    cd "src/test/resources/projects/maven/singleModMavenCustomInstall"
+    ./mvnw liberty:install-server -ntp
+    ./mvnw liberty:create
+    ./mvnw liberty:install-feature -ntp
+
+    # Run through dev mode server install/create and feature installation for the Gradle app.
+    cd "$workingDir"
+    cd "src/test/resources/projects/gradle/singleModGradleCustomInstall"
+    ./gradlew installLiberty
+    ./gradlew libertyCreate
+    ./gradlew installFeature
 
     # Go back to the working dir.
     cd "$workingDir"
@@ -65,7 +79,7 @@ prefetchDependencies() {
 # Configure custom WLP install path
 configureCustomWlpInstallMaven() {
     # Define the custom directory inside the user home
-    local targetDir="$HOME/customDir"
+    local targetDir="$HOME/customInstallDir"
 
     if [ -n "$HOME" ]; then
         copyWlpFolderGradle "target/liberty/wlp" "$targetDir"
@@ -92,7 +106,7 @@ copyWlpFolderMaven() {
 # Configure custom WLP install path
 configureCustomWlpInstallGradle() {
     # Define the custom directory inside the user home
-    local targetDir="$HOME/customDir"
+    local targetDir="$HOME/customInstallDir"
 
     if [ -n "$HOME" ]; then
         copyWlpFolderGradle "build/wlp" "$targetDir"
@@ -131,9 +145,9 @@ createCustomPom() {
         cp "$pomFile" "$customPomFile"
 
         # Define paths inside the user home directory
-        local wlpDir="$HOME/customDir/wlp"
-        local runtimeDir="$HOME/customDir"
-        local userDir="$HOME/customDir/wlp/usr"
+        local wlpDir="$HOME/customInstallDir/wlp"
+        local runtimeDir="$HOME/customInstallDir"
+        local userDir="$HOME/customInstallDir/wlp/usr"
 
         # Process the file correctly
         awk -v wlp="$wlpDir" -v runtime="$runtimeDir" -v user="$userDir" '
@@ -177,8 +191,8 @@ createCustomBuildGradle() {
         cp "$gradleFile" "$customGradleFile"
 
         # Define paths inside the user home directory
-        local wlpDir="$HOME/customDir/wlp"
-        local userDir="$HOME/customDir/wlp/usr"
+        local wlpDir="$HOME/customInstallDir/wlp"
+        local userDir="$HOME/customInstallDir/wlp/usr"
 
         # Modify the build.gradle file using awk
         awk -v wlp="$wlpDir" -v user="$userDir" '
@@ -198,31 +212,13 @@ createCustomBuildGradle() {
 }
 
 cleanupCustomWLPDir() {
-    local targetDir="$HOME/customDir"
+    local targetDir="$HOME/customInstallDir"
 
     if [ -d "$targetDir" ]; then
         rm -rf "$targetDir"
         echo "Cleaned up: $targetDir"
     else
         echo "No cleanup needed, $targetDir does not exist."
-    fi
-
-    # Remove the custom-pom.xml file
-    local customPomFile="src/test/resources/projects/maven/singleModMavenMP/custom-pom.xml"
-    if [ -f "$customPomFile" ]; then
-        rm "$customPomFile"
-        echo "Deleted custom POM file: $customPomFile"
-    else
-        echo "No custom POM file to delete."
-    fi
-
-    # Remove the custom-build.gradle file
-    local customGradleFile="src/test/resources/projects/gradle/singleModGradleMP/custom-build.gradle"
-    if [ -f "$customGradleFile" ]; then
-        rm "$customGradleFile"
-        echo "Deleted custom build.gradle file: $customGradleFile"
-    else
-        echo "No custom build.gradle file to delete."
     fi
 }
 
@@ -375,7 +371,7 @@ main() {
         echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
         #./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN --tests "io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest.testStartWithCustomConfigInDebugModeUsingToolbar" | tee "$JUNIT_OUTPUT_TXT"
+        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN --tests "io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest.testStartWithConfigInDebugModeUsingToolbar" --tests "io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest.testStartWithConfigInDebugModeUsingMenu" | tee "$JUNIT_OUTPUT_TXT"
         testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
         set +o pipefail # reset this option
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23

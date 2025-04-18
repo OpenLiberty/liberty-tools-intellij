@@ -151,18 +151,4 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
     }
-
-    @Disabled("Skipping this test for MavenMPMultipleProjectTest")
-    @Override
-    @Test
-    public void testStartWithCustomConfigInDebugModeUsingMenu() {
-
-    }
-
-    @Disabled("Skipping this test for MavenMPMultipleProjectTest")
-    @Override
-    @Test
-    public void testStartWithCustomConfigInDebugModeUsingToolbar() {
-
-    }
 }
