@@ -14,13 +14,13 @@ import org.junit.jupiter.api.BeforeAll;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
+ * Tests Liberty Tools actions using a single module Gradle project.
  */
-public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
+public class GradleSingleModCustomWLPInstallProjectTest extends SingleModMPProjectTestCommon {
     /**
-     * Single module Microprofile project name.
+     * Single module project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
+    private static final String SM_MP_PROJECT_NAME = "single-mod-gradle-custom-install";
 
     /**
      * The path to the folder containing the test projects.
@@ -35,7 +35,7 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
-    GradleSingleModMPProjectTest() {
+    GradleSingleModCustomWLPInstallProjectTest() {
         setProjectsDirPath(PROJECTS_PATH);
         setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.GRADLE_TYPE);

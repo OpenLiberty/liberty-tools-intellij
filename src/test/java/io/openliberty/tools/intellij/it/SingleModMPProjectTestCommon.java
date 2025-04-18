@@ -18,16 +18,27 @@ import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -126,6 +137,8 @@ public abstract class SingleModMPProjectTestCommon {
      * Check for the single project or multiple projects
      */
     private boolean isMultiple = false;
+
+    private String buildDirectory = null;
 
     /**
      * Returns the path where the Liberty server was installed.
@@ -277,6 +290,21 @@ public abstract class SingleModMPProjectTestCommon {
     }
     public void setProjectTypeIsMultiple(boolean value) {
         isMultiple = value;
+    }
+
+    /**
+     * Returns Build Directory
+     */
+    public String getBuildDirectory() {
+        return buildDirectory;
+    }
+
+    /**
+     * Sets Build Directory
+     * @param buildDir
+     */
+    public void setBuildDirectory(String buildDir) {
+        buildDirectory = buildDir;
     }
 
     /**
@@ -1322,6 +1350,159 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using custom WLP installation path
+     * - Using project frame toolbar's config selection box and Debug icon to select a Liberty configuration and start dev mode.
+     * - Automatic server JVM attachment to the debugger.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingToolbar() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingToolbar";
+        String customWLPPath = "";
+        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "toolBarDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName, getProjectTypeIsMutliple(), buildFilePath);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingToolbar(remoteRobot, configName);
+
+        // Click on the debug icon for the selected configuration.
+        UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
+
+        boolean fileExists = checkFileExists("liberty-plugin-config.xml");
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
+        }
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3, getProjectTypeIsMutliple());
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Tests:
+     * - Creating a new Liberty tools configuration.
+     * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
+     */
+    @Test
+    @Video
+    public void testStartWithCustomConfigInDebugModeUsingMenu() {
+        String testName = "testStartWithCustomConfigInDebugModeUsingMenu";
+        String customWLPPath = "";
+        String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
+
+        // Remove all other configurations first.
+        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+
+        // Add a new Liberty config.
+        String configName = "menuDebug-" + getSmMPProjectName();
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, configName, getProjectTypeIsMutliple(), buildFilePath);
+
+        // Find the newly created config in the config selection box on the project frame.
+        UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
+
+        boolean fileExists = checkFileExists("liberty-plugin-config.xml");
+        if (fileExists) {
+            customWLPPath = getCustomWLPPath();
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
+        }
+
+        try {
+            // Validate that the project started.
+            TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), customWLPPath, false);
+
+            // Stop the debugger.
+            // When the debugger is attached, the debugger window should open automatically.
+            // If the debugger was not attached or if the debugger window was not opened,
+            // the stop request will time out.
+            UIBotTestUtils.stopDebugger(remoteRobot);
+        } finally {
+            try {
+                // Open the terminal window.
+                UIBotTestUtils.openTerminalWindow(remoteRobot);
+            } finally {
+                try {
+                    // If the debugger did not attach, there might be an error dialog. Close it.
+                    try {
+                        UIBotTestUtils.closeErrorDialog(remoteRobot);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } finally {
+                    try {
+                        // Stop the server.
+                        if (TestUtils.isServerStopNeeded(customWLPPath)) {
+                            UIBotTestUtils.runStopAction(remoteRobot, testName, UIBotTestUtils.ActionExecType.LTWDROPDOWN, customWLPPath, getSmMPProjectName(), 3, getProjectTypeIsMutliple());
+                        }
+                    } finally {
+                        // Cleanup configurations.
+                        UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean checkFileExists(String fileName) {
+        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
+        boolean fileExists = false;
+        int maxAttempts = 15;
+        int attempts = 0;
+
+        while (!fileExists && attempts < maxAttempts) {
+            fileExists = Files.exists(filePath); // Check if the file exists
+
+            if (!fileExists) {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    TestUtils.sleepAndIgnoreException(5);
+                }
+            }
+        }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File Path: " + filePath + ". Is file present: " + fileExists);
+        return fileExists;
+    }
+
+    /**
      * Prepares the environment to run the tests.
      * This method calls the overloaded {@code prepareEnv} method with {@code isMultiple} set to {@code false}.
      *
@@ -1475,6 +1656,61 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Install directory
+     */
+    public void installLibertyDirectory() {
+        Keyboard keyboard = new Keyboard(remoteRobot);
+
+        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
+            if (getProjectsDirPath().contains("multiple-project")) {
+                keyboard.enterText("cd singleModMavenMP");
+                keyboard.enter();
+            }
+
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Maven commands");
+
+            // Command 1
+            keyboard.enterText("./mvnw liberty:install-server -ntp");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30); // optional delay between commands
+
+            // Command 2
+            keyboard.enterText("./mvnw liberty:create -ntp");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 3
+            keyboard.enterText("./mvnw liberty:deploy -ntp");
+            keyboard.enter();
+
+        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Gradle commands");
+
+            // Command 1
+            keyboard.enterText("./gradlew installLiberty");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 2
+            keyboard.enterText("./gradlew create");
+            keyboard.enter();
+            TestUtils.sleepAndIgnoreException(30);
+
+            // Command 3
+            keyboard.enterText("./gradlew deploy");
+            keyboard.enter();
+
+        } else {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Invalid build type specified");
+            return;
+        }
+
+        TestUtils.sleepAndIgnoreException(30);
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLibertyDirectory end");
+    }
+
+
+    /**
      * Clean project.
      */
     public void cleanTerminal() {
@@ -1525,4 +1761,40 @@ public abstract class SingleModMPProjectTestCommon {
         //TODO: rewrite validateTestReportExists() to accept one argument or to accept a null as the second argument
         TestUtils.validateTestReportExists(testReportPath, testReportPath);
     }
+
+    public String getCustomWLPPath() {
+        String wlpPath = "";
+        try {
+            Path configPath = Paths.get(getProjectsDirPath(),getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml");
+
+            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: configPath: " + configPath);
+
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
+            documentBuilderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(configPath.toString());
+            document.getDocumentElement().normalize();
+
+            NodeList nodeList = document.getElementsByTagName("serverDirectory");
+            if (nodeList.getLength() > 0) {
+                Element element = (Element) nodeList.item(0);
+                String serverDirectory = element.getTextContent();
+
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: serverDirectory: " + serverDirectory);
+
+                /* Trim value starts from /wlp to get the exact custom installation path of server */
+                //Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
+                Pattern pattern = Pattern.compile("^(.*?)([\\\\/]wlp)");
+                Matcher matcher = pattern.matcher(serverDirectory);
+                wlpPath = (matcher.find()) ? matcher.group(1) : "";
+
+                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: wlpPath: " + wlpPath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Paths.get(wlpPath).toAbsolutePath().toString();
+    }
+
 }

@@ -18,14 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Maven project.
+ * Tests Liberty Tools actions using a single module Maven project.
  */
-public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
+public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjectTestCommon {
 
     /**
-     * Single module Microprofile project name.
+     * Single module project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
+    private static final String SM_MP_PROJECT_NAME = "singleModMavenCustomInstall";
 
     /**
      * The path to the folder containing the test projects.
@@ -53,7 +53,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         prepareEnv(PROJECTS_PATH, SM_MP_PROJECT_NAME);
     }
 
-    MavenSingleModMPProjectTest() {
+    MavenSingleModCustomWLPInstallProjectTest() {
         setProjectsDirPath(PROJECTS_PATH);
         setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);

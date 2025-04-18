@@ -95,6 +95,7 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setBuildDirectory("target");
     }
 
     /**
