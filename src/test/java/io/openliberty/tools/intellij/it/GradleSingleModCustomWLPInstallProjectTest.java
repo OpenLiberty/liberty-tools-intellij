@@ -20,7 +20,7 @@ public class GradleSingleModCustomWLPInstallProjectTest extends SingleModMPProje
     /**
      * Single module project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "single-mod-gradle-custom-install";
+    private static final String SM_MP_PROJECT_NAME = "singleModGradleCustomInstall";
 
     /**
      * The path to the folder containing the test projects.
