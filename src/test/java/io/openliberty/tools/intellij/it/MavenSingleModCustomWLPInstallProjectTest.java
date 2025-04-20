@@ -14,8 +14,11 @@ import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Tests Liberty Tools actions using a single module Maven project.
@@ -92,5 +95,27 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
     public void validateTestReportsExist() {
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
+    }
+
+    /**
+     * Checks if the debug port is set to the specified value in the server.env file.
+     *
+     * @param absoluteWLPPath The absolute path to the WLP directory.
+     * @param debugPort The debug port to check in the server.env file.
+     * @throws IOException If an I/O error occurs while reading the server.env file.
+     */
+    @Override
+    public void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
+        boolean fileExists = checkFileExists("liberty-plugin-config.xml");
+        if (fileExists) {
+            absoluteWLPPath = getCustomWLPPath();
+        }
+        // Retrieve the WLP server.env file path
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        // Read all lines from server.env
+        List<String> lines = Files.readAllLines(serverEnvPath);
+        // Check if Debug Port is set to the specified port
+        boolean debugPortIsSet = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=" + debugPort));
+        Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
     }
 }

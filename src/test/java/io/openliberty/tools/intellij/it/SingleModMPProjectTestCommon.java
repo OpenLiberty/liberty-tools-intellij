@@ -1311,7 +1311,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // To check if debug port is set to a custom value (e.g., 9876)
-            TestUtils.checkDebugPort(absoluteWLPPath, 9876);
+            checkDebugPort(absoluteWLPPath, 9876);
 
         } catch (IOException e) {
             Assertions.fail("Error reading the server.env file: " + e.getMessage());
@@ -1335,7 +1335,7 @@ public abstract class SingleModMPProjectTestCommon {
             TestUtils.validateProjectStarted(testName, getSmMpProjResURI(), getSmMpProjPort(), getSmMPProjOutput(), absoluteWLPPath, false);
 
             // To check if debug port is set to the default value (7777)
-            TestUtils.checkDebugPort(absoluteWLPPath, 7777);
+            checkDebugPort(absoluteWLPPath, 7777);
 
         } catch (IOException e) {
             Assertions.fail("Error reading the server.env file: " + e.getMessage());
@@ -1482,7 +1482,7 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
-    private boolean checkFileExists(String fileName) {
+    public boolean checkFileExists(String fileName) {
         Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
         boolean fileExists = false;
         int maxAttempts = 15;
@@ -1656,57 +1656,20 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Install directory
+     * Checks if the debug port is set to the specified value in the server.env file.
+     *
+     * @param absoluteWLPPath The absolute path to the WLP directory.
+     * @param debugPort The debug port to check in the server.env file.
+     * @throws IOException If an I/O error occurs while reading the server.env file.
      */
-    public void installLibertyDirectory() {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-
-        if (getBuildCategory() == BuildType.MAVEN_TYPE) {
-            if (getProjectsDirPath().contains("multiple-project")) {
-                keyboard.enterText("cd singleModMavenMP");
-                keyboard.enter();
-            }
-
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Maven commands");
-
-            // Command 1
-            keyboard.enterText("./mvnw liberty:install-server -ntp");
-            keyboard.enter();
-            TestUtils.sleepAndIgnoreException(30); // optional delay between commands
-
-            // Command 2
-            keyboard.enterText("./mvnw liberty:create -ntp");
-            keyboard.enter();
-            TestUtils.sleepAndIgnoreException(30);
-
-            // Command 3
-            keyboard.enterText("./mvnw liberty:deploy -ntp");
-            keyboard.enter();
-
-        } else if (getBuildCategory() == BuildType.GRADLE_TYPE) {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Running Gradle commands");
-
-            // Command 1
-            keyboard.enterText("./gradlew installLiberty");
-            keyboard.enter();
-            TestUtils.sleepAndIgnoreException(30);
-
-            // Command 2
-            keyboard.enterText("./gradlew create");
-            keyboard.enter();
-            TestUtils.sleepAndIgnoreException(30);
-
-            // Command 3
-            keyboard.enterText("./gradlew deploy");
-            keyboard.enter();
-
-        } else {
-            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Invalid build type specified");
-            return;
-        }
-
-        TestUtils.sleepAndIgnoreException(30);
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Reached installLibertyDirectory end");
+    public void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
+        // Retrieve the WLP server.env file path
+        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        // Read all lines from server.env
+        List<String> lines = Files.readAllLines(serverEnvPath);
+        // Check if Debug Port is set to the specified port
+        boolean debugPortIsSet = lines.stream().anyMatch(line -> line.contains("WLP_DEBUG_ADDRESS=" + debugPort));
+        Assertions.assertTrue(debugPortIsSet, "Debug Port is not set to " + debugPort);
     }
 
 
