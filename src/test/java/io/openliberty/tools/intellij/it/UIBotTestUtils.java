@@ -109,24 +109,16 @@ public class UIBotTestUtils {
 
         remoteRobot.runJs("""
                 importClass(com.intellij.openapi.application.ApplicationManager);
-                importClass(com.intellij.ide.impl.OpenProjectTask);
+                importClass(com.intellij.ide.impl.ProjectUtil);
                 
-                const projectManager = com.intellij.openapi.project.ex.ProjectManagerEx.getInstanceEx();
-                let task;
-                try { 
-                    task = OpenProjectTask.build();
-                } catch(e) {
-                    task = OpenProjectTask.newProject();
-                }
                 const path = new java.io.File("%s").toPath();
+                            const openProject = new Runnable({
+                                run: function() {
+                                    ProjectUtil.openOrImport(path.toString(), null, false);
+                                }
+                            });
                 
-                const openProjectFunction = new Runnable({
-                    run: function() {
-                        projectManager.openProject(path, task);
-                    }
-                });
-                
-                ApplicationManager.getApplication().invokeLater(openProjectFunction);
+                ApplicationManager.getApplication().invokeLater(openProject);
                 """.formatted(projectFullPath));
 
         // Wait for the project frame to open, and make sure a few basic UI items are showing.
@@ -589,7 +581,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 projTree.findText(fileName).doubleClick();
                 break;
@@ -628,7 +620,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
