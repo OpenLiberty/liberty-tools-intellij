@@ -124,7 +124,7 @@ public class MavenMPMultipleProjectTest extends SingleModMPProjectTestCommon {
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(true);
-        setBuildDirectory("target");
+        setAbsoluteWLPPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString());
     }
 
     /**

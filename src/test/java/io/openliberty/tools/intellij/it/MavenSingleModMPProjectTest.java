@@ -67,7 +67,7 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
         setProjectTypeIsMultiple(false);
-        setBuildDirectory("target");
+        setAbsoluteWLPPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString());
     }
     /**
      * Deletes test reports.

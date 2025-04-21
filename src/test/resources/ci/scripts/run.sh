@@ -49,20 +49,6 @@ prefetchDependencies() {
     ./gradlew libertyCreate
     ./gradlew installFeature
 
-    # Run through dev mode server install/create and feature installation for the Maven custom WLP install app.
-    cd "$workingDir"
-    cd "src/test/resources/projects/maven/singleModMavenCustomInstall"
-    ./mvnw liberty:install-server -ntp
-    ./mvnw liberty:create
-    ./mvnw liberty:install-feature -ntp
-
-    # Run through dev mode server install/create and feature installation for the Gradle custom WLP install app.
-    cd "$workingDir"
-    cd "src/test/resources/projects/gradle/singleModGradleCustomInstall"
-    ./gradlew installLiberty
-    ./gradlew libertyCreate
-    ./gradlew installFeature
-
     # Go back to the working dir.
     cd "$workingDir"
 }
