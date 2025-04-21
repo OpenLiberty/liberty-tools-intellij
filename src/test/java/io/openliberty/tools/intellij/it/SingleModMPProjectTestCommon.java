@@ -285,16 +285,16 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Returns the absolute path to the custom Liberty installation directory.
+     * Returns the absolute WLP path
      *
-     * @return a String representing the absolute path to the custom WLP installation directory.
+     * @return a String representing the absolute path to the WLP installation directory.
      */
     public String getAbsoluteWLPPath() {
         return absoluteWLPPath;
     }
 
     /**
-     * Sets the absolute path to the custom Liberty installation directory.
+     * Sets the absolute WLP path
      *
      * @param absoluteWLPPath a String representing the path to be used as the WLP installation location.
      */
@@ -379,7 +379,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingDropDownMenu() {
         String testName = "testStartWithParamsActionUsingDropDownMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all other configurations first.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -434,7 +434,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingPlayToolbarButton() {
         String testName = "testStartWithParamsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -488,7 +488,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingPopUpMenu() {
         String testName = "testStartWithParamsActionUsingPopUpMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -542,7 +542,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithParamsActionUsingSearch() {
         String testName = "testStartWithParamsActionUsingSearch";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -605,7 +605,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingDropDownMenu() {
         String testName = "testRunTestsActionUsingDropDownMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -644,7 +644,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingPlayToolbarButton() {
         String testName = "testRunTestsActionUsingPlayToolbarButton";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -682,7 +682,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingPopUpMenu() {
         String testName = "testRunTestsActionUsingPopUpMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -720,7 +720,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testRunTestsActionUsingSearch() {
         String testName = "testRunTestsActionUsingSearch";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Delete any existing test report files.
         deleteTestReports();
@@ -770,7 +770,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInDebugModeUsingToolbar() {
         String testName = "testStartWithConfigInDebugModeUsingToolbar";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
@@ -831,7 +831,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInDebugModeUsingMenu() {
         String testName = "testStartWithConfigInDebugModeUsingMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
@@ -889,7 +889,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInRunModeUsingToolbar() {
         String testName = "testStartWithConfigInRunModeUsingToolbar";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
@@ -929,7 +929,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testStartWithConfigInRunModeUsingMenu() {
         String testName = "testStartWithConfigInRunModeUsingMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
         String buildFilePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildFileName()).toString();
 
         // Remove all other configurations first.
@@ -1079,7 +1079,7 @@ public abstract class SingleModMPProjectTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingDropDownMenu() {
         String testName = "testStartInContainerActionUsingDropDownMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", getSmMPProjectName(), false, 3);
@@ -1111,7 +1111,7 @@ public abstract class SingleModMPProjectTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingPlayToolbarButton() {
         String testName = "testStartInContainerActionUsingPlayToolbarButton";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start in container", getSmMPProjectName(), true, 3);
@@ -1142,7 +1142,7 @@ public abstract class SingleModMPProjectTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingPopUpMenu() {
         String testName = "testStartInContainerActionUsingPopUpMenu";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), "Liberty: Start in container", 3);
@@ -1174,7 +1174,7 @@ public abstract class SingleModMPProjectTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerActionUsingSearch() {
         String testName = "testStartInContainerActionUsingSearch";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Start dev mode in a container.
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Start in container", 3, getProjectTypeIsMutliple());
@@ -1222,7 +1222,7 @@ public abstract class SingleModMPProjectTestCommon {
     @EnabledOnOs({OS.LINUX})
     public void testStartInContainerParamClearedOnConfigRemoval() {
         String testName = "testStartInContainerParamClearedOnConfigRemoval";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all existing configurations for a clean state.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
@@ -1290,7 +1290,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testCustomStartParametersClearedOnConfigRemoval() {
         String testName = "testCustomStartParametersClearedOnConfigRemoval";
-        String absoluteWLPPath = getWLPInstallPath();
+        String absoluteWLPPath = getAbsoluteWLPPath();
 
         // Remove all existing configurations for a clean state.
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
