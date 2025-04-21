@@ -239,13 +239,14 @@ public class DebugModeHandler {
     }
 
     /**
-     * Returns the default path of the server.env file after Liberty server deployment.
+     * Returns the path to the `server.env` file for the given Liberty module.
      *
-     * @param libertyModule The Liberty module for which this operations is being performed.
+     * This method retrieves the server directory using the Liberty plugin config and
+     * constructs the expected path to the `server.env` file. If the file exists, the path is returned;
+     * otherwise, a trace log is recorded and {@code null} is returned.
      *
-     * @return The default path of the server.env file after Liberty server deployment.
-     *
-     * @throws Exception
+     * @param libertyModule the Liberty module to resolve the server environment file path for.
+     * @return the path to the `server.env` file if it exists, or null if not found.
      */
     private Path getServerEnvPath(LibertyModule libertyModule) {
         String serverDirectory = getServerDirectoryFromLibertyPluginConfig(libertyModule);
@@ -259,12 +260,15 @@ public class DebugModeHandler {
     }
 
     /**
-     * Parse the <serverDirectory> value from "liberty-plugin-config.xml" located in target/build directory
+     * Retrieves the server directory path from the Liberty plugin configuration file (`liberty-plugin-config.xml`)
+     * for the given Liberty module.
      *
-     * @param libertyModule The Liberty module for which this operations is being performed.
+     * The method determines the build folder (`target` for Maven projects, `build` for Gradle projects)
+     * based on the module's project type. It then parses the config file to extract the value of the
+     * <serverDirectory> element.
      *
-     * @return server.env file path
-     *
+     * @param libertyModule the Liberty module containing build and project metadata.
+     * @return the server directory path specified in the Liberty plugin config, or an empty string if not found or on error.
      */
     private String getServerDirectoryFromLibertyPluginConfig(LibertyModule libertyModule) {
         String serverDirectory = "";

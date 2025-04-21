@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,9 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-/*
- *  Move this class, originally provided from starter, into same package.
- */
 package io.openliberty.sample;
 
 import jakarta.ws.rs.ApplicationPath;

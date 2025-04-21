@@ -574,7 +574,7 @@ public class UIBotTestUtils {
      */
     public static void clickOnWindowPaneStripeButton(RemoteRobot remoteRobot, String StripeButtonName) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        ComponentFixture wpStripeButton = projectFrame.getStripeButton(StripeButtonName, "30");
+        ComponentFixture wpStripeButton = projectFrame.getStripeButton(StripeButtonName, "10");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
                 Duration.ofSeconds(1),
                 "Waiting for the " + StripeButtonName + " button on the main window pane stripe to be enabled",
@@ -2574,7 +2574,7 @@ public class UIBotTestUtils {
             projectFrame.getBaseLabel("Debug", "5");
         } catch (WaitForConditionTimeoutException wfcte) {
             // The debug tab is not opened for some reason. Open it.
-            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug", "30");
+            ComponentFixture debugStripe = projectFrame.getStripeButton("Debug", "10");
             debugStripe.click();
         }
 

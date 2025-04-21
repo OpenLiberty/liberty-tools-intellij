@@ -293,14 +293,14 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
-     * Returns Build Directory
+     * Returns Build Directory name
      */
     public String getBuildDirectory() {
         return buildDirectory;
     }
 
     /**
-     * Sets Build Directory
+     * Sets Build Directory name
      * @param buildDir
      */
     public void setBuildDirectory(String buildDir) {
@@ -1350,11 +1350,14 @@ public abstract class SingleModMPProjectTestCommon {
     }
 
     /**
+     * Liberty Tools Dev Mode Debugging via Project Frame Toolbar
+     *
      * Tests:
-     * - Creating a new Liberty tools configuration.
-     * - Using custom WLP installation path
-     * - Using project frame toolbar's config selection box and Debug icon to select a Liberty configuration and start dev mode.
-     * - Automatic server JVM attachment to the debugger.
+     * - Creation of a new Liberty Tools configuration.
+     * - Use of a custom WLP installation path.
+     * - Starting dev mode by selecting the Liberty configuration from the project frame toolbar
+     *   and clicking the Debug icon.
+     * - Automatic attachment of the Liberty server JVM to the debugger.
      */
     @Test
     @Video
@@ -1376,10 +1379,11 @@ public abstract class SingleModMPProjectTestCommon {
         // Click on the debug icon for the selected configuration.
         UIBotTestUtils.runConfigUsingIconOnToolbar(remoteRobot, UIBotTestUtils.ExecMode.DEBUG);
 
+        // Check if liberty-plugin-config.xml file exists
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
+            // Retrieves absolute path of the custom Liberty installation directory
             customWLPPath = getCustomWLPPath();
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
         try {
             // Validate that the project started.
@@ -1417,11 +1421,14 @@ public abstract class SingleModMPProjectTestCommon {
         }
     }
 
-
     /**
+     * Liberty Tools Dev Mode Debugging with Custom WLP Path
+     *
      * Tests:
-     * - Creating a new Liberty tools configuration.
-     * - Using Run->Debug... menu options to select the configuration and run in the project in dev mode.
+     * - Creating a new Liberty Tools configuration in the IDE.
+     * - Using a custom WLP installation path.
+     * - Running the project in dev mode using the Run -> Debug... menu options.
+     * - Verifying automatic JVM attachment of the Liberty server to the debugger.
      */
     @Test
     @Video
@@ -1440,10 +1447,11 @@ public abstract class SingleModMPProjectTestCommon {
         // Find the newly created config in the config selection box on the project frame.
         UIBotTestUtils.selectConfigUsingMenu(remoteRobot, configName, UIBotTestUtils.ExecMode.DEBUG);
 
+        // Check if liberty-plugin-config.xml file exists
         boolean fileExists = checkFileExists("liberty-plugin-config.xml");
         if (fileExists) {
+            // Retrieves absolute path of the custom Liberty installation directory
             customWLPPath = getCustomWLPPath();
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "customWLPPath: " + customWLPPath);
         }
 
         try {
@@ -1480,26 +1488,6 @@ public abstract class SingleModMPProjectTestCommon {
                 }
             }
         }
-    }
-
-    public boolean checkFileExists(String fileName) {
-        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
-        boolean fileExists = false;
-        int maxAttempts = 15;
-        int attempts = 0;
-
-        while (!fileExists && attempts < maxAttempts) {
-            fileExists = Files.exists(filePath); // Check if the file exists
-
-            if (!fileExists) {
-                attempts++;
-                if (attempts < maxAttempts) {
-                    TestUtils.sleepAndIgnoreException(5);
-                }
-            }
-        }
-        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "File Path: " + filePath + ". Is file present: " + fileExists);
-        return fileExists;
     }
 
     /**
@@ -1707,12 +1695,49 @@ public abstract class SingleModMPProjectTestCommon {
         TestUtils.validateTestReportExists(testReportPath, testReportPath);
     }
 
+    /**
+     * Checks for the existence of a file within the project's build directory with a retry mechanism.
+     *
+     * This method attempts to locate the specified file under the build directory of the current project.
+     * It retries up to 15 times with a 5-second pause between each attempt if the file is not initially found.
+     * Useful in scenarios where file creation might be delayed due to async build or generation processes.
+     *
+     * @param fileName the name of the file to check for existence.
+     * @return true if the file is found within the allowed attempts, false otherwise.
+     */
+    public boolean checkFileExists(String fileName) {
+        Path filePath = Paths.get(getProjectsDirPath(), getSmMPProjectName(), getBuildDirectory(), fileName);
+        boolean fileExists = false;
+        int maxAttempts = 15;
+        int attempts = 0;
+
+        while (!fileExists && attempts < maxAttempts) {
+            fileExists = Files.exists(filePath);
+
+            if (!fileExists) {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    TestUtils.sleepAndIgnoreException(5);
+                }
+            }
+        }
+        return fileExists;
+    }
+
+    /**
+     * Retrieves the custom installation path of the Liberty server
+     * by parsing the `liberty-plugin-config.xml` file from the project build directory.
+     *
+     * This method locates the XML config file, extracts the value of the <serverDirectory> tag,
+     * and trims the path to return only the base directory before "/wlp".
+     *
+     * @return the absolute path to the custom Liberty installation directory
+     *         or an empty string if the path cannot be resolved.
+     */
     public String getCustomWLPPath() {
         String wlpPath = "";
         try {
             Path configPath = Paths.get(getProjectsDirPath(),getSmMPProjectName(), getBuildDirectory(), "liberty-plugin-config.xml");
-
-            TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: configPath: " + configPath);
 
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
             documentBuilderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -1725,21 +1750,14 @@ public abstract class SingleModMPProjectTestCommon {
                 Element element = (Element) nodeList.item(0);
                 String serverDirectory = element.getTextContent();
 
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: serverDirectory: " + serverDirectory);
-
-                /* Trim value starts from /wlp to get the exact custom installation path of server */
-                //Pattern pattern = Pattern.compile("^(.*?)(/wlp)");
+                // Trim value starts from /wlp to get the exact custom installation path of server
                 Pattern pattern = Pattern.compile("^(.*?)([\\\\/]wlp)");
                 Matcher matcher = pattern.matcher(serverDirectory);
                 wlpPath = (matcher.find()) ? matcher.group(1) : "";
-
-                TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "TEST-DEBUG: wlpPath: " + wlpPath);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return Paths.get(wlpPath).toAbsolutePath().toString();
     }
-
 }
