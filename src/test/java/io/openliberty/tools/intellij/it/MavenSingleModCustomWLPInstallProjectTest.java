@@ -20,8 +20,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests Liberty Tools actions using a single module Maven project.
+ * This test class disables all inherited tests via @Disabled, re-enabling only the critical tests
+ * related to issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
+ * (server startup in debug mode via toolbar and main menu).
  */
+@Disabled("Disable inherited tests, only run selected overrides")
 public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjectTestCommon {
 
     /**
@@ -71,6 +74,7 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
         setProjectTypeIsMultiple(false);
         setAbsoluteWLPPath(Paths.get(System.getProperty("user.home"), "customInstallDir").toString());
     }
+
     /**
      * Deletes test reports.
      */
@@ -96,23 +100,39 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
     }
 
-    @Disabled("Skipping this test")
+    /**
+     * Re-enables this specific test from the base class to validate server startup
+     * in debug mode using the toolbar configuration.
+     *
+     * The entire test class is annotated with @Disabled to prevent running all
+     * inherited tests by default. This method is selectively re-enabled with @Test
+     * to ensure only this critical scenario is executed as part of this test suite.
+     *
+     * Reference: https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
+     * This test ensures that the debug mode startup functionality via the toolbar
+     * is properly verified, which is a part of the fix for issue #415.
+     */
     @Override
     @Test
-    public void testStartInContainerActionUsingSearch() {}
+    public void testStartWithConfigInDebugModeUsingToolbar() {
+        super.testStartWithConfigInDebugModeUsingToolbar();
+    }
 
-    @Disabled("Skipping this test")
+    /**
+     * Re-enables this specific test from the base class to verify server startup
+     * in debug mode using the main menu configuration.
+     *
+     * The class-level @Disabled annotation disables all inherited tests. This method
+     * is intentionally re-enabled to allow execution of just this test while keeping
+     * all other inherited tests suppressed in this subclass.
+     *
+     * Reference: https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
+     * This test ensures that the debug mode startup functionality via the main menu
+     * is properly verified, which is a part of the fix for issue #415.
+     */
     @Override
     @Test
-    public void testStartInContainerActionUsingPopUpMenu() {}
-
-    @Disabled("Skipping this test")
-    @Override
-    @Test
-    public void testStartInContainerActionUsingDropDownMenu() {}
-
-    @Disabled("Skipping this test")
-    @Override
-    @Test
-    public void testStartInContainerActionUsingPlayToolbarButton() {}
+    public void testStartWithConfigInDebugModeUsingMenu() {
+        super.testStartWithConfigInDebugModeUsingMenu();
+    }
 }
