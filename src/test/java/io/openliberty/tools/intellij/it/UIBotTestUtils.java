@@ -99,93 +99,35 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Imports a project using the UI.
+     * Imports a project using the IntelliJ API.
      *
      * @param remoteRobot  The RemoteRobot instance.
      * @param projectsPath The absolute path to the directory containing the projects.
+     * @param projectName  The name of the project to be imported.
      */
     public static void importProject(RemoteRobot remoteRobot, String projectsPath, String projectName) {
-        // Trigger the open project dialog.
-        CommonContainerFixture commonFixture = null;
-        Frame currentFrame = getCurrentFrame(remoteRobot);
-        if (currentFrame == null) {
-            fail("Unable to identify the current window frame (i.e. welcome/project)");
-        }
+        String projectFullPath = Paths.get(projectsPath, projectName).toAbsolutePath().toString().replace("\\", "/");
 
-        if (currentFrame == Frame.WELCOME) {
-            // From the welcome dialog.
-            WelcomeFrameFixture welcomePage = remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(10));
-            commonFixture = welcomePage;
-            ComponentFixture cf = welcomePage.getOpenProjectComponentFixture("Open");
-            cf.click();
-        } else if (currentFrame == Frame.PROJECT) {
-            // From the project frame.
-            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-            commonFixture = projectFrame;
-            String openAction = null;
-            if (remoteRobot.isMac()) {
-                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
-                projectFrame.clickOnMainMenuWithActions(remoteRobot, "File", openAction);
-            } else {
-                clickOnMainMenu(remoteRobot);
-                ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
-                fileMenuEntry.moveMouse();
-                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
-                ComponentFixture openFixture = projectFrame.getActionMenuItem(openAction);
-                openFixture.click(new Point());
-            }
-        }
-
-        // Specify the project's path. The text field is pre-populated by default.
-        DialogFixture newProjectDialog = commonFixture.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(10));
-        JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
-        // clear text in textField
-        textField.setText("");
-        JButtonFixture okButton = newProjectDialog.getButton("OK");
-
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the OK button on the open project dialog to be enabled",
-                "The OK button on the open project dialog was not enabled",
-                okButton::isEnabled);
-
-        TestUtils.sleepAndIgnoreException(10);
-
-        String projectFullPath = Paths.get(projectsPath, projectName).toString();
-        textField.setText(projectFullPath);
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the text box on the Open \"File or Project\" dialog to be populated with the given value",
-                "The text box on the Open \"File or Project\" dialog was not populated with the given value",
-                () -> textField.getText().equals(projectFullPath));
-
-        ComponentFixture projectTree = newProjectDialog.getTree();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for project tree on the Open \"File or Project\" dialog to show the set project",
-                "The project tree on the \"File or Project\" dialog did not show the set project",
-                () -> projectTree.getData().hasText(projectName));
-
-        // Click OK.
-        okButton.click();
-
-        // If in a project frame, choose where to open the project.
-        if (currentFrame == Frame.PROJECT) {
-            DialogFixture openProjectDialog = getOpenProjectLocationDialog(commonFixture);
-            JButtonFixture thisWinButton = openProjectDialog.getButton("This Window");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                    Duration.ofSeconds(1),
-                    "Waiting for The \"This window\" button on the \"Open Project\" dialog to be enabled",
-                    "The \"This window\" button on the \"Open Project\" dialog was not enable",
-                    thisWinButton::isEnabled);
-            thisWinButton.click();
-        }
+        remoteRobot.runJs("""
+                importClass(com.intellij.openapi.application.ApplicationManager);
+                importClass(com.intellij.ide.impl.ProjectUtil);
+                
+                const path = new java.io.File("%s").toPath();
+                            const openProject = new Runnable({
+                                run: function() {
+                                    ProjectUtil.openOrImport(path.toString(), null, false);
+                                }
+                            });
+                
+                ApplicationManager.getApplication().invokeLater(openProject);
+                """.formatted(projectFullPath));
 
         // Wait for the project frame to open, and make sure a few basic UI items are showing.
         // Note that at specific points in time, the window pane items will re-arrange themselves
         // as content is displayed. This, has an effect on the location of the items on the frame.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
+        // Ensure Liberty button is available (or any other validation that project is fully loaded)
         ComponentFixture wpStripeButton = projectFrame.getStripeButton("Liberty", "60");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
                 Duration.ofSeconds(1),
@@ -646,7 +588,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 projTree.findText(fileName).doubleClick();
                 break;
@@ -685,7 +627,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
@@ -2956,7 +2898,7 @@ public class UIBotTestUtils {
         String menuAction2;
         if (intellijVersion.startsWith("2024.2")) {
             menuAction2 = menuAction2024_2;
-        } else if (intellijVersion.startsWith("2024.3")) {
+        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025.1")) {
             menuAction2 = menuAction2024_3;
         } else {
             // If the version is unsupported, throw an exception to indicate the issue.
