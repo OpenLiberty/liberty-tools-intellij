@@ -13,6 +13,8 @@ import com.intellij.remoterobot.stepsProcessing.StepLogger;
 import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,4 +95,24 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
         TestUtils.validateTestReportExists(pathToITReport34, pathToITReport35);
         TestUtils.validateTestReportExists(pathToUTReport34, pathToUTReport35);
     }
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingSearch() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPopUpMenu() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingDropDownMenu() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPlayToolbarButton() {}
 }

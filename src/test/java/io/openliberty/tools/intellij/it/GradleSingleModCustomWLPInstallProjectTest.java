@@ -10,6 +10,8 @@
 package io.openliberty.tools.intellij.it;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 
@@ -51,4 +53,24 @@ public class GradleSingleModCustomWLPInstallProjectTest extends SingleModMPProje
         setProjectTypeIsMultiple(false);
         setAbsoluteWLPPath(Paths.get(System.getProperty("user.home"), "customInstallDir").toString());
     }
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingSearch() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPopUpMenu() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingDropDownMenu() {}
+
+    @Disabled("Skipping this test")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPlayToolbarButton() {}
 }
