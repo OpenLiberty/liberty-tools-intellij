@@ -20,11 +20,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * This test class disables all inherited tests via @Disabled, re-enabling only the critical tests
- * related to issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
- * (server startup in debug mode via toolbar and main menu).
+ * Integration test class for validating Maven single-module project behavior
+ * with a custom Liberty installation.
+ *
+ * This subclass disables all inherited tests by default using @Disabled at the method level,
+ * and selectively re-enables only the relevant ones required for regression validation of
+ * issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
+ * (debug mode startup via toolbar/menu). Other overridden tests are ignored here
+ * as they are not applicable to this custom installation configuration.
  */
-@Disabled("Disable inherited tests, only run selected overrides")
 public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjectTestCommon {
 
     /**
@@ -101,16 +105,8 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
     }
 
     /**
-     * Re-enables this specific test from the base class to validate server startup
-     * in debug mode using the toolbar configuration.
-     *
-     * The entire test class is annotated with @Disabled to prevent running all
-     * inherited tests by default. This method is selectively re-enabled with @Test
-     * to ensure only this critical scenario is executed as part of this test suite.
-     *
-     * Reference: https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
-     * This test ensures that the debug mode startup functionality via the toolbar
-     * is properly verified, which is a part of the fix for issue #415.
+     * Verifies that the Liberty server starts correctly in debug mode
+     * using the toolbar-based run configuration.
      */
     @Override
     @Test
@@ -119,20 +115,105 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
     }
 
     /**
-     * Re-enables this specific test from the base class to verify server startup
-     * in debug mode using the main menu configuration.
-     *
-     * The class-level @Disabled annotation disables all inherited tests. This method
-     * is intentionally re-enabled to allow execution of just this test while keeping
-     * all other inherited tests suppressed in this subclass.
-     *
-     * Reference: https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
-     * This test ensures that the debug mode startup functionality via the main menu
-     * is properly verified, which is a part of the fix for issue #415.
+     * Verifies that the Liberty server starts correctly in debug mode
+     * using the menu-based run configuration.
      */
     @Override
     @Test
     public void testStartWithConfigInDebugModeUsingMenu() {
         super.testStartWithConfigInDebugModeUsingMenu();
     }
+
+    /* === Disabled tests below are not applicable for custom WLP installation scenario === */
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testCustomStartParametersClearedOnConfigRemoval() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testMultipleConfigEditHistory() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testOpenBuildFileActionUsingPopUpMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testRunTestsActionUsingDropDownMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testRunTestsActionUsingPlayToolbarButton() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testRunTestsActionUsingPopUpMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testRunTestsActionUsingSearch() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingDropDownMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPlayToolbarButton() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingPopUpMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartInContainerActionUsingSearch() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartInContainerParamClearedOnConfigRemoval() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithConfigInRunModeUsingMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithConfigInRunModeUsingToolbar() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithParamsActionUsingDropDownMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithParamsActionUsingPlayToolbarButton() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithParamsActionUsingPopUpMenu() {}
+
+    @Disabled("Not relevant for custom WLP installation scenario")
+    @Override
+    @Test
+    public void testStartWithParamsActionUsingSearch() {}
+
 }
