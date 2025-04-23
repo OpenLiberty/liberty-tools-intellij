@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -159,7 +159,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Add project to the tool window", 3);
 
         // Select project from the 'Add Liberty project' dialog.
-        UIBotTestUtils.selectProjectFromAddLibertyProjectDialog(remoteRobot, getSmNLTRestProjectName());
+        UIBotTestUtils.selectProjectFromDialog(remoteRobot, getSmNLTRestProjectName(), "Add Liberty project");
 
         try {
             // Validate that the project is displayed in the Liberty tool window.

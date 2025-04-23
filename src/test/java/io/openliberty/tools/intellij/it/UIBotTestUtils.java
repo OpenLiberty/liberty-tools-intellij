@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -98,93 +99,35 @@ public class UIBotTestUtils {
     }
 
     /**
-     * Imports a project using the UI.
+     * Imports a project using the IntelliJ API.
      *
      * @param remoteRobot  The RemoteRobot instance.
      * @param projectsPath The absolute path to the directory containing the projects.
+     * @param projectName  The name of the project to be imported.
      */
     public static void importProject(RemoteRobot remoteRobot, String projectsPath, String projectName) {
-        // Trigger the open project dialog.
-        CommonContainerFixture commonFixture = null;
-        Frame currentFrame = getCurrentFrame(remoteRobot);
-        if (currentFrame == null) {
-            fail("Unable to identify the current window frame (i.e. welcome/project)");
-        }
+        String projectFullPath = Paths.get(projectsPath, projectName).toAbsolutePath().toString().replace("\\", "/");
 
-        if (currentFrame == Frame.WELCOME) {
-            // From the welcome dialog.
-            WelcomeFrameFixture welcomePage = remoteRobot.find(WelcomeFrameFixture.class, Duration.ofSeconds(10));
-            commonFixture = welcomePage;
-            ComponentFixture cf = welcomePage.getOpenProjectComponentFixture("Open");
-            cf.click();
-        } else if (currentFrame == Frame.PROJECT) {
-            // From the project frame.
-            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
-            commonFixture = projectFrame;
-            String openAction = null;
-            if (remoteRobot.isMac()) {
-                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
-                projectFrame.clickOnMainMenuWithActions(remoteRobot, "File", openAction);
-            } else {
-                clickOnMainMenu(remoteRobot);
-                ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
-                fileMenuEntry.moveMouse();
-                openAction = handleMenuBasedOnVersion(remoteRobot, "Open...", "Open…");
-                ComponentFixture openFixture = projectFrame.getActionMenuItem(openAction);
-                openFixture.click(new Point());
-            }
-        }
-
-        // Specify the project's path. The text field is pre-populated by default.
-        DialogFixture newProjectDialog = commonFixture.find(DialogFixture.class, DialogFixture.byTitle("Open File or Project"), Duration.ofSeconds(10));
-        JTextFieldFixture textField = newProjectDialog.getBorderLessTextField();
-        // clear text in textField
-        textField.setText("");
-        JButtonFixture okButton = newProjectDialog.getButton("OK");
-
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the OK button on the open project dialog to be enabled",
-                "The OK button on the open project dialog was not enabled",
-                okButton::isEnabled);
-
-        TestUtils.sleepAndIgnoreException(10);
-
-        String projectFullPath = Paths.get(projectsPath, projectName).toString();
-        textField.setText(projectFullPath);
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for the text box on the Open \"File or Project\" dialog to be populated with the given value",
-                "The text box on the Open \"File or Project\" dialog was not populated with the given value",
-                () -> textField.getText().equals(projectFullPath));
-
-        ComponentFixture projectTree = newProjectDialog.getTree();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                Duration.ofSeconds(1),
-                "Waiting for project tree on the Open \"File or Project\" dialog to show the set project",
-                "The project tree on the \"File or Project\" dialog did not show the set project",
-                () -> projectTree.getData().hasText(projectName));
-
-        // Click OK.
-        okButton.click();
-
-        // If in a project frame, choose where to open the project.
-        if (currentFrame == Frame.PROJECT) {
-            DialogFixture openProjectDialog = getOpenProjectLocationDialog(commonFixture);
-            JButtonFixture thisWinButton = openProjectDialog.getButton("This Window");
-            RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
-                    Duration.ofSeconds(1),
-                    "Waiting for The \"This window\" button on the \"Open Project\" dialog to be enabled",
-                    "The \"This window\" button on the \"Open Project\" dialog was not enable",
-                    thisWinButton::isEnabled);
-            thisWinButton.click();
-        }
+        remoteRobot.runJs("""
+                importClass(com.intellij.openapi.application.ApplicationManager);
+                importClass(com.intellij.ide.impl.ProjectUtil);
+                
+                const path = new java.io.File("%s").toPath();
+                            const openProject = new Runnable({
+                                run: function() {
+                                    ProjectUtil.openOrImport(path.toString(), null, false);
+                                }
+                            });
+                
+                ApplicationManager.getApplication().invokeLater(openProject);
+                """.formatted(projectFullPath));
 
         // Wait for the project frame to open, and make sure a few basic UI items are showing.
         // Note that at specific points in time, the window pane items will re-arrange themselves
         // as content is displayed. This, has an effect on the location of the items on the frame.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
 
+        // Ensure Liberty button is available (or any other validation that project is fully loaded)
         ComponentFixture wpStripeButton = projectFrame.getStripeButton("Liberty", "60");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
                 Duration.ofSeconds(1),
@@ -244,7 +187,7 @@ public class UIBotTestUtils {
      * @param action        The action to run
      * @param usePlayButton The indicator that specifies if play button should be used to run the action or not.
      */
-    public static void runLibertyActionFromLTWDropDownMenu(RemoteRobot remoteRobot, String action, boolean usePlayButton, int maxRetries) {
+    public static void runLibertyActionFromLTWDropDownMenu(RemoteRobot remoteRobot, String action, String projectName, boolean usePlayButton, int maxRetries) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         // Click on the Liberty toolbar to give it focus.
@@ -264,8 +207,14 @@ public class UIBotTestUtils {
                         treeFixture::isShowing);
 
                 List<RemoteText> rts = treeFixture.findAllText();
+                // Add a flag variable to confirm that the Liberty action is selecting exactly the same option under the specified project.
+                // Otherwise, the robot will click on the first appearance of the Liberty action text.
+                boolean flag = false;
                 for (RemoteText rt : rts) {
-                    if (action.equals(rt.getText())) {
+                    if (projectName.equals(rt.getText())) {
+                        flag = true;
+                    }
+                    if (action.equals(rt.getText()) && flag) {
                         if (usePlayButton) {
                             rt.click();
                             clickOnLibertyTWToolbarPlayButton(remoteRobot);
@@ -639,7 +588,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 projTree.findText(fileName).doubleClick();
                 break;
@@ -678,7 +627,7 @@ public class UIBotTestUtils {
                 hideTerminalWindow(remoteRobot);
 
                 // get a JTreeFixture reference to the file project viewer entry
-                JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+                JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
                 // expand project directories that are specific to this test app being used by these testcases
                 // must be expanded here before trying to open specific
@@ -822,7 +771,7 @@ public class UIBotTestUtils {
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -858,7 +807,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(20);
+                TestUtils.sleepAndIgnoreException(10);
                 // click on center of editor pane - allow hover to work on next attempt
                 editorNew.click();
             }
@@ -888,7 +837,7 @@ public class UIBotTestUtils {
         Point originPt = new Point(1, 1);
 
         Exception error = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             error = null;
             try {
                 // move the cursor to the origin of the editor
@@ -923,7 +872,7 @@ public class UIBotTestUtils {
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
-                TestUtils.sleepAndIgnoreException(2);
+                TestUtils.sleepAndIgnoreException(5);
                 // click on upper left corner of editor pane - allow hover to work on next attempt
                 editorNew.click(originPt);
             }
@@ -966,33 +915,33 @@ public class UIBotTestUtils {
         for (int i = 0; i < 10; i++) {
             error = null;
             try {
-        Keyboard keyboard = new Keyboard(remoteRobot);
-        // find the location in the file to begin the stanza insertion
-        // since we know this is a new empty file, go to position 1,1
-        goToLineAndColumn(remoteRobot, keyboard, 1, 1);
+                Keyboard keyboard = new Keyboard(remoteRobot);
+                // find the location in the file to begin the stanza insertion
+                // since we know this is a new empty file, go to position 1,1
+                goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
-        keyboard.enterText(snippetSubString);
+                keyboard.enterText(snippetSubString);
 
-        // Select the appropriate completion suggestion in the pop-up window that is automatically
-        // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
-        // and entry automatically if the completion suggestion windows has one entry only.
-        ComponentFixture namePopupWindow = projectFrame.getLookupList();
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofSeconds(1),
-                "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
-                "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
-                () -> namePopupWindow.hasText(snippetSubString));
+                // Select the appropriate completion suggestion in the pop-up window that is automatically
+                // opened as text is typed. Avoid hitting ctrl + space as it has the side effect of selecting
+                // and entry automatically if the completion suggestion windows has one entry only.
+                ComponentFixture namePopupWindow = projectFrame.getLookupList();
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
+                        Duration.ofSeconds(1),
+                        "Waiting for text " + snippetSubString + " to appear in the completion suggestion pop-up window",
+                        "Text " + snippetSubString + " did not appear in the completion suggestion pop-up window",
+                        () -> namePopupWindow.hasText(snippetSubString));
 
-        namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
+                namePopupWindow.findText(contains(snippetChooserString)).doubleClick();
 
-        // let the auto-save function of intellij save the file before testing it
-        if (remoteRobot.isMac()) {
-            keyboard.hotKey(VK_META, VK_S);
-        } else {
-            // linux + windows
-            keyboard.hotKey(VK_CONTROL, VK_S);
-        }
-        break;
+                // let the auto-save function of intellij save the file before testing it
+                if (remoteRobot.isMac()) {
+                    keyboard.hotKey(VK_META, VK_S);
+                } else {
+                    // linux + windows
+                    keyboard.hotKey(VK_CONTROL, VK_S);
+                }
+                break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 error = wftoe;
 
@@ -1256,7 +1205,13 @@ public class UIBotTestUtils {
                 }
 
                 // For either a FEATURE or a CONFIG stanza, insert where the cursor is currently located.
-                keyboard.enterText(stanzaSnippet);
+                // In Windows OS, text entry into a file is much faster compared to other operating systems, so adding some delays between each character helps ensure proper LS requests and responses.
+                if (remoteRobot.isWin()) {
+                    keyboard.enterText(stanzaSnippet, 200);
+                }
+                else {
+                    keyboard.enterText(stanzaSnippet);
+                }
 
                 if (completeWithPopup) {
                     // Select the appropriate completion suggestion in the pop-up window that is automatically
@@ -1686,11 +1641,22 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Runs an action from the Search Everywhere panel with a default value for `isMultiple`.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param action      The action to be executed.
+     * @param maxRetries  The number of retries in case of failure.
+     */
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries) {
+        runActionFromSearchEverywherePanel(remoteRobot, action, maxRetries, false);
+    }
+
+    /**
      * Opens the search everywhere dialog.
      *
      * @param remoteRobot The RemoteRobot instance.
      */
-    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries) {
+    public static void runActionFromSearchEverywherePanel(RemoteRobot remoteRobot, String action, int maxRetries, boolean isMultiple) {
         // Search everywhere UI actions may fail due to UI flickering/indexing on Windows. Retry in case of a failure.
         Exception error = null;
         for (int i = 0; i < maxRetries; i++) {
@@ -1727,9 +1693,9 @@ public class UIBotTestUtils {
                         Duration.ofSeconds(1),
                         "Waiting for the search to filter and show " + action + " in search output",
                         "The search did not filter or show " + action + " in the search output",
-                        () -> findTextInListOutputPanel(projectFrame, action) != null);
+                        () -> findTextInListOutputPanel(projectFrame, action, true) != null);
 
-                RemoteText foundAction = findTextInListOutputPanel(projectFrame, action);
+                RemoteText foundAction = findTextInListOutputPanel(projectFrame, action, true);
                 if (foundAction != null) {
                     foundAction.click();
                 } else {
@@ -1737,7 +1703,8 @@ public class UIBotTestUtils {
                 }
 
                 // If the Liberty: Start... action was selected, make sure the Edit Configuration dialog is displayed.
-                if (action.equals("Liberty: Start...")) {
+                // For multiple projects, an extra dialog appears to select the project before the "Edit Configuration" dialog is displayed.
+                if (action.equals("Liberty: Start...") && !isMultiple) {
                     // This call will fail if the expected dialog is not displayed.
                     projectFrame.find(DialogFixture.class, DialogFixture.byTitle("Edit Configuration"), Duration.ofSeconds(30));
                 }
@@ -1776,30 +1743,124 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Selects the specified project using the default 'Liberty project' dialog title.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param projectName The name of the project to select.
+     */
+    public static void selectProjectFromDialog(RemoteRobot remoteRobot, String projectName) {
+        selectProjectFromDialog(remoteRobot, projectName, "Liberty project");
+    }
+
+    /**
      * Selects the specified project from the list of detected projects shown in the 'Add Liberty project'
      * dialog.
      *
      * @param remoteRobot The RemoteRobot instance.
      * @param projectName The name of the project to select.
      */
-    public static void selectProjectFromAddLibertyProjectDialog(RemoteRobot remoteRobot, String projectName) {
+    public static void selectProjectFromDialog(RemoteRobot remoteRobot, String projectName, String dialogTitle) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
-                DialogFixture.byTitle("Add Liberty project"),
+                DialogFixture.byTitle(dialogTitle),
                 Duration.ofSeconds(10));
         JButtonFixture jbf = addProjectDialog.getBasicArrowButton();
         jbf.click();
 
-        RemoteText remoteProject = findTextInListOutputPanel(addProjectDialog, projectName);
+        RemoteText remoteProject = findTextInListOutputPanel(addProjectDialog, projectName, false);
         if (remoteProject != null) {
             remoteProject.click();
         } else {
-            fail("Unable to find " + projectName + " in the output list of the Add Liberty project dialog.");
+            fail("Unable to find " + projectName + " in the output list of the " + dialogTitle + " dialog.");
         }
 
         JButtonFixture okButton = addProjectDialog.getButton("OK");
         okButton.click();
     }
+
+    /**
+     * Selects the build file path for a Liberty project in the Run/Debug Configurations dialog.
+     *
+     * @param remoteRobot  The RemoteRobot instance.
+     * @param buildFilePath The desired build file path to select.
+     */
+    public static void selectProjectBuildFilePath(RemoteRobot remoteRobot, String buildFilePath) {
+        try {
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+            // Find the "Run/Debug Configurations" dialog within the project frame.
+            DialogFixture addProjectDialog = projectFrame.find(DialogFixture.class,
+                    DialogFixture.byTitle("Run/Debug Configurations"),
+                    Duration.ofSeconds(10));
+
+            Locator locator = byXpath("//div[@class='DialogPanel']//div[@class='ComboBox']");
+            ComboBoxFixture projBldFileBox = addProjectDialog.comboBox(locator, Duration.ofSeconds(10));
+
+            // Initialize the keyboard object to simulate key presses.
+            Keyboard keyboard = new Keyboard(remoteRobot);
+
+            // Click on the ComboBox to focus it.
+            projBldFileBox.click();
+
+            // Copy the currently selected value in the ComboBox to the clipboard.
+            if (remoteRobot.isMac()) {
+                keyboard.hotKey(VK_META, VK_C); // Command + C on Mac.
+            } else {
+                keyboard.hotKey(VK_CONTROL, VK_C); // Ctrl + C on Linux/Windows.
+            }
+
+            // Retrieve the copied value from the system clipboard.
+            String copiedValue = (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .getData(DataFlavor.stringFlavor);
+
+            // If the copied default build file path does not match the actual build file path of the project,
+            // the second item in the list represents the correct build file path. Select that item.
+            if (!(copiedValue.equals(buildFilePath))) {
+                List<JListFixture> searchLists = addProjectDialog.jLists(JListFixture.Companion.byType());
+                if (!searchLists.isEmpty()) {
+                    JListFixture searchList = searchLists.get(1);
+                    try {
+                        List<RemoteText> entries = searchList.findAllText();
+                        entries.get(1).click(); // Click on the second entry in the list.
+                    } catch (NoSuchElementException nsee) {
+                        // Handle the case where the list is empty.
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log the exception and fail the test if an error occurs.
+            e.printStackTrace();
+            Assertions.fail("Failed to select the exact " + buildFilePath + " : " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Checks if the "Liberty project" dialog is visible within the project frame.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @return true if the "Liberty project" dialog is visible; false otherwise.
+     */
+    public static boolean checkProjectDialog(RemoteRobot remoteRobot) {
+        try {
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+            // Search for a dialog titled "Liberty project" within the project frame, with a timeout of 10 seconds.
+            DialogFixture addProject = projectFrame.find(
+                    DialogFixture.class,
+                    DialogFixture.byTitle("Liberty project"),
+                    Duration.ofSeconds(10)
+            );
+
+            // Return true if the dialog is visible.
+            return addProject.isShowing();
+        } catch (Exception e) {
+            // Return false to indicate the dialog is not visible.
+            return false;
+        }
+    }
+
 
     /**
      * Selects the specified project from the list of detected projects shown in the 'Remove Liberty project'
@@ -1815,7 +1876,7 @@ public class UIBotTestUtils {
                 Duration.ofSeconds(10));
         removeProjectDialog.getBasicArrowButton().click();
 
-        RemoteText remoteProject = findTextInListOutputPanel(removeProjectDialog, projectName);
+        RemoteText remoteProject = findTextInListOutputPanel(removeProjectDialog, projectName, true);
         if (remoteProject != null) {
             remoteProject.click();
         } else {
@@ -1980,7 +2041,7 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      * @param cfgName     The name of the new configuration.
      */
-    public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName) {
+    public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName, boolean isMultiple, String buildFilePath) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
         String editConfigurationAction= null;
         if (remoteRobot.isMac()) {
@@ -2061,6 +2122,10 @@ public class UIBotTestUtils {
                     "The name of the config did not appear in the text box ",
                     () -> newNameTextField.getText().equals(cfgName));
 
+            if (isMultiple) {
+                UIBotTestUtils.selectProjectBuildFilePath(remoteRobot, buildFilePath);
+            }
+
             // Save the new configuration by clicking on the Apply button.
             JButtonFixture applyButton = addProjectDialog.getButton("Apply");
             RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
@@ -2090,9 +2155,9 @@ public class UIBotTestUtils {
      * @param cfgName     The name of the new configuration.
      * @param startParams The dev mode start parameters.
      */
-    public static void editLibertyConfigUsingEditConfigDialog(RemoteRobot remoteRobot, String cfgName, String startParams) {
+    public static void editLibertyConfigUsingEditConfigDialog(RemoteRobot remoteRobot, String projectName, String cfgName, String startParams) {
         // Display the Liberty Edit Configuration dialog.
-        runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", false, 3);
+        runLibertyActionFromLTWDropDownMenu(remoteRobot, "Start...", projectName, false, 3);
 
         // Get a hold of the Liberty Edit Configurations dialog.
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
@@ -2475,7 +2540,7 @@ public class UIBotTestUtils {
      * @return The RemoteText object representing the text found in the list panel, or
      * null if the text was not found.
      */
-    public static RemoteText findTextInListOutputPanel(CommonContainerFixture fixture, String text) {
+    public static RemoteText findTextInListOutputPanel(CommonContainerFixture fixture, String text, boolean exactMatch) {
         RemoteText foundText = null;
 
         List<JListFixture> searchLists = fixture.jLists(JListFixture.Companion.byType());
@@ -2484,7 +2549,7 @@ public class UIBotTestUtils {
             try {
                 List<RemoteText> entries = searchList.findAllText();
                 for (RemoteText entry : entries) {
-                    if (entry.getText().equals(text)) {
+                    if ((exactMatch && entry.getText().equals(text)) || (!exactMatch && entry.getText().contains(text))) {
                         foundText = entry;
                     }
                 }
@@ -2505,22 +2570,26 @@ public class UIBotTestUtils {
      * @param absoluteWLPPath The absolute path of the Liberty installation.
      * @param maxRetries      The maximum amount of attempts to try to stop the server.
      */
-    public static void runStopAction(RemoteRobot remoteRobot, String testName, ActionExecType execType, String absoluteWLPPath, String smMPProjName, int maxRetries) {
+    public static void runStopAction(RemoteRobot remoteRobot, String testName, ActionExecType execType, String absoluteWLPPath, String smMPProjName, int maxRetries, boolean isMultiple) {
         for (int i = 0; i < maxRetries; i++) {
             // Stop dev mode. Any failures during command processing are retried. If there are any
             // failures, this method will exit.
             switch (execType) {
                 case LTWPLAY:
-                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", true, maxRetries);
+                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", smMPProjName, true, maxRetries);
                     break;
                 case LTWDROPDOWN:
-                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", false, maxRetries);
+                    UIBotTestUtils.runLibertyActionFromLTWDropDownMenu(remoteRobot, "Stop", smMPProjName, false, maxRetries);
                     break;
                 case LTWPOPUP:
                     UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, smMPProjName, "Liberty: Stop", maxRetries);
                     break;
                 case SEARCH:
-                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries);
+                    UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Liberty: Stop", maxRetries, isMultiple);
+                    // For multiple projects, an additional dialog appears to select the project.
+                    if (isMultiple) {
+                        UIBotTestUtils.selectProjectFromDialog(remoteRobot, smMPProjName);
+                    }
                     break;
                 default:
                     fail("An invalid execution type of " + execType + " was requested.");
@@ -2829,7 +2898,7 @@ public class UIBotTestUtils {
         String menuAction2;
         if (intellijVersion.startsWith("2024.2")) {
             menuAction2 = menuAction2024_2;
-        } else if (intellijVersion.startsWith("2024.3")) {
+        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025.1")) {
             menuAction2 = menuAction2024_3;
         } else {
             // If the version is unsupported, throw an exception to indicate the issue.
@@ -2839,4 +2908,19 @@ public class UIBotTestUtils {
         return menuAction2;
     }
 
+    /**
+     * Simulates a click on the "Load all" button.
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void clickOnLoad(RemoteRobot remoteRobot) {
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
+
+        // XPath to locate the "Load all" button.
+        String xPath = "//div[@accessiblename='Load all' and @class='JButton']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
+
+        TestUtils.sleepAndIgnoreException(5);
+    }
 }

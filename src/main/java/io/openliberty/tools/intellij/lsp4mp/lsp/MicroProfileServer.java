@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020, 2025 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,18 +10,18 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
-import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusServer.java
  * to start LSP4MP, Language Server for MicroProfile
  */
-public class MicroProfileServer extends ProcessStreamConnectionProvider {
+public class MicroProfileServer extends OSProcessStreamConnectionProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
 
@@ -42,8 +42,8 @@ public class MicroProfileServer extends ProcessStreamConnectionProvider {
             return;
         }
         if (lsp4mpServerPath.exists()) {
-            setCommands(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
-                    lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true"));
+            setCommandLine(new GeneralCommandLine(Arrays.asList(javaHome + File.separator + "bin" + File.separator + "java", "-jar",
+                    lsp4mpServerPath.getAbsolutePath(), "-DrunAsync=true")));
         } else {
             LOGGER.warn(String.format("Unable to start Eclipse LSP4MP. Eclipse LSP4MP server path: %s does not exist"), lsp4mpServerPath);
         }
