@@ -250,6 +250,10 @@ public class DebugModeHandler {
      */
     private Path getServerEnvPath(LibertyModule libertyModule) {
         String serverDirectory = getServerDirectoryFromLibertyPluginConfig(libertyModule);
+        if (serverDirectory == null || serverDirectory.isEmpty()) {
+            LOGGER.trace(String.format("Server directory is null or empty for project %s", libertyModule.getName()));
+            return null;
+        }
         Path serverEnvPath = Paths.get(serverDirectory, WLP_SERVER_ENV_FILE_NAME);
         if (Files.exists(serverEnvPath)) {
             return serverEnvPath;
@@ -291,6 +295,7 @@ public class DebugModeHandler {
             }
         } catch (Exception e) {
             LOGGER.trace("Unable to find serverDirectory from liberty-plugin-config file");
+            return null;
         }
         return serverDirectory;
     }
