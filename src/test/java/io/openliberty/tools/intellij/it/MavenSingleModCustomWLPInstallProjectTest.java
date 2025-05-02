@@ -124,94 +124,99 @@ public class MavenSingleModCustomWLPInstallProjectTest extends SingleModMPProjec
         super.testStartWithConfigInDebugModeUsingMenu();
     }
 
-    /* === Disabled tests below are not applicable for custom WLP installation scenario === */
+    /**
+     * These tests are temporarily disabled due to
+     * timeout issues in GitHub Actions builds.
+     * See issue: https://github.com/OpenLiberty/ci.common/issues/1308
+     * Re-enable once resolved
+     */
 
     @Disabled("Not relevant for custom WLP installation scenario")
     @Override
     @Test
     public void testCustomStartParametersClearedOnConfigRemoval() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testMultipleConfigEditHistory() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testOpenBuildFileActionUsingPopUpMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testRunTestsActionUsingDropDownMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testRunTestsActionUsingPlayToolbarButton() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testRunTestsActionUsingPopUpMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testRunTestsActionUsingSearch() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues. It requires further investigation as part of the container test")
     @Override
     @Test
     public void testStartInContainerActionUsingDropDownMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues. It requires further investigation as part of the container test")
     @Override
     @Test
     public void testStartInContainerActionUsingPlayToolbarButton() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues. It requires further investigation as part of the container test")
     @Override
     @Test
     public void testStartInContainerActionUsingPopUpMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues. It requires further investigation as part of the container test")
     @Override
     @Test
     public void testStartInContainerActionUsingSearch() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues. It requires further investigation as part of the container test")
     @Override
     @Test
     public void testStartInContainerParamClearedOnConfigRemoval() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithConfigInRunModeUsingMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithConfigInRunModeUsingToolbar() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithParamsActionUsingDropDownMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithParamsActionUsingPlayToolbarButton() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithParamsActionUsingPopUpMenu() {}
 
-    @Disabled("Not relevant for custom WLP installation scenario")
+    @Disabled("Temporarily disabled due to GHA timeout issues")
     @Override
     @Test
     public void testStartWithParamsActionUsingSearch() {}
