@@ -56,10 +56,10 @@ prefetchDependencies() {
 # Configure custom WLP install path
 configureCustomWlpInstall() {
     # Define the custom directory inside the user home
-    local targetDir="$HOME/customInstallDir"
+    local customInstallPath="$HOME/customInstallDir"
 
     if [ -n "$HOME" ]; then
-        copyWlpFolder "target/liberty/wlp" "$targetDir"
+        copyWlpFolder "target/liberty/wlp" "$customInstallPath"
     else
         echo "$HOME directory not found."
     fi
@@ -82,13 +82,13 @@ copyWlpFolder() {
 
 # Deletes custom WLP install directory
 cleanupCustomWLPDir() {
-    local targetDir="$HOME/customInstallDir"
+    local customInstallPath="$HOME/customInstallDir"
 
-    if [ -d "$targetDir" ]; then
-        rm -rf "$targetDir"
-        echo "Cleaned up: $targetDir"
+    if [ -d "$customInstallPath" ]; then
+        rm -rf "$customInstallPath"
+        echo "Cleaned up: $customInstallPath"
     else
-        echo "No cleanup needed, $targetDir does not exist."
+        echo "No cleanup needed, $customInstallPath does not exist."
     fi
 }
 
@@ -177,6 +177,7 @@ startIDE() {
         if [ $count -eq 24 ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE to start. Output:"
             gatherDebugData $(pwd)
+            cleanupCustomWLPDir
             exit 12
         fi
         count=`expr $count + 1`
@@ -228,6 +229,7 @@ main() {
     rc=$?
     if [ "$rc" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while priming the env. rc: ${rc}."
+        cleanupCustomWLPDir
         exit 11
     fi
 
