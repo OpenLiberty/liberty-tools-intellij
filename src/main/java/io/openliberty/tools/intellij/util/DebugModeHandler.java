@@ -275,7 +275,7 @@ public class DebugModeHandler {
      * @return the server directory path specified in the Liberty plugin config, or an empty string if not found or on error.
      */
     private String getServerDirectoryFromLibertyPluginConfig(LibertyModule libertyModule) {
-        String serverDirectory = "";
+        String serverDirectory = null;
         try {
             String projectPath = libertyModule.getBuildFile().getParent().getPath();
             String projectType = libertyModule.getProjectType().toString();
@@ -295,7 +295,6 @@ public class DebugModeHandler {
             }
         } catch (Exception e) {
             LOGGER.trace("Unable to find serverDirectory from liberty-plugin-config file");
-            return null;
         }
         return serverDirectory;
     }
