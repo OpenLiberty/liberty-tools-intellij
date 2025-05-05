@@ -31,8 +31,6 @@ public abstract class SingleModMPProjectCfgTestCommon {
     // When we create a new Run/Debug configuration, the "Liberty project" field is populated by
     // default with one of the build files from one of the Liberty projects in the workspace. If
     // there is no default build file then there will be a Null Pointer Exception if we press Run.
-    // The following method will throw a NoSuchElementException if there are no Liberty projects
-    // detected when the Edit Liberty Run/Debug Configuration dialog is opened.
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -150,6 +148,8 @@ public abstract class SingleModMPProjectCfgTestCommon {
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Add a new Liberty configurations. Throws an exception if there is an error.
+        // Note: the method will throw a NoSuchElementException if there are no Liberty projects
+        // detected when the Edit Liberty Run/Debug Configuration dialog is opened.
         UIBotTestUtils.createLibertyConfiguration(remoteRobot, "newCfg1", false, null);
     }
 
