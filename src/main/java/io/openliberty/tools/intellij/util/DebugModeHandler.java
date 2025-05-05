@@ -272,7 +272,7 @@ public class DebugModeHandler {
      * <serverDirectory> element.
      *
      * @param libertyModule the Liberty module containing build and project metadata.
-     * @return the server directory path specified in the Liberty plugin config, or an empty string if not found or on error.
+     * @return the server directory path specified in the Liberty plugin config, or null if not found or on error.
      */
     private String getServerDirectoryFromLibertyPluginConfig(LibertyModule libertyModule) {
         String serverDirectory = null;
