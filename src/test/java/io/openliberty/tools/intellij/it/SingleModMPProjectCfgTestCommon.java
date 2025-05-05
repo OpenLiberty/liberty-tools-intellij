@@ -150,7 +150,7 @@ public abstract class SingleModMPProjectCfgTestCommon {
         UIBotTestUtils.deleteLibertyRunConfigurations(remoteRobot);
 
         // Add a new Liberty configurations. Throws an exception if there is an error.
-        UIBotTestUtils.createLibertyConfiguration(remoteRobot, "newCfg1");
+        UIBotTestUtils.createLibertyConfiguration(remoteRobot, "newCfg1", false, null);
     }
 
     /**
