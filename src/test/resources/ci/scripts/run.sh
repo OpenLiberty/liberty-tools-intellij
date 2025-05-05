@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ############################################################################
-# Copyright (c) 2023, 2024 IBM Corporation and others.
+# Copyright (c) 2023, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials are made available under the
 # terms of the Eclipse Public License v. 2.0 which is available at
@@ -39,6 +39,9 @@ prefetchDependencies() {
     ./mvnw liberty:create
     ./mvnw liberty:install-feature -ntp
 
+    # Setup custom wlp install in user home directory
+    configureCustomWlpInstall
+
     # Run through dev mode server install/create and feature installation for the Gradle app.
     cd "$workingDir"
     cd "src/test/resources/projects/gradle/singleModGradleMP"
@@ -48,6 +51,45 @@ prefetchDependencies() {
 
     # Go back to the working dir.
     cd "$workingDir"
+}
+
+# Configure custom WLP install path
+configureCustomWlpInstall() {
+    # Define the custom directory inside the user home
+    local customInstallPath="$HOME/customInstallDir"
+
+    if [ -n "$HOME" ]; then
+        copyWlpFolder "target/liberty/wlp" "$customInstallPath"
+    else
+        echo "$HOME directory not found."
+    fi
+}
+
+# Copy WLP folder from target/liberty/wlp to custom directory
+copyWlpFolder() {
+    local sourceDir="$1"
+    local destinationDir="$2"
+
+    # Ensure the source exists before copying
+    if [ -d "$sourceDir" ]; then
+        mkdir -p "$destinationDir"
+        cp -r "$sourceDir" "$destinationDir"
+        echo "wlp folder copied successfully to $destinationDir"
+    else
+        echo "Source wlp folder does not exist. Make sure Liberty is installed."
+    fi
+}
+
+# Deletes custom WLP install directory
+cleanupCustomWLPDir() {
+    local customInstallPath="$HOME/customInstallDir"
+
+    if [ -d "$customInstallPath" ]; then
+        rm -rf "$customInstallPath"
+        echo "Cleaned up: $customInstallPath"
+    else
+        echo "No cleanup needed, $customInstallPath does not exist."
+    fi
 }
 
 # Gathers resource usage information.
@@ -135,6 +177,7 @@ startIDE() {
         if [ $count -eq 24 ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE to start. Output:"
             gatherDebugData $(pwd)
+            cleanupCustomWLPDir
             exit 12
         fi
         count=`expr $count + 1`
@@ -186,6 +229,7 @@ main() {
     rc=$?
     if [ "$rc" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while priming the env. rc: ${rc}."
+        cleanupCustomWLPDir
         exit 11
     fi
 
@@ -227,8 +271,12 @@ main() {
     if [ "$testRC" -ne 0 ]; then
         echo -e "\n$(${currentTime[@]}): ERROR: Failure while running tests. rc: ${testRC}."
         gatherDebugData "$currentLoc"
+        cleanupCustomWLPDir
         exit -1
     fi
+
+    # Always clean up the custom wlp directory before exiting
+    cleanupCustomWLPDir
 }
 
 main "$@"
