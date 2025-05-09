@@ -2091,6 +2091,15 @@ public class UIBotTestUtils {
                     DialogFixture.byTitle("Run/Debug Configurations"),
                     Duration.ofSeconds(10));
 
+            // The new configuration should refer to one of the Liberty projects by default.
+            // If there are no Liberty projects detected in the workspace then the combobox
+            // will have zero values.
+            Locator projectComboLocator = byXpath("//div[@class='ComboBox']");
+            ComboBoxFixture projectCombo = addProjectDialog.comboBox(projectComboLocator);
+            if (projectCombo.listValues().isEmpty()) {
+                throw new NoSuchElementException("Liberty project field contains no elements");
+            }
+
             // Find the new configuration's name text field and give it a name.
             Locator locator = byXpath("//div[@class='JTextField']");
 
@@ -2134,6 +2143,8 @@ public class UIBotTestUtils {
                     "The Apply button on the add config dialog was not enabled",
                     applyButton::isEnabled);
             applyButton.click();
+
+            // Change which button we click to complete the operation
             exitButtonText = "OK";
         } finally {
             // Exit the Run/Debug Configurations dialog.
