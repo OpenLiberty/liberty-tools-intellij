@@ -92,21 +92,34 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    runs-on: ${{ matrix.os }}
+    name: build ( ${{ matrix.runtime.name }}, ${{ matrix.excludeLTITag }} )
+    runs-on: ${{ matrix.runtime.os }}
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
-        include:
-          - runtime: linux
+        runtime:
+          - name: linux
             os: ubuntu-latest
             reportName: linux-test-report
-          - runtime: mac
+          - name: mac
             os: macOS-latest
             reportName: mac-test-report
-          - runtime: windows
+          - name: windows
             os: windows-latest
             reportName: windows-test-report
+        # It’s not necessary to remove the below condition even after removing the '24.0.9' version from the 'tag' array in the cron job build.
+        # Specify the LTI tag to limit the OS.
+        # Adding a check to verify if 'refLTITag' is equal to '24.0.9'.
+        excludeLTITag:
+          - ${{ inputs.refLTITag == '24.0.9' }}
+        # Adding a check on macOS and Windows to verify if 'excludeLTITag' is equal to 'true'. The value of 'excludeLTITag' is used to determine whether the job need to be executed.
+        exclude:
+          - excludeLTITag: true
+            runtime:
+              name: mac
+          - excludeLTITag: true
+            runtime:
+              name: windows
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
@@ -169,6 +182,6 @@ jobs:
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          name: ${{ matrix.runtime.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             liberty-tools-intellij/build/reports/
