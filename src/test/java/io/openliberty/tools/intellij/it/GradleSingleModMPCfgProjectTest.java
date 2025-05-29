@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 IBM Corporation.
+ * Copyright (c) 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,9 +20,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Tests Liberty Tools actions using a single module MicroProfile Gradle project with space in directory and name.
+ * Test Liberty Tools creation of a Run/Debug configuration without a null pointer exception
+ * using a single module MicroProfile Gradle project.
  */
-public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon {
+public class GradleSingleModMPCfgProjectTest extends SingleModMPProjectCfgTestCommon {
 
     /**
      * Single module Microprofile project name specified in file settings.gradle.
@@ -40,9 +41,9 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
 
     /**
-     * The path to the folder containing the test projects, including directories with spaces.
+     * The path to the folder containing the copy of the test project.
      */
-    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gsample2").toAbsolutePath().toString();
 
     /**
      * Prepares the environment for test execution.
@@ -92,21 +93,10 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         }
     }
 
-    GradleSingleModMPSIDProjectTest() {
+    GradleSingleModMPCfgProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(PROJECTS_PATH_NEW);
-        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html"));
         setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
-        setBuildCategory(BuildType.GRADLE_TYPE);
-        setSmMpProjPort(9080);
-        setSmMpProjResURI("api/resource");
-        setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath("build");
-        setBuildFileName("build.gradle");
-        setBuildFileOpenCommand("Liberty: View Gradle config");
-        setStartParams("--hotTests");
-        setStartParamsDebugPort("--libertyDebugPort=9876");
-        setProjectTypeIsMultiple(false);
-        setAbsoluteWLPPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString());
     }
 }
