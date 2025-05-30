@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'io.openliberty.tools'
-version '25.0.1-SNAPSHOT'
+version '25.0.5'
 
 def remoteRobotVersion = "0.11.23"
 // To switch to nightly version, append "@nightly" to the version number (i.e. 0.4.1-20240828-013108@nightly)
@@ -231,6 +231,28 @@ intellijPlatform {
             untilBuild = providers.gradleProperty("pluginUntilBuild")
         }
         changeNotes = """
+        <h2> 25.0.5 </h2>
+        <p>Version 25.0.5 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 25.0.5 requires IntelliJ IDEA version 2024.2.*, 2024.3.*, or 2025.1.* and a minimum of Java 17.</p>
+        Notable changes:
+        <ul>
+        <li> Support for IntelliJ IDEA 2025.1 and its successive fix releases.
+        <li> Fix to enable the debugger to attach to a Liberty server when using a custom Liberty installation.
+        <li> Fix for NPE when creating a new Liberty run/debug configuration for a new project without opening the Liberty tool window first.
+        <li> Fix to enable the “Liberty: Start” action to always run a basic dev mode command with no parameters.
+        <li> Fix to enable removal of the “Run in container” parameter when the Liberty run/debug config is deleted.
+        <li> Prepopulate the name for a new Liberty run/debug config.
+        <li> Updated the <a href="https://github.com/OpenLiberty/liberty-language-server">Liberty Config Language Server</a> version to 2.2.1, which includes multiple enhancements and bug fixes. For more information regarding changes for version 2.2.1, refer to the release notes:
+          <ul>
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-2.2.1
+            <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.2.1
+          </ul>
+        <li> Updated the <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.3. For more information regarding changes for version 0.2.3, refer to the release notes: https://github.com/eclipse-lsp4jakarta/lsp4jakarta/releases/tag/0.2.3
+        <li> Liberty Tools version 25.0.5 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.13.0.
+          <ul>
+            <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide.
+          </ul>
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/24.0.12...25.0.5">commit log</a> for the full set of changes since the previous release.
+        <br>
         <h2> 24.0.12 </h2>
         <p>Version 24.0.12 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 24.0.12 requires IntelliJ IDEA version 2024.1.*, 2024.2.*, or 2024.3.* and a minimum of Java 17.</p>
         Notable changes:
