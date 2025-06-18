@@ -12,7 +12,7 @@ version '25.0.5'
 
 def remoteRobotVersion = "0.11.23"
 // To switch to nightly version, append "@nightly" to the version number (i.e. 0.4.1-20240828-013108@nightly)
-def lsp4ijVersion = '0.13.0'
+def lsp4ijVersion = '0.14.0'
 
 allprojects {
     sourceCompatibility = javaVersion
@@ -247,7 +247,7 @@ intellijPlatform {
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.2.1
           </ul>
         <li> Updated the <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> version to 0.2.3. For more information regarding changes for version 0.2.3, refer to the release notes: https://github.com/eclipse-lsp4jakarta/lsp4jakarta/releases/tag/0.2.3
-        <li> Liberty Tools version 25.0.5 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.13.0.
+        <li> Liberty Tools version 25.0.5 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.14.0.
           <ul>
             <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide.
           </ul>
