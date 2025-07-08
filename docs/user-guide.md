@@ -7,7 +7,10 @@ For information regarding known issues and limitations, refer to our [Common Iss
     - [Software requirements](#software-requirements)
     - [Application requirements](#application-requirements)
     - [Settings](#settings)
-- [Manually install specific release of the LSP4IJ plugin from the Marketplace](#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace)
+- [LSP4IJ plugin](#lsp4ij-plugin)
+    - [LSP4IJ tested versions](#lsp4ij-tested-versions)
+    - [Manually install specific release of the LSP4IJ plugin from the Marketplace](#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace)
+    - [Third party language servers](#third-party-language-servers)
 - [Open the Liberty tool window](#open-the-liberty-tool-window)
 - [Run your application on Liberty using dev mode](#run-your-application-on-liberty-using-dev-mode)
     - [Use the Liberty tool window](#use-the-liberty-tool-window)
@@ -51,11 +54,10 @@ Liberty Tools for IntelliJ IDEA honors the following settings:
 #### Environment Variables:
 - The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
-## Manually install specific release of the LSP4IJ plugin from the Marketplace
+## LSP4IJ plugin
+Liberty Tools for IntelliJ includes [LSP4IJ](https://github.com/redhat-developer/lsp4ij), an external plugin dependency that is automatically installed with Liberty Tools. LSP4IJ is a free and open-source Language Server Protocol (LSP) client developed by Red Hat, enabling seamless language server integration.
 
-When installing the Liberty Tools for IntelliJ plugin, the latest version of LSP4IJ from the JetBrains marketplace will be installed by default.
-
-If you prefer to use an older version of LSP4IJ (e.g., a specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the [JetBrains marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions).
+### LSP4IJ tested versions
 
 | Liberty Tools version | LSP4IJ version(s) tested                     |
 |-----------------------|----------------------------------------------|
@@ -63,6 +65,11 @@ If you prefer to use an older version of LSP4IJ (e.g., a specific version that w
 | 24.0.12               | 0.8.1, 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.13.0 |
 | 25.0.5                | 0.13.0, 0.14.0, 0.14.2                       |
 
+### Manually install specific release of the LSP4IJ plugin from the Marketplace
+
+When installing the Liberty Tools for IntelliJ plugin, the latest version of LSP4IJ from the JetBrains marketplace will be installed by default.
+
+If you prefer to use an older version of LSP4IJ (e.g., a specific version that was tested with the Liberty Tools release you are using), you can manually downgrade it by installing the desired version as a dependency from the [JetBrains marketplace](https://plugins.jetbrains.com/plugin/23257-lsp4ij/versions).
 
 Steps to install an older version of LSP4IJ:
 1. Go to the Plugins tab in the IDE Settings and uninstall the latest version.
@@ -75,6 +82,16 @@ Steps to install an older version of LSP4IJ:
    <img alt="Install Plugin from disk" height="300" src="images/LSP4IJ-Install Plugin from disk.png" width="350"/>
 
 5. Confirm by clicking OK, then apply the changes. If prompted, restart your IDE.
+
+### Third party language servers
+LSP4IJ includes a built-in installer that may prompt users to install additional third-party language servers. While users are free to explore and install these language servers, Liberty Tools **only supports the following officially bundled language servers**:
+
+- [Liberty Config Language Server](https://github.com/OpenLiberty/liberty-language-server)
+- [Liberty LemMinX Language Server](https://github.com/OpenLiberty/liberty-language-server)
+- [Eclipse LSP4Jakarta: Language Server for Jakarta EE](https://github.com/eclipse/lsp4jakarta)
+- [Eclipse LSP4MP: Language Server for MicroProfile](https://github.com/eclipse/lsp4mp)
+
+Third-party language servers installed via LSP4IJ are **not supported** by Liberty Tools. Any issues or unexpected behaviour resulting from such third-party tools fall outside the scope of Liberty Tools support. **The Liberty Tools team is not responsible for troubleshooting or resolving problems caused by third-party language servers.**
 
 ## Open the Liberty tool window
 Select **View > Tool Windows > Liberty**.
