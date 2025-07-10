@@ -55,7 +55,7 @@ Liberty Tools for IntelliJ IDEA honors the following settings:
 - The **JAVA_HOME** system environment variable in the current terminal is used when you run Liberty dev mode in any project.
 
 ## LSP4IJ plugin
-Liberty Tools for IntelliJ includes [LSP4IJ](https://github.com/redhat-developer/lsp4ij), an external plugin dependency that is automatically installed with Liberty Tools. LSP4IJ is a free and open-source client developed by Red Hat that supports both the Language Server Protocol (LSP) and Debug Adapter Protocol (DAP), enabling seamless integration of language servers and debuggers.
+Liberty Tools for IntelliJ has an external dependency on [LSP4IJ](https://github.com/redhat-developer/lsp4ij), which is automatically installed from the JetBrains Marketplace when Liberty Tools is installed. LSP4IJ is a free and open-source IntelliJ plugin that enables Language Server Protocol (LSP) support for language server integration in IntelliJ IDEA.
 
 ### LSP4IJ tested versions
 
