@@ -76,7 +76,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
         if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
-            // A single field or property cannot have the same
+            //A single field or property cannot be annotated with both @MapKey and @MapKeyClass
+            //Specification References:
+            //https://jakarta.ee/specifications/persistence/3.2/apidocs/jakarta.persistence/jakarta/persistence/mapkey
+            //https://jakarta.ee/specifications/persistence/3.2/apidocs/jakarta.persistence/jakarta/persistence/mapkeyclass
             diagnostics.add(createDiagnostic(fieldOrProperty, unit,
                     Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
