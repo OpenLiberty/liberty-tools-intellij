@@ -11,10 +11,10 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
 
@@ -31,7 +31,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        ShellTerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
+        TerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
         if (widget == null) {
             return;
         }

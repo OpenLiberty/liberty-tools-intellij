@@ -15,7 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import com.intellij.terminal.ui.TerminalWidget;
 
 /**
  * Represents a Liberty server module
@@ -28,14 +28,14 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
     private boolean debugMode;
-    private ShellTerminalWidget shellWidget;
+    private TerminalWidget terminalWidget;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
 
     public LibertyModule(Project project) {
         this.project = project;
         this.debugMode = false;
-        this.shellWidget = null;
+        this.terminalWidget = null;
         this.customRunConfig = null;
         this.useCustom = false;
     }
@@ -134,11 +134,11 @@ public class LibertyModule {
         this.debugMode = debugMode;
     }
 
-    public ShellTerminalWidget getShellWidget() {
-        return shellWidget;
+    public TerminalWidget getTerminalWidget() {
+        return terminalWidget;
     }
 
-    public void setShellWidget(ShellTerminalWidget shellWidget) {
-        this.shellWidget = shellWidget;
+    public void setTerminalWidget(TerminalWidget shellWidget) {
+        this.terminalWidget = shellWidget;
     }
 }

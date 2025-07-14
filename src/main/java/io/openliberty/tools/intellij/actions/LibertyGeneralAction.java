@@ -18,6 +18,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -25,7 +26,6 @@ import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
@@ -164,20 +164,20 @@ public abstract class LibertyGeneralAction extends AnAction {
      * Returns the Terminal widget for the corresponding Liberty module
      *
      * @param createWidget create Terminal widget if it does not already exist
-     * @return ShellTerminalWidget
+     * @return TerminalWidget
      */
-    protected ShellTerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected TerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
         // look for existing terminal tab
-        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
+        TerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
         // look for creating new terminal tab
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
+        TerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
         // Set Focus to existing terminal widget
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
+        if (widget == null || (!createWidget && !LibertyProjectUtil.isCommandRunningSafe(libertyModule.getTerminalWidget()))) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
