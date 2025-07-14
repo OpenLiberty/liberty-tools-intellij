@@ -177,7 +177,7 @@ public abstract class LibertyGeneralAction extends AnAction {
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        if (widget == null || (!createWidget && !LibertyProjectUtil.isCommandRunningSafe(libertyModule.getTerminalWidget()))) {
+        if (widget == null || (!createWidget && !LibertyProjectUtil.isCommandRunningSafe(widget))) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
