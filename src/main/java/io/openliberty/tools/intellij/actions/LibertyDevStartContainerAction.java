@@ -9,11 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartContainerAction extends LibertyDevStartAction {
 

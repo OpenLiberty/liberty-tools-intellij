@@ -27,7 +27,6 @@ import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import org.xml.sax.SAXException;
 
@@ -149,22 +148,25 @@ public class LibertyProjectUtil {
      * @param project
      * @param libertyModule
      * @param createWidget  true if a new widget should be created
-     * @return ShellTerminalWidget or null if it does not exist
+     * @return TerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
-                                                        TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
+    public static TerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
+                                                        TerminalToolWindowManager terminalToolWindowManager, TerminalWidget widget) {
         if (widget == null && createWidget) {
-            // create a new terminal tab
-            ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
-                    terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
-                            true, true));
-            libertyModule.setShellWidget(newTerminal);
-            return newTerminal;
+            // Create terminal tab — returns TerminalWidget
+            TerminalWidget terminalWidget = terminalToolWindowManager.createShellWidget(
+                    project.getBasePath(), libertyModule.getName(), true, true);
+
+            // Store it in the module
+            libertyModule.setTerminalWidget(terminalWidget);
+
+            return terminalWidget;
         }
+
         return widget;
     }
 
-    public static void setFocusToWidget(Project project, ShellTerminalWidget widget) {
+    public static void setFocusToWidget(Project project, TerminalWidget widget) {
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
 
@@ -248,10 +250,10 @@ public class LibertyProjectUtil {
      *
      * @param libertyModule
      * @param terminalToolWindowManager
-     * @return ShellTerminalWidget or null if it does not exist
+     * @return TerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
-        ShellTerminalWidget widget = libertyModule.getShellWidget();
+    public static TerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
+        TerminalWidget widget = libertyModule.getTerminalWidget();
         // check if widget exists in terminal view
         if (widget != null) {
             for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
@@ -261,11 +263,43 @@ public class LibertyProjectUtil {
                 }
             }
         }
-        libertyModule.setShellWidget(null);
+        libertyModule.setTerminalWidget(null);
         return null;
     }
 
     public static String includeEscapeToString(String path) {
         return "\"" + path + "\"";
+    }
+
+    /**
+     * Checks whether a command is currently running in the given terminal widget.
+     * This method ensures compatibility across IntelliJ versions:
+     * - In IntelliJ IDEA 2025.1 and later, it attempts to call {@code isCommandRunning()}.
+     * - In IntelliJ IDEA 2024.x and earlier, it falls back to {@code hasRunningCommands()}.
+     * If neither method is available or an error occurs, it returns {@code false}.
+     *
+     * @param terminalWidget the terminal widget instance to check. Typically an instance of TerminalWidget, JBTerminalWidget, or ShellTerminalWidget.
+     * @return true if a command is running in the terminal widget; false otherwise.
+     */
+    public static boolean isCommandRunningSafe(Object terminalWidget) {
+        if (terminalWidget == null) return false;
+        try {
+            // Try to call isCommandRunning() (2025.1+)
+            return (boolean) terminalWidget.getClass()
+                    .getMethod("isCommandRunning")
+                    .invoke(terminalWidget);
+        } catch (NoSuchMethodException e1) {
+            try {
+                // Try fallback to hasRunningCommands() (2024.x and before)
+                return (boolean) terminalWidget.getClass()
+                        .getMethod("hasRunningCommands")
+                        .invoke(terminalWidget);
+            } catch (Exception e2) {
+                // Both methods missing or failed - treat as not running
+            }
+        } catch (Exception e) {
+            // Invocation target error or other issues
+        }
+        return false;
     }
 }
