@@ -119,8 +119,8 @@ public class ResourceMethodTest extends BaseJakartaTest {
                 "* This program and the accompanying materials are made available under the\n" +
                 "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
                 "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
-                "* SPDX-License-Identifier: EPL-2.0\n*\n" +
-                "* Contributors:\n*     Bera Sogut\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n* Contributors:\n" +
+                "*     Bera Sogut\n" +
                 "*******************************************************************************/\n\n" +
                 "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
                 "import jakarta.ws.rs.BeanParam;\n" +
