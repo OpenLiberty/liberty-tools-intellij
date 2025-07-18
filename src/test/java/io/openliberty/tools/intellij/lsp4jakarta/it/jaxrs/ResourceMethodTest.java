@@ -93,9 +93,9 @@ public class ResourceMethodTest extends BaseJakartaTest {
 
         // Test for quick-fix code action
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        String newText1 = "/*******************************************************************************\n*" +
-                " Copyright (c) 2021 IBM Corporation.\n*\n*" +
-                " This program and the accompanying materials are made available under the\n" +
+        String newText1 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
                 "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
                 "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
                 "* SPDX-License-Identifier: EPL-2.0\n*\n" +
@@ -114,13 +114,13 @@ public class ResourceMethodTest extends BaseJakartaTest {
         TextEdit te1 = JakartaForJavaAssert.te(0, 0, 36, 0, newText1);
         CodeAction ca1 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam1", d1, te1);
 
-        String newText2 = "/*******************************************************************************\n*" +
-                " Copyright (c) 2021 IBM Corporation.\n*\n*" +
-                " This program and the accompanying materials are made available under the\n" +
+        String newText2 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
                 "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
-                "* http://www.eclipse.org/legal/epl-2.0.\n" +
-                "*\n* SPDX-License-Identifier: EPL-2.0\n" +
-                "*\n* Contributors:\n*     Bera Sogut\n" +
+                "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n" +
+                "* Contributors:\n*     Bera Sogut\n" +
                 "*******************************************************************************/\n\n" +
                 "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
                 "import jakarta.ws.rs.BeanParam;\n" +
