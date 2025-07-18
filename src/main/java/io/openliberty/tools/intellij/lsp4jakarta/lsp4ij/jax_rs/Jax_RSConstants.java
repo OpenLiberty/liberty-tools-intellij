@@ -26,7 +26,7 @@ public class Jax_RSConstants {
 
     /* Annotations which make a resource method parameter a non entity parameter. */
     public static final ArrayList<String> NON_ENTITY_PARAM_ANNOTATIONS = new ArrayList<String>(
-            List.of("FormParam", "MatrixParam", "QueryParam", "PathParam", "CookieParam", "HeaderParam", "Context"));
+            List.of("FormParam", "MatrixParam", "QueryParam", "PathParam", "CookieParam", "HeaderParam", "Context", "BeanParam"));
 
     public static final String PATH_ANNOTATION = "jakarta.ws.rs.Path";
     public static final String PROVIDER_ANNOTATION = "jakarta.ws.rs.ext.Provider";
@@ -46,7 +46,7 @@ public class Jax_RSConstants {
             "jakarta.ws.rs.OPTIONS" };
     public final static String[] SET_OF_NON_ENTITY_PARAM_ANNOTATIONS = { "jakarta.ws.rs.FormParam",
             "jakarta.ws.rs.MatrixParam", "jakarta.ws.rs.QueryParam", "jakarta.ws.rs.PathParam",
-            "jakarta.ws.rs.CookieParam", "jakarta.ws.rs.HeaderParam", "jakarta.ws.rs.core.Context" };
+            "jakarta.ws.rs.CookieParam", "jakarta.ws.rs.HeaderParam", "jakarta.ws.rs.core.Context", "jakarta.ws.rs.BeanParam" };
     public final static String[] SET_OF_JAXRS_ANNOTATIONS1 = { PATH_ANNOTATION, PROVIDER_ANNOTATION };
 
 }
