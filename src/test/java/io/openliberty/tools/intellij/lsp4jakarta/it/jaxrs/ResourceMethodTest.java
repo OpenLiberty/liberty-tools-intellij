@@ -136,6 +136,51 @@ public class ResourceMethodTest extends BaseJakartaTest {
         CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityParam2", d1, te2);
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
+
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+        String newText3 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n" +
+                "* Contributors:\n*     Bera Sogut\n" +
+                "*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.BeanParam;\n" +
+                "import jakarta.ws.rs.DELETE;\n" +
+                "import jakarta.ws.rs.FormParam;\n\n" +
+                "public class MultipleEntityParamsResourceMethod {\n\n\t" +
+                "@DELETE\n\t" +
+                "public void resourceMethodWithTwoEntityParams(String entityParam1, @FormParam(value = \"\") String nonEntityParam, int entityParam2) {\n        " +
+                "\n    }\n\n\t" +
+                "@DELETE\n\tpublic void resourceMethodWithTwoBeanParams(@BeanParam RequestBean requestBean, @BeanParam SessionBean sessionBean) {\n        \n    }\n\n\t" +
+                "@DELETE\n\tpublic void resourceMethodWithBeanParamsAndEnityParams(int entityInt, @BeanParam RequestBean requestBean, @BeanParam SessionBean sessionBean) {\n        \n    }\n}\n";
+        TextEdit te3 = JakartaForJavaAssert.te(0, 0, 36, 0, newText3);
+        CodeAction ca3 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityInt", d2, te3);
+
+        String newText4 = "/*******************************************************************************\n" +
+                "* Copyright (c) 2021 IBM Corporation.\n*\n" +
+                "* This program and the accompanying materials are made available under the\n" +
+                "* terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                "* http://www.eclipse.org/legal/epl-2.0.\n*\n" +
+                "* SPDX-License-Identifier: EPL-2.0\n*\n* Contributors:\n" +
+                "*     Bera Sogut\n" +
+                "*******************************************************************************/\n\n" +
+                "package io.openliberty.sample.jakarta.jax_rs;\n\n" +
+                "import jakarta.ws.rs.BeanParam;\n" +
+                "import jakarta.ws.rs.DELETE;\n" +
+                "import jakarta.ws.rs.FormParam;\n\n" +
+                "public class MultipleEntityParamsResourceMethod {\n\n\t" +
+                "@DELETE\n\t" +
+                "public void resourceMethodWithTwoEntityParams(String entityParam1, @FormParam(value = \"\") String nonEntityParam, int entityParam2) {\n        " +
+                "\n    }\n\n\t" +
+                "@DELETE\n\tpublic void resourceMethodWithTwoBeanParams(@BeanParam RequestBean requestBean, @BeanParam SessionBean sessionBean) {\n        \n    }\n\n\t" +
+                "@DELETE\n\tpublic void resourceMethodWithBeanParamsAndEnityParams(String entityString,  @BeanParam RequestBean requestBean, @BeanParam SessionBean sessionBean) {\n        \n    }\n}\n";
+        TextEdit te4 = JakartaForJavaAssert.te(0, 0, 36, 0, newText4);
+        CodeAction ca4 = JakartaForJavaAssert.ca(uri, "Remove all entity parameters except entityString", d2, te4);
+
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
     }
 
 }
