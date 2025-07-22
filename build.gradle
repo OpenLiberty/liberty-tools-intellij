@@ -57,6 +57,9 @@ repositories {
     maven {
         url = "https://cache-redirector.jetbrains.com/download-pgp-verifier"
     }
+    maven {
+        url = "https://central.sonatype.com/repository/maven-snapshots/"
+    }
     intellijPlatform {
         defaultRepositories()
     }
