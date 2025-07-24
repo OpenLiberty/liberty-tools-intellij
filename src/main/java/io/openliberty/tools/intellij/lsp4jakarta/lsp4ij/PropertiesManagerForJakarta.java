@@ -129,11 +129,6 @@ public final class PropertiesManagerForJakarta {
 
     private JavaCursorContextKind adapt(org.eclipse.lsp4mp.commons.JavaCursorContextKind kind) {
         if (kind != null) {
-            // Workaround for an issue with JavaCursorContextKind.forValue().
-            // See https://github.com/OpenLiberty/liberty-tools-intellij/issues/681 for details.
-            if (kind == org.eclipse.lsp4mp.commons.JavaCursorContextKind.NONE) {
-                return JavaCursorContextKind.NONE;
-            }
             return JavaCursorContextKind.forValue(kind.getValue());
         }
         return null;
