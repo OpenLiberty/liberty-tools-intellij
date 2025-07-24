@@ -28,6 +28,8 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import org.jetbrains.plugins.terminal.TerminalEngine;
+import org.jetbrains.plugins.terminal.TerminalOptionsProvider;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import org.xml.sax.SAXException;
 
@@ -154,6 +156,7 @@ public class LibertyProjectUtil {
     public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
                                                         TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
         if (widget == null && createWidget) {
+            TerminalOptionsProvider.getInstance().setTerminalEngine(TerminalEngine.CLASSIC);
             // create a new terminal tab
             ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
                     terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
