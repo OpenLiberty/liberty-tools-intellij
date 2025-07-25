@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024, 2025 Red Hat, Inc.
+ * Copyright (c) 2020, 2025 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -122,14 +122,9 @@ public final class PropertiesManagerForJakarta {
 
     private JavaCursorContextResult adapt(org.eclipse.lsp4mp.commons.JavaCursorContextResult contextResult) {
         if (contextResult != null) {
-            return new JavaCursorContextResult(adapt(contextResult.getKind()), contextResult.getPrefix());
-        }
-        return null;
-    }
-
-    private JavaCursorContextKind adapt(org.eclipse.lsp4mp.commons.JavaCursorContextKind kind) {
-        if (kind != null) {
-            return JavaCursorContextKind.forValue(kind.getValue());
+            var kind = contextResult.getKind();
+            if(kind != null)
+                return new JavaCursorContextResult(JavaCursorContextKind.forValue(kind.getValue()), contextResult.getPrefix());
         }
         return null;
     }
