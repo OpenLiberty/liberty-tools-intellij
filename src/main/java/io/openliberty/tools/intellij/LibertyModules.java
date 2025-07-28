@@ -229,7 +229,8 @@ public class LibertyModules {
             while (it.hasNext()) {
                 LibertyModule libertyModule = (LibertyModule) it.next();
                 // do not remove from list if the corresponding terminal widget has running commands
-                if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().hasRunningCommands())) {
+                if (project.equals(libertyModule.getProject()) &&
+                        !(libertyModule.getTerminalWidget() != null && LibertyProjectUtil.isCommandRunningSafe(libertyModule.getTerminalWidget()))) {
                     it.remove();
                 }
             }
