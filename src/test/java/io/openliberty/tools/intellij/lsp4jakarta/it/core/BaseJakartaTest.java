@@ -53,7 +53,11 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
         final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
         setTestFixture(testFixture);
-        testFixture.setUp();
+        try {
+            testFixture.setUp();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
