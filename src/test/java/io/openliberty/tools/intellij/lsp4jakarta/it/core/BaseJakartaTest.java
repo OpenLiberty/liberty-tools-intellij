@@ -46,14 +46,18 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
     protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
 
     @Override
-    protected void setUpFixtures() throws Exception {
+    protected void setUpFixtures() {
         // Don't call super.setUpFixtures() here, that will create FocusListener leak.
         myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
         final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
         ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
         final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
         setTestFixture(testFixture);
-        testFixture.setUp();
+        try {
+            testFixture.setUp();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
     }
 
