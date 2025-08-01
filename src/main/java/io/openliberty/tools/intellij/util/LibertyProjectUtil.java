@@ -34,6 +34,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -153,7 +155,25 @@ public class LibertyProjectUtil {
      */
     public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
                                                         TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
+        // Set Terminal engine to CLASSIC
         if (widget == null && createWidget) {
+            try {
+                Class<?> optionsProviderClass = Class.forName("org.jetbrains.plugins.terminal.TerminalOptionsProvider");
+                Object optionsProviderInstance = optionsProviderClass
+                        .getMethod("getInstance")
+                        .invoke(null);
+
+                Class<?> terminalEngineClass = Class.forName("org.jetbrains.plugins.terminal.TerminalEngine");
+                Object classicEngine = Enum.valueOf((Class<Enum>) terminalEngineClass, "CLASSIC");
+                Method setEngineMethod = optionsProviderClass
+                        .getMethod("setTerminalEngine", terminalEngineClass);
+                setEngineMethod.invoke(optionsProviderInstance, classicEngine);
+
+            } catch (ClassNotFoundException | NoSuchMethodException |
+                     IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("Failed to set TerminalEngine to CLASSIC via reflection: " + e.getMessage());
+            }
+
             // create a new terminal tab
             ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
                     terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
