@@ -2909,13 +2909,9 @@ public class UIBotTestUtils {
         String menuAction2;
         if (intellijVersion.startsWith("2024.2")) {
             menuAction2 = menuAction2024_2;
-        }
-        // Match 2024.3, 2025.1.x, 2025.2.x, etc.
-        else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025.1") || intellijVersion.startsWith("2025.2")) {
-        //else if (Pattern.matches("2024\\.3.*|2025\\..*", intellijVersion)) {
+        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025")) {
             menuAction2 = menuAction2024_3;
-        }
-        else {
+        } else {
             // If the version is unsupported, throw an exception to indicate the issue.
             throw new UnsupportedOperationException("Unsupported IntelliJ version: " + intellijVersion);
         }
