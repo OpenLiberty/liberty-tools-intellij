@@ -2909,7 +2909,7 @@ public class UIBotTestUtils {
         String menuAction2;
         if (intellijVersion.startsWith("2024.2")) {
             menuAction2 = menuAction2024_2;
-        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025.1")) {
+        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025")) {
             menuAction2 = menuAction2024_3;
         } else {
             // If the version is unsupported, throw an exception to indicate the issue.
