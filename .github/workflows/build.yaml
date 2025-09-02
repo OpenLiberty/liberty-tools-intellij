@@ -150,7 +150,7 @@ jobs:
 
       - name: 'Build Liberty-Tools-Intellij'
         working-directory: ./liberty-tools-intellij
-        run: bash ./gradlew buildPlugin --no-daemon -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
+        run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
       - name: 'Archive artifacts'
         if: ${{ runner.os == 'Linux' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
