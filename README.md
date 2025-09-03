@@ -1,7 +1,7 @@
 # Liberty Tools for IntelliJ IDEA
 
 <!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
-> Note: Version 25.0.8 requires **IntelliJ IDEA 2024.2.\***, **2024.3.\***, or **2025.1.\*** and a minimum of **Java 17**.
+> Note: Version 25.0.9 requires **IntelliJ IDEA 2024.2.\***, **2024.3.\***, **2025.1.\*** or **2025.2.\*** and a minimum of **Java 17**.
 >
 > This page provides an overview of Liberty Tools for IntelliJ IDEA.
 > For minimum requirements information and detailed instructions on how to use Liberty Tools, check the [user-guide](docs/user-guide.md).
@@ -106,7 +106,7 @@ If you experience a problem with this plugin you might be asked to collect langu
 
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
-Version 25.0.8 requires **IntelliJ IDEA 2024.2.\***, **2024.3.\***, or **2025.1.\*** and a minimum of **Java 17**.
+Version 25.0.9 requires **IntelliJ IDEA 2024.2.\***, **2024.3.\***, **2025.1.\*** or **2025.2.\*** and a minimum of **Java 17**.
 
 For more details, check the [user guide](docs/user-guide.md#software-requirements).
 
