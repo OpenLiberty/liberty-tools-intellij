@@ -250,7 +250,7 @@ intellijPlatform {
             <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide. </li>
           </ul>
         </li>
-        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/25.0.5...25.0.9">commit log</a> for the full set of changes since the previous release.
+        See the <a href="https://github.com/OpenLiberty/liberty-tools-intellij/compare/25.0.8...25.0.9">commit log</a> for the full set of changes since the previous release.
         <br>
         <h2> 25.0.8 </h2>
         <p>Version 25.0.8 of Liberty Tools for IntelliJ IDEA contains a workaroud for a bug in the IntelliJ IDEA 2025.1.x fix stream. Version 25.0.8 requires IntelliJ IDEA version 2024.2.*, 2024.3.*, or 2025.1.* and a minimum of Java 17.</p>
