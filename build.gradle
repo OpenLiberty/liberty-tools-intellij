@@ -235,7 +235,7 @@ intellijPlatform {
         }
         changeNotes = """
         <h2> 25.0.9 </h2>
-        <p>Version 25.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 25.0.9 requires IntelliJ IDEA version 2024.2.*, 2024.3.*, 2025.1.* or 2025.2.* and a minimum of Java 17.</p>
+        <p>Version 25.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 25.0.9 requires IntelliJ IDEA version 2024.3.*, 2025.1.* or 2025.2.* and a minimum of Java 17.</p>
         Notable changes:
         <ul>
         <li> Support for IntelliJ IDEA 2025.2 and its successive fix releases. </li>
