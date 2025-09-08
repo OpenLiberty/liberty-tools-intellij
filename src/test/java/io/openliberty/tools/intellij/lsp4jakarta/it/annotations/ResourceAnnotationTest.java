@@ -65,7 +65,7 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
                 "{\n\n    private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
                 "private boolean isHappy;\n\n	@Resource(name = \"test\")\n   " +
                 " private boolean isSad;\n\n\n    private String emailAddress;\n\n\n}\n\n" +
-                "@Resource(name = \"aa\",type=\"\")\nclass PostDoctoralStudent {\n\n    " +
+                "@Resource(name = \"aa\",type=Object.class)\nclass PostDoctoralStudent {\n\n    " +
                 "private Integer studentId;\n\n\n	@Resource(shareable = true)\n    " +
                 "private boolean isHappy;\n\n	@Resource\n    private boolean isSad;\n\n\n    " +
                 "private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass " +
