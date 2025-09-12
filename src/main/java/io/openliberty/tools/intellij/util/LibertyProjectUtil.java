@@ -183,7 +183,7 @@ public class LibertyProjectUtil {
                     LOGGER.info("TerminalEngine class is not an enum, using default.");
                 }
             } catch (Exception e) {
-                LOGGER.info("Falling back to default terminal engine.", t);
+                LOGGER.info("Falling back to default terminal engine.", e);
             }
 
             // create a new terminal tab
