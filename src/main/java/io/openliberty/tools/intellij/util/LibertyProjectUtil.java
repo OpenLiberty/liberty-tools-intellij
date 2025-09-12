@@ -158,20 +158,32 @@ public class LibertyProjectUtil {
         // Set Terminal engine to CLASSIC
         if (widget == null && createWidget) {
             try {
-                Class<?> optionsProviderClass = Class.forName("org.jetbrains.plugins.terminal.TerminalOptionsProvider");
-                Object optionsProviderInstance = optionsProviderClass
-                        .getMethod("getInstance")
-                        .invoke(null);
-
                 Class<?> terminalEngineClass = Class.forName("org.jetbrains.plugins.terminal.TerminalEngine");
-                Object classicEngine = Enum.valueOf((Class<Enum>) terminalEngineClass, "CLASSIC");
-                Method setEngineMethod = optionsProviderClass
-                        .getMethod("setTerminalEngine", terminalEngineClass);
-                setEngineMethod.invoke(optionsProviderInstance, classicEngine);
 
-            } catch (ClassNotFoundException | NoSuchMethodException |
-                     IllegalAccessException | InvocationTargetException e) {
-                LOGGER.error("Failed to set TerminalEngine to CLASSIC via reflection: " + e.getMessage());
+                if (terminalEngineClass.isEnum()) {
+                    Object[] constants = terminalEngineClass.getEnumConstants();
+
+                    boolean hasClassic = Arrays.stream(constants)
+                            .map(c -> ((Enum<?>) c).name())
+                            .anyMatch("CLASSIC"::equals);
+
+                    if (hasClassic) {
+                        Object classicEngine = Enum.valueOf((Class<Enum>) terminalEngineClass.asSubclass(Enum.class), "CLASSIC");
+
+                        Class<?> optionsProviderClass = Class.forName("org.jetbrains.plugins.terminal.TerminalOptionsProvider");
+                        Object optionsProviderInstance = optionsProviderClass.getMethod("getInstance").invoke(null);
+                        Method setEngineMethod = optionsProviderClass.getMethod("setTerminalEngine", terminalEngineClass);
+                        setEngineMethod.invoke(optionsProviderInstance, classicEngine);
+
+                        LOGGER.info("Terminal engine set to CLASSIC.");
+                    } else {
+                        LOGGER.info("CLASSIC engine not available, using default.");
+                    }
+                } else {
+                    LOGGER.info("TerminalEngine class is not an enum, using default.");
+                }
+            } catch (Exception e) {
+                LOGGER.info("Falling back to default terminal engine.", t);
             }
 
             // create a new terminal tab
