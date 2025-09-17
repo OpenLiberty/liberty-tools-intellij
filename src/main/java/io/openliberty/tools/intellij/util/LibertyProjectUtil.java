@@ -35,6 +35,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -169,8 +170,9 @@ public class LibertyProjectUtil {
                     Method setEngineMethod = optionsProviderClass
                             .getMethod("setTerminalEngine", terminalEngineClass);
                     setEngineMethod.invoke(optionsProviderInstance, classicEngine);
-                } catch (Exception e) {
-                    LOGGER.info("Falling back to default terminal engine.", e);
+                } catch (ClassNotFoundException | NoSuchMethodException |
+                         IllegalAccessException | InvocationTargetException e) {
+                    LOGGER.debug("Falling back to default terminal engine.", e);
                 }
             }
 
