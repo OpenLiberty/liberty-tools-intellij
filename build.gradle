@@ -235,7 +235,7 @@ intellijPlatform {
         }
         changeNotes = """
         <h2> 25.0.9 </h2>
-        <p>Version 25.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 25.0.9 requires IntelliJ IDEA version 2024.3.*, 2025.1.* or 2025.2.* and a minimum of Java 17.</p>
+        <p>Version 25.0.9 of Liberty Tools for IntelliJ IDEA contains enhancements and fixes. Version 25.0.9 requires IntelliJ IDEA version 2024.3.*, 2025.1.*, or 2025.2.* and a minimum of Java 17.</p>
         Notable changes:
         <ul>
         <li> Support for IntelliJ IDEA 2025.2 and its successive fix releases. </li>
@@ -245,7 +245,10 @@ intellijPlatform {
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.3.2 </li>
           </ul>
         </li>
-        <li> Liberty Tools version 25.0.9 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.15.0.
+        <li> Resolved an exception that occurred when running Liberty actions in IntelliJ 2024.3.x. </li>
+        <li> Enabled Liberty actions to be run with the new “Reworked 2025” terminal engine. </li>
+        <li> Resolved a bug where multiple @BeanParams were incorrectly reported as an error in Java files. </li>
+        <li> Liberty Tools version 25.0.9 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> versions 0.15.0, 0.16.0, and 0.16.1. </li>
           <ul>
             <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide. </li>
           </ul>
@@ -255,7 +258,7 @@ intellijPlatform {
         <h2> 25.0.8 </h2>
         <p>Version 25.0.8 of Liberty Tools for IntelliJ IDEA contains a workaroud for a bug in the IntelliJ IDEA 2025.1.x fix stream. Version 25.0.8 requires IntelliJ IDEA version 2024.2.*, 2024.3.*, or 2025.1.* and a minimum of Java 17.</p>
         <ul>
-        <li> Workaround for NullPointerException that occurs during application startup when using Liberty Tools with a fresh installation of IntelliJ IDEA 2025.1.2 or higher in the 2025.1.x fix stream. </li>
+        <li> This release contains a workaround for a NullPointerException that blocks application startup when using Liberty Tools with a fresh installation of IntelliJ IDEA 2025.1.2 or higher in the 2025.1.x fix stream. </li>
         <li> Liberty Tools version 25.0.8 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> version 0.14.2.
           <ul>
             <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide.
