@@ -245,10 +245,10 @@ intellijPlatform {
             <li> https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-2.3.2 </li>
           </ul>
         </li>
-        <li> Resolved exception that occurred when running Liberty actions in IntelliJ 2024.3.x.
-        <li> Enable Liberty actions to be run with the new “Reworked 2025” terminal engine.
-        <li> Resolved bug where multiple @BeanParams were incorrectly reported as an error in Java files.
-        <li> Liberty Tools version 25.0.9 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> versions 0.15.0, 0.16.0, and 0.16.1.
+        <li> Resolved an exception that occurred when running Liberty actions in IntelliJ 2024.3.x. </li>
+        <li> Enabled Liberty actions to be run with the new “Reworked 2025” terminal engine. </li>
+        <li> Resolved a bug where multiple @BeanParams were incorrectly reported as an error in Java files. </li>
+        <li> Liberty Tools version 25.0.9 has been tested with <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ</a> versions 0.15.0, 0.16.0, and 0.16.1. </li>
           <ul>
             <li> For more information regarding tested LSP4IJ versions, refer to the table in <a href="https://github.com/OpenLiberty/liberty-tools-intellij/blob/main/docs/user-guide.md#manually-install-specific-release-of-the-lsp4ij-plugin-from-the-marketplace">this section</a> of the user guide. </li>
           </ul>
