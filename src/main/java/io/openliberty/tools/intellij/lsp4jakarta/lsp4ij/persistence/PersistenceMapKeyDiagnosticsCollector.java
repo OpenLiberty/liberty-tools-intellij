@@ -75,6 +75,12 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                 }
             }
         }
+        if (hasMapKeyAnnotation) {
+            collectAccessorDiagnostics(fieldOrProperty,type,unit,diagnostics);
+        }
+        if (hasMapKeyClassAnnotation) {
+            collectAccessorDiagnostics(fieldOrProperty,type,unit,diagnostics);
+        }
         if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
             //A single field or property cannot be annotated with both @MapKey and @MapKeyClass
             //Specification References:
@@ -111,17 +117,33 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         });
     }
 
-    private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiJavaFile unit,
+    private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty,PsiClass type, PsiJavaFile unit,
                                             List<Diagnostic> diagnostics)  {
-        if(fieldOrProperty instanceof PsiMethod){
-            PsiMethod method = (PsiMethod) fieldOrProperty;
+        String messageKey = null;
+        String code = null;
+        if(fieldOrProperty instanceof PsiMethod method){
             String methodName = method.getName();
             boolean isPublic = method.getModifierList().hasModifierProperty(PsiModifier.PUBLIC);
             boolean isStartsWithGet = methodName.startsWith("get");
             boolean isPropertyExist = false;
 
-
-
+            if (isStartsWithGet) {
+                isPropertyExist = hasField(method, type);
+            }
+            if (!isPublic) {
+                messageKey = "MapKeyAnnotationsInvalidMethodAccessSpecifier";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ACCESS_SPECIFIER;
+            } else if (!isStartsWithGet) {
+                messageKey = "MapKeyAnnotationsOnInvalidMethod";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_METHOD_NAME;
+            } else if (!isPropertyExist) {
+                messageKey = "MapKeyAnnotationsFieldNotFound";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_FIELD_NOT_EXIST;
+            }
+            if (messageKey != null) {
+                diagnostics.add(createDiagnostic(fieldOrProperty, unit, Messages.getMessage(messageKey),
+                        code, null, DiagnosticSeverity.Warning));
+            }
         }
     }
 
@@ -139,8 +161,8 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                 expectedFieldName = Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
             }
         }
-        PsiField expectedfield= type.findFieldByName(expectedFieldName, false);
-        isPropertyExist = expectedfield != null;
+        PsiField expectedField= type.findFieldByName(expectedFieldName, false);
+        isPropertyExist = expectedField != null;
         return isPropertyExist;
     }
 }
