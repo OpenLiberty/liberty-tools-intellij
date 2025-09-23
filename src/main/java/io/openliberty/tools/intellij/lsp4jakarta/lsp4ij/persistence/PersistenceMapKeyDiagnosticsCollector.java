@@ -110,4 +110,37 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         });
     }
+
+    private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiJavaFile unit,
+                                            List<Diagnostic> diagnostics)  {
+        if(fieldOrProperty instanceof PsiMethod){
+            PsiMethod method = (PsiMethod) fieldOrProperty;
+            String methodName = method.getName();
+            boolean isPublic = method.getModifierList().hasModifierProperty(PsiModifier.PUBLIC);
+            boolean isStartsWithGet = methodName.startsWith("get");
+            boolean isPropertyExist = false;
+
+
+
+        }
+    }
+
+    private boolean hasField(PsiMethod method, PsiClass type ) {
+        boolean isPropertyExist = false;
+        String methodName = method.getName();
+        String expectedFieldName = null;
+
+        // Exclude 'get' from method name and decapitalize the first letter
+        if (methodName.startsWith("get") && methodName.length() > 3) {
+            String suffix = methodName.substring(3);
+            if (suffix.length() == 1) {
+                expectedFieldName = suffix.toLowerCase();
+            } else {
+                expectedFieldName = Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
+            }
+        }
+        PsiField expectedfield= type.findFieldByName(expectedFieldName, false);
+        isPropertyExist = expectedfield != null;
+        return isPropertyExist;
+    }
 }
