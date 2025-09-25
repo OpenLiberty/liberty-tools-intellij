@@ -104,6 +104,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
 
     private boolean collectTypeDiagnostics(PsiJvmModifiersOwner fieldOrProperty,String attribute, PsiJavaFile unit,
                                            List<Diagnostic> diagnostics){
+        final String MAP_INTERFACE_FQDN = "java.util.Map";
         boolean hasTypeDiagnostics = false;
         PsiType FPType = null;
         boolean isMapOrSubtype = false;
@@ -122,7 +123,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
 
         if (FPType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
-            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, "java.util.Map");
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, MAP_INTERFACE_FQDN);
         }
 
         if(!isMapOrSubtype){
