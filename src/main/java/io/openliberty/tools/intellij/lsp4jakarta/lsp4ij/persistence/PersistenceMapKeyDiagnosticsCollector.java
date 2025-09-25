@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
@@ -61,6 +62,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
         boolean hasMapKeyAnnotation = false;
         boolean hasMapKeyClassAnnotation = false;
+        boolean hasTypeDiagnostics = false;
         PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
         for (PsiAnnotation annotation : allAnnotations) {
             String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
@@ -76,12 +78,14 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
         if (hasMapKeyAnnotation) {
+            hasTypeDiagnostics = collectTypeDiagnostics(fieldOrProperty,"@MapKey",unit,diagnostics);
             collectAccessorDiagnostics(fieldOrProperty,type,unit,diagnostics);
         }
         if (hasMapKeyClassAnnotation) {
+            hasTypeDiagnostics = collectTypeDiagnostics(fieldOrProperty,"@MapKeyClass",unit,diagnostics);
             collectAccessorDiagnostics(fieldOrProperty,type,unit,diagnostics);
         }
-        if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
+        if (!hasTypeDiagnostics && (hasMapKeyAnnotation && hasMapKeyClassAnnotation)) {
             //A single field or property cannot be annotated with both @MapKey and @MapKeyClass
             //Specification References:
             //https://jakarta.ee/specifications/persistence/3.2/apidocs/jakarta.persistence/jakarta/persistence/mapkey
@@ -98,6 +102,36 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         }
     }
 
+    private boolean collectTypeDiagnostics(PsiJvmModifiersOwner fieldOrProperty,String attribute, PsiJavaFile unit,
+                                           List<Diagnostic> diagnostics){
+        boolean hasTypeDiagnostics = false;
+        PsiType FPType = null;
+        boolean isMapOrSubtype = false;
+        String messageKey = null;
+        String code = null;
+
+        if(fieldOrProperty instanceof PsiMethod method){
+            FPType = method.getReturnType();
+            messageKey = "MapKeyAnnotationsReturnTypeOfMethod";
+            code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_RETURN_TYPE;
+        }else if(fieldOrProperty instanceof PsiField field){
+            FPType = field.getType();
+            messageKey = "MapKeyAnnotationsTypeOfField";
+            code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_TYPE;
+        }
+
+        if (FPType instanceof PsiClassType classType) {
+            PsiClass psiClass = classType.resolve();
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, "java.util.Map");
+        }
+
+        if(!isMapOrSubtype){
+            hasTypeDiagnostics = true;
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit, Messages.getMessage(messageKey,attribute),
+                    code, null, DiagnosticSeverity.Error));
+        }
+        return hasTypeDiagnostics;
+    }
     private void validateMapKeyJoinColumnAnnotations(List<PsiAnnotation> annotations, PsiElement element,
                                                      PsiJavaFile unit, List<Diagnostic> diagnostics) {
         String message = (element instanceof PsiMethod) ?

@@ -39,6 +39,8 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_ACCESS_SPECIFIER = "InvalidMethodAccessSpecifier";
     public static final String DIAGNOSTIC_CODE_INVALID_METHOD_NAME = "InvalidMethodName";
     public static final String DIAGNOSTIC_CODE_FIELD_NOT_EXIST = "InvalidMapKeyAnnotationsFieldNotFound";
+    public static final String DIAGNOSTIC_CODE_INVALID_RETURN_TYPE = "InvalidReturnTypeOfMethod";
+    public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "InvalidTypeOfField";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN};
 }
