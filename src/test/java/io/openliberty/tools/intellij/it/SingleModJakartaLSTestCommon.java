@@ -59,11 +59,12 @@ public abstract class SingleModJakartaLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "SystemResource.java", "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "SystemResource2.java", "5");
-
+        if (remoteRobot.isMac()) {
+            UIBotTestUtils.closeAllEditorTabs(remoteRobot);
+        }
+        else {
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Close All Tabs", 3);
+        }
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
@@ -79,6 +80,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String snippetChooser = "class";
         String insertedCode = "public String methodname() {";
 
+        openSystemResourceFile(projectName);
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "SystemResource.java");
 
@@ -111,6 +113,7 @@ public abstract class SingleModJakartaLSTestCommon {
         String expectedHoverData = "Only public methods can be exposed as resource methods";
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
 
+        openSystemResourceFile(projectName);
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "SystemResource2.java");
 
@@ -156,6 +159,8 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
+        openSystemResourceFile(projectName);
+
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
         String quickfixChooserString = "Make method public";
 
@@ -186,6 +191,37 @@ public abstract class SingleModJakartaLSTestCommon {
         }
     }
 
+    @Test
+    @Video
+    public void testCompleteFilterAnnotationQuickFix() {
+        String sourceString = "@WebFilter()";
+        String flaggedString = "@WebFilter()";
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+
+
+        projTree.expand(projectName, "src", "main", "java", "io.openliberty.sample.jakarta", "servlet");
+        UIBotTestUtils.openFile(remoteRobot, projectName, "InvalidWebFilter", projectName, "src", "main", "java", "io.openliberty.sample.jakarta", "servlet");
+
+        Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "sample", "jakarta", "servlet", "InvalidWebFilter.java");
+        String quickfixChooserString = "Add the 'servletNames' attribute to @WebFilter";
+
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "InvalidWebFilter.java");
+        UIBotTestUtils.copyWindowContent(remoteRobot);
+        //UIBotTestUtils.selectAndModifyTextInJavaPart(remoteRobot, "InvalidWebFilter.java", sourceString, replacementString);
+
+        try {
+            //TestUtils.validateStringNotInFile(pathToSrc.toString(), sourceString);
+            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "InvalidWebFilter.java", quickfixChooserString);
+            UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
+            TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), sourceString);
+        }
+        finally {
+            UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+        }
+    }
+
     /**
      * Prepares the environment to run the tests.
      *
@@ -204,6 +240,11 @@ public abstract class SingleModJakartaLSTestCommon {
         UIBotTestUtils.openAndValidateLibertyToolWindow(remoteRobot, projectName);
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
 
+        // Removes the build tool window if it is opened. This prevents text to be hidden by it.
+        UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
+    }
+
+    private static void openSystemResourceFile(String projectName) {
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
         JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
@@ -214,10 +255,6 @@ public abstract class SingleModJakartaLSTestCommon {
 
         UIBotTestUtils.openFile(remoteRobot, projectName, "SystemResource", projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
         UIBotTestUtils.openFile(remoteRobot, projectName, "SystemResource2", projectName, "src", "main", "java", "io.openliberty.mp.sample", "system");
-
-
-        // Removes the build tool window if it is opened. This prevents text to be hidden by it.
-        UIBotTestUtils.removeToolWindow(remoteRobot, "Build:");
     }
 }
 
