@@ -90,4 +90,25 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
+
+    @Test
+    public void testIncorrectResourceAnnotation() throws Exception {
+        // Set up the module and file where a non-Jakarta Resource annotation is used
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // The file path to a Java file that includes an incorrectly qualified Resource annotation
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) +
+                        "/src/main/java/io/openliberty/sample/jakarta/annotations/IncorrectResourceAnnotation.java"
+        );
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        // Adding a test to ensure no diagnostics are triggered for any non-matching annotation or import path similar to "jakarta.annotation.Resource"
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Ensure no diagnostics are generated for any annotation or import that is not exactly "jakarta.annotation.Resource"
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }

@@ -360,4 +360,26 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);
     }
+
+    @Test
+    public void testIncorrectBeanValidation() throws Exception {
+        // Set up the module and file where non-Jakarta annotations are used
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // The file path to a Java file that includes incorrectly qualified annotations
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) +
+                        "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/IncorrectBeanValidation.java"
+        );
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        // Adding a test to ensure no diagnostics are triggered for any non-matching annotation or import path
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Ensure no diagnostics are generated for any incorrect annotation or import
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
