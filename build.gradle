@@ -85,7 +85,6 @@ configurations {
 }
 
 dependencies {
-
     implementation ("org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:$lsp4mpVersion") {
         exclude group: 'org.eclipse.lsp4j'
         exclude group: 'com.google.code.gson'
