@@ -310,4 +310,55 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaCodeAction(codeActionParams5, utils, ca5);
     }
+
+    @Test
+    public void testMethodOrFieldType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyAnnotationsType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = d(27, 19, 25,
+                "`@MapKey` annotation can only be applied to methods with a return type of java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidReturnTypeOfMethod");
+
+        Diagnostic d2 = d(13, 11, 15,
+                "`@MapKey` annotation can only be applied to fields of type java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidTypeOfField");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testAccessorAndNamingConventions() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyAnnotationsGetterConvention.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = d(37, 33, 41,
+                "Method is not public and may not be accessible as expected.",
+                DiagnosticSeverity.Warning, "jakarta-persistence", "InvalidMethodAccessSpecifier");
+
+        Diagnostic d2 = d(42, 33, 41,
+                "This method does not conform to persistent property getter naming conventions.",
+                DiagnosticSeverity.Warning, "jakarta-persistence", "InvalidMethodName");
+
+        Diagnostic d3 = d(47, 32, 42,
+                "Method has no matching field name.",
+                DiagnosticSeverity.Warning, "jakarta-persistence", "InvalidMapKeyAnnotationsFieldNotFound");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+    }
+
 }
