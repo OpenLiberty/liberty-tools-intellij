@@ -62,4 +62,10 @@ public class FieldConstraintValidation {
 
     @Past
     private static boolean doubleBad;      // static and invalid type
+
+    @Size
+    private Integer number;
+
+    @NotEmpty
+    private ValidConstraints validConstraints;
 }
