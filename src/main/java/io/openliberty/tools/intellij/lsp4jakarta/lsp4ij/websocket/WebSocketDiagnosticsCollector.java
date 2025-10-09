@@ -253,7 +253,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                         if (!JDTUtils.hasLeadingSlash(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
                                     Messages.getMessage("ServerEndpointNoSlash"),
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
+                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH, null, DiagnosticSeverity.Error));
                         }
                         if (hasRelativePathURIs(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,

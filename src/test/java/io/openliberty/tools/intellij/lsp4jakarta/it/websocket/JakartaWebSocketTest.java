@@ -163,7 +163,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d1 = JakartaForJavaAssert.d(7, 0, 23, "Server endpoint paths must start with a leading '/'.", DiagnosticSeverity.Error,
-                "jakarta-websocket", "ChangeInvalidServerEndpoint");
+                "jakarta-websocket", "InvalidEndpointWithoutStartingSlash");
         Diagnostic d2 = JakartaForJavaAssert.d(7, 0, 23, "Server endpoint paths must be a URI-template (level-1) or a partial URI.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "ChangeInvalidServerEndpoint");
 

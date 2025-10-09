@@ -46,6 +46,7 @@ public class WebSocketConstants {
     public static final String DIAGNOSTIC_CODE_ON_MESSAGE_DUPLICATE_METHOD = "OnMessageDuplicateMethod";
 
     public static final String DIAGNOSTIC_SERVER_ENDPOINT = "ChangeInvalidServerEndpoint";
+    public static final String DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH = "InvalidEndpointWithoutStartingSlash";
 
     /*
      * https://jakarta.ee/specifications/websocket/2.0/websocket-spec-2.0.html#
