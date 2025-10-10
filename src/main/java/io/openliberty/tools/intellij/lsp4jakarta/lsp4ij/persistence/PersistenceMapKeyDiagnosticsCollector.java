@@ -17,6 +17,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -186,7 +187,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         String methodName = method.getName();
         // Exclude 'get' from method name and decapitalize the first letter
         String expectedFieldName = (methodName.startsWith("get") && methodName.length() > 3) ? Introspector.decapitalize(methodName.substring(3)) : null;
-        PsiField expectedField = (expectedFieldName != null && !expectedFieldName.isEmpty()) ? type.findFieldByName(expectedFieldName, false) : null;
+        PsiField expectedField = !StringUtils.isEmpty(expectedFieldName) ? type.findFieldByName(expectedFieldName, false) : null;
         return expectedField != null;
     }
 }
