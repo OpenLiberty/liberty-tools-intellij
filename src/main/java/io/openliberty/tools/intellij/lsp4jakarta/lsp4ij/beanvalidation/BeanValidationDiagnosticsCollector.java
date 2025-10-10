@@ -165,7 +165,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 } else if (matchedAnnotation.equals(NOT_EMPTY) || matchedAnnotation.equals(SIZE)) {
                     if (!(isSizeOrNonEmptyAllowed(type))) {
                         String source = isMethod ?
-                                Messages.getMessage("SizeOrNonEmptyAnnotationsMethod") : Messages.getMessage("SizeOrNonEmptyAnnotationsField");
+                                Messages.getMessage("SizeOrNonEmptyAnnotationsMethod") : Messages.getMessage(
+                                        "SizeOrNonEmptyAnnotationsField");
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
@@ -207,7 +208,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         Project project = clazz.getProject();
         PsiClass superClass = JavaPsiFacade.getInstance(project)
                 .findClass(fqSuperType, GlobalSearchScope.allScope(project));
-        return superClass != null && clazz.isInheritor(superClass, true);
+        return superClass != null &&
+                (clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true));
     }
 
 
