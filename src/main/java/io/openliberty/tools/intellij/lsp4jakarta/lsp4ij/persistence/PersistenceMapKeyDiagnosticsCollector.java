@@ -106,22 +106,22 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                                            List<Diagnostic> diagnostics) {
         final String MAP_INTERFACE_FQDN = "java.util.Map";
         boolean hasTypeDiagnostics = false;
-        PsiType FPType = null;
+        PsiType fieldOrPropertyType = null;
         boolean isMapOrSubtype = false;
         String messageKey = null;
         String code = null;
 
         if (fieldOrProperty instanceof PsiMethod method) {
-            FPType = method.getReturnType();
+            fieldOrPropertyType = method.getReturnType();
             messageKey = "MapKeyAnnotationsReturnTypeOfMethod";
             code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_RETURN_TYPE;
         } else if (fieldOrProperty instanceof PsiField field) {
-            FPType = field.getType();
+            fieldOrPropertyType = field.getType();
             messageKey = "MapKeyAnnotationsTypeOfField";
             code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_TYPE;
         }
 
-        if (FPType instanceof PsiClassType classType) {
+        if (fieldOrPropertyType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
             isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, MAP_INTERFACE_FQDN);
         }
