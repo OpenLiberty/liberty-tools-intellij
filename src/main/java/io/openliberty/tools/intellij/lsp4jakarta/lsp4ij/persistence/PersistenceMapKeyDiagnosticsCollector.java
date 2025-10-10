@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -184,21 +185,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
     }
 
     private boolean hasField(PsiMethod method, PsiClass type) {
-        boolean isPropertyExist = false;
         String methodName = method.getName();
-        String expectedFieldName = null;
-
         // Exclude 'get' from method name and decapitalize the first letter
-        if (methodName.startsWith("get") && methodName.length() > 3) {
-            String suffix = methodName.substring(3);
-            if (suffix.length() == 1) {
-                expectedFieldName = suffix.toLowerCase();
-            } else {
-                expectedFieldName = Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
-            }
-        }
-        PsiField expectedField = type.findFieldByName(expectedFieldName, false);
-        isPropertyExist = expectedField != null;
-        return isPropertyExist;
+        String expectedFieldName = (methodName.startsWith("get") && methodName.length() > 3) ? Introspector.decapitalize(methodName.substring(3)) : null;
+        PsiField expectedField = (expectedFieldName != null && !expectedFieldName.isEmpty()) ? type.findFieldByName(expectedFieldName, false) : null;
+        return expectedField != null;
     }
 }
