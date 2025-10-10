@@ -187,7 +187,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         String methodName = method.getName();
         // Exclude 'get' from method name and decapitalize the first letter
         String expectedFieldName = (methodName.startsWith("get") && methodName.length() > 3) ? Introspector.decapitalize(methodName.substring(3)) : null;
-        PsiField expectedField = !StringUtils.isEmpty(expectedFieldName) ? type.findFieldByName(expectedFieldName, false) : null;
+        PsiField expectedField = StringUtils.isNotBlank(expectedFieldName) ? type.findFieldByName(expectedFieldName, false) : null;
         return expectedField != null;
     }
 }
