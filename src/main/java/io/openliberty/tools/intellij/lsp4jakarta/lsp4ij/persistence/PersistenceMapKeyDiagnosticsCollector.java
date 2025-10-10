@@ -121,12 +121,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             messageKey = "MapKeyAnnotationsTypeOfField";
             code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_TYPE;
         }
-
         if (fieldOrPropertyType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
             isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, MAP_INTERFACE_FQDN);
         }
-
         if (!isMapOrSubtype) {
             hasTypeDiagnostics = true;
             diagnostics.add(createDiagnostic(fieldOrProperty, unit, Messages.getMessage(messageKey, attribute),
