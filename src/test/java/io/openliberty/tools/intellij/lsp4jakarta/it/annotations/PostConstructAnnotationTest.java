@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -70,18 +70,22 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
         // Starting codeAction tests.
-        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\nimport jakarta.annotation.Resource;\n\n" +
-                "import java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\npublic class PostConstructAnnotation {\n\n    " +
-                "private Integer studentId;\n\n    private boolean isHappy;\n\n    private boolean isSad;\n\n    private String emailAddress;\n\n    " +
-                "@PostConstruct()\n    public void getStudentId() {\n        return this.studentId;\n    }\n\n    @PostConstruct\n    " +
-                "public void getHappiness(String type) {\n    }\n\n    @PostConstruct\n    public void throwTantrum() throws Exception {\n        " +
-                "System.out.println(\"I'm sad\");\n    }\n\n    @PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        " +
-                "System.out.println(\"RuntimeException\");\n    }\n\n    @PostConstruct\n    public void throwNullPointerException() throws NullPointerException {\n        " +
-                "System.out.println(\"NullPointerException\");\n    }\n\n    @PostConstruct\n    public void throwIOException() throws IOException {\n        " +
-                "System.out.println(\"IOException\");\n    }\n\n    @PostConstruct\n    " +
-                "public void throwExceptions() throws CustomCheckedException, CustomUncheckedException, IOException {\n        " +
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n\n    private Integer studentId;\n\n    private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n\n    private String emailAddress;\n\n    @PostConstruct()\n    " +
+                "public void getStudentId() {\n        return this.studentId;\n    }\n\n    @PostConstruct\n    " +
+                "public void getHappiness(String type) {\n    }\n\n    @PostConstruct\n    " +
+                "public void throwTantrum() throws Exception {\n        System.out.println(\"I'm sad\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        " +
+                "System.out.println(\"RuntimeException\");\n    }\n\n    @PostConstruct\n    " +
+                "public void throwNullPointerException() throws NullPointerException {\n        " +
+                "System.out.println(\"NullPointerException\");\n    }\n\n    @PostConstruct\n    " +
+                "public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwExceptions() throws CustomCheckedException, CustomUncheckedException, IOException {\n        " +
                 "System.out.println(\"throwExceptions\");\n    }\n\n    @PostConstruct\n    " +
-                "public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    " +
+                "public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        " +
+                "System.out.println(\"CustomUncheckedException\");\n    }\n\n    " +
                 "@PostConstruct\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n\n}";
 
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d1);
@@ -89,31 +93,40 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
         CodeAction ca3 = ca(uri, "Change return type to void", d1, te3);
         assertJavaCodeAction(codeActionParams2, utils, ca3);
 
-        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\nimport jakarta.annotation.Resource;\n\n" +
-                "import java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\npublic class PostConstructAnnotation {\n\n    " +
-                "private Integer studentId;\n\n    private boolean isHappy;\n\n    private boolean isSad;\n\n    private String emailAddress;\n\n    " +
-                "@PostConstruct()\n    public Integer getStudentId() {\n        return this.studentId;\n    }\n\n    public void getHappiness(String type) {\n    }\n\n    " +
+        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n\n    private Integer studentId;\n\n    private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n\n    private String emailAddress;\n\n    @PostConstruct()\n    " +
+                "public Integer getStudentId() {\n        return this.studentId;\n    }\n\n    public void getHappiness(String type) {\n    }\n\n    " +
                 "@PostConstruct\n    public void throwTantrum() throws Exception {\n        System.out.println(\"I'm sad\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        " +
+                "System.out.println(\"RuntimeException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwNullPointerException() throws NullPointerException {\n        " +
+                "System.out.println(\"NullPointerException\");\n    }\n\n    @PostConstruct\n    " +
+                "public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    " +
                 "@PostConstruct\n    public void throwExceptions() throws CustomCheckedException, CustomUncheckedException, IOException {\n        " +
                 "System.out.println(\"throwExceptions\");\n    }\n\n    @PostConstruct\n    " +
-                "public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n\n}";
-
-        String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\nimport jakarta.annotation.Resource;\n\n" +
-                "import java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\npublic class PostConstructAnnotation {\n\n    " +
-                "private Integer studentId;\n\n    private boolean isHappy;\n\n    private boolean isSad;\n\n    private String emailAddress;\n\n    " +
-                "@PostConstruct()\n    public Integer getStudentId() {\n        return this.studentId;\n    }\n\n    @PostConstruct\n    public void getHappiness() {\n    }\n\n    " +
-                "@PostConstruct\n    public void throwTantrum() throws Exception {\n        System.out.println(\"I'm sad\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    " +
-                "@PostConstruct\n    public void throwExceptions() throws CustomCheckedException, CustomUncheckedException, IOException {\n        " +
-                "System.out.println(\"throwExceptions\");\n    }\n\n    @PostConstruct\n    public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        " +
+                "public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        " +
                 "System.out.println(\"CustomUncheckedException\");\n    }\n\n    @PostConstruct\n    public void throwError() throws Error {\n        " +
                 "System.out.println(\"throwError\");\n    }\n\n}";
+
+        String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\n" +
+                "import jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\")\n" +
+                "public class PostConstructAnnotation {\n\n    private Integer studentId;\n\n    private boolean isHappy;\n\n    " +
+                "private boolean isSad;\n\n    private String emailAddress;\n\n    @PostConstruct()\n    " +
+                "public Integer getStudentId() {\n        return this.studentId;\n    }\n\n    @PostConstruct\n    " +
+                "public void getHappiness() {\n    }\n\n    @PostConstruct\n    public void throwTantrum() throws Exception {\n        " +
+                "System.out.println(\"I'm sad\");\n    }\n\n    @PostConstruct\n    public void throwRuntimeException() throws RuntimeException {\n        " +
+                "System.out.println(\"RuntimeException\");\n    }\n\n    @PostConstruct\n    " +
+                "public void throwNullPointerException() throws NullPointerException {\n        " +
+                "System.out.println(\"NullPointerException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwIOException() throws IOException {\n        " +
+                "System.out.println(\"IOException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwExceptions() throws CustomCheckedException, CustomUncheckedException, IOException {\n        " +
+                "System.out.println(\"throwExceptions\");\n    }\n\n    @PostConstruct\n    " +
+                "public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        " +
+                "System.out.println(\"CustomUncheckedException\");\n    }\n\n    " +
+                "@PostConstruct\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n\n}";
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
         TextEdit te = te(0, 0, 62, 1, newText1);
