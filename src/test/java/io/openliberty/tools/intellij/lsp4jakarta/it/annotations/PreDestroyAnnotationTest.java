@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2024 IBM Corporation and others.
+* Copyright (c) 2021, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -52,104 +52,43 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
 
         // expected annotations
         
-        Diagnostic d1 = d(20, 16, 28, "A method with the @PreDestroy annotation must not have any parameters.",
+        Diagnostic d1 = d(24, 16, 28, "A method with the @PreDestroy annotation must not have any parameters.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyParams");
         
-        Diagnostic d2 = d(26, 20, 31, "A method with the @PreDestroy annotation must not be static.",
+        Diagnostic d2 = d(30, 20, 31, "A method with the @PreDestroy annotation must not be static.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyStatic");
         d2.setData("makeUnhappy");
         
-        Diagnostic d3 = d(31, 13, 25, "A method with the @PreDestroy annotation must not throw checked exceptions.",
-                DiagnosticSeverity.Warning, "jakarta-annotations", "PreDestroyException");
+        Diagnostic d3 = d(55, 16, 37, "A method with the @PreDestroy annotation must not throw checked exceptions.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3);
+        Diagnostic d4 = d(35, 13, 25, "A method with the @PreDestroy annotation must not throw checked exceptions.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
+
+        Diagnostic d5 = d(50, 16, 32, "A method with the @PreDestroy annotation must not throw checked exceptions.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3, d4, d5);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        String newText = "package io.openliberty.sample.jakarta.annotations;\n\n" +
-                "import jakarta.annotation.PreDestroy;\n" +
-                "import jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\") \n" +
-                "public class PreDestroyAnnotation { \n\n" +
-                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
-                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
-                "	public Integer getStudentId() {\n" +
-                "		return this.studentId;\n	}\n	\n" +
-                "	public boolean getHappiness(String type) {\n" +
-                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
-                "		return this.isSad;\n	}\n	\n" +
-                "	@PreDestroy()\n	public static void makeUnhappy() {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n	\n" +
-                "	@PreDestroy()\n	public void throwTantrum() throws Exception {\n" +
-                "		System.out.println(\"I'm sad\");\n" +
-                "	}\n\n\n    private String emailAddress;\n\n\n}\n\n\n\n";
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PreDestroy;\nimport jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\") \npublic class PreDestroyAnnotation { \n\n    private Integer studentId;\n\t\n    private boolean isHappy;\n\n    private boolean isSad;\n\n\tprivate String emailAddress;\n\n\t@PreDestroy()\n\tpublic Integer getStudentId() {\n\t\treturn this.studentId;\n\t}\n\t\n\tpublic boolean getHappiness(String type) {\n\t\tif (type.equals(\"happy\")) return this.isHappy;\n\t\treturn this.isSad;\n\t}\n\t\n\t@PreDestroy()\n\tpublic static void makeUnhappy() {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\t\n\t@PreDestroy()\n\tpublic void throwTantrum() throws Exception {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\n    @PreDestroy()\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    @PreDestroy()\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    @PreDestroy()\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    @PreDestroy()\n    public void throwCustomExceptions() throws CustomCheckedException, CustomUncheckedException {\n        System.out.println(\"throwCustomExceptions\");\n    }\n\n    @PreDestroy()\n    public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    @PreDestroy()\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n}\n\n\n\n";
 
-        String newText3 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
-                "import jakarta.annotation.PreDestroy;\n" +
-                "import jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\") \n" +
-                "public class PreDestroyAnnotation { \n\n    " +
-                "private Integer studentId;\n	\n    " +
-                "private boolean isHappy;\n\n    " +
-                "private boolean isSad;\n	\n	" +
-                "@PreDestroy()\n	" +
-                "public Integer getStudentId() {\n		" +
-                "return this.studentId;\n	}\n	\n	" +
-                "@PreDestroy()\n	" +
-                "public boolean getHappiness() {\n		" +
-                "if (type.equals(\"happy\")) return this.isHappy;\n		" +
-                "return this.isSad;\n	}\n	\n	" +
-                "@PreDestroy()\n	" +
-                "public static void makeUnhappy() {\n		" +
-                "System.out.println(\"I'm sad\");\n	}\n	\n	" +
-                "@PreDestroy()\n	" +
-                "public void throwTantrum() throws Exception {\n		" +
-                "System.out.println(\"I'm sad\");\n	}\n\n\n    " +
-                "private String emailAddress;\n\n\n}\n\n\n\n";
+        String newText3 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PreDestroy;\nimport jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\") \npublic class PreDestroyAnnotation { \n\n    private Integer studentId;\n\t\n    private boolean isHappy;\n\n    private boolean isSad;\n\n\tprivate String emailAddress;\n\n\t@PreDestroy()\n\tpublic Integer getStudentId() {\n\t\treturn this.studentId;\n\t}\n\t\n\t@PreDestroy()\n\tpublic boolean getHappiness() {\n\t\tif (type.equals(\"happy\")) return this.isHappy;\n\t\treturn this.isSad;\n\t}\n\t\n\t@PreDestroy()\n\tpublic static void makeUnhappy() {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\t\n\t@PreDestroy()\n\tpublic void throwTantrum() throws Exception {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\n    @PreDestroy()\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    @PreDestroy()\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    @PreDestroy()\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    @PreDestroy()\n    public void throwCustomExceptions() throws CustomCheckedException, CustomUncheckedException {\n        System.out.println(\"throwCustomExceptions\");\n    }\n\n    @PreDestroy()\n    public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    @PreDestroy()\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n}\n\n\n\n";
 
-        TextEdit te = te(0, 0, 43, 0, newText);
+        TextEdit te = te(0, 0, 72, 0, newText);
         CodeAction ca = ca(uri, "Remove @PreDestroy", d1, te);
-        TextEdit te1 = te(0, 0, 43, 0, newText3);
+        TextEdit te1 = te(0, 0, 72, 0, newText3);
         CodeAction ca1 = ca(uri, "Remove all parameters", d1, te1);
         assertJavaCodeAction(codeActionParams, utils, ca, ca1);
 
-        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
-                "import jakarta.annotation.PreDestroy;\n" +
-                "import jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\") \n" +
-                "public class PreDestroyAnnotation { \n\n" +
-                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
-                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
-                "	public Integer getStudentId() {\n		return this.studentId;\n" +
-                "	}\n	\n	@PreDestroy()\n	public boolean getHappiness(String type) {\n" +
-                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
-                "		return this.isSad;\n	}\n	\n" +
-                "	public static void makeUnhappy() {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n	\n	@PreDestroy()\n" +
-                "	public void throwTantrum() throws Exception {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
-                "    private String emailAddress;\n\n\n}\n\n\n\n";
+        String newText1 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PreDestroy;\nimport jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\") \npublic class PreDestroyAnnotation { \n\n    private Integer studentId;\n\t\n    private boolean isHappy;\n\n    private boolean isSad;\n\n\tprivate String emailAddress;\n\n\t@PreDestroy()\n\tpublic Integer getStudentId() {\n\t\treturn this.studentId;\n\t}\n\t\n\t@PreDestroy()\n\tpublic boolean getHappiness(String type) {\n\t\tif (type.equals(\"happy\")) return this.isHappy;\n\t\treturn this.isSad;\n\t}\n\t\n\tpublic static void makeUnhappy() {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\t\n\t@PreDestroy()\n\tpublic void throwTantrum() throws Exception {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\n    @PreDestroy()\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    @PreDestroy()\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    @PreDestroy()\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    @PreDestroy()\n    public void throwCustomExceptions() throws CustomCheckedException, CustomUncheckedException {\n        System.out.println(\"throwCustomExceptions\");\n    }\n\n    @PreDestroy()\n    public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    @PreDestroy()\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n}\n\n\n\n";
 
-        String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\n" +
-                "import jakarta.annotation.PreDestroy;\n" +
-                "import jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\") \n" +
-                "public class PreDestroyAnnotation { \n\n" +
-                "    private Integer studentId;\n	\n    private boolean isHappy;\n\n" +
-                "    private boolean isSad;\n	\n	@PreDestroy()\n" +
-                "	public Integer getStudentId() {\n		return this.studentId;\n" +
-                "	}\n	\n	@PreDestroy()\n	public boolean getHappiness(String type) {\n" +
-                "		if (type.equals(\"happy\")) return this.isHappy;\n" +
-                "		return this.isSad;\n	}\n	\n" +
-                "	@PreDestroy()\n	public void makeUnhappy() {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n	\n	@PreDestroy()\n" +
-                "	public void throwTantrum() throws Exception {\n" +
-                "		System.out.println(\"I'm sad\");\n	}\n\n\n" +
-                "    private String emailAddress;\n\n\n}\n\n\n\n";
+        String newText2 = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PreDestroy;\nimport jakarta.annotation.Resource;\n\nimport java.io.IOException;\n\n@Resource(type = Object.class, name = \"aa\") \npublic class PreDestroyAnnotation { \n\n    private Integer studentId;\n\t\n    private boolean isHappy;\n\n    private boolean isSad;\n\n\tprivate String emailAddress;\n\n\t@PreDestroy()\n\tpublic Integer getStudentId() {\n\t\treturn this.studentId;\n\t}\n\t\n\t@PreDestroy()\n\tpublic boolean getHappiness(String type) {\n\t\tif (type.equals(\"happy\")) return this.isHappy;\n\t\treturn this.isSad;\n\t}\n\t\n\t@PreDestroy()\n\tpublic void makeUnhappy() {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\t\n\t@PreDestroy()\n\tpublic void throwTantrum() throws Exception {\n\t\tSystem.out.println(\"I'm sad\");\n\t}\n\n    @PreDestroy()\n    public void throwRuntimeException() throws RuntimeException {\n        System.out.println(\"RuntimeException\");\n    }\n\n    @PreDestroy()\n    public void throwNullPointerException() throws NullPointerException {\n        System.out.println(\"NullPointerException\");\n    }\n\n    @PreDestroy()\n    public void throwIOException() throws IOException {\n        System.out.println(\"IOException\");\n    }\n\n    @PreDestroy()\n    public void throwCustomExceptions() throws CustomCheckedException, CustomUncheckedException {\n        System.out.println(\"throwCustomExceptions\");\n    }\n\n    @PreDestroy()\n    public void throwCustomUnCheckedException() throws CustomUncheckedException {\n        System.out.println(\"CustomUncheckedException\");\n    }\n\n    @PreDestroy()\n    public void throwError() throws Error {\n        System.out.println(\"throwError\");\n    }\n}\n\n\n\n";
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
-        TextEdit te2 = te(0, 0, 43, 0, newText1);
+        TextEdit te2 = te(0, 0, 72, 0, newText1);
         CodeAction ca2 = ca(uri, "Remove @PreDestroy", d2, te2);
-        TextEdit te3 = te(0, 0, 43, 0, newText2);
+        TextEdit te3 = te(0, 0, 72, 0, newText2);
         CodeAction ca3 = ca(uri, "Remove the 'static' modifier from this method", d2, te3);
         assertJavaCodeAction(codeActionParams1, utils, ca2, ca3);
     }
