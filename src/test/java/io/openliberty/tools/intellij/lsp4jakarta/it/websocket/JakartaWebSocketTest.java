@@ -168,6 +168,16 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-websocket", "ChangeInvalidServerEndpoint");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "// Diagnostics:\n// + Server endpoint paths must start with a leading '/'.\n" +
+                "// + Server endpoint paths must be a URI-template (level-1) or a partial URI.\n" +
+                "@ServerEndpoint(\"/path\")\npublic class ServerEndpointNoSlash {\n}\n";
+        TextEdit te = te(0, 0, 9, 0, newText);
+        CodeAction ca = ca(uri, "Prefix value with '/'", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
     }
 
     @Test
