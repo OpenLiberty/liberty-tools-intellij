@@ -4,9 +4,12 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.PrefixSlashAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
@@ -14,8 +17,12 @@ import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class PrefixSlashAnnotationQuickFix implements IJavaCodeActionParticipant {
+
+    private static final Logger LOGGER = Logger.getLogger(PrefixSlashAnnotationQuickFix.class.getName());
+
     /**
      * Returns the unique identifier of this code action participant.
      *
@@ -43,7 +50,6 @@ public class PrefixSlashAnnotationQuickFix implements IJavaCodeActionParticipant
             return codeActions;
         }
         return Collections.emptyList();
-
     }
 
     /**
@@ -54,42 +60,14 @@ public class PrefixSlashAnnotationQuickFix implements IJavaCodeActionParticipant
      */
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
-        System.out.println("Inside resolveCodeAction------------------");
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
-        final PsiClass parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-        CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
-        String name = toResolve.getTitle();
         PsiElement declaringNode = getBinding(context.getCoveredNode());
         PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
-
-
-
-
-        if (annotationNode instanceof PsiAnnotation) {
-            System.out.println("Its an annotation");
-            System.out.println("Annotation: " + annotationNode.getQualifiedName());
-
-            for (PsiNameValuePair pair : annotationNode.getParameterList().getAttributes()) {
-                String pname = pair.getName(); // may be null if it's the default attribute
-                PsiAnnotationMemberValue value = pair.getValue();
-
-                String valueText = value != null ? value.getText() : "null";
-                System.out.println((pname != null ? pname : "value") + " = " + valueText);
-            }
-
-            //var parameters = annotationNode.getParameterList();
-            //var values = parameters.getAttributes();
-
-            //System.out.println("Values="+values);
-        }
-
-
-        System.out.println("Node----"+node.toString());
-        System.out.println("name----"+name);
-        System.out.println("declaringNode----"+declaringNode);
-
-        return null;
+        String label = getLabel();
+        ChangeCorrectionProposal proposal = new PrefixSlashAnnotationProposal(label, 0, context.getSource().getCompilationUnit(), declaringNode, annotationNode);
+        ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action " + label);
+        return toResolve;
     }
 
     protected static PsiElement getBinding(PsiElement node) {

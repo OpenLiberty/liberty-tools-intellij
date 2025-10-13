@@ -1,23 +1,38 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.*;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ASTRewriteCorrectionProposal;
+import org.eclipse.lsp4j.CodeActionKind;
 
-public class PrefixSlashAnnotationProposal extends ChangeCorrectionProposal {
+public class PrefixSlashAnnotationProposal extends ASTRewriteCorrectionProposal {
+    private final PsiAnnotation fAnnotation;
 
-    private final PsiFile fSourceCU;
-    private final PsiElement declaringNode;
-
-    public PrefixSlashAnnotationProposal(String name, String kind, int relevance, PsiFile sourceCU, PsiElement declaringNode) {
-        super(name, kind, relevance);
-        this.fSourceCU=sourceCU;
-        this.declaringNode=declaringNode;
+    public PrefixSlashAnnotationProposal(String name, int relevance, PsiFile sourceCU, PsiElement declaringNode, PsiAnnotation annotationNode) {
+        super(name, CodeActionKind.QuickFix, declaringNode, relevance, sourceCU);
+        this.fAnnotation = annotationNode;
     }
 
     @Override
-    public Change getChange() {
-        return null;
+    public void performUpdate() {
+        final String FORWARD_SLASH = "/";
+        final String ESCAPE_QUOTE = "\"";
+        if (fAnnotation != null) {
+            Project project = fAnnotation.getProject();
+            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+            for (PsiNameValuePair pair : fAnnotation.getParameterList().getAttributes()) {
+                PsiAnnotationMemberValue value = pair.getValue();
+                if (value instanceof PsiLiteralExpression literal) {
+                    Object literalValue = literal.getValue();
+                    String valueText = (String) literalValue;
+                    if (valueText != null && !valueText.startsWith(FORWARD_SLASH)) {
+                        String finalPath = FORWARD_SLASH + valueText;
+                        String literalText = ESCAPE_QUOTE + finalPath + ESCAPE_QUOTE;
+                        PsiAnnotationMemberValue newValue = factory.createExpressionFromText(literalText, fAnnotation);
+                        fAnnotation.setDeclaredAttributeValue(PsiAnnotation.DEFAULT_REFERENCED_METHOD_NAME, newValue);
+                    }
+                }
+            }
+        }
     }
 }
