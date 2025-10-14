@@ -30,18 +30,14 @@ public class PrefixSlashAnnotationProposal extends ASTRewriteCorrectionProposal 
         final String FORWARD_SLASH = "/";
         final String ESCAPE_QUOTE = "\"";
         if (fAnnotation != null) {
-            Project project = fAnnotation.getProject();
-            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+            PsiElementFactory factory = JavaPsiFacade.getElementFactory(fAnnotation.getProject());
             for (PsiNameValuePair pair : fAnnotation.getParameterList().getAttributes()) {
-                PsiAnnotationMemberValue value = pair.getValue();
-                if (value instanceof PsiLiteralExpression literal) {
-                    Object literalValue = literal.getValue();
-                    String valueText = (String) literalValue;
-                    if (valueText != null && !valueText.startsWith(FORWARD_SLASH)) {
-                        String finalPath = FORWARD_SLASH + valueText;
-                        String literalText = ESCAPE_QUOTE + finalPath + ESCAPE_QUOTE;
-                        PsiAnnotationMemberValue newValue = factory.createExpressionFromText(literalText, fAnnotation);
-                        fAnnotation.setDeclaredAttributeValue(PsiAnnotation.DEFAULT_REFERENCED_METHOD_NAME, newValue);
+                if (pair.getValue() instanceof PsiLiteralExpression literal && literal.getValue() instanceof String valueText) {
+                    if (!valueText.startsWith(FORWARD_SLASH)) {
+                        fAnnotation.setDeclaredAttributeValue(PsiAnnotation.DEFAULT_REFERENCED_METHOD_NAME, factory.createExpressionFromText(
+                                String.format("%s%s%s%s", ESCAPE_QUOTE, FORWARD_SLASH, valueText, ESCAPE_QUOTE),
+                                fAnnotation
+                        ));
                     }
                 }
             }
