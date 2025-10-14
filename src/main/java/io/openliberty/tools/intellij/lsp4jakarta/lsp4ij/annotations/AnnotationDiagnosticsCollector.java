@@ -13,10 +13,9 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -248,7 +247,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @return true if Exception is the superType of the given exception type.
      */
     private static boolean extendsException(PsiClass exceptionClass) {
-        return inheritsFrom(exceptionClass, "java.lang.Exception");
+        return DiagnosticsUtils.inheritsFrom(exceptionClass, "java.lang.Exception");
     }
 
     /**
@@ -258,23 +257,9 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @return true if RuntimeException is not the superType of the given exception type.
      */
     private static boolean notExtendsRuntimeException(PsiClass exceptionClass) {
-        return !inheritsFrom(exceptionClass, "java.lang.RuntimeException");
+        return !DiagnosticsUtils.inheritsFrom(exceptionClass, "java.lang.RuntimeException");
     }
 
-    /**
-     * inheritsFrom
-     * Check if specified superType is present or not in the type hierarchy
-     *
-     * @param clazz
-     * @param fqSuperType
-     * @return
-     */
-    private static boolean inheritsFrom(PsiClass clazz, String fqSuperType) {
-        Project project = clazz.getProject();
-        PsiClass superClass = JavaPsiFacade.getInstance(project)
-                .findClass(fqSuperType, GlobalSearchScope.allScope(project));
-        return superClass != null &&
-                (clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true));
-    }
+
 
 }
