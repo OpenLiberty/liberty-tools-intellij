@@ -102,7 +102,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "The @Dependent annotation must be the only scope defined by a Managed bean class of generic type.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
-        Diagnostic d2 = d(7, 12, 13,
+        Diagnostic d2 = d(7, 15, 16,
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
@@ -110,7 +110,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
-        Diagnostic d4 = d(18, 12, 13,
+        Diagnostic d4 = d(18, 15, 16,
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
@@ -171,23 +171,23 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
         String newText61 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n\tpublic int a;\n\n\t" +
-                "public ManagedBeanWithDependent() {\n\t\tthis.a = 10;\n\t}\n}\n\n@Dependent\n@RequestScoped\n" +
-                "@SessionScoped\nclass NonGenericManagedBean {\n\tpublic int a;\n\n\t" +
-                "public NonGenericManagedBean() {\n\t\tthis.a = 10;\n\t}\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithoutDependent<T>  {\n\tpublic static int a;\n\n\t" +
-                "public ManagedBeanWithoutDependent() {\n\t\tthis.a = 10;\n\t}\n}\n\n@SessionScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n\tpublic static int a;\n\n\t" +
-                "public ManagedBeanWithMultipleScopes2() {\n\t\tthis.a = 10;\n\t}\n}";
+                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
+                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
+                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@SessionScoped\n" +
+                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
         String newText62 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n\tpublic int a;\n\n\t" +
-                "public ManagedBeanWithDependent() {\n\t\tthis.a = 10;\n\t}\n}\n\n@Dependent\n@RequestScoped\n" +
-                "@SessionScoped\nclass NonGenericManagedBean {\n\tpublic int a;\n\n\t" +
-                "public NonGenericManagedBean() {\n\t\tthis.a = 10;\n\t}\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithoutDependent<T>  {\n\tpublic static int a;\n\n\t" +
-                "public ManagedBeanWithoutDependent() {\n\t\tthis.a = 10;\n\t}\n}\n\n@RequestScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n\tpublic static int a;\n\n\t" +
-                "public ManagedBeanWithMultipleScopes2() {\n\t\tthis.a = 10;\n\t}\n}";
+                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
+                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
+                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
 
         // Assert for the diagnostic d1
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
