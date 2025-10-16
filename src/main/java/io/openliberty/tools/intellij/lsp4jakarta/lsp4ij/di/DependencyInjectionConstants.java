@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation.
+ * Copyright (c) 2021, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,4 +26,5 @@ public class DependencyInjectionConstants {
     public static final String DIAGNOSTIC_CODE_INJECT_ABSTRACT = "RemoveInjectOrAbstract";
     public static final String DIAGNOSTIC_CODE_INJECT_STATIC = "RemoveInjectOrStatic";
     public static final String DIAGNOSTIC_CODE_INJECT_GENERIC = "RemoveInjectForGeneric";
+    public static final String DIAGNOSTIC_CODE_INJECT_INNER_CLASS= "RemoveInjectForInnerClass";
 }
