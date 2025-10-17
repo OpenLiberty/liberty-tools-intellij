@@ -63,6 +63,8 @@ public class BeanValidationConstants {
     public static final String STRING = "java.lang.String";
     public static final String BIG_INTEGER = "java.math.BigInteger";
     public static final String BIG_DECIMAL = "java.math.BigDecimal";
+    public static final String COLLECTION_FQ = "java.util.Collection";
+    public static final String MAP_FQ = "java.util.Map";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-bean-validation";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";

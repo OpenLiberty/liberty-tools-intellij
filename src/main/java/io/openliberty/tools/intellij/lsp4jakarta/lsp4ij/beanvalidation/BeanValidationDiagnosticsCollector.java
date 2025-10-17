@@ -191,9 +191,9 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             return false;
         }
         PsiClass resolvedClass = PsiUtil.resolveClassInClassTypeOnly(childType);
-        return resolvedClass != null && (inheritsFrom(resolvedClass, "java.lang.CharSequence")
-                || inheritsFrom(resolvedClass, "java.util.Collection")
-                || inheritsFrom(resolvedClass, "java.util.Map"));
+        return resolvedClass != null && (inheritsFrom(resolvedClass, CHAR_SEQUENCE)
+                || inheritsFrom(resolvedClass, COLLECTION_FQ)
+                || inheritsFrom(resolvedClass, MAP_FQ));
     }
 
     /**
