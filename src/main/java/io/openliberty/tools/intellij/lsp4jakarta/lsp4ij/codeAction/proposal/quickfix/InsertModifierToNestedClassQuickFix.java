@@ -12,15 +12,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.ClassUtil;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyModifiersProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
@@ -31,7 +25,6 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -104,7 +97,7 @@ public abstract class InsertModifierToNestedClassQuickFix implements IJavaCodeAc
             CodeAction toResolve
     ) {
         PsiClass injectedClass = classType.resolve();
-        if (injectedClass == null || !needsStaticModifier(injectedClass)) {
+        if (injectedClass == null || !needsModifier(injectedClass)) {
             return false;
         }
         final String label = getLabel(modifier);
@@ -125,13 +118,13 @@ public abstract class InsertModifierToNestedClassQuickFix implements IJavaCodeAc
     }
 
     /**
-     * needsStaticModifier
-     * It checks whether static modifier is applicable
+     * needsModifier
+     * It checks whether the modifier is applicable
      *
      * @param injectedClass
      * @return
      */
-    private boolean needsStaticModifier(PsiClass injectedClass) {
+    private boolean needsModifier(PsiClass injectedClass) {
         return injectedClass.getContainingClass() != null
                 && !injectedClass.hasModifierProperty(modifier);
     }
