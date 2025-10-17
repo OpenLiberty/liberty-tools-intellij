@@ -104,7 +104,9 @@ public abstract class InsertModifierToNestedClassQuickFix implements IJavaCodeAc
             CodeAction toResolve
     ) {
         PsiClass injectedClass = classType.resolve();
-        if (injectedClass == null || !needsStaticModifier(injectedClass)) return false;
+        if (injectedClass == null || !needsStaticModifier(injectedClass)) {
+            return false;
+        }
         final String label = getLabel(modifier);
         final ChangeCorrectionProposal proposal = new ModifyModifiersProposal(
                 label,
@@ -115,7 +117,6 @@ public abstract class InsertModifierToNestedClassQuickFix implements IJavaCodeAc
                 injectedClass.getModifierList(),
                 List.of(modifier)
         );
-
         ExceptionUtil.executeWithWorkspaceEditHandling(
                 context, proposal, toResolve, LOGGER,
                 "Unable to create workspace edit for code action " + label
