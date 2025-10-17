@@ -1440,8 +1440,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
         assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
     }
 
-
-    
     @Test
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -1450,14 +1448,11 @@ public class ManagedBeanTest extends BaseJakartaTest {
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/MultipleDisposes.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-
         Diagnostic d = d(9, 18, 23,
                 "The @Disposes annotation must not be defined on more than one parameter of a method.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveExtraDisposes");
-
         assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 }
