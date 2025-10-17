@@ -56,7 +56,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic d1 = d(6, 12, 13,
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
+        
         Diagnostic d2 = d(5, 13, 24,
                 "The @Dependent annotation must be the only scope defined by a Managed bean class of generic type.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
