@@ -78,10 +78,10 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             for (PsiField field : type.getFields()) {
                 collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
                 collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
-                collectJsonbUniquePropertyNames(uniquePropertyNames,field);
+                collectJsonbUniquePropertyNames(uniquePropertyNames, field);
             }
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
-            collectJsonbPropertyUniquenessDiagnostics(unit,diagnostics, uniquePropertyNames, type);
+            collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
         }
     }
 
@@ -91,7 +91,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @param field
      * @description Method collects distinct property name values to be referenced for finding duplicates
      */
-    private void collectJsonbUniquePropertyNames(Set<String> uniquePropertyNames, PsiField field)  {
+    private void collectJsonbUniquePropertyNames(Set<String> uniquePropertyNames, PsiField field) {
         for (PsiAnnotation annotation : field.getAnnotations()) {
             if (isMatchedAnnotation(annotation, JsonbConstants.JSONB_PROPERTY)) { // Checks whether annotation is JsonbProperty
                 String propertyName = JsonPropertyUtils.extractPropertyNameFromJsonField(annotation);
@@ -110,9 +110,9 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @param type
      * @description Method to collect JsonbProperty uniqueness diagnostics
      */
-    private void collectJsonbPropertyUniquenessDiagnostics( PsiJavaFile unit, List<Diagnostic> diagnostics, Set<String> uniquePropertyNames,PsiClass type) {
+    private void collectJsonbPropertyUniquenessDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                                           Set<String> uniquePropertyNames, PsiClass type) {
         Set<PsiClass> hierarchy = new LinkedHashSet<>(PsiClassImplUtil.getAllSuperClassesRecursively(type));
-
         Map<String, List<PsiField>> jsonbMap = buildPropertyMap(uniquePropertyNames, hierarchy);
 
         for (Map.Entry<String, List<PsiField>> entry : jsonbMap.entrySet()) { // Iterates through set of all key values pairs inside the map
@@ -134,17 +134,18 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @param type
      * @description Method creates diagnostics with appropriate message and cursor context
      */
-    private void createJsonbPropertyUniquenessDiagnostics(PsiJavaFile unit,
-                                                          List<Diagnostic> diagnostics, PsiField field, PsiClass type)  {
+    private void createJsonbPropertyUniquenessDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                                          PsiField field, PsiClass type) {
         List<String> jsonbAnnotationsForField = getJsonbAnnotationNames(type, field);
-        createJsonbTransientDiagnostic(unit, diagnostics, field, jsonbAnnotationsForField,
-                JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_DUPLICATE_NAME);
+        String diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbPropertyUniquenessField");
+        diagnostics.add(createDiagnostic(field, unit, diagnosticErrorMessage, JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_DUPLICATE_NAME,
+                (JsonArray) (new Gson().toJsonTree(jsonbAnnotationsForField)), DiagnosticSeverity.Error));
     }
 
     /**
      * @param uniquePropertyNames
      * @param hierarchy
-     * @return Map<String, List<IField>> jsonbMap
+     * @return Map<String, List < IField>> jsonbMap
      * @description This method collects the property name and fields using the same name if it's duplicated and builds it into a Map.
      */
     private Map<String, List<PsiField>> buildPropertyMap(Set<String> uniquePropertyNames, Set<PsiClass> hierarchy) {
@@ -229,9 +230,6 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbTransientOnField");
         else if (code.equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_ACCESSOR))
             diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbTransientOnAccessor");
-        else if (code.equals(JsonbConstants.DIAGNOSTIC_CODE_ANNOTATION_DUPLICATE_NAME))
-            diagnosticErrorMessage = Messages.getMessage("ErrorMessageJsonbPropertyUniquenessField");
-
 
         diagnostics.add(createDiagnostic(member, unit, diagnosticErrorMessage, code,
                 (JsonArray) (new Gson().toJsonTree(jsonbAnnotations)), DiagnosticSeverity.Error));
