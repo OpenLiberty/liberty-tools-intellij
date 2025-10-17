@@ -282,7 +282,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te2 = te(0, 0, 18, 1, newText1);
         CodeAction ca1 = ca(uri, "Remove @ApplicationScoped", d1, te1);
         CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        assertJavaCodeAction(codeActionParams1, utils, ca1,ca2);
 
         // Assert for the diagnostic d2
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
