@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -62,9 +62,31 @@ public class InnerClassInjectionTest extends BaseJakartaTest {
 
 
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
-        String newText11 = "/*******************************************************************************\n * Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n *******************************************************************************/\npackage io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\npublic class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    public static class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
+        String newText11 = "/*******************************************************************************\n * " +
+                "Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials are " +
+                "made available under the\n * terms of the Eclipse Public License v. 2.0 which is " +
+                "available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: " +
+                "EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n " +
+                "*******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\n" +
+                "public class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    " +
+                "public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    " +
+                "public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    " +
+                "public static class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
 
-        String newText12 = "/*******************************************************************************\n * Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n *******************************************************************************/\npackage io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\npublic class InnerClassInjection {\n\n    private InnerBean bean;\n\n    public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    public class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
+        String newText12 = "/*******************************************************************************\n * " +
+                "Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials " +
+                "are made available under the\n * terms of the Eclipse Public License v. 2.0 which is " +
+                "available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: " +
+                "EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n " +
+                "*******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\n" +
+                "public class InnerClassInjection {\n\n    private InnerBean bean;\n\n    " +
+                "public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    " +
+                "public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    " +
+                "public class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
 
         TextEdit te11 = JakartaForJavaAssert.te(0, 0, 38, 1, newText11);
         TextEdit te12 = JakartaForJavaAssert.te(0, 0, 38, 1, newText12);
@@ -74,9 +96,31 @@ public class InnerClassInjectionTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
 
-        String newText21 = "/*******************************************************************************\n * Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n *******************************************************************************/\npackage io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\npublic class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    public static class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
+        String newText21 = "/*******************************************************************************\n * " +
+                "Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials " +
+                "are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * " +
+                "http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * " +
+                "Contributors:\n *     IBM Corporation - initial implementation\n " +
+                "*******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\n" +
+                "public class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    " +
+                "public InnerBean getBean() {\n        return bean;\n    }\n\n    @Inject\n    " +
+                "public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    " +
+                "public static class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
 
-        String newText22 = "/*******************************************************************************\n * Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * Contributors:\n *     IBM Corporation - initial implementation\n *******************************************************************************/\npackage io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\npublic class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    public InnerBean getBean() {\n        return bean;\n    }\n\n    public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    public class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
+        String newText22 = "/*******************************************************************************\n * " +
+                "Copyright (c) 2025 IBM Corporation and others.\n *\n * This program and the accompanying materials " +
+                "are made available under the\n * terms of the Eclipse Public License v. 2.0 which is available at\n * " +
+                "http://www.eclipse.org/legal/epl-2.0.\n *\n * SPDX-License-Identifier: EPL-2.0\n *\n * " +
+                "Contributors:\n *     IBM Corporation - initial implementation\n " +
+                "*******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.di;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\nimport jakarta.mail.Service;\n\n@ApplicationScoped\n" +
+                "public class InnerClassInjection {\n\n    @Inject\n    private InnerBean bean;\n\n    " +
+                "public InnerBean getBean() {\n        return bean;\n    }\n\n    " +
+                "public void setBean(InnerClassInjection.InnerBean bean) {\n        this.bean = bean;\n    }\n\n    " +
+                "public class InnerBean {\n\n        @Inject\n        private Service service;\n    }\n}";
 
         TextEdit te21 = JakartaForJavaAssert.te(0, 0, 38, 1, newText21);
         TextEdit te22 = JakartaForJavaAssert.te(0, 0, 38, 1, newText22);
