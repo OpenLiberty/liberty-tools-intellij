@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.EXCEPTION;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.RUNTIME_EXCEPTION;
+
 /**
  *
  * jararta.annotation Diagnostics
@@ -247,17 +250,17 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @return true if Exception is the superType of the given exception type.
      */
     private static boolean extendsException(PsiClass exceptionClass) {
-        return DiagnosticsUtils.inheritsFrom(exceptionClass, "java.lang.Exception");
+        return DiagnosticsUtils.inheritsFrom(exceptionClass, EXCEPTION);
     }
 
     /**
      * notExtendsRuntimeException
      *
-     * @param exceptionClass
+     * @param exceptionClass The root type of which the super-types are checked.
      * @return true if RuntimeException is not the superType of the given exception type.
      */
     private static boolean notExtendsRuntimeException(PsiClass exceptionClass) {
-        return !DiagnosticsUtils.inheritsFrom(exceptionClass, "java.lang.RuntimeException");
+        return !DiagnosticsUtils.inheritsFrom(exceptionClass, RUNTIME_EXCEPTION);
     }
 
 
