@@ -1441,6 +1441,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
 
 
+    
     @Test
     public void multipleDisposes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
