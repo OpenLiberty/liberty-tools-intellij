@@ -47,7 +47,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, intellij-2025.3-support ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
