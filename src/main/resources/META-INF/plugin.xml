@@ -343,14 +343,6 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
                                    targetDiagnostic="jakarta-persistence#MissingEmptyConstructor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
@@ -413,8 +405,16 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveProduceAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#RemoveProducesOrConflictedAnnotations"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveInjectOrConflictedAnnotations"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#RemoveInjectOrConflictedAnnotations"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveDisposesOrConflictedAnnotations"
@@ -423,10 +423,6 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveDisposesOrConflictedAnnotations"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerParamAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#RemoveProducesOrConflictedAnnotations"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidManagedBeanAnnotation"
@@ -437,13 +433,8 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ConflictProducesInjectQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#RemoveInjectOrConflictedAnnotations"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerParamAnnotationQuickFix"/>
-        <javaCodeActionParticipant kind="quickfix"
-                                   group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidScopeDecl"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
-
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
@@ -451,11 +442,23 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidInjectParamAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
 
 
 
