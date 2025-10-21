@@ -150,23 +150,20 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      */
     private Map<String, List<PsiField>> buildPropertyMap(Set<String> uniquePropertyNames, Set<PsiClass> hierarchy) {
         Map<String, List<PsiField>> jsonbMap = new HashMap<>();
-        for (PsiClass finaltype : hierarchy) {
-            for (PsiField field : finaltype.getFields()) { // Iterates through all fields in super and subclass
-                for (PsiAnnotation annotation : field.getAnnotations()) {
-                    if (isMatchedAnnotation(annotation, JsonbConstants.JSONB_PROPERTY)) {
-                        String propertyName = JsonPropertyUtils.extractPropertyNameFromJsonField(annotation);
-                        if (propertyName != null) {
-                            propertyName = JsonPropertyUtils.decodeUnicodeName(propertyName);
-                            if (uniquePropertyNames.contains(propertyName)) {
-                                // Checks if the propertyName exists, if not, creates a new key for the property with List<IField> as value.
-                                // If it exists, add the field into the list.
-                                jsonbMap.computeIfAbsent(propertyName, k -> new ArrayList<>()).add(field);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        hierarchy.stream()
+                .flatMap(finalType -> Arrays.stream(finalType.getFields())) // flatten PsiFields
+                .flatMap(field -> Arrays.stream(field.getAnnotations())
+                        .filter(annotation -> isMatchedAnnotation(annotation, JsonbConstants.JSONB_PROPERTY))
+                        .map(annotation -> Map.entry(annotation, field))) // pair annotation with its field
+                .map(entry -> {
+                    String propertyName = JsonPropertyUtils.extractPropertyNameFromJsonField(entry.getKey());
+                    propertyName = propertyName != null ? JsonPropertyUtils.decodeUnicodeName(propertyName) : null;
+                    return Map.entry(propertyName, entry.getValue());
+                })
+                .filter(entry -> entry.getKey() != null && uniquePropertyNames.contains(entry.getKey()))
+                .forEach(entry ->
+                        jsonbMap.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(entry.getValue())
+                );
         return jsonbMap;
     }
 
