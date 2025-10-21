@@ -13,10 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
@@ -30,6 +27,7 @@ import com.google.gson.JsonArray;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
+import static org.eclipse.lsp4jakarta.jdt.internal.cdi.Constants.INVALID_INITIALIZER_PARAMS_FQ;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
@@ -234,7 +232,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             if (isManagedBean) {
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 boolean isDependent = managedBeanAnnotations.stream()
-                        .anyMatch(annotation -> DEPENDENT_FQ_NAME.equals(annotation));
+                            .anyMatch(annotation -> DEPENDENT_FQ_NAME.equals(annotation));
 
                 if (isClassGeneric && !isDependent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -313,6 +311,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
+        Set<String> paramScopesSet;
+        boolean mutuallyExclusive = false;
         for (PsiMethod method : type.getMethods()) {
             PsiAnnotation targetAnnotation = null;
 
@@ -335,20 +335,29 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 for (String annotation : paramScopes) {
                     invalidAnnotations.add("@" + getSimpleName(annotation));
                 }
+                paramScopesSet = new LinkedHashSet<>(paramScopes);
+                if (paramScopesSet.size() == INVALID_INITIALIZER_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INITIALIZER_PARAMS_FQ))) {
+                    mutuallyExclusive = true;
+                    diagnosticCode = DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM;
+                }
             }
 
             if (!invalidAnnotations.isEmpty()) {
                 String label = PRODUCES_FQ_NAME.equals(target) ?
                         createInvalidProducesLabel(invalidAnnotations) :
-                        createInvalidInjectLabel(invalidAnnotations);
+                        createInvalidInjectLabel(invalidAnnotations, mutuallyExclusive);
                 diagnostics.add(createDiagnostic(method, unit, label, diagnosticCode, null, DiagnosticSeverity.Error));
             }
 
         }
     }
 
-    private String createInvalidInjectLabel(Set<String> invalidAnnotations) {
-        return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
+    private String createInvalidInjectLabel(Set<String> invalidAnnotations, boolean mutuallyExclusive) {
+        if (mutuallyExclusive) {
+            return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
+        } else {
+            return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
+        }
     }
 
     private String createInvalidProducesLabel(Set<String> invalidAnnotations) {
