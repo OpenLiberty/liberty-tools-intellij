@@ -312,7 +312,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
         Set<String> paramScopesSet;
-        boolean mutuallyExclusive = false;
         for (PsiMethod method : type.getMethods()) {
             PsiAnnotation targetAnnotation = null;
 
@@ -337,7 +336,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
                 paramScopesSet = new LinkedHashSet<>(paramScopes);
                 if (paramScopesSet.size() == INVALID_INITIALIZER_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INITIALIZER_PARAMS_FQ))) {
-                    mutuallyExclusive = true;
                     diagnosticCode = DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM;
                 }
             }
@@ -345,19 +343,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             if (!invalidAnnotations.isEmpty()) {
                 String label = PRODUCES_FQ_NAME.equals(target) ?
                         createInvalidProducesLabel(invalidAnnotations) :
-                        createInvalidInjectLabel(invalidAnnotations, mutuallyExclusive);
+                        createInvalidInjectLabel(invalidAnnotations);
                 diagnostics.add(createDiagnostic(method, unit, label, diagnosticCode, null, DiagnosticSeverity.Error));
             }
 
         }
     }
 
-    private String createInvalidInjectLabel(Set<String> invalidAnnotations, boolean mutuallyExclusive) {
-        if (mutuallyExclusive) {
-            return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
-        } else {
-            return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
-        }
+    private String createInvalidInjectLabel(Set<String> invalidAnnotations) {
+        return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
     }
 
     private String createInvalidProducesLabel(Set<String> invalidAnnotations) {
