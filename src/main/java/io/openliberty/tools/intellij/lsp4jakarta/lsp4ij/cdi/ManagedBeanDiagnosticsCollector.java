@@ -27,7 +27,6 @@ import com.google.gson.JsonArray;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
-import static org.eclipse.lsp4jakarta.jdt.internal.cdi.Constants.INVALID_INITIALIZER_PARAMS_FQ;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
@@ -336,7 +335,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     invalidAnnotations.add("@" + getSimpleName(annotation));
                 }
                 paramScopesSet = new LinkedHashSet<>(paramScopes);
-                if (paramScopesSet.size() == INVALID_INITIALIZER_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INITIALIZER_PARAMS_FQ))) {
+                if (paramScopesSet.size() == INVALID_INJECT_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INJECT_PARAMS_FQ))) {
                     mutuallyExclusive = true;
                 }
             }
