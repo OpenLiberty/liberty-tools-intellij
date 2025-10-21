@@ -96,7 +96,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             if (isMatchedAnnotation(annotation, JsonbConstants.JSONB_PROPERTY)) { // Checks whether annotation is JsonbProperty
                 String propertyName = JsonPropertyUtils.extractPropertyNameFromJsonField(annotation);
                 if (propertyName != null) {
-                    uniquePropertyNames.add(JsonPropertyUtils.decodeUniCodeName(propertyName));
+                    uniquePropertyNames.add(JsonPropertyUtils.decodeUnicodeName(propertyName));
                 }
             }
         }
@@ -156,7 +156,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     if (isMatchedAnnotation(annotation, JsonbConstants.JSONB_PROPERTY)) {
                         String propertyName = JsonPropertyUtils.extractPropertyNameFromJsonField(annotation);
                         if (propertyName != null) {
-                            propertyName = JsonPropertyUtils.decodeUniCodeName(propertyName);
+                            propertyName = JsonPropertyUtils.decodeUnicodeName(propertyName);
                             if (uniquePropertyNames.contains(propertyName)) {
                                 // Checks if the propertyName exists, if not, creates a new key for the property with List<IField> as value.
                                 // If it exists, add the field into the list.

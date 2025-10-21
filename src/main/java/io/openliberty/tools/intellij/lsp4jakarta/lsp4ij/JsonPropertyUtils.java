@@ -1,16 +1,16 @@
 /*******************************************************************************
-* Copyright (c) 2025 IBM Corporation and others.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v. 2.0 which is available at
-* http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
-* which is available at https://www.apache.org/licenses/LICENSE-2.0.
-*
-* SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
-*
-* Contributors:
-*     IBM Corporation - initial API and implementation
-*******************************************************************************/
+ * Copyright (c) 2025 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
 import java.util.regex.Matcher;
@@ -31,7 +31,7 @@ public class JsonPropertyUtils {
      * @return String
      * @description Method decodes unicode property name value to string value
      */
-    public static String decodeUniCodeName(String propertyName) {
+    public static String decodeUnicodeName(String propertyName) {
         Pattern pattern = Pattern.compile(JsonbConstants.JSONB_PROPERTYNAME_UNICODE); // Pattern for detecting unicode sequence
         Matcher matcher = pattern.matcher(propertyName);
         StringBuffer decoded = new StringBuffer();
@@ -51,10 +51,10 @@ public class JsonPropertyUtils {
      */
     public static String extractPropertyNameFromJsonField(PsiAnnotation annotation) {
         PsiAnnotationMemberValue psiValue = annotation.findAttributeValue("value");
-        String value = psiValue !=null ? psiValue.getText(): null;
+        String value = psiValue != null ? psiValue.getText() : null;
         // Remove wrapping quotes if it's a string literal
-        if (value!=null && value.startsWith("\"") && value.endsWith("\"")) {
-            value =  value.substring(1, value.length() - 1);
+        if (value != null && value.startsWith("\"") && value.endsWith("\"")) {
+            value = value.substring(1, value.length() - 1);
         }
         return value;
     }
