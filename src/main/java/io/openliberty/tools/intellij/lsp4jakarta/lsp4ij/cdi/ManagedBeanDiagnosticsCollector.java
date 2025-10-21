@@ -312,6 +312,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
         Set<String> paramScopesSet;
+        boolean mutuallyExclusive = false;
         for (PsiMethod method : type.getMethods()) {
             PsiAnnotation targetAnnotation = null;
 
@@ -336,15 +337,23 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
                 paramScopesSet = new LinkedHashSet<>(paramScopes);
                 if (paramScopesSet.size() == INVALID_INITIALIZER_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INITIALIZER_PARAMS_FQ))) {
-                    diagnosticCode = DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM;
+                    mutuallyExclusive = true;
                 }
             }
 
             if (!invalidAnnotations.isEmpty()) {
-                String label = PRODUCES_FQ_NAME.equals(target) ?
-                        createInvalidProducesLabel(invalidAnnotations) :
-                        createInvalidInjectLabel(invalidAnnotations);
-                diagnostics.add(createDiagnostic(method, unit, label, diagnosticCode, null, DiagnosticSeverity.Error));
+                if(PRODUCES_FQ_NAME.equals(target)) {
+                    diagnostics.add(createDiagnostic(method, unit, createInvalidProducesLabel(invalidAnnotations),
+                            diagnosticCode, null, DiagnosticSeverity.Error));
+                } else {
+                    if (mutuallyExclusive) {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM, null, DiagnosticSeverity.Error));
+                    } else {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                diagnosticCode, null, DiagnosticSeverity.Error));
+                    }
+                }
             }
 
         }
