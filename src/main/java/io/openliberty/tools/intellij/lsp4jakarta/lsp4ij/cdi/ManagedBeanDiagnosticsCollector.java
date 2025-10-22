@@ -311,8 +311,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
         Set<String> paramScopesSet;
-        boolean mutuallyExclusive = false;
         for (PsiMethod method : type.getMethods()) {
+            boolean mutuallyExclusive = false;
             PsiAnnotation targetAnnotation = null;
 
             for (PsiAnnotation annotation : method.getAnnotations()) {
