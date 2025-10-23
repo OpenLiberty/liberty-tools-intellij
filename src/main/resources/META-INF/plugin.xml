@@ -317,6 +317,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-di#RemoveInject"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectForInnerClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.InsertStaticModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-di#RemoveInjectForInnerClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
 
         <!-- JSON-B -->
         <javaCodeActionParticipant kind="quickfix"
@@ -359,7 +367,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#AddPathParamsAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.AddPathParamQuickFix"/>
-
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-websocket#InvalidEndpointWithoutStartingSlash"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.PrefixSlashAnnotationQuickFix"/>
         <!-- Servlet -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
