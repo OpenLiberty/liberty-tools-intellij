@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2024 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -163,11 +163,21 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
         Diagnostic d1 = JakartaForJavaAssert.d(7, 0, 23, "Server endpoint paths must start with a leading '/'.", DiagnosticSeverity.Error,
-                "jakarta-websocket", "ChangeInvalidServerEndpoint");
+                "jakarta-websocket", "InvalidEndpointWithoutStartingSlash");
         Diagnostic d2 = JakartaForJavaAssert.d(7, 0, 23, "Server endpoint paths must be a URI-template (level-1) or a partial URI.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "ChangeInvalidServerEndpoint");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "// Diagnostics:\n// + Server endpoint paths must start with a leading '/'.\n" +
+                "// + Server endpoint paths must be a URI-template (level-1) or a partial URI.\n" +
+                "@ServerEndpoint(\"/path\")\npublic class ServerEndpointNoSlash {\n}\n";
+        TextEdit te = te(0, 0, 9, 0, newText);
+        CodeAction ca = ca(uri, "Prefix value with '/'", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
     }
 
     @Test
