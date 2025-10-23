@@ -6,7 +6,9 @@ import java.sql.Time;
 import java.time.OffsetDateTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.validation.constraints.Email;
@@ -66,10 +68,6 @@ public class ValidConstraints {
     
     @NotBlank
     private String saysomething;
-   
-//    not yet implemented - see issue #63
-//    @NotEmpty
-//    private String imgivinguponyou;
     
     @NotNull
     private String thisIsUsed;
@@ -89,7 +87,24 @@ public class ValidConstraints {
     @PositiveOrZero
     private int maybeZero;
 
-//    not yet implemented - see issue #63
-//    @Size
-//    private boolean wordMap;
+    @Size
+    private ValidConstraints[] validConstraintsList;
+
+    @Size
+    private ArrayList<Integer> list;
+
+    @Size
+    private String name;
+
+    @Size
+    private String[] names;
+
+    @NotEmpty
+    private int[] numberArray;
+
+    @NotEmpty
+    private HashMap map;
+
+    @NotEmpty
+    private java.lang.Boolean[] checks;
 }
