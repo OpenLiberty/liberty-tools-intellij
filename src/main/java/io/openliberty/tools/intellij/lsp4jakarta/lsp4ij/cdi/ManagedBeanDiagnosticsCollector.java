@@ -13,10 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
@@ -311,7 +308,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
+        Set<String> paramScopesSet;
         for (PsiMethod method : type.getMethods()) {
+            boolean mutuallyExclusive = false;
             PsiAnnotation targetAnnotation = null;
 
             for (PsiAnnotation annotation : method.getAnnotations()) {
@@ -333,15 +332,26 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 for (String annotation : paramScopes) {
                     invalidAnnotations.add("@" + getSimpleName(annotation));
                 }
+                paramScopesSet = new LinkedHashSet<>(paramScopes);
+                if (paramScopesSet.size() == INVALID_INJECT_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INJECT_PARAMS_FQ))) {
+                    mutuallyExclusive = true;
+                }
             }
 
             if (!invalidAnnotations.isEmpty()) {
-                String label = PRODUCES_FQ_NAME.equals(target) ?
-                        createInvalidProducesLabel(invalidAnnotations) :
-                        createInvalidInjectLabel(invalidAnnotations);
-                diagnostics.add(createDiagnostic(method, unit, label, diagnosticCode, null, DiagnosticSeverity.Error));
+                if(PRODUCES_FQ_NAME.equals(target)) {
+                    diagnostics.add(createDiagnostic(method, unit, createInvalidProducesLabel(invalidAnnotations),
+                            diagnosticCode, null, DiagnosticSeverity.Error));
+                } else {
+                    if (mutuallyExclusive) {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM, null, DiagnosticSeverity.Error));
+                    } else {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                diagnosticCode, null, DiagnosticSeverity.Error));
+                    }
+                }
             }
-
         }
     }
 
