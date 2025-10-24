@@ -83,7 +83,7 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
             for (String newAttr : this.attributesToAdd) {
                 // don't add duplicate attributes to an annotation
                 if (Arrays.stream(values).noneMatch(v -> v.getName().equals(newAttr))) {
-                    annotation.setDeclaredAttributeValue(newAttr, newDefaultExpression(annotation));
+                    annotation.setDeclaredAttributeValue(newAttr, newDefaultExpression(annotation, newAttr));
                 }
             }
             // remove attributes
@@ -100,8 +100,26 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
         return  new Change(sourceCU.getViewProvider().getDocument(), changed);
     }
 
-    private PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation) {
-        return PsiElementFactory.getInstance(annotation.getProject()).
-                createExpressionFromText("\"\"", annotation);
+    /**
+     * newDefaultExpression
+     * Add new attributes of type String or Class.
+     * For initial values, we use empty strings for String types and Object.class for Class types,
+     * since the user's intended values are unknown at this stage,
+     * These placeholders (e.g., name = "", type = Object.class) must be updated by the user as needed.
+     * when an annotation in Jakarta EE declares an attribute named type, it’s always of the form of Class<?>
+     *
+     * @param annotation
+     * @param attributeName
+     * @return
+     */
+    private PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation, String attributeName) {
+        if ("type".equals(attributeName)) {
+            return PsiElementFactory.getInstance(annotation.getProject())
+                    .createExpressionFromText("Object.class", annotation);
+        } else {
+            return PsiElementFactory.getInstance(annotation.getProject()).
+                    createExpressionFromText("\"\"", annotation);
+        }
+
     }
 }
