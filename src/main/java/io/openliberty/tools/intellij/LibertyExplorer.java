@@ -284,10 +284,10 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
             LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
             if (action != null) {
-                action.actionPerformed(new AnActionEvent(null,
-                        DataManager.getInstance().getDataContext(tree),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        am, 0));
+                action.actionPerformed(new AnActionEvent(DataManager.getInstance().getDataContext(tree),
+                        new Presentation(),
+                        ActionPlaces.UNKNOWN, ActionUiKind.NONE, null,
+                        0, am));
             }
         }
     }
