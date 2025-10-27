@@ -178,7 +178,7 @@ task copyDeps(type: Copy) {
 intellijPlatformTesting.runIde {
     runIdeLocally {
         version = providers.gradleProperty("ideTargetVersion")
-        type = IntelliJPlatformType.IntellijIdeaCommunity
+        type = IntelliJPlatformType.IntellijIdea
         task {
             jvmArgumentProviders.add({
                 [
@@ -203,7 +203,7 @@ test {
 intellijPlatformTesting.runIde {
     runIdeForUiTests {
         version = providers.gradleProperty("ideTargetVersion")
-        type = IntelliJPlatformType.IntellijIdeaCommunity
+        type = IntelliJPlatformType.IntellijIdea
         task {
             jvmArgumentProviders.add({
                 [
