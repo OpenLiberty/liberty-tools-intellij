@@ -15,6 +15,7 @@ import com.intellij.execution.configurations.*;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
@@ -152,15 +153,10 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         }
 
         // Required configuration event data.
-        DataContext dataCtx = dataId -> {
-            if (CommonDataKeys.PROJECT.is(dataId)) {
-                return libertyModule.getProject();
-            }
-            if (Constants.LIBERTY_BUILD_FILE_DATAKEY.getName().equals(dataId)) {
-                return libertyModule.getBuildFile();
-            }
-            return null;
-        };
+        DataContext dataCtx = SimpleDataContext.builder()
+                .add(CommonDataKeys.PROJECT, libertyModule.getProject())
+                .add(Constants.LIBERTY_BUILD_FILE_DATAKEY, libertyModule.getBuildFile())
+                .build();
 
         AnActionEvent event = new AnActionEvent(null, dataCtx, ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0);
         action.actionPerformed(event);
