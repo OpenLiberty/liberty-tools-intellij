@@ -158,7 +158,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
                 .add(Constants.LIBERTY_BUILD_FILE_DATAKEY, libertyModule.getBuildFile())
                 .build();
 
-        AnActionEvent event = new AnActionEvent(null, dataCtx, ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0);
+        AnActionEvent event = new AnActionEvent(dataCtx, new Presentation(), ActionPlaces.UNKNOWN, ActionUiKind.NONE, null, 0, ActionManager.getInstance());
         action.actionPerformed(event);
 
         // return null because we are not plugging into "Run" tool window in IntelliJ, just terminal and Debug
