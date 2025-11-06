@@ -216,6 +216,8 @@ intellijPlatformTesting.runIde {
                         "-Dide.mac.file.chooser.native=false",
                         "-DjbScreenMenuBar.enabled=false",
                         "-Dapple.laf.useScreenMenuBar=false",
+                        // This disables the EAP login prompt:
+                        "-Deap.require.license=release"
                 ]
             } as CommandLineArgumentProvider)
             systemProperty("ide.native.launcher", "true")
