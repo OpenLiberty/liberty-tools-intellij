@@ -93,25 +93,61 @@ jobs:
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
+        test-group: [ LSP4Jakarta-Unit, MavenSingleModMP, GradleSingleModMP, MavenSingleModCustomWLP, GradleSingleModCustomWLP, MavenSingleModMPCfg, GradleSingleModMPCfg, MavenSingleModMPSID, GradleSingleModMPSID, MavenSingleModNLTRest, GradleSingleModNLTRest, GradleSingleModLS, GradleSingleModMPLS, GradleSingleModJakartaLS, MavenMPMultipleProject ]
+        exclude:
+          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
+          - runtime: mac
+            test-group: LSP4Jakarta-Unit
+          - runtime: windows
+            test-group: LSP4Jakarta-Unit
         include:
           - runtime: linux
             os: ubuntu-latest
-            reportName: linux-test-report
           - runtime: mac
             os: macOS-14
-            reportName: mac-test-report
           - runtime: windows
             os: windows-latest
-            reportName: windows-test-report
+          - test-group: MavenSingleModMP
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
+          - test-group: GradleSingleModMP
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest
+          - test-group: MavenSingleModCustomWLP
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest
+          - test-group: GradleSingleModCustomWLP
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest
+          - test-group: MavenSingleModMPCfg
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
+          - test-group: GradleSingleModMPCfg
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
+          - test-group: MavenSingleModMPSID
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
+          - test-group: GradleSingleModMPSID
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
+          - test-group: MavenSingleModNLTRest
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
+          - test-group: GradleSingleModNLTRest
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest
+          - test-group: GradleSingleModLS
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
+          - test-group: GradleSingleModMPLS
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
+          - test-group: GradleSingleModJakartaLS
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
+          - test-group: MavenMPMultipleProject
+            test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
+          - test-group: LSP4Jakarta-Unit
+            test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
       LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
       REF_LTI_TAG: ${{ inputs.refLTITag }}
+      TEST_CLASS: ${{ matrix.test-class }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -152,7 +188,7 @@ jobs:
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
       - name: 'Archive artifacts'
-        if: ${{ runner.os == 'Linux' && !failure() }}
+        if: ${{ runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
           name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
@@ -161,7 +197,7 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
-      - name: 'Run UI integration tests'
+      - name: 'Run tests'
         id: run_tests
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/run.sh
@@ -169,6 +205,6 @@ jobs:
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             liberty-tools-intellij/build/reports/
