@@ -355,20 +355,27 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     public void testOpenBuildFileActionUsingPopUpMenu() {
         shouldCleanupTerminal = false;
-        String editorTabName = getBuildFileName() + " (" + getSmMPProjectName() + ")";
+        String editorTabNameWithProject = getBuildFileName() + " (" + getSmMPProjectName() + ")";
+        String editorTabNameSimple = getBuildFileName();
 
         // Close the editor tab if it was previously opened.
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabName, "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabNameWithProject, "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, editorTabNameSimple, "5");
 
         // Open the build file.
         UIBotTestUtils.openLibertyToolWindow(remoteRobot);
         UIBotTestUtils.runActionLTWPopupMenu(remoteRobot, getSmMPProjectName(), getBuildFileOpenCommand(), 3);
 
         // Verify that build file tab is opened.
-        Assertions.assertNotNull(UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabName, "10"),
-                "Editor tab with the name of " + editorTabName + " could not be found.");
+        ComponentFixture editorTabCloseButton = UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabNameWithProject, "10");
+        if (editorTabCloseButton == null) {
+            editorTabCloseButton = UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabNameSimple, "10");
+        }
+
+        Assertions.assertNotNull(editorTabCloseButton, "Editor tab with the name of " + editorTabNameWithProject + " or " + editorTabNameSimple + " could not be found.");
 
         // Close the editor tab.
+        String editorTabName = (UIBotTestUtils.getEditorTabCloseButton(remoteRobot, editorTabNameWithProject, "1") != null) ? editorTabNameWithProject : editorTabNameSimple;
         UIBotTestUtils.rightClickCloseOnFileTab(remoteRobot, editorTabName);
     }
 
