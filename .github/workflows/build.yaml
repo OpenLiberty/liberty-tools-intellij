@@ -98,7 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-Service-ID, Gradle-MP-Service-ID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
+        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
@@ -124,9 +124,9 @@ jobs:
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
           - test-group: Gradle-MP-Config
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
-          - test-group: Maven-MP-Service-ID
+          - test-group: Maven-MP-SID
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
-          - test-group: Gradle-MP-Service-ID
+          - test-group: Gradle-MP-SID
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
           - test-group: Maven-NLT-REST
             test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
