@@ -47,7 +47,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, check-ls-quickfix-intermittent-issue ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
@@ -161,10 +161,11 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
-      - name: 'Run UI integration tests'
+      - name: 'Run only GradleSingleModJakartaLSTest'
         id: run_tests
         working-directory: ./liberty-tools-intellij
-        run: bash ./src/test/resources/ci/scripts/run.sh
+        run: |
+          ./gradlew test --tests "io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest"
       - name: 'Archive Test logs and reports'
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
