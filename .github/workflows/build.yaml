@@ -93,25 +93,29 @@ jobs:
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
+        test-group: [ Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
         include:
           - runtime: linux
             os: ubuntu-latest
-            reportName: linux-test-report
           - runtime: mac
             os: macOS-latest
-            reportName: mac-test-report
           - runtime: windows
             os: windows-latest
-            reportName: windows-test-report
+          - test-group: Gradle-MP-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
+          - test-group: Gradle-Jakarta-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
       LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
       REF_LTI_TAG: ${{ inputs.refLTITag }}
+      TEST_CLASS: ${{ matrix.test-class }}
     steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
@@ -161,15 +165,14 @@ jobs:
             ./**/libs/*liberty-tools-intellij*.jar
           if-no-files-found: warn
           retention-days: 7
-      - name: 'Run only GradleSingleModJakartaLSTest'
+      - name: 'Run tests'
         id: run_tests
         working-directory: ./liberty-tools-intellij
-        run: |
-          ./gradlew test --tests "io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest"
+        run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: ${{ matrix.reportName }}-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             liberty-tools-intellij/build/reports/
