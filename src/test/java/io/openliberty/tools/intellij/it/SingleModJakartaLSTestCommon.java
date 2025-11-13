@@ -149,8 +149,8 @@ public abstract class SingleModJakartaLSTestCommon {
     /**
      * Tests Jakarta Language Server quick fix support in a Java source file
      */
-//    @Test
-//    @Video
+    @Test
+    @Video
     public void testJakartaQuickFixInJavaPart() {
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";
