@@ -46,15 +46,19 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
     protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
 
     @Override
-    protected void setUpFixtures() throws Exception {
-        // Don't call super.setUpFixtures() here, that will create FocusListener leak.
-        myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
-        final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
-        ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
-        final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
-        setTestFixture(testFixture);
-        testFixture.setUp();
-        LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
+    protected void setUpFixtures() {
+        try {
+            // Don't call super.setUpFixtures() here, that will create FocusListener leak.
+            myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
+            final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
+            ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
+            final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
+            setTestFixture(testFixture);
+            testFixture.setUp();
+            LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set up fixtures", e);
+        }
     }
 
     private static AtomicInteger counter = new AtomicInteger(0);
@@ -96,6 +100,24 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
     protected Module createMavenModule(File projectDir) throws Exception {
         List<Module> modules = createMavenModules(Collections.singletonList(projectDir));
         return modules.get(modules.size() - 1);
+    }
+
+    @Override
+    protected void setUp() {
+        try {
+            super.setUp();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void tearDown() {
+        try {
+            super.tearDown();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
