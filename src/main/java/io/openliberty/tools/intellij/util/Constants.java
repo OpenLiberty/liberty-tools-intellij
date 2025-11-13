@@ -15,7 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import java.util.*;
 
 public final class Constants {
-    public static final int REQUIRED_JAVA_VERSION = 17;
+    public static final int REQUIRED_JAVA_VERSION = 21;
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
     public enum ProjectType {
         LIBERTY_GRADLE_PROJECT,

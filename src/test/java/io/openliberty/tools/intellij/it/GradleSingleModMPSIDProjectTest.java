@@ -27,12 +27,12 @@ import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
 public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon {
 
     /**
-     * Single module Microprofile project name.
+     * Single module Microprofile project name specified in file settings.gradle.
      */
     private static final String SM_MP_PROJECT_NAME = GRADLE_MP_PROJECT;
 
     /**
-     * Single module Microprofile project name with space.
+     * Project name of Microprofile single module in file settings-copy.gradle.
      */
     private static final String SM_MP_PROJECT_NAME_NEW = GRADLE_MP_PROJECT_WITH_SPACE;
 
@@ -109,5 +109,6 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
         setProjectTypeIsMultiple(false);
+        setAbsoluteWLPPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), getWLPInstallPath()).toString());
     }
 }

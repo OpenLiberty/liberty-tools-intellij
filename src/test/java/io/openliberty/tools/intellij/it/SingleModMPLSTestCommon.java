@@ -343,7 +343,7 @@ public abstract class SingleModMPLSTestCommon {
 
         // pre-open project tree before attempting to open files needed by testcases
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
 
         UIBotTestUtils.openFile(remoteRobot, projectName, SERVICE_LIVEHEALTH_CHECK, combinePath(projectName, HEALTH_DIR_PATH_FOR_EXPAND));
         UIBotTestUtils.openFile(remoteRobot, projectName, MPCFG_PROPERTIES, combinePath(projectName, META_INF_DIR_PATH));

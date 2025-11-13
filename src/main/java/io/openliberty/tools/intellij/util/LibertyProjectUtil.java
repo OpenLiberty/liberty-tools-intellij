@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -34,6 +35,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -153,7 +156,26 @@ public class LibertyProjectUtil {
      */
     public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
                                                         TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
+        // Set Terminal engine to CLASSIC
         if (widget == null && createWidget) {
+            if (shouldForceClassicTerminal()) {
+                try {
+                    Class<?> optionsProviderClass = Class.forName("org.jetbrains.plugins.terminal.TerminalOptionsProvider");
+                    Object optionsProviderInstance = optionsProviderClass
+                            .getMethod("getInstance")
+                            .invoke(null);
+
+                    Class<?> terminalEngineClass = Class.forName("org.jetbrains.plugins.terminal.TerminalEngine");
+                    Object classicEngine = Enum.valueOf((Class<Enum>) terminalEngineClass, "CLASSIC");
+                    Method setEngineMethod = optionsProviderClass
+                            .getMethod("setTerminalEngine", terminalEngineClass);
+                    setEngineMethod.invoke(optionsProviderInstance, classicEngine);
+                } catch (ClassNotFoundException | NoSuchMethodException |
+                         IllegalAccessException | InvocationTargetException e) {
+                    LOGGER.debug("Falling back to default terminal engine.", e);
+                }
+            }
+
             // create a new terminal tab
             ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
                     terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
@@ -162,6 +184,28 @@ public class LibertyProjectUtil {
             return newTerminal;
         }
         return widget;
+    }
+
+    /**
+     * Determines whether the IntelliJ terminal engine should be forced to "CLASSIC"
+     * Return {@code true} for all IntelliJ versions starting with 2025.1.x,
+     *          except for the explicitly excluded versions: 2025.1, 2025.1.1, 2025.1.1.1
+     * Return {@code false} for all other versions (e.g., 2024.x and 2025.2+)
+     *
+     * @return {@code true} if the IDE version requires forcing the "CLASSIC"
+     *          terminal engine; {@code false} otherwise.
+     */
+    private static boolean shouldForceClassicTerminal() {
+        ApplicationInfo appInfo = ApplicationInfo.getInstance();
+        String fullVersion = appInfo.getFullVersion();
+
+        if (!fullVersion.startsWith("2025.1")) {
+            return false;
+        }
+
+        // Explicitly exclude safe builds
+        Set<String> excluded = Set.of("2025.1", "2025.1.1", "2025.1.1.1");
+        return !excluded.contains(fullVersion);
     }
 
     public static void setFocusToWidget(Project project, ShellTerminalWidget widget) {

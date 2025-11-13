@@ -592,7 +592,7 @@ public abstract class SingleModLibertyLSTestCommon {
 
         // get a JTreeFixture reference to the file project viewer entry
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
-        JTreeFixture projTree = projectFrame.getProjectViewJTree(projectName);
+        JTreeFixture projTree = projectFrame.getProjectViewJTree(remoteRobot, projectName);
         projTree.expand(combinePath(projectName, CONFIG_DIR_PATH));
 
         String[] configDirPath = combinePath(projectName, CONFIG_DIR_PATH);
