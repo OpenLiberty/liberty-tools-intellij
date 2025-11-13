@@ -240,9 +240,15 @@ main() {
     for restartCount in {1..5}; do
         startIDE
         # Run the tests
-        echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
+        if [ -n "$TEST_CLASS" ]; then
+            echo -e "\n$(${currentTime[@]}): INFO: Running specific test class: $TEST_CLASS"
+            test_args=(--tests "$TEST_CLASS")
+        else
+            echo -e "\n$(${currentTime[@]}): INFO: Running all tests..."
+            test_args=()
+        fi
+        ./gradlew test "${test_args[@]}" -PuseLocal="$USE_LOCAL_PLUGIN" | tee "$JUNIT_OUTPUT_TXT"
         testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
         set +o pipefail # reset this option
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
