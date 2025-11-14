@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation.
+ * Copyright (c) 2021, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,10 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
@@ -53,17 +50,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
-            boolean isManagedBean = managedBeanAnnotations.size() > 0;
-
-            if (managedBeanAnnotations.size() > 1) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
-                        DIAGNOSTIC_CODE_SCOPEDECL, (JsonArray) (new Gson().toJsonTree(managedBeanAnnotations)),
-                        DiagnosticSeverity.Error));
-            }
-
+            boolean isManagedBean = !managedBeanAnnotations.isEmpty();
+            boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
+            boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
+            boolean nonStaticPublicFieldPresent = false;
             for (PsiField field : fields) {
                 String[] annotationNames = Stream.of(field.getAnnotations())
                         .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
@@ -77,10 +69,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                  *
                  * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#managed_beans
                  */
-                if (isManagedBean
-                        && field.hasModifierProperty(PsiModifier.PUBLIC)
-                        && !field.hasModifierProperty(PsiModifier.STATIC)
-                        && !managedBeanAnnotations.contains(DEPENDENT_FQ_NAME)) {
+                if (validateNonStaticPublicField(isManagedBean, isDependent, hasMultipleScopes, field)) {
+                    nonStaticPublicFieldPresent = true;
                     diagnostics.add(createDiagnostic(field, unit,
                             Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null,
@@ -233,12 +223,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              */
             if (isManagedBean) {
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
-                boolean isDependent = managedBeanAnnotations.stream()
-                        .anyMatch(annotation -> DEPENDENT_FQ_NAME.equals(annotation));
-
-                if (isClassGeneric && !isDependent) {
+                if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (nonStaticPublicFieldPresent) {
+                    diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
+                            DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (hasMultipleScopes) {
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
+                            DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
+                            DiagnosticSeverity.Error));
                 }
             }
 
@@ -313,7 +308,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
+        Set<String> paramScopesSet;
         for (PsiMethod method : type.getMethods()) {
+            boolean mutuallyExclusive = false;
             PsiAnnotation targetAnnotation = null;
 
             for (PsiAnnotation annotation : method.getAnnotations()) {
@@ -335,15 +332,26 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 for (String annotation : paramScopes) {
                     invalidAnnotations.add("@" + getSimpleName(annotation));
                 }
+                paramScopesSet = new LinkedHashSet<>(paramScopes);
+                if (paramScopesSet.size() == INVALID_INJECT_PARAMS_FQ.length && paramScopesSet.equals(Set.of(INVALID_INJECT_PARAMS_FQ))) {
+                    mutuallyExclusive = true;
+                }
             }
 
             if (!invalidAnnotations.isEmpty()) {
-                String label = PRODUCES_FQ_NAME.equals(target) ?
-                        createInvalidProducesLabel(invalidAnnotations) :
-                        createInvalidInjectLabel(invalidAnnotations);
-                diagnostics.add(createDiagnostic(method, unit, label, diagnosticCode, null, DiagnosticSeverity.Error));
+                if(PRODUCES_FQ_NAME.equals(target)) {
+                    diagnostics.add(createDiagnostic(method, unit, createInvalidProducesLabel(invalidAnnotations),
+                            diagnosticCode, null, DiagnosticSeverity.Error));
+                } else {
+                    if (mutuallyExclusive) {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM, null, DiagnosticSeverity.Error));
+                    } else {
+                        diagnostics.add(createDiagnostic(method, unit, createInvalidInjectLabel(invalidAnnotations),
+                                diagnosticCode, null, DiagnosticSeverity.Error));
+                    }
+                }
             }
-
         }
     }
 
@@ -357,5 +365,22 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
     private String createInvalidDisposesLabel(Set<String> invalidAnnotations) {
         return Messages.getMessage("ManagedBeanInvalidDisposer", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
+    }
+
+    /**
+     * validateNonStaticPublicField
+     * This is to verify whether the @Dependent annotation must be the only scope applied to a managed bean
+     * that contains a non-static public field.
+     *
+     * @param isManagedBean
+     * @param isDependent
+     * @param hasMultipleScopes
+     * @param field
+     * @return
+     */
+    private boolean validateNonStaticPublicField(boolean isManagedBean, boolean isDependent, boolean hasMultipleScopes,
+                                                 PsiField field) {
+        return isManagedBean && field.hasModifierProperty(PsiModifier.PUBLIC) && !field.hasModifierProperty(PsiModifier.STATIC)
+                && (!isDependent || hasMultipleScopes);
     }
 }

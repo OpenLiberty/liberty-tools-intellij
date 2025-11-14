@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2022, 2024 IBM Corporation and others.
+ * Copyright (c) 2022, 2025 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the 
  * terms of the Eclipse Public License v. 2.0 which is available at 
@@ -253,7 +253,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                         if (!JDTUtils.hasLeadingSlash(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
                                     Messages.getMessage("ServerEndpointNoSlash"),
-                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT, null, DiagnosticSeverity.Error));
+                                    WebSocketConstants.DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH, null, DiagnosticSeverity.Error));
                         }
                         if (hasRelativePathURIs(path)) {
                             diagnostics.add(createDiagnostic(annotation, unit,

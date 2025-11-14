@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -162,13 +162,18 @@ public class BeanValidationTest extends BaseJakartaTest {
         Diagnostic d20 = d(63, 27, 36,
                 "Constraint annotations are not allowed on static fields.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.Past");
-
+        Diagnostic d21 = d(66, 20, 26,
+                "This annotation can only be used on fields of type CharSequence, Collection, Array, or Map.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Size");
+        Diagnostic d22 = d(69, 29, 45,
+                "This annotation can only be used on fields of type CharSequence, Collection, Array, or Map.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.NotEmpty");
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8,
-                d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20);
+                d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22);
 
         // Test quickfix codeActions - type (1-17), static, static+type (should only display static)
-        String newText = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
-                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n" +
+        String newText = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
+                "import jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n" +
                 "    private int isHappy;                    // invalid types\n\n    @AssertFalse\n    private Double isSad;\n\n" +
                 "    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n    private String bigDecimal;\n\n" +
                 "    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n    @Email\n    private Integer emailAddress;\n\n" +
@@ -179,15 +184,16 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n    private String[] area;\n\n" +
                 "    @PositiveOrZero\n    private List<String> maybeZero;\n\n    @AssertTrue\n" +
                 "    private static boolean typeValid;       // static\n\n    @Past\n" +
-                "    private static boolean doubleBad;      // static and invalid type\n}";
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        TextEdit te = te(0, 0, 64, 1, newText);
+        TextEdit te = te(0, 0, 70, 1, newText);
         CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
 
-        String newText6 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
+        String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
                 "import jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n    @AssertTrue\n" +
                 "    private int isHappy;                    // invalid types\n\n    @AssertFalse\n    private Double isSad;\n\n" +
                 "    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n    private String bigDecimal;\n\n" +
@@ -198,8 +204,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n    private double theGoodOldDays;\n\n" +
                 "    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n    private String[] area;\n\n    @PositiveOrZero\n" +
                 "    private List<String> maybeZero;\n\n    private static boolean typeValid;       // static\n\n    @Past\n" +
-                "    private static boolean doubleBad;      // static and invalid type\n}";
-        String newText7 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+        String newText2 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
                 "import jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n    @AssertTrue\n" +
                 "    private int isHappy;                    // invalid types\n\n    @AssertFalse\n    private Double isSad;\n\n" +
                 "    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n    private String bigDecimal;\n\n" +
@@ -210,17 +217,18 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n    private double theGoodOldDays;\n\n" +
                 "    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n    private String[] area;\n\n" +
                 "    @PositiveOrZero\n    private List<String> maybeZero;\n\n    @AssertTrue\n    private boolean typeValid;       // static\n\n" +
-                "    @Past\n    private static boolean doubleBad;      // static and invalid type\n}";
+                "    @Past\n    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
 
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d19);
-        TextEdit te1 = te(0, 0, 64, 1, newText6);
-        TextEdit te2 = te(0, 0, 64, 1, newText7);
+        TextEdit te1 = te(0, 0, 70, 1, newText1);
+        TextEdit te2 = te(0, 0, 70, 1, newText2);
         CodeAction ca1 = ca(uri, "Remove constraint annotation AssertTrue from element", d19, te1);
         CodeAction ca2 = ca(uri, "Remove static modifier from element", d19, te2);
 
         assertJavaCodeAction(codeActionParams2, utils, ca1, ca2);
 
-        String newText8 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
+        String newText3 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
                 "import jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n    @AssertTrue\n" +
                 "    private int isHappy;                    // invalid types\n\n    @AssertFalse\n    private Double isSad;\n\n" +
                 "    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n    private String bigDecimal;\n\n" +
@@ -232,8 +240,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    @Past\n    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n" +
                 "    @Positive\n    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
                 "    @AssertTrue\n    private static boolean typeValid;       // static\n\n" +
-                "    private static boolean doubleBad;      // static and invalid type\n}";
-        String newText9 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+        String newText4 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
                 "import jakarta.validation.constraints.*;\n\npublic class FieldConstraintValidation {\n\n" +
                 "    @AssertTrue\n    private int isHappy;                    // invalid types\n\n    @AssertFalse\n" +
                 "    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
@@ -245,17 +254,18 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    @Past\n    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n" +
                 "    @Positive\n    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
                 "    @AssertTrue\n    private static boolean typeValid;       // static\n\n" +
-                "    @Past\n    private boolean doubleBad;      // static and invalid type\n}";
+                "    @Past\n    private boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
 
         JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d20);
-        TextEdit te3 = te(0, 0, 64, 1, newText8);
-        TextEdit te4 = te(0, 0, 64, 1, newText9);
+        TextEdit te3 = te(0, 0, 70, 1, newText3);
+        TextEdit te4 = te(0, 0, 70, 1, newText4);
         CodeAction ca3 = ca(uri, "Remove constraint annotation Past from element", d20, te3);
         CodeAction ca4 = ca(uri, "Remove static modifier from element", d20, te4);
 
         assertJavaCodeAction(codeActionParams3, utils, ca3, ca4);
 
-        String newText10 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+        String newText5 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
                 "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
                 "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
                 "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
@@ -267,13 +277,392 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
                 "    private String[] area;\n\n    private List<String> maybeZero;\n\n" +
                 "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
-                "    private static boolean doubleBad;      // static and invalid type\n}";
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
 
         JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d18);
-        TextEdit te5 = te(0, 0, 64, 1, newText10);
+        TextEdit te5 = te(0, 0, 70, 1, newText5);
         CodeAction ca5 = ca(uri, "Remove constraint annotation PositiveOrZero from element", d1, te5);
 
         assertJavaCodeAction(codeActionParams4, utils, ca5);
+
+        String newText6 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d21);
+        TextEdit te6 = te(0, 0, 70, 1, newText6);
+        CodeAction ca6 = ca(uri, "Remove constraint annotation Size from element", d1, te6);
+
+        assertJavaCodeAction(codeActionParams5, utils, ca6);
+
+        String newText7 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d22);
+        TextEdit te7 = te(0, 0, 70, 1, newText7);
+        CodeAction ca7 = ca(uri, "Remove constraint annotation NotEmpty from element", d22, te7);
+
+        assertJavaCodeAction(codeActionParams6, utils, ca7);
+
+        String newText8 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d2);
+        TextEdit te8 = te(0, 0, 70, 1, newText8);
+        CodeAction ca8 = ca(uri, "Remove constraint annotation AssertFalse from element", d2, te8);
+
+        assertJavaCodeAction(codeActionParams8, utils, ca8);
+
+        String newText9 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams9 = createCodeActionParams(uri, d3);
+        TextEdit te9 = te(0, 0, 70, 1, newText9);
+        CodeAction ca9 = ca(uri, "Remove constraint annotation DecimalMax from element", d3, te9);
+
+        assertJavaCodeAction(codeActionParams9, utils, ca9);
+
+        String newText10 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams10 = createCodeActionParams(uri, d4);
+        TextEdit te10 = te(0, 0, 70, 1, newText10);
+        CodeAction ca10 = ca(uri, "Remove constraint annotation DecimalMin from element", d4, te10);
+
+        assertJavaCodeAction(codeActionParams10, utils, ca10);
+
+        String newText11 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams11 = createCodeActionParams(uri, d5);
+        TextEdit te11 = te(0, 0, 70, 1, newText11);
+        CodeAction ca11 = ca(uri, "Remove constraint annotation Digits from element", d5, te11);
+
+        assertJavaCodeAction(codeActionParams11, utils, ca11);
+
+        String newText12 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams12 = createCodeActionParams(uri, d6);
+        TextEdit te12 = te(0, 0, 70, 1, newText12);
+        CodeAction ca12 = ca(uri, "Remove constraint annotation Email from element", d6, te12);
+
+        assertJavaCodeAction(codeActionParams12, utils, ca12);
+
+        String newText13 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams13 = createCodeActionParams(uri, d7);
+        TextEdit te13 = te(0, 0, 70, 1, newText13);
+        CodeAction ca13 = ca(uri, "Remove constraint annotation FutureOrPresent from element", d7, te13);
+
+        assertJavaCodeAction(codeActionParams13, utils, ca13);
+
+        String newText14 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams14 = createCodeActionParams(uri, d8);
+        TextEdit te14 = te(0, 0, 70, 1, newText14);
+        CodeAction ca14 = ca(uri, "Remove constraint annotation Future from element", d8, te14);
+
+        assertJavaCodeAction(codeActionParams14, utils, ca14);
+
+        String newText15 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams15 = createCodeActionParams(uri, d9);
+        TextEdit te15 = te(0, 0, 70, 1, newText15);
+        CodeAction ca15 = ca(uri, "Remove constraint annotation Min from element", d9, te15);
+
+        assertJavaCodeAction(codeActionParams15, utils, ca15);
+
+        String newText16 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams16 = createCodeActionParams(uri, d10);
+        TextEdit te16 = te(0, 0, 70, 1, newText16);
+        CodeAction ca16 = ca(uri, "Remove constraint annotation Max from element", d10, te16);
+
+        assertJavaCodeAction(codeActionParams16, utils, ca16);
+
+        String newText17 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams17 = createCodeActionParams(uri, d11);
+        TextEdit te17 = te(0, 0, 70, 1, newText17);
+        CodeAction ca17 = ca(uri, "Remove constraint annotation Negative from element", d11, te17);
+
+        assertJavaCodeAction(codeActionParams17, utils, ca17);
+
+        String newText18 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams18 = createCodeActionParams(uri, d12);
+        TextEdit te18 = te(0, 0, 70, 1, newText18);
+        CodeAction ca18 = ca(uri, "Remove constraint annotation NegativeOrZero from element", d12, te18);
+
+        assertJavaCodeAction(codeActionParams18, utils, ca18);
+
+        String newText19 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams19 = createCodeActionParams(uri, d13);
+        TextEdit te19 = te(0, 0, 70, 1, newText19);
+        CodeAction ca19 = ca(uri, "Remove constraint annotation NotBlank from element", d13, te19);
+
+        assertJavaCodeAction(codeActionParams19, utils, ca19);
+
+        String newText20 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams20 = createCodeActionParams(uri, d14);
+        TextEdit te20 = te(0, 0, 70, 1, newText20);
+        CodeAction ca20 = ca(uri, "Remove constraint annotation Pattern from element", d14, te20);
+
+        assertJavaCodeAction(codeActionParams20, utils, ca20);
+
+        String newText21 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams21 = createCodeActionParams(uri, d15);
+        TextEdit te21 = te(0, 0, 70, 1, newText21);
+        CodeAction ca21 = ca(uri, "Remove constraint annotation Past from element", d15, te21);
+
+        assertJavaCodeAction(codeActionParams21, utils, ca21);
+
+        String newText22 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    private char[] aGoodFieldName;\n\n    @Positive\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams22 = createCodeActionParams(uri, d16);
+        TextEdit te22 = te(0, 0, 70, 1, newText22);
+        CodeAction ca22 = ca(uri, "Remove constraint annotation PastOrPresent from element", d16, te22);
+
+        assertJavaCodeAction(codeActionParams22, utils, ca22);
+
+        String newText23 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\n" +
+                "import java.util.List;\n\nimport jakarta.validation.constraints.*;\n\n" +
+                "public class FieldConstraintValidation {\n\n    @AssertTrue\n    private int isHappy;                    // invalid types\n\n" +
+                "    @AssertFalse\n    private Double isSad;\n\n    @DecimalMax(\"30.0\")\n    @DecimalMin(\"10.0\")\n" +
+                "    private String bigDecimal;\n\n    @Digits(fraction = 0, integer = 0)\n    private boolean digits;\n\n" +
+                "    @Email\n    private Integer emailAddress;\n\n    @FutureOrPresent\n    private boolean graduationDate;\n\n" +
+                "    @Future\n    private double fergiesYear;\n\n    @Min(value = 50)\n    @Max(value = 100)\n    private boolean gpa;\n\n" +
+                "    @Negative\n    private boolean subZero;\n\n    @NegativeOrZero\n    private String notPos;\n\n    @NotBlank\n" +
+                "    private boolean saysomething;\n\n    @Pattern(regexp = \"\")\n    private Calendar thisIsUsed;\n\n    @Past\n" +
+                "    private double theGoodOldDays;\n\n    @PastOrPresent\n    private char[] aGoodFieldName;\n\n" +
+                "    private String[] area;\n\n    @PositiveOrZero\n    private List<String> maybeZero;\n\n" +
+                "    @AssertTrue\n    private static boolean typeValid;       // static\n\n    @Past\n" +
+                "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
+                "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
+
+        JakartaJavaCodeActionParams codeActionParams23 = createCodeActionParams(uri, d17);
+        TextEdit te23 = te(0, 0, 70, 1, newText23);
+        CodeAction ca23 = ca(uri, "Remove constraint annotation Positive from element", d17, te23);
+
+        assertJavaCodeAction(codeActionParams23, utils, ca23);
     }
 
     @Test
@@ -289,75 +678,104 @@ public class BeanValidationTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics
-        Diagnostic d1 = d(20, 26, 38,
+        Diagnostic d1 = d(21, 26, 38,
                 "Constraint annotations are not allowed on static methods.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.AssertTrue");
-        Diagnostic d2 = d(25, 18, 28,
+        Diagnostic d2 = d(26, 18, 28,
                 "The @AssertTrue annotation can only be used on boolean and Boolean type methods.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.AssertTrue");
-        Diagnostic d3 = d(30, 23, 33,
+        Diagnostic d3 = d(31, 23, 33,
                 "Constraint annotations are not allowed on static methods.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.AssertFalse");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        Diagnostic d4 = d(36, 19, 28,
+                "This annotation can only be used on methods that have CharSequence, Collection, Array or Map as a return type.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Size");
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4);
 
         // Test quickfix codeAction
-        String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\nimport jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
-
+        String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    " +
+                "public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
+                "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    @Size\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
 
         String newText2 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
-                "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n" +
-                "    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
-                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n" +
-                "    // invalid cases\n    @AssertTrue\n    public boolean anotherTruth() {  // static\n        return true;\n    }\n\n" +
-                "    @AssertTrue\n    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n" +
-                "    @AssertFalse\n    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n}";
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n    " +
+                "public boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
+                "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    @Size\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        TextEdit te = te(0, 0, 34, 1, newText1);
-        TextEdit te2 = te(0, 0, 34, 1, newText2);
+        TextEdit te = te(0, 0, 39, 1, newText1);
+        TextEdit te2 = te(0, 0, 39, 1, newText2);
         CodeAction ca = ca(uri, "Remove constraint annotation AssertTrue from element", d1, te);
         CodeAction ca2 = ca(uri, "Remove static modifier from element", d1, te2);
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);
 
         String newText3 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
-                "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n    // valid cases\n" +
-                "    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
-                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n" +
-                "    @AssertTrue\n    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n" +
-                "    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n" +
-                "    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n    " +
+                "public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
+                "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    @Size\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
 
         codeActionParams = createCodeActionParams(uri, d2);
-        te = te(0, 0, 34, 1, newText3);
+        te = te(0, 0, 39, 1, newText3);
         ca = ca(uri, "Remove constraint annotation AssertTrue from element", d2, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         String newText4 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
-                "import jakarta.validation.constraints.AssertTrue;\n\npublic class MethodConstraintValidation {\n\n" +
-                "    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n        return false;\n    }\n\n" +
-                "    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n" +
-                "    public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n" +
-                "    public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n" +
-                "    private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n   \n}";
-
-        String newText5 = "package io.openliberty.sample.jakarta.beanvalidation;\n\n" +
-                "import jakarta.validation.constraints.AssertFalse;\nimport jakarta.validation.constraints.AssertTrue;\n\n" +
-                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    private boolean falseMethod() {\n" +
-                "        return false;\n    }\n\n    @AssertTrue\n    public boolean trueMethod() {\n        return true;\n    }\n\n" +
-                "    // invalid cases\n    @AssertTrue\n    public static boolean anotherTruth() {  // static\n" +
-                "        return true;\n    }\n\n    @AssertTrue\n    public String notBoolean() {            // invalid type\n" +
-                "        return \"aha!\";\n    }\n\n    @AssertFalse\n    private int notBoolTwo(int x) {  // invalid type, static\n" +
-                "        return x;\n    }\n\n}";
-
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n    " +
+                "public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    " +
+                "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    @Size\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
+        String newText5 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n    " +
+                "public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
+                "private int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    @Size\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
         codeActionParams = createCodeActionParams(uri, d3);
-        te = te(0, 0, 34, 1, newText4);
-        te2 = te(0, 0, 34, 1, newText5);
+        te = te(0, 0, 39, 1, newText4);
+        te2 = te(0, 0, 39, 1, newText5);
         ca = ca(uri, "Remove constraint annotation AssertFalse from element", d3, te);
         ca2 = ca(uri, "Remove static modifier from element", d3, te2);
 
         assertJavaCodeAction(codeActionParams, utils, ca, ca2);
+
+        String newText6 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
+                "import jakarta.validation.constraints.AssertTrue;\nimport jakarta.validation.constraints.Size;\n\n" +
+                "public class MethodConstraintValidation {\n\n    // valid cases\n    @AssertFalse\n    " +
+                "private boolean falseMethod() {\n        return false;\n    }\n\n    @AssertTrue\n    " +
+                "public boolean trueMethod() {\n        return true;\n    }\n\n    // invalid cases\n    @AssertTrue\n    " +
+                "public static boolean anotherTruth() {  // static\n        return true;\n    }\n\n    @AssertTrue\n    " +
+                "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
+                "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    " +
+                "private double getSalary(double x) {\n        return x;\n    }\n}";
+        codeActionParams = createCodeActionParams(uri, d4);
+        te = te(0, 0, 39, 1, newText6);
+        ca = ca(uri, "Remove constraint annotation Size from element", d4, te);
+
+        assertJavaCodeAction(codeActionParams, utils, ca);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -61,12 +61,19 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
         for (PsiClass type : alltypes) {
             PsiField[] allFields = type.getFields();
             for (PsiField field : allFields) {
-                if (field.hasModifierProperty(PsiModifier.FINAL)
-                        && containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
-                    String msg = Messages.getMessage("InjectNoFinalField");
-                    diagnostics.add(createDiagnostic(field, unit, msg,
-                            DIAGNOSTIC_CODE_INJECT_FINAL, field.getType().getInternalCanonicalText(),
-                            DiagnosticSeverity.Error));
+                if (containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
+                    if (field.hasModifierProperty(PsiModifier.FINAL)) {
+                        String msg = Messages.getMessage("InjectNoFinalField");
+                        diagnostics.add(createDiagnostic(field, unit, msg,
+                                DIAGNOSTIC_CODE_INJECT_FINAL, field.getType().getInternalCanonicalText(),
+                                DiagnosticSeverity.Error));
+                    }
+                    if (isNonStaticInnerClass(type, field.getType())) {
+                        String msg = Messages.getMessage("InjectNonStaticInnerClass");
+                        diagnostics.add(createDiagnostic(field, unit, msg,
+                                DIAGNOSTIC_CODE_INJECT_INNER_CLASS, field.getType().getInternalCanonicalText(),
+                                DiagnosticSeverity.Error));
+                    }
                 }
             }
 
@@ -106,6 +113,15 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                                 DIAGNOSTIC_CODE_INJECT_GENERIC, method.getReturnType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
                     }
+
+                    for (PsiParameter param : method.getParameterList().getParameters()) {
+                        if (isNonStaticInnerClass(type, param.getType())) {
+                            String msg = Messages.getMessage("InjectNonStaticInnerClass");
+                            diagnostics.add(createDiagnostic(method, unit, msg,
+                                    DIAGNOSTIC_CODE_INJECT_INNER_CLASS, method.getReturnType().getInternalCanonicalText(),
+                                    DiagnosticSeverity.Error));
+                        }
+                    }
                 }
             }
 
@@ -119,6 +135,29 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
             }
         }
     }
+
+    /**
+     * isNonStaticInnerClass
+     * This will check whether the parent class contains any nested class that has no static field matching the field’s type.
+     *
+     * @param outerClass
+     * @param injectedType
+     * @return
+     */
+    private boolean isNonStaticInnerClass(PsiClass outerClass, PsiType injectedType) {
+        PsiClass injectedClass = injectedType instanceof PsiClassType
+                ? ((PsiClassType) injectedType).resolve()
+                : null;
+
+        PsiClass parentClass = injectedClass != null
+                ? injectedClass.getContainingClass()
+                : null;
+
+        return injectedClass != null
+                && outerClass.equals(parentClass)
+                && !injectedClass.hasModifierProperty(PsiModifier.STATIC);
+    }
+
 
     private boolean containsAnnotation(PsiClass type, PsiAnnotation[] annotations, String annotationFQName) {
         return Stream.of(annotations).anyMatch(annotation -> {

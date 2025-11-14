@@ -36,9 +36,12 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_INJECT_PARAM = "RemoveInjectOrConflictedAnnotations";
     public static final String DIAGNOSTIC_CODE_INVALID_PRODUCES_PARAM = "RemoveProducesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_CODE_INVALID_DISPOSES_PARAM = "RemoveDisposesOrConflictedAnnotations";
+    public static final String DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM = "InvalidInjectAnnotationOnMultipleMethodParams";
 
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
-
+    //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
+    public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
+    public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
     public static final String[] INVALID_INJECT_PARAMS_FQ = { DISPOSES_FQ_NAME, OBSERVES_FQ_NAME,
             OBSERVES_ASYNC_FQ_NAME };
 

@@ -2,6 +2,7 @@ package io.openliberty.sample.jakarta.beanvalidation;
 
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Size;
 
 public class MethodConstraintValidation {
 
@@ -31,5 +32,9 @@ public class MethodConstraintValidation {
     private static int notBoolTwo(int x) {  // invalid type, static
         return x;
     }
-   
+
+    @Size
+    private double getSalary(double x) {
+        return x;
+    }
 }

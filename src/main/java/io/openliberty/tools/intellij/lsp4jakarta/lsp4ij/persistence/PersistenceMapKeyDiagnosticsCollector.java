@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation, Ankush Sharma and others.
+ * Copyright (c) 2020, 2025 IBM Corporation, Ankush Sharma and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,11 +14,14 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +64,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
         boolean hasMapKeyAnnotation = false;
         boolean hasMapKeyClassAnnotation = false;
+        boolean hasTypeDiagnostics = false;
         PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
         for (PsiAnnotation annotation : allAnnotations) {
             String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
@@ -75,7 +79,15 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                 }
             }
         }
-        if (hasMapKeyAnnotation && hasMapKeyClassAnnotation) {
+        if (hasMapKeyAnnotation) {
+            hasTypeDiagnostics = collectTypeDiagnostics(fieldOrProperty, "@MapKey", unit, diagnostics);
+            collectAccessorDiagnostics(fieldOrProperty, type, unit, diagnostics);
+        }
+        if (hasMapKeyClassAnnotation) {
+            hasTypeDiagnostics = collectTypeDiagnostics(fieldOrProperty, "@MapKeyClass", unit, diagnostics);
+            collectAccessorDiagnostics(fieldOrProperty, type, unit, diagnostics);
+        }
+        if (!hasTypeDiagnostics && (hasMapKeyAnnotation && hasMapKeyClassAnnotation)) {
             //A single field or property cannot be annotated with both @MapKey and @MapKeyClass
             //Specification References:
             //https://jakarta.ee/specifications/persistence/3.2/apidocs/jakarta.persistence/jakarta/persistence/mapkey
@@ -90,6 +102,36 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         if (mapKeyJoinCols.size() > 1) {
             validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, fieldOrProperty, unit, diagnostics);
         }
+    }
+
+    private boolean collectTypeDiagnostics(PsiJvmModifiersOwner fieldOrProperty, String attribute, PsiJavaFile unit,
+                                           List<Diagnostic> diagnostics) {
+        final String MAP_INTERFACE_FQDN = "java.util.Map";
+        boolean hasTypeDiagnostics = false;
+        PsiType fieldOrPropertyType = null;
+        boolean isMapOrSubtype = false;
+        String messageKey = null;
+        String code = null;
+
+        if (fieldOrProperty instanceof PsiMethod method) {
+            fieldOrPropertyType = method.getReturnType();
+            messageKey = "MapKeyAnnotationsReturnTypeOfMethod";
+            code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_RETURN_TYPE;
+        } else if (fieldOrProperty instanceof PsiField field) {
+            fieldOrPropertyType = field.getType();
+            messageKey = "MapKeyAnnotationsTypeOfField";
+            code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_TYPE;
+        }
+        if (fieldOrPropertyType instanceof PsiClassType classType) {
+            PsiClass psiClass = classType.resolve();
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, MAP_INTERFACE_FQDN);
+        }
+        if (!isMapOrSubtype) {
+            hasTypeDiagnostics = true;
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit, Messages.getMessage(messageKey, attribute),
+                    code, null, DiagnosticSeverity.Error));
+        }
+        return hasTypeDiagnostics;
     }
 
     private void validateMapKeyJoinColumnAnnotations(List<PsiAnnotation> annotations, PsiElement element,
@@ -109,5 +151,43 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES, null, DiagnosticSeverity.Error));
             }
         });
+    }
+
+    private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, PsiJavaFile unit,
+                                            List<Diagnostic> diagnostics) {
+        String messageKey = null;
+        String code = null;
+        if (fieldOrProperty instanceof PsiMethod method) {
+            String methodName = method.getName();
+            boolean isPublic = method.getModifierList().hasModifierProperty(PsiModifier.PUBLIC);
+            boolean isStartsWithGet = methodName.startsWith("get");
+            boolean isPropertyExist = false;
+
+            if (isStartsWithGet) {
+                isPropertyExist = hasField(method, type);
+            }
+            if (!isPublic) {
+                messageKey = "MapKeyAnnotationsInvalidMethodAccessSpecifier";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ACCESS_SPECIFIER;
+            } else if (!isStartsWithGet) {
+                messageKey = "MapKeyAnnotationsOnInvalidMethod";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_INVALID_METHOD_NAME;
+            } else if (!isPropertyExist) {
+                messageKey = "MapKeyAnnotationsFieldNotFound";
+                code = PersistenceConstants.DIAGNOSTIC_CODE_FIELD_NOT_EXIST;
+            }
+            if (messageKey != null) {
+                diagnostics.add(createDiagnostic(fieldOrProperty, unit, Messages.getMessage(messageKey),
+                        code, null, DiagnosticSeverity.Warning));
+            }
+        }
+    }
+
+    private boolean hasField(PsiMethod method, PsiClass type) {
+        String methodName = method.getName();
+        // Exclude 'get' from method name and decapitalize the first letter
+        String expectedFieldName = (methodName.startsWith("get") && methodName.length() > 3) ? Introspector.decapitalize(methodName.substring(3)) : null;
+        PsiField expectedField = StringUtils.isNotBlank(expectedFieldName) ? type.findFieldByName(expectedFieldName, false) : null;
+        return expectedField != null;
     }
 }
