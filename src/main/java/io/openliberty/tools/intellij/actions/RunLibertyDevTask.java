@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -81,7 +82,7 @@ public class RunLibertyDevTask extends AnAction {
                                 } else {
                                     // calls selected action
                                     AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
-                                    action.actionPerformed(new AnActionEvent(DataManager.getInstance().getDataContext(libertyTree), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
+                                    ActionUtil.performActionDumbAwareWithCallbacks(action, new AnActionEvent(DataManager.getInstance().getDataContext(libertyTree), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
                                 }
                             }
                         }
@@ -117,7 +118,7 @@ public class RunLibertyDevTask extends AnAction {
                 String selectedAction = libertyActions[ret];
                 // run selected action
                 AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(selectedAction));
-                action.actionPerformed(new AnActionEvent(e.getDataContext(), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
+                ActionUtil.performActionDumbAwareWithCallbacks(action, new AnActionEvent(e.getDataContext(), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
             }
         } else {
             handleLibertyTreeEvent(e, project, false);
