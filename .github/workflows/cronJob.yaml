@@ -87,51 +87,122 @@ jobs:
             echo "is_empty=false" >> $GITHUB_OUTPUT
           fi
 
-  # Run the LTI Tests against each open lsp4ij PRs
-  call-build-workflow-for-each-merge-commit-sha:
+  # Run the LTI Tests against each open lsp4ij PRs in Linux
+  linux-builds-pr:
     needs: fetch_all_pull_request_shas
     if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
-    uses: ./.github/workflows/build.yaml
+    uses: ./.github/workflows/build-linux.yaml
     strategy:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9', '24.0.12-lsp4ijFix' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
     with:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: ${{ matrix.tag }}
-    name: Run PR
+    name: Linux Builds - PR-${{ matrix.pr_details.number }} - ${{ matrix.tag }}
 
-  # Run the LTI Tests against lsp4ij main branch
-  call-build-workflow-for-lsp4ij-main-branch:
-    uses: ./.github/workflows/build.yaml
+  # Run the LTI Tests against each open lsp4ij PRs in Mac
+  mac-builds-pr:
+    needs: fetch_all_pull_request_shas
+    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
+    uses: ./.github/workflows/build-mac.yaml
     strategy:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9', '24.0.12-lsp4ijFix' ]
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
+    with:
+      useLocalPlugin: true
+      refLsp4ij: ${{ matrix.pr_details.sha }}
+      lsp4ijBranch: PR-${{ matrix.pr_details.number }}
+      refLTITag: ${{ matrix.tag }}
+    name: Mac Builds - PR-${{ matrix.pr_details.number }} - ${{ matrix.tag }}
+
+  # Run the LTI Tests against each open lsp4ij PRs in Windows
+  windows-builds-pr:
+    needs: fetch_all_pull_request_shas
+    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
+    uses: ./.github/workflows/build-windows.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
+    with:
+      useLocalPlugin: true
+      refLsp4ij: ${{ matrix.pr_details.sha }}
+      lsp4ijBranch: PR-${{ matrix.pr_details.number }}
+      refLTITag: ${{ matrix.tag }}
+    name: Windows Builds - PR-${{ matrix.pr_details.number }} - ${{ matrix.tag }}
+
+  # Run the LTI Tests against lsp4ij main branch in Linux
+  linux-builds-main:
+    uses: ./.github/workflows/build-linux.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
     with:
       useLocalPlugin: true
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Run Lsp4ij Main
+    name: Linux Builds - Main - ${{ matrix.tag }}
+
+  # Run the LTI Tests against lsp4ij main branch in Mac
+  mac-builds-main:
+    uses: ./.github/workflows/build-mac.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
+    with:
+      useLocalPlugin: true
+      refLsp4ij: main
+      lsp4ijBranch: main
+      refLTITag: ${{ matrix.tag }}
+    name: Mac Builds - Main - ${{ matrix.tag }}
+
+  # Run the LTI Tests against lsp4ij main branch in Windows
+  windows-builds-main:
+    uses: ./.github/workflows/build-windows.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'main', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
+    with:
+      useLocalPlugin: true
+      refLsp4ij: main
+      lsp4ijBranch: main
+      refLTITag: ${{ matrix.tag }}
+    name: Windows Builds - Main - ${{ matrix.tag }}
 
   # Send slack notification for build results
-  call-build-workflow-slack-notification:
+  slack-notification:
     runs-on: ubuntu-latest
-    needs: [ call-build-workflow-for-lsp4ij-main-branch, call-build-workflow-for-each-merge-commit-sha ]
+    needs: [ linux-builds-main, mac-builds-main, windows-builds-main, linux-builds-pr, mac-builds-pr, windows-builds-pr ]
     if: always()
     steps:
       - name: Send Slack Notification
         run: |
           STATUS="Failure"
-          JOB_STATUS_MAIN="${{ needs.call-build-workflow-for-lsp4ij-main-branch.result }}"
-          JOB_STATUS_PR="${{ needs.call-build-workflow-for-each-merge-commit-sha.result }}"
-          if [[ "$JOB_STATUS_MAIN" == "success" ]] && [[ "$JOB_STATUS_PR" == "success" ]]; then
+          LINUX_MAIN="${{ needs.linux-builds-main.result }}"
+          MAC_MAIN="${{ needs.mac-builds-main.result }}"
+          WINDOWS_MAIN="${{ needs.windows-builds-main.result }}"
+          LINUX_PR="${{ needs.linux-builds-pr.result }}"
+          MAC_PR="${{ needs.mac-builds-pr.result }}"
+          WINDOWS_PR="${{ needs.windows-builds-pr.result }}"
+          
+          if [[ "$LINUX_MAIN" == "success" ]] && [[ "$MAC_MAIN" == "success" ]] && [[ "$WINDOWS_MAIN" == "success" ]] && [[ "$LINUX_PR" == "success" ]] && [[ "$MAC_PR" == "success" ]] && [[ "$WINDOWS_PR" == "success" ]]; then
             STATUS="Success"
           fi
           echo "Final status: $STATUS"
