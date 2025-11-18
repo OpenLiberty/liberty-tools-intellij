@@ -102,7 +102,7 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: main
-    name: Linux Builds - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+    name: Linux - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against each open lsp4ij PRs in Mac
   mac-builds-pr:
@@ -119,7 +119,7 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: main
-    name: Mac Builds - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+    name: Mac - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against each open lsp4ij PRs in Windows
   windows-builds-pr:
@@ -136,7 +136,7 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: main
-    name: Windows Builds - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+    name: Windows - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against lsp4ij main branch in Linux
   linux-builds-main:
@@ -151,7 +151,7 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Linux Builds - lsp4ij-main - LTI-${{ matrix.tag }}
+    name: Linux - lsp4ij-main - LTI-${{ matrix.tag }}
 
   # Run the LTI Tests against lsp4ij main branch in Mac
   mac-builds-main:
@@ -166,7 +166,7 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Mac Builds - lsp4ij-main - LTI-${{ matrix.tag }}
+    name: Mac - lsp4ij-main - LTI-${{ matrix.tag }}
 
   # Run the LTI Tests against lsp4ij main branch in Windows
   windows-builds-main:
@@ -181,7 +181,7 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Windows Builds - lsp4ij-main - LTI-${{ matrix.tag }}
+    name: Windows - lsp4ij-main - LTI-${{ matrix.tag }}
 
   # Send slack notification for build results
   slack-notification:
