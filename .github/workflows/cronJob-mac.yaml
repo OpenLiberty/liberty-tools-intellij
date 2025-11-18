@@ -1,7 +1,6 @@
 name: Cron Job - Mac
 
 on:
-  push:
   workflow_dispatch:
 #  Temporarily turn off the LSP4IJ integration till https://github.com/OpenLiberty/liberty-tools-intellij/issues/1457 is resolved.
 #  schedule:
