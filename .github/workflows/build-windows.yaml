@@ -30,49 +30,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-group:
-          - Maven-MicroProfile
-          - Gradle-MicroProfile
-          - Maven-Custom-Liberty-Install
-          - Gradle-Custom-Liberty-Install
-          - Maven-MP-Config
-          - Gradle-MP-Config
-          - Maven-MP-SID
-          - Gradle-MP-SID
-          - Maven-NLT-REST
-          - Gradle-NLT-REST
-          - Gradle-Language-Server
-          - Gradle-MP-Language-Server
-          - Gradle-Jakarta-Language-Server
-          - Maven-Multi-Module-MP
+        test-group: [ Maven-MicroProfile-Tests, Gradle-MicroProfile-Tests, Maven-Custom-Liberty-Installation, Gradle-Custom-Liberty-Installation, Maven-MicroProfile-RunDebugCreation, Gradle-MicroProfile-RunDebugCreation, Maven-MicroProfile-SpaceInDirectory, Gradle-MicroProfile-SpaceInDirectory, Maven-NonLibertyTools-REST, Gradle-NonLibertyTools-REST, Liberty-Config-Language-Server, MicroProfile-Language-Server, Jakarta-Language-Server, Maven-Multi-Module-MicroProfile ]
         include:
-          - test-group: Maven-MicroProfile
+          - test-group: Maven-MicroProfile-Tests
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
-          - test-group: Gradle-MicroProfile
+          - test-group: Gradle-MicroProfile-Tests
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest
-          - test-group: Maven-Custom-Liberty-Install
+          - test-group: Maven-Custom-Liberty-Installation
             test-class: io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest
-          - test-group: Gradle-Custom-Liberty-Install
+          - test-group: Gradle-Custom-Liberty-Installation
             test-class: io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest
-          - test-group: Maven-MP-Config
+          - test-group: Maven-MicroProfile-RunDebugCreation
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
-          - test-group: Gradle-MP-Config
+          - test-group: Gradle-MicroProfile-RunDebugCreation
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
-          - test-group: Maven-MP-SID
+          - test-group: Maven-MicroProfile-SpaceInDirectory
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
-          - test-group: Gradle-MP-SID
+          - test-group: Gradle-MicroProfile-SpaceInDirectory
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
-          - test-group: Maven-NLT-REST
+          - test-group: Maven-NonLibertyTools-REST
             test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
-          - test-group: Gradle-NLT-REST
+          - test-group: Gradle-NonLibertyTools-REST
             test-class: io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest
-          - test-group: Gradle-Language-Server
+          - test-group: Liberty-Config-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
-          - test-group: Gradle-MP-Language-Server
+          - test-group: MicroProfile-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
-          - test-group: Gradle-Jakarta-Language-Server
+          - test-group: Jakarta-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
-          - test-group: Maven-Multi-Module-MP
+          - test-group: Maven-Multi-Module-MicroProfile
             test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
