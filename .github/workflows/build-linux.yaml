@@ -103,7 +103,7 @@ jobs:
         if: ${{ matrix.test-group == 'LSP4Jakarta-Unit-Tests' && !failure() }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: liberty-tools-intellij-LTI-${{ github.ref_name }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             ./**/*liberty-tools-intellij*.zip
             ./**/libs/*liberty-tools-intellij*.jar
@@ -117,6 +117,6 @@ jobs:
         if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: linux-${{ matrix.test-group }}-test-report-LTI-${{ github.ref_name }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          name: linux-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
           path: |
             liberty-tools-intellij/build/reports/
