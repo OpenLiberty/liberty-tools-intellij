@@ -47,7 +47,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main, lsp4jakarta-0.2.5-integration ]
+    branches: [ main ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
