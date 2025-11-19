@@ -102,7 +102,7 @@ jobs:
       useLocalPlugin: true
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
-      refLTITag: main
+      refLTITag: clean-up-cron-job
     name: Mac - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against lsp4ij main branch in Mac
