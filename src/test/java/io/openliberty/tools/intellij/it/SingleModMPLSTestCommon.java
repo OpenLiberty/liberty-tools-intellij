@@ -65,7 +65,7 @@ public abstract class SingleModMPLSTestCommon {
         projectFrame.findText("resources").doubleClick();
 
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "ServiceLiveHealthCheck.java", "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "microprofile-config.properties, properties file", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "microprofile-config.properties", "5");
         if (!remoteRobot.isMac()) {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
         }

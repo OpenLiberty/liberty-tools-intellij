@@ -64,9 +64,9 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml, XML file", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml", "5");
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.env", "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "bootstrap.properties, properties file", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "bootstrap.properties", "5");
         if (!remoteRobot.isMac()) {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
         }
