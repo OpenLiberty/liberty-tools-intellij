@@ -744,7 +744,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         try {
-            String xPath = "//div[@accessiblename='" + fileName + "' and @class='EditorTabLabel']";
+            String xPath = "//div[starts-with(@accessiblename, '" + fileName + "') and @class='EditorTabLabel']";
             ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
             actionButton.click();
 
@@ -780,7 +780,7 @@ public class UIBotTestUtils {
                 // Find the target text on the editor and move the move to it.
                 editorNew.findText(contains(hoverTarget)).moveMouse();
                 // clear and "lightbulb" icons?
-                if (!hoverFile.equals("server.xml")) {
+                if (!hoverFile.startsWith("server.xml")) {
                     keyboard.hotKey(VK_ESCAPE);
                 }
 

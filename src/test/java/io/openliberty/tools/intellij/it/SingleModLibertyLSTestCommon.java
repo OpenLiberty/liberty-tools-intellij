@@ -86,7 +86,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This feature provides support for the MicroProfile Health specification.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml, XML file", UIBotTestUtils.PopupType.DOCUMENTATION);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml", UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
@@ -104,7 +104,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "Configuration properties for an HTTP endpoint.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml, XML file", UIBotTestUtils.PopupType.DOCUMENTATION);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "server.xml", UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
@@ -122,7 +122,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedFeature = "<feature>el-3.0</feature>";
 
         // get focus on server.xml tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml, XML file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -149,7 +149,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String insertedConfig = "<logging></logging>";
 
         // get focus on server.xml tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml, XML file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -265,7 +265,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties, properties file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -293,7 +293,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties, properties file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -321,7 +321,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties, properties file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -386,7 +386,7 @@ public abstract class SingleModLibertyLSTestCommon {
         String hoverExpectedOutcome = "This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.";
 
         //mover cursor to hover point
-        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "bootstrap.properties, properties file", UIBotTestUtils.PopupType.DOCUMENTATION);
+        UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, testHoverTarget, "bootstrap.properties", UIBotTestUtils.PopupType.DOCUMENTATION);
         String hoverFoundOutcome = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DOCUMENTATION);
 
         // Validate that the hover action raised the expected hint text
@@ -408,7 +408,7 @@ public abstract class SingleModLibertyLSTestCommon {
         pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
         // get focus on server.xml tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml, XML file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -417,7 +417,7 @@ public abstract class SingleModLibertyLSTestCommon {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "server.xml, XML file", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "server.xml", UIBotTestUtils.PopupType.DIAGNOSTIC);
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
 
@@ -444,7 +444,7 @@ public abstract class SingleModLibertyLSTestCommon {
         pathToServerXML = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.xml");
 
         // get focus on server.xml tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml, XML file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.xml");
 
         // Save the current server.xml content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
@@ -506,16 +506,16 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedHoverData = "The value `none` is not valid for the property `com.ibm.ws.logging.console.format`.";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties, properties file");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties, properties file", configNameSnippet, configNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippet, configNameChooserSnippet, incorrectValue, false);
 
             //move cursor to hover point
-            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "none", "bootstrap.properties, properties file", UIBotTestUtils.PopupType.DIAGNOSTIC);
+            UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, "none", "bootstrap.properties", UIBotTestUtils.PopupType.DIAGNOSTIC);
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
             TestUtils.validateHoverData(expectedHoverData, foundHoverData);
         } finally {
