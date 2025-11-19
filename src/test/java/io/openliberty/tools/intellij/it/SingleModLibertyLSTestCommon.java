@@ -353,7 +353,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testCompletionValuesInBootstrapProperties() {
-        runCompletionTest("bootstrap.properties, properties file", "com.ibm.ws.logging.console.log.level=", new String[]{"AUDIT", "ERROR", "INFO", "OFF", "WARNING"}, 5);
+        runCompletionTest("bootstrap.properties", "com.ibm.ws.logging.console.log.level=", new String[]{"AUDIT", "ERROR", "INFO", "OFF", "WARNING"}, 5);
     }
 
     /**
