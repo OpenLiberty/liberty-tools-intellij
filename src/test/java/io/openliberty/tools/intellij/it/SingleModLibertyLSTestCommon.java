@@ -64,9 +64,9 @@ public abstract class SingleModLibertyLSTestCommon {
      */
     @AfterAll
     public static void cleanup() {
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.xml, XML file", "5");
         UIBotTestUtils.closeFileEditorTab(remoteRobot, "server.env", "5");
-        UIBotTestUtils.closeFileEditorTab(remoteRobot, "bootstrap.properties", "5");
+        UIBotTestUtils.closeFileEditorTab(remoteRobot, "bootstrap.properties, properties file", "5");
         if (!remoteRobot.isMac()) {
             UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
         }
@@ -453,7 +453,7 @@ public abstract class SingleModLibertyLSTestCommon {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
 
             //there should be a diagnostic - move cursor to hover point
-            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "server.xml, XML file", quickfixChooserString);
+            UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "server.xml", quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
             TestUtils.validateStanzaInConfigFile(pathToServerXML.toString(), correctedStanza);
