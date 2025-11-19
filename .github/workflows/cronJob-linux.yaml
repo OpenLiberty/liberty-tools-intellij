@@ -103,7 +103,7 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: main
-    name: Linux Builds - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+    name: Linux - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against lsp4ij main branch in Linux
   linux-builds-main:
@@ -118,7 +118,7 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Linux Builds - lsp4ij-main - LTI-${{ matrix.tag }}
+    name: Linux - lsp4ij-main - LTI-${{ matrix.tag }}
 
   # Send slack notification for build results
   slack-notification:

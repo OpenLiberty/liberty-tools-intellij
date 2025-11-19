@@ -103,7 +103,7 @@ jobs:
       refLsp4ij: ${{ matrix.pr_details.sha }}
       lsp4ijBranch: PR-${{ matrix.pr_details.number }}
       refLTITag: main
-    name: Windows Builds - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+    name: Windows - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
 
   # Run the LTI Tests against lsp4ij main branch in Windows
   windows-builds-main:
@@ -118,7 +118,7 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
-    name: Windows Builds - lsp4ij-main - LTI-${{ matrix.tag }}
+    name: Windows - lsp4ij-main - LTI-${{ matrix.tag }}
 
   # Send slack notification for build results
   slack-notification:
