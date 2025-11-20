@@ -3,90 +3,15 @@ name: Cron Job - Mac
 on:
   push:
   workflow_dispatch:
-#  Temporarily turn off the LSP4IJ integration till https://github.com/OpenLiberty/liberty-tools-intellij/issues/1457 is resolved.
-#  schedule:
-#    # The job runs at 9:30 AM UTC every Monday through Friday, which is 3:00 PM IST and 4:30 AM EST.
-#    # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
-#    - cron: '30 9 * * 1-5'
+  schedule:
+    # The job runs at 9:30 AM UTC every Monday through Friday, which is 3:00 PM IST and 4:30 AM EST.
+    # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+    - cron: '30 9 * * 1-5'
 
 jobs:
+  # Fetch PR details
   fetch_all_pull_request_shas:
-    runs-on: ubuntu-latest
-    outputs:
-      pr_details: ${{ steps.extract.outputs.pr_details }}
-      is_empty: ${{ steps.extract.outputs.is_empty }}
-    env:
-      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
-    name: PR Details
-    steps:
-      - name: Extract PR numbers and merge_commit_shas
-        shell: bash
-        id: extract
-        run: |
-          # Fetch PR details from the GitHub API
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
-          
-          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
-          pr_numbers=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha} | @base64')          
-          
-          # Array to store PRs that are not drafts and have no merge conflicts
-          declare -a valid_prs=()
-          
-          for pr in $pr_numbers; do
-            # Decode the base64 encoded JSON string
-            pr=$(echo "$pr" | base64 --decode)
-          
-            # Extract PR number
-            number=$(echo "$pr" | jq -r '.number')
-          
-            url="${{ env.API_URL }}/$number"
-          
-            mergeable=null
-            attempts=0
-            max_attempts=5
-          
-            # Retry loop for checking mergeability
-            while [[ "$mergeable" == "null" && $attempts -lt $max_attempts ]]; do
-              pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-              mergeable=$(jq -r '.mergeable' <<< "$pr_detail")
-              echo "PR Number $number Mergeable value now : $mergeable"
-          
-              if [[ "$mergeable" == "null" ]]; then
-              echo "Mergeable status is null, retrying in 5 seconds..."
-              sleep 5
-              fi
-          
-              attempts=$((attempts + 1))
-            done
-          
-            if [[ "$mergeable" == "null" ]]; then
-              echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") still has Mergeable value of 'null' after $max_attempts attempts."
-            fi
-            if [[ "$mergeable" != "false" ]]; then
-            pr_number=$(jq -r '.number' <<< "$pr_detail")
-            pr_sha=$(jq -r '.merge_commit_sha' <<< "$pr_detail")
-            pr_link=$(jq -r '.html_url' <<< "$pr_detail")
-            valid_prs+=("{\"number\": \"$pr_number\", \"sha\": \"$pr_sha\", \"link\": \"$pr_link\"}")
-            else
-              echo "::warning file=::PR #$(jq -r '.number' <<< "$pr_detail") has conflicts. See : $(jq -r '.html_url' <<< "$pr_detail")"
-            fi
-          done
-          
-          # Create a JSON string from the array
-          pr_details_array=$(IFS=,; echo "[${valid_prs[*]}]")
-          # Print Pr number and SHA values
-          echo "PRs having no merge conflicts"
-          echo "$pr_details_array" | jq '.[]'
-          # Set the output for further steps
-          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
-          
-          # Check if pr_details_array is empty
-          if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
-            echo "::warning file=::There are no open PRs, or all the existing PRs are either drafts or have merge conflicts. Skipping further actions."
-            echo "is_empty=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_empty=false" >> $GITHUB_OUTPUT
-          fi
+    uses: ./.github/workflows/cronJob-fetch-prs.yaml
 
   # Run the LTI Tests against each open lsp4ij PRs in Mac
   mac-builds-pr:
