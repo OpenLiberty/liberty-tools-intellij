@@ -13,7 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
-
+/**
+ * Tests MicroProfile Language Server features for Gradle single module projects.
+ *
+ * GHA tag - MicroProfile-Language-Server
+ */
 public class GradleSingleModMPLSTest extends SingleModMPLSTestCommon {
 
     /**

@@ -24,6 +24,8 @@ import java.nio.file.Paths;
  * issue https://github.com/OpenLiberty/liberty-tools-intellij/issues/415
  * (debug mode startup via toolbar/menu). Other overridden tests are ignored here
  * as they are not applicable to this custom installation configuration.
+ *
+ * GHA tag - Gradle-Custom-Liberty-Installation
  */
 public class GradleSingleModCustomWLPInstallProjectTest extends SingleModMPProjectTestCommon {
     /**
