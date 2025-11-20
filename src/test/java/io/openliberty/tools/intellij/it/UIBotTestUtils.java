@@ -829,18 +829,25 @@ public class UIBotTestUtils {
      */
     public static void hoverForQuickFixInAppFile(RemoteRobot remoteRobot, String hoverTarget, String hoverFile, String quickfixChooserString) {
 
+        System.out.println("[hoverForQuickFix] START hoverForQuickFixInAppFile()");
+        System.out.println("[hoverForQuickFix] hoverTarget=" + hoverTarget);
+        System.out.println("[hoverForQuickFix] hoverFile=" + hoverFile);
+        System.out.println("[hoverForQuickFix] expected quickfix text=" + quickfixChooserString);
+
         Keyboard keyboard = new Keyboard(remoteRobot);
 
         Locator locator = byXpath("//div[@class='EditorCompositePanel']//div[@class='EditorComponentImpl']");
         clickOnFileTab(remoteRobot, hoverFile);
+        System.out.println("[hoverForQuickFix] Clicking on file tab: " + hoverFile);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
+        System.out.println("[hoverForQuickFix] Editor located.");
         Point originPt = new Point(1, 1);
 
         Exception error = null;
         for (int i = 0; i < 15; i++) {
             error = null;
             try {
-                // move the cursor to the origin of the editor
+                System.out.println("[hoverForQuickFix] Moving cursor to (1,1)");
                 goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
                 editorNew.click(originPt);
@@ -854,32 +861,40 @@ public class UIBotTestUtils {
                 // provoke the hint popup with a cursor jitter
                 jitterCursor(editorNew, p.x, p.y);
 
-                // first get the contents of the popup - put in a String
+                System.out.println("[hoverForQuickFix] Trying to get diagnostic popup...");
                 ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
                 projectFrame.getDiagnosticPane();
+                System.out.println("[hoverForQuickFix] diagnostic pane accessible");
                 ContainerFixture quickFixPopupLink = projectFrame.getQuickFixMoreActionsLink();
+                System.out.println("[hoverForQuickFix] Found 'More actions' link, clicking it...");
                 quickFixPopupLink.click();
 
                 ContainerFixture quickFixPopup = projectFrame.getQuickFixPane();
+                System.out.println("[hoverForQuickFix] Quickfix popup pane found.");
 
+                System.out.println("[hoverForQuickFix] Waiting for popup to contain: " + quickfixChooserString);
                 RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                         Duration.ofSeconds(2),
                         "Waiting for the The quickfix popup to contain " + quickfixChooserString,
                         "The quickfix popup did not contain " + quickfixChooserString,
                         () -> quickFixPopup.hasText(quickfixChooserString));
 
+                System.out.println("[hoverForQuickFix] Quickfix FOUND in popup");
                 break;
             } catch (WaitForConditionTimeoutException wftoe) {
+                System.out.println("[hoverForQuickFix][ERROR] Timed out waiting for quickfix popup.");
                 error = wftoe;
                 TestUtils.sleepAndIgnoreException(5);
                 // click on upper left corner of editor pane - allow hover to work on next attempt
                 editorNew.click(originPt);
+                System.out.println("[hoverForQuickFix] Retrying...");
             }
         }
 
         // Report the last error if there is one.
         if (error != null) {
+            System.out.println("[hoverForQuickFix][FINAL ERROR] Hover failed.");
             throw new RuntimeException("Hover on text: '" + hoverTarget + "' did not trigger a pop-up window to open", error);
         }
     }
@@ -1384,32 +1399,41 @@ public class UIBotTestUtils {
      * @param quickfixChooserString the text to find in the quick fix menu
      */
     public static void chooseQuickFix(RemoteRobot remoteRobot, String quickfixChooserString) {
-        // first trigger the quickfix popup by using the keyboard
+
+        System.out.println("[chooseQuickFix] START chooseQuickFix()");
+        System.out.println("[chooseQuickFix] Expected quickfix: " + quickfixChooserString);
+
         Keyboard keyboard = new Keyboard(remoteRobot);
 
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
 
         ContainerFixture quickFixPopup = projectFrame.getQuickFixPane();
 
+        System.out.println("[chooseQuickFix] Quickfix popup located.");
         RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(2),
                 "Waiting for the The quickfix popup to contain " + quickfixChooserString,
                 "The quickfix popup did not contain " + quickfixChooserString,
                 () -> quickFixPopup.hasText(quickfixChooserString));
 
-        // get the text from the quickfix popup
+        System.out.println("[chooseQuickFix] Popup contains expected quickfix.");
+
+        System.out.println("[chooseQuickFix] Clicking quickfix...");
         quickFixPopup.findText(contains(quickfixChooserString)).click();
-        // After you click IntelliJ can chug for a while before the edit is rendered
+
+        System.out.println("[chooseQuickFix] Quickfix clicked, sleeping for rendering...");
         TestUtils.sleepAndIgnoreException(5);
 
         // Save the file.
         if (remoteRobot.isMac()) {
+            System.out.println("[chooseQuickFix] Saving file (Cmd+S)");
             keyboard.hotKey(VK_META, VK_S);
         } else {
-            // linux + windows
+            System.out.println("[chooseQuickFix] Saving file (Ctrl+S)");
             keyboard.hotKey(VK_CONTROL, VK_S);
         }
 
+        System.out.println("[chooseQuickFix] Saved file.");
     }
 
     /**

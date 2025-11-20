@@ -152,6 +152,8 @@ public abstract class SingleModJakartaLSTestCommon {
     @Test
     @Video
     public void testJakartaQuickFixInJavaPart() {
+        System.out.println("=== Starting testJakartaQuickFixInJavaPart ===");
+
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
@@ -159,30 +161,43 @@ public abstract class SingleModJakartaLSTestCommon {
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
         String quickfixChooserString = "Make method public";
 
+        System.out.println("File under test: " + pathToSrc);
+
         // get focus on file tab prior to copy
+        System.out.println("Clicking on SystemResource2.java tab...");
         UIBotTestUtils.clickOnFileTab(remoteRobot, "SystemResource2.java");
 
         // Save the current content.
+        System.out.println("Copying window content...");
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         // Modify the method signature
+        System.out.println("Replacing public method with private...");
         UIBotTestUtils.selectAndModifyTextInJavaPart(remoteRobot, "SystemResource2.java", publicString, privateString);
 
         try {
             // validate public signature no longer found in java part
+            System.out.println("Validating that public signature is removed...");
             TestUtils.validateStringNotInFile(pathToSrc.toString(), publicString);
 
             // there should be a diagnostic - move cursor to hover point
+            System.out.println("Hovering for quickfix...");
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, "SystemResource2.java", quickfixChooserString);
 
             // trigger and use the quickfix popup attached to the diagnostic
+            System.out.println("Choosing quickfix: " + quickfixChooserString);
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);
 
+            System.out.println("Validating that public signature is restored in source file...");
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), publicString);
+
+            System.out.println("=== Test Completed Successfully ===");
         }
         finally {
             // Replace modified content with the original content
+            System.out.println("Restoring original content...");
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            System.out.println("=== Restoration Complete ===");
         }
     }
 
