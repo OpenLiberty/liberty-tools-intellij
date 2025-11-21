@@ -192,6 +192,8 @@ public abstract class SingleModJakartaLSTestCommon {
             TestUtils.validateCodeInJavaSrc(pathToSrc.toString(), publicString);
 
             System.out.println("=== Test Completed Successfully ===");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         finally {
             // Replace modified content with the original content
