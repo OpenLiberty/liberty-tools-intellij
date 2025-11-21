@@ -744,7 +744,7 @@ public class UIBotTestUtils {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
         try {
-            String xPath = "//div[@accessiblename='" + fileName + "' and @class='EditorTabLabel']";
+            String xPath = "//div[starts-with(@accessiblename, '" + fileName + "') and @class='EditorTabLabel']";
             ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
             actionButton.click();
 
@@ -780,7 +780,7 @@ public class UIBotTestUtils {
                 // Find the target text on the editor and move the move to it.
                 editorNew.findText(contains(hoverTarget)).moveMouse();
                 // clear and "lightbulb" icons?
-                if (!hoverFile.equals("server.xml")) {
+                if (!hoverFile.startsWith("server.xml")) {
                     keyboard.hotKey(VK_ESCAPE);
                 }
 
@@ -2069,6 +2069,11 @@ public class UIBotTestUtils {
             ActionButtonFixture addCfgButton = addProjectDialog.actionButton(addButtonLocator);
             addCfgButton.click();
 
+            // Click on the Collapse All button.
+            Locator collapseButtonLocator = byXpath("//div[@accessiblename='Collapse All']");
+            ActionButtonFixture collapseButton = addProjectDialog.actionButton(collapseButtonLocator);
+            collapseButton.click();
+
             // Look for the Liberty entry in the Add New configuration window and  create a new configuration.
             ComponentFixture pluginCfgTree = addProjectDialog.getMyTree();
             RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
@@ -2400,7 +2405,7 @@ public class UIBotTestUtils {
     public static void runConfigUsingIconOnToolbar(RemoteRobot remoteRobot, ExecMode execMode) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
 
-        Locator locator = byXpath("//div[@class='ActionButton' and @myaction='Run (Run selected configuration)']");
+        Locator locator = byXpath("//div[@class='ActionButton' and @myaction='Run (Run the selected configuration)']");
         if (execMode == ExecMode.DEBUG) {
             locator = byXpath("//div[@class='ActionButton' and @myicon='debug.svg']");
         }
