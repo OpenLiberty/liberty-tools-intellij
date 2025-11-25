@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij.platform' version '2.7.2'
+    id 'org.jetbrains.intellij.platform' version '2.10.1'
     id 'org.jetbrains.kotlin.jvm' version '2.0.20'
 }
 
@@ -178,7 +178,7 @@ task copyDeps(type: Copy) {
 intellijPlatformTesting.runIde {
     runIdeLocally {
         version = providers.gradleProperty("ideTargetVersion")
-        type = IntelliJPlatformType.IntellijIdeaCommunity
+        type = IntelliJPlatformType.IntellijIdea
         task {
             jvmArgumentProviders.add({
                 [
@@ -203,7 +203,7 @@ test {
 intellijPlatformTesting.runIde {
     runIdeForUiTests {
         version = providers.gradleProperty("ideTargetVersion")
-        type = IntelliJPlatformType.IntellijIdeaCommunity
+        type = IntelliJPlatformType.IntellijIdea
         task {
             jvmArgumentProviders.add({
                 [
@@ -216,6 +216,8 @@ intellijPlatformTesting.runIde {
                         "-Dide.mac.file.chooser.native=false",
                         "-DjbScreenMenuBar.enabled=false",
                         "-Dapple.laf.useScreenMenuBar=false",
+                        // This disables the EAP login prompt:
+                        "-Deap.require.license=release"
                 ]
             } as CommandLineArgumentProvider)
             systemProperty("ide.native.launcher", "true")
