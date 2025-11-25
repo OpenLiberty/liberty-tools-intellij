@@ -844,9 +844,9 @@ public class UIBotTestUtils {
         Point originPt = new Point(1, 1);
 
         Exception error = null;
-        /* for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 15; i++) {
             error = null;
-            try { */
+            try {
                 System.out.println("[hoverForQuickFix] Moving cursor to (1,1)");
                 goToLineAndColumn(remoteRobot, keyboard, 1, 1);
 
@@ -881,7 +881,7 @@ public class UIBotTestUtils {
                         () -> quickFixPopup.hasText(quickfixChooserString));
 
                 System.out.println("[hoverForQuickFix] Quickfix FOUND in popup");
-                /* break;
+                break;
             } catch (WaitForConditionTimeoutException wftoe) {
                 System.out.println("[hoverForQuickFix][ERROR] Timed out waiting for quickfix popup.");
                 error = wftoe;
@@ -890,7 +890,7 @@ public class UIBotTestUtils {
                 editorNew.click(originPt);
                 System.out.println("[hoverForQuickFix] Retrying...");
             }
-        } */
+        }
 
         // Report the last error if there is one.
         if (error != null) {
