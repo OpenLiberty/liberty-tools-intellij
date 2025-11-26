@@ -12,6 +12,8 @@ package io.openliberty.tools.intellij.it;
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -22,6 +24,7 @@ import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 /**
  * Holds common tests that use a single module MicroProfile project.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModMPProjectCfgTestCommon {
 
     // In this test case the environment has been set up so that there is a new project
@@ -135,6 +138,22 @@ public abstract class SingleModMPProjectCfgTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+    }
+
+    /**
+     * Test to handle macOS permission popup if it appears
+     */
+    @Order(1)
+    @Test
+    @Video
+    @EnabledOnOs({OS.MAC})
+    public void AllowPopupTest() {
+        boolean isGradle = getSmMPProjectName().equals("singleMod GradleMP");
+        String buildFileName = isGradle ? "build.gradle" : "pom.xml";
+        // Open the build file to bring focus
+        UIBotTestUtils.openFile(remoteRobot, smMpProjectName, buildFileName, smMpProjectName);
+        // Handle macOS permission popup if it appears
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, buildFileName);
     }
 
     /**

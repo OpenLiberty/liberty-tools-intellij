@@ -12,6 +12,8 @@ package io.openliberty.tools.intellij.it;
 import com.automation.remarks.junit5.Video;
 import com.intellij.remoterobot.RemoteRobot;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Holds common tests that use a single module non Liberty Tools compliant REST project.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModNLTRestProjectTestCommon {
 
     /**
@@ -143,6 +146,20 @@ public abstract class SingleModNLTRestProjectTestCommon {
     }
     public void setBuildFileName(String name) {
         buildFileName = name;
+    }
+
+    /**
+     * Test to handle macOS permission popup if it appears
+     */
+    @Order(1)
+    @Test
+    @Video
+    @EnabledOnOs({OS.MAC})
+    public void AllowPopupTest() {
+        // Open the build file to bring focus
+        UIBotTestUtils.openFile(remoteRobot, smNLTRestProjectName, getBuildFileName(), smNLTRestProjectName);
+        // Handle macOS permission popup if it appears
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, getBuildFileName());
     }
 
     /**

@@ -37,6 +37,7 @@ import static io.openliberty.tools.intellij.util.Constants.LIBERTY_MAVEN_START_C
 /**
  * Holds common tests that use a single module MicroProfile project.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModMPProjectTestCommon {
 
     /**
@@ -346,6 +347,20 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+    }
+
+    /**
+     * Test to handle macOS permission popup if it appears
+     */
+    @Order(1)
+    @Test
+    @Video
+    @EnabledOnOs({OS.MAC})
+    public void AllowPopupTest() {
+        // Open the build file to bring focus
+        UIBotTestUtils.openFile(remoteRobot, smMpProjectName, getBuildFileName(), smMpProjectName);
+        // Handle macOS permission popup if it appears
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, getBuildFileName());
     }
 
     /**

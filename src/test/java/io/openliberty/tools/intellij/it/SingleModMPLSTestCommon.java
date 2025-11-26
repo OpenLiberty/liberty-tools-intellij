@@ -14,6 +14,8 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.JTreeFixture;
 import io.openliberty.tools.intellij.it.fixtures.ProjectFrameFixture;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +23,7 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class SingleModMPLSTestCommon {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
@@ -72,6 +75,18 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
+    }
+
+    /**
+     * Test to handle macOS permission popup if it appears
+     */
+    @Order(1)
+    @Test
+    @Video
+    @EnabledOnOs({OS.MAC})
+    public void AllowPopupTest() {
+        // Handle macOS permission popup if it appears
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, "ServiceLiveHealthCheck");
     }
 
     /**
