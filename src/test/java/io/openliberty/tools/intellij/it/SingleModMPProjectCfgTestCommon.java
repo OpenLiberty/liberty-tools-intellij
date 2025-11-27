@@ -102,6 +102,8 @@ public abstract class SingleModMPProjectCfgTestCommon {
     @BeforeEach
     public void beforeEach(TestInfo info) {
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, this.getClass().getSimpleName() + "." + info.getDisplayName() + ". Entry");
+        // IntelliJ does not start building and indexing until the Project View is open
+        UIBotTestUtils.waitForIndexing(remoteRobot);
     }
 
     /**
