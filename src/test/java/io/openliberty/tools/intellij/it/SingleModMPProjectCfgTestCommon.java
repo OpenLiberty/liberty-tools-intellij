@@ -16,7 +16,6 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
@@ -148,12 +147,7 @@ public abstract class SingleModMPProjectCfgTestCommon {
     @Video
     @EnabledOnOs({OS.MAC})
     public void AllowPopupTest() {
-        boolean isGradle = getSmMPProjectName().equals("singleMod GradleMP");
-        String buildFileName = isGradle ? "build.gradle" : "pom.xml";
-        // Open the build file to bring focus
-        UIBotTestUtils.openFile(remoteRobot, smMpProjectName, buildFileName, smMpProjectName);
-        // Handle macOS permission popup if it appears
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, buildFileName);
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

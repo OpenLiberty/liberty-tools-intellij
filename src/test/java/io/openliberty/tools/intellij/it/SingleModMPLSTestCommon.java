@@ -85,8 +85,7 @@ public abstract class SingleModMPLSTestCommon {
     @Video
     @EnabledOnOs({OS.MAC})
     public void AllowPopupTest() {
-        // Handle macOS permission popup if it appears
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, "ServiceLiveHealthCheck");
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

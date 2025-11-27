@@ -357,10 +357,7 @@ public abstract class SingleModMPProjectTestCommon {
     @Video
     @EnabledOnOs({OS.MAC})
     public void AllowPopupTest() {
-        // Open the build file to bring focus
-        UIBotTestUtils.openFile(remoteRobot, smMpProjectName, getBuildFileName(), smMpProjectName);
-        // Handle macOS permission popup if it appears
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, getBuildFileName());
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

@@ -2944,61 +2944,38 @@ public class UIBotTestUtils {
      * Handles macOS permission popup for screen recording by clicking the "Allow" button.
      *
      * @param remoteRobot The RemoteRobot instance.
-     * @param fileTabName The name of the file tab to click on for focus (e.g., "server.xml").
      */
-    public static void handleMacOSPermissionPopup(RemoteRobot remoteRobot, String fileTabName) {
+    public static void handleMacOSPermissionPopup(RemoteRobot remoteRobot) {
         if (!remoteRobot.isMac()) {
             return; // Only applicable to macOS
         }
-
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Handling macOS permission popup...");
 
-        // Click on the specified file tab to ensure the window is in focus
-        clickOnFileTab(remoteRobot, fileTabName);
-
         // Wait for the permission popup to appear
-        TestUtils.sleepAndIgnoreException(12);
-
+        TestUtils.sleepAndIgnoreException(10);
         // Execute AppleScript to click the "Allow" button
         try {
             String appleScript =
                     "tell application \"System Events\"\n" +
-                            "    set dialogFound to false\n" +
-                            "    \n" +
-                            "    -- Try to find and click Allow button in various processes\n" +
-                            "    repeat with proc in (every process whose visible is true)\n" +
-                            "        try\n" +
-                            "            tell proc\n" +
-                            "                if exists (button \"Allow\" of window 1) then\n" +
-                            "                    click button \"Allow\" of window 1\n" +
-                            "                    set dialogFound to true\n" +
-                            "                    exit repeat\n" +
+                            "    tell process \"UserNotificationCenter\"\n" +
+                            "        if exists window 1 then\n" +
+                            "            try\n" +
+                            "                set dialogText to value of static text 1 of window 1\n" +
+                            "                if dialogText contains \"bash\" and dialogText contains \"screen and audio\" then\n" +
+                            "                    if exists button \"Allow\" of window 1 then\n" +
+                            "                        click button \"Allow\" of window 1\n" +
+                            "                    end if\n" +
                             "                end if\n" +
-                            "            end tell\n" +
-                            "        end try\n" +
-                            "    end repeat\n" +
-                            "    \n" +
-                            "    -- If not found, try specific processes\n" +
-                            "    if not dialogFound then\n" +
-                            "        try\n" +
-                            "            tell process \"UserNotificationCenter\"\n" +
-                            "                if exists button \"Allow\" of window 1 then\n" +
-                            "                    click button \"Allow\" of window 1\n" +
-                            "                    set dialogFound to true\n" +
-                            "                end if\n" +
-                            "            end tell\n" +
-                            "        end try\n" +
-                            "    end if\n" +
-                            "    \n" +
-                            "    return dialogFound\n" +
+                            "            end try\n" +
+                            "        end if\n" +
+                            "    end tell\n" +
                             "end tell";
 
             new ProcessBuilder("osascript", "-e", appleScript).start();
 
             // Wait a moment for the click to take effect
-            TestUtils.sleepAndIgnoreException(2);
+            TestUtils.sleepAndIgnoreException(5);
 
-            UIBotTestUtils.closeFileEditorTab(remoteRobot, fileTabName, "3");
         } catch (Exception e) {
             TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Failed to execute AppleScript: " + e.getMessage());
         }

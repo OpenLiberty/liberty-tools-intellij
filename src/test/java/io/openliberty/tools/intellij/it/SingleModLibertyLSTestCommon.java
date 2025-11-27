@@ -86,8 +86,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Video
     @EnabledOnOs({OS.MAC})
     public void AllowPopupTest() {
-        // Handle macOS permission popup if it appears
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, "server.xml");
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

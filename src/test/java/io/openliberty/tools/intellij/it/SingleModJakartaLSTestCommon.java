@@ -80,7 +80,7 @@ public abstract class SingleModJakartaLSTestCommon {
     @Video
     @EnabledOnOs({OS.MAC})
     public void AllowPopupTest() {
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot, "SystemResource");
+        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**
