@@ -38,7 +38,7 @@ import static io.openliberty.tools.intellij.util.Constants.LIBERTY_MAVEN_START_C
  * Holds common tests that use a single module MicroProfile project.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class SingleModMPProjectTestCommon {
+public abstract class SingleModMPProjectTestCommon extends MacOSAllowPopupTest {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -347,17 +347,6 @@ public abstract class SingleModMPProjectTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-    }
-
-    /**
-     * Test to handle macOS permission popup if it appears
-     */
-    @Order(1)
-    @Test
-    @Video
-    @EnabledOnOs({OS.MAC})
-    public void AllowPopupTest() {
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Holds common tests that use a single module non Liberty Tools compliant REST project.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class SingleModNLTRestProjectTestCommon {
+public abstract class SingleModNLTRestProjectTestCommon extends MacOSAllowPopupTest {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
@@ -146,17 +146,6 @@ public abstract class SingleModNLTRestProjectTestCommon {
     }
     public void setBuildFileName(String name) {
         buildFileName = name;
-    }
-
-    /**
-     * Test to handle macOS permission popup if it appears
-     */
-    @Order(1)
-    @Test
-    @Video
-    @EnabledOnOs({OS.MAC})
-    public void AllowPopupTest() {
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

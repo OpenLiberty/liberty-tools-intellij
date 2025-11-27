@@ -24,7 +24,7 @@ import java.time.Duration;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class SingleModMPLSTestCommon {
+public abstract class SingleModMPLSTestCommon extends MacOSAllowPopupTest {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
 
@@ -75,17 +75,6 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-    }
-
-    /**
-     * Test to handle macOS permission popup if it appears
-     */
-    @Order(1)
-    @Test
-    @Video
-    @EnabledOnOs({OS.MAC})
-    public void AllowPopupTest() {
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**

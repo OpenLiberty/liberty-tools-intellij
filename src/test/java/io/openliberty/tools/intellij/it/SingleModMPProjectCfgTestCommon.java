@@ -24,7 +24,7 @@ import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
  * Holds common tests that use a single module MicroProfile project.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class SingleModMPProjectCfgTestCommon {
+public abstract class SingleModMPProjectCfgTestCommon extends MacOSAllowPopupTest {
 
     // In this test case the environment has been set up so that there is a new project
     // that has not been used in a previous execution of IntelliJ. Also, the Liberty explorer
@@ -137,17 +137,6 @@ public abstract class SingleModMPProjectCfgTestCommon {
         UIBotTestUtils.closeProjectView(remoteRobot);
         UIBotTestUtils.closeProjectFrame(remoteRobot);
         UIBotTestUtils.validateProjectFrameClosed(remoteRobot);
-    }
-
-    /**
-     * Test to handle macOS permission popup if it appears
-     */
-    @Order(1)
-    @Test
-    @Video
-    @EnabledOnOs({OS.MAC})
-    public void AllowPopupTest() {
-        UIBotTestUtils.handleMacOSPermissionPopup(remoteRobot);
     }
 
     /**
