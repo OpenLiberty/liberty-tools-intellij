@@ -27,7 +27,7 @@ import static java.awt.event.KeyEvent.VK_SPACE;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class SingleModLibertyLSTestCommon extends MacOSAllowPopupTest {
+public abstract class SingleModLibertyLSTestCommon extends BaseOSUtilities {
     public static final String REMOTEBOT_URL = "http://localhost:8082";
     public static final RemoteRobot remoteRobot = new RemoteRobot(REMOTEBOT_URL);
 

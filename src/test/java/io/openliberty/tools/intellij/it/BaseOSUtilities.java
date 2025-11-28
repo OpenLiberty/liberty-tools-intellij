@@ -16,7 +16,7 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 
-public class MacOSAllowPopupTest {
+public class BaseOSUtilities {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
