@@ -2943,6 +2943,14 @@ public class UIBotTestUtils {
     /**
      * Handles macOS permission popup for screen recording by clicking the "Allow" button.
      *
+     * <p>This AppleScript implementation is adapted from community examples on handling macOS security dialogs:
+     * https://smartwatermelon.medium.com/automating-macos-security-dialogs-a-tale-of-yak-shaving-and-applescript-759300d6fba9
+     *
+     * <p>For official documentation on UI scripting and accessibility automation, refer to:
+     * Apple – Automate the User Interface:
+     * https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/AutomatetheUserInterface.html
+     *
+     *
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void handleMacOSPermissionPopup(RemoteRobot remoteRobot) {
