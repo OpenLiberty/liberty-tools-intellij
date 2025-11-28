@@ -2939,4 +2939,53 @@ public class UIBotTestUtils {
 
         TestUtils.sleepAndIgnoreException(5);
     }
+
+    /**
+     * Handles macOS permission popup for screen recording by clicking the "Allow" button.
+     *
+     * <p>This AppleScript implementation is adapted from community examples on handling macOS security dialogs:
+     * https://smartwatermelon.medium.com/automating-macos-security-dialogs-a-tale-of-yak-shaving-and-applescript-759300d6fba9
+     *
+     * <p>For official documentation on UI scripting and accessibility automation, refer to:
+     * Apple – Automate the User Interface:
+     * https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/AutomatetheUserInterface.html
+     *
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void handleMacOSPermissionPopup(RemoteRobot remoteRobot) {
+        if (!remoteRobot.isMac()) {
+            return; // Only applicable to macOS
+        }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Handling macOS permission popup...");
+
+        // Wait for the permission popup to appear
+        TestUtils.sleepAndIgnoreException(10);
+        // Execute AppleScript to click the "Allow" button
+        try {
+            String appleScript =
+                    "tell application \"System Events\"\n" +
+                            "    tell process \"UserNotificationCenter\"\n" +
+                            "        if exists window 1 then\n" +
+                            "            try\n" +
+                            "                set dialogText to value of static text 1 of window 1\n" +
+                            "                if dialogText contains \"bash\" and dialogText contains \"screen and audio\" then\n" +
+                            "                    if exists button \"Allow\" of window 1 then\n" +
+                            "                        click button \"Allow\" of window 1\n" +
+                            "                    end if\n" +
+                            "                end if\n" +
+                            "            end try\n" +
+                            "        end if\n" +
+                            "    end tell\n" +
+                            "end tell";
+
+            new ProcessBuilder("osascript", "-e", appleScript).start();
+
+            // Wait a moment for the click to take effect
+            TestUtils.sleepAndIgnoreException(5);
+
+        } catch (Exception e) {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Failed to execute AppleScript: " + e.getMessage());
+        }
+    }
 }

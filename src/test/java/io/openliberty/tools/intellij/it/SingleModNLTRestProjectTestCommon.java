@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Holds common tests that use a single module non Liberty Tools compliant REST project.
  */
-public abstract class SingleModNLTRestProjectTestCommon {
+public abstract class SingleModNLTRestProjectTestCommon extends BaseOSUtilities {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
