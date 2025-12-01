@@ -98,13 +98,10 @@ jobs:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
-        exclude:
-          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
-          - runtime: mac
-            test-group: LSP4Jakarta-Unit
-          - runtime: windows
-            test-group: LSP4Jakarta-Unit
+        test-group: [ Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
+        repeat: [ 1,2,3,4,5,6,7,8,9,10,
+                    11,12,13,14,15,16,17,18,19,20,
+                    21,22,23,24,25,26,27,28,29,30 ]
         include:
           - runtime: linux
             os: ubuntu-latest
@@ -112,36 +109,10 @@ jobs:
             os: macOS-14
           - runtime: windows
             os: windows-latest
-          - test-group: Maven-MicroProfile
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
-          - test-group: Gradle-MicroProfile
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest
-          - test-group: Maven-Custom-Liberty-Install
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest
-          - test-group: Gradle-Custom-Liberty-Install
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest
-          - test-group: Maven-MP-Config
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
-          - test-group: Gradle-MP-Config
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
-          - test-group: Maven-MP-SID
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
-          - test-group: Gradle-MP-SID
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
-          - test-group: Maven-NLT-REST
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
-          - test-group: Gradle-NLT-REST
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest
-          - test-group: Gradle-Language-Server
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
           - test-group: Gradle-MP-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
           - test-group: Gradle-Jakarta-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
-          - test-group: Maven-Multi-Module-MP
-            test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
-          - test-group: LSP4Jakarta-Unit
-            test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}

@@ -149,12 +149,15 @@ public abstract class SingleModJakartaLSTestCommon {
     /**
      * Tests Jakarta Language Server quick fix support in a Java source file
      */
-//    @Test
-//    @Video
+    @Test
+    @Video
     public void testJakartaQuickFixInJavaPart() {
         String publicString = "public Response getProperties() {";
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
+
+        UIBotTestUtils.clickOnWindowPaneStripeButton(remoteRobot, "Language Servers");
+        UIBotTestUtils.enableDebugTraceInLS(remoteRobot);
 
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
         String quickfixChooserString = "Make method public";
@@ -183,6 +186,7 @@ public abstract class SingleModJakartaLSTestCommon {
         finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.captureLSPConsoleLog(remoteRobot);
         }
     }
 

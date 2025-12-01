@@ -446,4 +446,11 @@ public class ProjectFrameFixture extends CommonContainerFixture {
             throw new IllegalStateException("Failed to perform the menu actions after multiple attempts.");
         }
     }
+
+    /**
+     * Method to get list of comboBoxes
+     */
+    public List<ComboBoxFixture> getComboBoxButton() {
+        return comboBoxes(byXpath("//div[@class='ComboBox']"));
+    }
 }
