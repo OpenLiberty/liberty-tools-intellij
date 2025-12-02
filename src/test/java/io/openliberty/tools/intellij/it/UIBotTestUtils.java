@@ -2978,7 +2978,7 @@ public class UIBotTestUtils {
         ComponentFixture node3 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
         List<RemoteText> rts3 = node3.findAllText();
         for (RemoteText rt : rts3) {
-            if (rt.getText().contains("started pid")) {
+            if (rt.getText().contains("start")) {
                 rt.click();
                 break;
             }
