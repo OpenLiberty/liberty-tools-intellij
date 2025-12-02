@@ -98,10 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
-        repeat: [ 1,2,3,4,5,6,7,8,9,10,
-                    11,12,13,14,15,16,17,18,19,20,
-                    21,22,23,24,25,26,27,28,29,30 ]
+        test-group: [ Gradle-Jakarta-Language-Server ]
         include:
           - runtime: linux
             os: ubuntu-latest
@@ -109,8 +106,6 @@ jobs:
             os: macOS-14
           - runtime: windows
             os: windows-latest
-          - test-group: Gradle-MP-Language-Server
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
           - test-group: Gradle-Jakarta-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
     env:
@@ -173,7 +168,7 @@ jobs:
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
-        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4.3.4
         with:
           name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
