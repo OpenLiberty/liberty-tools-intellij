@@ -1080,7 +1080,11 @@ public class UIBotTestUtils {
                 // we will put new config at the end of the config file
                 // (after the last line already in the file)
                 keyboard.hotKey(VK_CONTROL, VK_END);
+                // Move to the end of the current line to ensure we're at the end of the last line
+                keyboard.hotKey(VK_END);
                 keyboard.enter();
+                // Wait for the editor to process the newline before typing
+                TestUtils.sleepAndIgnoreException(1);
 
                 keyboard.enterText(configNameSnippetCaseSpecific);
                 // After typing it can take 1 or 2s for IntelliJ to render diagnostics etc. Must wait before continuing.
