@@ -442,7 +442,7 @@ public class UIBotTestUtils {
      */
     public static void openProjectView(RemoteRobot remoteRobot) {
         // maximize windows os intellij ide to avoid failures accessing menu
-        if (remoteRobot.isWin()) {
+        if (remoteRobot.isWin() || remoteRobot.isMac()) {
             maximizeWindow(remoteRobot);
         }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openProjectView Entry");
@@ -2855,7 +2855,12 @@ public class UIBotTestUtils {
     public static void maximizeWindow(RemoteRobot remoteRobot) {
         if (!isFullScreen(remoteRobot)) {
             Keyboard keyboard = new Keyboard(remoteRobot);
-            keyboard.hotKey(VK_WINDOWS, VK_UP);
+            if (remoteRobot.isWin()) {
+                keyboard.hotKey(VK_WINDOWS, VK_UP);
+            } else {
+                // macOS fullscreen shortcut: Command + Control + F
+                keyboard.hotKey(VK_META, VK_CONTROL, VK_F);
+            }
             keyboard.enter();
         }
     }
