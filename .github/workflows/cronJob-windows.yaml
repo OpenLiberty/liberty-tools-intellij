@@ -1,12 +1,11 @@
 name: Cron Job - Windows
 
 on:
-  push:
   workflow_dispatch:
   schedule:
-    # The job runs at 9:30 AM UTC every Monday through Friday, which is 3:00 PM IST and 4:30 AM EST.
+    # The job runs at 9:30 AM UTC on Tuesday and Friday, which is 3:00 PM IST and 4:30 AM EST.
     # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
-    - cron: '30 9 * * 1-5'
+    - cron: '30 9 * * 2,5'
 
 jobs:
   # Fetch PR details
