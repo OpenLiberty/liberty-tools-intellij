@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'clean-up-cron-job', '25.0.8-fixBranch', '25.0.9-fixBranch' ] # Can specify tags or branches such as '24.0.6' and 'main'
+        tag: [ 'main', '25.0.8-CI/CD', '25.0.9-CI/CD' ] # Can specify tags or branches such as '24.0.6' and 'main'
     with:
       useLocalPlugin: true
       refLsp4ij: main
