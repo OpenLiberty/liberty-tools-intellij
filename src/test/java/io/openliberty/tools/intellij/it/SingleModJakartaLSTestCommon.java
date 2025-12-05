@@ -123,7 +123,7 @@ public abstract class SingleModJakartaLSTestCommon {
             // validate the method signature is no longer set to public
             TestUtils.validateStringNotInFile(pathToSrc.toString(), publicString);
 
-            //there should be a diagnostic for "private" on method signature - move cursor to hover point
+            // there should be a diagnostic for "private" on method signature - move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, SYSTEM_RESOURCE_2_JAVA, UIBotTestUtils.PopupType.DIAGNOSTIC);
 
             String foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
@@ -174,7 +174,7 @@ public abstract class SingleModJakartaLSTestCommon {
             // validate public signature no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), publicString);
 
-            //there should be a diagnostic - move cursor to hover point
+            // there should be a diagnostic - move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, SYSTEM_RESOURCE_2_JAVA, quickfixChooserString);
 
             // trigger and use the quickfix popup attached to the diagnostic

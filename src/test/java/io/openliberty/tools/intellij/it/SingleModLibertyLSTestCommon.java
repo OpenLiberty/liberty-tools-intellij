@@ -454,7 +454,7 @@ public abstract class SingleModLibertyLSTestCommon {
         try {
             UIBotTestUtils.insertStanzaInAppServerXML(remoteRobot, stanzaSnippet, 20, 0, UIBotTestUtils.InsertionType.ELEMENT, false);
 
-            //there should be a diagnostic - move cursor to hover point
+            // there should be a diagnostic - move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, SERVER_XML, quickfixChooserString);
 
             UIBotTestUtils.chooseQuickFix(remoteRobot, quickfixChooserString);

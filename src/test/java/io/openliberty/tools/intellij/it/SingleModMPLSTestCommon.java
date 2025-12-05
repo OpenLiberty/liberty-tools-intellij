@@ -135,7 +135,7 @@ public abstract class SingleModMPLSTestCommon {
             String foundHoverData = null;
             int maxWait = 60, delay = 5; // in some cases it can take 35s for the diagnostic to appear
             for (int i = 0; i <= maxWait; i += delay) {
-                //there should be a diagnostic - move cursor to hover point
+                // there should be a diagnostic - move cursor to hover point
                 UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, SERVICE_LIVE_HEALTH_CHECK_JAVA, UIBotTestUtils.PopupType.DIAGNOSTIC);
 
                 foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
@@ -177,7 +177,7 @@ public abstract class SingleModMPLSTestCommon {
             // validate @Liveness no longer found in java part
             TestUtils.validateStringNotInFile(pathToSrc.toString(), livenessString);
 
-            //there should be a diagnostic - move cursor to hover point
+            // there should be a diagnostic - move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, flaggedString, SERVICE_LIVE_HEALTH_CHECK_JAVA, quickfixChooserString);
 
             // trigger and use the quickfix popup attached to the diagnostic
