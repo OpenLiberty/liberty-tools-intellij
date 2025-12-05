@@ -13,6 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+/**
+ * Tests Jakarta Language Server features for Gradle single module projects.
+ *
+ * GHA tag - Jakarta-Language-Server
+ */
 public class GradleSingleModJakartaLSTest extends SingleModJakartaLSTestCommon {
 
     /**

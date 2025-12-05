@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 
 /**
  * Tests that use a single module non Liberty Tools compliant REST Maven project.
+ *
+ * GHA tag - Maven-NonLibertyTools-REST
  */
 public class MavenSingleModNLTRestProjectTest extends SingleModNLTRestProjectTestCommon {
 

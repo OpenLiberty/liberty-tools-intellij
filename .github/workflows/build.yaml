@@ -1,27 +1,6 @@
 name: Build
 
 on:
-  workflow_call:
-    inputs:
-      refLsp4ij:
-        description: 'Reference/branch for Lsp4ij checkout'
-        type: string
-        required: true
-        default: main
-      lsp4ijBranch:
-        description: 'PR number or branch name for Artifact upload'
-        type: string
-        required: true
-      useLocalPlugin:
-        description: 'Use lsp4ij locally'
-        required: true
-        type: boolean
-        default: false
-      refLTITag:
-        description: 'Reference LTI Tag/Branch'
-        type: string
-        required: true
-        default: main
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -90,121 +69,35 @@ jobs:
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
-  build:
+  # Call Linux Builds
+  linux-builds:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    runs-on: ${{ matrix.os }}
-    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
-    strategy:
-      fail-fast: false
-      matrix:
-        runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
-        exclude:
-          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
-          - runtime: mac
-            test-group: LSP4Jakarta-Unit
-          - runtime: windows
-            test-group: LSP4Jakarta-Unit
-        include:
-          - runtime: linux
-            os: ubuntu-latest
-          - runtime: mac
-            os: macOS-14
-          - runtime: windows
-            os: windows-latest
-          - test-group: Maven-MicroProfile
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
-          - test-group: Gradle-MicroProfile
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest
-          - test-group: Maven-Custom-Liberty-Install
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest
-          - test-group: Gradle-Custom-Liberty-Install
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest
-          - test-group: Maven-MP-Config
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
-          - test-group: Gradle-MP-Config
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
-          - test-group: Maven-MP-SID
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
-          - test-group: Gradle-MP-SID
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
-          - test-group: Maven-NLT-REST
-            test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
-          - test-group: Gradle-NLT-REST
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest
-          - test-group: Gradle-Language-Server
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
-          - test-group: Gradle-MP-Language-Server
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
-          - test-group: Gradle-Jakarta-Language-Server
-            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
-          - test-group: Maven-Multi-Module-MP
-            test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
-          - test-group: LSP4Jakarta-Unit
-            test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
-    env:
-      USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
-      REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
-      LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
-      REF_LTI_TAG: ${{ inputs.refLTITag }}
-      TEST_CLASS: ${{ matrix.test-class }}
-    steps:
-      - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
-        uses: al-cheb/configure-pagefile-action@v1.4
-        with:
-          minimum-size: 8GB
-          maximum-size: 10GB
-          disk-root: "C:"
-      - name: 'Checkout liberty-tools-intellij'
-        uses: actions/checkout@v4
-        with:
-          path: liberty-tools-intellij
-          ref: ${{ env.REF_LTI_TAG }}
-      - name: 'Install required integration test software'
-        working-directory: ./liberty-tools-intellij
-        run: bash ./src/test/resources/ci/scripts/setup.sh
+    uses: ./.github/workflows/build-linux.yaml
+    with:
+      useLocalPlugin: ${{ inputs.useLocalPlugin || false }}
+      refLsp4ij: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      lsp4ijBranch: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
+      refLTITag: ${{ inputs.refLTITag }}
+    name: Linux Builds
 
-      # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
-      - name: 'Checkout lsp4ij'
-        if: ${{ inputs.useLocalPlugin == true }}
-        uses: actions/checkout@v4
-        with:
-          repository: redhat-developer/lsp4ij
-          path: lsp4ij
-          ref: ${{ env.REF_LSP4IJ }}
-      - name: 'Build Lsp4ij'
-        if: ${{ inputs.useLocalPlugin == true }}
-        working-directory: ./lsp4ij
-        run: bash ./gradlew buildPlugin
-      # This step is retained to support the 24.0.9 tag running in the cron job, as it requires an unzipped LSP4IJ.
-      - name: 'Unzip lsp4ij file'
-        if: ${{ inputs.useLocalPlugin == true }}
-        working-directory: ./lsp4ij/build/distributions
-        run: |
-          unzip -o '*.zip' -d .
+  # Call Mac Builds
+  mac-builds:
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    uses: ./.github/workflows/build-mac.yaml
+    with:
+      useLocalPlugin: ${{ inputs.useLocalPlugin || false }}
+      refLsp4ij: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      lsp4ijBranch: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
+      refLTITag: ${{ inputs.refLTITag }}
+    name: Mac Builds
 
-      - name: 'Build Liberty-Tools-Intellij'
-        working-directory: ./liberty-tools-intellij
-        run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
-      - name: 'Archive artifacts'
-        if: ${{ runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure() }}
-        uses: actions/upload-artifact@v4.3.4
-        with:
-          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
-          path: |
-            ./**/*liberty-tools-intellij*.zip
-            ./**/libs/*liberty-tools-intellij*.jar
-          if-no-files-found: warn
-          retention-days: 7
-      - name: 'Run tests'
-        id: run_tests
-        working-directory: ./liberty-tools-intellij
-        run: bash ./src/test/resources/ci/scripts/run.sh
-      - name: 'Archive Test logs and reports'
-        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
-        uses: actions/upload-artifact@v4.3.4
-        with:
-          name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
-          path: |
-            liberty-tools-intellij/build/reports/
+  # Call Windows Builds
+  windows-builds:
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    uses: ./.github/workflows/build-windows.yaml
+    with:
+      useLocalPlugin: ${{ inputs.useLocalPlugin || false }}
+      refLsp4ij: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      lsp4ijBranch: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
+      refLTITag: ${{ inputs.refLTITag }}
+    name: Windows Builds
