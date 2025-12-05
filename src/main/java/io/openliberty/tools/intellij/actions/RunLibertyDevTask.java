@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -81,7 +82,8 @@ public class RunLibertyDevTask extends AnAction {
                                 } else {
                                     // calls selected action
                                     AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
-                                    action.actionPerformed(new AnActionEvent(DataManager.getInstance().getDataContext(libertyTree), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
+                                    AnActionEvent event = new AnActionEvent(DataManager.getInstance().getDataContext(libertyTree), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance());
+                                    ActionUtil.performActionDumbAwareWithCallbacks(action, event);
                                 }
                             }
                         }
@@ -117,7 +119,8 @@ public class RunLibertyDevTask extends AnAction {
                 String selectedAction = libertyActions[ret];
                 // run selected action
                 AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(selectedAction));
-                action.actionPerformed(new AnActionEvent(e.getDataContext(), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance()));
+                AnActionEvent event = new AnActionEvent(e.getDataContext(), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance());
+                ActionUtil.performActionDumbAwareWithCallbacks(action, event);
             }
         } else {
             handleLibertyTreeEvent(e, project, false);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,8 +14,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -24,6 +24,9 @@ import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.EXCEPTION;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.RUNTIME_EXCEPTION;
 
 /**
  *
@@ -148,6 +151,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
+                        if (isCheckedExceptionPresent(method)) {
+                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                    "@PostConstruct");
+                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION, null,
+                                    DiagnosticSeverity.Error));
+                        }
                         if (method.getParameters().length != 0) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
                                     "@PostConstruct");
@@ -163,18 +173,17 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                     AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE, null,
                                     DiagnosticSeverity.Error));
                         }
-
-                        if (method.getThrowsTypes().length != 0) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
-                                    "@PostConstruct");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION, null,
-                                    DiagnosticSeverity.Warning));
-                        }
                     }
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
+                        if (isCheckedExceptionPresent(method)) {
+                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                    "@PreDestroy");
+                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION, null,
+                                    DiagnosticSeverity.Error));
+                        }
                         if (method.getParameters().length != 0) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
                                     "@PreDestroy");
@@ -189,14 +198,6 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
                                     AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC, method.getName(),
                                     DiagnosticSeverity.Error));
-                        }
-
-                        if (method.getThrowsTypes().length != 0) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
-                                    "@PreDestroy");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION, null,
-                                    DiagnosticSeverity.Warning));
                         }
                     }
                 }
@@ -224,4 +225,44 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         }
         return false;
     }
+
+    /**
+     * isCheckedExceptionPresent
+     * This method scans the exception signatures to identify if any checked exceptions are declared.
+     *
+     * @param method
+     * @return
+     */
+    private boolean isCheckedExceptionPresent(PsiMethod method) {
+        for (PsiClassType type : method.getThrowsList().getReferencedTypes()) {
+            PsiClass exceptionClass = type.resolve();
+            if (exceptionClass != null && extendsException(exceptionClass) && notExtendsRuntimeException(exceptionClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * extendsException
+     *
+     * @param exceptionClass The root type of which the super-types are checked.
+     * @return true if Exception is the superType of the given exception type.
+     */
+    private static boolean extendsException(PsiClass exceptionClass) {
+        return DiagnosticsUtils.inheritsFrom(exceptionClass, EXCEPTION);
+    }
+
+    /**
+     * notExtendsRuntimeException
+     *
+     * @param exceptionClass The root type of which the super-types are checked.
+     * @return true if RuntimeException is not the superType of the given exception type.
+     */
+    private static boolean notExtendsRuntimeException(PsiClass exceptionClass) {
+        return !DiagnosticsUtils.inheritsFrom(exceptionClass, RUNTIME_EXCEPTION);
+    }
+
+
+
 }

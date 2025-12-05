@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation, Reza Akhavan and others.
+ * Copyright (c) 2020, 2025 IBM Corporation, Reza Akhavan and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,11 +14,13 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.inheritsFrom;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants.*;
 
@@ -159,38 +161,38 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
+                } else if (matchedAnnotation.equals(NOT_EMPTY) || matchedAnnotation.equals(SIZE)) {
+                    if (!(isSizeOrNonEmptyAllowed(type))) {
+                        String source = isMethod ?
+                                Messages.getMessage("SizeOrNonEmptyAnnotationsMethod") : Messages.getMessage(
+                                        "SizeOrNonEmptyAnnotationsField");
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+                    }
                 }
-
-                // These ones contains check on all collection types which requires resolving
-                // the String of the type somehow
-                // This will also require us to check if the field type was a custom collection
-                // subtype which means we
-                // have to resolve it and get the super interfaces and check to see if
-                // Collection, Map or Array was implemented
-                // for that custom type (which could as well be a user made subtype)
-
-//    			else if (annotation.getElementName().equals(NOT_EMPTY) || annotation.getElementName().equals(SIZE)) {
-//    				
-//    				System.out.println("--Field name: " + Signature.getTypeSignatureKind(fieldType));
-//    				System.out.println("--Field name: " + Signature.getParameterTypes(fieldType));			
-//    				if (	!fieldType.equals(getSignatureFormatOfType(CHAR_SEQUENCE)) &&
-//    						!fieldType.contains("List") &&
-//    						!fieldType.contains("Set") &&
-//    						!fieldType.contains("Collection") &&
-//    						!fieldType.contains("Array") &&
-//    						!fieldType.contains("Vector") &&
-//    						!fieldType.contains("Stack") &&
-//    						!fieldType.contains("Queue") &&
-//    						!fieldType.contains("Deque") &&
-//    						!fieldType.contains("Map")) {
-//    					
-//    					diagnostics.add(new Diagnostic(fieldAnnotationrange,
-//    							"This annotation can only be used on CharSequence, Collection, Array, "
-//    							+ "Map type fields."));	
-//    				}
-//    			}
             }
         }
+    }
+
+    /**
+     * isSizeOrNonEmptyAllowed
+     * This method checks whether the supported types for the Size and NotEmpty annotations are CharSequence, Collection, Map, or array.
+     *
+     * @param childType
+     * @return
+     */
+    public static boolean isSizeOrNonEmptyAllowed(PsiType childType) {
+
+        if (childType instanceof PsiArrayType) {
+            return true;
+        }
+        if (childType instanceof PsiPrimitiveType) {
+            return false;
+        }
+        PsiClass resolvedClass = PsiUtil.resolveClassInClassTypeOnly(childType);
+        return resolvedClass != null && (inheritsFrom(resolvedClass, CHAR_SEQUENCE)
+                || inheritsFrom(resolvedClass, COLLECTION_FQ)
+                || inheritsFrom(resolvedClass, MAP_FQ));
     }
 
     private void checkStringOnly(PsiElement element, List<Diagnostic> diagnostics, String annotationName, boolean isMethod, PsiType type) {
