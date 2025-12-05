@@ -172,16 +172,34 @@ startIDE() {
     # Wait for the IDE to come up.
     echo -e "\n$(${currentTime[@]}): INFO: Waiting for the Intellij IDE to start..."
     callLivenessEndpoint=(curl -s http://localhost:8082)
+    # Initialize counters and configuration
     count=1
-    while ! ${callLivenessEndpoint[@]} | grep -qF 'div'; do # search for any amount of html from the IDE
-        if [ $count -eq 24 ]; then
+    sleepInterval=5        # Wait interval (in seconds) between retries
+    maxRetries=24          # Maximum number of attempts before timing out (24 retries × 5 seconds = 2 minutes total wait time)
+
+    # Keep checking IntelliJ's liveness endpoint until it responds successfully
+    while ! ${callLivenessEndpoint[@]} | grep -qF 'div'; do
+        # If the maximum number of retries has been reached, handle timeout
+        if [ $count -eq $maxRetries ]; then
             echo -e "\n$(${currentTime[@]}): ERROR: Timed out waiting for the Intellij IDE to start. Output:"
             gatherDebugData $(pwd)
             cleanupCustomWLPDir
             exit 12
         fi
-        count=`expr $count + 1`
-        echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for the Intellij IDE to start..." && sleep 5
+        # Increment attempt counter
+        count=$((count + 1))
+        echo -e "\n$(${currentTime[@]}): INFO: Continue waiting for IntelliJ IDE to start... (Attempt: $count/$maxRetries)"
+
+        # Dynamically extend timeout if downloads are detected in the log
+        if tail -n 50 remoteServer.log | grep -qiE "(downloading|download.*from)"; then
+            if [ $maxRetries -lt 60 ]; then # Prevent extending timeout beyond 60 retries (5 minutes total)
+                echo -e "$(${currentTime[@]}): INFO: IntelliJ is downloading dependencies... extending wait time by 4 retries."
+                maxRetries=$((maxRetries + 4)) # Extending timeout: +4 retries × 5s each = +20 seconds total wait time
+            fi
+        fi
+
+        # Wait before the next retry
+        sleep $sleepInterval
     done
     if [[ $OS == "MINGW64_NT"* ]]; then
         # On Windows ps -ef only shows the processes for the current user (i.e. 3-4 processes)
@@ -240,9 +258,15 @@ main() {
     for restartCount in {1..5}; do
         startIDE
         # Run the tests
-        echo -e "\n$(${currentTime[@]}): INFO: Running tests..."
         set -o pipefail # using tee requires we use this setting to gather the rc of gradlew
-        ./gradlew test -PuseLocal=$USE_LOCAL_PLUGIN | tee "$JUNIT_OUTPUT_TXT"
+        if [ -n "$TEST_CLASS" ]; then
+            echo -e "\n$(${currentTime[@]}): INFO: Running specific test class: $TEST_CLASS"
+            test_args=(--tests "$TEST_CLASS")
+        else
+            echo -e "\n$(${currentTime[@]}): INFO: Running all tests..."
+            test_args=()
+        fi
+        ./gradlew test "${test_args[@]}" -PuseLocal="$USE_LOCAL_PLUGIN" | tee "$JUNIT_OUTPUT_TXT"
         testRC=$? # gradlew test only returns 0 or 1, not the return code from JUnit
         set +o pipefail # reset this option
         grep -i "SocketTimeoutException" "$JUNIT_OUTPUT_TXT" && testRC=23
