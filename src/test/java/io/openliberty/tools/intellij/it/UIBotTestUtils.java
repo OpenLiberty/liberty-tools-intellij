@@ -2986,6 +2986,46 @@ public class UIBotTestUtils {
     }
 
     /**
+     * Enable the trace level to verbose in LSP console
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void enableMPDebugTraceInLS(RemoteRobot remoteRobot) {
+        ComponentFixture node = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+
+        List<RemoteText> rts = node.findAllText();
+        for (RemoteText rt : rts) {
+            if (rt.getText().contains("MicroProfile"))
+                rt.click();
+        }
+
+        ComponentFixture node1 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts1 = node1.findAllText();
+        for (RemoteText rt : rts1) {
+            if (rt.getText().contains("Debug"))
+                rt.click();
+        }
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        List<ComboBoxFixture> comboBoxes = projectFrame.getComboBoxButton();
+        ComboBoxFixture comboBox = comboBoxes.get(1);
+        comboBox.selectItem("verbose");
+
+        String xPath = "//div[starts-with(@accessiblename, 'Apply') and @class='ActionButton']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
+
+        ComponentFixture node3 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts3 = node3.findAllText();
+        for (RemoteText rt : rts3) {
+            if (rt.getText().contains("started pid")) {
+                rt.click();
+                break;
+            }
+        }
+    }
+
+    /**
      * Access editor content in LSP console
      *
      * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
