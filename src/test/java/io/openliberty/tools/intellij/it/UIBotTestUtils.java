@@ -3031,7 +3031,7 @@ public class UIBotTestUtils {
      * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
      */
     public static void captureLSPConsoleLog(RemoteRobot remoteRobot) {
-        Locator locator = byXpath("//div[@class='EditorComponentImpl' and @accessiblename='Editor' ]");
+        Locator locator = byXpath("(//div[@class='EditorComponentImpl' and @accessiblename='Editor'])[1]");
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
         editorNew.click();
 
