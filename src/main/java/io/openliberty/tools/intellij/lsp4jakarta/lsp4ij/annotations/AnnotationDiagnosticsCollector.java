@@ -166,8 +166,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                             String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
                                     "@PostConstruct");
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS,
-                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
+                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS, null,
                                     DiagnosticSeverity.Error));
                         }
 
@@ -187,7 +186,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                             String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                     "@PreDestroy");
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION, null,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION,
+                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
                                     DiagnosticSeverity.Error));
                         }
                         if (method.getParameters().length != 0) {
