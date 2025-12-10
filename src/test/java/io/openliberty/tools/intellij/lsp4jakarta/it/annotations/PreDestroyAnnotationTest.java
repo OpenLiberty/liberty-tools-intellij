@@ -33,6 +33,7 @@ import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
@@ -62,15 +63,15 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
         
         Diagnostic d3 = d(55, 16, 37, "A method with the @PreDestroy annotation must not throw checked exceptions.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
-        d3.setData(new Gson().toJsonTree(Arrays.asList("io.openliberty.sample.jakarta.annotations.CustomCheckedException")));
+        d3.setData(new Gson().toJsonTree(List.of("io.openliberty.sample.jakarta.annotations.CustomCheckedException")));
 
         Diagnostic d4 = d(35, 13, 25, "A method with the @PreDestroy annotation must not throw checked exceptions.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
-        d4.setData(new Gson().toJsonTree(Arrays.asList("java.lang.Exception")));
+        d4.setData(new Gson().toJsonTree(List.of("java.lang.Exception")));
 
         Diagnostic d5 = d(50, 16, 32, "A method with the @PreDestroy annotation must not throw checked exceptions.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
-        d5.setData(new Gson().toJsonTree(Arrays.asList("java.io.IOException")));
+        d5.setData(new Gson().toJsonTree(List.of("java.io.IOException")));
 
         assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3, d4, d5);
 

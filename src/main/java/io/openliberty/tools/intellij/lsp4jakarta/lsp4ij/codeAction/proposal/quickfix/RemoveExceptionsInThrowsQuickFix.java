@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -31,13 +32,9 @@ import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
- * Quickfix for removing all parameters from a method
- * 
- * @author Zijian Pei
+ * Quickfix for removing all exceptions from a throws clause
  */
 public class RemoveExceptionsInThrowsQuickFix implements IJavaCodeActionParticipant {
 
@@ -45,6 +42,7 @@ public class RemoveExceptionsInThrowsQuickFix implements IJavaCodeActionParticip
 
     private final String messageIdentifier;
     public static final String EXCEPTIONS_TYPE = "exceptions.name";
+
     /**
      * Constructor.
      *
@@ -61,9 +59,7 @@ public class RemoveExceptionsInThrowsQuickFix implements IJavaCodeActionParticip
 
     @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        JsonArray diagnosticData = (JsonArray) diagnostic.getData();
-        List<String> exceptions = IntStream.range(0, diagnosticData.size())
-                .mapToObj(idx -> diagnosticData.get(idx).getAsString()).collect(Collectors.toList());
+        List<String> exceptions = getExceptions((JsonArray) diagnostic.getData());
         List<CodeAction> codeActions = new ArrayList<>();
         Map<String, Object> extendedData = new HashMap<>();
         extendedData.put(EXCEPTIONS_TYPE, exceptions);
@@ -74,16 +70,26 @@ public class RemoveExceptionsInThrowsQuickFix implements IJavaCodeActionParticip
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        final PsiElement node = context.getCoveredNode();
         CodeActionResolveData data = (CodeActionResolveData) toResolve.getData();
+        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(context.getCoveredNode(), PsiMethod.class);
         List<String> exceptions = (List<String>) data.getExtendedDataEntry(EXCEPTIONS_TYPE);
-        final PsiMethod parentMethod = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-        assert parentMethod != null;
         ChangeCorrectionProposal proposal = new ModifyThrownExceptionsProposal(getLabel(), context.getSource().getCompilationUnit(),
                 context.getASTRoot(), parentMethod, 0, new ArrayList<>(), exceptions);
-
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action");
         return toResolve;
+    }
+    /**
+     * getExceptions
+     *
+     * @param diagnosticData as JsonArray
+     * @return Get the exception list from diagnosticData
+     */
+    private List<String> getExceptions(JsonArray diagnosticData) {
+        List<String> exceptions = new ArrayList<>(diagnosticData.size());
+        for (JsonElement element : diagnosticData) {
+            exceptions.add(element.getAsString());
+        }
+        return exceptions;
     }
     /**
      * Returns the code action label.
