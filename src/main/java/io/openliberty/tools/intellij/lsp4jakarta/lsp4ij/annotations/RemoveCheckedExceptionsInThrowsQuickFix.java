@@ -16,9 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveExceptionsInThrowsQuickFix;
 
 /**
- * Quickfix for removing @PreDestory
- *
- * @author Zijian Pei
+ * Quickfix for removing checked exceptions from throws clause
  *
  */
 public class RemoveCheckedExceptionsInThrowsQuickFix extends RemoveExceptionsInThrowsQuickFix {
