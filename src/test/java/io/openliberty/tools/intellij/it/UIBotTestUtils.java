@@ -3020,7 +3020,6 @@ public class UIBotTestUtils {
         for (RemoteText rt : rts3) {
             if (rt.getText().contains("started pid")) {
                 rt.click();
-                break;
             }
         }
     }
