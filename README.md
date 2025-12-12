@@ -106,7 +106,7 @@ If you experience a problem with this plugin you might be asked to collect langu
 
 ## Requirements
 <!-- Make sure to also update the note at the top of this file, and in user-guide.md -->
-Version 25.0.12 requires **IntelliJ IDEA 2025.1.\***, **2025.2.\***, or **2025.3.\*** and a minimum of **Java 17**.
+Version 25.0.12 requires a minimum of **IntelliJ IDEA 2025.1** and a minimum of **Java 17**.
 
 For more details, check the [user guide](docs/user-guide.md#software-requirements).
 
