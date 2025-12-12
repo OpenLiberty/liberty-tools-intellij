@@ -1,7 +1,7 @@
 # Liberty Tools for IntelliJ IDEA
 
 <!-- Make sure to also update the #Requirements section below, and in user-guide.md -->
-> Note: Version 25.0.12 requires **IntelliJ IDEA 2025.1.\***, **2025.2.\***, or **2025.3.\*** and a minimum of **Java 17**.
+> Note: Version 25.0.12 requires a minimum of **IntelliJ IDEA 2025.1** and a minimum of **Java 17**.
 >
 > This page provides an overview of Liberty Tools for IntelliJ IDEA.
 > For minimum requirements information and detailed instructions on how to use Liberty Tools, check the [user-guide](docs/user-guide.md).
