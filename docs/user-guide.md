@@ -32,7 +32,7 @@ For information regarding known issues and limitations, refer to our [Common Iss
 ## Before you begin
 ### Software requirements
 <!-- Make sure to also update the main README.md note at its top, and its #Requirements section -->
-- Version 25.0.9 requires **IntelliJ IDEA 2024.3.\***, **2025.1.\***, or **2025.2.\*** and a minimum of **Java 17**. Liberty Tools for IntelliJ IDEA is compatible with both IntelliJ IDEA Ultimate and IntelliJ IDEA Community Edition.
+- Version 25.0.12 requires a minimum of **IntelliJ IDEA 2025.1**.
 - **Java 17** or later. If you change the IntelliJ IDEA Boot Java Runtime through the **Change Boot Java Runtime for the IDE** preference, ensure that you are using Java 17 or later.
 - [Liberty Tools for IntelliJ IDEA plugin](https://plugins.jetbrains.com/plugin/14856-liberty-tools/)
 
@@ -66,6 +66,7 @@ Liberty Tools for IntelliJ has an external dependency on [LSP4IJ](https://github
 | 25.0.5                | 0.13.0, 0.14.0, 0.14.2                       |
 | 25.0.8                | 0.14.2, 0.15.0, 0.16.0, 0.16.1               |
 | 25.0.9                | 0.15.0, 0.16.0, 0.16.1, 0.17.0, 0.18.0       |
+| 25.0.12               | 0.19.0                                       |
 
 ### Manually install specific release of the LSP4IJ plugin from the Marketplace
 
