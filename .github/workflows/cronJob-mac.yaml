@@ -1,0 +1,78 @@
+name: Cron Job - Mac
+
+on:
+  workflow_dispatch:
+  schedule:
+    # The job runs at 9:30 AM UTC on Wednesday, which is 3:00 PM IST and 4:30 AM EST.
+    # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+    - cron: '30 9 * * 3'
+
+jobs:
+  # Fetch PR details
+  fetch_all_pull_request_shas:
+    uses: ./.github/workflows/cronJob-fetch-prs.yaml
+
+  # Run the LTI Tests against each open lsp4ij PRs in Mac
+  mac-builds-pr:
+    needs: fetch_all_pull_request_shas
+    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
+    uses: ./.github/workflows/build-mac.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # lsp4ij PRs run against LTI main tag only
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
+    with:
+      useLocalPlugin: true
+      refLsp4ij: ${{ matrix.pr_details.sha }}
+      lsp4ijBranch: PR-${{ matrix.pr_details.number }}
+      refLTITag: clean-up-cron-job
+    name: Mac - lsp4ij-PR-${{ matrix.pr_details.number }} - LTI-main
+
+  # Run the LTI Tests against lsp4ij main branch in Mac
+  mac-builds-main:
+    uses: ./.github/workflows/build-mac.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
+        tag: [ 'main', '25.0.8-CICD', '25.0.9-CICD' ] # Can specify tags or branches such as '24.0.6' and 'main'
+    with:
+      useLocalPlugin: true
+      refLsp4ij: main
+      lsp4ijBranch: main
+      refLTITag: ${{ matrix.tag }}
+    name: Mac - lsp4ij-main - LTI-${{ matrix.tag }}
+
+  # Send slack notification for build results
+  slack-notification:
+    runs-on: ubuntu-latest
+    needs: [ mac-builds-main, mac-builds-pr ]
+    if: always()
+    steps:
+      - name: Send Slack Notification
+        run: |
+          STATUS="Failure"
+          MAC_MAIN="${{ needs.mac-builds-main.result }}"
+          MAC_PR="${{ needs.mac-builds-pr.result }}"
+          
+          if [[ "$MAC_MAIN" == "success" ]] && [[ "$MAC_PR" == "success" ]]; then
+            STATUS="Success"
+          fi
+          echo "Final status: $STATUS"
+          payload=$(jq -n \
+            --arg status "$STATUS" \
+            --arg branch "${{ github.ref }}" \
+            --arg build_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            '
+            {
+              "Status": $status,
+              "Branch": $branch,
+              "Build_url": $build_url
+            }')
+          
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$NOTIFY_BUILD_RESULT" || echo "Slack notification failed with status code: $?"
+
+        env:
+          NOTIFY_BUILD_RESULT: ${{ secrets.NOTIFY_BUILD_RESULT }}
+    name: Run Slack Notification
