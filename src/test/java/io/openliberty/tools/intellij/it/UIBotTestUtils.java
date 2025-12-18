@@ -26,13 +26,18 @@ import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -2939,4 +2944,143 @@ public class UIBotTestUtils {
 
         TestUtils.sleepAndIgnoreException(5);
     }
+
+    /**
+     * Enable the trace level to verbose in LSP console
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void enableDebugTraceInLS(RemoteRobot remoteRobot) {
+        ComponentFixture node = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+
+        List<RemoteText> rts = node.findAllText();
+        for (RemoteText rt : rts) {
+            if (rt.getText().contains("Jakarta EE"))
+                rt.click();
+        }
+
+        ComponentFixture node1 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts1 = node1.findAllText();
+        for (RemoteText rt : rts1) {
+            if (rt.getText().contains("Debug"))
+                rt.click();
+        }
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        List<ComboBoxFixture> comboBoxes = projectFrame.getComboBoxButton();
+        ComboBoxFixture comboBox = comboBoxes.get(1);
+        comboBox.selectItem("verbose");
+
+        String xPath = "//div[starts-with(@accessiblename, 'Apply') and @class='ActionButton']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
+
+        ComponentFixture node3 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts3 = node3.findAllText();
+        for (RemoteText rt : rts3) {
+            if (rt.getText().contains("start")) {
+                rt.click();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Enable the trace level to verbose in LSP console
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void enableMPDebugTraceInLS(RemoteRobot remoteRobot) {
+        ComponentFixture node = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+
+        List<RemoteText> rts = node.findAllText();
+        for (RemoteText rt : rts) {
+            if (rt.getText().contains("MicroProfile"))
+                rt.click();
+        }
+
+        ComponentFixture node1 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts1 = node1.findAllText();
+        for (RemoteText rt : rts1) {
+            if (rt.getText().contains("Debug"))
+                rt.click();
+        }
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        List<ComboBoxFixture> comboBoxes = projectFrame.getComboBoxButton();
+        ComboBoxFixture comboBox = comboBoxes.get(1);
+        comboBox.selectItem("verbose");
+
+        String xPath = "//div[starts-with(@accessiblename, 'Apply') and @class='ActionButton']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
+
+        ComponentFixture node3 = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='LSPConsoleToolWindowPanel']"), Duration.ofSeconds(10));
+        List<RemoteText> rts3 = node3.findAllText();
+        for (RemoteText rt : rts3) {
+            if (rt.getText().contains("started pid")) {
+                rt.click();
+            }
+        }
+    }
+
+    /**
+     * Access editor content in LSP console
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void captureLSPConsoleLog(RemoteRobot remoteRobot) {
+        Locator locator = byXpath("(//div[@class='EditorComponentImpl' and @accessiblename='Editor'])[1]");
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, locator, Duration.ofSeconds(20));
+        editorNew.click();
+
+        copyEditorContent(remoteRobot);
+    }
+
+    /**
+     * Copies the entire content of the LSP console,
+     * writes it to a log file, and then triggers the “Hide” action button in the UI.
+     *
+     * @param remoteRobot Instance of the RemoteRobot to interact with the IntelliJ UI.
+     */
+    public static void copyEditorContent(RemoteRobot remoteRobot) {
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        keyboard.hotKey(remoteRobot.isMac() ? KeyEvent.VK_META : KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+        keyboard.hotKey(remoteRobot.isMac() ? KeyEvent.VK_META : KeyEvent.VK_CONTROL, KeyEvent.VK_C);
+
+        String copiedText = getClipboardText();
+        Path logPath = Path.of("build/reports/problems/lsp4ij-logs.log");
+        try {
+            Files.createDirectories(logPath.getParent());
+
+            Files.writeString(
+                    logPath,
+                    copiedText + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofMinutes(2));
+        String xPath = "//div[starts-with(@accessiblename, 'Hide') and @class='ActionButton']";
+        ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
+        actionButton.click();
+    }
+
+    /**
+     * Retrieves the current text content from the system clipboard.
+     */
+    private static String getClipboardText() {
+        try {
+            TestUtils.sleepAndIgnoreException(1);
+            return (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .getData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException | IOException e) {
+            throw new RuntimeException("Failed to read from clipboard", e);
+        }
+    }
+
 }
