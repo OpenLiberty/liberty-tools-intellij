@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation, Matheus Cruz and others.
+ * Copyright (c) 2020, 2026 IBM Corporation, Matheus Cruz and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -50,10 +50,27 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
         PsiClass[] types = unit.getClasses();
+        PsiClass[] innerClasses;
         PsiMethod[] methods;
         PsiAnnotation[] allAnnotations;
+        //Jsonb type for Parent
+        boolean jsonbtypeParent;
+        //No-Args for Parent and Child
+        boolean parentHasNoArgsConstructor;
+        boolean parentHasParameterizedConrtuctor;
+        boolean childHasNoArgsConstructor;
+        boolean childHasParameterizedConrtuctor;
+        boolean missingParentNoArgs;
+        boolean missingChildNoArgs;
 
         for (PsiClass type : types) {
+            parentHasNoArgsConstructor = false;
+            parentHasParameterizedConrtuctor = false;
+            innerClasses = type.getInnerClasses();
+            jsonbtypeParent = Arrays.stream(type.getAnnotations())
+                        .map(PsiAnnotation::getQualifiedName)
+                        .filter(Objects::nonNull)
+                        .anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
             methods = type.getMethods();
             List<PsiMethod> jonbMethods = new ArrayList<PsiMethod>();
             // methods
@@ -63,6 +80,16 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     for (PsiAnnotation annotation : allAnnotations) {
                         if (isMatchedJavaElement(type, annotation.getQualifiedName(), JsonbConstants.JSONB_CREATOR))
                             jonbMethods.add(method);
+                    }
+                }
+                //Checks if parent class has public or protected no-args constructor
+                if(isConstructorMethod(method)){
+                    PsiParameterList params = method.getParameterList();
+                    boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
+                    if(params.getParametersCount()==0 && isPubOrPro){
+                        parentHasNoArgsConstructor = true;
+                    }else{
+                        parentHasParameterizedConrtuctor = true;
                     }
                 }
             }
@@ -79,9 +106,72 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
                 collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
                 collectJsonbUniquePropertyNames(uniquePropertyNames, field);
+                //If class not annotated with JSONB, find if fields are.
+                if(!jsonbtypeParent){
+                    jsonbtypeParent = Arrays.stream(field.getAnnotations())
+                            .map(PsiAnnotation::getQualifiedName)
+                            .filter(Objects::nonNull)
+                            .anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
+                }
+            }
+            for(PsiClass innerClass: innerClasses){
+                childHasNoArgsConstructor = false;
+                childHasParameterizedConrtuctor = false;
+                for (PsiMethod innerMethod : innerClass.getMethods()) {
+                    //Checks if parent class has public or protected no-args constructor
+                    if (isConstructorMethod(innerMethod)) {
+                        PsiParameterList params = innerMethod.getParameterList();
+                        boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
+                        if (params.getParametersCount() == 0 && isPubOrPro) {
+                            childHasNoArgsConstructor = true;
+                        } else {
+                            childHasParameterizedConrtuctor = true;
+                        }
+                    }
+                }
+                //Child class conditions for no-args
+                missingChildNoArgs = jsonbtypeParent && !childHasNoArgsConstructor && childHasParameterizedConrtuctor;
+                //Jsonb deseriazation diagnostics
+                generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
+                        false, missingChildNoArgs, innerClass);
             }
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
+            //Parent class conditions for no-args
+            missingParentNoArgs = jsonbtypeParent && !parentHasNoArgsConstructor && parentHasParameterizedConrtuctor;
+            //Jsonb deseriazation diagnostics
+            generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
+                    missingParentNoArgs, false, type);
+        }
+    }
+    
+    /**
+     * @param unit
+     * @param diagnostics
+     * @param jsonbtypeParent
+     * @param isInnerClass
+     * @param missingParentNoArgs
+     * @param missingChildNoArgs
+     * @param type
+     * @description This method generates diagnostics which deals with deserialization
+     */
+    private void generateJsonbDeserializerDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, boolean jsonbtypeParent, boolean isInnerClass, boolean missingParentNoArgs,
+                                                      boolean missingChildNoArgs, PsiClass type) {
+        //Parent class diagnostics
+        if (!isInnerClass) {
+            if (missingParentNoArgs) {
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING, null, DiagnosticSeverity.Error));
+            }
+        } else {
+            //Child class non-static and No-args diagnostics
+            if (!type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbInnerNonStatic", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Error));
+            }
+            if (type.hasModifierProperty(PsiModifier.STATIC) && missingChildNoArgs)
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING, null, DiagnosticSeverity.Error));
         }
     }
 
