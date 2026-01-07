@@ -167,7 +167,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             //Child class non-static and No-args diagnostics
             if (!type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
                 diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbInnerNonStatic", type.getName()),
-                        JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Error));
+                        JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Warning));
             }
             if (type.hasModifierProperty(PsiModifier.STATIC) && missingChildNoArgs)
                 diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),

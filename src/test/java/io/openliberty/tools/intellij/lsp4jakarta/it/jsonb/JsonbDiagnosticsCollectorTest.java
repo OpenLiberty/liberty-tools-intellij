@@ -522,7 +522,7 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
         Diagnostic d3 = JakartaForJavaAssert.d(83, 14, 22,
                 "Cannot de-serialize class SubChild because it is non-static. Please declare the class as static for JSONB de-serialization.",
-                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
     }
