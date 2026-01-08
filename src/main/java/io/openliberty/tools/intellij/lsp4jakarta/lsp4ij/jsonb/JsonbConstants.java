@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation and others.
+ * Copyright (c) 2020, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,6 +25,8 @@ public class JsonbConstants {
     public static final String DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_FIELD = "NonmutualJsonbTransientAnnotation";
     public static final String DIAGNOSTIC_CODE_ANNOTATION_TRANSIENT_ACCESSOR = "NonmutualJsonbTransientAnnotationOnAccessor";
     public static final String DIAGNOSTIC_CODE_ANNOTATION_DUPLICATE_NAME = "DuplicatePropertyNamesOnJsonbFields";
+    public static final String DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING = "InvalidJsonBNoArgsConstructorMissing";
+    public static final String DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS = "InvalidJsonBNonStaticInnerClass";
 
     /* Annotation Constants */
     public static final String JSONB_PACKAGE = "jakarta.json.bind.annotation.";
