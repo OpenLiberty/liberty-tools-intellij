@@ -56,16 +56,16 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         //Jsonb type for Parent
         boolean jsonbtypeParent;
         //No-Args for Parent and Child
-        boolean parentHasNoArgsConstructor;
-        boolean parentHasParameterizedConrtuctor;
-        boolean childHasNoArgsConstructor;
-        boolean childHasParameterizedConrtuctor;
-        boolean missingParentNoArgs;
-        boolean missingChildNoArgs;
+        boolean parentHasValidNoArgsConstructor;
+        boolean parentHasInvalidConstructor;
+        boolean childHasValidNoArgsConstructor;
+        boolean childHasInvalidConstructor;
+        boolean missingParentNoArgsConstructor;
+        boolean missingChildNoArgsConstructor;
 
         for (PsiClass type : types) {
-            parentHasNoArgsConstructor = false;
-            parentHasParameterizedConrtuctor = false;
+            parentHasValidNoArgsConstructor = false;
+            parentHasInvalidConstructor = false;
             innerClasses = type.getInnerClasses();
             jsonbtypeParent = Arrays.stream(type.getAnnotations())
                         .map(PsiAnnotation::getQualifiedName)
@@ -87,9 +87,9 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     PsiParameterList params = method.getParameterList();
                     boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
                     if(params.getParametersCount()==0 && isPubOrPro){
-                        parentHasNoArgsConstructor = true;
+                        parentHasValidNoArgsConstructor = true;
                     }else{
-                        parentHasParameterizedConrtuctor = true;
+                        parentHasInvalidConstructor = true;
                     }
                 }
             }
@@ -115,33 +115,33 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 }
             }
             for(PsiClass innerClass: innerClasses){
-                childHasNoArgsConstructor = false;
-                childHasParameterizedConrtuctor = false;
+                childHasValidNoArgsConstructor = false;
+                childHasInvalidConstructor = false;
                 for (PsiMethod innerMethod : innerClass.getMethods()) {
                     //Checks if parent class has public or protected no-args constructor
                     if (isConstructorMethod(innerMethod)) {
                         PsiParameterList params = innerMethod.getParameterList();
                         boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
                         if (params.getParametersCount() == 0 && isPubOrPro) {
-                            childHasNoArgsConstructor = true;
+                            childHasValidNoArgsConstructor = true;
                         } else {
-                            childHasParameterizedConrtuctor = true;
+                            childHasInvalidConstructor = true;
                         }
                     }
                 }
                 //Child class conditions for no-args
-                missingChildNoArgs = jsonbtypeParent && !childHasNoArgsConstructor && childHasParameterizedConrtuctor;
+                missingChildNoArgsConstructor = jsonbtypeParent && !childHasValidNoArgsConstructor && childHasInvalidConstructor;
                 //Jsonb deseriazation diagnostics
                 generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
-                        false, missingChildNoArgs, innerClass);
+                        false, missingChildNoArgsConstructor, innerClass);
             }
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
             //Parent class conditions for no-args
-            missingParentNoArgs = jsonbtypeParent && !parentHasNoArgsConstructor && parentHasParameterizedConrtuctor;
+            missingParentNoArgsConstructor = jsonbtypeParent && !parentHasValidNoArgsConstructor && parentHasInvalidConstructor;
             //Jsonb deseriazation diagnostics
             generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
-                    missingParentNoArgs, false, type);
+                    missingParentNoArgsConstructor, false, type);
         }
     }
     
