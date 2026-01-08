@@ -513,11 +513,11 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic d1 = JakartaForJavaAssert.d(4, 13, 33,
-                "Missing NoArgsConstructor: Class JsonbDeserialization is used with JSONB, but does not declare a public or protected no-argument constructor.",
+                "Missing Public or Protected NoArgsConstructor: Class JsonbDeserialization is used with JSONB, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
         Diagnostic d2 = JakartaForJavaAssert.d(56, 21, 31,
-                "Missing NoArgsConstructor: Class ChildClass is used with JSONB, but does not declare a public or protected no-argument constructor.",
+                "Missing Public or Protected NoArgsConstructor: Class ChildClass is used with JSONB, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
         Diagnostic d3 = JakartaForJavaAssert.d(83, 14, 22,
