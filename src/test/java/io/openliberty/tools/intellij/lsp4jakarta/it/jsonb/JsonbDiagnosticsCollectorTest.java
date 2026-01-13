@@ -566,8 +566,6 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10);
 
-        // Test code actions
-        // Quick fix for the field "favoriteEditor"
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
         String newText = "/******************************************************************************* \n" +
                 "* Copyright (c) 2025 IBM Corporation and others.\n" +
