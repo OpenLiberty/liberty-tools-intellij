@@ -56,36 +56,36 @@ public class ValidationMethodParamAnnotationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Past");
         Diagnostic d2 = d(51, 77, 81,
-                "The @Positive annotation can only be used on \n- BigDecimal \n- BigInteger\n- byte, short, int, long, float, double (and their respective wrappers) \n type Parameters.",
+                "The @Positive annotation can only be used on \n- BigDecimal \n- BigInteger\n- byte, short, int, long, float, double (and their respective wrappers) \n type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Positive");
         Diagnostic d3 = d(52, 30, 46,
-                "This annotation can only be used on Parameters that have CharSequence, Collection, Array or Map as a Parameter type.",
+                "This annotation can only be used on parameters that have CharSequence, Collection, Array or Map as a parameter type.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.NotEmpty");
 
         Diagnostic d4 = d(57, 39, 46,
-                "The @Negative annotation can only be used on \n- BigDecimal \n- BigInteger\n- byte, short, int, long, float, double (and their respective wrappers) \n type Parameters.",
+                "The @Negative annotation can only be used on \n- BigDecimal \n- BigInteger\n- byte, short, int, long, float, double (and their respective wrappers) \n type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Negative");
 
         Diagnostic d5 = d(57, 66, 78,
-                "The @NotBlank annotation can only be used on String and CharSequence type Parameters.",
+                "The @NotBlank annotation can only be used on String and CharSequence type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.NotBlank");
 
         Diagnostic d6 = d(58, 34, 44,
-                "The @Pattern annotation can only be used on String and CharSequence type Parameters.",
+                "The @Pattern annotation can only be used on String and CharSequence type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Pattern");
 
         Diagnostic d7 = d(63, 68, 69,
-                "The @Digits annotation can only be used on: \n- BigDecimal \n- BigInteger \n- CharSequence\n- byte, short, int, long (and their respective wrappers) \n type Parameters.",
+                "The @Digits annotation can only be used on: \n- BigDecimal \n- BigInteger \n- CharSequence\n- byte, short, int, long (and their respective wrappers) \n type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Digits");
 
         Diagnostic d8 = d(63, 86, 98,
-                "The @Email annotation can only be used on String and CharSequence type Parameters.",
+                "The @Email annotation can only be used on String and CharSequence type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Email");
 
@@ -95,17 +95,17 @@ public class ValidationMethodParamAnnotationTest extends BaseJakartaTest {
                 "jakarta.validation.constraints.FutureOrPresent");
 
         Diagnostic d10 = d(69, 41, 42,
-                "This annotation can only be used on Parameters that have CharSequence, Collection, Array or Map as a Parameter type.",
+                "This annotation can only be used on parameters that have CharSequence, Collection, Array or Map as a parameter type.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.Size");
 
         Diagnostic d11 = d(69, 63, 64,
-                "The @AssertTrue annotation can only be used on boolean and Boolean type Parameters.",
+                "The @AssertTrue annotation can only be used on boolean and Boolean type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.AssertTrue");
 
         Diagnostic d12 = d(69, 93, 103,
-                "The @DecimalMax annotation can only be used on: \n- BigDecimal \n- BigInteger \n- CharSequence\n- byte, short, int, long (and their respective wrappers) \n type Parameters.",
+                "The @DecimalMax annotation can only be used on: \n- BigDecimal \n- BigInteger \n- CharSequence\n- byte, short, int, long (and their respective wrappers) \n type parameters.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement",
                 "jakarta.validation.constraints.DecimalMax");
 
