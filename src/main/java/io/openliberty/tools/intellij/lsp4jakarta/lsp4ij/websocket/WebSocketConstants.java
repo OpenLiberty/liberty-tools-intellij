@@ -47,6 +47,7 @@ public class WebSocketConstants {
 
     public static final String DIAGNOSTIC_SERVER_ENDPOINT = "ChangeInvalidServerEndpoint";
     public static final String DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH = "InvalidEndpointWithoutStartingSlash";
+    public static final String DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR = "missingPublicNoArgConstructor";
 
     /*
      * https://jakarta.ee/specifications/websocket/2.0/websocket-spec-2.0.html#
