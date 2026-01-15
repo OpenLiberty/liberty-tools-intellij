@@ -325,7 +325,6 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                 if(params.getParametersCount()==0 && isPublic){
                     hasPublicNoArgConstructor = true;
                 }
-
             }
         }
 
