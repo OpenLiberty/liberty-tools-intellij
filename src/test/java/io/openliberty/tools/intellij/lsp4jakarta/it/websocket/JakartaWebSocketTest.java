@@ -266,4 +266,35 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
         CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
     }
+
+
+    @Test
+    public void testDefaultConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/DefaultConstructorTest.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testUserDefinedNoArgConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/UserDefinedNoArgConstrctor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
