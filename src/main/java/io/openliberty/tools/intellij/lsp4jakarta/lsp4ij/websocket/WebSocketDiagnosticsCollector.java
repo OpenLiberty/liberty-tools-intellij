@@ -316,10 +316,10 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
     }
 
     private void publicNoArgsConstructorCheck(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit){
-        boolean hasConstructor = false, hasPublicNoArgConstructor = false;
+        boolean hasUserDefinedConstructor = false, hasPublicNoArgConstructor = false;
         for (PsiMethod method : type.getMethods()) {
             if (isConstructorMethod(method)){
-                hasConstructor = true;
+                hasUserDefinedConstructor = true;
                 PsiParameterList params = method.getParameterList();
                 boolean isPublic = method.hasModifierProperty(PsiModifier.PUBLIC);
                 if(params.getParametersCount()==0 && isPublic){
@@ -328,7 +328,7 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
             }
         }
 
-        if (hasConstructor && !hasPublicNoArgConstructor) {
+        if (hasUserDefinedConstructor && !hasPublicNoArgConstructor) {
             diagnostics.add(createDiagnostic(type, unit,
                     Messages.getMessage("publicNoArgConstructorMissing", type.getName()),
                     WebSocketConstants.DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR, null, DiagnosticSeverity.Error));
