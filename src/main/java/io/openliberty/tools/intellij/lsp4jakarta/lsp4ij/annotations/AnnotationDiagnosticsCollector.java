@@ -220,7 +220,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         PsiType returnType = element.getReturnType();
         String diagnosticMessage;
         if(!methodName.startsWith("set")){
-            diagnosticMessage = Messages.getMessage("AnnotationNameStartWithSet",
+            diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
                     "@Resource", methodName);
             diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
                     AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET, null,
