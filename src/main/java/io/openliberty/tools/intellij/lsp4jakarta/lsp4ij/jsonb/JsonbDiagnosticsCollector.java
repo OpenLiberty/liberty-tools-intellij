@@ -53,8 +53,6 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         PsiClass[] innerClasses;
         PsiMethod[] methods;
         PsiAnnotation[] allAnnotations;
-        //Jsonb type for Parent
-        boolean jsonbtypeParent;
         //No-Args for Parent and Child
         boolean parentHasValidNoArgsConstructor;
         boolean parentHasInvalidConstructor;
@@ -62,15 +60,11 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         boolean childHasInvalidConstructor;
         boolean missingParentNoArgsConstructor;
         boolean missingChildNoArgsConstructor;
-
         for (PsiClass type : types) {
             parentHasValidNoArgsConstructor = false;
             parentHasInvalidConstructor = false;
             innerClasses = type.getInnerClasses();
-            jsonbtypeParent = Arrays.stream(type.getAnnotations())
-                        .map(PsiAnnotation::getQualifiedName)
-                        .filter(Objects::nonNull)
-                        .anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
+
             methods = type.getMethods();
             List<PsiMethod> jonbMethods = new ArrayList<PsiMethod>();
             // methods
@@ -83,15 +77,15 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     }
                 }
                 //Checks if parent class has public or protected no-args constructor
-                if(isConstructorMethod(method)){
-                    PsiParameterList params = method.getParameterList();
-                    boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
-                    if(params.getParametersCount()==0 && isPubOrPro){
-                        parentHasValidNoArgsConstructor = true;
-                    }else{
-                        parentHasInvalidConstructor = true;
-                    }
-                }
+				if (isConstructorMethod(method)) {
+					PsiParameterList params = method.getParameterList();
+					boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
+					if (params.getParametersCount() == 0 && isPubOrPro) {
+						parentHasValidNoArgsConstructor = true;
+					} else {
+						parentHasInvalidConstructor = true;
+					}
+				}
             }
             if (jonbMethods.size() > JsonbConstants.MAX_METHOD_WITH_JSONBCREATOR) {
                 for (PsiMethod method : methods) {
@@ -102,49 +96,61 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             // fields
             //Changes to detect if Jsonb property names are not unique
             Set<String> uniquePropertyNames = new LinkedHashSet<String>();
+            //Checks for class level JSONB Annotations
+            boolean jsonbtypeParent = isJsonbtypeParent(type);
             for (PsiField field : type.getFields()) {
+				// If class not annotated with JSONB, find if fields are.
+				if (!jsonbtypeParent) {
+					jsonbtypeParent = isJsonbtypeParent(field);
+				}
                 collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
                 collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
                 collectJsonbUniquePropertyNames(uniquePropertyNames, field);
-                //If class not annotated with JSONB, find if fields are.
-                if(!jsonbtypeParent){
-                    jsonbtypeParent = Arrays.stream(field.getAnnotations())
-                            .map(PsiAnnotation::getQualifiedName)
-                            .filter(Objects::nonNull)
-                            .anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
-                }
             }
-            for(PsiClass innerClass: innerClasses){
-                childHasValidNoArgsConstructor = false;
-                childHasInvalidConstructor = false;
-                for (PsiMethod innerMethod : innerClass.getMethods()) {
-                    //Checks if parent class has public or protected no-args constructor
-                    if (isConstructorMethod(innerMethod)) {
-                        PsiParameterList params = innerMethod.getParameterList();
-                        boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
-                        if (params.getParametersCount() == 0 && isPubOrPro) {
-                            childHasValidNoArgsConstructor = true;
-                        } else {
-                            childHasInvalidConstructor = true;
-                        }
-                    }
-                }
-                //Child class conditions for no-args
-                missingChildNoArgsConstructor = jsonbtypeParent && !childHasValidNoArgsConstructor && childHasInvalidConstructor;
-                //Jsonb deseriazation diagnostics
-                generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
-                        false, missingChildNoArgsConstructor, innerClass);
-            }
+			for (PsiClass innerClass : innerClasses) {
+				childHasValidNoArgsConstructor = false;
+				childHasInvalidConstructor = false;
+				for (PsiMethod innerMethod : innerClass.getMethods()) {
+					// Checks if parent class has public or protected no-args constructor
+					if (isConstructorMethod(innerMethod)) {
+						PsiParameterList params = innerMethod.getParameterList();
+						boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
+						if (params.getParametersCount() == 0 && isPubOrPro) {
+							childHasValidNoArgsConstructor = true;
+						} else {
+							childHasInvalidConstructor = true;
+						}
+					}
+				}
+				// Child class conditions for no-args
+				missingChildNoArgsConstructor = jsonbtypeParent && !childHasValidNoArgsConstructor
+						&& childHasInvalidConstructor;
+				// Jsonb deseriazation diagnostics
+				generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
+						false, missingChildNoArgsConstructor, innerClass);
+			}
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
-            //Parent class conditions for no-args
-            missingParentNoArgsConstructor = jsonbtypeParent && !parentHasValidNoArgsConstructor && parentHasInvalidConstructor;
-            //Jsonb deseriazation diagnostics
-            generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
-                    missingParentNoArgsConstructor, false, type);
+			// Parent class conditions for no-args
+			missingParentNoArgsConstructor = jsonbtypeParent && !parentHasValidNoArgsConstructor
+					&& parentHasInvalidConstructor;
+			// Jsonb deseriazation diagnostics
+			generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
+					missingParentNoArgsConstructor, false, type);
         }
     }
-    
+
+    /**
+     * @param element
+     * @description This method checks if the Psi element passed has annotations of JSON Binding and declares it JSONB Type class or not.
+     */
+	private static boolean isJsonbtypeParent(PsiModifierListOwner element) {
+		return Arrays.stream(element.getAnnotations())
+				.map(PsiAnnotation::getQualifiedName)
+				.filter(Objects::nonNull)
+				.anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
+	}
+
     /**
      * @param unit
      * @param diagnostics
