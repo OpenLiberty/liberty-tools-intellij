@@ -55,14 +55,14 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         PsiAnnotation[] allAnnotations;
         //No-Args for Parent and Child
         boolean parentHasValidNoArgsConstructor;
-        boolean parentHasInvalidConstructor;
         boolean childHasValidNoArgsConstructor;
-        boolean childHasInvalidConstructor;
         boolean missingParentNoArgsConstructor;
         boolean missingChildNoArgsConstructor;
+        boolean hasUserDefinedParentConstructor; //To check for existence of explicit constructors
+        boolean hasUserDefinedChildConstructor; //To check for existence of explicit constructors
         for (PsiClass type : types) {
             parentHasValidNoArgsConstructor = false;
-            parentHasInvalidConstructor = false;
+            hasUserDefinedParentConstructor = false;
             innerClasses = type.getInnerClasses();
 
             methods = type.getMethods();
@@ -78,12 +78,11 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 }
                 //Checks if parent class has public or protected no-args constructor
 				if (isConstructorMethod(method)) {
+					hasUserDefinedParentConstructor = true;
 					PsiParameterList params = method.getParameterList();
 					boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
 					if (params.getParametersCount() == 0 && isPubOrPro) {
 						parentHasValidNoArgsConstructor = true;
-					} else {
-						parentHasInvalidConstructor = true;
 					}
 				}
             }
@@ -109,22 +108,21 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             }
 			for (PsiClass innerClass : innerClasses) {
 				childHasValidNoArgsConstructor = false;
-				childHasInvalidConstructor = false;
+				hasUserDefinedChildConstructor = false;
 				for (PsiMethod innerMethod : innerClass.getMethods()) {
 					// Checks if parent class has public or protected no-args constructor
 					if (isConstructorMethod(innerMethod)) {
+						hasUserDefinedChildConstructor = true;
 						PsiParameterList params = innerMethod.getParameterList();
 						boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
 						if (params.getParametersCount() == 0 && isPubOrPro) {
 							childHasValidNoArgsConstructor = true;
-						} else {
-							childHasInvalidConstructor = true;
 						}
 					}
 				}
 				// Child class conditions for no-args
 				missingChildNoArgsConstructor = jsonbtypeParent && !childHasValidNoArgsConstructor
-						&& childHasInvalidConstructor;
+						&& hasUserDefinedChildConstructor;
 				// Jsonb deseriazation diagnostics
 				generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
 						false, missingChildNoArgsConstructor, innerClass);
@@ -133,7 +131,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
 			// Parent class conditions for no-args
 			missingParentNoArgsConstructor = jsonbtypeParent && !parentHasValidNoArgsConstructor
-					&& parentHasInvalidConstructor;
+					&& hasUserDefinedParentConstructor;
 			// Jsonb deseriazation diagnostics
 			generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
 					missingParentNoArgsConstructor, false, type);
