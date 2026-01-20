@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project with space in directory name.
  */
@@ -27,17 +29,17 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     /**
      * Single module Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
+    private static final String SM_MP_PROJECT_NAME = MAVEN_MP_PROJECT;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(MAVEN_PROJECT_PATH).toAbsolutePath().toString();
 
     /**
      * The path to the folder containing the test projects, including directories with spaces.
      */
-    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "maven sample").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH_NEW = Paths.get(MAVEN_PROJECT_PATH_WITH_SPACE).toAbsolutePath().toString();
 
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
@@ -83,14 +85,14 @@ public class MavenSingleModMPSIDProjectTest extends SingleModMPProjectTestCommon
     MavenSingleModMPSIDProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(PROJECTS_PATH_NEW);
-        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, "build", "reports", "tests", "test", "index.html"));
+        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME, INDEX_HTML_PATH));
         setSmMPProjectName(SM_MP_PROJECT_NAME);
         setBuildCategory(BuildType.MAVEN_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath(Paths.get("target", "liberty").toString());
-        setBuildFileName("pom.xml");
+        setBuildFileName(MAVEN_BUILD_FILE);
         setBuildFileOpenCommand("Liberty: View pom.xml");
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");

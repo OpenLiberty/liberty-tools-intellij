@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project with space in directory and name.
  */
@@ -27,22 +29,22 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     /**
      * Single module Microprofile project name specified in file settings.gradle.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
+    private static final String SM_MP_PROJECT_NAME = GRADLE_MP_PROJECT;
 
     /**
      * Project name of Microprofile single module in file settings-copy.gradle.
      */
-    private static final String SM_MP_PROJECT_NAME_NEW = "singleMod GradleMP";
+    private static final String SM_MP_PROJECT_NAME_NEW = GRADLE_MP_PROJECT_WITH_SPACE;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR).toAbsolutePath().toString();
 
     /**
      * The path to the folder containing the test projects, including directories with spaces.
      */
-    private static final String PROJECTS_PATH_NEW = Paths.get("src", "test", "resources", "projects", "gradle sample").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH_NEW = Paths.get(GRADLE_PROJECT_PATH_WITH_SPACE).toAbsolutePath().toString();
 
     /**
      * Prepares the environment for test execution.
@@ -57,13 +59,13 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
             Path projectDirPath = pathNew.resolve(SM_MP_PROJECT_NAME);
 
             // Define paths for the original and copy of settings.gradle
-            Path originalPath = projectDirPath.resolve("settings.gradle");
-            Path originalPathCopy = projectDirPath.resolve("settings-copy.gradle");
+            Path originalPath = projectDirPath.resolve(SETTINGS_GRADLE);
+            Path originalPathCopy = projectDirPath.resolve(SETTINGS_COPY_GRADLE);
 
             // Rename settings.gradle to settings-duplicate.gradle
-            Files.move(originalPath, originalPath.resolveSibling("settings-duplicate.gradle"));
+            Files.move(originalPath, originalPath.resolveSibling(SETTINGS_DUPLICATE_GRADLE));
             // Rename settings-copy.gradle to settings.gradle
-            Files.move(originalPathCopy, originalPathCopy.resolveSibling("settings.gradle"));
+            Files.move(originalPathCopy, originalPathCopy.resolveSibling(SETTINGS_GRADLE));
 
             Path projectDirNewPath = pathNew.resolve(SM_MP_PROJECT_NAME_NEW);
 
@@ -95,14 +97,14 @@ public class GradleSingleModMPSIDProjectTest extends SingleModMPProjectTestCommo
     GradleSingleModMPSIDProjectTest() {
         // set the new locations for the test, not the original locations
         setProjectsDirPath(PROJECTS_PATH_NEW);
-        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, "build", "reports", "tests", "test", "index.html"));
+        setTestReportPath(Paths.get(PROJECTS_PATH_NEW, SM_MP_PROJECT_NAME_NEW, INDEX_HTML_PATH));
         setSmMPProjectName(SM_MP_PROJECT_NAME_NEW);
         setBuildCategory(BuildType.GRADLE_TYPE);
         setSmMpProjPort(9080);
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath("build");
-        setBuildFileName("build.gradle");
+        setBuildFileName(GRADLE_BUILD_FILE);
         setBuildFileOpenCommand("Liberty: View Gradle config");
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");
