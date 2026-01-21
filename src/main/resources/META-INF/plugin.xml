@@ -352,6 +352,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotationOnAccessor"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
 
         <!-- Persistence -->
         <javaCodeActionParticipant kind="quickfix"
@@ -388,6 +392,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#InvalidEndpointWithoutStartingSlash"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.PrefixSlashAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-websocket#missingPublicNoArgConstructor"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketNoArgConstructorQuickFix"/>
         <!-- Servlet -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"

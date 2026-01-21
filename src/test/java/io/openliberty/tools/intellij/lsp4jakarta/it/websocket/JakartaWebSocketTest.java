@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2025 IBM Corporation and others.
+* Copyright (c) 2022, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -233,5 +233,68 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnMessageDuplicateMethod");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testNoArgConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/MissingPublicNoArgConstructor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 42,
+                "WebSocket endpoint class MissingPublicNoArgConstructor must declare a public no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-websocket", "missingPublicNoArgConstructor");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "@ServerEndpoint(\"/path\")\npublic class MissingPublicNoArgConstructor {\n\n" +
+                "    String status;\n\n" +
+                "    public MissingPublicNoArgConstructor() {\n    }\n\n" +
+                "    public MissingPublicNoArgConstructor(String status) {\n" +
+                "        super();\n        this.status = status;\n    }\n\n}\n";
+
+        TextEdit te = te(0, 0, 15, 0, newText);
+        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+    }
+
+
+    @Test
+    public void testDefaultConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/DefaultConstructorTest.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testUserDefinedNoArgConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/UserDefinedNoArgConstrctor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 }

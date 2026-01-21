@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -38,6 +38,9 @@ public class AnnotationConstants {
     public static final String DIAGNOSTIC_CODE_RESOURCE_RETURN_TYPE = "IncorrectResourceReturnType";
     public static final String DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE = "MissingResourceTypeAttribute";
     public static final String DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE = "MissingResourceNameAttribute";
+    public static final String DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET = "ResourceNameMustStartWithSet";
+    public static final String DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM = "ResourceMustDeclareExactlyOneParam";
+    public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID = "ResourceReturnTypeMustBeVoid";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS = "PostConstructParams";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE = "PostConstructReturnType";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION = "PostConstructException";
