@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -146,6 +146,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                     AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE, null,
                                     DiagnosticSeverity.Error));
                         }
+                    } else if (element instanceof PsiMethod) {
+                        validateResourceMethods(unit, diagnostics, (PsiMethod) element, annotation);
                     }
                 }
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
@@ -204,6 +206,42 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             }
         }
     }
+
+    /**
+     * validateResourceMethods
+     * This method is responsible for finding diagnostics in methods annotated with @Resource.
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validateResourceMethods(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiMethod element, PsiAnnotation annotation) {
+        String methodName = element.getName();
+        PsiType returnType = element.getReturnType();
+        String diagnosticMessage;
+        if(!methodName.startsWith("set")){
+            diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
+                    "@Resource", methodName);
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET, null,
+                    DiagnosticSeverity.Error));
+        }
+        if(!(returnType == null || returnType.equals(PsiTypes.voidType()))){
+            diagnosticMessage = Messages.getMessage("AnnotationReturnTypeMustBeVoid",
+                    "@Resource", methodName);
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID, null,
+                    DiagnosticSeverity.Error));
+        }
+        if(element.getParameterList().getParametersCount() != 1){
+            diagnosticMessage = Messages.getMessage("AnnotationMustDeclareExactlyOneParam",
+                    "@Resource", methodName);
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
                                     ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables,

@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2022, 2025 IBM Corporation and others.
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the 
  * terms of the Eclipse Public License v. 2.0 which is available at 
@@ -68,6 +68,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                 // ServerEndpoint annotation diagnostics
                 serverEndpointErrorCheck(type, diagnostics, unit);
+
+                publicNoArgsConstructorCheck(type, diagnostics, unit);
             }
         }
     }
@@ -312,6 +314,27 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         }
         return endpointPathVars;
     }
+
+    private void publicNoArgsConstructorCheck(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit){
+        boolean hasUserDefinedConstructor = false, hasPublicNoArgConstructor = false;
+        for (PsiMethod method : type.getMethods()) {
+            if (isConstructorMethod(method)){
+                hasUserDefinedConstructor = true;
+                PsiParameterList params = method.getParameterList();
+                boolean isPublic = method.hasModifierProperty(PsiModifier.PUBLIC);
+                if(params.getParametersCount()==0 && isPublic){
+                    hasPublicNoArgConstructor = true;
+                }
+            }
+        }
+
+        if (hasUserDefinedConstructor && !hasPublicNoArgConstructor) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("publicNoArgConstructorMissing", type.getName()),
+                    WebSocketConstants.DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR, null, DiagnosticSeverity.Error));
+        }
+    }
+
     /**
      * Check if valueClass is a wrapper object for a primitive value Based on
      * https://github.com/eclipse/lsp4mp/blob/9789a1a996811fade43029605c014c7825e8f1da/microprofile.jdt/org.eclipse.lsp4mp.jdt.core/src/main/java/org/eclipse/lsp4mp/jdt/core/utils/JDTTypeUtils.java#L294-L298
