@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation, Matheus Cruz and others.
+ * Copyright (c) 2020, 2026 IBM Corporation, Matheus Cruz and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -50,10 +50,21 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
         PsiClass[] types = unit.getClasses();
+        PsiClass[] innerClasses;
         PsiMethod[] methods;
         PsiAnnotation[] allAnnotations;
-
+        //No-Args for Parent and Child
+        boolean parentHasValidNoArgsConstructor;
+        boolean childHasValidNoArgsConstructor;
+        boolean missingParentNoArgsConstructor;
+        boolean missingChildNoArgsConstructor;
+        boolean hasUserDefinedParentConstructor; //To check for existence of explicit constructors
+        boolean hasUserDefinedChildConstructor; //To check for existence of explicit constructors
         for (PsiClass type : types) {
+            parentHasValidNoArgsConstructor = false;
+            hasUserDefinedParentConstructor = false;
+            innerClasses = type.getInnerClasses();
+
             methods = type.getMethods();
             List<PsiMethod> jonbMethods = new ArrayList<PsiMethod>();
             // methods
@@ -65,6 +76,15 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                             jonbMethods.add(method);
                     }
                 }
+                //Checks if parent class has public or protected no-args constructor
+				if (isConstructorMethod(method)) {
+					hasUserDefinedParentConstructor = true;
+					PsiParameterList params = method.getParameterList();
+					boolean isPubOrPro = method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.PROTECTED);
+					if (params.getParametersCount() == 0 && isPubOrPro) {
+						parentHasValidNoArgsConstructor = true;
+					}
+				}
             }
             if (jonbMethods.size() > JsonbConstants.MAX_METHOD_WITH_JSONBCREATOR) {
                 for (PsiMethod method : methods) {
@@ -75,13 +95,87 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             // fields
             //Changes to detect if Jsonb property names are not unique
             Set<String> uniquePropertyNames = new LinkedHashSet<String>();
+            //Checks for class level JSONB Annotations
+            boolean jsonbtypeParent = isJsonbtypeParent(type);
             for (PsiField field : type.getFields()) {
+				// If class not annotated with JSONB, find if fields are.
+				if (!jsonbtypeParent) {
+					jsonbtypeParent = isJsonbtypeParent(field);
+				}
                 collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
                 collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
                 collectJsonbUniquePropertyNames(uniquePropertyNames, field);
             }
+			for (PsiClass innerClass : innerClasses) {
+				childHasValidNoArgsConstructor = false;
+				hasUserDefinedChildConstructor = false;
+				for (PsiMethod innerMethod : innerClass.getMethods()) {
+					// Checks if parent class has public or protected no-args constructor
+					if (isConstructorMethod(innerMethod)) {
+						hasUserDefinedChildConstructor = true;
+						PsiParameterList params = innerMethod.getParameterList();
+						boolean isPubOrPro = innerMethod.hasModifierProperty(PsiModifier.PUBLIC) || innerMethod.hasModifierProperty(PsiModifier.PROTECTED);
+						if (params.getParametersCount() == 0 && isPubOrPro) {
+							childHasValidNoArgsConstructor = true;
+						}
+					}
+				}
+				// Child class conditions for no-args
+				missingChildNoArgsConstructor = jsonbtypeParent && !childHasValidNoArgsConstructor
+						&& hasUserDefinedChildConstructor;
+				// Jsonb deseriazation diagnostics
+				generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
+						false, missingChildNoArgsConstructor, innerClass);
+			}
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
+			// Parent class conditions for no-args
+			missingParentNoArgsConstructor = jsonbtypeParent && !parentHasValidNoArgsConstructor
+					&& hasUserDefinedParentConstructor;
+			// Jsonb deseriazation diagnostics
+			generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
+					missingParentNoArgsConstructor, false, type);
+        }
+    }
+
+    /**
+     * @param element
+     * @description This method checks if the Psi element passed has annotations of JSON Binding and declares it JSONB Type class or not.
+     */
+	private static boolean isJsonbtypeParent(PsiModifierListOwner element) {
+		return Arrays.stream(element.getAnnotations())
+				.map(PsiAnnotation::getQualifiedName)
+				.filter(Objects::nonNull)
+				.anyMatch(JsonbConstants.JSONB_ANNOTATIONS::contains);
+	}
+
+    /**
+     * @param unit
+     * @param diagnostics
+     * @param jsonbtypeParent
+     * @param isInnerClass
+     * @param missingParentNoArgs
+     * @param missingChildNoArgs
+     * @param type
+     * @description This method generates diagnostics which deals with deserialization
+     */
+    private void generateJsonbDeserializerDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, boolean jsonbtypeParent, boolean isInnerClass, boolean missingParentNoArgs,
+                                                      boolean missingChildNoArgs, PsiClass type) {
+        //Parent class diagnostics
+        if (!isInnerClass) {
+            if (missingParentNoArgs) {
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING, null, DiagnosticSeverity.Error));
+            }
+        } else {
+            //Child class non-static and No-args diagnostics
+            if (!type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbInnerNonStatic", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Warning));
+            }
+            if (type.hasModifierProperty(PsiModifier.STATIC) && missingChildNoArgs)
+                diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),
+                        JsonbConstants.DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING, null, DiagnosticSeverity.Error));
         }
     }
 
