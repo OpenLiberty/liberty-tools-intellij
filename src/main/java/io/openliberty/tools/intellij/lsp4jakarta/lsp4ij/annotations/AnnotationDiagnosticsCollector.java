@@ -13,6 +13,8 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
@@ -153,11 +155,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
-                        if (isCheckedExceptionPresent(method)) {
+                        List<String> checkedExceptions = getCheckedExceptionPresent(method);
+                        if (!checkedExceptions.isEmpty()) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                     "@PostConstruct");
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION, null,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION,
+                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
                                     DiagnosticSeverity.Error));
                         }
                         if (method.getParameters().length != 0) {
@@ -179,11 +183,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) element;
-                        if (isCheckedExceptionPresent(method)) {
+                        List<String> checkedExceptions = getCheckedExceptionPresent(method);
+                        if (!checkedExceptions.isEmpty()) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                     "@PreDestroy");
                             diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION, null,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION,
+                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
                                     DiagnosticSeverity.Error));
                         }
                         if (method.getParameters().length != 0) {
@@ -265,20 +271,27 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     }
 
     /**
-     * isCheckedExceptionPresent
+     * getCheckedExceptionPresent
      * This method scans the exception signatures to identify if any checked exceptions are declared.
      *
-     * @param method
-     * @return
+     * @param method the PSI method
+     * @return list of fully qualified names of checked exceptions
      */
-    private boolean isCheckedExceptionPresent(PsiMethod method) {
+    private List<String> getCheckedExceptionPresent(PsiMethod method) {
+        List<String> checkedExceptions = new ArrayList<>();
         for (PsiClassType type : method.getThrowsList().getReferencedTypes()) {
             PsiClass exceptionClass = type.resolve();
+            /*
+             * A checked exception is any class that extends java.lang.Exception but not
+             * java.lang.RuntimeException.
+             * An unchecked exception is any class that extends java.lang.RuntimeException
+             * or java.lang.Error.
+             */
             if (exceptionClass != null && extendsException(exceptionClass) && notExtendsRuntimeException(exceptionClass)) {
-                return true;
+                checkedExceptions.add(exceptionClass.getQualifiedName());
             }
         }
-        return false;
+        return checkedExceptions;
     }
 
     /**
