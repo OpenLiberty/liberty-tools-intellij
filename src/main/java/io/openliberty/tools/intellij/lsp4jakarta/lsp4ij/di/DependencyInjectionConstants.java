@@ -13,6 +13,9 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di;
 
+import java.util.List;
+import java.util.Set;
+
 public class DependencyInjectionConstants {
 
     /* Annotation Constants */
@@ -27,4 +30,16 @@ public class DependencyInjectionConstants {
     public static final String DIAGNOSTIC_CODE_INJECT_STATIC = "RemoveInjectOrStatic";
     public static final String DIAGNOSTIC_CODE_INJECT_GENERIC = "RemoveInjectForGeneric";
     public static final String DIAGNOSTIC_CODE_INJECT_INNER_CLASS= "RemoveInjectForInnerClass";
+    public static final String DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER= "RemoveInvalidQualifier";
+
+    public static final Set<String> CDI_ANNOTATIONS_FQ = Set.of("jakarta.enterprise.context.ApplicationScoped",
+            "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
+            "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
+            "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype",
+            "jakarta.enterprise.context.Dependent");
+
+    public static final List<String> BUILT_IN_QUALIFIERS = List.of(
+            "jakarta.enterprise.inject.Default",
+            "jakarta.enterprise.inject.Any",
+            "jakarta.inject.Named");
 }

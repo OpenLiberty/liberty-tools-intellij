@@ -19,11 +19,12 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsColle
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionConstants.*;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -60,6 +61,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
         alltypes = unit.getClasses();
         for (PsiClass type : alltypes) {
             PsiField[] allFields = type.getFields();
+            boolean isCdiScoped = hasCdiScopeAnnotation(type);
             for (PsiField field : allFields) {
                 if (containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
                     if (field.hasModifierProperty(PsiModifier.FINAL)) {
@@ -72,6 +74,12 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                         String msg = Messages.getMessage("InjectNonStaticInnerClass");
                         diagnostics.add(createDiagnostic(field, unit, msg,
                                 DIAGNOSTIC_CODE_INJECT_INNER_CLASS, field.getType().getInternalCanonicalText(),
+                                DiagnosticSeverity.Error));
+                    }
+                    List<PsiAnnotation> qualifiers = getQualifiers(field.getAnnotations(), unit, type);
+                    if (qualifiers.size() > 1 && !isCdiScoped) {
+                        diagnostics.add(createDiagnostic(field, unit , Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, field.getType().getInternalCanonicalText(),
                                 DiagnosticSeverity.Error));
                     }
                 }
@@ -121,6 +129,17 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                                     DIAGNOSTIC_CODE_INJECT_INNER_CLASS, method.getReturnType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+                        List<PsiAnnotation> qualifiers = getQualifiers(param.getAnnotations(), unit, type);
+                        if (qualifiers.size() > 1 && !isCdiScoped) {
+                            if (isConstructorMethod(method))
+                                diagnostics.add(createDiagnostic(method, unit , Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                        DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, null,
+                                        DiagnosticSeverity.Error));
+                            else
+                                diagnostics.add(createDiagnostic(method, unit , Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                        DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, method.getReturnType().getInternalCanonicalText(),
+                                        DiagnosticSeverity.Error));
+                        }
                     }
                 }
             }
@@ -133,7 +152,52 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                             DIAGNOSTIC_CODE_INJECT_CONSTRUCTOR, null, DiagnosticSeverity.Error));
                 }
             }
+            //Checking if inner classes have more than one qualifier in fields or method params
+            for(PsiClass innerClass: type.getInnerClasses()){
+                for(PsiField innerField: innerClass.getFields()){
+                    if (containsAnnotation(type, innerField.getAnnotations(), INJECT_FQ_NAME)) {
+                        List<PsiAnnotation> qualifiers = getQualifiers(innerField.getAnnotations(), unit, type);
+                        if (qualifiers.size() > 1 && !isCdiScoped) {
+                            diagnostics.add(createDiagnostic(innerField, unit , Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                    DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, innerField.getType().getInternalCanonicalText(),
+                                    DiagnosticSeverity.Error));
+                        }
+                    }
+                }
+                for(PsiMethod innerMethod: innerClass.getMethods()){
+                    if (containsAnnotation(type, innerMethod.getAnnotations(), INJECT_FQ_NAME)) {
+                        for (PsiParameter param : innerMethod.getParameterList().getParameters()) {
+                            List<PsiAnnotation> qualifiers = getQualifiers(innerMethod.getAnnotations(), unit, type);
+                            if (qualifiers.size() > 1 && !isCdiScoped) {
+                                if (isConstructorMethod(innerMethod))
+                                    diagnostics.add(createDiagnostic(innerMethod, unit, Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                            DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, null,
+                                            DiagnosticSeverity.Error));
+                                else
+                                    diagnostics.add(createDiagnostic(innerMethod, unit , Messages.getMessage("InjectInvalidQualifiersOnField"),
+                                            DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, innerMethod.getReturnType().getInternalCanonicalText(),
+                                            DiagnosticSeverity.Error));
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private List<PsiAnnotation> getQualifiers(PsiAnnotation [] annotations, PsiJavaFile unit, PsiClass type) {
+        return annotations == null ? List.of() : Arrays.stream(annotations).filter(Objects::nonNull).filter(annotation -> DIUtils.isQualifier(annotation, unit, type)
+        ).collect(Collectors.toList());
+    }
+
+    private Boolean hasCdiScopeAnnotation(PsiClass type) {
+        return Arrays.stream(type.getAnnotations()).filter(Objects::nonNull).anyMatch(annotation -> isCdiAnnotation(annotation.getQualifiedName(), type));
+    }
+
+    private boolean isCdiAnnotation(String annotationName, PsiClass type) {
+        return CDI_ANNOTATIONS_FQ.stream().anyMatch(annotation -> {
+            return isMatchedJavaElement(type, annotationName, annotation);
+        });
     }
 
     /**
@@ -161,7 +225,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
 
     private boolean containsAnnotation(PsiClass type, PsiAnnotation[] annotations, String annotationFQName) {
         return Stream.of(annotations).anyMatch(annotation -> {
-                return isMatchedJavaElement(type, annotation.getQualifiedName(), annotationFQName);
+            return isMatchedJavaElement(type, annotation.getQualifiedName(), annotationFQName);
         });
     }
 }

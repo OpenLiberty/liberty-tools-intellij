@@ -318,4 +318,44 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
 
     }
+
+    @Test
+    public void InvalidInjectQualifiersDI() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/di/InvalidInjectQualifiers.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(15, 19, 28,
+                "Injector independent classes must not declare more than one qualifier on an @Inject field or parameter.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidQualifier");
+        d1.setData("io.openliberty.sample.jakarta.di.InvalidInjectQualifiers.Processor");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(18, 8, 31,
+                "Injector independent classes must not declare more than one qualifier on an @Inject field or parameter.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidQualifier");
+        d2.setData(null);
+
+        Diagnostic d3 = JakartaForJavaAssert.d(26, 19, 23,
+                "Injector independent classes must not declare more than one qualifier on an @Inject field or parameter.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidQualifier");
+        d3.setData("io.openliberty.sample.jakarta.di.InvalidInjectQualifiers.InnerBean");
+
+        Diagnostic d4 = JakartaForJavaAssert.d(43, 18, 25,
+                "Injector independent classes must not declare more than one qualifier on an @Inject field or parameter.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidQualifier");
+        d4.setData("jakarta.mail.Service");
+
+        Diagnostic d5 = JakartaForJavaAssert.d(51, 18, 25,
+                "Injector independent classes must not declare more than one qualifier on an @Inject field or parameter.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidQualifier");
+        d5.setData("jakarta.mail.Service");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+    }
 }
