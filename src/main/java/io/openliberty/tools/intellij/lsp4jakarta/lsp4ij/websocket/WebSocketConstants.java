@@ -18,6 +18,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class WebSocketConstants {
@@ -48,6 +49,7 @@ public class WebSocketConstants {
     public static final String DIAGNOSTIC_SERVER_ENDPOINT = "ChangeInvalidServerEndpoint";
     public static final String DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH = "InvalidEndpointWithoutStartingSlash";
     public static final String DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR = "missingPublicNoArgConstructor";
+    public static final String DIAGNOSTICS_DUPLICATE_ANNOTATION = "DuplicateLifeCycleAnnotation";
 
     /*
      * https://jakarta.ee/specifications/websocket/2.0/websocket-spec-2.0.html#
@@ -80,10 +82,10 @@ public class WebSocketConstants {
     /* Annotations */
     public static final String ON_OPEN = "jakarta.websocket.OnOpen";
     public static final String ON_CLOSE = "jakarta.websocket.OnClose";
+    public static final String ON_ERROR = "jakarta.websocket.OnError";
     public static final String ON_MESSAGE = "jakarta.websocket.OnMessage";
 
     public static final String IS_ANNOTATION = "isAnnotation";
-
     /* Types */
     public static final String PATH_PARAM_ANNOTATION = "jakarta.websocket.server.PathParam";
 
