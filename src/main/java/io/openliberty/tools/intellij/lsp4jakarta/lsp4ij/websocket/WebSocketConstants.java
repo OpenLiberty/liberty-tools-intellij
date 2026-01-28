@@ -18,7 +18,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class WebSocketConstants {
