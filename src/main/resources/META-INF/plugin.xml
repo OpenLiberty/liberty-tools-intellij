@@ -396,6 +396,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#missingPublicNoArgConstructor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketNoArgConstructorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-websocket#DuplicateLifeCycleAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.RemoveWebsocketAnnotationsQuickFix"/>
         <!-- Servlet -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
