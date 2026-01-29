@@ -338,13 +338,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
                 "@ServerEndpoint(\"/path\")\n" +
                 "public class DuplicateAnnotationTest {\n\n	" +
-                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnClose\n	public void onClose(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnError\n	public void onError(Session session, Throwable throwable) {\n		// TODO\n	}\n	\n	" +
-                "public void onOpen2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "@OnClose\n	public void onClose2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n		// TODO\n	}\n}\n";
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnClose\n	public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
         TextEdit te = te(0, 0, 50, 0, newText);
         CodeAction ca = ca(uri, "Remove @OnOpen", d1, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
@@ -357,13 +357,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
                 "@ServerEndpoint(\"/path\")\n" +
                 "public class DuplicateAnnotationTest {\n\n	" +
-                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnClose\n	public void onClose(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnError\n	public void onError(Session session, Throwable throwable) {\n		// TODO\n	}\n	\n	" +
-                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "public void onClose2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n		// TODO\n	}\n}\n";
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
         te = te(0, 0, 50, 0, newText);
         ca = ca(uri, "Remove @OnClose", d2, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
@@ -376,13 +376,13 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
                 "@ServerEndpoint(\"/path\")\n" +
                 "public class DuplicateAnnotationTest {\n\n	" +
-                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnClose\n	public void onClose(Session session) throws IOException {\n		// TODO\n	}\n\n	" +
-                "@OnError\n	public void onError(Session session, Throwable throwable) {\n		// TODO\n	}\n	\n	" +
-                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "@OnClose\n	public void onClose2(Session session) throws IOException {\n		// TODO\n	}\n	\n	" +
-                "public void onError2(Session session, Throwable throwable) {\n		// TODO\n	}\n}\n";
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnClose\n	public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
         te = te(0, 0, 50, 0, newText);
         ca = ca(uri, "Remove @OnError", d3, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
