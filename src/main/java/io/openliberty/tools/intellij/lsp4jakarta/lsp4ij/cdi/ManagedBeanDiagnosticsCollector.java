@@ -176,7 +176,20 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             Messages.getMessage("ManagedBeanProducesAndInject"),
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
-
+                //Generate diagnostics for mutually exclusive observes and observesAsync annotations
+                Set<String> conflictParams = new HashSet<>();
+                for (PsiParameter param : method.getParameterList().getParameters()) {
+                    List<String> observesObservesAsync = getMatchedJavaElementNames(type,
+                            Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
+                            INVALID_DISPOSER_FQ_CONFLICTED_PARAMS);
+                    if (new HashSet<>(observesObservesAsync).equals(new HashSet<String>(Arrays.asList(INVALID_DISPOSER_FQ_CONFLICTED_PARAMS)))) {
+                        conflictParams.add(param.getName());
+                    }
+                }
+                if (!conflictParams.isEmpty()) {
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
+                            DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
             }
 
             if (isManagedBean && constructorMethods.size() > 0) {
