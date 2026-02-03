@@ -37,6 +37,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_PRODUCES_PARAM = "RemoveProducesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_CODE_INVALID_DISPOSES_PARAM = "RemoveDisposesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM = "InvalidInjectAnnotationOnMultipleMethodParams";
+    public static final String DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT = "InvalidObservesObservesAsyncMethodParams";
 
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
