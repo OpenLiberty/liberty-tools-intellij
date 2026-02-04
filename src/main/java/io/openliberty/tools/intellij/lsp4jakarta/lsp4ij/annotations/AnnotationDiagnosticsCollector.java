@@ -263,10 +263,11 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM, null,
                         DiagnosticSeverity.Error));
             }
-            case null, default -> {
+            case VALID_SETTER_METHOD -> {
                 PsiParameter param = element.getParameterList().getParameter(0);
                 checkTypeCompatibility(unit, diagnostics, annotation, param.getType(), "parameter");
             }
+            default -> System.out.println("Unexpected value");
         }
     }
 
