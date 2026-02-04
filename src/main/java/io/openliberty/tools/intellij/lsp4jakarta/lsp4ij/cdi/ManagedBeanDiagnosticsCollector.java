@@ -179,9 +179,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 //Generate diagnostics for mutually exclusive observes and observesAsync annotations
                 Set<String> conflictParams = new HashSet<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
-                    Set<String> observesObservesAsync = new HashSet<>(getMatchedJavaElementNames(type,
-                            Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
-                            INVALID_OBSERVES_OBSERVESASYNC_CONFLICTED_PARAMS.toArray(String[]::new)));
+                    String[] annotationSimpleNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
+                    String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVESASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
+                    Set<String> observesObservesAsync = new HashSet<>(getMatchedJavaElementNames(type, annotationSimpleNames, conflictedParamAnnotations));
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVESASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
