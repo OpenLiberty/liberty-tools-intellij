@@ -18,6 +18,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket;
 import java.util.*;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -70,6 +71,8 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                 serverEndpointErrorCheck(type, diagnostics, unit);
 
                 publicNoArgsConstructorCheck(type, diagnostics, unit);
+
+                duplicateLifeCycleAnnotationCheck(type, diagnostics, unit);
             }
         }
     }
@@ -333,6 +336,36 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
                     Messages.getMessage("publicNoArgConstructorMissing", type.getName()),
                     WebSocketConstants.DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR, null, DiagnosticSeverity.Error));
         }
+    }
+
+    private void duplicateLifeCycleAnnotationCheck(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
+
+        Set<String> visitedAnnotations = new HashSet<>();
+
+        for (PsiMethod method : type.getMethods()) {
+            for (PsiAnnotation annotation : method.getAnnotations()) {
+                String annotationName = annotation.getQualifiedName();
+
+                if (isLifecycleAnnotation(type, annotationName)) {
+                    if (visitedAnnotations.contains(annotationName)) {
+                        JsonArray diagnosticsData = new JsonArray();
+                        diagnosticsData.add(annotationName);
+
+                        diagnostics.add(createDiagnostic(annotation, unit,
+                                Messages.getMessage("DuplicateLifeCycleAnnotation", annotationName),
+                                WebSocketConstants.DIAGNOSTICS_DUPLICATE_ANNOTATION, diagnosticsData, DiagnosticSeverity.Error));
+                    } else {
+                        visitedAnnotations.add(annotationName);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isLifecycleAnnotation(PsiClass type, String annotationName) {
+        return isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_OPEN)
+                || isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_CLOSE)
+                || isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_ERROR);
     }
 
     /**
