@@ -1,14 +1,19 @@
 package io.openliberty.sample.jakarta.di;
 
-
-import io.openliberty.sample.jakarta.di.CustomQualifiers.*;
+import io.openliberty.sample.jakarta.di.CustomQualifiers.Fast;
+import io.openliberty.sample.jakarta.di.CustomQualifiers.Gone;
+import io.openliberty.sample.jakarta.di.CustomQualifiers.Invalid;
+import io.openliberty.sample.jakarta.di.CustomQualifiers.Secure;
+import io.openliberty.sample.jakarta.di.CustomQualifiers.Unused;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.mail.Service;
 
-public class InvalidInjectQualifiers {
+@ApplicationScoped
+public class ValidMultipleQualifiers {
 
 	@Inject
 	@Fast
@@ -16,7 +21,7 @@ public class InvalidInjectQualifiers {
 	private Processor processor;
 
 	@Inject
-	public InvalidInjectQualifiers(@Fast @Secure Processor processor)
+	public ValidMultipleQualifiers(@Fast @Secure Processor processor)
 	{
 		this.processor = processor;
 	}
@@ -32,7 +37,7 @@ public class InvalidInjectQualifiers {
 	}
 
 	@Inject
-	public void setBean(io.openliberty.sample.jakarta.di.InvalidInjectQualifiers.InnerBean bean) {
+	public void setBean(io.openliberty.sample.jakarta.di.ValidMultipleQualifiers.InnerBean bean) {
 		this.bean = bean;
 	}
 
@@ -77,7 +82,7 @@ public class InvalidInjectQualifiers {
 	public void setBean2(@Any @Default InnerBean bean2) {
 		this.bean2 = bean2;
 	}
-
+	
 	@Inject
 	@Gone
 	@Unused
@@ -86,6 +91,6 @@ public class InvalidInjectQualifiers {
 
 }
 
-class TempClass{
+class TempClass2{
 	int id;
 }

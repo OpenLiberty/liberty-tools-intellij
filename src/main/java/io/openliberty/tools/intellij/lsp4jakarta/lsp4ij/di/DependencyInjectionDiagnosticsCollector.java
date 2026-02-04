@@ -56,8 +56,6 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
             return;
 
         PsiClass[] alltypes;
-        boolean isInject = false;
-        Set<String> fqNames = new HashSet<>();
         alltypes = unit.getClasses();
         for (PsiClass type : alltypes) {
             PsiField[] allFields = type.getFields();
@@ -77,6 +75,8 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                                 DiagnosticSeverity.Error));
                     }
                 }
+                boolean isInject = false;
+                Set<String> fqNames = new HashSet<>();
                 for(PsiAnnotation annotation: field.getAnnotations()){
                     if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)){
                         isInject = true;

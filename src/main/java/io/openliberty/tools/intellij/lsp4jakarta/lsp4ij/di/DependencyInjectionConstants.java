@@ -13,7 +13,6 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di;
 
-import java.util.List;
 import java.util.Set;
 
 public class DependencyInjectionConstants {
@@ -38,7 +37,7 @@ public class DependencyInjectionConstants {
             "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype",
             "jakarta.enterprise.context.Dependent");
 
-    public static final List<String> BUILT_IN_QUALIFIERS = List.of(
+    public static final Set<String> BUILT_IN_QUALIFIERS = Set.of(
             "jakarta.enterprise.inject.Default",
             "jakarta.enterprise.inject.Any",
             "jakarta.inject.Named");
