@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.*;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.EXCEPTION;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.RUNTIME_EXCEPTION;
 
@@ -150,6 +152,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         }
                     } else if (element instanceof PsiMethod) {
                         validateResourceMethods(unit, diagnostics, (PsiMethod) element, annotation);
+                    } else if (element instanceof PsiField) {
+                        validateResourceFields(unit, diagnostics, (PsiField) element, annotation);
                     }
                 }
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
@@ -214,6 +218,18 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     }
 
     /**
+     * validateResourceFields
+     * This method is responsible for finding diagnostics in fields annotated with @Resource.
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validateResourceFields(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiField element, PsiAnnotation annotation) {
+        checkTypeCompatibility(unit, diagnostics, annotation, element.getType(), "field");
+    }
+
+    /**
      * validateResourceMethods
      * This method is responsible for finding diagnostics in methods annotated with @Resource.
      * @param unit
@@ -223,31 +239,63 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      */
     private void validateResourceMethods(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiMethod element, PsiAnnotation annotation) {
         String methodName = element.getName();
-        PsiType returnType = element.getReturnType();
         String diagnosticMessage;
-        if(!methodName.startsWith("set")){
-            diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
-                    "@Resource", methodName);
-            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                    AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET, null,
-                    DiagnosticSeverity.Error));
-        }
-        if(!(returnType == null || returnType.equals(PsiTypes.voidType()))){
-            diagnosticMessage = Messages.getMessage("AnnotationReturnTypeMustBeVoid",
-                    "@Resource", methodName);
-            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                    AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID, null,
-                    DiagnosticSeverity.Error));
-        }
-        if(element.getParameterList().getParametersCount() != 1){
-            diagnosticMessage = Messages.getMessage("AnnotationMustDeclareExactlyOneParam",
-                    "@Resource", methodName);
-            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                    AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM, null,
-                    DiagnosticSeverity.Error));
+        String errorCode = validateSetterMethod(element);
+        switch (errorCode) {
+            case NAME_MUST_START_WITH_SET -> {
+                diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
+                        "@Resource", methodName);
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET, null,
+                        DiagnosticSeverity.Error));
+            }
+            case RETURN_TYPE_MUST_BE_VOID -> {
+                diagnosticMessage = Messages.getMessage("AnnotationReturnTypeMustBeVoid",
+                        "@Resource", methodName);
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID, null,
+                        DiagnosticSeverity.Error));
+            }
+            case MUST_DECLARE_EXACTLY_ONE_PARAM -> {
+                diagnosticMessage = Messages.getMessage("AnnotationMustDeclareExactlyOneParam",
+                        "@Resource", methodName);
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM, null,
+                        DiagnosticSeverity.Error));
+            }
+            case null, default -> {
+                PsiParameter param = element.getParameterList().getParameter(0);
+                checkTypeCompatibility(unit, diagnostics, annotation, param.getType(), "parameter");
+            }
         }
     }
 
+    /**
+     * checkTypeCompatibility
+     * Create diagnostics if the type specified by a particular annotation is incompatible with
+     * the type of the corresponding field or method parameter.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param annotation
+     * @param type
+     * @param typeString
+     */
+    private void checkTypeCompatibility(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiAnnotation annotation, PsiType type, String typeString) {
+        PsiAnnotationMemberValue typeValue = annotation.findDeclaredAttributeValue("type");
+        if (typeValue instanceof PsiClassObjectAccessExpression) {
+            PsiType psiResourceType = ((PsiClassObjectAccessExpression) typeValue).getOperand().getType();
+                PsiClass psiTypeClass = PsiUtil.resolveClassInType(type);
+                PsiClass psiResourceClass = PsiUtil.resolveClassInType(psiResourceType);
+                if (!inheritsFrom(psiResourceClass, psiTypeClass)){
+                    String diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
+                            typeString);
+                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                            AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH, null,
+                            DiagnosticSeverity.Error));
+                }
+        }
+    }
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
                                     ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables,

@@ -41,6 +41,7 @@ public class AnnotationConstants {
     public static final String DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET = "ResourceNameMustStartWithSet";
     public static final String DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM = "ResourceMustDeclareExactlyOneParam";
     public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID = "ResourceReturnTypeMustBeVoid";
+    public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH = "ResourceTypeMismatch";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS = "PostConstructParams";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE = "PostConstructReturnType";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION = "PostConstructException";
