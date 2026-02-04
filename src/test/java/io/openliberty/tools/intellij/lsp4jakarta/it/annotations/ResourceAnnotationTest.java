@@ -100,4 +100,39 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
+
+    @Test
+    public void ResourceAnnotationTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/annotations/ResourceAnnotationTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // expected annotations
+        Diagnostic d1 = d(8, 1, 51, "Type of the field MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        Diagnostic d2 = d(17, 1, 33, "Type of the field MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        Diagnostic d3 = d(23, 1, 33, "Type of the field MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        Diagnostic d4 = d(26, 1, 32, "Type of the field MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        Diagnostic d5 = d(44, 1, 31, "Type of the parameter MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        Diagnostic d6 = d(49, 1, 32, "Type of the parameter MUST be compatible with the type element of the Resource annotation, if specified.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6);
+
+    }
 }
