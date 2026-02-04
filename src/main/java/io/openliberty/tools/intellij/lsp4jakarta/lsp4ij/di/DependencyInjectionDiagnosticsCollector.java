@@ -17,7 +17,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbConstants;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionConstants.*;
@@ -82,9 +81,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                     if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)){
                         isInject = true;
                     }else{
-                        String matchedAnn = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
-                        if(matchedAnn!=null){
-                            fqNames.add(matchedAnn);
+                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
+                        if(matchedAnnotation!=null){
+                            fqNames.add(matchedAnnotation);
                         }
                     }
                 }
@@ -175,9 +174,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                         if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)){
                             isInjectInner = true;
                             }else{
-                                String matchedAnn = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
-                                if(matchedAnn!=null){
-                                    fqNamesInner.add(matchedAnn);
+                                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
+                                if(matchedAnnotation !=null){
+                                    fqNamesInner.add(matchedAnnotation);
                                 }
                             }
                         }

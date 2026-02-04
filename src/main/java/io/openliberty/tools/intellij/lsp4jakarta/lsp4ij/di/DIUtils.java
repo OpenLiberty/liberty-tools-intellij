@@ -22,9 +22,9 @@ public class DIUtils extends AbstractDiagnosticsCollector {
         if (!hasBuiltInQualifier) {
             PsiJavaCodeReferenceElement ref = annotation.getNameReferenceElement();
             PsiElement resolved = ref != null ? ref.resolve() : null;
-            if (resolved instanceof PsiClass annClass) {
-                for (PsiAnnotation metaAnn : annClass.getAnnotations()) {
-                    return isMatchedJavaElement(type, metaAnn.getQualifiedName(), QUALIFIER_META);
+            if (resolved instanceof PsiClass metaAnnotationClass) {
+                for (PsiAnnotation metaAnnotation : metaAnnotationClass.getAnnotations()) {
+                    return isMatchedJavaElement(type, metaAnnotation.getQualifiedName(), QUALIFIER_META);
                 }
             }
         }
