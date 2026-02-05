@@ -176,7 +176,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             Messages.getMessage("ManagedBeanProducesAndInject"),
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
-                //Generate diagnostics for mutually exclusive observes and observesAsync annotations
+                // Generate diagnostics for mutually exclusive observes and observesAsync annotations
+                //
+                // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
+                // observer_methods
                 Set<String> conflictParams = new HashSet<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationSimpleNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
