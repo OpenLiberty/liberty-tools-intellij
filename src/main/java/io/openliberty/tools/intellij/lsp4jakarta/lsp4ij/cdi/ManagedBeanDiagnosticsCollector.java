@@ -180,9 +180,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 Set<String> conflictParams = new HashSet<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationSimpleNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
-                    String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVESASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
+                    String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
                     Set<String> observesObservesAsync = new HashSet<>(getMatchedJavaElementNames(type, annotationSimpleNames, conflictedParamAnnotations));
-                    if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVESASYNC_CONFLICTED_PARAMS)) {
+                    if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
                 }
