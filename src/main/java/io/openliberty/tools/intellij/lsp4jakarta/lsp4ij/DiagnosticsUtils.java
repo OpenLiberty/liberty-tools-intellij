@@ -37,4 +37,12 @@ public class DiagnosticsUtils {
         return superClass != null &&
                 (clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true));
     }
+
+    public static boolean isClass(PsiClass psiClass) {
+        return psiClass != null &&
+                !psiClass.isInterface() &&
+                !psiClass.isEnum() &&
+                !psiClass.isAnnotationType() &&
+                !psiClass.isRecord();
+    }
 }
