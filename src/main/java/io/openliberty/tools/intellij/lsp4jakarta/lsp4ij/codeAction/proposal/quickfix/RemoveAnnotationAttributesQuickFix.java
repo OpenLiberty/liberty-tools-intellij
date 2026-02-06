@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Lidia Ataupillco Ramos
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
@@ -27,7 +26,6 @@ import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -59,25 +57,15 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
         final CodeAction toResolve = context.getUnresolved();
         final PsiElement node = context.getCoveredNode();
         PsiModifierListOwner binding = getBinding(node);
-        // annotationNode is null when adding an annotation and non-null when adding attributes.
-        PsiAnnotation annotationNode = getAnnotation(node);
-
+        PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
         assert binding != null;
         String label = getLabel();
         ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), binding, annotationNode, 0, this.annotation, new ArrayList<>(), Arrays.asList(attributes));
-
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action " + label);
         return toResolve;
     }
 
-
-    private static PsiAnnotation getAnnotation(PsiElement e) {
-        if (e instanceof PsiAnnotation) {
-            return (PsiAnnotation) e;
-        }
-        return PsiTreeUtil.getParentOfType(e, PsiAnnotation.class);
-    }
     protected static PsiModifierListOwner getBinding(PsiElement node) {
         PsiModifierListOwner binding = PsiTreeUtil.getParentOfType(node, PsiVariable.class);
         if (binding != null) {
@@ -89,6 +77,7 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
         }
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
+
     protected abstract String getLabel();
 
 }
