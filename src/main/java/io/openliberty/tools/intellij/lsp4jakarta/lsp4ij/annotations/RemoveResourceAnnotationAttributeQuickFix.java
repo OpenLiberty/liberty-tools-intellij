@@ -14,12 +14,11 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 
 
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
 
-import org.eclipse.lsp4jakarta.jdt.internal.Messages;
-
 /**
- * Removes the @Resource annotation from the declaring element.
+ * Removes the @Resource annotation attribute
  */
 public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
@@ -29,7 +28,7 @@ public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationA
 
     @Override
     public String getLabel() {
-        return "df";
+        return Messages.getMessage("RemoveAttribute", "type", "@Resource");
     }
 
     @Override
