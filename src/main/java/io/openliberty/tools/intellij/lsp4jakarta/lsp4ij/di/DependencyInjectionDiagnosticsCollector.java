@@ -21,7 +21,12 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionConstants.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,6 +65,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
         for (PsiClass type : alltypes) {
             PsiField[] allFields = type.getFields();
             boolean isCdiScoped = hasCdiScopeAnnotation(type);
+            String[] implicitQualifiers = IMPLICIT_QUALIFIERS.toArray(String[]::new);
             for (PsiField field : allFields) {
                 if (containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
                     if (field.hasModifierProperty(PsiModifier.FINAL)) {
@@ -81,21 +87,10 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                     if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)){
                         isInject = true;
                     }else{
-                        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
-                        if(matchedAnnotation!=null){
-                            fqNames.add(matchedAnnotation);
-                        }
+                        getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNames);
                     }
                 }
-                if (fqNames.equals(IMPLICIT_QUALIFIERS)) {
-                    continue;
-                }else {
-                    //Finding and generating invalid inject qualifier diagnostics for fields in parent class
-                    List<PsiAnnotation> qualifiers = getQualifiers(field.getAnnotations(), unit, type);
-                    if (isInject && qualifiers.size() > 1 && !isCdiScoped) {
-                        createInvalidInjectQualifierFieldDiagnostics(unit, diagnostics, field);
-                    }
-                }
+                checkInvalidQualifiersForField(unit, diagnostics, type, field, fqNames, isInject, isCdiScoped);
             }
 
             List<PsiMethod> injectedConstructors = new ArrayList<PsiMethod>();
@@ -141,18 +136,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                                     DIAGNOSTIC_CODE_INJECT_INNER_CLASS, method.getReturnType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
-                        if(new HashSet<>(getMatchedJavaElementNames(type, Arrays.stream(param.getAnnotations())
-                                .map(PsiAnnotation::getQualifiedName)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet()).toArray(String[]::new), IMPLICIT_QUALIFIERS.toArray(String[]::new))).equals(IMPLICIT_QUALIFIERS)){
-                            continue;
-                        }else {
-                            //Finding and generating invalid inject qualifier diagnostics for method parameters in parent class
-                            List<PsiAnnotation> qualifiers = getQualifiers(param.getAnnotations(), unit, type);
-                            if (qualifiers.size() > 1 && !isCdiScoped) {
-                                createInvalidInjectQualifierMethodDiagnostics(unit, diagnostics, method);
-                            }
-                        }
+                        checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, method, param, implicitQualifiers, isCdiScoped, true);
                     }
                 }
             }
@@ -174,39 +158,91 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                         if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)){
                             isInjectInner = true;
                             }else{
-                                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), IMPLICIT_QUALIFIERS.toArray(String[]::new));
-                                if(matchedAnnotation !=null){
-                                    fqNamesInner.add(matchedAnnotation);
-                                }
+                                getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNamesInner);
                             }
                         }
-                        if (fqNamesInner.equals(IMPLICIT_QUALIFIERS)) {
-                            continue;
-                        }
-                        else {
-                            List<PsiAnnotation> qualifiers = getQualifiers(innerField.getAnnotations(), unit, type);
-                            if (isInjectInner && qualifiers.size() > 1 && !isCdiScoped) {
-                                createInvalidInjectQualifierFieldDiagnostics(unit, diagnostics, innerField);
-                            }
-                        }
-                    }
+                    checkInvalidQualifiersForField(unit, diagnostics, type, innerField, fqNamesInner, isInjectInner, isCdiScoped);
+                }
                 for(PsiMethod innerMethod: innerClass.getMethods()){
                     if (containsAnnotation(type, innerMethod.getAnnotations(), INJECT_FQ_NAME)) {
                         for (PsiParameter param : innerMethod.getParameterList().getParameters()) {
-                            if(new HashSet<>(getMatchedJavaElementNames(type, Arrays.stream(param.getAnnotations())
-                                    .map(PsiAnnotation::getQualifiedName)
-                                    .filter(Objects::nonNull)
-                                    .collect(Collectors.toSet()).toArray(String[]::new), IMPLICIT_QUALIFIERS.toArray(String[]::new))).equals(IMPLICIT_QUALIFIERS)){
-                                continue;
-                            }else {
-                                List<PsiAnnotation> qualifiers = getQualifiers(innerMethod.getAnnotations(), unit, type);
-                                if (qualifiers.size() > 1 && !isCdiScoped) {
-                                    createInvalidInjectQualifierMethodDiagnostics(unit, diagnostics, innerMethod);
-                                }
-                            }
+                            checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, innerMethod, param, implicitQualifiers, isCdiScoped, false);
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * checkInvalidQualifiersForField
+     * Method to generate field level diagnostics for invalid qualifiers
+     *
+     * @param unit
+     * @param diagnostics
+     * @param type
+     * @param field
+     * @param fqNames
+     * @param isInject
+     * @param isCdiScoped
+     */
+    private void checkInvalidQualifiersForField(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiField field, Set<String> fqNames, boolean isInject, boolean isCdiScoped) {
+        if (fqNames.equals(IMPLICIT_QUALIFIERS)) {
+            return;
+        }else {
+            //Finding and generating invalid inject qualifier diagnostics for fields in parent class
+            List<PsiAnnotation> qualifiers = getQualifiers(field.getAnnotations(), unit, type);
+            if (isInject && qualifiers.size() > 1 && !isCdiScoped) {
+                createInvalidInjectQualifierFieldDiagnostics(unit, diagnostics, field);
+            }
+        }
+    }
+
+    /**
+     * getMatchedAnnotationFQ
+     * Gets Fully qualified annotations matching with implicit qualifiers
+     *
+     * @param type
+     * @param annotation
+     * @param implicitQualifiers
+     * @param fqNamesInner
+     */
+    private static void getMatchedAnnotationFQ(PsiClass type, PsiAnnotation annotation, String[] implicitQualifiers, Set<String> fqNamesInner) {
+        String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(), implicitQualifiers);
+        if(matchedAnnotation !=null){
+            fqNamesInner.add(matchedAnnotation);
+        }
+    }
+
+    /**
+     * checkInvalidQualifierMethodDiagnostics
+     * Method checks if invalid qualifier combination is used and throws appropriate diagnostics
+     *
+     * @param unit
+     * @param diagnostics
+     * @param type
+     * @param method
+     * @param param
+     * @param implicitQualifiers
+     * @param isCdiScoped
+     */
+    private void checkInvalidQualifierMethodDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiMethod method, PsiParameter param, String[] implicitQualifiers, boolean isCdiScoped, boolean isParent) {
+        String[] paramAnnotations= Arrays.stream(param.getAnnotations())
+                .map(PsiAnnotation::getQualifiedName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet()).toArray(String[]::new);
+        Set paramAnnotationsFQ = new HashSet<>(getMatchedJavaElementNames(type, paramAnnotations, implicitQualifiers));
+        if(paramAnnotationsFQ.equals(IMPLICIT_QUALIFIERS)){
+            return;
+        }else {
+            //Finding and generating invalid inject qualifier diagnostics for method parameters
+            List<PsiAnnotation> qualifiers = new ArrayList<>();
+            if(isParent)
+                qualifiers = getQualifiers(param.getAnnotations(), unit, type);
+            else
+                qualifiers = getQualifiers(method.getAnnotations(), unit, type);
+            if (qualifiers.size() > 1 && !isCdiScoped) {
+                createInvalidInjectQualifierMethodDiagnostics(unit, diagnostics, method);
             }
         }
     }
