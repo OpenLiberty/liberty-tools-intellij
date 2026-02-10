@@ -25,9 +25,12 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpl
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants.*;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
+    private static final Logger LOGGER = Logger.getLogger(BeanValidationDiagnosticsCollector.class.getName());
     public BeanValidationDiagnosticsCollector() {
         super();
     }
@@ -161,7 +164,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 }
-                default -> System.out.println("Unexpected value for annotation");
+                default -> LOGGER.log(Level.SEVERE, "Unexpected value for annotation");
             }
         }
     }
