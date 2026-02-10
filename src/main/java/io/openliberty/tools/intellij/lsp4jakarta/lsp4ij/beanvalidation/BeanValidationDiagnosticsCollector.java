@@ -86,24 +86,25 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                         source, DIAGNOSTIC_CODE_STATIC,
                         annotationName, DiagnosticSeverity.Error));
-            } else {
-                PsiType type = (isMethod) ? ((PsiMethod) element).getReturnType() : (isField) ?
-                        ((PsiField) element).getType() : ((PsiParameter) element).getType();
-                if (type instanceof PsiClassType) {
-                    PsiType t = PsiPrimitiveType.getUnboxedType(type);
-                    if (t != null) {
-                        type = t;
-                    }
+            }
+            PsiType type = (isMethod) ? ((PsiMethod) element).getReturnType() : (isField) ?
+                    ((PsiField) element).getType() : ((PsiParameter) element).getType();
+            if (type instanceof PsiClassType) {
+                PsiType t = PsiPrimitiveType.getUnboxedType(type);
+                if (t != null) {
+                    type = t;
                 }
-
-                if (matchedAnnotation.equals(ASSERT_FALSE) || matchedAnnotation.equals(ASSERT_TRUE)) {
+            }
+            //The below block throws diagnostics if invalid element type is used with constraint annotations
+            switch (matchedAnnotation) {
+                case ASSERT_FALSE, ASSERT_TRUE -> {
                     String source = getSource(isMethod, isField, annotationName, "AnnotationBoolean");
                     if (!type.equals(PsiTypes.booleanType())) {
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(DECIMAL_MAX) || matchedAnnotation.equals(DECIMAL_MIN)
-                        || matchedAnnotation.equals(DIGITS)) {
+                }
+                case DECIMAL_MAX, DECIMAL_MIN, DIGITS -> {
                     if (!type.getCanonicalText().equals(BIG_DECIMAL)
                             && !type.getCanonicalText().equals(BIG_INTEGER)
                             && !type.getCanonicalText().equals(CHAR_SEQUENCE)
@@ -115,14 +116,9 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(), source,
                                 DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(EMAIL)) {
-                    checkStringOnly(element, diagnostics, annotationName, isMethod, type, isField);
-                } else if (matchedAnnotation.equals(NOT_BLANK)) {
-                    checkStringOnly(element, diagnostics, annotationName, isMethod, type, isField);
-                } else if (matchedAnnotation.equals(PATTERN)) {
-                    checkStringOnly(element, diagnostics, annotationName, isMethod, type, isField);
-                } else if (matchedAnnotation.equals(FUTURE) || matchedAnnotation.equals(FUTURE_OR_PRESENT)
-                        || matchedAnnotation.equals(PAST) || matchedAnnotation.equals(PAST_OR_PRESENT)) {
+                }
+                case EMAIL, PATTERN, NOT_BLANK -> checkStringOnly(element, diagnostics, annotationName, isMethod, type, isField);
+                case FUTURE, FUTURE_OR_PRESENT, PAST, PAST_OR_PRESENT -> {
                     String dataType = type.getCanonicalText();
                     String dataTypeFQName = getMatchedJavaElementName(classType, dataType,
                             SET_OF_DATE_TYPES.toArray(new String[0]));
@@ -131,7 +127,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(MIN) || matchedAnnotation.equals(MAX)) {
+                }
+                case MIN, MAX -> {
                     if (!type.getCanonicalText().equals(BIG_DECIMAL)
                             && !type.getCanonicalText().equals(BIG_INTEGER)
                             && !type.equals(PsiTypes.byteType())
@@ -142,8 +139,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(NEGATIVE) || matchedAnnotation.equals(NEGATIVE_OR_ZERO)
-                        || matchedAnnotation.equals(POSITIVE) || matchedAnnotation.equals(POSITIVE_OR_ZERO)) {
+                }
+                case NEGATIVE, NEGATIVE_OR_ZERO, POSITIVE, POSITIVE_OR_ZERO -> {
                     if (!type.getCanonicalText().equals(BIG_DECIMAL)
                             && !type.getCanonicalText().equals(BIG_INTEGER)
                             && !type.equals(PsiTypes.byteType())
@@ -156,13 +153,15 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
-                } else if (matchedAnnotation.equals(NOT_EMPTY) || matchedAnnotation.equals(SIZE)) {
+                }
+                case NOT_EMPTY, SIZE -> {
                     if (!(isSizeOrNonEmptyAllowed(type))) {
                         String source = getSource(isMethod, isField, annotationName, "SizeOrNonEmptyAnnotations");
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 }
+                default -> System.out.println("Unexpected value for annotation");
             }
         }
     }
