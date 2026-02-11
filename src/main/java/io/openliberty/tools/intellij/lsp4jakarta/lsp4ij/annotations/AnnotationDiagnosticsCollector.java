@@ -129,8 +129,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         }
                     }
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
-                    if (element instanceof PsiClass) {
-                        PsiClass type = (PsiClass) element;
+                    if (element instanceof PsiClass type) {
                         Boolean nameEmpty = true;
                         Boolean typeEmpty = true;
                         for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
@@ -164,8 +163,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                     }
                 }
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
-                    if (element instanceof PsiMethod) {
-                        PsiMethod method = (PsiMethod) element;
+                    if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
                         if (!checkedExceptions.isEmpty()) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
@@ -192,8 +190,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                         }
                     }
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
-                    if (element instanceof PsiMethod) {
-                        PsiMethod method = (PsiMethod) element;
+                    if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
                         if (!checkedExceptions.isEmpty()) {
                             String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
@@ -233,7 +230,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @param annotation
      */
     private void validateResourceFields(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiField element, PsiAnnotation annotation) {
-        checkTypeCompatibility(unit, diagnostics, annotation, element.getType(), "field");
+        if(isAnnotationTypeNotCompatible(annotation, element.getType())){
+            String diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
+                    "field");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH, null,
+                    DiagnosticSeverity.Error));
+        }
     }
 
     /**
@@ -246,63 +249,60 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      */
     private void validateResourceMethods(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiMethod element, PsiAnnotation annotation) {
         String methodName = element.getName();
-        String diagnosticMessage;
+        String diagnosticMessage = null;
+        String messageKey = null;
         String errorCode = validateSetterMethod(element);
         switch (errorCode) {
             case NAME_MUST_START_WITH_SET -> {
                 diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
                         "@Resource", methodName);
-                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                        AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET, null,
-                        DiagnosticSeverity.Error));
+                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET;
             }
             case RETURN_TYPE_MUST_BE_VOID -> {
                 diagnosticMessage = Messages.getMessage("AnnotationReturnTypeMustBeVoid",
                         "@Resource", methodName);
-                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                        AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID, null,
-                        DiagnosticSeverity.Error));
+                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID;
             }
             case MUST_DECLARE_EXACTLY_ONE_PARAM -> {
                 diagnosticMessage = Messages.getMessage("AnnotationMustDeclareExactlyOneParam",
                         "@Resource", methodName);
-                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                        AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM, null,
-                        DiagnosticSeverity.Error));
+                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM;
             }
             case VALID_SETTER_METHOD -> {
                 PsiParameter param = element.getParameterList().getParameter(0);
-                checkTypeCompatibility(unit, diagnostics, annotation, param.getType(), "parameter");
+                if (isAnnotationTypeNotCompatible(annotation, param.getType())){
+                    diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
+                            "parameter");
+                    messageKey = AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH;
+                }
             }
             default -> LOGGER.log(Level.SEVERE, "Unexpected value");
+        }
+        if (null != messageKey){
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    messageKey, null,
+                    DiagnosticSeverity.Error));
         }
     }
 
     /**
-     * checkTypeCompatibility
+     * isAnnotationTypeNotCompatible
      * Create diagnostics if the type specified by a particular annotation is incompatible with
      * the type of the corresponding field or method parameter.
      *
-     * @param unit
-     * @param diagnostics
      * @param annotation
      * @param type
-     * @param typeString
+     * @return
      */
-    private void checkTypeCompatibility(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiAnnotation annotation, PsiType type, String typeString) {
+    private boolean isAnnotationTypeNotCompatible(PsiAnnotation annotation, PsiType type) {
         PsiAnnotationMemberValue typeValue = annotation.findDeclaredAttributeValue("type");
         if (typeValue instanceof PsiClassObjectAccessExpression) {
             PsiType psiResourceType = ((PsiClassObjectAccessExpression) typeValue).getOperand().getType();
                 PsiClass psiTypeClass = PsiUtil.resolveClassInType(type);
                 PsiClass psiResourceClass = PsiUtil.resolveClassInType(psiResourceType);
-                if (!inheritsFrom(psiResourceClass, psiTypeClass)){
-                    String diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
-                            typeString);
-                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                            AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH, null,
-                            DiagnosticSeverity.Error));
-                }
+            return !inheritsFrom(psiResourceClass, psiTypeClass);
         }
+        return false;
     }
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
