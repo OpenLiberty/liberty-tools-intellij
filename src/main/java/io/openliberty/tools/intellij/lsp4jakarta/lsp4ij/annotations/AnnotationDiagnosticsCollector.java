@@ -233,15 +233,16 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                   PsiAnnotation annotation) {
         if (element instanceof PsiClass || element instanceof PsiParameter) {
             PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
-            if (value instanceof PsiLiteralExpression literal) {
-                Object constantValue = literal.getValue();
-                if (constantValue instanceof Integer priority && priority < 0) {
+            if(value instanceof PsiPrefixExpression prefix && prefix.getOperand() instanceof PsiLiteralExpression literal &&
+                    literal.getValue() instanceof Integer){
+                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())){
                     String diagnosticMessage = Messages.getMessage(
                             "PriorityShouldBeNonNegative");
                     diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
                             AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NEGATIVE, null,
-                            DiagnosticSeverity.Error));
+                            DiagnosticSeverity.Warning));
                 }
+
             }
         }
     }
