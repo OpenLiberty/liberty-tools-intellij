@@ -12,7 +12,11 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaCodeReferenceElement;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSConstants;
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 
 import java.util.Arrays;
@@ -48,4 +52,27 @@ public class AnnotationUtil {
                 }
         );
     }
+
+    /**
+     * Check existence of meta annotation
+     *
+     * @param annotation
+     * @param type
+     * @param metaAnnotationFQN
+     * @return Returns true if the annotation has annotated with meta annotation
+     */
+    public static boolean hasMetaAnnotation(PsiAnnotation annotation, PsiClass type, String metaAnnotationFQN){
+        PsiJavaCodeReferenceElement ref = annotation.getNameReferenceElement();
+        PsiElement resolved = ref != null ? ref.resolve() : null;
+
+        if (resolved instanceof PsiClass targetClass) {
+            return Arrays.stream(targetClass.getAnnotations())
+                    .map(PsiAnnotation::getQualifiedName)
+                    .anyMatch(qualifiedName ->
+                            DiagnosticsUtils.isMatchedJavaElement(type, qualifiedName, metaAnnotationFQN)
+                    );
+        }
+        return false;
+    }
+
 }

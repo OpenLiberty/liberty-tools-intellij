@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
@@ -50,37 +51,29 @@ public class JaxrsDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 }
 
                 if (isJaxrsClass) {
-                    Arrays.stream(type.getMethods())
-                            .filter(method -> isConstructorMethod(method) || validateSetterMethod(method))
-                            .flatMap(method -> Arrays.stream(method.getParameterList().getParameters()))
-                            .flatMap(param -> Arrays.stream(param.getAnnotations()))
-                            .filter(paramAnnotation -> isConstraintAnnotation(paramAnnotation, type))
-                            .forEach(paramAnnotation ->
-                                    diagnostics.add(createDiagnostic(paramAnnotation, unit,
-                                            Messages.getMessage("InvalidConstraintTarget"),
-                                            Jax_RSConstants.DIAGNOSTIC_CODE_INVALID_CONSTRAINT_TARGET,
-                                            null, DiagnosticSeverity.Error))
-                            );
+                    checkInvalidConstraintTarget(type, diagnostics, unit);
                 }
             }
         }
     }
 
     private boolean validateSetterMethod(PsiMethod method) {
-        return method.getName().startsWith("set") && PsiTypes.voidType().equals(method.getReturnType()) && method.getParameterList().getParametersCount() == 1;
+        return method.getName().startsWith("set") && PsiTypes.voidType().equals(method.getReturnType())
+                && method.getParameterList().getParametersCount() == 1
+                && method.getModifierList().hasModifierProperty(PsiModifier.PUBLIC);
     }
 
-    private boolean isConstraintAnnotation(PsiAnnotation annotation, PsiClass type) {
-        PsiJavaCodeReferenceElement ref = annotation.getNameReferenceElement();
-        PsiElement resolved = ref != null ? ref.resolve() : null;
-
-        if (resolved instanceof PsiClass targetClass) {
-            return Arrays.stream(targetClass.getAnnotations())
-                    .map(PsiAnnotation::getQualifiedName)
-                    .anyMatch(qualifiedName ->
-                            isMatchedJavaElement(type, qualifiedName, Jax_RSConstants.CONSTRAINT_ANNOTATION)
-                    );
-        }
-        return false;
+    private void checkInvalidConstraintTarget(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit){
+        Arrays.stream(type.getMethods())
+                .filter(method -> isConstructorMethod(method) || validateSetterMethod(method))
+                .flatMap(method -> Arrays.stream(method.getParameterList().getParameters()))
+                .flatMap(param -> Arrays.stream(param.getAnnotations()))
+                .filter(paramAnnotation -> AnnotationUtil.hasMetaAnnotation(paramAnnotation, type, Jax_RSConstants.CONSTRAINT_ANNOTATION))
+                .forEach(paramAnnotation ->
+                        diagnostics.add(createDiagnostic(paramAnnotation, unit,
+                                Messages.getMessage("InvalidConstraintTarget"),
+                                Jax_RSConstants.DIAGNOSTIC_CODE_INVALID_CONSTRAINT_TARGET,
+                                null, DiagnosticSeverity.Error))
+                );
     }
 }

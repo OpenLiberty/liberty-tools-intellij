@@ -45,4 +45,23 @@ public class DiagnosticsUtils {
                 !psiClass.isAnnotationType() &&
                 !psiClass.isRecord();
     }
+
+    /**
+     * Returns true if the java element name matches the given fully qualified java
+     * element name and false otherwise.
+     *
+     * @param type              Java class.
+     * @param javaElementName   given object name.
+     * @param javaElementFQName the fully qualified name.
+     * @return true if the java element name matches the given fully qualified java
+     *         element name and false otherwise.
+     */
+    public static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
+        if (javaElementFQName.equals(javaElementName)) {
+            JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
+            Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
+            return (o != null);
+        }
+        return false;
+    }
 }
