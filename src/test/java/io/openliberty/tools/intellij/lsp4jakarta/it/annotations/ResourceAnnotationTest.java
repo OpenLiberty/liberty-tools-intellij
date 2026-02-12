@@ -57,46 +57,59 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         Diagnostic d2 = d(39, 0, 30, "The @Resource annotation must define the attribute 'name'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceNameAttribute");
 
-        Diagnostic d3 = d(44, 4, 13, "@Resource method 'setStudentId' is invalid: must declare exactly one parameter.",
-                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceMustDeclareExactlyOneParam");
+        Diagnostic d3 = d(44, 4, 13, "The @Resource method 'setStudentId' MUST follow the standard JavaBeans convention: must declare exactly one parameter.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "MustDeclareExactlyOneParam");
 
-        Diagnostic d4 = d(49, 4, 13, "@Resource method 'getStudentId' is invalid: method name must start with set.",
-                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceNameMustStartWithSet");
+        Diagnostic d4 = d(49, 4, 13, "The @Resource method 'getStudentId' MUST follow the standard JavaBeans convention: method name must start with set.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "NameMustStartWithSet");
 
-        Diagnostic d5 = d(54, 4, 13, "@Resource method 'setStudentId1' is invalid: return type must be void.",
-                DiagnosticSeverity.Error, "jakarta-annotations", "ResourceReturnTypeMustBeVoid");
+        Diagnostic d5 = d(54, 4, 13, "The @Resource method 'setIsHappy' MUST follow the standard JavaBeans convention: return type must be void.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "ReturnTypeMustBeVoid");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+        Diagnostic d6 = d(59, 4, 13, "The @Resource method 'setStudentId' MUST follow the standard JavaBeans convention: must be public.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "MethodMustBePublic");
+
+        Diagnostic d7 = d(64, 4, 13, "The @Resource method 'setIsHappy1' MUST follow the standard JavaBeans convention: method must contain property name.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "FieldMustExistInSetter");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;" +
-                "\n\n@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;" +
-                "\n\n\n\t@Resource(shareable = true)\n    private boolean isHappy;\n\n\t@Resource(name = \"test\")\n    private boolean isSad;" +
-                "\n\n\n    private String emailAddress;\n\n\n}\n\n@Resource(name = \"aa\",type=Object.class)\nclass PostDoctoralStudent {\n\n    " +
-                "private Integer studentId;\n\n\n\t@Resource(shareable = true)\n    private boolean isHappy;\n\n\t@Resource\n    " +
-                "private boolean isSad;\n\n\n    private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass MasterStudent {\n\n    " +
+        String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;\n\n" +
+                "@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;\n\n\n\t" +
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t@Resource(name = \"test\")\n    " +
+                "private boolean isSad;\n\n\n    private String emailAddress;\n\n\n}\n\n" +
+                "@Resource(name = \"aa\",type=Object.class)\nclass PostDoctoralStudent {\n\n    private Integer studentId;\n\n\n\t" +
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t@Resource\n    private boolean isSad;\n\n\n    " +
+                "private String emailAddress;\n\n}\n\n@Resource(type = Object.class)\nclass MasterStudent {\n\n    " +
                 "private Integer studentId;\n\n    @Resource\n    public void setStudentId() {\n        this.studentId = studentId;\n    }\n\n    " +
                 "@Resource\n    public void getStudentId(Integer studentId) {\n        this.studentId = studentId;\n    }\n\n    " +
-                "@Resource\n    public Integer setStudentId1(Integer studentId) {\n        return studentId;\n    }\n\n    " +
-                "@Resource\n    public void setStudentId(Integer studentId) {\n        this.studentId = studentId;\n    }\n} \n";
-        TextEdit te = te(0, 0, 64, 0, newText);
+                "@Resource\n    public boolean setIsHappy(boolean isHappy) {\n        return isHappy;\n    }\n\n    " +
+                "@Resource\n    private void setStudentId(Integer studentId) {\n        this.studentId = studentId;\n    }\n\n    " +
+                "@Resource\n    public void setIsHappy1(boolean isHappy) {\n\n    }\n\n    " +
+                "@Resource\n    public void setIsSad(boolean isSad) {\n        this.isSad = isSad;\n    }\n\n    " +
+                "private boolean isSad;\n\n    private boolean isHappy;\n} \n";
+        TextEdit te = te(0, 0, 78, 0, newText);
         CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
         newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;\n\n" +
-                "@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    " +
-                "private Integer studentId;\n\n\n\t@Resource(shareable = true)\n    private boolean isHappy;\n\n\t" +
+                "@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;\n\n\n\t" +
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t" +
                 "@Resource(name = \"test\")\n    private boolean isSad;\n\n\n    private String emailAddress;\n\n\n}\n\n" +
                 "@Resource(name = \"aa\")\nclass PostDoctoralStudent {\n\n    private Integer studentId;\n\n\n\t" +
-                "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t@Resource\n    private boolean isSad;\n\n\n    " +
-                "private String emailAddress;\n\n}\n\n@Resource(type = Object.class, name=\"\")\nclass MasterStudent {\n\n    " +
-                "private Integer studentId;\n\n    @Resource\n    public void setStudentId() {\n        " +
-                "this.studentId = studentId;\n    }\n\n    @Resource\n    public void getStudentId(Integer studentId) {\n        " +
-                "this.studentId = studentId;\n    }\n\n    @Resource\n    public Integer setStudentId1(Integer studentId) {\n        " +
-                "return studentId;\n    }\n\n    @Resource\n    public void setStudentId(Integer studentId) {\n        " +
-                "this.studentId = studentId;\n    }\n} \n";
-        TextEdit te1 = te(0, 0, 64, 0, newText);
+                "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t" +
+                "@Resource\n    private boolean isSad;\n\n\n    private String emailAddress;\n\n}\n\n" +
+                "@Resource(type = Object.class, name=\"\")\nclass MasterStudent {\n\n    private Integer studentId;\n\n    " +
+                "@Resource\n    public void setStudentId() {\n        this.studentId = studentId;\n    }\n\n    " +
+                "@Resource\n    public void getStudentId(Integer studentId) {\n        this.studentId = studentId;\n    }\n\n    " +
+                "@Resource\n    public boolean setIsHappy(boolean isHappy) {\n        return isHappy;\n    }\n\n    " +
+                "@Resource\n    private void setStudentId(Integer studentId) {\n        this.studentId = studentId;\n    }\n\n    " +
+                "@Resource\n    public void setIsHappy1(boolean isHappy) {\n\n    }\n\n    " +
+                "@Resource\n    public void setIsSad(boolean isSad) {\n        this.isSad = isSad;\n    }\n\n    " +
+                "private boolean isSad;\n\n    private boolean isHappy;\n} \n";
+        TextEdit te1 = te(0, 0, 78, 0, newText);
         CodeAction ca1 = ca(uri, "Add name to jakarta.annotation.Resource", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
     }

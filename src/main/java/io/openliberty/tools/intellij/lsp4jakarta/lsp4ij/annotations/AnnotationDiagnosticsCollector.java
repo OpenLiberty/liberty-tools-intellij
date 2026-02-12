@@ -26,7 +26,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -250,38 +249,24 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     private void validateResourceMethods(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiMethod element, PsiAnnotation annotation) {
         String methodName = element.getName();
         String diagnosticMessage = null;
-        String messageKey = null;
-        String errorCode = validateSetterMethod(element);
-        switch (errorCode) {
-            case NAME_MUST_START_WITH_SET -> {
-                diagnosticMessage = Messages.getMessage("AnnotationNameMustStartWithSet",
+        List<String> errorCodes = validateSetterMethod(element, element.getContainingClass());
+        if(errorCodes.isEmpty()){
+            PsiParameter param = element.getParameterList().getParameter(0);
+            if (isAnnotationTypeNotCompatible(annotation, param.getType())){
+                diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
+                        "parameter");
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        "ResourceTypeMismatch", null,
+                        DiagnosticSeverity.Error));
+            }
+        } else {
+            for (String errorCode : errorCodes) {
+                diagnosticMessage = Messages.getMessage(errorCode,
                         "@Resource", methodName);
-                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET;
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        errorCode, null,
+                        DiagnosticSeverity.Error));
             }
-            case RETURN_TYPE_MUST_BE_VOID -> {
-                diagnosticMessage = Messages.getMessage("AnnotationReturnTypeMustBeVoid",
-                        "@Resource", methodName);
-                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID;
-            }
-            case MUST_DECLARE_EXACTLY_ONE_PARAM -> {
-                diagnosticMessage = Messages.getMessage("AnnotationMustDeclareExactlyOneParam",
-                        "@Resource", methodName);
-                messageKey = AnnotationConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM;
-            }
-            case VALID_SETTER_METHOD -> {
-                PsiParameter param = element.getParameterList().getParameter(0);
-                if (isAnnotationTypeNotCompatible(annotation, param.getType())){
-                    diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
-                            "parameter");
-                    messageKey = AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH;
-                }
-            }
-            default -> LOGGER.log(Level.SEVERE, "Unexpected value");
-        }
-        if (null != messageKey){
-            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                    messageKey, null,
-                    DiagnosticSeverity.Error));
         }
     }
 
