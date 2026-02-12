@@ -25,11 +25,7 @@ import java.util.List;
  * Utility class for common IntelliJ PSI-based diagnostic logic.
  */
 public class DiagnosticsUtils {
-
-    public static final String NAME_MUST_START_WITH_SET = "NameMustStartWithSet";
-    public static final String MUST_DECLARE_EXACTLY_ONE_PARAM = "MustDeclareExactlyOneParam";
-    public static final String RETURN_TYPE_MUST_BE_VOID = "ReturnTypeMustBeVoid";
-    public static final String VALID_SETTER_METHOD = "ValidSetterMethod";
+    
     /**
      * inheritsFrom
      * find super class and Check if it is present or not in the type hierarchy
