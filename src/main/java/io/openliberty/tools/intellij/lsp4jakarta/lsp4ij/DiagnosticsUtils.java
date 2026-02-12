@@ -38,6 +38,11 @@ public class DiagnosticsUtils {
                 (clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true));
     }
 
+    /**
+     * Check the given PsiClass is a Java Class
+     * @param psiClass
+     * @return Returns true if the given PsiClass is a Java Class
+     */
     public static boolean isClass(PsiClass psiClass) {
         return psiClass != null &&
                 !psiClass.isInterface() &&
