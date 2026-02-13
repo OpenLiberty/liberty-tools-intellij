@@ -92,7 +92,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                         getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNames);
                     }
                 }
-                checkInvalidQualifiersForField(unit, diagnostics, type, field, fqNames, isInject, isCdiScoped);
+                if (isInject && !isCdiScoped) {
+                    checkInvalidQualifiersForField(unit, diagnostics, type, field, fqNames);
+                }
             }
 
             List<PsiMethod> injectedConstructors = new ArrayList<PsiMethod>();
@@ -138,7 +140,9 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                                     DIAGNOSTIC_CODE_INJECT_INNER_CLASS, method.getReturnType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
-                        checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, method, param, implicitQualifiers, isCdiScoped, true);
+                        if(!isCdiScoped) {
+                            checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, method, param, implicitQualifiers, true);
+                        }
                     }
                 }
             }
@@ -152,24 +156,25 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                 }
             }
             //Checking if inner classes have more than one qualifier in fields or method params
-            for(PsiClass innerClass: type.getInnerClasses()) {
-                for(PsiField innerField: innerClass.getFields()) {
+            for (PsiClass innerClass : type.getInnerClasses()) {
+                for (PsiField innerField : innerClass.getFields()) {
                     boolean isInjectInner = false;
                     Set<String> fqNamesInner = new HashSet<>();
-                    for(PsiAnnotation annotation: innerField.getAnnotations()) {
-                        if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)) {
+                    for (PsiAnnotation annotation : innerField.getAnnotations()) {
+                        if (isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)) {
                             isInjectInner = true;
-                            }
-                        else {
-                                getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNamesInner);
-                            }
+                        } else {
+                            getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNamesInner);
                         }
-                    checkInvalidQualifiersForField(unit, diagnostics, type, innerField, fqNamesInner, isInjectInner, isCdiScoped);
+                    }
+                    if (isInjectInner && !isCdiScoped) {
+                        checkInvalidQualifiersForField(unit, diagnostics, type, innerField, fqNamesInner);
+                    }
                 }
-                for(PsiMethod innerMethod: innerClass.getMethods()) {
-                    if (containsAnnotation(type, innerMethod.getAnnotations(), INJECT_FQ_NAME)) {
+                for (PsiMethod innerMethod : innerClass.getMethods()) {
+                    if (containsAnnotation(type, innerMethod.getAnnotations(), INJECT_FQ_NAME) && !isCdiScoped) {
                         for (PsiParameter param : innerMethod.getParameterList().getParameters()) {
-                            checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, innerMethod, param, implicitQualifiers, isCdiScoped, false);
+                            checkInvalidQualifierMethodDiagnostics(unit, diagnostics, type, innerMethod, param, implicitQualifiers, false);
                         }
                     }
                 }
@@ -186,20 +191,15 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
      * @param type
      * @param field
      * @param fqNames
-     * @param isInject
-     * @param isCdiScoped
      */
-    private void checkInvalidQualifiersForField(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiField field, Set<String> fqNames, boolean isInject, boolean isCdiScoped) {
-        if (isInject && !isCdiScoped) {
-            if (fqNames.equals(IMPLICIT_QUALIFIERS)) {
-                return;
-            }
-            else {
-                //Finding and generating invalid inject qualifier diagnostics for fields in parent class
-                List<PsiAnnotation> qualifiers = getQualifiers(field.getAnnotations(), unit, type);
-                if (qualifiers.size() > 1) {
-                    createInvalidInjectQualifierFieldDiagnostics(unit, diagnostics, field);
-                }
+    private void checkInvalidQualifiersForField(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiField field, Set<String> fqNames) {
+        if (fqNames.equals(IMPLICIT_QUALIFIERS)) {
+            return;
+        } else {
+            //Finding and generating invalid inject qualifier diagnostics for fields in parent class
+            List<PsiAnnotation> qualifiers = getQualifiers(field.getAnnotations(), unit, type);
+            if (qualifiers.size() > 1) {
+                createInvalidInjectQualifierFieldDiagnostics(unit, diagnostics, field);
             }
         }
     }
@@ -230,31 +230,28 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
      * @param method
      * @param param
      * @param implicitQualifiers
-     * @param isCdiScoped
      */
-    private void checkInvalidQualifierMethodDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiMethod method, PsiParameter param, String[] implicitQualifiers, boolean isCdiScoped, boolean isParent) {
-        if(!isCdiScoped) {
-            String[] paramAnnotations= Arrays.stream(param.getAnnotations())
-                    .map(PsiAnnotation::getQualifiedName)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet()).toArray(String[]::new);
-            Set paramAnnotationsFQ = new HashSet<>(getMatchedJavaElementNames(type, paramAnnotations, implicitQualifiers));
+    private void checkInvalidQualifierMethodDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, PsiMethod method, PsiParameter param, String[] implicitQualifiers, boolean isParent) {
+        String[] paramAnnotations= Arrays.stream(param.getAnnotations())
+                .map(PsiAnnotation::getQualifiedName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet()).toArray(String[]::new);
+        Set paramAnnotationsFQ = new HashSet<>(getMatchedJavaElementNames(type, paramAnnotations, implicitQualifiers));
 
-            if (paramAnnotationsFQ.equals(IMPLICIT_QUALIFIERS)) {
-                return;
+        if (paramAnnotationsFQ.equals(IMPLICIT_QUALIFIERS)) {
+            return;
+        } else {
+            //Finding and generating invalid inject qualifier diagnostics for method parameters
+            List<PsiAnnotation> qualifiers;
+
+            if (isParent) {
+                qualifiers = getQualifiers(param.getAnnotations(), unit, type);
             } else {
-                //Finding and generating invalid inject qualifier diagnostics for method parameters
-                List<PsiAnnotation> qualifiers;
+                qualifiers = getQualifiers(method.getAnnotations(), unit, type);
+            }
 
-                if (isParent) {
-                    qualifiers = getQualifiers(param.getAnnotations(), unit, type);
-                } else {
-                    qualifiers = getQualifiers(method.getAnnotations(), unit, type);
-                }
-
-                if (qualifiers.size() > 1) {
-                    createInvalidInjectQualifierMethodDiagnostics(unit, diagnostics, method);
-                }
+            if (qualifiers.size() > 1) {
+                createInvalidInjectQualifierMethodDiagnostics(unit, diagnostics, method);
             }
         }
     }
@@ -284,8 +281,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
             diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("InjectInvalidQualifiersOnField"),
                     DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, null,
                     DiagnosticSeverity.Error));
-        }
-        else {
+        } else {
             diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("InjectInvalidQualifiersOnField"),
                     DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER, method.getReturnType().getInternalCanonicalText(),
                     DiagnosticSeverity.Error));
