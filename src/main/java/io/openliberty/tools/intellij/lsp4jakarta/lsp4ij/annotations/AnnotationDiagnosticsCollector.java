@@ -231,6 +231,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                                   List<Diagnostic> diagnostics,
                                   PsiElement element,
                                   PsiAnnotation annotation) {
+
+        // Priority is valid only for elements that are either classes or method parameters.
         if (element instanceof PsiClass || element instanceof PsiParameter) {
             PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
             if(value instanceof PsiPrefixExpression prefix && prefix.getOperand() instanceof PsiLiteralExpression literal &&
