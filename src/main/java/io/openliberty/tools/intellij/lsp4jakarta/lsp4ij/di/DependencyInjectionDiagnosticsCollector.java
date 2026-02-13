@@ -87,8 +87,7 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
                 for(PsiAnnotation annotation: field.getAnnotations()){
                     if(isMatchedJavaElement(type, annotation.getQualifiedName(), INJECT_FQ_NAME)) {
                         isInject = true;
-                    }
-                    else {
+                    } else {
                         getMatchedAnnotationFQ(type, annotation, implicitQualifiers, fqNames);
                     }
                 }
