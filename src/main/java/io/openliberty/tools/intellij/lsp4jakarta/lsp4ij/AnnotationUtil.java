@@ -16,7 +16,6 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaCodeReferenceElement;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.Jax_RSConstants;
 import io.openliberty.tools.intellij.util.ExceptionUtil;
 
 import java.util.Arrays;
