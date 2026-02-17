@@ -45,7 +45,7 @@ public class AnnotationConstants {
     public static final String DIAGNOSTIC_CODE_PREDESTROY_PARAMS = "PreDestroyParams";
     public static final String DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION = "PreDestroyException";
     public static final String DIAGNOSTIC_CODE_PREDESTROY_STATIC = "PreDestroyStatic";
-    public static final String DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NEGATIVE = "PriorityShouldBeNonNegative";
+    public static final String DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE = "PriorityShouldBeNonNegative";
 
     /* Exceptions */
     public static final String EXCEPTION = "java.lang.Exception";

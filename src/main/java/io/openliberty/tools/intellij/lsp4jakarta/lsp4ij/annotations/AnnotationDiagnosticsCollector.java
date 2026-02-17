@@ -241,7 +241,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                     String diagnosticMessage = Messages.getMessage(
                             "PriorityShouldBeNonNegative");
                     diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                            AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NEGATIVE, null,
+                            AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE, null,
                             DiagnosticSeverity.Warning));
                 }
 
