@@ -27,4 +27,7 @@ public class DependencyInjectionConstants {
     public static final String DIAGNOSTIC_CODE_INJECT_STATIC = "RemoveInjectOrStatic";
     public static final String DIAGNOSTIC_CODE_INJECT_GENERIC = "RemoveInjectForGeneric";
     public static final String DIAGNOSTIC_CODE_INJECT_INNER_CLASS= "RemoveInjectForInnerClass";
+
+    public static final String SCOPE_FQ_NAME = "jakarta.inject.Scope";
+    public static final String DIAGNOSTIC_CODE_INVALID_SCOPE_ATTRIBUTE= "RemoveInvalidScopeAttribute";
 }
