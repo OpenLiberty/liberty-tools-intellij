@@ -13,6 +13,9 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+/**
+ * Common Constants
+ */
 public class CommonConstants {
 
     public static final String DIAGNOSTIC_CODE_METHOD_NAME_START_WITH_SET = "NameMustStartWithSet";

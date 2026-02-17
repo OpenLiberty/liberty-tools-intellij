@@ -88,7 +88,14 @@ public class DiagnosticsUtils {
     }
 
 
-
+    /**
+     * validateSetterMethod
+     * This is to check whether a method is a valid setter.
+     *
+     * @param method
+     * @param parentType
+     * @return
+     */
     public static List<String> validateSetterMethod(PsiMethod method, PsiClass parentType) {
         List<String> errorCodes = new ArrayList<>();
         String methodName = method.getName();
