@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -162,14 +162,17 @@ public class BeanValidationTest extends BaseJakartaTest {
         Diagnostic d20 = d(63, 27, 36,
                 "Constraint annotations are not allowed on static fields.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.Past");
-        Diagnostic d21 = d(66, 20, 26,
+        Diagnostic d21 = d(63, 27, 36,
+                "The @Past annotation can only be used on: Date, Calendar, Instant, LocalDate, LocalDateTime, LocalTime, MonthDay, OffsetDateTime, OffsetTime, Year, YearMonth, ZonedDateTime, HijrahDate, JapaneseDate, JapaneseDate, MinguoDate and ThaiBuddhistDate type fields.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Past");
+        Diagnostic d22 = d(66, 20, 26,
                 "This annotation can only be used on fields of type CharSequence, Collection, Array, or Map.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Size");
-        Diagnostic d22 = d(69, 29, 45,
+        Diagnostic d23 = d(69, 29, 45,
                 "This annotation can only be used on fields of type CharSequence, Collection, Array, or Map.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.NotEmpty");
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8,
-                d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22);
+                d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23);
 
         // Test quickfix codeActions - type (1-17), static, static+type (should only display static)
         String newText = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport java.util.Calendar;\nimport java.util.List;\n\n" +
@@ -301,9 +304,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    private static boolean doubleBad;      // static and invalid type\n\n    private Integer number;\n\n" +
                 "    @NotEmpty\n    private ValidConstraints validConstraints;\n}";
 
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d21);
+        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d22);
         TextEdit te6 = te(0, 0, 70, 1, newText6);
-        CodeAction ca6 = ca(uri, "Remove constraint annotation Size from element", d1, te6);
+        CodeAction ca6 = ca(uri, "Remove constraint annotation Size from element", d22, te6);
 
         assertJavaCodeAction(codeActionParams5, utils, ca6);
 
@@ -322,9 +325,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "    private static boolean doubleBad;      // static and invalid type\n\n    @Size\n    private Integer number;\n\n" +
                 "    private ValidConstraints validConstraints;\n}";
 
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d22);
+        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d23);
         TextEdit te7 = te(0, 0, 70, 1, newText7);
-        CodeAction ca7 = ca(uri, "Remove constraint annotation NotEmpty from element", d22, te7);
+        CodeAction ca7 = ca(uri, "Remove constraint annotation NotEmpty from element", d23, te7);
 
         assertJavaCodeAction(codeActionParams6, utils, ca7);
 
@@ -687,10 +690,13 @@ public class BeanValidationTest extends BaseJakartaTest {
         Diagnostic d3 = d(31, 23, 33,
                 "Constraint annotations are not allowed on static methods.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "MakeNotStatic", "jakarta.validation.constraints.AssertFalse");
-        Diagnostic d4 = d(36, 19, 28,
+        Diagnostic d4 = d(31, 23, 33,
+                "The @AssertFalse annotation can only be used on boolean and Boolean type methods.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.AssertFalse");
+        Diagnostic d5 = d(36, 19, 28,
                 "This annotation can only be used on methods that have CharSequence, Collection, Array or Map as a return type.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation", "FixTypeOfElement", "jakarta.validation.constraints.Size");
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4);
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
 
         // Test quickfix codeAction
         String newText1 = "package io.openliberty.sample.jakarta.beanvalidation;\n\nimport jakarta.validation.constraints.AssertFalse;\n" +
@@ -772,9 +778,9 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "public String notBoolean() {            // invalid type\n        return \"aha!\";\n    }\n\n    @AssertFalse\n    " +
                 "private static int notBoolTwo(int x) {  // invalid type, static\n        return x;\n    }\n\n    " +
                 "private double getSalary(double x) {\n        return x;\n    }\n}";
-        codeActionParams = createCodeActionParams(uri, d4);
+        codeActionParams = createCodeActionParams(uri, d5);
         te = te(0, 0, 39, 1, newText6);
-        ca = ca(uri, "Remove constraint annotation Size from element", d4, te);
+        ca = ca(uri, "Remove constraint annotation Size from element", d5, te);
 
         assertJavaCodeAction(codeActionParams, utils, ca);
     }
