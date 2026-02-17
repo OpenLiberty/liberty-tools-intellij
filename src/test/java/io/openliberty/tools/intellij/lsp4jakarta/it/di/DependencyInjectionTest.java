@@ -318,4 +318,34 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
 
     }
+
+    @Test
+    public void InvalidScopeAttributes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/di/InvalidScopeAttributes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(7, 25, 31,
+                "Scope annotation InvalidScopeAttributes should not declare any attributes.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
+        d1.setData("int");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(9, 8, 13,
+                "Scope annotation InvalidScopeAttributes should not declare any attributes.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
+        d2.setData("java.lang.String");
+
+        Diagnostic d3 = JakartaForJavaAssert.d(11, 5, 10,
+                "Scope annotation InvalidScopeAttributes should not declare any attributes.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
+        d3.setData("int");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+    }
 }
