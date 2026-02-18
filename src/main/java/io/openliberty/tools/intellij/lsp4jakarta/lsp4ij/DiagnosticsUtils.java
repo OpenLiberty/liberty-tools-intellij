@@ -28,7 +28,7 @@ public class DiagnosticsUtils {
     
     /**
      * inheritsFrom
-     * find super class and Check if it is present or not in the type hierarchy
+     * find super class and Check
      *
      * @param clazz
      * @param fqSuperType

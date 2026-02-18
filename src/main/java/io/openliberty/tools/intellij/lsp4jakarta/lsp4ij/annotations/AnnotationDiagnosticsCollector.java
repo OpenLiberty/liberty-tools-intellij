@@ -26,7 +26,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.*;
@@ -54,10 +53,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.Annot
  */
 public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
-    /**
-     * Logger object to record events for this class.
-     */
-    private static final Logger LOGGER = Logger.getLogger(AnnotationDiagnosticsCollector.class.getName());
     
     private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
     private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
