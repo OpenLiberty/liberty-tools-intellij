@@ -97,6 +97,47 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+                        //Validate @Id and @Temporal annotations
+                        //Spec: https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a132
+                        PsiAnnotation[] fieldAnnotations = field.getAnnotations();
+                        PsiAnnotation id = null, temporal = null;
+                        for (PsiAnnotation fieldAnnotation : fieldAnnotations) {
+                            String matchedAnnotation = getMatchedJavaElementName(type, fieldAnnotation.getQualifiedName(),
+                                    PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+
+                            if (matchedAnnotation != null) {
+                                if (matchedAnnotation.equals(PersistenceConstants.ID)) {
+                                    id = fieldAnnotation;
+                                } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
+                                    temporal = fieldAnnotation;
+                                }
+                            }
+                        }
+
+                        if (id != null) {
+                            String fieldTypeFQ = null;
+                            if (field.getType() instanceof PsiClassType classType) {
+                                PsiClass psiClass = classType.resolve();
+                                fieldTypeFQ = psiClass.getQualifiedName();
+                            }
+                            if (fieldTypeFQ != null && fieldTypeFQ.equals(PersistenceConstants.UTIL_DATE)) {
+                                if (temporal != null) {
+                                    if (!isValidTemporalDateValue(temporal.findAttributeValue("value"))) {
+                                        // Add diagnostics for invalid type
+                                        diagnostics.add(createDiagnostic(temporal, unit,
+                                                Messages.getMessage("InvalidValueInTemporalAnnotation"),
+                                                PersistenceConstants.DIAGNOSTIC_CODE_TEMPORAL_INVALID_VALUE, null,
+                                                DiagnosticSeverity.Error));
+                                    }
+                                } else {
+                                    // Add diagnostics for missing annotation
+                                    diagnostics.add(createDiagnostic(field, unit,
+                                            Messages.getMessage("MissingTemporalAnnotation"),
+                                            PersistenceConstants.DIAGNOSTIC_CODE_MISSING_TEMPORAL, null,
+                                            DiagnosticSeverity.Error));
+                                }
+                            }
+                        }
                     }
 
                     // Ensure that the Entity class is not given a final modifier
@@ -121,5 +162,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
         // We do not do anything if the found unit is null
+    }
+
+    private boolean isValidTemporalDateValue(PsiAnnotationMemberValue value) {
+        if(value == null) return false;
+        if (!(value instanceof PsiReferenceExpression ref)) return false;
+        if (!(ref.resolve() instanceof PsiEnumConstant)) return false;
+        return PersistenceConstants.TEMPORAL_TYPE_DATE.equals(value.getText());
     }
 }
