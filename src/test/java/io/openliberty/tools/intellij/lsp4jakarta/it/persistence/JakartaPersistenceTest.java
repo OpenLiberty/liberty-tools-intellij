@@ -361,4 +361,42 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
     }
 
+    @Test
+    public void testIdDateMissingTemporal() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityIdDateMissingTemporal.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = d(11, 14, 16,
+                "A field marked with @Id and typed as java.util.Date must explicitly declare @Temporal(TemporalType.DATE).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MissingTemporalAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+    }
+
+    @Test
+    public void testIdDateInvalidTemporalType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidTemporalType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = d(13, 1, 29,
+                "The @Temporal annotation on a field annotated with @Id and of type java.util.Date must specify TemporalType.DATE.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidValueInTemporalAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+    }
+
 }
