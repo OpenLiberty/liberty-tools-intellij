@@ -14,6 +14,9 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
 import com.intellij.psi.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  Utility class for synthesizing default values for annotation attributes in IntelliJ PSI.
@@ -21,6 +24,8 @@ import com.intellij.psi.*;
  */
 public class ModifyAnnotationAttributes  {
 
+    /** Logger object to record events for this class. */
+    private static final Logger LOGGER = Logger.getLogger(ModifyAnnotationAttributes.class.getName());
 
     /**
      * newDefaultExpression
@@ -35,17 +40,21 @@ public class ModifyAnnotationAttributes  {
         PsiElementFactory factory = PsiElementFactory.getInstance(annotation.getProject());
         PsiJavaCodeReferenceElement ref = annotation.getNameReferenceElement();
         if (ref == null){
+            logUnableToCreateDefaultValue();
             return factory.createExpressionFromText("null", annotation);
         }
         PsiElement resolved = ref.resolve();
         if (!(resolved instanceof PsiClass annotationClass)){
+            logUnableToCreateDefaultValue();
             return factory.createExpressionFromText("null", annotation);
         }
         for (PsiMethod method : annotationClass.getMethods()) {
             if (method.getName().equals(attributeName) && method instanceof PsiAnnotationMethod annotationMethod) {
                 // Use declared default if present
                 PsiAnnotationMemberValue declaredDefault = annotationMethod.getDefaultValue();
-                if (declaredDefault != null) return declaredDefault;
+               if (declaredDefault != null) {
+                   return declaredDefault;
+                }
                 // Otherwise create a default value based on the annotation attribute type
                 PsiType returnType = annotationMethod.getReturnType();
                 return returnType != null
@@ -53,6 +62,7 @@ public class ModifyAnnotationAttributes  {
                         : factory.createExpressionFromText("null", annotation);
             }
         }
+        logUnableToCreateDefaultValue();
         return factory.createExpressionFromText("null", annotation);
     }
 
@@ -79,7 +89,6 @@ public class ModifyAnnotationAttributes  {
             case "double":  return factory.createExpressionFromText("0d", context);
             case "char":    return factory.createExpressionFromText("'\\u0000'", context);
             case "java.lang.String": return factory.createExpressionFromText("\"\"", context);
-            case "java.lang.Class<?>":  return factory.createExpressionFromText("Object.class", context);
             default:
                 if (type instanceof PsiArrayType) {
                     return factory.createExpressionFromText("{}", context);
@@ -87,6 +96,10 @@ public class ModifyAnnotationAttributes  {
                 if (type instanceof PsiClassType) {
                     PsiClass resolved = ((PsiClassType) type).resolve();
                     if (resolved != null) {
+                        if ("java.lang.Class".equals(resolved.getQualifiedName())) {
+                            // Covers Class, Class<?>, Class<? extends T>
+                             return factory.createExpressionFromText("Object.class", context);
+                        }
                         if (resolved.isEnum()) {
                             for (PsiField f : resolved.getFields()) {
                                 if (f instanceof PsiEnumConstant) {
@@ -99,7 +112,16 @@ public class ModifyAnnotationAttributes  {
                         }
                     }
                 }
+                logUnableToCreateDefaultValue();
                 return factory.createExpressionFromText("null", context);
         }
     }
+
+    /**
+     * log if Unable To Create DefaultValue
+     */
+    private static void logUnableToCreateDefaultValue() {
+        LOGGER.log(Level.WARNING, "Unable to create Default Attribute Value");
+    }
+
 }
