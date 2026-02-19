@@ -12,7 +12,7 @@ version '25.0.12'
 
 def remoteRobotVersion = "0.11.23"
 // To switch to nightly version, append "@nightly" to the version number (i.e. 0.4.1-20240828-013108@nightly)
-def lsp4ijVersion = '0.19.1'
+def lsp4ijVersion = '0.19.2'
 
 allprojects {
     sourceCompatibility = javaVersion

@@ -66,7 +66,7 @@ Liberty Tools for IntelliJ has an external dependency on [LSP4IJ](https://github
 | 25.0.5                | 0.13.0, 0.14.0, 0.14.2                       |
 | 25.0.8                | 0.14.2, 0.15.0, 0.16.0, 0.16.1               |
 | 25.0.9                | 0.15.0, 0.16.0, 0.16.1, 0.17.0, 0.18.0       |
-| 25.0.12               | 0.19.0                                       |
+| 25.0.12               | 0.19.0, 0.19.1, 0.19.2                       |
 
 ### Manually install specific release of the LSP4IJ plugin from the Marketplace
 
