@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 IBM Corporation
+ * Copyright (c) 2025, 2026 IBM Corporation
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -36,5 +36,37 @@ public class DiagnosticsUtils {
                 .findClass(fqSuperType, GlobalSearchScope.allScope(project));
         return superClass != null &&
                 (clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true));
+    }
+
+    /**
+     * Check the given PsiClass is a Java Class
+     * @param psiClass
+     * @return Returns true if the given PsiClass is a Java Class
+     */
+    public static boolean isClass(PsiClass psiClass) {
+        return psiClass != null &&
+                !psiClass.isInterface() &&
+                !psiClass.isEnum() &&
+                !psiClass.isAnnotationType() &&
+                !psiClass.isRecord();
+    }
+
+    /**
+     * Returns true if the java element name matches the given fully qualified java
+     * element name and false otherwise.
+     *
+     * @param type              Java class.
+     * @param javaElementName   given object name.
+     * @param javaElementFQName the fully qualified name.
+     * @return true if the java element name matches the given fully qualified java
+     *         element name and false otherwise.
+     */
+    public static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
+        if (javaElementFQName.equals(javaElementName)) {
+            JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
+            Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
+            return (o != null);
+        }
+        return false;
     }
 }
