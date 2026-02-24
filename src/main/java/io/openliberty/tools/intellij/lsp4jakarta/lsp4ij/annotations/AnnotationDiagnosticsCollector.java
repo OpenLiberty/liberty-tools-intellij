@@ -224,7 +224,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @param annotation
      */
     private void validateResourceFields(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiField element, PsiAnnotation annotation) {
-        if(isAnnotationTypeNotCompatible(annotation, element.getType())){
+        if(!isAnnotationTypeCompatible(annotation, element.getType())){
             String diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
                     "field");
             diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
@@ -247,7 +247,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         List<String> errorCodes = validateSetterMethod(element, element.getContainingClass());
         if(errorCodes.isEmpty()){
             PsiParameter param = element.getParameterList().getParameter(0);
-            if (isAnnotationTypeNotCompatible(annotation, param.getType())){
+            if (!isAnnotationTypeCompatible(annotation, param.getType())){
                 diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
                         "parameter");
                 diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
@@ -266,23 +266,23 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
     }
 
     /**
-     * isAnnotationTypeNotCompatible
-     * Create diagnostics if the type specified by a particular annotation is incompatible with
+     * isAnnotationTypeCompatible
+     * Create diagnostics if the type specified by a particular annotation is compatible with
      * the type of the corresponding field or method parameter.
      *
      * @param annotation
      * @param type
      * @return
      */
-    private boolean isAnnotationTypeNotCompatible(PsiAnnotation annotation, PsiType type) {
+    private boolean isAnnotationTypeCompatible(PsiAnnotation annotation, PsiType type) {
         PsiAnnotationMemberValue typeValue = annotation.findDeclaredAttributeValue("type");
         if (typeValue instanceof PsiClassObjectAccessExpression) {
             PsiType psiResourceType = ((PsiClassObjectAccessExpression) typeValue).getOperand().getType();
                 PsiClass psiTypeClass = PsiUtil.resolveClassInType(type);
                 PsiClass psiResourceClass = PsiUtil.resolveClassInType(psiResourceType);
-            return !inheritsFrom(psiResourceClass, psiTypeClass);
+            return inheritsFrom(psiResourceClass, psiTypeClass);
         }
-        return false;
+        return true;
     }
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
