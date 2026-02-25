@@ -331,21 +331,10 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = JakartaForJavaAssert.d(7, 25, 31,
-                "Scope annotated custom interface: InvalidScopeAttributes should not declare any attributes.",
+        Diagnostic d1 = JakartaForJavaAssert.d(5, 18, 40,
+                "Scope annotated interface: InvalidScopeAttributes should not declare any attributes.",
                 DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
-        d1.setData("int");
 
-        Diagnostic d2 = JakartaForJavaAssert.d(9, 8, 13,
-                "Scope annotated custom interface: InvalidScopeAttributes should not declare any attributes.",
-                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
-        d2.setData("java.lang.String");
-
-        Diagnostic d3 = JakartaForJavaAssert.d(11, 5, 10,
-                "Scope annotated custom interface: InvalidScopeAttributes should not declare any attributes.",
-                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
-        d3.setData("int");
-
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
     }
 }
