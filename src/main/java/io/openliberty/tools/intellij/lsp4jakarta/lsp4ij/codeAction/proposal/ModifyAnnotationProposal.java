@@ -83,7 +83,7 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
             for (String newAttr : this.attributesToAdd) {
                 // don't add duplicate attributes to an annotation
                 if (Arrays.stream(values).noneMatch(v -> v.getName().equals(newAttr))) {
-                    annotation.setDeclaredAttributeValue(newAttr, ModifyAnnotationAttributes.newDefaultExpression(annotation, newAttr));
+                    annotation.setDeclaredAttributeValue(newAttr, ModifyAnnotationAttributes.createAnnotationAttributeDefault(annotation, newAttr));
                 }
             }
             // remove attributes

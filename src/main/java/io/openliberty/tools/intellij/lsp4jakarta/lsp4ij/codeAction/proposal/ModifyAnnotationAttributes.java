@@ -28,14 +28,14 @@ public class ModifyAnnotationAttributes  {
     private static final Logger LOGGER = Logger.getLogger(ModifyAnnotationAttributes.class.getName());
 
     /**
-     * newDefaultExpression
+     * createAnnotationAttributeDefault
      * Generates a default value for a given annotation attribute.
      *
      * @param annotation
      * @param attributeName
      * @return
      */
-    public static PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation,
+    public static PsiAnnotationMemberValue createAnnotationAttributeDefault(PsiAnnotation annotation,
                                                                 String attributeName) {
         PsiElementFactory factory = PsiElementFactory.getInstance(annotation.getProject());
         PsiJavaCodeReferenceElement ref = annotation.getNameReferenceElement();
