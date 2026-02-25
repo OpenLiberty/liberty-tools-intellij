@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation and others.
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -43,9 +43,14 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         }
         Collection<PsiMethodCallExpression> allMethodInvocations = PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
         List<PsiMethodCallExpression> createPointerInvocations = new ArrayList<>();
+        //Used to get the list of method invocations for JsonObjectBuilder add methods
+        List<PsiMethodCallExpression> createObjectBuilderMethodInvocations = new ArrayList<>();
         for (PsiMethodCallExpression mi : allMethodInvocations) {
             if (isMatchedJsonCreatePointer(mi)) {
                 createPointerInvocations.add(mi);
+            }
+            if (isMatchedJsonObjectBuilder(mi)) {
+                createObjectBuilderMethodInvocations.add(mi);
             }
         }
         for (PsiMethodCallExpression m: createPointerInvocations) {
@@ -59,6 +64,34 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
                 diagnostics.add(diagnostic);
             }
         }
+        for(PsiMethodCallExpression m: createObjectBuilderMethodInvocations){
+            PsiExpression arg = m.getArgumentList().getExpressions()[0];
+            //https://jakarta.ee/specifications/jsonp/2.1/apidocs/jakarta.json/jakarta/json/jsonobjectbuilder
+            //Does not allow key to be null for JsonObjectBuilder.add() method
+            if(arg instanceof PsiLiteralExpression lit && lit.getValue() == null) {
+                Range range = PositionUtils.toNameRange(arg);
+                Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("ErrorMessageJsonPObjectKeyNonNull"));
+                completeDiagnostic(diagnostic, JsonpConstants.DIAGNOSTIC_CODE_INVALID_OBJECT_BUILDER_KEY);
+                diagnostics.add(diagnostic);
+            }
+        }
+    }
+
+    /**
+     * isMatchedJsonObjectBuilder
+     * Method used to identify jakarta.json.JsonObjectBuilder.add type method invocations
+     *
+     * @param mi
+     * @return boolean
+     */
+    private boolean isMatchedJsonObjectBuilder(PsiMethodCallExpression mi) {
+        String miFQName = null;
+        PsiMethod m = mi.resolveMethod();
+        if (m != null && m.getClass() != null) {
+            miFQName = m.getContainingClass().getQualifiedName() + "." + m.getName();
+        }
+        return mi.getArgumentList().getExpressionCount() == 2
+                && JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_ADD.equals(miFQName);
     }
 
     private boolean isInvalidArgument(PsiExpression arg) {
