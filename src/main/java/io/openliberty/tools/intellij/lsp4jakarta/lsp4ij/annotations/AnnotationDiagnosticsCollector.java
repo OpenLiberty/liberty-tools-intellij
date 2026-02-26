@@ -225,8 +225,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      */
     private void validateResourceFields(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiField element, PsiAnnotation annotation) {
         if(!isAnnotationTypeCompatible(annotation, element.getType())){
-            String diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
-                    "field");
+            String diagnosticMessage = Messages.getMessage("ResourceTypeMismatchField");
             diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
                     AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH, null,
                     DiagnosticSeverity.Error));
@@ -248,8 +247,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         if(errorCodes.isEmpty()){
             PsiParameter param = element.getParameterList().getParameter(0);
             if (!isAnnotationTypeCompatible(annotation, param.getType())){
-                diagnosticMessage = Messages.getMessage("ResourceTypeMismatch",
-                        "parameter");
+                diagnosticMessage = Messages.getMessage("ResourceTypeMismatchParameter");
                 diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
                         "ResourceTypeMismatch", null,
                         DiagnosticSeverity.Error));
