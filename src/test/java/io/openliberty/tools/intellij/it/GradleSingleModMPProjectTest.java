@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
+ *
+ * GHA tag - Gradle-MicroProfile-Tests
  */
 public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**

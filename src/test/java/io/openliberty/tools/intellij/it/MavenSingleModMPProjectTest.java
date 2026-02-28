@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
+ *
+ * GHA tag - Maven-MicroProfile-Tests
  */
 public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
 
