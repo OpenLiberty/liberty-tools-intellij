@@ -53,10 +53,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
 
     private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
     private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
-            AnnotationConstants.RESOURCE_FQ_NAME };
+            AnnotationConstants.RESOURCE_FQ_NAME, AnnotationConstants.PRIORITY_FQ_NAME };
+    private static final String[] VALID_FIELD_ANNOTATION = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME};
     private static final String[] VALID_METHOD_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
             AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
             AnnotationConstants.RESOURCE_FQ_NAME };
+    private static final String[] VALID_METHOD_PARAM_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME, AnnotationConstants.PRIORITY_FQ_NAME };
 
     public AnnotationDiagnosticsCollector() {
         super();
@@ -89,13 +92,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                     // method parameters
                     PsiParameter[] parameters = method.getParameterList().getParameters();
                     for (PsiParameter parameter : parameters) {
-                        processAnnotations(parameter, annotatables, VALID_ANNOTATIONS);
+                        processAnnotations(parameter, annotatables, VALID_METHOD_PARAM_ANNOTATIONS);
                     }
                 }
                 // Field
                 PsiField[] fields = type.getFields();
                 for (PsiField field : fields) {
-                    processAnnotations(field, annotatables, VALID_TYPE_ANNOTATIONS);
+                    processAnnotations(field, annotatables, VALID_FIELD_ANNOTATION);
                 }
             }
 
@@ -151,6 +154,8 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                     } else if (element instanceof PsiMethod) {
                         validateResourceMethods(unit, diagnostics, (PsiMethod) element, annotation);
                     }
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRIORITY_FQ_NAME)) {
+                    validatePriority(unit, diagnostics, element, annotation);
                 }
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod) {
@@ -212,6 +217,38 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             }
         }
     }
+
+    /**
+     * validatePriority
+     * This method validates priority values to check whether any negative values have been applied.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validatePriority(PsiJavaFile unit,
+                                  List<Diagnostic> diagnostics,
+                                  PsiElement element,
+                                  PsiAnnotation annotation) {
+
+        // Priority is valid only for elements that are either classes or method parameters.
+        if (element instanceof PsiClass || element instanceof PsiParameter) {
+            PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
+            if(value instanceof PsiPrefixExpression prefix && prefix.getOperand() instanceof PsiLiteralExpression literal &&
+                    literal.getValue() instanceof Integer){
+                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())){
+                    String diagnosticMessage = Messages.getMessage(
+                            "PriorityShouldBeNonNegative");
+                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                            AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE, null,
+                            DiagnosticSeverity.Warning));
+                }
+
+            }
+        }
+    }
+
 
     /**
      * validateResourceMethods
