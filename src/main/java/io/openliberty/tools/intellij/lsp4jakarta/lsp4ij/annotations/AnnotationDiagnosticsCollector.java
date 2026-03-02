@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
+import com.redhat.devtools.lsp4ij.internal.StringUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -359,7 +360,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             PsiAnnotation annotation,
             List<Diagnostic> diagnostics, PsiJavaFile unit) {
 
-        if (name == null || name.trim().isEmpty()) {
+        if (StringUtils.isBlank(name)) {
             String diagnosticMessage = Messages.getMessage("GeneratedValueCannotBeEmpty", "@Generated", "value");
             diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
                     AnnotationConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_EMPTY, null,
