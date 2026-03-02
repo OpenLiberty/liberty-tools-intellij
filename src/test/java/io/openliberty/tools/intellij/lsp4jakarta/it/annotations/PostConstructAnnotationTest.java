@@ -135,4 +135,25 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
         CodeAction ca1 = ca(uri, "Remove all parameters", d2, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca, ca1);
     }
+
+    @Test
+    public void testIncorrectPostConstructAnnotation() throws Exception {
+        // Set up the module and file where a non-Jakarta PostConstruct annotation is used
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // The file path to a Java file that includes an incorrectly qualified PostConstruct annotation
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) +
+                        "/src/main/java/io/openliberty/sample/jakarta/annotations/IncorrectPostConstructAnnotation.java"
+        );
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        // Adding a test to ensure no diagnostics are triggered for any non-matching annotation or import path similar to "jakarta.annotation.PostConstruct"
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Ensure no diagnostics are generated for any annotation or import that is not exactly "jakarta.annotation.PostConstruct"
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
