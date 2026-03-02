@@ -47,16 +47,23 @@ public class GeneratedAnnotationTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected annotations
-        Diagnostic d1 = JakartaForJavaAssert.d(7, 4, 63,
+        Diagnostic d1 = JakartaForJavaAssert.d(4, 0, 31,
+                "The @Generated annotation attribute 'value' must have the name of the code generator.",
+                DiagnosticSeverity.Error, "jakarta-annotations", "GeneratedValueEmpty");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(7, 4, 67,
                 "The @Generated annotation must define the attribute 'date' following the ISO 8601 standard.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "InvalidDateFormat");
+        Diagnostic d3 = JakartaForJavaAssert.d(10, 4, 74,
+                "The @Generated annotation attribute 'value' should use the fully qualified name of the code generator.",
+                DiagnosticSeverity.Warning, "jakarta-annotations", "GeneratedValueInvalidFormat");
         
-        Diagnostic d2 = JakartaForJavaAssert.d(13, 4, 70,
+        Diagnostic d4 = JakartaForJavaAssert.d(13, 4, 66,
                 "The @Generated annotation must define the attribute 'date' following the ISO 8601 standard.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "InvalidDateFormat");
 
         
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4);
     }
 
 }
