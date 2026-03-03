@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation.
+ * Copyright (c) 2021, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -176,7 +176,23 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             Messages.getMessage("ManagedBeanProducesAndInject"),
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
-
+                // Generate diagnostics for mutually exclusive observes and observesAsync annotations
+                //
+                // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
+                // observer_methods
+                Set<String> conflictParams = new HashSet<>();
+                for (PsiParameter param : method.getParameterList().getParameters()) {
+                    String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
+                    String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
+                    Set<String> observesObservesAsync = new HashSet<>(getMatchedJavaElementNames(type, annotationQualifiedNames, conflictedParamAnnotations));
+                    if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
+                        conflictParams.add(param.getName());
+                    }
+                }
+                if (!conflictParams.isEmpty()) {
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
+                            DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
             }
 
             if (isManagedBean && constructorMethods.size() > 0) {

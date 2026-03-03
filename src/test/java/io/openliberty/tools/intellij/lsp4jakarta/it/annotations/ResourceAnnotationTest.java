@@ -51,10 +51,10 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected annotations
-        Diagnostic d1 = d(22, 0, 22, "The @Resource annotation must define the attribute 'type'.",
+        Diagnostic d1 = d(24, 0, 22, "The @Resource annotation must define the attribute 'type'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceTypeAttribute");
 
-        Diagnostic d2 = d(39, 0, 30, "The @Resource annotation must define the attribute 'name'.",
+        Diagnostic d2 = d(42, 0, 30, "The @Resource annotation must define the attribute 'name'.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "MissingResourceNameAttribute");
 
         Diagnostic d3 = d(44, 4, 13, "The @Resource method 'setStudentId' must follow the standard JavaBeans convention: must declare exactly one parameter.",
@@ -72,7 +72,13 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         Diagnostic d7 = d(64, 4, 13, "The @Resource method 'setIsHappy1' must follow the standard JavaBeans convention: method must contain property name.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "FieldMustExistInSetter");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7);
+        Diagnostic d8 = d(25, 0, 13, "Priority values should generally be non-negative, with negative values reserved for special meanings such as \"undefined\" or \"not specified\".",
+                DiagnosticSeverity.Warning, "jakarta-annotations", "PriorityShouldBeNonNegative");
+
+        Diagnostic d9 = d(64, 29, 43, "Priority values should generally be non-negative, with negative values reserved for special meanings such as \"undefined\" or \"not specified\".",
+                DiagnosticSeverity.Warning, "jakarta-annotations", "PriorityShouldBeNonNegative");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6, d7, d8, d9);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;\n\n" +
@@ -90,10 +96,12 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
                 "@Resource\n    public void setIsSad(boolean isSad) {\n        this.isSad = isSad;\n    }\n\n    " +
                 "private boolean isSad;\n\n    private boolean isHappy;\n} \n";
         TextEdit te = te(0, 0, 78, 0, newText);
+
         CodeAction ca = ca(uri, "Add type to jakarta.annotation.Resource", d1, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d2);
+
         newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.Resource;\n\n" +
                 "@Resource(type = Object.class, name = \"aa\")\npublic class ResourceAnnotation {\n\n    private Integer studentId;\n\n\n\t" +
                 "@Resource(shareable = true)\n    private boolean isHappy;\n\n\t" +

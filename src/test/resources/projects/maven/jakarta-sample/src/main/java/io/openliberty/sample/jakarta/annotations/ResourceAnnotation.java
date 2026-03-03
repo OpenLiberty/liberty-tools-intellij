@@ -1,8 +1,10 @@
 package io.openliberty.sample.jakarta.annotations;
 
+import jakarta.annotation.Priority;
 import jakarta.annotation.Resource;
 
 @Resource(type = Object.class, name = "aa")
+@Priority(0)
 public class ResourceAnnotation {
 
     private Integer studentId;
@@ -21,6 +23,7 @@ public class ResourceAnnotation {
 }
 
 @Resource(name = "aa")
+@Priority(-1)
 class PostDoctoralStudent {
 
     private Integer studentId;
@@ -38,6 +41,7 @@ class PostDoctoralStudent {
 }
 
 @Resource(type = Object.class)
+@Priority(1)
 class MasterStudent {
 
     private Integer studentId;
@@ -59,6 +63,14 @@ class MasterStudent {
 
     @Resource
     private void setStudentId(Integer studentId) {
+         this.studentId = studentId;
+    }
+    public Integer setStudentId1(@Priority(20) Integer studentId) {
+        return studentId;
+    }
+
+    @Resource
+    public void setStudentId3(@Priority(-20) Integer studentId) {
         this.studentId = studentId;
     }
 
