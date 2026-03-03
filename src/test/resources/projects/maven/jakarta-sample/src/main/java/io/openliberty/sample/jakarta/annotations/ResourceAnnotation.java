@@ -65,18 +65,18 @@ class MasterStudent {
     private void setStudentId(Integer studentId) {
          this.studentId = studentId;
     }
+
     public Integer setStudentId1(@Priority(20) Integer studentId) {
         return studentId;
     }
 
-    @Resource
     public void setStudentId3(@Priority(-20) Integer studentId) {
         this.studentId = studentId;
     }
 
     @Resource
     public void setIsHappy1(boolean isHappy) {
-
+        this.isHappy = isHappy;
     }
 
     @Resource

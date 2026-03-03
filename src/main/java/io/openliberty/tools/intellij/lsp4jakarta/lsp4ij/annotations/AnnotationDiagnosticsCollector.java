@@ -238,26 +238,29 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         }
     }
 
-/**
- * validatePriority
- * This method validates priority values to check whether any negative values have been applied.
- * 
- * @param unit
- * @param diagnostics
- * @param element
- * @param annotation
- */
+    /**
+     * validatePriority
+     * This method validates priority values to check whether any negative values
+     * have been applied.
+     * 
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
     private void validatePriority(PsiJavaFile unit,
-                                  List<Diagnostic> diagnostics,
-                                  PsiElement element,
-                                  PsiAnnotation annotation) {
+            List<Diagnostic> diagnostics,
+            PsiElement element,
+            PsiAnnotation annotation) {
 
-        // Priority is valid only for elements that are either classes or method parameters.
+        // Priority is valid only for elements that are either classes or method
+        // parameters.
         if (element instanceof PsiClass || element instanceof PsiParameter) {
             PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
-            if(value instanceof PsiPrefixExpression prefix && prefix.getOperand() instanceof PsiLiteralExpression literal &&
-                    literal.getValue() instanceof Integer){
-                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())){
+            if (value instanceof PsiPrefixExpression prefix
+                    && prefix.getOperand() instanceof PsiLiteralExpression literal &&
+                    literal.getValue() instanceof Integer) {
+                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())) {
                     String diagnosticMessage = Messages.getMessage(
                             "PriorityShouldBeNonNegative");
                     diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
