@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -60,6 +60,18 @@ public class DependencyInjectionDiagnosticsCollector extends AbstractDiagnostics
         alltypes = unit.getClasses();
         for (PsiClass type : alltypes) {
             PsiField[] allFields = type.getFields();
+            //Checks if type is @interface annotated
+            if(type.isAnnotationType()){
+                //Checks if type annotation contains @Scope
+                boolean containsScope = containsAnnotation(type, type.getAnnotations(), SCOPE_FQ_NAME);
+                //Checks if there are any attributes inside the type
+                boolean hasAttributes = type.getMethods().length > 0 || type.getFields().length > 0;
+                if (containsScope && hasAttributes) {
+                    diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("InvalidScopeAttributesOnType",type.getName()),
+                            DIAGNOSTIC_CODE_INVALID_SCOPE_ATTRIBUTE, null,
+                            DiagnosticSeverity.Error));
+                }
+            }
             for (PsiField field : allFields) {
                 if (containsAnnotation(type, field.getAnnotations(), INJECT_FQ_NAME)) {
                     if (field.hasModifierProperty(PsiModifier.FINAL)) {
