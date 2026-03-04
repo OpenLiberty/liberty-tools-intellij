@@ -1,5 +1,3 @@
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
-
 /*******************************************************************************
  * Copyright (c) 2026 IBM Corporation
  *
@@ -12,6 +10,8 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
 /**
  * Common Constants
