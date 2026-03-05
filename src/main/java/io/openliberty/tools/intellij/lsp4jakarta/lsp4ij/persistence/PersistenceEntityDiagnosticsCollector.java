@@ -82,6 +82,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS, method.getReturnType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+
+                        //Validate @Id and @Temporal annotations
+                        validatePKDateTemporal(method,type,diagnostics,unit);
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
@@ -98,46 +101,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     DiagnosticSeverity.Error));
                         }
                         //Validate @Id and @Temporal annotations
-                        //Spec: https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a132
-                        PsiAnnotation[] fieldAnnotations = field.getAnnotations();
-                        PsiAnnotation id = null, temporal = null;
-                        for (PsiAnnotation fieldAnnotation : fieldAnnotations) {
-                            String matchedAnnotation = getMatchedJavaElementName(type, fieldAnnotation.getQualifiedName(),
-                                    PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+                        validatePKDateTemporal(field,type,diagnostics,unit);
 
-                            if (matchedAnnotation != null) {
-                                if (matchedAnnotation.equals(PersistenceConstants.ID)) {
-                                    id = fieldAnnotation;
-                                } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
-                                    temporal = fieldAnnotation;
-                                }
-                            }
-                        }
 
-                        if (id != null) {
-                            String fieldTypeFQ = null;
-                            if (field.getType() instanceof PsiClassType classType) {
-                                PsiClass psiClass = classType.resolve();
-                                fieldTypeFQ = psiClass.getQualifiedName();
-                            }
-                            if (fieldTypeFQ != null && fieldTypeFQ.equals(PersistenceConstants.UTIL_DATE)) {
-                                if (temporal != null) {
-                                    if (!isValidTemporalDateValue(temporal.findAttributeValue("value"))) {
-                                        // Add diagnostics for invalid type
-                                        diagnostics.add(createDiagnostic(temporal, unit,
-                                                Messages.getMessage("InvalidValueInTemporalAnnotation"),
-                                                PersistenceConstants.DIAGNOSTIC_CODE_TEMPORAL_INVALID_VALUE, null,
-                                                DiagnosticSeverity.Error));
-                                    }
-                                } else {
-                                    // Add diagnostics for missing annotation
-                                    diagnostics.add(createDiagnostic(field, unit,
-                                            Messages.getMessage("MissingTemporalAnnotation"),
-                                            PersistenceConstants.DIAGNOSTIC_CODE_MISSING_TEMPORAL, null,
-                                            DiagnosticSeverity.Error));
-                                }
-                            }
-                        }
                     }
 
                     // Ensure that the Entity class is not given a final modifier
@@ -164,10 +130,82 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         // We do not do anything if the found unit is null
     }
 
+    /**
+     * Check the annotation value is TemporalType.DATE Enum
+     *
+     * @param value
+     * @return
+     */
     private boolean isValidTemporalDateValue(PsiAnnotationMemberValue value) {
         if(value == null) return false;
         if (!(value instanceof PsiReferenceExpression ref)) return false;
         if (!(ref.resolve() instanceof PsiEnumConstant)) return false;
         return PersistenceConstants.TEMPORAL_TYPE_DATE.equals(value.getText());
+    }
+
+    /**
+     * Check @Temporal annotation exist for primary key field/property with @Id annotation
+     * Specification: https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a132
+     *
+     * @param fieldOrProperty
+     * @param type
+     * @param diagnostics
+     * @param unit
+     */
+    private void validatePKDateTemporal(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
+
+        PsiAnnotation[] annotations = null;
+        PsiAnnotation id = null, temporal = null;
+        String typeFQ = null;
+
+        if (fieldOrProperty instanceof PsiMethod method) {
+            annotations = method.getAnnotations();
+            if (method.getReturnType() instanceof PsiClassType classType) {
+                PsiClass psiClass = classType.resolve();
+                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
+            }
+        } else if (fieldOrProperty instanceof PsiField field) {
+            annotations = field.getAnnotations();
+            if (field.getType() instanceof PsiClassType classType) {
+                PsiClass psiClass = classType.resolve();
+                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
+            }
+        }
+
+        if (annotations != null) {
+            for (PsiAnnotation annotation : annotations) {
+                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                        PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+
+                if (matchedAnnotation != null) {
+                    if (matchedAnnotation.equals(PersistenceConstants.ID)) {
+                        id = annotation;
+                    } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
+                        temporal = annotation;
+                    }
+                }
+            }
+        }
+
+        if (id != null) {
+
+            if (typeFQ != null && typeFQ.equals(PersistenceConstants.UTIL_DATE)) {
+                if (temporal != null) {
+                    if (!isValidTemporalDateValue(temporal.findAttributeValue("value"))) {
+                        // Add diagnostics for invalid type
+                        diagnostics.add(createDiagnostic(temporal, unit,
+                                Messages.getMessage("InvalidValueInTemporalAnnotation"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_TEMPORAL_INVALID_VALUE, null,
+                                DiagnosticSeverity.Error));
+                    }
+                } else {
+                    // Add diagnostics for missing annotation
+                    diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                            Messages.getMessage("MissingTemporalAnnotation"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_MISSING_TEMPORAL, null,
+                            DiagnosticSeverity.Error));
+                }
+            }
+        }
     }
 }
