@@ -69,4 +69,33 @@ public class DiagnosticsUtils {
         }
         return false;
     }
+
+    /**
+     * Get the value of an annotation member attribute.
+     *
+     * @param annotation    the annotation
+     * @param attributeName the attribute name
+     * @param expectedType  the expected type of the attribute value
+     * @param <T>           the type parameter
+     * @return the attribute value, or null if not found or wrong type
+     */
+    public static <T> T getAnnotationMemberValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (value == null) {
+            return null;
+        }
+
+        Object constantValue = null;
+        if (value instanceof PsiLiteral) {
+            constantValue = ((PsiLiteral) value).getValue();
+        } else if (value instanceof PsiExpression) {
+            constantValue = ((PsiExpression) value).getType();
+        }
+
+        if (constantValue != null && expectedType.isInstance(constantValue)) {
+            return expectedType.cast(constantValue);
+        }
+
+        return null;
+    }
 }

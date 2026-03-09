@@ -69,6 +69,7 @@ public class BeanValidationConstants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-bean-validation";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";
     public static final String DIAGNOSTIC_CODE_STATIC = "MakeNotStatic";
+    public static final String DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS = "ConflictingConstraints";
 
     public final static Set<String> SET_OF_ANNOTATIONS = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(ASSERT_TRUE, ASSERT_FALSE, DIGITS, DECIMAL_MAX,

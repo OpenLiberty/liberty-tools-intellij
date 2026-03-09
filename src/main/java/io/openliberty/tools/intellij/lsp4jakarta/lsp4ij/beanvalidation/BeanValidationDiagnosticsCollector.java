@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -66,6 +67,10 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner, PsiClass type, List<Diagnostic> diagnostics) {
         PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        
+        // Check for conflicting constraints
+        checkConflictingConstraints(psiModifierOwner, type, annotations, diagnostics);
+        
         for (PsiAnnotation annotation : annotations) {
             String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                     SET_OF_ANNOTATIONS.toArray(new String[0]));
@@ -213,6 +218,73 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             String source = getSource(isMethod, isField, annotationName, "AnnotationString");
             diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                     source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Check for conflicting constraint annotations (e.g., @Min > @Max, @DecimalMin > @DecimalMax, @Size min > max).
+     *
+     * @param element     the PSI element (field, method, or parameter)
+     * @param type        the declaring class
+     * @param annotations the annotations on the element
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void checkConflictingConstraints(PsiJvmModifiersOwner element, PsiClass type,
+                                            PsiAnnotation[] annotations, List<Diagnostic> diagnostics) {
+
+        PsiAnnotation minAnn = null, maxAnn = null, decMinAnn = null, decMaxAnn = null, sizeAnn = null;
+
+        for (PsiAnnotation ann : annotations) {
+            String matched = getMatchedJavaElementName(type, ann.getQualifiedName(),
+                    new String[]{MIN, MAX, DECIMAL_MIN, DECIMAL_MAX, SIZE});
+            if (matched != null) {
+                switch (matched) {
+                    case MIN -> minAnn = ann;
+                    case MAX -> maxAnn = ann;
+                    case DECIMAL_MIN -> decMinAnn = ann;
+                    case DECIMAL_MAX -> decMaxAnn = ann;
+                    case SIZE -> sizeAnn = ann;
+                }
+            }
+        }
+
+        // Check @Min/@Max conflict
+        if (minAnn != null && maxAnn != null) {
+            Long min = DiagnosticsUtils.getAnnotationMemberValue(minAnn, "value", Long.class);
+            Long max = DiagnosticsUtils.getAnnotationMemberValue(maxAnn, "value", Long.class);
+            if (min != null && max != null && min > max) {
+                diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                        Messages.getMessage("ConflictingConstraintAnnotationsMinMax", min.toString(), max.toString()),
+                        DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
+            }
+        }
+
+        // Check @DecimalMin/@DecimalMax conflict
+        if (decMinAnn != null && decMaxAnn != null) {
+            String min = DiagnosticsUtils.getAnnotationMemberValue(decMinAnn, "value", String.class);
+            String max = DiagnosticsUtils.getAnnotationMemberValue(decMaxAnn, "value", String.class);
+            if (min != null && max != null) {
+                try {
+                    if (Double.parseDouble(min) > Double.parseDouble(max)) {
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                Messages.getMessage("ConflictingConstraintAnnotationsDecimalMinMax", min, max),
+                                DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid number format
+                }
+            }
+        }
+
+        // Check @Size min/max conflict
+        if (sizeAnn != null) {
+            Integer min = DiagnosticsUtils.getAnnotationMemberValue(sizeAnn, "min", Integer.class);
+            Integer max = DiagnosticsUtils.getAnnotationMemberValue(sizeAnn, "max", Integer.class);
+            if (min != null && max != null && min > max) {
+                diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                        Messages.getMessage("ConflictingConstraintAnnotationsSize", min.toString(), max.toString()),
+                        DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
+            }
         }
     }
 }

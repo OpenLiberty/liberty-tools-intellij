@@ -784,4 +784,40 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         assertJavaCodeAction(codeActionParams, utils, ca);
     }
+
+    @Test
+    public void conflictingConstraints() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/ConflictingConstraints.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for conflicting constraints
+        Diagnostic d1 = d(10, 16, 29,
+                "The @Min value '100' cannot be greater than the @Max value '50'.",
+                DiagnosticSeverity.Warning, "jakarta-bean-validation", "ConflictingConstraints");
+
+        Diagnostic d2 = d(19, 23, 43,
+                "The @DecimalMin value '100.5' cannot be greater than the @DecimalMax value '50.5'.",
+                DiagnosticSeverity.Warning, "jakarta-bean-validation", "ConflictingConstraints");
+
+        Diagnostic d3 = d(27, 19, 30,
+                "The @Size min value '10' cannot be greater than the max value '5'.",
+                DiagnosticSeverity.Warning, "jakarta-bean-validation", "ConflictingConstraints");
+
+        Diagnostic d4 = d(35, 15, 37,
+                "The @Min value '200' cannot be greater than the @Max value '100'.",
+                DiagnosticSeverity.Warning, "jakarta-bean-validation", "ConflictingConstraints");
+
+        Diagnostic d5 = d(40, 77, 82,
+                "The @Min value '50' cannot be greater than the @Max value '10'.",
+                DiagnosticSeverity.Warning, "jakarta-bean-validation", "ConflictingConstraints");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+    }
 }
