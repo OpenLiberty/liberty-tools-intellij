@@ -1,13 +1,41 @@
-package io.openliberty.sample.jakarta.di;
+package io.openliberty.sample.jakarta.interceptor;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Singleton;
+import jakarta.interceptor.Interceptor;
 
-@ApplicationScoped
-public class Greeting {
+@Interceptor
+public abstract class InvalidInterceptor {
 
-    public String greet(String name) {
-        return "Hello, " + name;
+    String config;
+
+    public String getConfig() {
+        return config;
+    }
+
+    public void setConfig(String config) {
+        this.config = config;
+    }
+
+    public InvalidInterceptor(String config) {
+
+    }
+
+    @Interceptor
+    public class InnerInvalidInterceptor{
+
+        String innerConfig;
+
+        public String getInnerConfig() {
+            return innerConfig;
+        }
+
+        public void setInnerConfig(String innerConfig) {
+            this.innerConfig = innerConfig;
+        }
+
+        public InnerInvalidInterceptor(String innerConfig) {
+
+        }
+
     }
 
 }
