@@ -13,7 +13,13 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
