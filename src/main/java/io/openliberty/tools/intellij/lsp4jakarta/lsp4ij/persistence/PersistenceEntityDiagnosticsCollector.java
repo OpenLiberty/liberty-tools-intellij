@@ -134,13 +134,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * Check the annotation value is TemporalType.DATE Enum
      *
      * @param value
-     * @return
+     * @return true if the value is a reference to a TemporalType.DATE else return false
      */
     private boolean isValidTemporalDateValue(PsiAnnotationMemberValue value) {
-        if(value == null) return false;
-        if (!(value instanceof PsiReferenceExpression ref)) return false;
-        if (!(ref.resolve() instanceof PsiEnumConstant)) return false;
-        return PersistenceConstants.TEMPORAL_TYPE_DATE.equals(value.getText());
+        return value instanceof PsiReferenceExpression ref
+                && ref.resolve() instanceof PsiEnumConstant
+                && PersistenceConstants.TEMPORAL_TYPE_DATE.equals(value.getText());
     }
 
     /**
