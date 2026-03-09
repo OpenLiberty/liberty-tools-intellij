@@ -222,6 +222,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     }
 
     /**
+     * checkConflictingConstraints
      * Check for conflicting constraint annotations (e.g., @Min > @Max, @DecimalMin > @DecimalMax, @Size min > max).
      *
      * @param element     the PSI element (field, method, or parameter)
@@ -250,8 +251,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 
         // Check @Min/@Max conflict
         if (minAnn != null && maxAnn != null) {
-            Long min = DiagnosticsUtils.getAnnotationMemberValue(minAnn, "value", Long.class);
-            Long max = DiagnosticsUtils.getAnnotationMemberValue(maxAnn, "value", Long.class);
+            Long min = getNumericValue(minAnn, "value", Long.class);
+            Long max = getNumericValue(maxAnn, "value", Long.class);
             if (min != null && max != null && min > max) {
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                         Messages.getMessage("ConflictingConstraintAnnotationsMinMax", min.toString(), max.toString()),
@@ -278,13 +279,32 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 
         // Check @Size min/max conflict
         if (sizeAnn != null) {
-            Integer min = DiagnosticsUtils.getAnnotationMemberValue(sizeAnn, "min", Integer.class);
-            Integer max = DiagnosticsUtils.getAnnotationMemberValue(sizeAnn, "max", Integer.class);
+            Integer min = getNumericValue(sizeAnn, "min", Integer.class);
+            Integer max = getNumericValue(sizeAnn, "max", Integer.class);
             if (min != null && max != null && min > max) {
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                         Messages.getMessage("ConflictingConstraintAnnotationsSize", min.toString(), max.toString()),
                         DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
             }
         }
+    }
+
+    /**
+     * getNumericValue
+     * Helper method to get numeric annotation values with type conversion.
+     * Handles conversion from any Number type to the expected type.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends Number> T getNumericValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
+        Object value = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Object.class);
+        if (value instanceof Number) {
+            Number num = (Number) value;
+            if (expectedType == Long.class) {
+                return (T) Long.valueOf(num.longValue());
+            } else if (expectedType == Integer.class) {
+                return (T) Integer.valueOf(num.intValue());
+            }
+        }
+        return null;
     }
 }

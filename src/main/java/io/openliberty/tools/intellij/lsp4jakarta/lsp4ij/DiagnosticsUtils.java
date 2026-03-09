@@ -71,6 +71,7 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * getAnnotationMemberValue
      * Get the value of an annotation member attribute.
      *
      * @param annotation    the annotation
@@ -81,21 +82,11 @@ public class DiagnosticsUtils {
      */
     public static <T> T getAnnotationMemberValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
         PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
-        if (value == null) {
+        if (!(value instanceof PsiLiteral)) {
             return null;
         }
 
-        Object constantValue = null;
-        if (value instanceof PsiLiteral) {
-            constantValue = ((PsiLiteral) value).getValue();
-        } else if (value instanceof PsiExpression) {
-            constantValue = ((PsiExpression) value).getType();
-        }
-
-        if (constantValue != null && expectedType.isInstance(constantValue)) {
-            return expectedType.cast(constantValue);
-        }
-
-        return null;
+        Object constantValue = ((PsiLiteral) value).getValue();
+        return expectedType.isInstance(constantValue) ? expectedType.cast(constantValue) : null;
     }
 }
