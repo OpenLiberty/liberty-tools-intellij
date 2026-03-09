@@ -272,7 +272,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore invalid number format
+                    LOGGER.log(Level.INFO, "Ignore invalid number format");
                 }
             }
         }
