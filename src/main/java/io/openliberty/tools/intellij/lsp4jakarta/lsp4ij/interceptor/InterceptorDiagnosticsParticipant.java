@@ -61,9 +61,9 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			}
         }
 		Collection<PsiMethod> allMethodDeclarations =  PsiTreeUtil.findChildrenOfType(unit, PsiMethod.class);
-		List<PsiMethod> createProceedInvocationDeclarations = allMethodDeclarations.stream().filter(m -> hasInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toUnmodifiableList());
+		List<PsiMethod> createProceedInvocationDeclarations = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
 		for(PsiMethod invokeMethod: createProceedInvocationDeclarations){
-			Range range = PositionUtils.toNameRange(invokeMethod.getName().codePointCount());
+			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
@@ -76,13 +76,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param unit
 	 * @return
 	 */
-	private boolean hasInterceptorMethodProceedInvocation(PsiMethod m, PsiJavaFile unit) {
+	private boolean missingInterceptorMethodProceedInvocation(PsiMethod m, PsiJavaFile unit) {
 		if(isInterceptorTypeReferenced(m.getContainingClass(), unit)) {
 			PsiAnnotation[] annotations = m.getModifierList().getAnnotations();
 			for (PsiAnnotation ann : annotations) {
 				boolean isInterceptorMethod = Constants.INTERCEPTOR_METHODS.stream().anyMatch(annotation -> isMatchedJavaElement(m.getContainingClass(), ann.getQualifiedName(), annotation));
 				if (isInterceptorMethod) {
-					return checkMethodInvokedExists(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
+					return !checkMethodInvokedExists(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
 				}
 			}
 		}
