@@ -23,7 +23,9 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import java.util.List;
 
 /**
- * Security diagnostic participant for @DeclareRoles annotation.
+ * Security diagnostic participant.
+ *
+ * @see <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security">...</a>
  */
 public class SecurityDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
