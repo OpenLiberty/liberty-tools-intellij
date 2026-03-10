@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2025 IBM Corporation and others.
+* Copyright (c) 2021, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -1956,5 +1956,32 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         CodeAction ca13 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTransient", d10, te13);
         CodeAction ca14 = JakartaForJavaAssert.ca(uri, "Remove @JsonbTypeDeserializer, @JsonbTypeSerializer", d10, te14);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams10, utils, ca13, ca14);
+    }
+  
+    @Test
+    public void JsonbDeserialization() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbDeserialization.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(4, 13, 33,
+                "Missing Public or Protected NoArgsConstructor: Class JsonbDeserialization uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(56, 21, 31,
+                "Missing Public or Protected NoArgsConstructor: Class ChildClass uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
+
+        Diagnostic d3 = JakartaForJavaAssert.d(83, 14, 22,
+                "Cannot deserialize class SubChild because it is not static. Please declare the class as static for JSONB deserialization.",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
     }
 }

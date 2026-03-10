@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -318,7 +318,7 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca, ca1);
 
     }
-
+    
     @Test
     public void InvalidInjectQualifiersDI() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -357,5 +357,24 @@ public class DependencyInjectionTest extends BaseJakartaTest {
         d5.setData("jakarta.mail.Service");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+    }
+  
+    @Test
+    public void InvalidScopeAttributes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/di/InvalidScopeAttributes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(5, 18, 40,
+                "Scope annotated interface: InvalidScopeAttributes should not declare any attributes.",
+                DiagnosticSeverity.Error, "jakarta-di", "RemoveInvalidScopeAttribute");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
     }
 }
