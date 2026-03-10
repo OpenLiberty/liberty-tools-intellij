@@ -45,11 +45,12 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         List<PsiMethodCallExpression> createPointerInvocations = new ArrayList<>();
         //Used to get the list of method invocations for JsonObjectBuilder add methods
         List<PsiMethodCallExpression> createObjectBuilderMethodInvocations = new ArrayList<>();
+        String createPointerFQName = JsonpConstants.JSON_FQ_NAME + "." + JsonpConstants.CREATE_POINTER;
         for (PsiMethodCallExpression mi : allMethodInvocations) {
-            if (isMatchedJsonCreatePointer(mi)) {
+            if (isMatchedMethodFQName(mi,JsonpConstants.EXPRESSION_COUNT_CREATE_POINTER, createPointerFQName)) {
                 createPointerInvocations.add(mi);
             }
-            if (isMatchedJsonObjectBuilder(mi)) {
+            if (isMatchedMethodFQName(mi,JsonpConstants.EXPRESSION_COUNT_ADD, JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_ADD)){
                 createObjectBuilderMethodInvocations.add(mi);
             }
         }
@@ -78,20 +79,20 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
-     * isMatchedJsonObjectBuilder
-     * Method used to identify jakarta.json.JsonObjectBuilder.add type method invocations
+     * isMatchedMethodFQName
+     * Method is used to identify passed method invocations
      *
      * @param mi
      * @return boolean
      */
-    private boolean isMatchedJsonObjectBuilder(PsiMethodCallExpression mi) {
+    private boolean isMatchedMethodFQName(PsiMethodCallExpression mi, int expressionCount, String methodNameFQ) {
         String miFQName = null;
         PsiMethod m = mi.resolveMethod();
         if (m != null && m.getClass() != null) {
             miFQName = m.getContainingClass().getQualifiedName() + "." + m.getName();
         }
-        return mi.getArgumentList().getExpressionCount() == 2
-                && JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_ADD.equals(miFQName);
+        return mi.getArgumentList().getExpressionCount() == expressionCount
+                && methodNameFQ.equals(miFQName);
     }
 
     private boolean isInvalidArgument(PsiExpression arg) {
@@ -104,16 +105,5 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
             }
         }
         return false;
-    }
-
-    private boolean isMatchedJsonCreatePointer(PsiMethodCallExpression mi) {
-        String fqName = JsonpConstants.JSON_FQ_NAME + "." + JsonpConstants.CREATE_POINTER;
-        String miName = null;
-        PsiMethod m = mi.resolveMethod();
-        if (m != null && m.getClass() != null) {
-            miName = m.getContainingClass().getQualifiedName() + "." + m.getName();
-        }
-        return mi.getArgumentList().getExpressionCount() == 1
-                && fqName.equals(miName);
     }
 }

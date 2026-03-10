@@ -24,4 +24,6 @@ public class JsonpConstants {
     public static final String DIAGNOSTIC_CODE_CREATE_POINTER = "InvalidCreatePointerArg";
     public static final String DIAGNOSTIC_CODE_INVALID_OBJECT_BUILDER_KEY = "InvalidJsonObjectBuilderKey";
     public static final String JAKARTA_JSON_OBJECT_BUILDER_ADD = "jakarta.json.JsonObjectBuilder.add";
+    public static final int EXPRESSION_COUNT_ADD = 2;
+    public static final int EXPRESSION_COUNT_CREATE_POINTER = 1;
 }
