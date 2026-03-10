@@ -253,7 +253,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         if (isConstructorMethod(method)) {
             constructorInfo.put("hasConstructor", true); // Check explicit constructor declaration
             PsiParameterList params = method.getParameterList();
-            if (params.getParametersCount() == 0) { // Checks manually declared no-args constructor
+            if (params.getParametersCount() == 0) { // Checks for user defined no-args constructor
                 if (method.hasModifierProperty(PsiModifier.PUBLIC)) {
                     constructorInfo.put("hasValidPublicNoArgsConstructor", true);
                 }
