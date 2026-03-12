@@ -217,7 +217,9 @@ intellijPlatformTesting.runIde {
                         "-DjbScreenMenuBar.enabled=false",
                         "-Dapple.laf.useScreenMenuBar=false",
                         // This disables the EAP login prompt:
-                        "-Deap.require.license=release"
+                        "-Deap.require.license=release",
+                        // Disable the Islands theme popup
+                        "-Didea.is.integration.test=true"
                 ]
             } as CommandLineArgumentProvider)
             systemProperty("ide.native.launcher", "true")
