@@ -90,7 +90,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.ServletException;\n" +
                 "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n" +
                 "import jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\n" +
-                "import java.io.IOException;\n\n@WebServlet(urlPatterns=\"\")\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
+                "import java.io.IOException;\n\n@WebServlet(urlPatterns={})\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
                 "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, " +
                 "IOException {\n\t\tres.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + " +
                 "Open Liberty!\");\n\t}\n}";
@@ -100,10 +100,9 @@ public class JakartaServletTest extends BaseJakartaTest {
         String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.ServletException;\n" +
                 "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n" +
                 "import jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\n" +
-                "import java.io.IOException;\n\n@WebServlet(\"\")\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
-                "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, " +
-                "IOException {\n\t\tres.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + " +
-                "Open Liberty!\");\n\t}\n}";
+                "import java.io.IOException;\n\n@WebServlet({})\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
+                "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {\n\t\t" +
+                "res.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + Open Liberty!\");\n\t}\n}";
         TextEdit te2 = JakartaForJavaAssert.te(0, 0, 16, 1, newText1);
         CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Add the `value` attribute to @WebServlet", d, te2);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
@@ -160,13 +159,13 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(servletNames=\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(servletNames={})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
         String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(urlPatterns=\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(urlPatterns={})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
         String newText2 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter({})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
 
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);

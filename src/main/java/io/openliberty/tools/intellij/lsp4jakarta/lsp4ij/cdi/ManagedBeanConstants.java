@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation.
+ * Copyright (c) 2021, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -37,6 +37,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_PRODUCES_PARAM = "RemoveProducesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_CODE_INVALID_DISPOSES_PARAM = "RemoveDisposesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM = "InvalidInjectAnnotationOnMultipleMethodParams";
+    public static final String DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT = "InvalidObservesObservesAsyncMethodParams";
 
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
@@ -52,4 +53,6 @@ public class ManagedBeanConstants {
                     "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
                     "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
                     "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype"));
+
+    public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
 }

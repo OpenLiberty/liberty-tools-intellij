@@ -17,18 +17,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 
+import java.beans.Introspector;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Utility class for common IntelliJ PSI-based diagnostic logic.
  */
 public class DiagnosticsUtils {
-
-    public static final String NAME_MUST_START_WITH_SET = "NameMustStartWithSet";
-    public static final String MUST_DECLARE_EXACTLY_ONE_PARAM = "MustDeclareExactlyOneParam";
-    public static final String RETURN_TYPE_MUST_BE_VOID = "ReturnTypeMustBeVoid";
-    public static final String VALID_SETTER_METHOD = "ValidSetterMethod";
+    
     /**
      * inheritsFrom
-     * find super class and Check if it is present or not in the type hierarchy
+     * find super class and Check
      *
      * @param clazz
      * @param fqSuperType
@@ -56,24 +56,97 @@ public class DiagnosticsUtils {
         return clazz.isEquivalentTo(superClass) || clazz.isInheritor(superClass, true);
     }
 
+    /**
+     * isPublic
+     * Check if the given method is public or not
+     *
+     * @param method
+     * @return
+     */
+    public static boolean isPublic(PsiMethod method) {
+        return method.hasModifierProperty(PsiModifier.PUBLIC);
+    }
+
+    /**
+     * hasField
+     * Checks if the given type has a field matching the method name.
+     *
+     * @param methodName
+     * @param type
+     * @return
+     */
+    public static boolean hasField(String methodName, PsiClass type)  {
+        if (methodName == null || methodName.length() <= 3) {
+            return false;
+        }
+        String expectedFieldName = Introspector.decapitalize(methodName.substring(3));
+        if (expectedFieldName.isEmpty()) {
+            return false;
+        }
+        PsiField field = type.findFieldByName(expectedFieldName, false);
+        return field!= null;
+    }
+
 
     /**
      * validateSetterMethod
      * This is to check whether a method is a valid setter.
      *
-     * @param element
+     * @param method
+     * @param parentType
      * @return
      */
-    public static String validateSetterMethod(PsiMethod element) {
-        String methodName = element.getName();
-        PsiType returnType = element.getReturnType();
-        if(!methodName.startsWith("set")){
-            return NAME_MUST_START_WITH_SET;
-        } else if(!(returnType == null || returnType.equals(PsiTypes.voidType()))){
-            return RETURN_TYPE_MUST_BE_VOID;
-        } else if(element.getParameterList().getParametersCount() != 1){
-            return MUST_DECLARE_EXACTLY_ONE_PARAM;
+    public static List<String> validateSetterMethod(PsiMethod method, PsiClass parentType) {
+        List<String> errorCodes = new ArrayList<>();
+        String methodName = method.getName();
+        PsiType returnType = method.getReturnType();
+        if (!methodName.startsWith("set")) {
+            errorCodes.add(CommonConstants.DIAGNOSTIC_CODE_METHOD_NAME_START_WITH_SET);
         }
-        return VALID_SETTER_METHOD;
+        if (!hasField(methodName, parentType)) {
+            errorCodes.add(CommonConstants.DIAGNOSTIC_CODE_FIELD_MUST_EXIST_IN_SETTER);
+        }
+        if (!(returnType == null || returnType.equals(PsiTypes.voidType()))) {
+            errorCodes.add(CommonConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID);
+        }
+        if (method.getParameterList().getParametersCount() != 1) {
+            errorCodes.add(CommonConstants.DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM);
+        }
+        if (!isPublic(method)) {
+            errorCodes.add(CommonConstants.DIAGNOSTIC_CODE_METHOD_MUST_BE_PUBLIC);
+        }
+        return errorCodes;
+    }
+
+    /**
+     * Check the given PsiClass is a Java Class
+     * @param psiClass
+     * @return Returns true if the given PsiClass is a Java Class
+     */
+    public static boolean isClass(PsiClass psiClass) {
+        return psiClass != null &&
+                !psiClass.isInterface() &&
+                !psiClass.isEnum() &&
+                !psiClass.isAnnotationType() &&
+                !psiClass.isRecord();
+    }
+
+    /**
+     * Returns true if the java element name matches the given fully qualified java
+     * element name and false otherwise.
+     *
+     * @param type              Java class.
+     * @param javaElementName   given object name.
+     * @param javaElementFQName the fully qualified name.
+     * @return true if the java element name matches the given fully qualified java
+     *         element name and false otherwise.
+     */
+    public static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
+        if (javaElementFQName.equals(javaElementName)) {
+            JavaPsiFacade facade = JavaPsiFacade.getInstance(type.getProject());
+            Object o = facade.findClass(javaElementFQName, GlobalSearchScope.allScope(type.getProject()));
+            return (o != null);
+        }
+        return false;
     }
 }

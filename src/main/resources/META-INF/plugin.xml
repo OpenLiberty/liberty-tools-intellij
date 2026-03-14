@@ -130,6 +130,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.ResourceMethodDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jax_rs.JaxrsDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
@@ -404,6 +407,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-websocket#missingPublicNoArgConstructor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketNoArgConstructorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-websocket#DuplicateLifeCycleAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.RemoveWebsocketAnnotationsQuickFix"/>
         <!-- Servlet -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
