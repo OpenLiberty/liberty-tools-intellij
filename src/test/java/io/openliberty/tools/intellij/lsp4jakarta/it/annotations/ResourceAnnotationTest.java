@@ -140,7 +140,6 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected annotations
-
         Diagnostic d1 = d(8, 1, 51, "Type of the field must be compatible with the type element of the Resource annotation, if specified.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "ResourceTypeMismatch");
 
