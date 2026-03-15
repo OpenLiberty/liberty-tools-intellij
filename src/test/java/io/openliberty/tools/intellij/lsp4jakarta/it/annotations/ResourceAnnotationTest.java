@@ -161,65 +161,20 @@ public class ResourceAnnotationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
-        String newText11 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\n" +
-                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\n" +
-                "class ResourceAnnotationTypeMismatch {\n\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\t" +
-                "private Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t" +
-                "@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\t" +
-                "private Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\t" +
-                "public void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setMatchsStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tpublic void setChemStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n}\n";
-        TextEdit te11 = te(0, 0, 54, 0, newText11);
+        String newText11 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\nimport jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setStudentId1(Integer studentId) {\n\t\tthis.studentId1 = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t@Resource(type = Boolean.class)\n\tpublic void setFrenchhStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n\n\tprivate Integer studentId1;\n}\n";
+        TextEdit te11 = te(0, 0, 56, 0, newText11);
         CodeAction ca11 = ca(uri, "Remove @Resource", d1, te11);
-        String newText12 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\n" +
-                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t" +
-                "@Resource( name = \"studentId\")\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t" +
-                "@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t" +
-                "@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t" +
-                "@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setMatchsStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tpublic void setChemStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n}\n";
-        TextEdit te12 = te(0, 0, 54, 0, newText12);
+        String newText12 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\nimport jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t@Resource( name = \"studentId\")\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setStudentId1(Integer studentId) {\n\t\tthis.studentId1 = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t@Resource(type = Boolean.class)\n\tpublic void setFrenchhStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n\n\tprivate Integer studentId1;\n}\n";
+        TextEdit te12 = te(0, 0, 56, 0, newText12);
         CodeAction ca12 = ca(uri, "Remove type attribute from @Resource", d1, te12);
         assertJavaCodeAction(codeActionParams, utils, ca11, ca12);
 
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d6);
-        String newText21 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\n" +
-                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t" +
-                "@Resource(type = Object.class, name = \"studentId\")\n\tprivate Integer studentId;\n\n\t" +
-                "@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t" +
-                "@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t" +
-                "@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t" +
-                "@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t" +
-                "@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t" +
-                "@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setMatchsStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t" +
-                "public void setChemStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n}\n";
-        TextEdit te21 = te(0, 0, 54, 0, newText21);
+        String newText21 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\nimport jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t@Resource(type = Object.class, name = \"studentId\")\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setStudentId1(Integer studentId) {\n\t\tthis.studentId1 = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\tpublic void setFrenchhStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n\n\tprivate Integer studentId1;\n}\n";
+        TextEdit te21 = te(0, 0, 56, 0, newText21);
         CodeAction ca21 = ca(uri, "Remove @Resource", d6, te21);
-        String newText22 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\n" +
-                "import jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t" +
-                "@Resource(type = Object.class, name = \"studentId\")\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\t" +
-                "private Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t" +
-                "@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\t" +
-                "private Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t" +
-                "@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\t" +
-                "public void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setMatchsStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t" +
-                "@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t" +
-                "@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t" +
-                "@Resource()\n\tpublic void setChemStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n}\n";
-        TextEdit te22 = te(0, 0, 54, 0, newText22);
+        String newText22 = "package io.openliberty.sample.jakarta.annotations;\n\nimport io.openliberty.sample.jakarta.di.Greeting;\nimport jakarta.annotation.Resource;\n\n@Resource(type = Object.class, name = \"\")\nclass ResourceAnnotationTypeMismatch {\n\n\t@Resource(type = Object.class, name = \"studentId\")\n\tprivate Integer studentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Integer mathsStudentId;\n\n\t@Resource(type = Integer.class)\n\tprivate Object itStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate Integer bioStudentId;\n\n\t@Resource(name = \"studentId\")\n\tprivate Integer mechStudentId;\n\n\t@Resource(type = Greeting.class)\n\tprivate int englishStudentId;\n\n\t@Resource(type = Boolean.class)\n\tprivate boolean frenchhStudentId;\n\n\t@Resource\n\tpublic void setStudentId(Integer studentId) {\n\t\tthis.studentId = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setStudentId1(Integer studentId) {\n\t\tthis.studentId1 = studentId;\n\t}\n\n\t@Resource(type = Integer.class)\n\tpublic void setItStudentId(Object itStudentId) {\n\t\tthis.itStudentId = itStudentId;\n\t}\n\n\t@Resource(type = Object.class)\n\tpublic void setMechStudentId(Integer mechStudentId) {\n\t\tthis.mechStudentId = mechStudentId;\n\t}\n\n\t@Resource()\n\tpublic void setFrenchhStudentId(boolean frenchhStudentId) {\n\t\tthis.frenchhStudentId = frenchhStudentId;\n\t}\n\n\tprivate Integer studentId1;\n}\n";
+        TextEdit te22 = te(0, 0, 56, 0, newText22);
         CodeAction ca22 = ca(uri, "Remove type attribute from @Resource", d6, te22);
         assertJavaCodeAction(codeActionParams2, utils, ca21, ca22);
     }
