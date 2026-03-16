@@ -442,7 +442,7 @@ public class UIBotTestUtils {
      */
     public static void openProjectView(RemoteRobot remoteRobot) {
         // maximize windows os intellij ide to avoid failures accessing menu
-        if (remoteRobot.isWin()) {
+        if (remoteRobot.isWin() || remoteRobot.isMac()) {
             maximizeWindow(remoteRobot);
         }
         TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "UIBotTestUtils.openProjectView Entry");
@@ -1080,7 +1080,11 @@ public class UIBotTestUtils {
                 // we will put new config at the end of the config file
                 // (after the last line already in the file)
                 keyboard.hotKey(VK_CONTROL, VK_END);
+                // Move to the end of the current line to ensure we're at the end of the last line
+                keyboard.hotKey(VK_END);
                 keyboard.enter();
+                // Wait for the editor to process the newline before typing
+                TestUtils.sleepAndIgnoreException(1);
 
                 keyboard.enterText(configNameSnippetCaseSpecific);
                 // After typing it can take 1 or 2s for IntelliJ to render diagnostics etc. Must wait before continuing.
@@ -2851,7 +2855,12 @@ public class UIBotTestUtils {
     public static void maximizeWindow(RemoteRobot remoteRobot) {
         if (!isFullScreen(remoteRobot)) {
             Keyboard keyboard = new Keyboard(remoteRobot);
-            keyboard.hotKey(VK_WINDOWS, VK_UP);
+            if (remoteRobot.isWin()) {
+                keyboard.hotKey(VK_WINDOWS, VK_UP);
+            } else {
+                // macOS fullscreen shortcut: Command + Control + F
+                keyboard.hotKey(VK_META, VK_CONTROL, VK_F);
+            }
             keyboard.enter();
         }
     }
@@ -2938,5 +2947,54 @@ public class UIBotTestUtils {
         actionButton.click();
 
         TestUtils.sleepAndIgnoreException(5);
+    }
+
+    /**
+     * Handles macOS permission popup for screen recording by clicking the "Allow" button.
+     *
+     * <p>This AppleScript implementation is adapted from community examples on handling macOS security dialogs:
+     * https://smartwatermelon.medium.com/automating-macos-security-dialogs-a-tale-of-yak-shaving-and-applescript-759300d6fba9
+     *
+     * <p>For official documentation on UI scripting and accessibility automation, refer to:
+     * Apple – Automate the User Interface:
+     * https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/AutomatetheUserInterface.html
+     *
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     */
+    public static void handleMacOSPermissionPopup(RemoteRobot remoteRobot) {
+        if (!remoteRobot.isMac()) {
+            return; // Only applicable to macOS
+        }
+        TestUtils.printTrace(TestUtils.TraceSevLevel.INFO, "Handling macOS permission popup...");
+
+        // Wait for the permission popup to appear
+        TestUtils.sleepAndIgnoreException(10);
+        // Execute AppleScript to click the "Allow" button
+        try {
+            String appleScript =
+                    "tell application \"System Events\"\n" +
+                            "    tell process \"UserNotificationCenter\"\n" +
+                            "        if exists window 1 then\n" +
+                            "            try\n" +
+                            "                set dialogText to value of static text 1 of window 1\n" +
+                            "                if dialogText contains \"bash\" and dialogText contains \"screen and audio\" then\n" +
+                            "                    if exists button \"Allow\" of window 1 then\n" +
+                            "                        click button \"Allow\" of window 1\n" +
+                            "                    end if\n" +
+                            "                end if\n" +
+                            "            end try\n" +
+                            "        end if\n" +
+                            "    end tell\n" +
+                            "end tell";
+
+            new ProcessBuilder("osascript", "-e", appleScript).start();
+
+            // Wait a moment for the click to take effect
+            TestUtils.sleepAndIgnoreException(5);
+
+        } catch (Exception e) {
+            TestUtils.printTrace(TestUtils.TraceSevLevel.ERROR, "Failed to execute AppleScript: " + e.getMessage());
+        }
     }
 }
