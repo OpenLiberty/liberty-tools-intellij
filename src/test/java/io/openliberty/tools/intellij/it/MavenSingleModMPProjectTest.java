@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeAll;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Maven project.
  */
@@ -25,12 +27,12 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Single module Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModMavenMP";
+    private static final String SM_MP_PROJECT_NAME = MAVEN_MP_PROJECT;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "maven").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(MAVEN_PROJECT_PATH).toAbsolutePath().toString();
 
     /**
      * The paths to the integration test reports. The first is used when maven-surefire-report-plugin 3.4 is used and the second when version 3.5 is used.
@@ -61,8 +63,8 @@ public class MavenSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath(Paths.get("target", "liberty").toString());
-        setTestReportPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), "build", "reports", "tests", "test", "index.html"));
-        setBuildFileName("pom.xml");
+        setTestReportPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), INDEX_HTML_PATH));
+        setBuildFileName(MAVEN_BUILD_FILE);
         setBuildFileOpenCommand("Liberty: View pom.xml");
         setStartParams("-DhotTests=true");
         setStartParamsDebugPort("-DdebugPort=9876");
