@@ -13,6 +13,8 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di;
 
+import java.util.Set;
+
 public class DependencyInjectionConstants {
 
     /* Annotation Constants */
@@ -27,6 +29,22 @@ public class DependencyInjectionConstants {
     public static final String DIAGNOSTIC_CODE_INJECT_STATIC = "RemoveInjectOrStatic";
     public static final String DIAGNOSTIC_CODE_INJECT_GENERIC = "RemoveInjectForGeneric";
     public static final String DIAGNOSTIC_CODE_INJECT_INNER_CLASS= "RemoveInjectForInnerClass";
+    public static final String DIAGNOSTIC_CODE_INJECT_INVALID_QUALIFIER= "RemoveInvalidQualifier";
+
+    public static final Set<String> CDI_ANNOTATIONS_FQ = Set.of("jakarta.enterprise.context.ApplicationScoped",
+            "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
+            "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
+            "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype",
+            "jakarta.enterprise.context.Dependent");
+
+    public static final Set<String> BUILT_IN_QUALIFIERS = Set.of(
+            "jakarta.enterprise.inject.Default",
+            "jakarta.enterprise.inject.Any",
+            "jakarta.inject.Named");
+
+    public static final Set<String> IMPLICIT_QUALIFIERS = Set.of(
+            "jakarta.enterprise.inject.Default",
+            "jakarta.enterprise.inject.Any");
 
     public static final String SCOPE_FQ_NAME = "jakarta.inject.Scope";
     public static final String DIAGNOSTIC_CODE_INVALID_SCOPE_ATTRIBUTE= "RemoveInvalidScopeAttribute";
