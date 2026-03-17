@@ -21,6 +21,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.getAnnotationMemberNumericValue;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.inheritsFrom;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants.*;
@@ -233,26 +234,26 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     private void checkConflictingConstraints(PsiJvmModifiersOwner element, PsiClass type,
                                             PsiAnnotation[] annotations, List<Diagnostic> diagnostics) {
 
-        PsiAnnotation minAnn = null, maxAnn = null, decMinAnn = null, decMaxAnn = null, sizeAnn = null;
+        PsiAnnotation minAnnotation = null, maxAnnotation = null, decMinAnnotation = null, decMaxAnnotation = null, sizeAnnotation = null;
 
-        for (PsiAnnotation ann : annotations) {
-            String matched = getMatchedJavaElementName(type, ann.getQualifiedName(),
+        for (PsiAnnotation annotation : annotations) {
+            String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                     new String[]{MIN, MAX, DECIMAL_MIN, DECIMAL_MAX, SIZE});
             if (matched != null) {
                 switch (matched) {
-                    case MIN -> minAnn = ann;
-                    case MAX -> maxAnn = ann;
-                    case DECIMAL_MIN -> decMinAnn = ann;
-                    case DECIMAL_MAX -> decMaxAnn = ann;
-                    case SIZE -> sizeAnn = ann;
+                    case MIN -> minAnnotation = annotation;
+                    case MAX -> maxAnnotation = annotation;
+                    case DECIMAL_MIN -> decMinAnnotation = annotation;
+                    case DECIMAL_MAX -> decMaxAnnotation = annotation;
+                    case SIZE -> sizeAnnotation = annotation;
                 }
             }
         }
 
         // Check @Min/@Max conflict
-        if (minAnn != null && maxAnn != null) {
-            Long min = getNumericValue(minAnn, "value", Long.class);
-            Long max = getNumericValue(maxAnn, "value", Long.class);
+        if (minAnnotation != null && maxAnnotation != null) {
+            Long min = getAnnotationMemberNumericValue(minAnnotation, "value", Long.class);
+            Long max = getAnnotationMemberNumericValue(maxAnnotation, "value", Long.class);
             if (min != null && max != null && min > max) {
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                         Messages.getMessage("ConflictingConstraintAnnotationsMinMax", min.toString(), max.toString()),
@@ -261,9 +262,9 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         }
 
         // Check @DecimalMin/@DecimalMax conflict
-        if (decMinAnn != null && decMaxAnn != null) {
-            String min = DiagnosticsUtils.getAnnotationMemberValue(decMinAnn, "value", String.class);
-            String max = DiagnosticsUtils.getAnnotationMemberValue(decMaxAnn, "value", String.class);
+        if (decMinAnnotation != null && decMaxAnnotation != null) {
+            String min = DiagnosticsUtils.getAnnotationMemberValue(decMinAnnotation, "value", String.class);
+            String max = DiagnosticsUtils.getAnnotationMemberValue(decMaxAnnotation, "value", String.class);
             if (min != null && max != null) {
                 try {
                     if (Double.parseDouble(min) > Double.parseDouble(max)) {
@@ -278,33 +279,14 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         }
 
         // Check @Size min/max conflict
-        if (sizeAnn != null) {
-            Integer min = getNumericValue(sizeAnn, "min", Integer.class);
-            Integer max = getNumericValue(sizeAnn, "max", Integer.class);
+        if (sizeAnnotation != null) {
+            Integer min = getAnnotationMemberNumericValue(sizeAnnotation, "min", Integer.class);
+            Integer max = getAnnotationMemberNumericValue(sizeAnnotation, "max", Integer.class);
             if (min != null && max != null && min > max) {
                 diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                         Messages.getMessage("ConflictingConstraintAnnotationsSize", min.toString(), max.toString()),
                         DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS, null, DiagnosticSeverity.Warning));
             }
         }
-    }
-
-    /**
-     * getNumericValue
-     * Helper method to get numeric annotation values with type conversion.
-     * Handles conversion from any Number type to the expected type.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T extends Number> T getNumericValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
-        Object value = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Object.class);
-        if (value instanceof Number) {
-            Number num = (Number) value;
-            if (expectedType == Long.class) {
-                return (T) Long.valueOf(num.longValue());
-            } else if (expectedType == Integer.class) {
-                return (T) Integer.valueOf(num.intValue());
-            }
-        }
-        return null;
     }
 }

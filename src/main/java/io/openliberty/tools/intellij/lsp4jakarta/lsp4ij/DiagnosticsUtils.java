@@ -169,4 +169,24 @@ public class DiagnosticsUtils {
         Object constantValue = ((PsiLiteral) value).getValue();
         return expectedType.isInstance(constantValue) ? expectedType.cast(constantValue) : null;
     }
+
+
+    /**
+     * getAnnotationMemberNumericValue
+     * Helper method to get numeric annotation values with type conversion.
+     * Handles conversion from any Number type to the expected type.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Number> T getAnnotationMemberNumericValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
+        Object value = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Object.class);
+        if (value instanceof Number) {
+            Number num = (Number) value;
+            if (expectedType == Long.class) {
+                return (T) Long.valueOf(num.longValue());
+            } else if (expectedType == Integer.class) {
+                return (T) Integer.valueOf(num.intValue());
+            }
+        }
+        return null;
+    }
 }
