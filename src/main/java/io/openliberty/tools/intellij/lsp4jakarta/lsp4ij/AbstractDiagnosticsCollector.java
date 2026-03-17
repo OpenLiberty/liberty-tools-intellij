@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2026 IBM Corporation and others.
+ * Copyright (c) 2022, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,7 +16,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -241,28 +240,4 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     protected static boolean isConstructorMethod(PsiMethod m) {
         return m.isConstructor();
     }
-
-    /**
-     * Checks if the given method is a constructor and has valid no-args constructor.
-     *
-     * @param method
-     * @param constructorInfo
-     * @return Map<String, Boolean>
-     */
-    public static Map<String, Boolean> hasValidNoArgsConstructor(PsiMethod method, Map<String,Boolean> constructorInfo) {
-        if (isConstructorMethod(method)) {
-            constructorInfo.put("hasConstructor", true); // Check explicit constructor declaration
-            PsiParameterList params = method.getParameterList();
-            if (params.getParametersCount() == 0) { // Checks for user defined no-args constructor
-                if (method.hasModifierProperty(PsiModifier.PUBLIC)) {
-                    constructorInfo.put("hasValidPublicNoArgsConstructor", true);
-                }
-                if (method.hasModifierProperty(PsiModifier.PROTECTED)) {
-                    constructorInfo.put("hasValidProtectedNoArgsConstructor", true);
-                }
-            }
-        }
-        return constructorInfo;
-    }
-
 }

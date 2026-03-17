@@ -53,7 +53,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 		Diagnostic d2 = JakartaForJavaAssert.d(5, 22, 40,
 				"Missing Public NoArgsConstructor. Class InvalidInterceptor is of Interceptor type, but does not declare a public no-argument constructor.",
 				DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnNoArgsConstructor");
-		Diagnostic d3 = JakartaForJavaAssert.d(22, 14, 37,
+		Diagnostic d3 = JakartaForJavaAssert.d(32, 14, 37,
 				"Missing Public NoArgsConstructor. Class InnerInvalidInterceptor is of Interceptor type, but does not declare a public no-argument constructor.",
 				DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnNoArgsConstructor");
 
