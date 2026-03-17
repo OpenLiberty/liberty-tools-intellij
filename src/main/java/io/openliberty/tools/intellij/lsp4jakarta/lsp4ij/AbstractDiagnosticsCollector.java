@@ -240,5 +240,5 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     protected static boolean isConstructorMethod(PsiMethod m) {
         return m.isConstructor();
     }
-    
+
 }
