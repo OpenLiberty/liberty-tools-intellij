@@ -11,11 +11,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.helpers;
 
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiParameterList;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 
 /**
  * Constructor information diagnostics helper for a given method.

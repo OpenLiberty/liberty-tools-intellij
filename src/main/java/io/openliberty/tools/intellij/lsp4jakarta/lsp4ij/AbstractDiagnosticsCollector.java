@@ -237,7 +237,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @param m method
      * @return true if the given method is a constructor and false otherwise
      */
-    protected static boolean isConstructorMethod(PsiMethod m) {
+    public static boolean isConstructorMethod(PsiMethod m) {
         return m.isConstructor();
     }
 
