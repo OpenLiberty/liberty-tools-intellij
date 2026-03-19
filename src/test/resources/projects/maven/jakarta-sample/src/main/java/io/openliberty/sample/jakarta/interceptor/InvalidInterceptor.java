@@ -3,7 +3,7 @@ package io.openliberty.sample.jakarta.interceptor;
 import jakarta.interceptor.Interceptor;
 
 @Interceptor
-public abstract class InvalidInterceptor {
+public class InvalidInterceptor {
 
 	String config;
 

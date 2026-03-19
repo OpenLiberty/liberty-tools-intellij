@@ -74,18 +74,18 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 						Messages.getMessage("InvalidInterceptorAbstractClass", type.getName()),
 						DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS, null,
 						DiagnosticSeverity.Error));
-			}
-			for (PsiMethod method : type.getMethods()) {
-				//Checks if method is a constructor and has valid no-args constructor
-				constructorInfo.mergeConstructorInfo(ConstructorInfoDiagnosticHelper.getConstructorInfo(method));
-			}
-			// Conditions for checking missing public no-args constructor
-			if(constructorInfo != null && !constructorInfo.hasValidPublicNoArgsConstructor()
-					&& constructorInfo.hasConstructor()) {
-				diagnostics.add(createDiagnostic(type, unit,
-						Messages.getMessage("InterceptorNoArgConstructorMissing", type.getName()),
-						DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR, null,
-						DiagnosticSeverity.Error));
+			} else {
+				for (PsiMethod method : type.getMethods()) {
+					//Checks if method is a constructor and has valid no-args constructor
+					constructorInfo.mergeConstructorInfo(ConstructorInfoDiagnosticHelper.getConstructorInfo(method));
+				}
+				// Conditions for checking missing public no-args constructor
+				if (constructorInfo.hasConstructor() && !constructorInfo.hasValidPublicNoArgsConstructor()) {
+					diagnostics.add(createDiagnostic(type, unit,
+							Messages.getMessage("InterceptorNoArgConstructorMissing", type.getName()),
+							DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR, null,
+							DiagnosticSeverity.Error));
+				}
 			}
 		}
 	}
@@ -98,6 +98,6 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @return boolean
 	 */
 	private static boolean isInterceptorType(PsiClass type) {
-		return Arrays.stream(type.getAnnotations()).filter(Objects::nonNull).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTOR_FQ_NAME));
+		return Arrays.stream(type.getAnnotations()).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTOR_FQ_NAME));
 	}
 }

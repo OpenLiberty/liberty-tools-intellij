@@ -3,10 +3,9 @@
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
- * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * http://www.eclipse.org/legal/epl-2.0
  *
- * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -68,7 +67,7 @@ public final class ConstructorInfoDiagnosticHelper {
         boolean isPublicNoArgsConstructor = false;
         boolean isProtectedNoArgsConstructor = false;
 
-        if (AbstractDiagnosticsCollector.isConstructorMethod((method))) {
+        if (AbstractDiagnosticsCollector.isConstructorMethod(method)) {
             isUserDefinedConstructor = true; // Check explicit constructor declaration
             PsiParameterList params = method.getParameterList();
             if (params.getParametersCount() == 0) { // Checks for user defined no-args constructor
