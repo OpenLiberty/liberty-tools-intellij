@@ -75,12 +75,12 @@ configurations {
     runtimeClasspath {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
-}
 
-// Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
-tasks.withType(KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = javaVersion
+    // Ensures that the JVM target is set to 17 for all Kotlin compilation tasks, including both main and test sources.
+    tasks.withType(KotlinCompile).all {
+        kotlinOptions {
+            jvmTarget = javaVersion
+        }
     }
 }
 
