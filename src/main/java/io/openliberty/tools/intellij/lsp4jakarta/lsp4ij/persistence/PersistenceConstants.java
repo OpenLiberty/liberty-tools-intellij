@@ -16,6 +16,9 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 public class PersistenceConstants {
     /* Annotation Constants */
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String ID = "jakarta.persistence.Id";
+    public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
+    public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
     public static final String MAPKEY = "jakarta.persistence.MapKey";
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
@@ -32,6 +35,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_FINAL_METHODS = "RemoveFinalMethods";
     public static final String DIAGNOSTIC_CODE_FINAL_VARIABLES = "RemoveFinalVariables";
     public static final String DIAGNOSTIC_CODE_FINAL_CLASS = "InvalidClass";
+    public static final String DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY = "MissingPrimaryKey";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_ANNOTATION = "RemoveMapKeyorMapKeyClass";
