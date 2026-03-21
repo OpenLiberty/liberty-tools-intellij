@@ -177,10 +177,11 @@ public class DiagnosticsUtils {
      * Handles conversion from any Number type to the expected type.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T getAnnotationMemberNumericValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
-        Object value = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Object.class);
-        if (value instanceof Number) {
-            Number num = (Number) value;
+    public static <T extends Number> T getAnnotationMemberNumericValue(
+            PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
+
+        Number num = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Number.class);
+        if (num != null) {
             if (expectedType == Long.class) {
                 return (T) Long.valueOf(num.longValue());
             } else if (expectedType == Integer.class) {
@@ -189,4 +190,5 @@ public class DiagnosticsUtils {
         }
         return null;
     }
+
 }
