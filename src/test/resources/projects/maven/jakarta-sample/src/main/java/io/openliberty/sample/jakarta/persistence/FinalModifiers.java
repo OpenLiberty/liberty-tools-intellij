@@ -1,10 +1,13 @@
 package io.openliberty.sample.jakarta.persistence;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public final class FinalModifiers {
 
+    @Id
+    int id;
     final int x = 1;
     final String y = "hello", z = "world";
     
