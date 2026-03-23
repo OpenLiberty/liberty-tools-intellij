@@ -139,7 +139,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     if (!hasPrimaryKey) {
                         diagnostics.add(createDiagnostic(type, unit,
                                 Messages.getMessage("EntityMissingPrimaryKey"),
-                                PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, type.getQualifiedName(),
+                                PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
                                 DiagnosticSeverity.Error));
                     }
                 }
