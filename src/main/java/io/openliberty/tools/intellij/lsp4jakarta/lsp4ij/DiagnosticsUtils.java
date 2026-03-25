@@ -149,46 +149,4 @@ public class DiagnosticsUtils {
         }
         return false;
     }
-
-    /**
-     * getAnnotationMemberValue
-     * Get the value of an annotation member attribute.
-     *
-     * @param annotation    the annotation
-     * @param attributeName the attribute name
-     * @param expectedType  the expected type of the attribute value
-     * @param <T>           the type parameter
-     * @return the attribute value, or null if not found or wrong type
-     */
-    public static <T> T getAnnotationMemberValue(PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
-        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
-        if (!(value instanceof PsiLiteral)) {
-            return null;
-        }
-
-        Object constantValue = ((PsiLiteral) value).getValue();
-        return expectedType.isInstance(constantValue) ? expectedType.cast(constantValue) : null;
-    }
-
-
-    /**
-     * getAnnotationMemberNumericValue
-     * Helper method to get numeric annotation values with type conversion.
-     * Handles conversion from any Number type to the expected type.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends Number> T getAnnotationMemberNumericValue(
-            PsiAnnotation annotation, String attributeName, Class<T> expectedType) {
-
-        Number num = DiagnosticsUtils.getAnnotationMemberValue(annotation, attributeName, Number.class);
-        if (num != null) {
-            if (expectedType == Long.class) {
-                return (T) Long.valueOf(num.longValue());
-            } else if (expectedType == Integer.class) {
-                return (T) Integer.valueOf(num.intValue());
-            }
-        }
-        return null;
-    }
-
 }
