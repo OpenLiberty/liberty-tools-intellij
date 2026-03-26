@@ -435,7 +435,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveInjectOrConflictedAnnotations");
 
         Diagnostic d6 = d(34, 18, 44,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters name1, name2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic d7 = d(40, 18, 44,
@@ -447,7 +447,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveInjectOrConflictedAnnotations");
 
         Diagnostic d9 = d(46, 18, 52,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters name2, name3 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic d10 = d(51, 18, 53,
@@ -929,7 +929,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "A producer method cannot have parameter(s) annotated with @Observes, @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
         Diagnostic d6 = d(36, 18, 44,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters name1, name2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic d7 = d(42, 18, 44,
@@ -960,14 +960,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         Diagnostic d14 = d(48, 18, 52,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters name2, name3 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic d15 = d(54, 18, 53,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
         Diagnostic d16 = d(58, 18, 52,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters name, name1 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic d17 = d(58, 18, 52,

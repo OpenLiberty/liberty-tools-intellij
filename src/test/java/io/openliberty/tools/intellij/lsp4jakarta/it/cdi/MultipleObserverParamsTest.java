@@ -51,12 +51,12 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
         // test expected diagnostics
         // Line 16: invalidTwoObserves method has two @Observes parameters
         Diagnostic d1 = d(15, 16, 34,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters event1, event2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         // Line 20: invalidObservesAndObservesAsync method has @Observes and @ObservesAsync parameters
         Diagnostic d2 = d(19, 16, 47,
-                "A method cannot have more than one parameter annotated with @Observes or @ObservesAsync.",
+                "Parameters event1, event2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);

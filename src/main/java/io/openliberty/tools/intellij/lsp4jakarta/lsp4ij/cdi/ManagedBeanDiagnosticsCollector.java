@@ -202,8 +202,11 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // Generate diagnostic for multiple observer parameters
                 // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
                 if (paramsWithObserverAnnotations.size() > 1) {
-                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams"),
-                            DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
+                    String paramNames = paramsWithObserverAnnotations.stream()
+                            .map(PsiParameter::getName)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
+                                        DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 }
             }
 
