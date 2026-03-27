@@ -47,12 +47,16 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         PsiClass[] types = unit.getClasses();
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : types) {
-            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
+            PsiAnnotation[] typeAnnotations = type.getAnnotations();
+            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
+            boolean isStateless = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
+                            .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
+                    new String[]{STATELESS_FQ_NAME}).size() > 0;
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
             boolean nonStaticPublicFieldPresent = false;
@@ -251,6 +255,19 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
                 }
+            }
+
+            /**
+             * A stateless session bean must belong to the @Dependent pseudo-scope.
+             * If a session bean specifies an illegal scope, the container automatically detects
+             * the problem and treats it as a definition error.
+             *
+             * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
+             */
+            if (isStateless && (!isDependent || hasMultipleScopes)) {
+                diagnostics.add(createDiagnostic(type, unit,
+                        Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
+                        DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
             }
 
             /*

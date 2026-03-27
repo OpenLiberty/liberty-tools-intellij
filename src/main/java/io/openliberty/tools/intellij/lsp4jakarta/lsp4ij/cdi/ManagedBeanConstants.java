@@ -25,11 +25,13 @@ public class ManagedBeanConstants {
     public static final String OBSERVES_FQ_NAME = "jakarta.enterprise.event.Observes";
     public static final String OBSERVES_ASYNC_FQ_NAME = "jakarta.enterprise.event.ObservesAsync";
     public static final String DEPENDENT_FQ_NAME = "jakarta.enterprise.context.Dependent";
+    public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
     public static final String DIAGNOSTIC_CODE_SCOPEDECL = "InvalidScopeDecl";
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
+    public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanWithIllegalScope";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
