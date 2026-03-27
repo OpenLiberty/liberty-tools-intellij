@@ -21,8 +21,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +51,8 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Test expected diagnostics
-        Diagnostic d1 = d(10, 13, 39,
+        // Test expected diagnostics (order matches actual diagnostic order: line 23, 16, 10)
+        Diagnostic d1 = d(23, 6, 33,
                 "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
 
@@ -57,10 +60,11 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
 
-        Diagnostic d3 = d(24, 6, 33,
+        Diagnostic d3 = d(10, 13, 33,
                 "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+
     }
 }

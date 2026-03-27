@@ -249,25 +249,23 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 } else if (nonStaticPublicFieldPresent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (isStateless && (!isDependent || hasMultipleScopes)) {
+                    /**
+                     * A stateless session bean must belong to the @Dependent pseudo-scope.
+                     * If a session bean specifies an illegal scope, the container automatically detects
+                     * the problem and treats it as a definition error.
+                     *
+                     * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
+                     */
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
+                            DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
                 }
-            }
-
-            /**
-             * A stateless session bean must belong to the @Dependent pseudo-scope.
-             * If a session bean specifies an illegal scope, the container automatically detects
-             * the problem and treats it as a definition error.
-             *
-             * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
-             */
-            if (isStateless && (!isDependent || hasMultipleScopes)) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
-                        DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
             }
 
             /*
