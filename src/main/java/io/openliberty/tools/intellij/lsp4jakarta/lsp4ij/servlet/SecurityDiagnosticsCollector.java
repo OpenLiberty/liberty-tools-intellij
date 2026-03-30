@@ -41,10 +41,10 @@ public class SecurityDiagnosticsCollector extends AbstractDiagnosticsCollector {
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            PsiClass[] alltypes;
+            PsiClass[] allTypes;
             PsiAnnotation[] allAnnotations;
-            alltypes = unit.getClasses();
-            for (PsiClass type : alltypes) {
+            allTypes = unit.getClasses();
+            for (PsiClass type : allTypes) {
                 allAnnotations = type.getAnnotations();
                 PsiAnnotation declareRolesAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
@@ -55,7 +55,7 @@ public class SecurityDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     }
                 }
                 if (declareRolesAnnotation != null) {
-                    if(!DiagnosticsUtils.inheritsFrom(type, ServletConstants.SERVLET_FQ_NAME)){
+                    if (!DiagnosticsUtils.inheritsFrom(type, ServletConstants.SERVLET_FQ_NAME)) {
                         diagnostics.add(createDiagnostic(type, unit,
                                 Messages.getMessage("DeclareRolesMustImplement"),
                                 ServletConstants.DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
