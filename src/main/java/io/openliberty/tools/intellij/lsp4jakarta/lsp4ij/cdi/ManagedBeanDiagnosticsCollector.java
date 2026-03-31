@@ -251,7 +251,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
                 } else if (isStateless && (!isDependent || hasMultipleScopes)) {
                     /**
-                     * A stateless session bean must belong to the @Dependent pseudo-scope.
+                     * A stateless session bean must belong to the @Dependent scope.
                      * If a session bean specifies an illegal scope, the container automatically detects
                      * the problem and treats it as a definition error.
                      *

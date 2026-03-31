@@ -14,6 +14,8 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationConflictQuickFix;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.STATELESS_FQ_NAME;
+
 /**
  *
  * Quick fix for removing @Stateless annotation
@@ -22,7 +24,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 public class RemoveStatelessAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
     public RemoveStatelessAnnotationQuickFix() {
-        super(false, "jakarta.ejb.Stateless");
+        super(false, STATELESS_FQ_NAME);
     }
 
     @Override
