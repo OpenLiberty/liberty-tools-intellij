@@ -13,6 +13,7 @@ public class StatelessSessionBean {
 
 // Invalid: Stateless with SessionScoped
 @Stateless
+@SessionScoped
 class StatelessWithSessionScoped {
 }
 
