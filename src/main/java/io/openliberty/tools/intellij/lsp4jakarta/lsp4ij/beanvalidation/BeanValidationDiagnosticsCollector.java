@@ -283,13 +283,13 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                ConstraintCheck check,
                                List<Diagnostic> diagnostics) {
 
-        var minStr = AnnotationUtils.getAnnotationMemberValue(check.minAnn(), check.minKey());
-        var maxStr = AnnotationUtils.getAnnotationMemberValue(check.maxAnn(), check.maxKey());
+        var minStr = AnnotationUtils.getAnnotationMemberValue(check.minAnnotation(), check.minKey());
+        var maxStr = AnnotationUtils.getAnnotationMemberValue(check.maxAnnotation(), check.maxKey());
 
         if (minStr != null && maxStr != null) {
             try {
-                var min = check.parser().apply(minStr);
-                var max = check.parser().apply(maxStr);
+                Number min = check.parser().apply(minStr);
+                Number max = check.parser().apply(maxStr);
                 if (min.doubleValue() > max.doubleValue()) {
                     diagnostics.add(createDiagnostic(
                             element,
@@ -306,8 +306,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     }
 
     private record ConstraintCheck(
-            PsiAnnotation minAnn,
-            PsiAnnotation maxAnn,
+            PsiAnnotation minAnnotation,
+            PsiAnnotation maxAnnotation,
             String minKey,
             String maxKey,
             Function<String, Number> parser,
