@@ -27,7 +27,9 @@ import org.eclipse.lsp4j.Diagnostic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * Quickfix for removing annotations attributes
@@ -58,7 +60,6 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
         final PsiElement node = context.getCoveredNode();
         PsiModifierListOwner binding = getBinding(node);
         PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
-        assert binding != null;
         String label = getLabel();
         ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
                 context.getASTRoot(), binding, annotationNode, 0, this.annotation, new ArrayList<>(), Arrays.asList(attributes));
@@ -66,16 +67,23 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
         return toResolve;
     }
 
+    /**
+     * Finds the nearest PsiModifierListOwner parent of the given node.
+     * Searches in priority order: PsiVariable, PsiMethod, then PsiClass.
+     *
+     * @param node the PSI element to start searching from
+     * @return the nearest PsiModifierListOwner parent, or null if none found
+     */
     protected static PsiModifierListOwner getBinding(PsiElement node) {
-        PsiModifierListOwner binding = PsiTreeUtil.getParentOfType(node, PsiVariable.class);
-        if (binding != null) {
-            return binding;
-        }
-        binding = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-        if (binding != null) {
-            return binding;
-        }
-        return PsiTreeUtil.getParentOfType(node, PsiClass.class);
+        return Stream.<Class<? extends PsiModifierListOwner>>of(
+                PsiVariable.class,
+                PsiMethod.class,
+                PsiClass.class
+        )
+                .map(clazz -> PsiTreeUtil.getParentOfType(node, clazz))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     protected abstract String getLabel();
