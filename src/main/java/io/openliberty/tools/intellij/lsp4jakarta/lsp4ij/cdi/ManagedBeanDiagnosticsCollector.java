@@ -238,8 +238,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
-
-
                 validateSingletonSessionBean(unit, diagnostics, type, managedBeanAnnotations);
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
