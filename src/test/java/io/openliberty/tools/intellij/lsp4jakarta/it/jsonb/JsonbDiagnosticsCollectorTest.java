@@ -20,6 +20,7 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -31,7 +32,6 @@ import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 import java.io.File;
 import java.util.Arrays;
 
@@ -1974,14 +1974,158 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "Missing Public or Protected NoArgsConstructor: Class JsonbDeserialization uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d2 = JakartaForJavaAssert.d(56, 21, 31,
+        Diagnostic d2 = JakartaForJavaAssert.d(56, 24, 34,
                 "Missing Public or Protected NoArgsConstructor: Class ChildClass uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d3 = JakartaForJavaAssert.d(83, 14, 22,
+        Diagnostic d3 = JakartaForJavaAssert.d(83, 17, 25,
                 "Cannot deserialize class SubChild because it is not static. Please declare the class as static for JSONB deserialization.",
                 DiagnosticSeverity.Warning, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+
+        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+        String newText1 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    protected JsonbDeserialization() {\n    }\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n" +
+                "            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        String newText2 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization() {\n    }\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n" +
+                "            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 100, 1, newText1);
+        CodeAction ca1 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d1, te1);
+        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 100, 1, newText2);
+        CodeAction ca2 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d1, te2);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+        String newText3 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        protected ChildClass() {\n        }\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        String newText4 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass() {\n        }\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        TextEdit te3 = JakartaForJavaAssert.te(0, 0, 100, 1, newText3);
+        CodeAction ca3 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d2, te3);
+        TextEdit te4 = JakartaForJavaAssert.te(0, 0, 100, 1, newText4);
+        CodeAction ca4 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d2, te4);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
     }
 }
