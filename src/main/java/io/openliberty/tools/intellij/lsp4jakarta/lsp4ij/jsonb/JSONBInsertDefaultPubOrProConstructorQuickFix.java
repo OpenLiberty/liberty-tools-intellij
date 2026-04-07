@@ -10,7 +10,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonp;
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
