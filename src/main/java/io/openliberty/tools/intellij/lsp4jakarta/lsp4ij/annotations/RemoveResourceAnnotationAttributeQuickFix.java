@@ -28,7 +28,7 @@ public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationA
 
     @Override
     public String getLabel() {
-        return Messages.getMessage("RemoveAttribute", "type", "@Resource");
+        return Messages.getMessage("RemoveRedundantAttribute", "type", "@Resource");
     }
 
     @Override
