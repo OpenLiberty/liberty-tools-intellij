@@ -56,14 +56,14 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         JsonArray data1 = new JsonArray();
         data1.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic dRequestScopedAnnotation = d(11, 13, 33,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope; any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data1);
 
         // Test case 2: Singleton with invalid scope (SessionScoped) - should report error on class name
         JsonArray data2 = new JsonArray();
         data2.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic dSessionScopedClass = d(17, 6, 31,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope; any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data2);
 
         // Test case 6: Singleton with mixed valid and invalid scopes (RequestScoped + ApplicationScoped)
@@ -71,7 +71,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         data3.add("jakarta.enterprise.context.ApplicationScoped");
         data3.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic dMixedInvalidAndApplicationScopedInvalidScope = d(41, 6, 51,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope; any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data3);
         
         JsonArray data3b = new JsonArray();
@@ -86,7 +86,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         data4.add("jakarta.enterprise.context.Dependent");
         data4.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic dMixedInvalidAndDependentInvalidScope = d(48, 6, 43,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope; any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data4);
         
         JsonArray data4b = new JsonArray();
@@ -129,8 +129,8 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
                 "should report error\n@Singleton\n@SessionScoped\n@Dependent\nclass SingletonWithMixedInvalidAndDependent {\n}\n\n" +
                 "// Test case 8: Singleton with both valid scopes (ApplicationScoped + Dependent) - should NOT report error\n@Singleton\n@ApplicationScoped\n@Dependent\n" +
                 "class SingletonWithBothValidScopes {\n}";
-        TextEdit te1a = te(0, 0, 56, 1, newText1a);
-        CodeAction ca1a = ca(uri, "Remove @Singleton", dRequestScopedAnnotation, te1a);
+        TextEdit removeSingleton1 = te(0, 0, 56, 1, newText1a);
+        CodeAction removeSingletonAction1 = ca(uri, "Remove @Singleton", dRequestScopedAnnotation, removeSingleton1);
         
         String newText1b = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Singleton;\nimport jakarta.enterprise.context.SessionScoped;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.enterprise.context.Dependent;\n\n" +
@@ -145,9 +145,9 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
                 "@Singleton\n@SessionScoped\n@Dependent\nclass SingletonWithMixedInvalidAndDependent {\n}\n\n" +
                 "// Test case 8: Singleton with both valid scopes (ApplicationScoped + Dependent) - should NOT report error\n" +
                 "@Singleton\n@ApplicationScoped\n@Dependent\nclass SingletonWithBothValidScopes {\n}";
-        TextEdit te1b = te(0, 0, 56, 1, newText1b);
-        CodeAction ca1b = ca(uri, "Replace current scope with @Dependent", dRequestScopedAnnotation, te1b);
-        assertJavaCodeAction(codeActionParams1, utils, ca1a, ca1b);
+        TextEdit replaceWithDependent1 = te(0, 0, 56, 1, newText1b);
+        CodeAction replaceWithDependentAction1 = ca(uri, "Replace current scope with @Dependent", dRequestScopedAnnotation, replaceWithDependent1);
+        assertJavaCodeAction(codeActionParams1, utils, removeSingletonAction1, replaceWithDependentAction1);
 
         // Test code actions for dMixedInvalidAndDependentMultipleScopes (Test case 7)
         // Expected: Remove @SessionScoped or Remove @Dependent
@@ -164,8 +164,8 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
                 "// Test case 7: Singleton with mixed valid and invalid scopes (SessionScoped + Dependent) - should report error\n@Singleton\n@SessionScoped\n" +
                 "class SingletonWithMixedInvalidAndDependent {\n}\n\n// Test case 8: Singleton with both valid scopes (ApplicationScoped + Dependent) - should NOT report error\n" +
                 "@Singleton\n@ApplicationScoped\n@Dependent\nclass SingletonWithBothValidScopes {\n}";
-        TextEdit te2a = te(0, 0, 56, 1, newText2a);
-        CodeAction ca2a = ca(uri, "Remove @Dependent", dMixedInvalidAndDependentMultipleScopes, te2a);
+        TextEdit removeDependent2 = te(0, 0, 56, 1, newText2a);
+        CodeAction removeDependentAction2 = ca(uri, "Remove @Dependent", dMixedInvalidAndDependentMultipleScopes, removeDependent2);
         
         String newText2b = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Singleton;\nimport jakarta.enterprise.context.RequestScoped;\n" +
                 "import jakarta.enterprise.context.SessionScoped;\nimport jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.enterprise.context.Dependent;\n\n" +
@@ -179,8 +179,8 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
                 "@Singleton\n@Dependent\nclass SingletonWithMixedInvalidAndDependent {\n}\n\n" +
                 "// Test case 8: Singleton with both valid scopes (ApplicationScoped + Dependent) - should NOT report error\n@Singleton\n@ApplicationScoped\n@Dependent\n" +
                 "class SingletonWithBothValidScopes {\n}";
-        TextEdit te2b = te(0, 0, 56, 1, newText2b);
-        CodeAction ca2b = ca(uri, "Remove @SessionScoped", dMixedInvalidAndDependentMultipleScopes, te2b);
-        assertJavaCodeAction(codeActionParams2, utils, ca2a, ca2b);
+        TextEdit removeSessionScoped2 = te(0, 0, 56, 1, newText2b);
+        CodeAction removeSessionScopedAction2 = ca(uri, "Remove @SessionScoped", dMixedInvalidAndDependentMultipleScopes, removeSessionScoped2);
+        assertJavaCodeAction(codeActionParams2, utils, removeDependentAction2, removeSessionScopedAction2);
     }
 }
