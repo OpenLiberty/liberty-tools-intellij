@@ -480,11 +480,11 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanWithIllegalScope"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveStatelessAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanWithIllegalScope"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"

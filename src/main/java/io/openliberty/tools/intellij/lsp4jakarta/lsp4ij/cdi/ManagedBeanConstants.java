@@ -31,7 +31,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
     public static final String DIAGNOSTIC_CODE_SCOPEDECL = "InvalidScopeDecl";
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
-    public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanWithIllegalScope";
+    public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 

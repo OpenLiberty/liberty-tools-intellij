@@ -53,16 +53,16 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics (order matches actual diagnostic order: line 23, 16, 10)
         Diagnostic withRequestScoped = d(23, 6, 33,
-                "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
+                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         Diagnostic withSessionScoped = d(16, 6, 32,
-                "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
+                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         Diagnostic withDependentAndRequest = d(10, 13, 33,
-                "A stateless session bean belongs to the @Dependent scope; any other scope is invalid.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanWithIllegalScope");
+                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         assertJavaDiagnostics(diagnosticsParams, utils, withRequestScoped, withSessionScoped, withDependentAndRequest);
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, withRequestScoped);
@@ -80,11 +80,11 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "@Dependent\n@Stateless\nclass StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
                 "@Stateless\nclass StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n" +
                 "@Stateless\n@Dependent\nclass StatelessWithDependent {\n}\n";
-        TextEdit te1 = te(0, 0, 36, 0, newText);
-        TextEdit te2 = te(0, 0, 36, 0, newText0);
-        CodeAction ca1 = ca(uri, "Remove @Stateless", withRequestScoped, te1);
-        CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", withRequestScoped, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        TextEdit removeStateless1 = te(0, 0, 36, 0, newText);
+        TextEdit replaceWithDependent1 = te(0, 0, 36, 0, newText0);
+        CodeAction removeStatelessAction1 = ca(uri, "Remove @Stateless", withRequestScoped, removeStateless1);
+        CodeAction replaceWithDependentAction1 = ca(uri, "Replace current scope with @Dependent", withRequestScoped, replaceWithDependent1);
+        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction1, replaceWithDependentAction1);
 
         codeActionParams1 = createCodeActionParams(uri, withSessionScoped);
         newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
@@ -99,11 +99,11 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "@Dependent\n@Stateless\nclass StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
                 "@Stateless\n@Dependent\n@RequestScoped\nclass StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
                 "@Stateless\nclass StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\nclass StatelessWithDependent {\n}\n";
-        te1 = te(0, 0, 36, 0, newText);
-        te2 = te(0, 0, 36, 0, newText0);
-        ca1 = ca(uri, "Remove @Stateless", withSessionScoped, te1);
-        ca2 = ca(uri, "Replace current scope with @Dependent", withSessionScoped, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        TextEdit removeStateless2 = te(0, 0, 36, 0, newText);
+        TextEdit replaceWithDependent2 = te(0, 0, 36, 0, newText0);
+        CodeAction removeStatelessAction2 = ca(uri, "Remove @Stateless", withSessionScoped, removeStateless2);
+        CodeAction replaceWithDependentAction2 = ca(uri, "Replace current scope with @Dependent", withSessionScoped, replaceWithDependent2);
+        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction2, replaceWithDependentAction2);
 
         codeActionParams1 = createCodeActionParams(uri, withDependentAndRequest);
         newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
@@ -118,10 +118,10 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "@Stateless\n@SessionScoped\nclass StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
                 "@Stateless\n@Dependent\n@RequestScoped\nclass StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
                 "@Stateless\nclass StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\nclass StatelessWithDependent {\n}\n";
-        te1 = te(0, 0, 36, 0, newText);
-        te2 = te(0, 0, 36, 0, newText0);
-        ca1 = ca(uri, "Remove @Stateless", withDependentAndRequest, te1);
-        ca2 = ca(uri, "Replace current scope with @Dependent", withDependentAndRequest, te2);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        TextEdit removeStateless3 = te(0, 0, 36, 0, newText);
+        TextEdit replaceWithDependent3 = te(0, 0, 36, 0, newText0);
+        CodeAction removeStatelessAction3 = ca(uri, "Remove @Stateless", withDependentAndRequest, removeStateless3);
+        CodeAction replaceWithDependentAction3 = ca(uri, "Replace current scope with @Dependent", withDependentAndRequest, replaceWithDependent3);
+        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction3, replaceWithDependentAction3);
     }
 }
