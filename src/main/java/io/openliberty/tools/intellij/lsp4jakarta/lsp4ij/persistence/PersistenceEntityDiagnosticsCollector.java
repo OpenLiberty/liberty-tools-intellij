@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -244,12 +245,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @return true if a primary key annotation is found
      */
     private boolean hasPrimaryKeyAnnotation(PsiClass type, PsiAnnotation[] annotations) {
-        for (PsiAnnotation annotation : annotations) {
-            if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ID) || isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.EMBEDDEDID)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(annotations).anyMatch(annotation ->
+                getMatchedJavaElementName(type, annotation.getQualifiedName(),new String[] {PersistenceConstants.ID,PersistenceConstants.EMBEDDEDID}) != null);
     }
 
     /**
