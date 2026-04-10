@@ -155,6 +155,9 @@
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.InterceptorDiagnosticsParticipant"/>
 
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
