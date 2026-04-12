@@ -909,75 +909,75 @@ public class ManagedBeanTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = d(12, 18, 31,
+        Diagnostic producesWithDisposes = d(12, 18, 31,
                 "A producer method cannot have parameter(s) annotated with @Disposes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d2 = d(18, 18, 31,
+        Diagnostic producesWithObserves = d(18, 18, 31,
                 "A producer method cannot have parameter(s) annotated with @Observes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d3 = d(24, 18, 36,
+        Diagnostic producesWithAsync = d(24, 18, 36,
                 "A producer method cannot have parameter(s) annotated with @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d4 = d(30, 18, 39,
+        Diagnostic producesDisposesObs = d(30, 18, 39,
                 "A producer method cannot have parameter(s) annotated with @Disposes, @Observes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d5 = d(36, 18, 44,
+        Diagnostic producesObsAsync = d(36, 18, 44,
                 "A producer method cannot have parameter(s) annotated with @Observes, @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
-        Diagnostic d6 = d(36, 18, 44,
+        Diagnostic multiObsParams1 = d(36, 18, 44,
                 "Parameters name1, name2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
-        Diagnostic d7 = d(42, 18, 44,
+        Diagnostic producesDisposesAsync = d(42, 18, 44,
                 "A producer method cannot have parameter(s) annotated with @Disposes, @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d8 = d(48, 18, 52,
+        Diagnostic producesAllThree = d(48, 18, 52,
                 "A producer method cannot have parameter(s) annotated with @Disposes, @Observes, @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d9 = d(54, 18, 53,
+        Diagnostic obsBothAnnotations = d(54, 18, 53,
                 "A CDI method must not have parameter(s): name annotated with @Observes and @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidObservesObservesAsyncMethodParams");
 
-        Diagnostic d10 = d(54, 18, 53,
+        Diagnostic producesAllThree2 = d(54, 18, 53,
                 "A producer method cannot have parameter(s) annotated with @Disposes, @Observes, @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveProducesOrConflictedAnnotations");
 
-        Diagnostic d11 = d(30, 18, 39,
+        Diagnostic disposesWithObs = d(30, 18, 39,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
 
-        Diagnostic d12 = d(42, 18, 44,
+        Diagnostic disposesWithAsync = d(42, 18, 44,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
 
-        Diagnostic d13 = d(48, 18, 52,
+        Diagnostic disposesObsAsync = d(48, 18, 52,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
-        Diagnostic d14 = d(48, 18, 52,
+        Diagnostic multiObsParams2 = d(48, 18, 52,
                 "Parameters name2, name3 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
-        Diagnostic d15 = d(54, 18, 53,
+        Diagnostic disposesObsAsync2 = d(54, 18, 53,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
-        Diagnostic d16 = d(58, 18, 52,
+        Diagnostic multiObsParams3 = d(58, 18, 52,
                 "Parameters name, name1 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
-        Diagnostic d17 = d(58, 18, 52,
+        Diagnostic obsBothAnnotations2 = d(58, 18, 52,
                 "A CDI method must not have parameter(s): name, name1 annotated with @Observes and @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidObservesObservesAsyncMethodParams");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d6, d5, d7, d14, d9, d10, d11, d12, d8, d13, d15, d17, d16);
+        assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs, multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2, disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2, multiObsParams3);
 
         //Starting CodeAction tests
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, producesWithDisposes);
 
         String newText = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1029,12 +1029,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         TextEdit te1 = te(0, 0, 62, 0, newText);
         TextEdit te2 = te(0, 0, 62, 0, newText1);
-        CodeAction ca1 = ca(uri, "Remove @Produces", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove the @Disposes modifier from parameter name", d1, te2);
+        CodeAction ca1 = ca(uri, "Remove @Produces", producesWithDisposes, te1);
+        CodeAction ca2 = ca(uri, "Remove the @Disposes modifier from parameter name", producesWithDisposes, te2);
 
         assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
 
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, producesWithObserves);
 
         String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1083,12 +1083,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         TextEdit te3 = te(0, 0, 62, 0, newText2);
         TextEdit te4 = te(0, 0, 62, 0, newText3);
-        CodeAction ca3 = ca(uri, "Remove @Produces", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove the @Observes modifier from parameter name", d2, te4);
+        CodeAction ca3 = ca(uri, "Remove @Produces", producesWithObserves, te3);
+        CodeAction ca4 = ca(uri, "Remove the @Observes modifier from parameter name", producesWithObserves, te4);
 
         assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
 
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, producesWithAsync);
 
         String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1135,12 +1135,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         TextEdit te5 = te(0, 0, 62, 0, newText4);
         TextEdit te6 = te(0, 0, 62, 0, newText5);
-        CodeAction ca5 = ca(uri, "Remove @Produces", d3, te5);
-        CodeAction ca6 = ca(uri, "Remove the @ObservesAsync modifier from parameter name", d3, te6);
+        CodeAction ca5 = ca(uri, "Remove @Produces", producesWithAsync, te5);
+        CodeAction ca6 = ca(uri, "Remove the @ObservesAsync modifier from parameter name", producesWithAsync, te6);
 
         assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
 
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, d4);
+        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, producesDisposesObs);
 
         String newText6 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1204,13 +1204,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te7 = te(0, 0, 62, 0, newText6);
         TextEdit te8 = te(0, 0, 62, 0, newText7);
         TextEdit te9 = te(0, 0, 62, 0, newText8);
-        CodeAction ca7 = ca(uri, "Remove @Produces", d4, te7);
-        CodeAction ca8 = ca(uri, "Remove the @Disposes modifier from parameter name1", d4, te8);
-        CodeAction ca9 = ca(uri, "Remove the @Observes modifier from parameter name2", d4, te9);
+        CodeAction ca7 = ca(uri, "Remove @Produces", producesDisposesObs, te7);
+        CodeAction ca8 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesObs, te8);
+        CodeAction ca9 = ca(uri, "Remove the @Observes modifier from parameter name2", producesDisposesObs, te9);
 
         assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
 
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, d5);
+        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, producesObsAsync);
 
         String newText9 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1276,13 +1276,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te10 = te(0, 0, 62, 0, newText9);
         TextEdit te11 = te(0, 0, 62, 0, newText10);
         TextEdit te12 = te(0, 0, 62, 0, newText11);
-        CodeAction ca10 = ca(uri, "Remove @Produces", d5, te10);
-        CodeAction ca11 = ca(uri, "Remove the @Observes modifier from parameter name1", d5, te11);
-        CodeAction ca12 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", d5, te12);
+        CodeAction ca10 = ca(uri, "Remove @Produces", producesObsAsync, te10);
+        CodeAction ca11 = ca(uri, "Remove the @Observes modifier from parameter name1", producesObsAsync, te11);
+        CodeAction ca12 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesObsAsync, te12);
 
         assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
 
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d8);
+        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, producesAllThree);
 
         String newText12 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
@@ -1363,14 +1363,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te14 = te(0, 0, 62, 0, newText13);
         TextEdit te15 = te(0, 0, 62, 0, newText14);
         TextEdit te162 = te(0, 0, 62, 0, newText152);
-        CodeAction ca13 = ca(uri, "Remove @Produces", d8, te13);
-        CodeAction ca14 = ca(uri, "Remove the @Disposes modifier from parameter name1", d8, te14);
-        CodeAction ca15 = ca(uri, "Remove the @ObservesAsync modifier from parameter name3", d8, te15);
-        CodeAction ca162 = ca(uri, "Remove the @Observes modifier from parameter name2", d8, te162);
+        CodeAction ca13 = ca(uri, "Remove @Produces", producesAllThree, te13);
+        CodeAction ca14 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesAllThree, te14);
+        CodeAction ca15 = ca(uri, "Remove the @ObservesAsync modifier from parameter name3", producesAllThree, te15);
+        CodeAction ca162 = ca(uri, "Remove the @Observes modifier from parameter name2", producesAllThree, te162);
 
         assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca162, ca15);
 
-        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, producesDisposesAsync);
 
         String newText15 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\nimport jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
@@ -1415,13 +1415,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te16 = te(0, 0, 62, 0, newText15);
         TextEdit te17 = te(0, 0, 62, 0, newText16);
         TextEdit te19 = te(0, 0, 62, 0, newText18);
-        CodeAction ca16 = ca(uri, "Remove @Produces", d7, te16);
-        CodeAction ca17 = ca(uri, "Remove the @Disposes modifier from parameter name1", d7, te17);
-        CodeAction ca19 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", d7, te19);
+        CodeAction ca16 = ca(uri, "Remove @Produces", producesDisposesAsync, te16);
+        CodeAction ca17 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesAsync, te17);
+        CodeAction ca19 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesDisposesAsync, te19);
 
         assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca19);
 
-        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d10);
+        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, producesAllThree2);
 
         String newText19 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
@@ -1468,8 +1468,8 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
         TextEdit te20 = te(0, 0, 62, 0, newText19);
         TextEdit te21 = te(0, 0, 62, 0, newText20);
-        CodeAction ca20 = ca(uri, "Remove @Produces", d10, te20);
-        CodeAction ca21 = ca(uri, "Remove the @Disposes, @Observes, @ObservesAsync modifier from parameter name", d10, te21);
+        CodeAction ca20 = ca(uri, "Remove @Produces", producesAllThree2, te20);
+        CodeAction ca21 = ca(uri, "Remove the @Disposes, @Observes, @ObservesAsync modifier from parameter name", producesAllThree2, te21);
 
         assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
     }
