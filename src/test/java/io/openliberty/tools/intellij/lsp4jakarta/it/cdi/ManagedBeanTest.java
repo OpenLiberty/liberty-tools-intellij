@@ -977,9 +977,9 @@ public class ManagedBeanTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs, multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2, disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2, multiObsParams3);
 
         //Starting CodeAction tests
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, producesWithDisposes);
+        JakartaJavaCodeActionParams paramsProducesDisposes = createCodeActionParams(uri, producesWithDisposes);
 
-        String newText = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\n" +
@@ -1007,7 +1007,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveDisposes1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\n" +
@@ -1027,16 +1027,16 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te1 = te(0, 0, 62, 0, newText);
-        TextEdit te2 = te(0, 0, 62, 0, newText1);
-        CodeAction ca1 = ca(uri, "Remove @Produces", producesWithDisposes, te1);
-        CodeAction ca2 = ca(uri, "Remove the @Disposes modifier from parameter name", producesWithDisposes, te2);
+        TextEdit editRemoveProduces1 = te(0, 0, 62, 0, textRemoveProduces1);
+        TextEdit editRemoveDisposes1 = te(0, 0, 62, 0, textRemoveDisposes1);
+        CodeAction actionRemoveProduces1 = ca(uri, "Remove @Produces", producesWithDisposes, editRemoveProduces1);
+        CodeAction actionRemoveDisposes1 = ca(uri, "Remove the @Disposes modifier from parameter name", producesWithDisposes, editRemoveDisposes1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        assertJavaCodeAction(paramsProducesDisposes, utils, actionRemoveProduces1, actionRemoveDisposes1);
 
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, producesWithObserves);
+        JakartaJavaCodeActionParams paramsProducesObserves = createCodeActionParams(uri, producesWithObserves);
 
-        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\n" +
@@ -1061,7 +1061,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText3 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveObserves2 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\n" +
@@ -1081,16 +1081,16 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te3 = te(0, 0, 62, 0, newText2);
-        TextEdit te4 = te(0, 0, 62, 0, newText3);
-        CodeAction ca3 = ca(uri, "Remove @Produces", producesWithObserves, te3);
-        CodeAction ca4 = ca(uri, "Remove the @Observes modifier from parameter name", producesWithObserves, te4);
+        TextEdit editRemoveProduces2 = te(0, 0, 62, 0, textRemoveProduces2);
+        TextEdit editRemoveObserves2 = te(0, 0, 62, 0, textRemoveObserves2);
+        CodeAction actionRemoveProduces2 = ca(uri, "Remove @Produces", producesWithObserves, editRemoveProduces2);
+        CodeAction actionRemoveObserves2 = ca(uri, "Remove the @Observes modifier from parameter name", producesWithObserves, editRemoveObserves2);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+        assertJavaCodeAction(paramsProducesObserves, utils, actionRemoveProduces2, actionRemoveObserves2);
 
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, producesWithAsync);
+        JakartaJavaCodeActionParams paramsProducesAsync = createCodeActionParams(uri, producesWithAsync);
 
-        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces3 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
@@ -1113,7 +1113,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText5 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveAsync3 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\n" +
@@ -1133,16 +1133,16 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te5 = te(0, 0, 62, 0, newText4);
-        TextEdit te6 = te(0, 0, 62, 0, newText5);
-        CodeAction ca5 = ca(uri, "Remove @Produces", producesWithAsync, te5);
-        CodeAction ca6 = ca(uri, "Remove the @ObservesAsync modifier from parameter name", producesWithAsync, te6);
+        TextEdit editRemoveProduces3 = te(0, 0, 62, 0, textRemoveProduces3);
+        TextEdit editRemoveAsync3 = te(0, 0, 62, 0, textRemoveAsync3);
+        CodeAction actionRemoveProduces3 = ca(uri, "Remove @Produces", producesWithAsync, editRemoveProduces3);
+        CodeAction actionRemoveAsync3 = ca(uri, "Remove the @ObservesAsync modifier from parameter name", producesWithAsync, editRemoveAsync3);
 
-        assertJavaCodeAction(codeActionParams3, utils, ca5, ca6);
+        assertJavaCodeAction(paramsProducesAsync, utils, actionRemoveProduces3, actionRemoveAsync3);
 
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, producesDisposesObs);
+        JakartaJavaCodeActionParams paramsProducesDisposesObs = createCodeActionParams(uri, producesDisposesObs);
 
-        String newText6 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces4 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
@@ -1164,7 +1164,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText7 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveDisposes4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    " +
                 "@Produces\n    public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    " +
@@ -1182,7 +1182,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText8 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveObserves4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
                 "public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    " +
@@ -1201,18 +1201,18 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te7 = te(0, 0, 62, 0, newText6);
-        TextEdit te8 = te(0, 0, 62, 0, newText7);
-        TextEdit te9 = te(0, 0, 62, 0, newText8);
-        CodeAction ca7 = ca(uri, "Remove @Produces", producesDisposesObs, te7);
-        CodeAction ca8 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesObs, te8);
-        CodeAction ca9 = ca(uri, "Remove the @Observes modifier from parameter name2", producesDisposesObs, te9);
+        TextEdit editRemoveProduces4 = te(0, 0, 62, 0, textRemoveProduces4);
+        TextEdit editRemoveDisposes4 = te(0, 0, 62, 0, textRemoveDisposes4);
+        TextEdit editRemoveObserves4 = te(0, 0, 62, 0, textRemoveObserves4);
+        CodeAction actionRemoveProduces4 = ca(uri, "Remove @Produces", producesDisposesObs, editRemoveProduces4);
+        CodeAction actionRemoveDisposes4 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesObs, editRemoveDisposes4);
+        CodeAction actionRemoveObserves4 = ca(uri, "Remove the @Observes modifier from parameter name2", producesDisposesObs, editRemoveObserves4);
 
-        assertJavaCodeAction(codeActionParams4, utils, ca7, ca8, ca9);
+        assertJavaCodeAction(paramsProducesDisposesObs, utils, actionRemoveProduces4, actionRemoveDisposes4, actionRemoveObserves4);
 
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, producesObsAsync);
+        JakartaJavaCodeActionParams paramsProducesObsAsync = createCodeActionParams(uri, producesObsAsync);
 
-        String newText9 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces5 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
@@ -1236,7 +1236,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText10 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveObserves5 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
                 "public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    " +
@@ -1254,7 +1254,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText11 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveAsync5 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
                 "public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    " +
@@ -1273,18 +1273,18 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te10 = te(0, 0, 62, 0, newText9);
-        TextEdit te11 = te(0, 0, 62, 0, newText10);
-        TextEdit te12 = te(0, 0, 62, 0, newText11);
-        CodeAction ca10 = ca(uri, "Remove @Produces", producesObsAsync, te10);
-        CodeAction ca11 = ca(uri, "Remove the @Observes modifier from parameter name1", producesObsAsync, te11);
-        CodeAction ca12 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesObsAsync, te12);
+        TextEdit editRemoveProduces5 = te(0, 0, 62, 0, textRemoveProduces5);
+        TextEdit editRemoveObserves5 = te(0, 0, 62, 0, textRemoveObserves5);
+        TextEdit editRemoveAsync5 = te(0, 0, 62, 0, textRemoveAsync5);
+        CodeAction actionRemoveProduces5 = ca(uri, "Remove @Produces", producesObsAsync, editRemoveProduces5);
+        CodeAction actionRemoveObserves5 = ca(uri, "Remove the @Observes modifier from parameter name1", producesObsAsync, editRemoveObserves5);
+        CodeAction actionRemoveAsync5 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesObsAsync, editRemoveAsync5);
 
-        assertJavaCodeAction(codeActionParams5, utils, ca10, ca11, ca12);
+        assertJavaCodeAction(paramsProducesObsAsync, utils, actionRemoveProduces5, actionRemoveObserves5, actionRemoveAsync5);
 
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, producesAllThree);
+        JakartaJavaCodeActionParams paramsProducesAllThree = createCodeActionParams(uri, producesAllThree);
 
-        String newText12 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveProduces6 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
@@ -1303,7 +1303,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "@Produces\n    public String greetDisposesObservesObservesAsync2(@Disposes @Observes @ObservesAsync String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText13 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveDisposes6 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
@@ -1322,7 +1322,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public String greetDisposesObservesObservesAsync2(@Disposes @Observes @ObservesAsync String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText14 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveAsync6 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
@@ -1340,7 +1340,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public String greetDisposesObservesObservesAsync2(@Disposes @Observes @ObservesAsync String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText152 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveObserves6 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    " +
@@ -1359,26 +1359,26 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te13 = te(0, 0, 62, 0, newText12);
-        TextEdit te14 = te(0, 0, 62, 0, newText13);
-        TextEdit te15 = te(0, 0, 62, 0, newText14);
-        TextEdit te162 = te(0, 0, 62, 0, newText152);
-        CodeAction ca13 = ca(uri, "Remove @Produces", producesAllThree, te13);
-        CodeAction ca14 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesAllThree, te14);
-        CodeAction ca15 = ca(uri, "Remove the @ObservesAsync modifier from parameter name3", producesAllThree, te15);
-        CodeAction ca162 = ca(uri, "Remove the @Observes modifier from parameter name2", producesAllThree, te162);
+        TextEdit editRemoveProduces6 = te(0, 0, 62, 0, textRemoveProduces6);
+        TextEdit editRemoveDisposes6 = te(0, 0, 62, 0, textRemoveDisposes6);
+        TextEdit editRemoveAsync6 = te(0, 0, 62, 0, textRemoveAsync6);
+        TextEdit editRemoveObserves6 = te(0, 0, 62, 0, textRemoveObserves6);
+        CodeAction actionRemoveProduces6 = ca(uri, "Remove @Produces", producesAllThree, editRemoveProduces6);
+        CodeAction actionRemoveDisposes6 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesAllThree, editRemoveDisposes6);
+        CodeAction actionRemoveAsync6 = ca(uri, "Remove the @ObservesAsync modifier from parameter name3", producesAllThree, editRemoveAsync6);
+        CodeAction actionRemoveObserves6 = ca(uri, "Remove the @Observes modifier from parameter name2", producesAllThree, editRemoveObserves6);
 
-        assertJavaCodeAction(codeActionParams6, utils, ca13, ca14, ca162, ca15);
+        assertJavaCodeAction(paramsProducesAllThree, utils, actionRemoveProduces6, actionRemoveDisposes6, actionRemoveObserves6, actionRemoveAsync6);
 
-        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, producesDisposesAsync);
+        JakartaJavaCodeActionParams paramsProducesDisposesAsync = createCodeActionParams(uri, producesDisposesAsync);
 
-        String newText15 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\nimport jakarta.enterprise.inject.Produces;\n" +
+        String textRemoveProduces7 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\nimport jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    public String greetDisposes(@Disposes String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetObserves(@Observes String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetObservesAsync(@ObservesAsync String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetDisposesObserves(@Disposes String name1, @Observes String name2) {\n        return \"Hi \" + name1 + \" and \" + name2 + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetObservesObservesAsync(@Observes String name1, @ObservesAsync String name2) {\n        return \"Hi \" + name1 + \" and \" + name2 + \"!\";\n    }\n    \n    \n    public String greetDisposesObservesAsync(@Disposes String name1, @ObservesAsync String name2) {\n        return \"Hi \" + name1 + \" and \" + name2 + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetDisposesObservesObservesAsync(@Disposes String name1, @Observes String name2, @ObservesAsync String name3) {\n        return \"Hi \" + name1 + \", \" + name2 + \" and \" + name3 + \"!\";\n    }\n    \n    \n    @Produces\n    public String greetDisposesObservesObservesAsync2(@Disposes @Observes @ObservesAsync String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText16 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\nimport jakarta.enterprise.inject.Produces;\n" +
+        String textRemoveDisposes7 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\nimport jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n\n" +
                 "@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    public String greetDisposes(@Disposes String name) {\n        " +
                 "return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    public String greetObserves(@Observes String name) {\n        " +
@@ -1394,7 +1394,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public String greetDisposesObservesObservesAsync2(@Disposes @Observes @ObservesAsync String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n    " +
                 "public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText18 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveAsync7 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    " +
                 "@Produces\n    public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    " +
@@ -1412,18 +1412,18 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-        TextEdit te16 = te(0, 0, 62, 0, newText15);
-        TextEdit te17 = te(0, 0, 62, 0, newText16);
-        TextEdit te19 = te(0, 0, 62, 0, newText18);
-        CodeAction ca16 = ca(uri, "Remove @Produces", producesDisposesAsync, te16);
-        CodeAction ca17 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesAsync, te17);
-        CodeAction ca19 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesDisposesAsync, te19);
+        TextEdit editRemoveProduces7 = te(0, 0, 62, 0, textRemoveProduces7);
+        TextEdit editRemoveDisposes7 = te(0, 0, 62, 0, textRemoveDisposes7);
+        TextEdit editRemoveAsync7 = te(0, 0, 62, 0, textRemoveAsync7);
+        CodeAction actionRemoveProduces7 = ca(uri, "Remove @Produces", producesDisposesAsync, editRemoveProduces7);
+        CodeAction actionRemoveDisposes7 = ca(uri, "Remove the @Disposes modifier from parameter name1", producesDisposesAsync, editRemoveDisposes7);
+        CodeAction actionRemoveAsync7 = ca(uri, "Remove the @ObservesAsync modifier from parameter name2", producesDisposesAsync, editRemoveAsync7);
 
-        assertJavaCodeAction(codeActionParams7, utils, ca16, ca17, ca19);
+        assertJavaCodeAction(paramsProducesDisposesAsync, utils, actionRemoveProduces7, actionRemoveDisposes7, actionRemoveAsync7);
 
-        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, producesAllThree2);
+        JakartaJavaCodeActionParams paramsProducesAllThree2 = createCodeActionParams(uri, producesAllThree2);
 
-        String newText19 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String textRemoveProduces8 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.enterprise.inject.Disposes;\n" +
@@ -1448,7 +1448,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "        return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        String newText20 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
+        String textRemoveAllAnnotations8 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.ApplicationScoped;\n\n" +
                 "import jakarta.enterprise.inject.Produces;\nimport jakarta.enterprise.inject.Disposes;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\n@ApplicationScoped\npublic class ProducesAndDisposesObservesObservesAsync {\n    @Produces\n    " +
                 "public String greetDisposes(@Disposes String name) {\n        return \"Hi \" + name + \"!\";\n    }\n\n\n    @Produces\n    " +
@@ -1466,12 +1466,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n"+
                 "    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n" +
                 "        return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
-        TextEdit te20 = te(0, 0, 62, 0, newText19);
-        TextEdit te21 = te(0, 0, 62, 0, newText20);
-        CodeAction ca20 = ca(uri, "Remove @Produces", producesAllThree2, te20);
-        CodeAction ca21 = ca(uri, "Remove the @Disposes, @Observes, @ObservesAsync modifier from parameter name", producesAllThree2, te21);
+        TextEdit editRemoveProduces8 = te(0, 0, 62, 0, textRemoveProduces8);
+        TextEdit editRemoveAllAnnotations8 = te(0, 0, 62, 0, textRemoveAllAnnotations8);
+        CodeAction actionRemoveProduces8 = ca(uri, "Remove @Produces", producesAllThree2, editRemoveProduces8);
+        CodeAction actionRemoveAllAnnotations8 = ca(uri, "Remove the @Disposes, @Observes, @ObservesAsync modifier from parameter name", producesAllThree2, editRemoveAllAnnotations8);
 
-        assertJavaCodeAction(codeActionParams8, utils, ca20, ca21);
+        assertJavaCodeAction(paramsProducesAllThree2, utils, actionRemoveProduces8, actionRemoveAllAnnotations8);
     }
 
     @Test
