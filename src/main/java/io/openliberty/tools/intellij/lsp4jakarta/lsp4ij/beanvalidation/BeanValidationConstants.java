@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation, Reza Akhavan and others.
+ * Copyright (c) 2020, 2026 IBM Corporation, Reza Akhavan and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -69,6 +69,7 @@ public class BeanValidationConstants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-bean-validation";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";
     public static final String DIAGNOSTIC_CODE_STATIC = "MakeNotStatic";
+    public static final String DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS = "ConflictingConstraints";
 
     public final static Set<String> SET_OF_ANNOTATIONS = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(ASSERT_TRUE, ASSERT_FALSE, DIGITS, DECIMAL_MAX,

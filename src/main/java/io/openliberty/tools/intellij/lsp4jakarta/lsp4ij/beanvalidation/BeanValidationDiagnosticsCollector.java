@@ -17,6 +17,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -24,7 +25,9 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation.BeanValidationConstants.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +69,10 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
 
     private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner, PsiClass type, List<Diagnostic> diagnostics) {
         PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        
+        // Check for conflicting constraints
+        checkConflictingConstraints(psiModifierOwner, type, annotations, diagnostics);
+        
         for (PsiAnnotation annotation : annotations) {
             String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                     SET_OF_ANNOTATIONS.toArray(new String[0]));
@@ -215,4 +222,96 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
         }
     }
+
+    /**
+     * checkConflictingConstraints
+     * Check for conflicting constraint annotations (e.g., @Min > @Max, @DecimalMin > @DecimalMax, @Size min > max).
+     *
+     * @param element     the PSI element (field, method, or parameter)
+     * @param type        the declaring class
+     * @param annotations the annotations on the element
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void checkConflictingConstraints(PsiJvmModifiersOwner element,
+                                             PsiClass type,
+                                             PsiAnnotation[] annotations,
+                                             List<Diagnostic> diagnostics) {
+
+        PsiAnnotation minAnnotation = null, maxAnnotation = null,
+                decMinAnnotation = null, decMaxAnnotation = null,
+                sizeAnnotation = null;
+
+        for (PsiAnnotation annotation : annotations) {
+            String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    new String[]{MIN, MAX, DECIMAL_MIN, DECIMAL_MAX, SIZE});
+            if (matched != null) {
+                switch (matched) {
+                    case MIN -> minAnnotation = annotation;
+                    case MAX -> maxAnnotation = annotation;
+                    case DECIMAL_MIN -> decMinAnnotation = annotation;
+                    case DECIMAL_MAX -> decMaxAnnotation = annotation;
+                    case SIZE -> sizeAnnotation = annotation;
+                }
+            }
+        }
+
+        // Build constraint checks
+        List<ConstraintCheck> checks = new ArrayList<>();
+        if (minAnnotation != null && maxAnnotation != null) {
+            checks.add(new ConstraintCheck(minAnnotation, maxAnnotation,
+                    "value", "value", Long::parseLong,
+                    "ConflictingConstraintAnnotationsMinMax"));
+        }
+        if (decMinAnnotation != null && decMaxAnnotation != null) {
+            checks.add(new ConstraintCheck(decMinAnnotation, decMaxAnnotation,
+                    "value", "value", Double::parseDouble,
+                    "ConflictingConstraintAnnotationsDecimalMinMax"));
+        }
+        if (sizeAnnotation != null) {
+            checks.add(new ConstraintCheck(sizeAnnotation, sizeAnnotation,
+                    "min", "max", Integer::parseInt,
+                    "ConflictingConstraintAnnotationsSize"));
+        }
+
+        // Run all checks
+        for (ConstraintCheck check : checks) {
+            checkConflict(element, check, diagnostics);
+        }
+    }
+
+    private void checkConflict(PsiJvmModifiersOwner element,
+                               ConstraintCheck check,
+                               List<Diagnostic> diagnostics) {
+
+        var minStr = AnnotationUtils.getAnnotationMemberValue(check.minAnnotation(), check.minKey());
+        var maxStr = AnnotationUtils.getAnnotationMemberValue(check.maxAnnotation(), check.maxKey());
+
+        if (minStr != null && maxStr != null) {
+            try {
+                Number min = check.parser().apply(minStr);
+                Number max = check.parser().apply(maxStr);
+                if (min.doubleValue() > max.doubleValue()) {
+                    diagnostics.add(createDiagnostic(
+                            element,
+                            (PsiJavaFile) element.getContainingFile(),
+                            Messages.getMessage(check.messageKey(), minStr, maxStr),
+                            DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS,
+                            null,
+                            DiagnosticSeverity.Warning));
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.INFO, () -> "Ignore invalid number format for " + check.messageKey());
+            }
+        }
+    }
+
+    private record ConstraintCheck(
+            PsiAnnotation minAnnotation,
+            PsiAnnotation maxAnnotation,
+            String minKey,
+            String maxKey,
+            Function<String, Number> parser,
+            String messageKey) {}
+
+
 }
