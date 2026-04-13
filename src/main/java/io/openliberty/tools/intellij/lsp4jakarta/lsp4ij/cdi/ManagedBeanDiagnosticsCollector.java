@@ -181,6 +181,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
+                List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -188,10 +189,21 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
+                    // Track parameters with @Observes or @ObservesAsync annotations
+                    if (!observesObservesAsync.isEmpty()) {
+                        paramsWithObserverAnnotations.add(param);
+                    }
                 }
                 if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
+                
+                // Generate diagnostic for multiple observer parameters
+                // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
+                if (paramsWithObserverAnnotations.size() > 1) {
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams"),
+                            DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 }
             }
 
