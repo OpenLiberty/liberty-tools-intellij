@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -192,6 +193,18 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
+
+                // Check for conditional observer methods on @Dependent scoped beans
+                // Beans with scope @Dependent may not have conditional observer methods.
+                // If a bean with scope @Dependent has an observer method declared notifyObserver=IF_EXISTS,
+                // the container automatically detects the problem and treats it as a definition error.
+                if (isDependent) {
+                    if (hasConditionalObserverAnnotation(type, method)) {
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
+                                DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
+                    }
                 }
             }
 
@@ -398,5 +411,42 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                                  PsiField field) {
         return isManagedBean && field.hasModifierProperty(PsiModifier.PUBLIC) && !field.hasModifierProperty(PsiModifier.STATIC)
                 && (!isDependent || hasMultipleScopes);
+    }
+
+    /**
+     * isConditionalObserver
+     * Checks if the annotation is a conditional observer (notifyObserver=IF_EXISTS).
+     *
+     * @param type the type
+     * @param annotation the annotation to check
+     * @return true if the annotation is @Observes or @ObservesAsync with notifyObserver=IF_EXISTS
+     */
+    private boolean isConditionalObserver(PsiClass type, PsiAnnotation annotation) {
+        String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME });
+        if (matched != null) {
+            String notifyObserverValue = AnnotationUtils.getAnnotationMemberValue(annotation, "notifyObserver");
+            return notifyObserverValue != null && notifyObserverValue.contains("IF_EXISTS");
+        }
+        return false;
+    }
+
+    /**
+     * hasConditionalObserverAnnotation
+     * Checks if any parameter in the method has a conditional observer annotation.
+     *
+     * @param type the type
+     * @param method the method to check
+     * @return true if any parameter has a conditional observer annotation
+     */
+    private boolean hasConditionalObserverAnnotation(PsiClass type, PsiMethod method) {
+        for (PsiParameter param : method.getParameterList().getParameters()) {
+            for (PsiAnnotation annotation : param.getAnnotations()) {
+                if (isConditionalObserver(type, annotation)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
