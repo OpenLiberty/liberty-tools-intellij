@@ -47,7 +47,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         PsiClass[] types = unit.getClasses();
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : types) {
-            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
+            PsiAnnotation[] typeAnnotations = type.getAnnotations();
+            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
@@ -238,6 +239,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
+                boolean isStateless = !getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
+                                .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                        new String[]{STATELESS_FQ_NAME}).isEmpty();
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -245,6 +249,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 } else if (nonStaticPublicFieldPresent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (isStateless && (!isDependent || hasMultipleScopes)) {
+                    /**
+                     * A stateless session bean must belong to the @Dependent scope.
+                     * If a session bean specifies an illegal scope, the container automatically detects
+                     * the problem and treats it as a definition error.
+                     *
+                     * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
+                     */
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
+                            DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("ScopeTypeAnnotationsManagedBean"),

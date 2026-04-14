@@ -483,6 +483,14 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveStatelessAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
