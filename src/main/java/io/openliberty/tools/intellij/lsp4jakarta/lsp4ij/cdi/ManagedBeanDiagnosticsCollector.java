@@ -238,6 +238,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
+                validateSingletonSessionBean(unit, diagnostics, type, managedBeanAnnotations);
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -318,6 +319,34 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DiagnosticSeverity.Error));
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * validateSingletonSessionBean
+     * Singleton session bean scope validation
+     * A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.
+     * If a singleton bean declares any other scope, the container must treat it as a definition error.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param type
+     * @param managedBeanAnnotations
+     */
+    private void validateSingletonSessionBean(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, List<String> managedBeanAnnotations) {
+        boolean isSingletonSessionBean = Stream.of(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), SINGLETON_FQ_NAME));
+        if (isSingletonSessionBean) {
+            boolean hasInvalidScope = managedBeanAnnotations.stream()
+                    .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
+                            && !DEPENDENT_FQ_NAME.equals(annotation));
+            if (hasInvalidScope) {
+                diagnostics.add(createDiagnostic(type, unit,
+                        Messages.getMessage("SingletonSessionBeanInvalidScope"),
+                        DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
+                        new Gson().toJsonTree(managedBeanAnnotations),
+                        DiagnosticSeverity.Error));
             }
         }
     }
