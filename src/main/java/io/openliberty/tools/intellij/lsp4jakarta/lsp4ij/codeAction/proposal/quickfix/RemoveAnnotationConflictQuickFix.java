@@ -140,7 +140,7 @@ public abstract class RemoveAnnotationConflictQuickFix implements IJavaCodeActio
         codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId(), extendedData));
     }
 
-    protected static PsiElement getBinding(PsiElement node) {
+    protected  PsiElement getBinding(PsiElement node) {
         PsiElement parent = PsiTreeUtil.getParentOfType(node, PsiModifierListOwner.class);
         if (parent != null) {
             return parent;
