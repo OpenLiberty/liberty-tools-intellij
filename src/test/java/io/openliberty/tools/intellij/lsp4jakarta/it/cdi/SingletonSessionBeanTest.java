@@ -56,14 +56,14 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         JsonArray data1 = new JsonArray();
         data1.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic dRequestScopedAnnotation = d(11, 13, 33,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data1);
 
         // Test case 2: Singleton with invalid scope (SessionScoped) - should report error on class name
         JsonArray data2 = new JsonArray();
         data2.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic dSessionScopedClass = d(17, 6, 31,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data2);
 
         // Test case 6: Singleton with mixed valid and invalid scopes (RequestScoped + ApplicationScoped)
@@ -71,7 +71,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         data3.add("jakarta.enterprise.context.ApplicationScoped");
         data3.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic dMixedInvalidAndApplicationScopedInvalidScope = d(41, 6, 51,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data3);
         
         JsonArray data3b = new JsonArray();
@@ -86,7 +86,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         data4.add("jakarta.enterprise.context.Dependent");
         data4.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic dMixedInvalidAndDependentInvalidScope = d(48, 6, 43,
-                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. any other scope is invalid.",
+                "A singleton session bean belongs to either the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data4);
         
         JsonArray data4b = new JsonArray();
