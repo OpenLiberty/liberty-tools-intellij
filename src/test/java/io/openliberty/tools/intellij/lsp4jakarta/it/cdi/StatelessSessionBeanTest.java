@@ -53,15 +53,15 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics (order matches actual diagnostic order: line 23, 16, 10)
         Diagnostic withRequestScoped = d(23, 6, 33,
-                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         Diagnostic withSessionScoped = d(16, 6, 32,
-                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         Diagnostic withDependentAndRequest = d(10, 13, 33,
-                "A stateless session bean belongs to the @Dependent scope. any other scope is invalid.",
+                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
         assertJavaDiagnostics(diagnosticsParams, utils, withRequestScoped, withSessionScoped, withDependentAndRequest);
