@@ -14,13 +14,19 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import org.eclipse.lsp4j.Diagnostic;
@@ -241,4 +247,91 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         return m.isConstructor();
     }
 
+    /**
+     * isImportReferencedJavaElement
+     * Method checks if class has references of interceptor type imports
+     *
+     * @param javaFile
+     * @param interceptorImport
+     * @return
+     */
+    private static boolean isImportReferencedJavaElement(PsiJavaFile javaFile, String interceptorImport) {
+        PsiImportList importList = javaFile.getImportList();
+        if (importList != null) {
+            for (PsiImportStatement importStatement : importList.getImportStatements()) {
+                PsiElement resolved = importStatement.resolve();
+                if (resolved instanceof PsiClass psiClass) {
+                    String qualifiedName = psiClass.getQualifiedName();
+                    if (qualifiedName != null && qualifiedName.contains(interceptorImport)) {
+                       return true;
+                    }
+                }
+                else if (resolved instanceof PsiPackage psiPackage) {
+                    String pkgName = psiPackage.getQualifiedName();
+                    if (pkgName.contains(interceptorImport)) {
+                       return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * isInterceptorType
+     * Method checks if the class is an Interceptor type
+     *
+     * @param type
+     * @return boolean
+     */
+    public static boolean isInterceptorType(PsiClass type) {
+        return Arrays.stream(type.getAnnotations()).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
+    }
+
+    /**
+     * isInterceptorTypeReferenced
+     * Method checks if class references Interceptor types
+     *
+     * @param type
+     * @param javaFile
+     * @return
+     */
+    public static boolean isInterceptorTypeReferenced(PsiClass type, PsiJavaFile javaFile) {
+        if(!isInterceptorType(type)){
+            return isImportReferencedJavaElement(javaFile, Constants.INTERCEPTOR_IMPORT);
+        }
+        return false;
+    }
+
+    /**
+     * checkMethodInvokedExists
+     * This method checks if the passed method is being invoked in the declared method body
+     *
+     * @param m
+     * @return
+     */
+    public boolean checkMethodInvokedExists(PsiMethod m, String methodInvoked, String methodParentType) {
+        PsiCodeBlock body = m.getBody();
+        if (body != null) {
+            Collection<PsiMethodCallExpression> allInterceptorMethodInvocations =
+                    PsiTreeUtil.findChildrenOfType(body, PsiMethodCallExpression.class);
+            for (PsiMethodCallExpression call : allInterceptorMethodInvocations) {
+                PsiReferenceExpression methodExpr = call.getMethodExpression();
+                String methodName = methodExpr.getReferenceName();
+                if (methodInvoked.equals(methodName)) {
+                    PsiMethod target = call.resolveMethod();
+                    if (target != null) {
+                        PsiClass containingClass = target.getContainingClass();
+                        if (containingClass != null) {
+                            String fqn = containingClass.getQualifiedName();
+                            if (methodParentType.equals(fqn)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

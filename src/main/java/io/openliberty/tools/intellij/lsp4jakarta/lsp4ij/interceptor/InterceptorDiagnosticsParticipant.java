@@ -13,15 +13,18 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.Collection;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.helpers.ConstructorInfoDiagnosticHelper;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import org.eclipse.lsp4j.Range;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.helpers.ConstructorInfoDiagnosticHelper;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants.*;
 
 
@@ -49,14 +52,41 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		for (PsiClass type : alltypes) {
 			//Build the diagnostics if the parent class is Interceptor type and is abstract.
 			// Also, checks for missing public no-args constructor.
-        	buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
+      		buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
 			for(PsiClass innerClass: type.getInnerClasses()){
 				//Build the diagnostics if the child class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, innerClass);
 			}
-        }
+     }
+		Collection<PsiMethod> allMethodDeclarations =  PsiTreeUtil.findChildrenOfType(unit, PsiMethod.class);
+		List<PsiMethod> createProceedInvocationDeclarations = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
+		for(PsiMethod invokeMethod: createProceedInvocationDeclarations){
+			Range range = PositionUtils.toNameRange(invokeMethod);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
+			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
+			diagnostics.add(diagnostic);
+		}
     }
+
+	/**
+	 *
+	 * @param m
+	 * @param unit
+	 * @return
+	 */
+	private boolean missingInterceptorMethodProceedInvocation(PsiMethod m, PsiJavaFile unit) {
+		if(isInterceptorTypeReferenced(m.getContainingClass(), unit)) {
+			PsiAnnotation[] annotations = m.getModifierList().getAnnotations();
+			for (PsiAnnotation ann : annotations) {
+				boolean isInterceptorMethod = Constants.INTERCEPTOR_METHODS.stream().anyMatch(annotation -> isMatchedJavaElement(m.getContainingClass(), ann.getQualifiedName(), annotation));
+				if (isInterceptorMethod) {
+					return !checkMethodInvokedExists(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * buildAbstractAndNoArgsConstructorDiagnostics
@@ -88,16 +118,5 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 			}
 		}
-	}
-
-	/**
-	 * isInterceptorType
-	 * Method checks if the class is an Interceptor type
-	 *
-	 * @param type
-	 * @return boolean
-	 */
-	private static boolean isInterceptorType(PsiClass type) {
-		return Arrays.stream(type.getAnnotations()).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTOR_FQ_NAME));
 	}
 }
