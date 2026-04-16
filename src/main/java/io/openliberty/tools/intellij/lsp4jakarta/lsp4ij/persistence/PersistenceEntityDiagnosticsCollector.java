@@ -15,10 +15,12 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,6 +62,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     boolean hasPublicOrProtectedNoArgConstructor = false;
                     boolean hasArgConstructor = false;
                     boolean isEntityClassFinal = false;
+                    boolean hasPrimaryKey = false;
 
                     // Get the Methods of the annotated Class
                     for (PsiMethod method : type.getMethods()) {
@@ -83,8 +86,16 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     DiagnosticSeverity.Error));
                         }
 
+
+                        // Check if any method has @Id or @EmbeddedId annotation
+                        if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, method.getAnnotations())) {
+                            hasPrimaryKey = true;
+                        }
+
+
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(method,type,diagnostics,unit);
+
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
@@ -100,9 +111,20 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+
+
+                        // Check if any field has @Id or @EmbeddedId annotation
+                        if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, field.getAnnotations())) {
+                            hasPrimaryKey = true;
+                        }
+
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(field,type,diagnostics,unit);
+                    }
 
+                    // Check superclass hierarchy for primary key in @MappedSuperclass
+                    if (!hasPrimaryKey) {
+                        hasPrimaryKey = hasPrimaryKeyInSuperclass(type);
 
                     }
 
@@ -122,6 +144,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         diagnostics.add(createDiagnostic(type, unit,
                                 Messages.getMessage("EntityNoFinalClass"),
                                 PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS, type.getQualifiedName(),
+                                DiagnosticSeverity.Error));
+                    }
+
+                    if (!hasPrimaryKey) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("EntityMissingPrimaryKey"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
                                 DiagnosticSeverity.Error));
                     }
                 }
@@ -207,4 +236,57 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
     }
+
+    /**
+     * Check if the given annotations contain @Id or @EmbeddedId
+     *
+     * @param type the type context for resolving annotations
+     * @param annotations the annotations to check
+     * @return true if a primary key annotation is found
+     */
+    private boolean hasPrimaryKeyAnnotation(PsiClass type, PsiAnnotation[] annotations) {
+        return Arrays.stream(annotations).anyMatch(annotation ->
+                getMatchedJavaElementName(type, annotation.getQualifiedName(),new String[] {PersistenceConstants.ID,PersistenceConstants.EMBEDDEDID}) != null);
+    }
+
+    /**
+     * Check if the type or its superclass hierarchy (annotated with @MappedSuperclass)
+     * contains a primary key (@Id or @EmbeddedId)
+     *
+     * @param type the type to check
+     * @return true if a primary key is found in the hierarchy
+     */
+    private boolean hasPrimaryKeyInSuperclass(PsiClass type) {
+        List<PsiClass> hierarchySuperClasses = DiagnosticsUtils.collectSuperClasses(type);
+
+        for (PsiClass superClass : hierarchySuperClasses) {
+            // Check if superclass is annotated with @MappedSuperclass
+            boolean isMappedSuperclass = false;
+            for (PsiAnnotation annotation : superClass.getAnnotations()) {
+                if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.MAPPEDSUPERCLASS)) {
+                    isMappedSuperclass = true;
+                    break;
+                }
+            }
+
+            // Only check for primary key if it's a @MappedSuperclass
+            if (isMappedSuperclass) {
+                // Check fields in superclass
+                for (PsiField field : superClass.getFields()) {
+                    if (hasPrimaryKeyAnnotation(superClass, field.getAnnotations())) {
+                        return true;
+                    }
+                }
+
+                // Check methods in superclass
+                for (PsiMethod method : superClass.getMethods()) {
+                    if (hasPrimaryKeyAnnotation(superClass, method.getAnnotations())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }
