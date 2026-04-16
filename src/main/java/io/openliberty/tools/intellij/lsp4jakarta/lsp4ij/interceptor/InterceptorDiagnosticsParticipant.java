@@ -13,9 +13,10 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.Collection;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -24,7 +25,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Range;
-
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.helpers.ConstructorInfoDiagnosticHelper;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants.*;
 
 
@@ -50,16 +51,15 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		PsiClass[] alltypes;
 		alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
-			Map<String,Boolean> constructorInfo = new HashMap<>();
 			//Build the diagnostics if the parent class is Interceptor type and is abstract.
 			// Also, checks for missing public no-args constructor.
-        	buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type, constructorInfo);
+      buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
 			for(PsiClass innerClass: type.getInnerClasses()){
 				//Build the diagnostics if the child class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
-				buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, innerClass, constructorInfo);
+				buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, innerClass);
 			}
-        }
+     }
 		Collection<PsiMethod> allMethodDeclarations =  PsiTreeUtil.findChildrenOfType(unit, PsiMethod.class);
 		List<PsiMethod> createProceedInvocationDeclarations = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
 		for(PsiMethod invokeMethod: createProceedInvocationDeclarations){
@@ -96,28 +96,27 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param unit
 	 * @param diagnostics
 	 * @param type
-	 * @param constructorInfo
 	 */
-	private void buildAbstractAndNoArgsConstructorDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, Map<String, Boolean> constructorInfo) {
-		constructorInfo.put("hasConstructor", false);
-		constructorInfo.put("hasValidPublicNoArgsConstructor", false);
+	private void buildAbstractAndNoArgsConstructorDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
+		ConstructorInfoDiagnosticHelper constructorInfo = ConstructorInfoDiagnosticHelper.initialize();
 		if (isInterceptorType(type)) {
 			if(type.hasModifierProperty(PsiModifier.ABSTRACT)) {
 				diagnostics.add(createDiagnostic(type, unit,
 						Messages.getMessage("InvalidInterceptorAbstractClass", type.getName()),
 						DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS, null,
 						DiagnosticSeverity.Error));
-			}
-			for (PsiMethod method : type.getMethods()) {
-				//Checks if method is a constructor and has valid no-args constructor
-				constructorInfo = hasValidNoArgsConstructor(method, constructorInfo);
-			}
-			// Conditions for checking missing public no-args constructor
-			if(!constructorInfo.get("hasValidPublicNoArgsConstructor") && constructorInfo.get("hasConstructor")) {
-				diagnostics.add(createDiagnostic(type, unit,
-						Messages.getMessage("InterceptorNoArgConstructorMissing", type.getName()),
-						DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR, null,
-						DiagnosticSeverity.Error));
+			} else {
+				for (PsiMethod method : type.getMethods()) {
+					//Checks if method is a constructor and has valid no-args constructor
+					constructorInfo.mergeConstructorInfo(ConstructorInfoDiagnosticHelper.getConstructorInfo(method));
+				}
+				// Conditions for checking missing public no-args constructor
+				if (constructorInfo.hasConstructor() && !constructorInfo.hasValidPublicNoArgsConstructor()) {
+					diagnostics.add(createDiagnostic(type, unit,
+							Messages.getMessage("InterceptorNoArgConstructorMissing", type.getName()),
+							DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR, null,
+							DiagnosticSeverity.Error));
+				}
 			}
 		}
 	}

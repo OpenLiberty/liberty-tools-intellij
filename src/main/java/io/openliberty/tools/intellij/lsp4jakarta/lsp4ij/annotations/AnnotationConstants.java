@@ -32,6 +32,7 @@ public class AnnotationConstants {
     public static final String PRE_DESTROY_FQ_NAME = "jakarta.annotation.PreDestroy";
 
     /* Diagnostics fields constants */
+    public static final String GENERATED_NAME_REGEX = "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)+$";
     public static final String DIAGNOSTIC_SOURCE = "jakarta-annotations";
     public static final String DIAGNOSTIC_CODE_DATE_FORMAT = "InvalidDateFormat";
     public static final String DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE = "MissingResourceTypeAttribute";
@@ -39,6 +40,9 @@ public class AnnotationConstants {
     public static final String DIAGNOSTIC_CODE_ANNOTATION_START_WITH_SET = "ResourceNameMustStartWithSet";
     public static final String DIAGNOSTIC_CODE_MUST_DECLARE_EXACTLY_ONE_PARAM = "ResourceMustDeclareExactlyOneParam";
     public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID = "ResourceReturnTypeMustBeVoid";
+    public static final String DIAGNOSTIC_CODE_GENERATED_VALUE_EMPTY = "GeneratedValueEmpty";
+    public static final String DIAGNOSTIC_CODE_GENERATED_VALUE_INVALID_FORMAT = "GeneratedValueInvalidFormat";
+    public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH = "ResourceTypeMismatch";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS = "PostConstructParams";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE = "PostConstructReturnType";
     public static final String DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION = "PostConstructException";

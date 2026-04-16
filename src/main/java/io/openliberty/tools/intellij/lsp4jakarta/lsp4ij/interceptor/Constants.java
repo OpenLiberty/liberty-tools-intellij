@@ -24,7 +24,7 @@ public class Constants {
     public static final String INTERCEPTOR_FQ_NAME = "jakarta.interceptor.Interceptor";
 
     /* Source */
-	public static final String DIAGNOSTIC_SOURCE = "jakarta-interceptor";
+	  public static final String DIAGNOSTIC_SOURCE = "jakarta-interceptor";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS = "RemoveInterceptorAnnotationOnAbstractClass";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR = "RemoveInterceptorAnnotationOnNoArgsConstructor";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED = "RemoveInterceptorMethodAnnotationOnMethod";
