@@ -117,14 +117,10 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
      * @return
      */
     private boolean isInvalidNullArgument(PsiExpression arg) {
-        if (arg instanceof PsiLiteralExpression lit && lit.getValue() == null) {
-            return true;
-        }
-        if (arg instanceof PsiTypeCastExpression cast) {
-            return cast.getOperand() instanceof PsiLiteralExpression
-                    && ((PsiLiteralExpression) cast.getOperand()).getValue() == null ;
-        }
-        return false;
+        return (arg instanceof PsiLiteralExpression lit && lit.getValue() == null)
+                || (arg instanceof PsiTypeCastExpression cast
+                && cast.getOperand() instanceof PsiLiteralExpression
+                && ((PsiLiteralExpression) cast.getOperand()).getValue() == null);
     }
 
     /**
