@@ -248,29 +248,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
-     * Checks if the given method is a constructor and has valid no-args constructor.
-     *
-     * @param method
-     * @param constructorInfo
-     * @return Map<String, Boolean>
-     */
-    public static Map<String, Boolean> hasValidNoArgsConstructor(PsiMethod method, Map<String,Boolean> constructorInfo) {
-        if (isConstructorMethod(method)) {
-            constructorInfo.put("hasConstructor", true); // Check explicit constructor declaration
-            PsiParameterList params = method.getParameterList();
-            if (params.getParametersCount() == 0) { // Checks manually declared no-args constructor
-                if (method.hasModifierProperty(PsiModifier.PUBLIC)) {
-                    constructorInfo.put("hasValidPublicNoArgsConstructor", true);
-                }
-                if (method.hasModifierProperty(PsiModifier.PROTECTED)) {
-                    constructorInfo.put("hasValidProtectedNoArgsConstructor", true);
-                }
-            }
-        }
-        return constructorInfo;
-    }
-
-    /**
      * isImportReferencedJavaElement
      * Method checks if class has references of interceptor type imports
      *
@@ -308,7 +285,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @return boolean
      */
     public static boolean isInterceptorType(PsiClass type) {
-        return Arrays.stream(type.getAnnotations()).filter(Objects::nonNull).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
+        return Arrays.stream(type.getAnnotations()).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
     }
 
     /**
