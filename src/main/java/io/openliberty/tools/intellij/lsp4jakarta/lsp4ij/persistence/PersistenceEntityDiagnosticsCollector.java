@@ -260,9 +260,6 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         List<PsiClass> hierarchySuperClasses = DiagnosticsUtils.collectSuperClasses(type);
 
         for (PsiClass superClass : hierarchySuperClasses) {
-            if (superClass.equals(type)) {
-                continue;
-            }
             // Check if superclass is annotated with @MappedSuperclass
             boolean isMappedSuperclass = false;
             for (PsiAnnotation annotation : superClass.getAnnotations()) {
