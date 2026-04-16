@@ -13,7 +13,6 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Collection;
@@ -53,7 +52,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		for (PsiClass type : alltypes) {
 			//Build the diagnostics if the parent class is Interceptor type and is abstract.
 			// Also, checks for missing public no-args constructor.
-      buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
+      		buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
 			for(PsiClass innerClass: type.getInnerClasses()){
 				//Build the diagnostics if the child class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
