@@ -338,10 +338,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         boolean isSingletonSessionBean = Stream.of(type.getAnnotations())
                 .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), SINGLETON_FQ_NAME));
         if (isSingletonSessionBean) {
-            boolean hasInvalidScope = managedBeanAnnotations.stream()
+            boolean hasInvalidSingletonScope = managedBeanAnnotations.stream()
                     .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
                             && !DEPENDENT_FQ_NAME.equals(annotation));
-            if (hasInvalidScope) {
+            if (hasInvalidSingletonScope) {
                 diagnostics.add(createDiagnostic(type, unit,
                         Messages.getMessage("SingletonSessionBeanInvalidScope"),
                         DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
