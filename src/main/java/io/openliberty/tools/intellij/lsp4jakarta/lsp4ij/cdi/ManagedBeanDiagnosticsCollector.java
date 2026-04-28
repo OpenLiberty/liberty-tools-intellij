@@ -426,7 +426,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME });
         if (matched != null) {
             String notifyObserverValue = AnnotationUtils.getAnnotationMemberValue(annotation, "notifyObserver");
-            return notifyObserverValue != null && notifyObserverValue.contains("IF_EXISTS");
+            return notifyObserverValue != null && notifyObserverValue.endsWith("IF_EXISTS");
         }
         return false;
     }
