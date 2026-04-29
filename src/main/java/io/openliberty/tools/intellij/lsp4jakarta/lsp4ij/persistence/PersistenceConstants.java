@@ -21,6 +21,7 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String ID = "jakarta.persistence.Id";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
+    public static final String VERSION = "jakarta.persistence.Version";
 
     /* Annotation Fields */
     public static final String NAME = "name";
@@ -36,6 +37,8 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_FINAL_CLASS = "InvalidClass";
     public static final String DIAGNOSTIC_CODE_TEMPORAL_INVALID_VALUE = "InvalidValueInTemporalAnnotation";
     public static final String DIAGNOSTIC_CODE_MISSING_TEMPORAL = "MissingTemporalAnnotation";
+    public static final String DIAGNOSTIC_CODE_DUPLICATE_VERSION = "MultipleVersionAnnotations";
+    public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_ANNOTATION = "RemoveMapKeyorMapKeyClass";
