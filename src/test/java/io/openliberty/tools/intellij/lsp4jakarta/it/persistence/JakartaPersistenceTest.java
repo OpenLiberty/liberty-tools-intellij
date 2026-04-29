@@ -437,4 +437,72 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d1);
     }
 
+    @Test
+    public void testDuplicateVersionAnnotationOnFields() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityDuplicateVersion.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for duplicate @Version annotations on fields
+        Diagnostic d1 = d(9, 16, 24,
+                "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
+
+        Diagnostic d2 = d(12, 16, 24,
+                "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testDuplicateVersionAnnotationOnMethods() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityDuplicateVersionMethods.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for duplicate @Version annotations on methods
+        Diagnostic d1 = d(15, 16, 27,
+                "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
+
+        Diagnostic d2 = d(20, 16, 27,
+                "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testVersionAnnotationInHierarchy() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityChildWithVersion.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for @Version annotation in both parent and child entity
+        Diagnostic d1 = d(9, 16, 28,
+                "A @Version annotation is already present in the entity hierarchy. Only one @Version annotation is allowed across the entire entity inheritance hierarchy.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "VersionAnnotationInHierarchy");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+    }
+
 }
