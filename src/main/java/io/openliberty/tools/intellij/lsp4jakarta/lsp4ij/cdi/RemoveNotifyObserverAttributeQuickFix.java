@@ -12,15 +12,20 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
+import com.intellij.psi.PsiAnnotation;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
+
+import java.util.Arrays;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_FQ_NAME;
 
 /**
- * Removes the 'notifyObserver' attribute from @Observes and @ObservesAsync annotations.
+ * Removes the 'notifyObserver' attribute from @Observes and @ObservesAsync annotations
+ * when they are conditional observers (notifyObserver=IF_EXISTS).
  */
 public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
@@ -34,10 +39,25 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
     }
 
     @Override
+    protected boolean isTargetAnnotation(PsiAnnotation annotation) {
+        String qualifiedName = annotation.getQualifiedName();
+        if (qualifiedName == null || !Arrays.asList(getAnnotations()).contains(qualifiedName)) {
+            return false;
+        }
+        
+        // Check if the annotation has the notifyObserver attribute with IF_EXISTS value (conditional observer)
+        for (String attribute : getAttributes()) {
+            String value = AnnotationUtils.getAnnotationMemberValue(annotation, attribute);
+            if (value != null && value.endsWith("IF_EXISTS")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     protected String getLabel(String annotation, String[] attributes) {
-        // If annotation is null, use a default name (shouldn't happen in practice)
-        String annotationName = annotation != null ? JDTUtils.getSimpleName(annotation) : "Observes";
-        return Messages.getMessage("RemoveNotifyObserverAttribute", annotationName);
+        return Messages.getMessage("RemoveNotifyObserverAttribute", JDTUtils.getSimpleName(annotation));
     }
 }
 
