@@ -12,16 +12,20 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_FQ_NAME;
+
 /**
- * Quickfix for removing the notifyObserver attribute from @Observes or @ObservesAsync annotations
+ * Removes the 'notifyObserver' attribute from @Observes and @ObservesAsync annotations.
  */
 public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
     public RemoveNotifyObserverAttributeQuickFix() {
-        super(ManagedBeanConstants.OBSERVES_FQ_NAME, "notifyObserver");
+        super(new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME }, "notifyObserver");
     }
 
     @Override
@@ -30,8 +34,10 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
     }
 
     @Override
-    protected String getLabel() {
-        return Messages.getMessage("RemoveTheNotifyObserverAttribute", "@Observes/@ObservesAsync");
+    protected String getLabel(String annotation, String[] attributes) {
+        // If annotation is null, use a default name (shouldn't happen in practice)
+        String annotationName = annotation != null ? JDTUtils.getSimpleName(annotation) : "Observes";
+        return Messages.getMessage("RemoveNotifyObserverAttribute", annotationName);
     }
 }
 
