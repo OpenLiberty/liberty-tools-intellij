@@ -87,28 +87,28 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics
-        Diagnostic aroundInvokeInvalidProceed = JakartaForJavaAssert.d(12, 18, 38,
+        Diagnostic aroundInvokeInvalidProceed = JakartaForJavaAssert.d(17, 18, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic aroundConstructInvalidProceed = JakartaForJavaAssert.d(18, 18, 41,
+        Diagnostic aroundConstructInvalidProceed = JakartaForJavaAssert.d(23, 18, 41,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic aroundTimeoutInvalidProceed = JakartaForJavaAssert.d(24, 18, 39,
+        Diagnostic aroundTimeoutInvalidProceed = JakartaForJavaAssert.d(29, 18, 39,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic postConstructInvalidProceed = JakartaForJavaAssert.d(30, 16, 36,
+        Diagnostic postConstructInvalidProceed = JakartaForJavaAssert.d(35, 16, 36,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic preDestroyInvalidProceed = JakartaForJavaAssert.d(35, 16, 33,
+        Diagnostic preDestroyInvalidProceed = JakartaForJavaAssert.d(40, 16, 33,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic aroundInvokeInvalidProceedChild = JakartaForJavaAssert.d(46, 19, 44,
+        Diagnostic aroundInvokeInvalidProceedChild = JakartaForJavaAssert.d(51, 22, 47,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic postConstructInvalidProceedChild = JakartaForJavaAssert.d(62, 17, 42,
+        Diagnostic postConstructInvalidProceedChild = JakartaForJavaAssert.d(67, 20, 45,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
-        Diagnostic preDestroyInvalidProceedChild = JakartaForJavaAssert.d(67, 14, 36,
+        Diagnostic preDestroyInvalidProceedChild = JakartaForJavaAssert.d(72, 20, 42,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorMethodAnnotationOnMethod");
 
