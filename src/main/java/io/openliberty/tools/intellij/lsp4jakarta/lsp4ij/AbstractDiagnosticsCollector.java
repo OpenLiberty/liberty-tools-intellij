@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation and others.
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -237,7 +237,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @param m method
      * @return true if the given method is a constructor and false otherwise
      */
-    protected static boolean isConstructorMethod(PsiMethod m) {
+    public static boolean isConstructorMethod(PsiMethod m) {
         return m.isConstructor();
     }
 
