@@ -2647,4 +2647,55 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, addPublicConstructorChildEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
+
+    @Test
+    public void JsonbCloseInvalidDiagnostics() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbCloseInvalid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test unsafeCloseWithThread method - line 38
+        Diagnostic d1 = JakartaForJavaAssert.d(37, 8, 19,
+                "Ensure all threads have finished interaction with Jsonb before calling close(), as the behavior is undefined otherwise.",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        // Test unsafeCloseWithExecutor method - line 54
+        Diagnostic d2 = JakartaForJavaAssert.d(53, 8, 19,
+                "Ensure all threads have finished interaction with Jsonb before calling close(), as the behavior is undefined otherwise.",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        // Test unsafeCloseWithMultipleThreads method - line 70
+        Diagnostic d3 = JakartaForJavaAssert.d(69, 8, 19,
+                "Ensure all threads have finished interaction with Jsonb before calling close(), as the behavior is undefined otherwise.",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        // Test unsafeCloseWithRunnable method - line 86
+        Diagnostic d4 = JakartaForJavaAssert.d(85, 8, 19,
+                "Ensure all threads have finished interaction with Jsonb before calling close(), as the behavior is undefined otherwise.",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4);
+    }
+
+    @Test
+    public void JsonbCloseValidNoDiagnostics() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbCloseValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics should be reported for valid cases
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }

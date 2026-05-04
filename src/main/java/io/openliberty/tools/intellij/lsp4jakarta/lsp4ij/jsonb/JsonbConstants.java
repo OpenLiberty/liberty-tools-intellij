@@ -28,7 +28,8 @@ public class JsonbConstants {
     public static final String DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING = "InvalidJsonBNoArgsConstructorMissing";
     public static final String DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS = "InvalidJsonBNonStaticInnerClass";
     public static final String DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS = "InvalidJsonBNonPublicProtectedStaticNestedClass";
-
+    public static final String DIAGNOSTIC_CODE_CLOSABLE_CLOSE = "JsonbClosableCloseWarning";
+    
     /* Annotation Constants */
     public static final String JSONB_PACKAGE = "jakarta.json.bind.annotation.";
     public static final String JSONB_PREFIX = "Jsonb";
@@ -55,5 +56,16 @@ public class JsonbConstants {
     public static final List<String> JSONB_ANNOTATIONS = List.of(JSONB_CREATOR, JSONB_TRANSIENT_FQ_NAME, JSONB_ANNOTATION,
             JSONB_DATE_FORMAT, JSONB_NILLABLE, JSONB_NUMBER_FORMAT, JSONB_PROPERTY, JSONB_PROPERTY_ORDER,
             JSONB_TYPE_ADAPTER, JSONB_TYPE_DESERIALIZER, JSONB_TYPE_SERIALIZER, JSONB_VISIBILITY);
+
+    /* Jsonb and Thread-related Constants */
+    public static final String JAKARTA_JSON_BIND_JSONB = "jakarta.json.bind.Jsonb";
+    public static final String CLOSE_METHOD = "close";
+    public static final String START_METHOD = "start";
+    public static final String RUN_METHOD = "run";
+    public static final String EXECUTE_METHOD = "execute";
+    public static final String SUBMIT_METHOD = "submit";
+    public static final String JOIN_METHOD = "join";
+    public static final String SHUTDOWN_METHOD = "shutdown";
+    public static final String AWAIT_TERMINATION_METHOD = "awaitTermination";
 
 }
