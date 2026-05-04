@@ -97,14 +97,18 @@ public class JakartaJsonpTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = JakartaForJavaAssert.d(17, 14, 27,
+        Diagnostic invalidArrayBuilderStringNull = JakartaForJavaAssert.d(17, 14, 27,
                 "JsonArrayBuilder class does not allow null to be used as a value while building the JSON array.",
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidJsonArrayBuilderValue");
 
-        Diagnostic d2 = JakartaForJavaAssert.d(20, 14, 30,
+        Diagnostic invalidArrayBuilderNull = JakartaForJavaAssert.d(20, 14, 30,
                 "JsonArrayBuilder class does not allow null to be used as a value while building the JSON array.",
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidJsonArrayBuilderValue");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        Diagnostic invalidArrayBuilderTwoParamString = JakartaForJavaAssert.d(23, 17, 30,
+                "JsonArrayBuilder class does not allow null to be used as a value while building the JSON array.",
+                DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidJsonArrayBuilderValue");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, invalidArrayBuilderStringNull, invalidArrayBuilderNull, invalidArrayBuilderTwoParamString);
     }
 }

@@ -93,21 +93,35 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
     private void createDiagnosticsForMethodInvocations(List<Diagnostic> diagnostics,
                                                        List<PsiMethodCallExpression> builderMethodInvocations,
                                                        String msg, String errCode) {
-        boolean invalidArgs= false;
         for(PsiMethodCallExpression m: builderMethodInvocations){
-            PsiExpression arg = m.getArgumentList().getExpressions()[0];
             if(getMethodName(m).equals(JsonpConstants.CREATE_POINTER)){
-                invalidArgs = isInvalidArgumentCreatePointer(arg);
+                PsiExpression arg = m.getArgumentList().getExpressions()[0];
+                if(isInvalidArgumentCreatePointer(arg)) {
+                    buildInvaliArrayBuilderDiagnostic(diagnostics, msg, errCode, arg);
+                }
             } else if(getMethodName(m).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
-                invalidArgs = isInvalidNullArgument(arg);
-            }
-            if(invalidArgs) {
-                Range range = PositionUtils.toNameRange(arg);
-                Diagnostic diagnostic = new Diagnostic(range, msg);
-                completeDiagnostic(diagnostic, errCode);
-                diagnostics.add(diagnostic);
+                PsiExpression[] args = m.getArgumentList().getExpressions();
+                for(PsiExpression arg : args) {
+                    if(isInvalidNullArgument(arg)) {
+                        buildInvaliArrayBuilderDiagnostic(diagnostics, msg, errCode, arg);
+                    }
+                }
             }
         }
+    }
+
+    /**
+     * Method to build and construct Invalid Array Builder diagnostics
+     * @param diagnostics
+     * @param msg
+     * @param errCode
+     * @param arg
+     */
+    private void buildInvaliArrayBuilderDiagnostic(List<Diagnostic> diagnostics, String msg, String errCode, PsiExpression arg) {
+        Range range = PositionUtils.toNameRange(arg);
+        Diagnostic diagnostic = new Diagnostic(range, msg);
+        completeDiagnostic(diagnostic, errCode);
+        diagnostics.add(diagnostic);
     }
 
     /**
