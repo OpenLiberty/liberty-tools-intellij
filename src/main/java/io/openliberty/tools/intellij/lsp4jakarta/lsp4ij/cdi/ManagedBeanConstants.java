@@ -24,6 +24,8 @@ public class ManagedBeanConstants {
     public static final String DISPOSES_FQ_NAME = "jakarta.enterprise.inject.Disposes";
     public static final String OBSERVES_FQ_NAME = "jakarta.enterprise.event.Observes";
     public static final String OBSERVES_ASYNC_FQ_NAME = "jakarta.enterprise.event.ObservesAsync";
+    public static final String INTERCEPTOR_FQ_NAME = "jakarta.interceptor.Interceptor";
+    public static final String DECORATOR_FQ_NAME = "jakarta.decorator.Decorator";
     public static final String DEPENDENT_FQ_NAME = "jakarta.enterprise.context.Dependent";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
 
@@ -40,6 +42,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_DISPOSES_PARAM = "RemoveDisposesOrConflictedAnnotations";
     public static final String DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM = "InvalidInjectAnnotationOnMultipleMethodParams";
     public static final String DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT = "InvalidObservesObservesAsyncMethodParams";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER = "InvalidInterceptorOrDecoratorWithObserverMethod";
 
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540

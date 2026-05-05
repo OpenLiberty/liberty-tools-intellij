@@ -54,6 +54,13 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
+            // Check if the class is an interceptor or decorator
+            boolean interceptorOrDecorator = !getMatchedJavaElementNames(type,
+                    Stream.of(typeAnnotations).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                    new String[]{
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME
+                    }).isEmpty();
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
             boolean nonStaticPublicFieldPresent = false;
@@ -182,15 +189,25 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
+                Set<String> observesObservesAsyncParams = new HashSet<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
                     Set<String> observesObservesAsync = new HashSet<>(getMatchedJavaElementNames(type, annotationQualifiedNames, conflictedParamAnnotations));
+                    if (!observesObservesAsync.isEmpty()) {
+                        observesObservesAsyncParams.add(param.getName());
+                    }
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
                 }
-                if (!conflictParams.isEmpty()) {
+                if (interceptorOrDecorator && !observesObservesAsyncParams.isEmpty()) {
+                    diagnostics.add(createDiagnostic(method, unit,
+                            Messages.getMessage("InvalidInterceptorOrDecoratorWithObserverMethod"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
+                            null,
+                            DiagnosticSeverity.Error));
+                } else if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
                 }
