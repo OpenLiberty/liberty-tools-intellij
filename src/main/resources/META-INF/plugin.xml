@@ -365,6 +365,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotationOnAccessor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#InvalidJsonBNonPublicStaticNestedClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbChangeModifierToPublicQuickFix"/>
 
         <!-- Persistence -->
         <javaCodeActionParticipant kind="quickfix"
