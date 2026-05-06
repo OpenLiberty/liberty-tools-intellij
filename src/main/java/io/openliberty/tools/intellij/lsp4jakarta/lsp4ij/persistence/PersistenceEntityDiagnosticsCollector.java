@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation, Ankush Sharma and others.
+ * Copyright (c) 2020, 2026 IBM Corporation, Ankush Sharma and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -82,6 +82,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS, method.getReturnType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+
+                        //Validate @Id and @Temporal annotations
+                        validatePKDateTemporal(method,type,diagnostics,unit);
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
@@ -97,6 +100,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
+                        //Validate @Id and @Temporal annotations
+                        validatePKDateTemporal(field,type,diagnostics,unit);
+
+
                     }
 
                     // Ensure that the Entity class is not given a final modifier
@@ -121,5 +128,83 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
         // We do not do anything if the found unit is null
+    }
+
+    /**
+     * Check the annotation value is TemporalType.DATE Enum
+     *
+     * @param value
+     * @return true if the value is a reference to a TemporalType.DATE else return false
+     */
+    private boolean isValidTemporalDateValue(PsiAnnotationMemberValue value) {
+        return value instanceof PsiReferenceExpression ref
+                && ref.resolve() instanceof PsiEnumConstant
+                && PersistenceConstants.TEMPORAL_TYPE_DATE.equals(value.getText());
+    }
+
+    /**
+     * Check @Temporal annotation exist for primary key field/property with @Id annotation
+     * Specification: https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a132
+     *
+     * @param fieldOrProperty
+     * @param type
+     * @param diagnostics
+     * @param unit
+     */
+    private void validatePKDateTemporal(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
+
+        PsiAnnotation[] annotations = null;
+        PsiAnnotation id = null, temporal = null;
+        String typeFQ = null;
+
+        if (fieldOrProperty instanceof PsiMethod method) {
+            annotations = method.getAnnotations();
+            if (method.getReturnType() instanceof PsiClassType classType) {
+                PsiClass psiClass = classType.resolve();
+                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
+            }
+        } else if (fieldOrProperty instanceof PsiField field) {
+            annotations = field.getAnnotations();
+            if (field.getType() instanceof PsiClassType classType) {
+                PsiClass psiClass = classType.resolve();
+                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
+            }
+        }
+
+        if (annotations != null) {
+            for (PsiAnnotation annotation : annotations) {
+                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                        PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+
+                if (matchedAnnotation != null) {
+                    if (matchedAnnotation.equals(PersistenceConstants.ID)) {
+                        id = annotation;
+                    } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
+                        temporal = annotation;
+                    }
+                }
+            }
+        }
+
+        if (id != null) {
+
+            if (typeFQ != null && typeFQ.equals(PersistenceConstants.UTIL_DATE)) {
+                if (temporal != null) {
+                    if (!isValidTemporalDateValue(temporal.findAttributeValue("value"))) {
+                        // Add diagnostics for invalid type
+                        diagnostics.add(createDiagnostic(temporal, unit,
+                                Messages.getMessage("InvalidValueInTemporalAnnotation"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_TEMPORAL_INVALID_VALUE, null,
+                                DiagnosticSeverity.Error));
+                    }
+                } else {
+                    // Add diagnostics for missing annotation
+                    diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                            Messages.getMessage("MissingTemporalAnnotation"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_MISSING_TEMPORAL, null,
+                            DiagnosticSeverity.Error));
+                }
+            }
+        }
     }
 }

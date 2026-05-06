@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -307,5 +307,33 @@ public class JakartaServletTest extends BaseJakartaTest {
         CodeAction ca7 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletRequestListener'", d, te7);
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3, ca4, ca5, ca6, ca7);
+    }
+    @Test
+    public void ExtendWebServletForDeclareRoles() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DeclareRolesWithoutServlet.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // expected
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 39, "Annotated classes with @DeclareRoles must implement the Servlet interface or its subclasses.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ExtendHttpServlet");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.annotation.security.DeclareRoles;\n" +
+                "import jakarta.servlet.http.HttpServlet;\n\n@DeclareRoles(\"Administrator\")\n" +
+                "public class DeclareRolesWithoutServlet extends HttpServlet {\n\n}\n";
+
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 8, 0, newText);
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DeclareRolesWithoutServlet' extend 'HttpServlet'", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
     }
 }
