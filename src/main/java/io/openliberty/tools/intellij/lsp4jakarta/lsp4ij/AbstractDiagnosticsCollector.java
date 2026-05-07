@@ -248,59 +248,94 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
-     * isImportReferencedJavaElement
-     * Method checks if class has references of passed type imports
-     *
-     * @param javaFile
-     * @param importRef
-     * @return
-     */
-    private static boolean isImportReferencedJavaElement(PsiJavaFile javaFile, String importRef) {
-        PsiImportList importList = javaFile.getImportList();
-        if (importList != null) {
-            for (PsiImportStatement importStatement : importList.getImportStatements()) {
-                PsiElement resolved = importStatement.resolve();
-                if (resolved instanceof PsiClass psiClass) {
-                    String qualifiedName = psiClass.getQualifiedName();
-                    if (qualifiedName != null && qualifiedName.contains(importRef)) {
-                       return true;
-                    }
-                }
-                else if (resolved instanceof PsiPackage psiPackage) {
-                    String pkgName = psiPackage.getQualifiedName();
-                    if (pkgName.contains(importRef)) {
-                       return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * isInterceptorType
      * Method checks if the class is an Interceptor type
      *
-     * @param type
-     * @return boolean
+     * @param type the type to check
+     * @return true if the type has @Interceptor annotation
      */
     public static boolean isInterceptorType(PsiClass type) {
-        return Arrays.stream(type.getAnnotations()).anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
+        return Arrays.stream(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
     }
 
     /**
-     * isInterceptorTypeReferenced
-     * Method checks if class references Interceptor types
+     * Checks if type is of Interceptor type or uses interceptor-related features.
+     * Returns true if:
+     * - The type has @Interceptor annotation
+     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundConstruct, AroundTimeout)
+     * - The type or its methods use @Interceptors annotation
      *
-     * @param type
-     * @param javaFile
-     * @return
+     * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
+     *
+     * @param type     the type to check
+     * @param javaFile the Java file containing the type
+     * @return true if the type is an interceptor type or uses interceptor-related features
      */
     public static boolean isInterceptorTypeReferenced(PsiClass type, PsiJavaFile javaFile) {
-        if(!isInterceptorType(type)){
-            return isImportReferencedJavaElement(javaFile, Constants.INTERCEPTOR_IMPORT);
+        if (type == null) {
+            return false;
         }
+
+        // Check if the type has @Interceptor annotation (no method iteration needed)
+        if (isInterceptorType(type)) {
+            return true;
+        }
+
+        PsiMethod[] methods = type.getMethods();
+
+        // Check if the type or methods use interceptor-specific annotations
+        if (hasInterceptorMethodAnnotations(type, methods)) {
+            return true;
+        }
+
+        // Check if the type uses @Interceptors annotation (class-level or method-level)
+        if (hasInterceptorsAnnotation(type, methods)) {
+            return true;
+        }
+
         return false;
+    }
+
+    /**
+     * Checks if the type has any methods annotated with interceptor-specific annotations.
+     * Checks for: @AroundInvoke, @AroundConstruct, @AroundTimeout
+     *
+     * @param type    the type to check
+     * @param methods the methods array (pre-fetched to avoid redundant calls)
+     * @return true if any method uses interceptor-specific annotations
+     */
+    private static boolean hasInterceptorMethodAnnotations(PsiClass type, PsiMethod[] methods) {
+        String[] interceptorReferences = Constants.INTERCEPTOR_REFERENCES.toArray(String[]::new);
+
+        return Arrays.stream(methods)
+                .flatMap(method -> Arrays.stream(method.getAnnotations()))
+                .anyMatch(annotation -> {
+                    String annotationName = annotation.getQualifiedName();
+                    return getMatchedJavaElementName(type, annotationName, interceptorReferences) != null;
+                });
+    }
+
+    /**
+     * Checks if the type or its methods use @Interceptors annotation.
+     * The @Interceptors annotation is used to bind interceptors to a class or method.
+     *
+     * @param type    the type to check
+     * @param methods the methods array (pre-fetched to avoid redundant calls)
+     * @return true if @Interceptors annotation is found
+     */
+    private static boolean hasInterceptorsAnnotation(PsiClass type, PsiMethod[] methods) {
+
+        // Check class-level @Interceptors annotation
+        if (Arrays.stream(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTORS_FQ_NAME))) {
+            return true;
+        }
+
+        // Check method-level @Interceptors annotation
+        return Arrays.stream(methods)
+                .flatMap(method -> Arrays.stream(method.getAnnotations()))
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTORS_FQ_NAME));
     }
 
     /**
