@@ -384,9 +384,9 @@ public class DependencyInjectionTest extends BaseJakartaTest {
                 "\n\nimport jakarta.inject.Scope;\n\n" +
                 "@Scope\npublic @interface InvalidScopeAttributes {\n\n}\n\n";
 
-        TextEdit te = JakartaForJavaAssert.te(0, 0, 14, 0, newText);
-        CodeAction removeInvalidAttributes = JakartaForJavaAssert.ca(uri, "Remove all attributes from @Scope annotation type", invalidScopeAttribute, te);
+        TextEdit removeBodyDeclarationsEdit = JakartaForJavaAssert.te(0, 0, 14, 0, newText);
+        CodeAction removeScopeBodyDeclarations = JakartaForJavaAssert.ca(uri, "Remove all attributes from @Scope annotation", invalidScopeAttribute, removeBodyDeclarationsEdit);
 
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, removeInvalidAttributes);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, removeScopeBodyDeclarations);
     }
 }

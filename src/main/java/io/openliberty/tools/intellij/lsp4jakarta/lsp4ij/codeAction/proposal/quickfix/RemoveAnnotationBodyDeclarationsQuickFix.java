@@ -1,0 +1,123 @@
+/*******************************************************************************
+ * Copyright (c) 2026 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
+
+import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.RemoveAnnotationBodyDeclarationsProposal;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
+import io.openliberty.tools.intellij.util.ExceptionUtil;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.Diagnostic;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
+/**
+ * Abstract base class for quick fixes that remove body declarations (methods and fields) 
+ * from annotation types. Subclasses should provide the specific label.
+ * 
+ * This class can be extended by any module that needs to remove body declarations from
+ * annotation types, making it reusable across different Jakarta EE specifications.
+ * 
+ * Note: "attributes" in annotation context refers to annotation parameters like @Min(value=1),
+ * whereas this class removes member declarations (body declarations) from the annotation type definition itself.
+ */
+public abstract class RemoveAnnotationBodyDeclarationsQuickFix implements IJavaCodeActionParticipant {
+
+    /** Logger object to record events for this class. */
+    private static final Logger LOGGER = Logger.getLogger(RemoveAnnotationBodyDeclarationsQuickFix.class.getName());
+
+    /**
+     * Returns the label key for the code action message.
+     * 
+     * @return the message key for the code action label
+     */
+    protected abstract String getLabelKey();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getParticipantId() {
+        return this.getClass().getName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
+        PsiElement node = context.getCoveredNode();
+        PsiClass annotationClass = PsiTreeUtil.getParentOfType(node, PsiClass.class);
+
+        if (annotationClass != null && annotationClass.isAnnotationType()) {
+            List<CodeAction> codeActions = new ArrayList<>();
+            codeActions.add(JDTUtils.createCodeAction(context, diagnostic,
+                    io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages.getMessage(getLabelKey()), 
+                    getParticipantId()));
+            return codeActions;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * Resolves the code action by removing all body declarations (methods and fields)
+     * from the annotation type.
+     */
+    @Override
+    public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
+        final CodeAction toResolve = context.getUnresolved();
+        final PsiElement node = context.getCoveredNode();
+        final PsiClass annotationClass = PsiTreeUtil.getParentOfType(node, PsiClass.class);
+        
+        if (annotationClass != null && annotationClass.isAnnotationType()) {
+            // Collect all methods and fields to remove (body declarations)
+            List<PsiElement> bodyDeclarationsToRemove = new ArrayList<>();
+            bodyDeclarationsToRemove.addAll(Arrays.asList(annotationClass.getMethods()));
+            bodyDeclarationsToRemove.addAll(Arrays.asList(annotationClass.getFields()));
+            
+            LOGGER.info("Found " + bodyDeclarationsToRemove.size() + " body declarations to remove");
+            
+            if (!bodyDeclarationsToRemove.isEmpty()) {
+                final String label = io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages.getMessage(getLabelKey());
+                final ChangeCorrectionProposal proposal = new RemoveAnnotationBodyDeclarationsProposal(
+                        label,
+                        context.getSource().getCompilationUnit(),
+                        context.getASTRoot(),
+                        annotationClass,
+                        0,
+                        bodyDeclarationsToRemove
+                );
+                ExceptionUtil.executeWithWorkspaceEditHandling(
+                        context, proposal, toResolve, LOGGER,
+                        "Unable to create workspace edit for removing body declarations"
+                );
+            }
+        }
+        
+        return toResolve;
+    }
+}
+
+// Made with Bob

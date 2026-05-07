@@ -20,30 +20,28 @@ import com.intellij.psi.PsiModifierListOwner;
 import java.util.List;
 
 /**
- * Proposal for removing attributes (methods and fields) from annotation type declarations.
- *
- * <p>This is specifically used for removing attributes from @Scope annotated interfaces
- * to comply with Jakarta EE Dependency Injection specifications.</p>
+ * Code action proposal for removing body declarations (methods and fields) from an annotation type.
+ * 
  */
-public class RemoveAnnotationAttributesProposal extends RemoveElementsProposal {
+public class RemoveAnnotationBodyDeclarationsProposal extends RemoveElementsProposal {
 
     /**
-     * Constructor.
+     * Constructor for RemoveAnnotationBodyDeclarationsProposal.
      *
      * @param label The label for this proposal
      * @param sourceCU The source compilation unit
      * @param invocationNode The invocation node
      * @param binding The modifier list owner (the annotation class)
      * @param relevance The relevance score
-     * @param attributesToRemove List of attributes (methods and fields) to remove
+     * @param bodyDeclarationsToRemove List of body declarations (methods and fields) to remove
      */
-    public RemoveAnnotationAttributesProposal(
+    public RemoveAnnotationBodyDeclarationsProposal(
             String label,
             PsiFile sourceCU,
             PsiFile invocationNode,
             PsiModifierListOwner binding,
             int relevance,
-            List<? extends PsiElement> attributesToRemove) {
-        super(label, sourceCU, invocationNode, binding, relevance, attributesToRemove);
+            List<? extends PsiElement> bodyDeclarationsToRemove) {
+        super(label, sourceCU, invocationNode, binding, relevance, bodyDeclarationsToRemove);
     }
 }
