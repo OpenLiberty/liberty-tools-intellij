@@ -94,12 +94,12 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
                                                        List<PsiMethodCallExpression> builderMethodInvocations,
                                                        String msg, String errCode) {
         for(PsiMethodCallExpression m: builderMethodInvocations){
-            if(getMethodName(m).equals(JsonpConstants.CREATE_POINTER)){
+            if(getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
                 PsiExpression arg = m.getArgumentList().getExpressions()[0];
                 if(isInvalidArgumentCreatePointer(arg)) {
                     buildInvaliArrayBuilderDiagnostic(diagnostics, msg, errCode, arg);
                 }
-            } else if(getMethodName(m).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
+            } else if(getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
                 PsiExpression[] args = m.getArgumentList().getExpressions();
                 for(PsiExpression arg : args) {
                     if(isInvalidNullArgument(arg)) {
@@ -147,10 +147,10 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
      */
     private boolean isMatchedMethodFQName(PsiMethodCallExpression mce, String methodParentTypeFQ) {
         PsiMethod method = mce.resolveMethod();
-        if(getMethodName(mce).equals(JsonpConstants.CREATE_POINTER)){
+        if(getMethodName(method).equals(JsonpConstants.CREATE_POINTER)){
             return mce.getArgumentList().getExpressionCount() == JsonpConstants.EXPRESSION_COUNT_CREATE_POINTER
                     && methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
-        } else if(getMethodName(mce).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
+        } else if(getMethodName(method).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
             return methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
         }
         return false;
@@ -159,11 +159,10 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
     /**
      * Check if valid method exists
      *
-     * @param methodCall
+     * @param method
      * @return
      */
-    private String getMethodName(PsiMethodCallExpression methodCall) {
-        PsiMethod method = methodCall.resolveMethod();
+    private String getMethodName(PsiMethod method) {
         if(method != null && method.getClass() != null){
            return method.getName();
         }
