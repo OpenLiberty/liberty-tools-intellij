@@ -10,7 +10,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -41,12 +41,12 @@ import java.util.logging.Logger;
  * @author Archana Iyer
  *
  */
-public class JSONBInsertDefaultPubOrProConstructorQuickFix implements IJavaCodeActionParticipant {
-    private static final Logger LOGGER = Logger.getLogger(JSONBInsertDefaultPubOrProConstructorQuickFix.class.getName());
+public class InsertDefaultPubOrProConstructorQuickFix implements IJavaCodeActionParticipant {
+    private static final Logger LOGGER = Logger.getLogger(InsertDefaultPubOrProConstructorQuickFix.class.getName());
 
     @Override
     public String getParticipantId() {
-        return JSONBInsertDefaultPubOrProConstructorQuickFix.class.getName();
+        return InsertDefaultPubOrProConstructorQuickFix.class.getName();
     }
 
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {

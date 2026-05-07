@@ -1970,21 +1970,21 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = JakartaForJavaAssert.d(4, 13, 33,
+        Diagnostic missingPubOrProConstructorParent = JakartaForJavaAssert.d(4, 13, 33,
                 "Missing Public or Protected NoArgsConstructor: Class JsonbDeserialization uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d2 = JakartaForJavaAssert.d(56, 24, 34,
+        Diagnostic missingPubOrProConstructorChild = JakartaForJavaAssert.d(56, 21, 31,
                 "Missing Public or Protected NoArgsConstructor: Class ChildClass uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d3 = JakartaForJavaAssert.d(83, 17, 25,
+        Diagnostic missingPubOrProConstructorSubChild = JakartaForJavaAssert.d(83, 14, 22,
                 "Cannot deserialize class SubChild because it is not static. Please declare the class as static for JSONB deserialization.",
                 DiagnosticSeverity.Warning, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingPubOrProConstructorParent, missingPubOrProConstructorChild, missingPubOrProConstructorSubChild);
 
-        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, d1);
+        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, missingPubOrProConstructorParent);
         String newText1 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
                 "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
                 "public class JsonbDeserialization {\n\n" +
@@ -2052,12 +2052,12 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
 
         TextEdit te1 = JakartaForJavaAssert.te(0, 0, 100, 1, newText1);
-        CodeAction ca1 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d1, te1);
+        CodeAction insertNoArgProConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorParent, te1);
         TextEdit te2 = JakartaForJavaAssert.te(0, 0, 100, 1, newText2);
-        CodeAction ca2 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d1, te2);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        CodeAction insertNoArgPubConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorParent, te2);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, insertNoArgProConstructorParent, insertNoArgPubConstructorParent);
 
-        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, d2);
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, missingPubOrProConstructorChild);
         String newText3 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
                 "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
                 "public class JsonbDeserialization {\n\n" +
@@ -2123,9 +2123,9 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
 
         TextEdit te3 = JakartaForJavaAssert.te(0, 0, 100, 1, newText3);
-        CodeAction ca3 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), d2, te3);
+        CodeAction insertNoArgProConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorChild, te3);
         TextEdit te4 = JakartaForJavaAssert.te(0, 0, 100, 1, newText4);
-        CodeAction ca4 = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), d2, te4);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+        CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, te4);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
 }
