@@ -38,8 +38,6 @@ import java.util.logging.Logger;
  * This class can be extended by any module that needs to remove body declarations from
  * annotation types, making it reusable across different Jakarta EE specifications.
  * 
- * Note: "attributes" in annotation context refers to annotation parameters like @Min(value=1),
- * whereas this class removes member declarations (body declarations) from the annotation type definition itself.
  */
 public abstract class RemoveAnnotationBodyDeclarationsQuickFix implements IJavaCodeActionParticipant {
 
