@@ -321,7 +321,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected
-        Diagnostic d = JakartaForJavaAssert.d(5, 13, 39, "Annotated classes with @DeclareRoles must implement the Servlet interface or its subclasses.",
+        Diagnostic d = JakartaForJavaAssert.d(6, 13, 39, "Annotated classes with @DeclareRoles must implement the Servlet interface or its subclasses.",
                 DiagnosticSeverity.Error, "jakarta-servlet", "ExtendHttpServlet");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
@@ -332,7 +332,7 @@ public class JakartaServletTest extends BaseJakartaTest {
                 "import jakarta.servlet.http.HttpServlet;\n\n@DeclareRoles(\"Administrator\")\n" +
                 "public class DeclareRolesWithoutServlet extends HttpServlet {\n\n}\n";
 
-        TextEdit te = JakartaForJavaAssert.te(0, 0, 8, 0, newText);
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 9, 0, newText);
         CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DeclareRolesWithoutServlet' extend 'HttpServlet'", d, te);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
     }
