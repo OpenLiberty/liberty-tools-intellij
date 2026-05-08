@@ -47,7 +47,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         PsiClass[] types = unit.getClasses();
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : types) {
-            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
+            PsiAnnotation[] typeAnnotations = type.getAnnotations();
+            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
@@ -181,6 +182,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
+                List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -188,10 +190,24 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
+                    // Track parameters with @Observes or @ObservesAsync annotations
+                    if (!observesObservesAsync.isEmpty()) {
+                        paramsWithObserverAnnotations.add(param);
+                    }
                 }
                 if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
+                
+                // Generate diagnostic for multiple observer parameters
+                // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
+                if (paramsWithObserverAnnotations.size() > 1) {
+                    String paramNames = paramsWithObserverAnnotations.stream()
+                            .map(PsiParameter::getName)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
+                                        DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 }
             }
 
@@ -238,6 +254,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
+                boolean isStateless = !getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
+                                .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                        new String[]{STATELESS_FQ_NAME}).isEmpty();
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -245,6 +264,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 } else if (nonStaticPublicFieldPresent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (isStateless && (!isDependent || hasMultipleScopes)) {
+                    /**
+                     * A stateless session bean must belong to the @Dependent scope.
+                     * If a session bean specifies an illegal scope, the container automatically detects
+                     * the problem and treats it as a definition error.
+                     *
+                     * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
+                     */
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
+                            DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("ScopeTypeAnnotationsManagedBean"),

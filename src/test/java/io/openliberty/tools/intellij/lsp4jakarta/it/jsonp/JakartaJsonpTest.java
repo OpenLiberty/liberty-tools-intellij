@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation and others.
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -60,5 +60,28 @@ public class JakartaJsonpTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidCreatePointerArg");
         
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+    }
+
+    @Test
+    public void invalidJsonObjectBuilder() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonp/CreateInvalidJsonObjectBuilder.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(22, 58, 62,
+                "The JsonObjectBuilder class does not allow null to be used as a name while building the JSON object.",
+                DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidJsonObjectBuilderKey");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(29, 59, 63,
+                "The JsonObjectBuilder class does not allow null to be used as a name while building the JSON object.",
+                DiagnosticSeverity.Error, "jakarta-jsonp", "InvalidJsonObjectBuilderKey");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
     }
 }

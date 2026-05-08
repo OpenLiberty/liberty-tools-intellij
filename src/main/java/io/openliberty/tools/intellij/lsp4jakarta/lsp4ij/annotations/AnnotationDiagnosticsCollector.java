@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
+import com.redhat.devtools.lsp4ij.internal.StringUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -29,8 +30,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.*;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.EXCEPTION;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.RUNTIME_EXCEPTION;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.*;
 
 /**
  *
@@ -111,6 +111,9 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
 
                 if (isMatchedAnnotation(annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
                     for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
+                        if ("value".equals(pair.getAttributeName())) {
+                            validateGeneratedName(unit, diagnostics, pair, annotation);
+                        }
                         // If date element exists and is non-empty, it must follow ISO 8601 format.
                         if (pair.getAttributeName().equals("date")) {
                             String date = pair.getLiteralValue();
@@ -388,6 +391,58 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
         return !DiagnosticsUtils.inheritsFrom(exceptionClass, RUNTIME_EXCEPTION);
     }
 
+    /**
+     * validateGeneratedName
+     * Validates the 'value' attribute of the @Generated annotation.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param pair
+     * @param annotation
+     */
+    private void validateGeneratedName(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiNameValuePair pair, PsiAnnotation annotation) {
+        PsiAnnotationMemberValue value = pair.getValue();
+        if (value instanceof PsiLiteralExpression literal) {
+            Object val = literal.getValue();
+            if (val instanceof String str) {
+                validateGeneratedName(str, annotation, diagnostics, unit);
+            }
 
+        } else if (value instanceof PsiArrayInitializerMemberValue array) {
+            for (PsiAnnotationMemberValue mv : array.getInitializers()) {
+                if (mv instanceof PsiLiteralExpression literal) {
+                    Object val = literal.getValue();
+                    if (val instanceof String str) {
+                        validateGeneratedName(str, annotation, diagnostics, unit);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * validateGeneratedName
+     * Validates a single generator name value from the @Generated annotation.
+     *
+     * @param name
+     * @param annotation
+     * @param diagnostics
+     * @param unit
+     */
+    private void validateGeneratedName(
+            String name,
+            PsiAnnotation annotation,
+            List<Diagnostic> diagnostics, PsiJavaFile unit) {
 
+        if (StringUtils.isBlank(name)) {
+            String diagnosticMessage = Messages.getMessage("GeneratedValueCannotBeEmpty", "@Generated", "value");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_EMPTY, null,
+                    DiagnosticSeverity.Error));
+        } else if (!name.matches(GENERATED_NAME_REGEX)){
+            String diagnosticMessage = Messages.getMessage("GeneratedValueMustBeValidIdentifier", "@Generated", "value");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_INVALID_FORMAT, null,
+                    DiagnosticSeverity.Warning));
+        }
+    }
 }
