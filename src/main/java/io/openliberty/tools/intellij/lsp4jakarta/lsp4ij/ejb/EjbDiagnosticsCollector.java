@@ -1,0 +1,92 @@
+/*******************************************************************************
+ * Copyright (c) 2026 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
+
+import com.intellij.psi.*;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
+
+/**
+ * EJB diagnostic collector for session beans.
+ */
+public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    public EjbDiagnosticsCollector() {
+        super();
+    }
+
+    @Override
+    protected String getDiagnosticSource() {
+        return DIAGNOSTIC_SOURCE;
+    }
+
+    @Override
+    public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        if (unit == null)
+            return;
+
+        PsiClass[] types = unit.getClasses();
+        for (PsiClass type : types) {
+            List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
+                    Stream.of(type.getAnnotations())
+                            .map(annotation -> annotation.getQualifiedName())
+                            .toArray(String[]::new),
+                    SESSION_BEAN_ANNOTATIONS);
+
+            if (!sessionBeanAnnotations.isEmpty()) {
+                validateSessionBeanConstructor(type, unit, diagnostics);
+            }
+        }
+    }
+
+    /**
+     * Validates that a session bean has a public no-arg constructor.
+     *
+     * @param type the class to validate
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanConstructor(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiMethod[] constructors = type.getConstructors();
+
+        if (constructors.length == 0) {
+            return;
+        }
+
+        boolean hasPublicNoArgConstructor = false;
+
+        for (PsiMethod constructor : constructors) {
+            if (constructor.hasModifierProperty(PsiModifier.PUBLIC) &&
+                constructor.getParameterList().getParametersCount() == 0) {
+                hasPublicNoArgConstructor = true;
+                break;
+            }
+        }
+
+        if (!hasPublicNoArgConstructor) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanNoArgConstructor"),
+                    DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+}
