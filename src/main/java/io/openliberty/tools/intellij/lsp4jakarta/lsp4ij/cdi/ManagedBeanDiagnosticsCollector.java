@@ -497,13 +497,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * @return true if any parameter has a conditional observer annotation
      */
     private boolean hasConditionalObserverAnnotation(PsiClass type, PsiMethod method) {
-        for (PsiParameter param : method.getParameterList().getParameters()) {
-            for (PsiAnnotation annotation : param.getAnnotations()) {
-                if (isConditionalObserver(type, annotation)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return Stream.of(method.getParameterList().getParameters())
+                .flatMap(param -> Stream.of(param.getAnnotations()))
+                .anyMatch(annotation -> isConditionalObserver(type, annotation));
     }
 }
