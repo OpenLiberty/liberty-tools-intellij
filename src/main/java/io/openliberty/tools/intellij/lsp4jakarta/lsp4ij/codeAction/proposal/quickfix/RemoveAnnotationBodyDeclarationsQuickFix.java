@@ -117,5 +117,3 @@ public abstract class RemoveAnnotationBodyDeclarationsQuickFix implements IJavaC
         return toResolve;
     }
 }
-
-// Made with Bob
