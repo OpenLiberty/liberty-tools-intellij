@@ -97,13 +97,13 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
             if(getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
                 PsiExpression arg = m.getArgumentList().getExpressions()[0];
                 if(isInvalidArgumentCreatePointer(arg)) {
-                    buildInvaliArrayBuilderDiagnostic(diagnostics, msg, errCode, arg);
+                    buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                 }
             } else if(getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
                 PsiExpression[] args = m.getArgumentList().getExpressions();
                 for(PsiExpression arg : args) {
                     if(isInvalidNullArgument(arg)) {
-                        buildInvaliArrayBuilderDiagnostic(diagnostics, msg, errCode, arg);
+                        buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                     }
                 }
             }
@@ -111,13 +111,14 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
-     * Method to build and construct Invalid Array Builder diagnostics
-     * @param diagnostics
-     * @param msg
-     * @param errCode
-     * @param arg
+     * Adds a diagnostic for an invalid argument in JSON-P method invocations
+     *
+     * @param diagnostics the list to add the diagnostic to
+     * @param msg the diagnostic message
+     * @param errCode the error code for the diagnostic
+     * @param arg the invalid argument expression
      */
-    private void buildInvaliArrayBuilderDiagnostic(List<Diagnostic> diagnostics, String msg, String errCode, PsiExpression arg) {
+    private void buildInvalidArgumentDiagnostic(List<Diagnostic> diagnostics, String msg, String errCode, PsiExpression arg) {
         Range range = PositionUtils.toNameRange(arg);
         Diagnostic diagnostic = new Diagnostic(range, msg);
         completeDiagnostic(diagnostic, errCode);
