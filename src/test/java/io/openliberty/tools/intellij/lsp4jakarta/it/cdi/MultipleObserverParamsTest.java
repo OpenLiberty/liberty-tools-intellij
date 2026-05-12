@@ -53,22 +53,22 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
 
         // test expected diagnostics
         // Line 16: invalidTwoObserves method has two @Observes parameters
-        Diagnostic d1 = d(15, 16, 34,
+        Diagnostic twoObservesDiag = d(15, 16, 34,
                 "Parameters event1, event2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         // Line 20: invalidObservesAndObservesAsync method has @Observes and @ObservesAsync parameters
-        Diagnostic d2 = d(19, 16, 47,
+        Diagnostic mixedObserversDiag = d(19, 16, 47,
                 "Parameters event1, event2 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, twoObservesDiag, mixedObserversDiag);
 
-        // Test code actions for d1 (invalidTwoObserves)
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        // Test code actions for twoObservesDiag (invalidTwoObserves)
+        JakartaJavaCodeActionParams twoObservesParams = createCodeActionParams(uri, twoObservesDiag);
 
         // Expected text after removing @Observes from event1
-        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
+        String removeEvent1Observes = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\npublic class MultipleObserverParams {\n\n    " +
                 "public void validSingleObserves(@Observes String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
                 "public void validSingleObservesAsync(@ObservesAsync String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
@@ -78,7 +78,7 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
                 "System.out.println(\"Events: \" + event1 + \", \" + event2);\n    }\n}\n";
 
         // Expected text after removing @Observes from event2
-        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
+        String removeEvent2Observes = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\npublic class MultipleObserverParams {\n\n    " +
                 "public void validSingleObserves(@Observes String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
                 "public void validSingleObservesAsync(@ObservesAsync String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
@@ -87,18 +87,18 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
                 "public void invalidObservesAndObservesAsync(@Observes String event1, @ObservesAsync String event2) {\n        " +
                 "System.out.println(\"Events: \" + event1 + \", \" + event2);\n    }\n}\n";
 
-        TextEdit te1 = te(0, 0, 23, 0, newText1);
-        TextEdit te2 = te(0, 0, 23, 0, newText2);
-        CodeAction ca1 = ca(uri, "Remove the @Observes modifier from parameter event1", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove the @Observes modifier from parameter event2", d1, te2);
+        TextEdit editRemoveEvent1 = te(0, 0, 23, 0, removeEvent1Observes);
+        TextEdit editRemoveEvent2 = te(0, 0, 23, 0, removeEvent2Observes);
+        CodeAction removeEvent1Action = ca(uri, "Remove the @Observes modifier from parameter event1", twoObservesDiag, editRemoveEvent1);
+        CodeAction removeEvent2Action = ca(uri, "Remove the @Observes modifier from parameter event2", twoObservesDiag, editRemoveEvent2);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2);
+        assertJavaCodeAction(twoObservesParams, utils, removeEvent1Action, removeEvent2Action);
 
-        // Test code actions for d2 (invalidObservesAndObservesAsync)
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        // Test code actions for mixedObserversDiag (invalidObservesAndObservesAsync)
+        JakartaJavaCodeActionParams mixedObserversParams = createCodeActionParams(uri, mixedObserversDiag);
 
         // Expected text after removing @Observes from event1
-        String newText3 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
+        String removeMixedEvent1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\npublic class MultipleObserverParams {\n\n    " +
                 "public void validSingleObserves(@Observes String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
                 "public void validSingleObservesAsync(@ObservesAsync String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
@@ -108,7 +108,7 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
                 "System.out.println(\"Events: \" + event1 + \", \" + event2);\n    }\n}\n";
 
         // Expected text after removing @ObservesAsync from event2
-        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
+        String removeMixedEvent2 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\n\npublic class MultipleObserverParams {\n\n    " +
                 "public void validSingleObserves(@Observes String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
                 "public void validSingleObservesAsync(@ObservesAsync String event) {\n        System.out.println(\"Event: \" + event);\n    }\n\n    " +
@@ -116,11 +116,11 @@ public class MultipleObserverParamsTest extends BaseJakartaTest {
                 "System.out.println(\"Events: \" + event1 + \", \" + event2);\n    }\n\n    " +
                 "public void invalidObservesAndObservesAsync(@Observes String event1, String event2) {\n        " +
                 "System.out.println(\"Events: \" + event1 + \", \" + event2);\n    }\n}\n";
-        TextEdit te3 = te(0, 0, 23, 0, newText3);
-        TextEdit te4 = te(0, 0, 23, 0, newText4);
-        CodeAction ca3 = ca(uri, "Remove the @Observes modifier from parameter event1", d2, te3);
-        CodeAction ca4 = ca(uri, "Remove the @ObservesAsync modifier from parameter event2", d2, te4);
+        TextEdit editRemoveMixedEvent1 = te(0, 0, 23, 0, removeMixedEvent1);
+        TextEdit editRemoveMixedEvent2 = te(0, 0, 23, 0, removeMixedEvent2);
+        CodeAction removeMixedEvent1Action = ca(uri, "Remove the @Observes modifier from parameter event1", mixedObserversDiag, editRemoveMixedEvent1);
+        CodeAction removeMixedEvent2Action = ca(uri, "Remove the @ObservesAsync modifier from parameter event2", mixedObserversDiag, editRemoveMixedEvent2);
 
-        assertJavaCodeAction(codeActionParams2, utils, ca3, ca4);
+        assertJavaCodeAction(mixedObserversParams, utils, removeMixedEvent1Action, removeMixedEvent2Action);
     }
 }

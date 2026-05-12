@@ -1359,7 +1359,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "return \"Hi \" + name + \"!\";\n    }\n\n    public String greetObservesObservesAsyncConflict(@Observes @ObservesAsync String name, @Observes @ObservesAsync String name1) {\n        " +
                 "return \"Hi \" + name + \" and \" + name1 + \"!\";\n    }\n}\n";
 
-
         TextEdit editRemoveProduces6 = te(0, 0, 62, 0, textRemoveProduces6);
         TextEdit editRemoveDisposes6 = te(0, 0, 62, 0, textRemoveDisposes6);
         TextEdit editRemoveAsync6 = te(0, 0, 62, 0, textRemoveAsync6);
