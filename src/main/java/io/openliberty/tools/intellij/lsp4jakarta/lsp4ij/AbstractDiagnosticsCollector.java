@@ -342,31 +342,57 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * checkMethodInvokedExists
      * This method checks if the passed method is being invoked in the declared method body
      *
-     * @param m
-     * @return
+     * @param psiMethod the method to check
+     * @param methodInvoked the name of the method to search for
+     * @param methodParentType the fully qualified name of the parent type containing the invoked method
+     * @return true if the specified method invocation exists in the method body, false otherwise
      */
-    public boolean checkMethodInvokedExists(PsiMethod m, String methodInvoked, String methodParentType) {
-        PsiCodeBlock body = m.getBody();
-        if (body != null) {
-            Collection<PsiMethodCallExpression> allInterceptorMethodInvocations =
-                    PsiTreeUtil.findChildrenOfType(body, PsiMethodCallExpression.class);
-            for (PsiMethodCallExpression call : allInterceptorMethodInvocations) {
-                PsiReferenceExpression methodExpr = call.getMethodExpression();
-                String methodName = methodExpr.getReferenceName();
-                if (methodInvoked.equals(methodName)) {
-                    PsiMethod target = call.resolveMethod();
-                    if (target != null) {
-                        PsiClass containingClass = target.getContainingClass();
-                        if (containingClass != null) {
-                            String fqn = containingClass.getQualifiedName();
-                            if (methodParentType.equals(fqn)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+    public boolean checkMethodInvokedExists(PsiMethod psiMethod, String methodInvoked, String methodParentType) {
+        PsiCodeBlock body = psiMethod.getBody();
+        if (body == null) {
+            return false;
+        }
+        
+        Collection<PsiMethodCallExpression> allInterceptorMethodInvocations =
+                PsiTreeUtil.findChildrenOfType(body, PsiMethodCallExpression.class);
+        
+        for (PsiMethodCallExpression call : allInterceptorMethodInvocations) {
+            if (isMatchingMethodInvocation(call, methodInvoked, methodParentType)) {
+                return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if a method call expression matches the expected method name and parent type.
+     *
+     * @param call the method call expression to check
+     * @param methodInvoked the name of the method to match
+     * @param methodTargetClass the fully qualified name of the parent type to match
+     * @return true if the method call matches both the method name and parent type, false otherwise
+     */
+    private boolean isMatchingMethodInvocation(PsiMethodCallExpression call,
+                                              String methodInvoked,
+                                              String methodTargetClass) {
+        PsiReferenceExpression methodExpr = call.getMethodExpression();
+        String methodName = methodExpr.getReferenceName();
+        
+        if (!methodInvoked.equals(methodName)) {
+            return false;
+        }
+        
+        PsiMethod target = call.resolveMethod();
+        if (target == null) {
+            return false;
+        }
+        
+        PsiClass containingClass = target.getContainingClass();
+        if (containingClass == null) {
+            return false;
+        }
+        
+        String fqn = containingClass.getQualifiedName();
+        return methodTargetClass.equals(fqn);
     }
 }

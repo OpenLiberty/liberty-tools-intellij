@@ -60,8 +60,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			}
      }
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
-		List<PsiMethod> createProceedInvocationDeclarations = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
-		for(PsiMethod invokeMethod: createProceedInvocationDeclarations){
+		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
+		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
 			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
@@ -70,18 +70,24 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
     }
 
 	/**
+	 * Checks if an interceptor method is missing the required proceed() invocation.
 	 *
-	 * @param m
-	 * @param unit
-	 * @return
+	 * This method verifies that interceptor methods (annotated with @AroundInvoke,
+	 * @AroundConstruct, @PostConstruct, @PreDestroy, or @AroundTimeout) properly
+	 * invoke the proceed() method on the InvocationContext parameter.
+	 *
+	 * @param method the method to check for proceed invocation
+	 * @param unit the Java file containing the method
+	 * @return true if the method is an interceptor method missing proceed() invocation, false otherwise
 	 */
-	private boolean missingInterceptorMethodProceedInvocation(PsiMethod m, PsiJavaFile unit) {
-		if(isInterceptorTypeReferenced(m.getContainingClass(), unit)) {
-			PsiAnnotation[] annotations = m.getModifierList().getAnnotations();
+	private boolean missingInterceptorMethodProceedInvocation(PsiMethod method, PsiJavaFile unit) {
+		if(isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+			PsiAnnotation[] annotations = method.getModifierList().getAnnotations();
 			for (PsiAnnotation ann : annotations) {
-				boolean isInterceptorMethod = Constants.INTERCEPTOR_METHODS.stream().anyMatch(annotation -> isMatchedJavaElement(m.getContainingClass(), ann.getQualifiedName(), annotation));
+				boolean isInterceptorMethod = Constants.INTERCEPTOR_METHODS.stream().anyMatch(annotation -> isMatchedJavaElement(method.getContainingClass(), ann.getQualifiedName(), annotation));
 				if (isInterceptorMethod) {
-					return !checkMethodInvokedExists(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
+					// Check if the interceptor method invokes proceed() on InvocationContext
+					return !checkMethodInvokedExists(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
 				}
 			}
 		}
