@@ -183,6 +183,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
+                List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -190,12 +191,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
+                    // Track parameters with @Observes or @ObservesAsync annotations
+                    if (!observesObservesAsync.isEmpty()) {
+                        paramsWithObserverAnnotations.add(param);
+                    }
                 }
                 if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
                 }
-
                 // Check for conditional observer methods on @Dependent scoped beans
                 // Beans with scope @Dependent may not have conditional observer methods.
                 // If a bean with scope @Dependent has an observer method declared notifyObserver=IF_EXISTS,
@@ -206,6 +210,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
                                 DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
                     }
+                }
+                // Generate diagnostic for multiple observer parameters
+                // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
+                if (paramsWithObserverAnnotations.size() > 1) {
+                    String paramNames = paramsWithObserverAnnotations.stream()
+                            .map(PsiParameter::getName)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
+                                        DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 }
             }
 
@@ -252,6 +265,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
+                validateSingletonSessionBean(unit, diagnostics, type, managedBeanAnnotations);
                 boolean isStateless = !getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                                 .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
                         new String[]{STATELESS_FQ_NAME}).isEmpty();
@@ -350,6 +364,34 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         }
     }
 
+    /**
+     * validateSingletonSessionBean
+     * Singleton session bean scope validation
+     * A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.
+     * If a singleton bean declares any other scope, the container must treat it as a definition error.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param type
+     * @param managedBeanAnnotations
+     */
+    private void validateSingletonSessionBean(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, List<String> managedBeanAnnotations) {
+        boolean isSingletonSessionBean = Stream.of(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), SINGLETON_FQ_NAME));
+        if (isSingletonSessionBean) {
+            boolean hasInvalidSingletonScope = managedBeanAnnotations.stream()
+                    .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
+                            && !DEPENDENT_FQ_NAME.equals(annotation));
+            if (hasInvalidSingletonScope) {
+                diagnostics.add(createDiagnostic(type, unit,
+                        Messages.getMessage("SingletonSessionBeanInvalidScope"),
+                        DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
+                        new Gson().toJsonTree(managedBeanAnnotations),
+                        DiagnosticSeverity.Error));
+            }
+        }
+    }
+
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
                                     String diagnosticCode) {
         Set<String> paramScopesSet;
@@ -441,7 +483,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME });
         if (matched != null) {
             String notifyObserverValue = AnnotationUtils.getAnnotationMemberValue(annotation, "notifyObserver");
-            return notifyObserverValue != null && notifyObserverValue.contains("IF_EXISTS");
+            return notifyObserverValue != null && notifyObserverValue.endsWith("IF_EXISTS");
         }
         return false;
     }
@@ -455,13 +497,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * @return true if any parameter has a conditional observer annotation
      */
     private boolean hasConditionalObserverAnnotation(PsiClass type, PsiMethod method) {
-        for (PsiParameter param : method.getParameterList().getParameters()) {
-            for (PsiAnnotation annotation : param.getAnnotations()) {
-                if (isConditionalObserver(type, annotation)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return Stream.of(method.getParameterList().getParameters())
+                .flatMap(param -> Stream.of(param.getAnnotations()))
+                .anyMatch(annotation -> isConditionalObserver(type, annotation));
     }
 }

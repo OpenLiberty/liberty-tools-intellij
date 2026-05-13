@@ -53,12 +53,12 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
 
         // Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)
         Diagnostic d1 = d(12, 16, 30,
-                "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' has notifyObserver set to Reception.IF_EXISTS, which is not allowed on a @Dependent scoped bean.",
+                "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' sets notifyObserver to Reception.IF_EXISTS, which is not permitted for @Dependent scoped bean.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDependentScopeWithConditionalObserver");
 
         // Test case 2: @Dependent with conditional @ObservesAsync (should trigger diagnostic)
         Diagnostic d2 = d(21, 16, 30,
-                "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' has notifyObserver set to Reception.IF_EXISTS, which is not allowed on a @Dependent scoped bean.",
+                "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' sets notifyObserver to Reception.IF_EXISTS, which is not permitted for @Dependent scoped bean.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDependentScopeWithConditionalObserver");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
