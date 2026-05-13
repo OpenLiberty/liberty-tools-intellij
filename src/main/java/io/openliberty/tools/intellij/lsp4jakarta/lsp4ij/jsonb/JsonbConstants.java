@@ -27,7 +27,7 @@ public class JsonbConstants {
     public static final String DIAGNOSTIC_CODE_ANNOTATION_DUPLICATE_NAME = "DuplicatePropertyNamesOnJsonbFields";
     public static final String DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING = "InvalidJsonBNoArgsConstructorMissing";
     public static final String DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS = "InvalidJsonBNonStaticInnerClass";
-    public static final String DIAGNOSTIC_CODE_NON_PUBLIC_STATIC_NESTED_CLASS = "InvalidJsonBNonPublicStaticNestedClass";
+    public static final String DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS = "InvalidJsonBNonPublicProtectedStaticNestedClass";
 
     /* Annotation Constants */
     public static final String JSONB_PACKAGE = "jakarta.json.bind.annotation.";

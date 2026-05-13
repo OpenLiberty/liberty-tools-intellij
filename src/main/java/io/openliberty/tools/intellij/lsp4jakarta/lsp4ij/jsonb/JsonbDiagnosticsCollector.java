@@ -14,11 +14,9 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
-import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -27,7 +25,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JsonPropertyUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This class contains logic for Jsonb diagnostics:
@@ -179,7 +176,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 if (type.hasModifierProperty(PsiModifier.PRIVATE) ||
                     (!type.hasModifierProperty(PsiModifier.PUBLIC) && !type.hasModifierProperty(PsiModifier.PROTECTED))) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ErrorMessageJsonbNonPublicProtectedStaticNestedClass", type.getName()),
-                            JsonbConstants.DIAGNOSTIC_CODE_NON_PUBLIC_STATIC_NESTED_CLASS, null, DiagnosticSeverity.Error));
+                            JsonbConstants.DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS, null, DiagnosticSeverity.Error));
                 }
             }
             if (type.hasModifierProperty(PsiModifier.STATIC) && missingChildNoArgs)
