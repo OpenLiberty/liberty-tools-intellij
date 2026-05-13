@@ -2051,10 +2051,10 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "        public String getTitle() {\n            return title;\n        }\n\n" +
                 "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
 
-        TextEdit te1 = JakartaForJavaAssert.te(0, 0, 100, 1, newText1);
-        CodeAction insertNoArgProConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorParent, te1);
-        TextEdit te2 = JakartaForJavaAssert.te(0, 0, 100, 1, newText2);
-        CodeAction insertNoArgPubConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorParent, te2);
+        TextEdit addProtectedConstructorParentEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText1);
+        CodeAction insertNoArgProConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorParent, addProtectedConstructorParentEdit);
+        TextEdit addPublicConstructorParentEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText2);
+        CodeAction insertNoArgPubConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorParent, addPublicConstructorParentEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, insertNoArgProConstructorParent, insertNoArgPubConstructorParent);
 
         JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, missingPubOrProConstructorChild);
@@ -2122,10 +2122,10 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "        public String getTitle() {\n            return title;\n        }\n\n" +
                 "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
 
-        TextEdit te3 = JakartaForJavaAssert.te(0, 0, 100, 1, newText3);
-        CodeAction insertNoArgProConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorChild, te3);
-        TextEdit te4 = JakartaForJavaAssert.te(0, 0, 100, 1, newText4);
-        CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, te4);
+        TextEdit addProtectedConstructorChildEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText3);
+        CodeAction insertNoArgProConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorChild, addProtectedConstructorChildEdit);
+        TextEdit addPublicConstructorChildEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText4);
+        CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, addPublicConstructorChildEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
 }
