@@ -178,7 +178,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 // Flag if private OR if not public and not protected (i.e., package-private/default)
                 if (type.hasModifierProperty(PsiModifier.PRIVATE) ||
                     (!type.hasModifierProperty(PsiModifier.PUBLIC) && !type.hasModifierProperty(PsiModifier.PROTECTED))) {
-                    diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ErrorMessageJsonbNonPublicStaticNestedClass", type.getName()),
+                    diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ErrorMessageJsonbNonPublicProtectedStaticNestedClass", type.getName()),
                             JsonbConstants.DIAGNOSTIC_CODE_NON_PUBLIC_STATIC_NESTED_CLASS, null, DiagnosticSeverity.Error));
                 }
             }
