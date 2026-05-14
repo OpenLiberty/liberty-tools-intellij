@@ -22,12 +22,14 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
  */
 public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
+    private static final String RESOURCE_ANNOTATION = "jakarta.annotation.Resource";
+
     public RemoveResourceAnnotationAttributeQuickFix() {
-        super("jakarta.annotation.Resource","type");
+        super(new String[] { RESOURCE_ANNOTATION }, "type");
     }
 
     @Override
-    public String getLabel() {
+    protected String getLabel(String annotation, String[] attributes) {
         return Messages.getMessage("RemoveRedundantAttribute", "type", "@Resource");
     }
 
