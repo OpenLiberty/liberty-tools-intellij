@@ -13,6 +13,10 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import com.intellij.psi.PsiAnnotation;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
@@ -26,6 +30,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanCo
 /**
  * Removes the 'notifyObserver' attribute from @Observes and @ObservesAsync annotations
  * when they are conditional observers (notifyObserver=IF_EXISTS).
+ * Works on method parameters with these annotations.
  */
 public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
@@ -34,12 +39,25 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
     }
 
     @Override
-    public String getParticipantId() {
-        return RemoveNotifyObserverAttributeQuickFix.class.getName();
+    protected AnnotationInfo findAnnotationInfo(PsiElement node) {
+        // Search method parameters for @Observes/@ObservesAsync annotations
+        PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
+        if (method != null) {
+            for (PsiParameter param : method.getParameterList().getParameters()) {
+                for (PsiAnnotation annotation : param.getAnnotations()) {
+                    if (isTargetAnnotation(annotation)) {
+                        return new AnnotationInfo(annotation, param);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
-    @Override
-    protected boolean isTargetAnnotation(PsiAnnotation annotation) {
+    /**
+     * Checks if the annotation is @Observes or @ObservesAsync with notifyObserver=IF_EXISTS.
+     */
+    private boolean isTargetAnnotation(PsiAnnotation annotation) {
         String qualifiedName = annotation.getQualifiedName();
         if (qualifiedName == null || !Arrays.asList(getAnnotations()).contains(qualifiedName)) {
             return false;
@@ -58,6 +76,11 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
     @Override
     protected String getLabel(String annotation, String[] attributes) {
         return Messages.getMessage("RemoveNotifyObserverAttribute", JDTUtils.getSimpleName(annotation));
+    }
+
+    @Override
+    public String getParticipantId() {
+        return RemoveNotifyObserverAttributeQuickFix.class.getName();
     }
 }
 

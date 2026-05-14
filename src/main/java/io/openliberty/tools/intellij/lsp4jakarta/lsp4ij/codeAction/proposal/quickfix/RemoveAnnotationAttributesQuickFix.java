@@ -13,7 +13,6 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.ModifyAnnotationProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
@@ -27,164 +26,86 @@ import org.eclipse.lsp4j.Diagnostic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
- * Quickfix for removing annotations attributes
+ * Base class for removing annotation attributes.
+ * Subclasses must implement methods to find the target annotation and its binding.
  */
 public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeActionParticipant {
 
     private final String[] attributes;
-
     private final String[] annotations;
-
     private static final Logger LOGGER = Logger.getLogger(RemoveAnnotationAttributesQuickFix.class.getName());
 
+    public record AnnotationInfo(PsiAnnotation annotation, PsiModifierListOwner binding) {}
 
-    public RemoveAnnotationAttributesQuickFix(String[] annotations,
-                                              String... attributes) {
+    public RemoveAnnotationAttributesQuickFix(String[] annotations, String... attributes) {
         this.annotations = annotations;
         this.attributes = attributes;
     }
 
-    private record AnnotationInfo(PsiAnnotation annotation, PsiModifierListOwner binding) {
-    }
-
     @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        PsiElement node = context.getCoveredNode();
-        
-        // Try to find annotation in method parameters first (for @Observes/@ObservesAsync)
-        AnnotationInfo info = findAnnotationWithBinding(node);
-        
+        AnnotationInfo info = findAnnotationInfo(context.getCoveredNode());
         if (info != null) {
             String label = getLabel(info.annotation.getQualifiedName(), attributes);
             return List.of(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
         }
-        
-        // Fall back to direct annotation lookup (for @Resource on fields/variables)
-        PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
-        if (annotationNode != null && isTargetAnnotation(annotationNode)) {
-            String label = getLabel(annotationNode.getQualifiedName(), attributes);
-            return List.of(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
-        }
-        
         return List.of();
     }
 
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        final PsiElement node = context.getCoveredNode();
-        String label = toResolve.getTitle();
-        
-        // Try to find annotation in method parameters first (for @Observes/@ObservesAsync)
-        AnnotationInfo info = findAnnotationWithBinding(node);
+        AnnotationInfo info = findAnnotationInfo(context.getCoveredNode());
         
         if (info != null) {
-            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
-                    context.getASTRoot(), info.binding, info.annotation, 0, null, new ArrayList<>(), Arrays.asList(attributes));
-            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action " + label);
-            return toResolve;
-        }
-        
-        // Fall back to direct annotation lookup (for @Resource on fields/variables)
-        PsiModifierListOwner binding = getBinding(node);
-        PsiAnnotation annotationNode = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
-        
-        if (binding != null && annotationNode != null) {
-            // For single annotation mode, use the annotation name; for multiple, use null
+            String label = toResolve.getTitle();
             String targetAnnotation = annotations.length == 1 ? annotations[0] : null;
-            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(label, context.getSource().getCompilationUnit(),
-                    context.getASTRoot(), binding, annotationNode, 0, targetAnnotation, new ArrayList<>(), Arrays.asList(attributes));
-            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to create workspace edit for code action " + label);
+            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(
+                label, 
+                context.getSource().getCompilationUnit(),
+                context.getASTRoot(), 
+                info.binding, 
+                info.annotation, 
+                0, 
+                targetAnnotation, 
+                new ArrayList<>(), 
+                Arrays.asList(attributes)
+            );
+            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, 
+                "Unable to create workspace edit for code action " + label);
         }
         
         return toResolve;
     }
 
     /**
-     * Finds the target annotation with its binding.
-     * Searches in method parameters for annotations matching the criteria.
-     * Used primarily for @Observes/@ObservesAsync annotations on method parameters.
-     *
+     * Finds the target annotation and its binding.
+     * Subclasses must implement this to locate the annotation based on their specific requirements.
+     * 
      * @param node the PSI element to start searching from
      * @return AnnotationInfo containing the annotation and its binding, or null if not found
      */
-    private AnnotationInfo findAnnotationWithBinding(PsiElement node) {
-        PsiMethod method = PsiTreeUtil.getParentOfType(node, PsiMethod.class);
-        if (method != null) {
-            for (PsiParameter param : method.getParameterList().getParameters()) {
-                for (PsiAnnotation annotation : param.getAnnotations()) {
-                    if (isTargetAnnotation(annotation)) {
-                        return new AnnotationInfo(annotation, param);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the nearest PsiModifierListOwner parent of the given node.
-     * Searches in priority order: PsiVariable, PsiMethod, then PsiClass.
-     * Used primarily for @Resource annotations on fields/variables.
-     *
-     * @param node the PSI element to start searching from
-     * @return the nearest PsiModifierListOwner parent, or null if none found
-     */
-    protected static PsiModifierListOwner getBinding(PsiElement node) {
-        return Stream.<Class<? extends PsiModifierListOwner>>of(
-                PsiVariable.class,
-                PsiMethod.class,
-                PsiClass.class
-        )
-                .map(clazz -> PsiTreeUtil.getParentOfType(node, clazz))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Checks if the annotation is a target annotation that should have its attributes removed.
-     * Default implementation checks if the annotation's qualified name matches any of the configured annotations.
-     * Subclasses can override this to add additional filtering logic.
-     *
-     * @param annotation the annotation to check
-     * @return true if it's a target annotation
-     */
-    protected boolean isTargetAnnotation(PsiAnnotation annotation) {
-        String qualifiedName = annotation.getQualifiedName();
-        return qualifiedName != null && Arrays.asList(annotations).contains(qualifiedName);
-    }
+    protected abstract AnnotationInfo findAnnotationInfo(PsiElement node);
 
     /**
      * Returns the label for the code action.
-     *
-     * @param annotation The fully qualified annotation name
-     * @param attributes The attributes to remove
-     * @return The label for the code action
+     * 
+     * @param annotation the fully qualified annotation name
+     * @param attributes the attributes to remove
+     * @return the label text
      */
     protected abstract String getLabel(String annotation, String[] attributes);
 
-    /**
-     * Gets the annotations array.
-     *
-     * @return the annotations array
-     */
     protected String[] getAnnotations() {
         return annotations;
     }
 
-    /**
-     * Gets the attributes array.
-     *
-     * @return the attributes array
-     */
     protected String[] getAttributes() {
         return attributes;
     }
-
 }
+
+// Made with Bob
