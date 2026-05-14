@@ -289,11 +289,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
             return true;
         }
 
-        // Check if the type uses @Interceptors annotation (class-level or method-level)
-        if (hasInterceptorsAnnotation(type, methods)) {
-            return true;
-        }
-
         return false;
     }
 
@@ -314,28 +309,6 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                     String annotationName = annotation.getQualifiedName();
                     return getMatchedJavaElementName(type, annotationName, interceptorReferences) != null;
                 });
-    }
-
-    /**
-     * Checks if the type or its methods use @Interceptors annotation.
-     * The @Interceptors annotation is used to bind interceptors to a class or method.
-     *
-     * @param type    the type to check
-     * @param methods the methods array (pre-fetched to avoid redundant calls)
-     * @return true if @Interceptors annotation is found
-     */
-    private static boolean hasInterceptorsAnnotation(PsiClass type, PsiMethod[] methods) {
-
-        // Check class-level @Interceptors annotation
-        if (Arrays.stream(type.getAnnotations())
-                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTORS_FQ_NAME))) {
-            return true;
-        }
-
-        // Check method-level @Interceptors annotation
-        return Arrays.stream(methods)
-                .flatMap(method -> Arrays.stream(method.getAnnotations()))
-                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTORS_FQ_NAME));
     }
 
     /**
