@@ -166,21 +166,6 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         // We do not do anything if the found unit is null
     }
 
-    /**
-     * Checks if the given annotations contain a @Version annotation.
-     *
-     * @param type        the class context for annotation matching
-     * @param annotations array of annotations to check
-     * @return true if @Version annotation is found, false otherwise
-     */
-    private boolean hasVersionAnnotation(PsiClass type, PsiAnnotation[] annotations) {
-        for (PsiAnnotation annotation : annotations) {
-            if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.VERSION)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Validates @Version annotation usage in entity classes.
@@ -195,92 +180,84 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     private void validateVersionAnnotation(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
         // Collect all @Version annotated fields and methods in the current class
         List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
-        
+
         // Check fields
         for (PsiField field : type.getFields()) {
-            if (hasVersionAnnotation(type, field.getAnnotations())) {
+            if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
                 versionAnnotatedElements.add(field);
             }
         }
-        
+
         // Check methods (getters)
         for (PsiMethod method : type.getMethods()) {
-            if (hasVersionAnnotation(type, method.getAnnotations())) {
+            if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                 versionAnnotatedElements.add(method);
             }
         }
-        
+
         // Check for duplicate @Version annotations within the same class
         if (versionAnnotatedElements.size() > 1) {
-            for (PsiJvmModifiersOwner element : versionAnnotatedElements) {
-                diagnostics.add(createDiagnostic(element, unit,
-                        Messages.getMessage("DuplicateVersionAnnotation"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_DUPLICATE_VERSION, null,
-                        DiagnosticSeverity.Error));
-            }
+            createVersionAnnotationDiagnostics(unit, versionAnnotatedElements, diagnostics, "DuplicateVersionAnnotation",
+                    PersistenceConstants.DIAGNOSTIC_CODE_DUPLICATE_VERSION);
         }
-        
+
         // Check for @Version annotations in the inheritance hierarchy
-        if (!versionAnnotatedElements.isEmpty()) {
-            // Get all superclasses recursively
-            Set<PsiClass> hierarchy = new LinkedHashSet<>(PsiClassImplUtil.getAllSuperClassesRecursively(type));
-            
-            // Check if any superclass has @Version annotation
-            boolean versionInParent = false;
-            for (PsiClass superClass : hierarchy) {
-                // Skip Object class or same class
-                if (superClass.getQualifiedName() != null &&
-                    superClass.getQualifiedName().equals("java.lang.Object") || type.equals(superClass)) {
-                    continue;
-                }
-                
-                // Check if superclass is an entity
-                if (!hasVersionAnnotation(superClass, superClass.getAnnotations())) {
-                    // Check if it's an entity class
-                    boolean isSuperEntity = false;
-                    for (PsiAnnotation annotation : superClass.getAnnotations()) {
-                        if (isMatchedJavaElement(superClass, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
-                            isSuperEntity = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!isSuperEntity) {
-                        continue;
-                    }
-                }
-                
-                // Check for @Version in superclass fields
-                for (PsiField field : superClass.getFields()) {
-                    if (hasVersionAnnotation(superClass, field.getAnnotations())) {
-                        versionInParent = true;
-                        break;
-                    }
-                }
-                
-                // Check for @Version in superclass methods
-                if (!versionInParent) {
-                    for (PsiMethod method : superClass.getMethods()) {
-                        if (hasVersionAnnotation(superClass, method.getAnnotations())) {
-                            versionInParent = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (versionInParent) break;
+        if (!versionAnnotatedElements.isEmpty() && hasVersionInParentEntity(type)) {
+            createVersionAnnotationDiagnostics(unit, versionAnnotatedElements, diagnostics, "VersionAnnotationInHierarchy",
+                    PersistenceConstants.DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY);
+
+        }
+    }
+
+    private void createVersionAnnotationDiagnostics(PsiJavaFile unit, List<PsiJvmModifiersOwner> versionAnnotatedElements,
+                                                    List<Diagnostic> diagnostics, String messageKey, String errorCode) {
+
+        for (PsiJvmModifiersOwner element : versionAnnotatedElements) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage(messageKey),
+                    errorCode, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Check @Version annotation exist in super classes
+     *
+     * @param type
+     * @return
+     */
+    private boolean hasVersionInParentEntity(PsiClass type) {
+        // Get all superclasses recursively
+        Set<PsiClass> hierarchy = new LinkedHashSet<>(PsiClassImplUtil.getAllSuperClassesRecursively(type));
+        boolean versionInParent = false;
+        for (PsiClass superClass : hierarchy) {
+            // Skip Object class or same class
+            if (superClass.getQualifiedName() != null &&
+                    superClass.getQualifiedName().equals(PersistenceConstants.OBJECT) || type.equals(superClass)) {
+                continue;
             }
-            
-            // If @Version found in parent, report diagnostic on current class's @Version annotations
-            if (versionInParent) {
-                for (PsiJvmModifiersOwner element : versionAnnotatedElements) {
-                    diagnostics.add(createDiagnostic(element, unit,
-                            Messages.getMessage("VersionAnnotationInHierarchy"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY, null,
-                            DiagnosticSeverity.Error));
+
+            // Check if it's an entity class
+            boolean isSuperEntity = isMatchedAnnotation(superClass.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS);
+            if (!isSuperEntity) {
+                continue;
+            }
+
+
+            // Check for @Version in superclass fields
+            for (PsiField field : superClass.getFields()) {
+                if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
+                    return true;
+                }
+            }
+            // Check for @Version in superclass methods
+            for (PsiMethod method : superClass.getMethods()) {
+                if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /**

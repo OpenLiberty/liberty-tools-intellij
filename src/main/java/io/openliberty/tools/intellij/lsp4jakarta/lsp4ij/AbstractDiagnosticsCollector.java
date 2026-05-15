@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -129,6 +130,11 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     protected static boolean isMatchedAnnotation(PsiAnnotation annotation, String annotationFQName) {
         String elementName = annotation.getQualifiedName();
         return annotationFQName.equals(elementName);
+    }
+
+    protected static boolean isMatchedAnnotation(PsiAnnotation[] annotations, String annotationFQName) {
+        return Arrays.stream(annotations)
+                .anyMatch(annotation -> isMatchedAnnotation(annotation, annotationFQName));
     }
 
     /**

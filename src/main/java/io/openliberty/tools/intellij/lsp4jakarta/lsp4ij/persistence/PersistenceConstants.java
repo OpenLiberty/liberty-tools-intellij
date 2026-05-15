@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 public class PersistenceConstants {
     /* Annotation Constants */
+    public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";

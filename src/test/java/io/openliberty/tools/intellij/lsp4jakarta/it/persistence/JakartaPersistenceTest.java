@@ -538,11 +538,11 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for duplicate @Version annotations on fields
-        Diagnostic d1 = d(9, 16, 24,
+        Diagnostic d1 = d(13, 16, 24,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        Diagnostic d2 = d(12, 16, 24,
+        Diagnostic d2 = d(16, 16, 24,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
@@ -562,11 +562,11 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for duplicate @Version annotations on methods
-        Diagnostic d1 = d(15, 16, 27,
+        Diagnostic d1 = d(18, 15, 26,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        Diagnostic d2 = d(20, 16, 27,
+        Diagnostic d2 = d(23, 15, 26,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
