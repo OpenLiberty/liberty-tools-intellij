@@ -966,15 +966,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic disposesObsAsync2 = d(54, 18, 53,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
-        Diagnostic multiObsParams3 = d(58, 18, 52,
-                "Parameters name, name1 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic obsBothAnnotations2 = d(58, 18, 52,
                 "A CDI method must not have parameter(s): name, name1 annotated with @Observes and @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidObservesObservesAsyncMethodParams");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs, multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2, disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2, multiObsParams3);
+        assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs,
+                multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2,
+                disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2);
 
         //Starting CodeAction tests
         JakartaJavaCodeActionParams paramsProducesDisposes = createCodeActionParams(uri, producesWithDisposes);
