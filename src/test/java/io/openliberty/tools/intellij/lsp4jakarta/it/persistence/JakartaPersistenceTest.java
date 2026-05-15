@@ -538,15 +538,15 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for duplicate @Version annotations on fields
-        Diagnostic d1 = d(13, 16, 24,
+        Diagnostic duplicateVersionD1 = d(13, 16, 24,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        Diagnostic d2 = d(16, 16, 24,
+        Diagnostic duplicateVersiond2 = d(16, 16, 24,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, duplicateVersionD1, duplicateVersiond2);
     }
 
     @Test
@@ -562,15 +562,15 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for duplicate @Version annotations on methods
-        Diagnostic d1 = d(18, 15, 26,
+        Diagnostic duplicateVersionInMethodD1 = d(18, 15, 26,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        Diagnostic d2 = d(23, 15, 26,
+        Diagnostic duplicateVersionInMethodD2 = d(23, 15, 26,
                 "Multiple fields or properties are annotated with @Version. Only one @Version annotation is allowed per entity class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MultipleVersionAnnotations");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, duplicateVersionInMethodD1, duplicateVersionInMethodD2);
     }
 
     @Test
@@ -586,10 +586,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for @Version annotation in both parent and child entity
-        Diagnostic d1 = d(9, 16, 28,
+        Diagnostic versionInHierarchyD1 = d(9, 16, 28,
                 "A @Version annotation is already present in the entity hierarchy. Only one @Version annotation is allowed across the entire entity inheritance hierarchy.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "VersionAnnotationInHierarchy");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        assertJavaDiagnostics(diagnosticsParams, utils, versionInHierarchyD1);
     }
 }
