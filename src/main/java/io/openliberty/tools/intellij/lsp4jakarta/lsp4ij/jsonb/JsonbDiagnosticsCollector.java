@@ -170,11 +170,10 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbInnerNonStatic", type.getName()),
                         JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Warning));
             }
-            // Check for private or package-private static nested classes (spec requires public or protected)
+            // Check if static nested class is not public or protected (spec requires public or protected)
             if (type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
-                // Flag if private OR if not public and not protected (i.e., package-private/default)
-                if (type.hasModifierProperty(PsiModifier.PRIVATE) ||
-                    (!type.hasModifierProperty(PsiModifier.PUBLIC) && !type.hasModifierProperty(PsiModifier.PROTECTED))) {
+                // Flag if not public and not protected (covers private and package-private/default)
+                if (!type.hasModifierProperty(PsiModifier.PUBLIC) && !type.hasModifierProperty(PsiModifier.PROTECTED)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ErrorMessageJsonbNonPublicProtectedStaticNestedClass", type.getName()),
                             JsonbConstants.DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS, null, DiagnosticSeverity.Error));
                 }
