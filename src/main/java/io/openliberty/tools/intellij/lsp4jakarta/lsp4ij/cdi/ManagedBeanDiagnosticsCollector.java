@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -47,7 +48,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         PsiClass[] types = unit.getClasses();
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : types) {
-            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(type.getAnnotations())
+            PsiAnnotation[] typeAnnotations = type.getAnnotations();
+            List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
@@ -181,6 +183,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // see: https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
+                List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -188,10 +191,34 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (observesObservesAsync.equals(INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS)) {
                         conflictParams.add(param.getName());
                     }
+                    // Track parameters with @Observes or @ObservesAsync annotations
+                    if (!observesObservesAsync.isEmpty()) {
+                        paramsWithObserverAnnotations.add(param);
+                    }
                 }
                 if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
+                }
+                // Check for conditional observer methods on @Dependent scoped beans
+                // Beans with scope @Dependent may not have conditional observer methods.
+                // If a bean with scope @Dependent has an observer method declared notifyObserver=IF_EXISTS,
+                // the container automatically detects the problem and treats it as a definition error.
+                if (isDependent) {
+                    if (hasConditionalObserverAnnotation(type, method)) {
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
+                                DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
+                    }
+                }
+                // Generate diagnostic for multiple observer parameters
+                // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
+                if (paramsWithObserverAnnotations.size() > 1) {
+                    String paramNames = paramsWithObserverAnnotations.stream()
+                            .map(PsiParameter::getName)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
+                                        DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 }
             }
 
@@ -238,6 +265,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
             if (isManagedBean) {
+                validateSingletonSessionBean(unit, diagnostics, type, managedBeanAnnotations);
+                boolean isStateless = !getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
+                                .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                        new String[]{STATELESS_FQ_NAME}).isEmpty();
                 boolean isClassGeneric = type.getTypeParameters().length != 0;
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
@@ -245,6 +276,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 } else if (nonStaticPublicFieldPresent) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanWithNonStaticPublicField"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
+                } else if (isStateless && (!isDependent || hasMultipleScopes)) {
+                    /**
+                     * A stateless session bean must belong to the @Dependent scope.
+                     * If a session bean specifies an illegal scope, the container automatically detects
+                     * the problem and treats it as a definition error.
+                     *
+                     * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
+                     */
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
+                            DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
@@ -318,6 +360,34 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DiagnosticSeverity.Error));
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * validateSingletonSessionBean
+     * Singleton session bean scope validation
+     * A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.
+     * If a singleton bean declares any other scope, the container must treat it as a definition error.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param type
+     * @param managedBeanAnnotations
+     */
+    private void validateSingletonSessionBean(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, List<String> managedBeanAnnotations) {
+        boolean isSingletonSessionBean = Stream.of(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), SINGLETON_FQ_NAME));
+        if (isSingletonSessionBean) {
+            boolean hasInvalidSingletonScope = managedBeanAnnotations.stream()
+                    .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
+                            && !DEPENDENT_FQ_NAME.equals(annotation));
+            if (hasInvalidSingletonScope) {
+                diagnostics.add(createDiagnostic(type, unit,
+                        Messages.getMessage("SingletonSessionBeanInvalidScope"),
+                        DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
+                        new Gson().toJsonTree(managedBeanAnnotations),
+                        DiagnosticSeverity.Error));
             }
         }
     }
@@ -398,5 +468,37 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                                  PsiField field) {
         return isManagedBean && field.hasModifierProperty(PsiModifier.PUBLIC) && !field.hasModifierProperty(PsiModifier.STATIC)
                 && (!isDependent || hasMultipleScopes);
+    }
+
+    /**
+     * isConditionalObserver
+     * Checks if the annotation is a conditional observer (notifyObserver=IF_EXISTS).
+     *
+     * @param type the type
+     * @param annotation the annotation to check
+     * @return true if the annotation is @Observes or @ObservesAsync with notifyObserver=IF_EXISTS
+     */
+    private boolean isConditionalObserver(PsiClass type, PsiAnnotation annotation) {
+        String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME });
+        if (matched != null) {
+            String notifyObserverValue = AnnotationUtils.getAnnotationMemberValue(annotation, "notifyObserver");
+            return notifyObserverValue != null && notifyObserverValue.endsWith("IF_EXISTS");
+        }
+        return false;
+    }
+
+    /**
+     * hasConditionalObserverAnnotation
+     * Checks if any parameter in the method has a conditional observer annotation.
+     *
+     * @param type the type
+     * @param method the method to check
+     * @return true if any parameter has a conditional observer annotation
+     */
+    private boolean hasConditionalObserverAnnotation(PsiClass type, PsiMethod method) {
+        return Stream.of(method.getParameterList().getParameters())
+                .flatMap(param -> Stream.of(param.getAnnotations()))
+                .anyMatch(annotation -> isConditionalObserver(type, annotation));
     }
 }

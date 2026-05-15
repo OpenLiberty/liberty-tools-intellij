@@ -154,6 +154,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.SecurityDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket.WebSocketDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
@@ -296,6 +299,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#PreDestroyException"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveCheckedExceptionsInThrowsQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#ResourceTypeMismatch"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveResourceAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#ResourceTypeMismatch"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveResourceAnnotationAttributeQuickFix"/>
 
         <!-- Bean Validation -->
         <javaCodeActionParticipant kind="quickfix"
@@ -483,6 +494,14 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ScopeDeclarationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveStatelessAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidInjectAnnotationOnMultipleMethodParams"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
@@ -505,6 +524,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveSingletonAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
 
 
 
