@@ -412,10 +412,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "\t\n" +
                 "\t\n" +
                 "}\n";
-        TextEdit te1 = te(0, 0, 23, 0, newText);
-        CodeAction ca1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", d1, te1);
+        TextEdit idDateMissingTemporalTE1 = te(0, 0, 23, 0, newText);
+        CodeAction idDateMissingTemporalCA1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", d1, idDateMissingTemporalTE1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, idDateMissingTemporalCA1);
     }
 
     @Test
@@ -458,10 +458,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "\t\n" +
                 "\t\n" +
                 "}\n";
-        TextEdit te1 = te(0, 0, 23, 0, newText);
-        CodeAction ca1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", d1, te1);
+        TextEdit propertyIdDateMissingTemporalTE1 = te(0, 0, 23, 0, newText);
+        CodeAction propertyIdDateMissingTemporalCA1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", d1, propertyIdDateMissingTemporalTE1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, propertyIdDateMissingTemporalCA1);
     }
 
     @Test
@@ -502,8 +502,8 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "\t\tthis.pk = pk;\n" +
                 "\t}\n" +
                 "}\n";
-        TextEdit te1 = te(0, 0, 24, 0, newText);
-        CodeAction ca1 = ca(uri, "Change @Temporal value to TemporalType.DATE", d1, te1);
+        TextEdit idDateInvalidTemporalTypeTE1 = te(0, 0, 24, 0, newText);
+        CodeAction idDateInvalidTemporalTypeCA1 = ca(uri, "Change @Temporal value to TemporalType.DATE", d1, te1);
 
         assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
