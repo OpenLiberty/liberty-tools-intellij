@@ -188,7 +188,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
 
-        // Check methods (getters)
+        // Check methods
         for (PsiMethod method : type.getMethods()) {
             if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                 versionAnnotatedElements.add(method);
@@ -209,6 +209,15 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         }
     }
 
+    /**
+     * Create diagnostics for @Version annotation validation
+     *
+     * @param unit
+     * @param versionAnnotatedElements
+     * @param diagnostics
+     * @param messageKey
+     * @param errorCode
+     */
     private void createVersionAnnotationDiagnostics(PsiJavaFile unit, List<PsiJvmModifiersOwner> versionAnnotatedElements,
                                                     List<Diagnostic> diagnostics, String messageKey, String errorCode) {
 
