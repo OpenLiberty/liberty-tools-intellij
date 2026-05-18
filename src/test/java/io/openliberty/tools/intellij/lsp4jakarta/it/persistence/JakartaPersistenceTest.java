@@ -503,9 +503,9 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "\t}\n" +
                 "}\n";
         TextEdit idDateInvalidTemporalTypeTE1 = te(0, 0, 24, 0, newText);
-        CodeAction idDateInvalidTemporalTypeCA1 = ca(uri, "Change @Temporal value to TemporalType.DATE", d1, te1);
+        CodeAction idDateInvalidTemporalTypeCA1 = ca(uri, "Change @Temporal value to TemporalType.DATE", d1, idDateInvalidTemporalTypeTE1);
 
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, idDateInvalidTemporalTypeCA1);
     }
 
     @Test

@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.psi.*;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
             for (String newAttr : this.attributesToAdd) {
                 // don't add duplicate attributes to an annotation
                 if (Arrays.stream(values).noneMatch(v -> v.getName().equals(newAttr))) {
-                    annotation.setDeclaredAttributeValue(newAttr, ModifyAnnotationAttributes.createAnnotationAttributeDefault(annotation, newAttr));
+                    annotation.setDeclaredAttributeValue(newAttr, AnnotationValueExpressionUtil.createAnnotationAttributeDefault(annotation, newAttr));
                 }
             }
             // remove attributes
