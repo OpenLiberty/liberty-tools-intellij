@@ -171,6 +171,13 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 }
+                case VALID -> {
+                    if (!isCascadableType(type)) {
+                        String source = getSource(isMethod, isField, annotationName, "InvalidValidAnnotation");
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                source, DIAGNOSTIC_CODE_INVALID_VALID_ANNOTATION, annotationName, DiagnosticSeverity.Error));
+                    }
+                }
                 default -> LOGGER.log(Level.SEVERE, "Unexpected value for annotation");
             }
         }
@@ -211,6 +218,74 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         return resolvedClass != null && (inheritsFrom(resolvedClass, CHAR_SEQUENCE)
                 || inheritsFrom(resolvedClass, COLLECTION_FQ)
                 || inheritsFrom(resolvedClass, MAP_FQ));
+    }
+
+    /**
+     * isCascadableType
+     * This method checks whether a type is cascadable for @Valid annotation.
+     * Non-cascadable types include: primitives, boxed types, String, and other simple types.
+     * Cascadable types include: complex objects, collections, arrays, and maps.
+     *
+     * @param type the type to check
+     * @return true if the type is cascadable, false otherwise
+     */
+    public static boolean isCascadableType(PsiType type) {
+        // Primitive types are not cascadable
+        if (type instanceof PsiPrimitiveType) {
+            return false;
+        }
+
+        // Arrays are cascadable
+        if (type instanceof PsiArrayType) {
+            return true;
+        }
+
+        // Get the canonical text for comparison
+        String canonicalText = type.getCanonicalText();
+
+        // Boxed primitive types are not cascadable
+        if (canonicalText.equals("java.lang.Boolean") ||
+            canonicalText.equals("java.lang.Byte") ||
+            canonicalText.equals("java.lang.Character") ||
+            canonicalText.equals("java.lang.Short") ||
+            canonicalText.equals("java.lang.Integer") ||
+            canonicalText.equals("java.lang.Long") ||
+            canonicalText.equals("java.lang.Float") ||
+            canonicalText.equals("java.lang.Double")) {
+            return false;
+        }
+
+        // String and CharSequence are not cascadable
+        if (canonicalText.equals(STRING) || canonicalText.equals(CHAR_SEQUENCE)) {
+            return false;
+        }
+
+        // BigDecimal and BigInteger are not cascadable
+        if (canonicalText.equals(BIG_DECIMAL) || canonicalText.equals(BIG_INTEGER)) {
+            return false;
+        }
+
+        // Date/time types are not cascadable
+        if (canonicalText.equals(DATE) || canonicalText.equals(CALENDAR) ||
+            canonicalText.equals(INSTANT) || canonicalText.equals(LOCAL_DATE) ||
+            canonicalText.equals(LOCAL_DATE_TIME) || canonicalText.equals(LOCAL_TIME) ||
+            canonicalText.equals(MONTH_DAY) || canonicalText.equals(OFFSET_DATE_TIME) ||
+            canonicalText.equals(OFFSET_TIME) || canonicalText.equals(YEAR) ||
+            canonicalText.equals(YEAR_MONTH) || canonicalText.equals(ZONED_DATE_TIME) ||
+            canonicalText.equals(HIJRAH_DATE) || canonicalText.equals(JAPANESE_DATE) ||
+            canonicalText.equals(MINGUO_DATE) || canonicalText.equals(THAI_BUDDHIST_DATE)) {
+            return false;
+        }
+
+        // Collections and Maps are cascadable
+        PsiClass resolvedClass = PsiUtil.resolveClassInClassTypeOnly(type);
+        if (resolvedClass != null && (inheritsFrom(resolvedClass, COLLECTION_FQ) ||
+                                      inheritsFrom(resolvedClass, MAP_FQ))) {
+            return true;
+        }
+
+        // All other complex types (custom classes, etc.) are cascadable
+        return true;
     }
 
     private void checkStringOnly(PsiElement element, List<Diagnostic> diagnostics, String annotationName,

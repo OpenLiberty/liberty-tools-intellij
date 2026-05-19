@@ -820,4 +820,65 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, minMaxField, decimalMinMaxField, sizeField, minMaxMethod, minMaxMethodParam);
     }
+
+    @Test
+    public void testValidAnnotationOnNonCascadableTypes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/beanvalidation/ValidAnnotationTest.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for @Valid on non-cascadable types
+        // These should all produce errors
+        Diagnostic primitiveIntField = d(17, 16, 28,
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic boxedIntegerField = d(21, 20, 32,
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic stringField = d(25, 19, 30,
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic boxedDoubleField = d(29, 19, 30,
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic bigDecimalField = d(33, 23, 38,
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic primitiveReturnMethod = d(57, 19, 36,
+                "The @Valid annotation cannot be used on methods returning non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        Diagnostic primitiveParameter = d(72, 52, 57,
+                "The @Valid annotation cannot be used on parameters with non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                DiagnosticSeverity.Error, "jakarta-bean-validation",
+                "InvalidValidAnnotationOnNonCascadableType",
+                "jakarta.validation.Valid");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, primitiveIntField, boxedIntegerField, stringField,
+                              boxedDoubleField, bigDecimalField, primitiveReturnMethod, primitiveParameter);
+    }
+
 }
