@@ -14,7 +14,7 @@ public class InterceptorWithObserverMethod {
     
     // This method should also trigger a diagnostic - interceptor with @ObservesAsync
     public void asyncObserverMethod(@ObservesAsync String event) {
-        System.out.println("Async observer method called with: " + event);
+
     }
     
     // This method should not trigger a diagnostic - no observer annotations
@@ -22,5 +22,3 @@ public class InterceptorWithObserverMethod {
         System.out.println("Normal method called with: " + param);
     }
 }
-
-// Made with Bob
