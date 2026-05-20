@@ -384,14 +384,14 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = d(11, 14, 16,
+        Diagnostic idDateMissingTemporalD1 = d(11, 14, 16,
                 "A field or property marked with @Id and of type java.util.Date must explicitly specify @Temporal(TemporalType.DATE).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MissingTemporalAnnotation");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        assertJavaDiagnostics(diagnosticsParams, utils, idDateMissingTemporalD1);
 
         // test quick fix
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, idDateMissingTemporalD1);
         String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
                 "import java.util.Date;\n\n" +
                 "import jakarta.persistence.Entity;\n" +

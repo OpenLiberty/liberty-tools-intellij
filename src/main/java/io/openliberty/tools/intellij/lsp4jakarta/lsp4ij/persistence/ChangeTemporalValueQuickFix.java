@@ -46,7 +46,7 @@ public class ChangeTemporalValueQuickFix extends ModifyAnnotationAttributeValueQ
         // Create the TemporalType.DATE enum value
         PsiAnnotationMemberValue dateValue = AnnotationValueExpressionUtil.createEnumValueExpression(
                 annotation,
-                "jakarta.persistence.TemporalType",
+                PersistenceConstants.TEMPORAL_TYPE,
                 "DATE"
         );
         attributes.put("value", dateValue);

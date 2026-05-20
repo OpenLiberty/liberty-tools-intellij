@@ -46,8 +46,8 @@ public class AnnotationValueExpressionUtil {
         
         PsiAnnotationMemberValue value = factory.createExpressionFromText(enumReference, annotation);
         
-        // Add import if needed
-        addImportIfNeeded(annotation, enumClassName);
+        // Add any missing imports
+        addMissingImport(annotation, enumClassName);
         
         return value;
     }
@@ -82,7 +82,7 @@ public class AnnotationValueExpressionUtil {
      * @param annotation the annotation context
      * @param className the fully qualified class name to import
      */
-    private static void addImportIfNeeded(PsiAnnotation annotation, String className) {
+    private static void addMissingImport(PsiAnnotation annotation, String className) {
         PsiFile containingFile = annotation.getContainingFile();
         if (containingFile instanceof PsiJavaFile) {
             PsiJavaFile javaFile = (PsiJavaFile) containingFile;

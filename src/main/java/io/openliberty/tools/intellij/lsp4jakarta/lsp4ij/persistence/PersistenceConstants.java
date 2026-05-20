@@ -23,6 +23,7 @@ public class PersistenceConstants {
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
+    public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
 
     /* Annotation Fields */
     public static final String NAME = "name";
