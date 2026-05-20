@@ -67,9 +67,15 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     boolean hasArgConstructor = false;
                     boolean isEntityClassFinal = false;
                     boolean hasPrimaryKey = false;
+                    List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
 
                     // Get the Methods of the annotated Class
                     for (PsiMethod method : type.getMethods()) {
+                        // find @Version annotation usage on methods
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
+                            versionAnnotatedElements.add(method);
+                        }
+
                         if (isConstructorMethod(method)) {
                             // We have found a method that is a constructor
                             if (method.getParameterList().getParametersCount() > 0) {
@@ -90,24 +96,27 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     DiagnosticSeverity.Error));
                         }
 
-
                         // Check if any method has @Id or @EmbeddedId annotation
                         if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, method.getAnnotations())) {
                             hasPrimaryKey = true;
                         }
 
-
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(method,type,diagnostics,unit);
-
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
                     for (PsiField field : type.getFields()) {
+                        // find @Version annotation usage on fields
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
+                            versionAnnotatedElements.add(field);
+                        }
+
                         // If a field is static, we do not care about it, we care about all other field
                         if (field.hasModifierProperty(PsiModifier.STATIC)) {
                             continue;
                         }
+
                         // If we find a non-static variable that is final, this is a problem
                         if (field.hasModifierProperty(PsiModifier.FINAL)) {
                             diagnostics.add(createDiagnostic(field, unit,
@@ -115,7 +124,6 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                     PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
                                     DiagnosticSeverity.Error));
                         }
-
 
                         // Check if any field has @Id or @EmbeddedId annotation
                         if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, field.getAnnotations())) {
@@ -152,7 +160,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     }
 
                     // Validate @Version annotation usage
-                    validateVersionAnnotation(type, unit, diagnostics);
+                    if(!versionAnnotatedElements.isEmpty()){
+                        validateVersionAnnotation(versionAnnotatedElements,type, unit, diagnostics);
+                    }
 
                     if (!hasPrimaryKey) {
                         diagnostics.add(createDiagnostic(type, unit,
@@ -173,27 +183,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * 1. Multiple @Version annotations within the same entity class
      * 2. @Version annotations in both parent and child entity classes
      *
+     * @param versionAnnotatedElements list of elements with @version annotation
      * @param type        the entity class to validate
      * @param unit        compilation unit of Java class
      * @param diagnostics list to add diagnostics to
      */
-    private void validateVersionAnnotation(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Collect all @Version annotated fields and methods in the current class
-        List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
-
-        // Check fields
-        for (PsiField field : type.getFields()) {
-            if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
-                versionAnnotatedElements.add(field);
-            }
-        }
-
-        // Check methods
-        for (PsiMethod method : type.getMethods()) {
-            if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
-                versionAnnotatedElements.add(method);
-            }
-        }
+    private void validateVersionAnnotation(List<PsiJvmModifiersOwner> versionAnnotatedElements,PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
 
         // Check for duplicate @Version annotations within the same class
         if (versionAnnotatedElements.size() > 1) {
