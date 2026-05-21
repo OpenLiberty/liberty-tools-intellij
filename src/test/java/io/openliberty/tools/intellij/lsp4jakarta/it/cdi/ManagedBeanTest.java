@@ -1504,16 +1504,16 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics for interceptor with observer methods
         // Diagnostic for method with @Observes parameter
-        Diagnostic d1 = d(10, 16, 30,
+        Diagnostic observesDiagnostic = d(10, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
         // Diagnostic for method with @ObservesAsync parameter
-        Diagnostic d2 = d(15, 16, 35,
+        Diagnostic observesAsyncDiagnostic = d(15, 16, 35,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
     }
 
     @Test
@@ -1530,15 +1530,15 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics for decorator with observer methods
         // Diagnostic for method with @Observes parameter
-        Diagnostic d1 = d(13, 16, 30,
+        Diagnostic observesDiagnostic = d(13, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
         // Diagnostic for method with @ObservesAsync parameter
-        Diagnostic d2 = d(18, 16, 35,
+        Diagnostic observesAsyncDiagnostic = d(18, 16, 35,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
     }
 }

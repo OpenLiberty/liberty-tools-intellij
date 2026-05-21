@@ -12,7 +12,7 @@ public class DecoratorWithObserverMethod {
 
     // Invalid: Decorator with @Observes parameter
     public void observerMethod(@Observes String event) {
-        System.out.println("Observer method: " + event);
+
     }
 
     // Invalid: Decorator with @ObservesAsync parameter
@@ -22,6 +22,6 @@ public class DecoratorWithObserverMethod {
 
     // Valid: Regular method without observer annotations
     public void regularMethod(String param) {
-        System.out.println("Regular method: " + param);
+
     }
 }
