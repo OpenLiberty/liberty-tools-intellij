@@ -20,22 +20,27 @@ import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 
-import java.util.Arrays;
-
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_FQ_NAME;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Removes the 'notifyObserver' attribute from @Observes and @ObservesAsync annotations
- * when they are conditional observers (notifyObserver=IF_EXISTS).
+ * when it has the value Reception.IF_EXISTS (conditional observer on @Dependent scoped beans).
  * Works on method parameters with these annotations.
  */
 public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
     public RemoveNotifyObserverAttributeQuickFix() {
-        super(new String[] { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME }, "notifyObserver");
+        super(createAnnotationAttributesMap());
+    }
+
+    private static Map<String, List<String>> createAnnotationAttributesMap() {
+        Map<String, List<String>> map = new HashMap<>();
+        map.put(ManagedBeanConstants.OBSERVES_FQ_NAME, List.of("notifyObserver"));
+        map.put(ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME, List.of("notifyObserver"));
+        return map;
     }
 
     @Override
@@ -45,7 +50,8 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
         if (method != null) {
             for (PsiParameter param : method.getParameterList().getParameters()) {
                 for (PsiAnnotation annotation : param.getAnnotations()) {
-                    if (isTargetAnnotation(annotation)) {
+                    String qualifiedName = annotation.getQualifiedName();
+                    if (qualifiedName != null && getAnnotationAttributesMap().containsKey(qualifiedName)) {
                         return new AnnotationInfo(annotation, param);
                     }
                 }
@@ -54,27 +60,8 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
         return null;
     }
 
-    /**
-     * Checks if the annotation is @Observes or @ObservesAsync with notifyObserver=IF_EXISTS.
-     */
-    private boolean isTargetAnnotation(PsiAnnotation annotation) {
-        String qualifiedName = annotation.getQualifiedName();
-        if (qualifiedName == null || !Arrays.asList(getAnnotations()).contains(qualifiedName)) {
-            return false;
-        }
-        
-        // Check if the annotation has the notifyObserver attribute with IF_EXISTS value (conditional observer)
-        for (String attribute : getAttributes()) {
-            String value = AnnotationUtils.getAnnotationMemberValue(annotation, attribute);
-            if (value != null && value.endsWith("IF_EXISTS")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
-    protected String getLabel(String annotation, String[] attributes) {
+    protected String getLabel(String annotation, List<String> attributes) {
         return Messages.getMessage("RemoveNotifyObserverAttribute", JDTUtils.getSimpleName(annotation));
     }
 

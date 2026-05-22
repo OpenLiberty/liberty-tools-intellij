@@ -17,15 +17,13 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationConflictQuickFix;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.DEPENDENT_FQ_NAME;
-
 /**
  * Quick fix for removing @Dependent annotation from a class
  */
 public class RemoveDependentAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
     public RemoveDependentAnnotationQuickFix() {
-        super(DEPENDENT_FQ_NAME);
+        super(ManagedBeanConstants.DEPENDENT_FQ_NAME);
     }
 
     @Override

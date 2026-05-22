@@ -14,16 +14,13 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveParamAnnotationQuickFix;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.OBSERVES_FQ_NAME;
-
 /**
  * Quick fix for removing @Observes or @ObservesAsync annotation from method parameters
  */
 public class RemoveObserverAnnotationQuickFix extends RemoveParamAnnotationQuickFix {
 
     public RemoveObserverAnnotationQuickFix() {
-        super(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
+        super(ManagedBeanConstants.OBSERVES_FQ_NAME, ManagedBeanConstants.OBSERVES_ASYNC_FQ_NAME);
     }
 
     @Override

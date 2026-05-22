@@ -24,32 +24,39 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Base class for removing annotation attributes.
- * Subclasses must implement methods to find the target annotation and its binding.
+ * QuickFix for removing attributes from annotations.
+ * Uses a Map structure to directly associate each annotation with its attributes to remove.
  */
 public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeActionParticipant {
 
-    private final String[] attributes;
-    private final String[] annotations;
     private static final Logger LOGGER = Logger.getLogger(RemoveAnnotationAttributesQuickFix.class.getName());
+
+    /** Map of annotation names to their attributes to remove. */
+    private final Map<String, List<String>> annotationAttributesMap;
 
     public record AnnotationInfo(PsiAnnotation annotation, PsiModifierListOwner binding) {}
 
-    public RemoveAnnotationAttributesQuickFix(String[] annotations, String... attributes) {
-        this.annotations = annotations;
-        this.attributes = attributes;
+    /**
+     * Constructor accepting a map of annotation names to their attributes to remove.
+     * 
+     * @param annotationAttributesMap Map of annotation names to their attributes to remove
+     */
+    public RemoveAnnotationAttributesQuickFix(Map<String, List<String>> annotationAttributesMap) {
+        this.annotationAttributesMap = annotationAttributesMap;
     }
 
     @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
         AnnotationInfo info = findAnnotationInfo(context.getCoveredNode());
         if (info != null) {
-            String label = getLabel(info.annotation.getQualifiedName(), attributes);
+            String annotationName = info.annotation.getQualifiedName();
+            List<String> attributes = annotationAttributesMap.get(annotationName);
+            String label = getLabel(annotationName, attributes);
             return List.of(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
         }
         return List.of();
@@ -59,25 +66,22 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
         AnnotationInfo info = findAnnotationInfo(context.getCoveredNode());
-        
-        if (info != null) {
-            String label = toResolve.getTitle();
-            String targetAnnotation = annotations.length == 1 ? annotations[0] : null;
-            ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(
-                label, 
-                context.getSource().getCompilationUnit(),
-                context.getASTRoot(), 
-                info.binding, 
-                info.annotation, 
-                0, 
-                targetAnnotation, 
-                new ArrayList<>(), 
-                Arrays.asList(attributes)
-            );
-            ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, 
-                "Unable to create workspace edit for code action " + label);
-        }
-        
+            String annotationName = info.annotation.getQualifiedName();
+            List<String> attributes = annotationAttributesMap.get(annotationName);
+                String label = getLabel(annotationName, attributes);
+                ChangeCorrectionProposal proposal = new ModifyAnnotationProposal(
+                    label,
+                    context.getSource().getCompilationUnit(),
+                    context.getASTRoot(),
+                    info.binding,
+                    info.annotation,
+                    0,
+                    annotationName,
+                    new ArrayList<>(),
+                    attributes
+                );
+                ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER,
+                    "Unable to create workspace edit for code action " + label);
         return toResolve;
     }
 
@@ -92,18 +96,19 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
 
     /**
      * Returns the label for the code action.
-     * 
+     *
      * @param annotation the fully qualified annotation name
      * @param attributes the attributes to remove
      * @return the label text
      */
-    protected abstract String getLabel(String annotation, String[] attributes);
+    protected abstract String getLabel(String annotation, List<String> attributes);
 
-    protected String[] getAnnotations() {
-        return annotations;
-    }
-
-    protected String[] getAttributes() {
-        return attributes;
+    /**
+     * Gets the map of annotations to their attributes to remove.
+     * 
+     * @return the annotation attributes map
+     */
+    protected Map<String, List<String>> getAnnotationAttributesMap() {
+        return annotationAttributesMap;
     }
 }

@@ -19,7 +19,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationAttributesQuickFix;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -29,22 +30,18 @@ import java.util.stream.Stream;
  */
 public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationAttributesQuickFix {
 
-    private static final String RESOURCE_ANNOTATION = "jakarta.annotation.Resource";
-
     public RemoveResourceAnnotationAttributeQuickFix() {
-        super(new String[] { RESOURCE_ANNOTATION }, "type");
+        super(Collections.singletonMap(AnnotationConstants.RESOURCE_FQ_NAME, List.of("type")));
     }
 
     @Override
     protected AnnotationInfo findAnnotationInfo(PsiElement node) {
         // Find the @Resource annotation directly (it's at the annotation level)
         PsiAnnotation annotation = PsiTreeUtil.getParentOfType(node, PsiAnnotation.class);
-        if (annotation != null && isTargetAnnotation(annotation)) {
             PsiModifierListOwner binding = getBinding(node);
             if (binding != null) {
                 return new AnnotationInfo(annotation, binding);
             }
-        }
         return null;
     }
 
@@ -63,16 +60,8 @@ public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationA
                 .orElse(null);
     }
 
-    /**
-     * Checks if the annotation is @Resource.
-     */
-    private boolean isTargetAnnotation(PsiAnnotation annotation) {
-        String qualifiedName = annotation.getQualifiedName();
-        return qualifiedName != null && Arrays.asList(getAnnotations()).contains(qualifiedName);
-    }
-
     @Override
-    protected String getLabel(String annotation, String[] attributes) {
+    protected String getLabel(String annotation, List<String> attributes) {
         return Messages.getMessage("RemoveRedundantAttribute", "type", "@Resource");
     }
 
