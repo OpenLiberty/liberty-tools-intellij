@@ -81,5 +81,3 @@ public class RemoveResourceAnnotationAttributeQuickFix extends RemoveAnnotationA
         return RemoveResourceAnnotationAttributeQuickFix.class.getName();
     }
 }
-
-// Made with Bob

@@ -83,5 +83,3 @@ public class RemoveNotifyObserverAttributeQuickFix extends RemoveAnnotationAttri
         return RemoveNotifyObserverAttributeQuickFix.class.getName();
     }
 }
-
-// Made with Bob

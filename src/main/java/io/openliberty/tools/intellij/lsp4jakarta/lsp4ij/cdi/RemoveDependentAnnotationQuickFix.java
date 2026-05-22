@@ -43,5 +43,3 @@ public class RemoveDependentAnnotationQuickFix extends RemoveAnnotationConflictQ
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
     }
 }
-
-// Made with Bob

@@ -107,5 +107,3 @@ public abstract class RemoveAnnotationAttributesQuickFix implements IJavaCodeAct
         return attributes;
     }
 }
-
-// Made with Bob

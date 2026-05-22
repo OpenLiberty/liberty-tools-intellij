@@ -31,5 +31,3 @@ public class RemoveObserverAnnotationQuickFix extends RemoveParamAnnotationQuick
         return RemoveObserverAnnotationQuickFix.class.getName();
     }
 }
-
-// Made with Bob
