@@ -52,22 +52,22 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)
-        Diagnostic d1 = d(12, 16, 30,
+        Diagnostic observesDiag = d(12, 16, 30,
                 "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' sets notifyObserver to Reception.IF_EXISTS, which is not permitted for @Dependent scoped bean.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDependentScopeWithConditionalObserver");
 
         // Test case 2: @Dependent with conditional @ObservesAsync (should trigger diagnostic)
-        Diagnostic d2 = d(21, 16, 30,
+        Diagnostic asyncDiag = d(21, 16, 30,
                 "Beans with scope @Dependent may not have conditional observer methods. Observer method 'observerMethod' sets notifyObserver to Reception.IF_EXISTS, which is not permitted for @Dependent scoped bean.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDependentScopeWithConditionalObserver");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, observesDiag, asyncDiag);
 
         // Test code actions for @Observes (3 quick fixes)
         // Note: RemoveNotifyObserverAttributeQuickFix uses ModifyAnnotationProposal which generates full file replacement
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, observesDiag);
         
-        String fileContent11 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
+        String observesRemoveAttr = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n" +
                 "import jakarta.enterprise.event.Reception;\n\n// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\n" +
                 "@Dependent\npublic class DependentScopedConditionalObserver {\n    \n    public void observerMethod(@Observes() String event) {\n        " +
@@ -85,7 +85,7 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "@ApplicationScoped\nclass ApplicationScopedConditionalObserver {\n    \n    " +
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
-        String fileContent12 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
+        String observesRemoveDependent = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.enterprise.event.Observes;\n" +
                 "import jakarta.enterprise.event.ObservesAsync;\nimport jakarta.enterprise.event.Reception;\n\n" +
                 "// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\npublic class DependentScopedConditionalObserver {\n    \n    " +
@@ -103,7 +103,7 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "@ApplicationScoped with conditional observer (should NOT trigger diagnostic)\n@ApplicationScoped\nclass ApplicationScopedConditionalObserver {\n    \n    " +
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
-        String fileContent13 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
+        String observesRemoveAnnotation = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\nimport jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\n" +
                 "import jakarta.enterprise.event.Reception;\n\n// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\n@Dependent\n" +
                 "public class DependentScopedConditionalObserver {\n\n    public void observerMethod(String event) {\n        " +
@@ -120,18 +120,18 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
 
-        TextEdit te1 = te(0, 0, 52, 0, fileContent11);
-        TextEdit te2 = te(0, 0, 52, 0, fileContent12);
-        TextEdit te3 = te(0, 0, 52, 0, fileContent13);
-        CodeAction ca1 = ca(uri, "Remove 'notifyObserver' attribute from @Observes", d1, te1);
-        CodeAction ca2 = ca(uri, "Remove @Dependent", d1, te2);
-        CodeAction ca3 = ca(uri, "Remove the @Observes modifier from parameter event", d1, te3);
-        assertJavaCodeAction(codeActionParams1, utils, ca1, ca2, ca3);
+        TextEdit observesEditRemoveAttr = te(0, 0, 52, 0, observesRemoveAttr);
+        TextEdit observesEditRemoveDependent = te(0, 0, 52, 0, observesRemoveDependent);
+        TextEdit observesEditRemoveAnnotation = te(0, 0, 52, 0, observesRemoveAnnotation);
+        CodeAction observesActionRemoveAttr = ca(uri, "Remove 'notifyObserver' attribute from @Observes", observesDiag, observesEditRemoveAttr);
+        CodeAction observesActionRemoveDependent = ca(uri, "Remove @Dependent", observesDiag, observesEditRemoveDependent);
+        CodeAction observesActionRemoveAnnotation = ca(uri, "Remove the @Observes modifier from parameter event", observesDiag, observesEditRemoveAnnotation);
+        assertJavaCodeAction(codeActionParams1, utils, observesActionRemoveAttr, observesActionRemoveDependent, observesActionRemoveAnnotation);
 
         // Test code actions for @ObservesAsync (3 quick fixes)
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, asyncDiag);
         
-        String fileContent21 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+        String asyncRemoveAttr = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\nimport jakarta.enterprise.event.Reception;\n\n" +
                 "// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\n@Dependent\npublic class DependentScopedConditionalObserver {\n    \n    " +
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        // This should trigger a diagnostic\n    }\n}\n\n" +
@@ -144,7 +144,7 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "// This should NOT trigger a diagnostic (defaults to ALWAYS)\n    }\n}\n\n// Test case 5: @ApplicationScoped with conditional observer (should NOT trigger diagnostic)\n" +
                 "@ApplicationScoped\nclass ApplicationScopedConditionalObserver {\n    \n    public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
-        String fileContent22 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+        String asyncRemoveDependent = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\nimport jakarta.enterprise.event.Reception;\n\n" +
                 "// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\n@Dependent\npublic class DependentScopedConditionalObserver {\n    \n    " +
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        // This should trigger a diagnostic\n    }\n}\n\n" +
@@ -157,7 +157,7 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "// This should NOT trigger a diagnostic (defaults to ALWAYS)\n    }\n}\n\n// Test case 5: @ApplicationScoped with conditional observer (should NOT trigger diagnostic)\n" +
                 "@ApplicationScoped\nclass ApplicationScopedConditionalObserver {\n    \n    public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
-        String fileContent23 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
+        String asyncRemoveAnnotation = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\nimport jakarta.enterprise.context.ApplicationScoped;\n" +
                 "import jakarta.enterprise.event.Observes;\nimport jakarta.enterprise.event.ObservesAsync;\nimport jakarta.enterprise.event.Reception;\n\n" +
                 "// Test case 1: @Dependent with conditional @Observes (should trigger diagnostic)\n@Dependent\npublic class DependentScopedConditionalObserver {\n\n    " +
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        // This should trigger a diagnostic\n    }\n}\n\n" +
@@ -172,12 +172,12 @@ public class DependentScopedConditionalObserverTest extends BaseJakartaTest {
                 "public void observerMethod(@Observes(notifyObserver = Reception.IF_EXISTS) String event) {\n        " +
                 "// This should NOT trigger a diagnostic (not @Dependent)\n    }\n}\n";
 
-        TextEdit te4 = te(0, 0, 52, 0, fileContent21);
-        TextEdit te5 = te(0, 0, 52, 0, fileContent22);
-        TextEdit te6 = te(0, 0, 52, 0, fileContent23);
-        CodeAction ca4 = ca(uri, "Remove 'notifyObserver' attribute from @ObservesAsync", d2, te4);
-        CodeAction ca5 = ca(uri, "Remove @Dependent", d2, te5);
-        CodeAction ca6 = ca(uri, "Remove the @ObservesAsync modifier from parameter event", d2, te6);
-        assertJavaCodeAction(codeActionParams2, utils, ca4, ca5, ca6);
+        TextEdit asyncEditRemoveAttr = te(0, 0, 52, 0, asyncRemoveAttr);
+        TextEdit asyncEditRemoveDependent = te(0, 0, 52, 0, asyncRemoveDependent);
+        TextEdit asyncEditRemoveAnnotation = te(0, 0, 52, 0, asyncRemoveAnnotation);
+        CodeAction asyncActionRemoveAttr = ca(uri, "Remove 'notifyObserver' attribute from @ObservesAsync", asyncDiag, asyncEditRemoveAttr);
+        CodeAction asyncActionRemoveDependent = ca(uri, "Remove @Dependent", asyncDiag, asyncEditRemoveDependent);
+        CodeAction asyncActionRemoveAnnotation = ca(uri, "Remove the @ObservesAsync modifier from parameter event", asyncDiag, asyncEditRemoveAnnotation);
+        assertJavaCodeAction(codeActionParams2, utils, asyncActionRemoveAttr, asyncActionRemoveDependent, asyncActionRemoveAnnotation);
     }
 }
