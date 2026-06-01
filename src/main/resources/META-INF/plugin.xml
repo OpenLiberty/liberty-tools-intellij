@@ -373,6 +373,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jsonb#NonmutualJsonbTransientAnnotationOnAccessor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#InvalidJsonBNoArgsConstructorMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common.InsertDefaultPubOrProConstructorQuickFix"/>
 
         <!-- Persistence -->
         <javaCodeActionParticipant kind="quickfix"
@@ -399,6 +403,16 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#RemoveMapKeyorMapKeyClass"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.DeleteConflictMapKeyQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#MissingTemporalAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.InsertTemporalAnnotationQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#InvalidValueInTemporalAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.ChangeTemporalValueQuickFix"/>
 
         <!-- WebSocket -->
         <javaCodeActionParticipant kind="quickfix"

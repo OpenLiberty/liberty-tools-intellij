@@ -372,6 +372,51 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     }
 
 
+    @Test
+    public void testIdDateMissingTemporal() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityIdDateMissingTemporal.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic idDateMissingTemporalD1 = d(11, 14, 16,
+                "A field or property marked with @Id and of type java.util.Date must explicitly specify @Temporal(TemporalType.DATE).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MissingTemporalAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, idDateMissingTemporalD1);
+
+        // test quick fix
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, idDateMissingTemporalD1);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.Date;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\n" +
+                "import jakarta.persistence.Temporal;\n" +
+                "import jakarta.persistence.TemporalType;\n\n" +
+                "@Entity\n" +
+                "public class EntityIdDateMissingTemporal {\n\n" +
+                "    @Temporal(TemporalType.DATE)\n" +
+                "    @Id\n" +
+                "    private Date pk;\n\n" +
+                "\tpublic Date getPk() {\n" +
+                "\t\treturn pk;\n" +
+                "\t}\n\n" +
+                "\tpublic void setPk(Date pk) {\n" +
+                "\t\tthis.pk = pk;\n" +
+                "\t}\n" +
+                "\t\n" +
+                "\t\n" +
+                "}\n";
+        TextEdit idDateMissingTemporalTE1 = te(0, 0, 23, 0, newText);
+        CodeAction idDateMissingTemporalCA1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", idDateMissingTemporalD1, idDateMissingTemporalTE1);
+
+        assertJavaCodeAction(codeActionParams1, utils, idDateMissingTemporalCA1);
+    }
 
     @Test
     public void testPropertyIdDateMissingTemporal() throws Exception{
@@ -385,11 +430,38 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = d(13, 13, 18,
+        Diagnostic propertyIdDateMissingTemporalD1 = d(13, 13, 18,
                 "A field or property marked with @Id and of type java.util.Date must explicitly specify @Temporal(TemporalType.DATE).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MissingTemporalAnnotation");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        assertJavaDiagnostics(diagnosticsParams, utils, propertyIdDateMissingTemporalD1);
+
+        // test quick fix
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, propertyIdDateMissingTemporalD1);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.Date;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\n" +
+                "import jakarta.persistence.Temporal;\n" +
+                "import jakarta.persistence.TemporalType;\n\n" +
+                "@Entity\n" +
+                "public class EntityPropertyIdDateMissingTemporal {\n\n" +
+                "\tprivate Date pk;\n\n" +
+                "    @Temporal(TemporalType.DATE)\n" +
+                "    @Id\n" +
+                "    public Date getPk() {\n" +
+                "\t\treturn pk;\n" +
+                "\t}\n\n" +
+                "\tpublic void setPk(Date pk) {\n" +
+                "\t\tthis.pk = pk;\n" +
+                "\t}\n" +
+                "\t\n" +
+                "\t\n" +
+                "}\n";
+        TextEdit propertyIdDateMissingTemporalTE1 = te(0, 0, 23, 0, newText);
+        CodeAction propertyIdDateMissingTemporalCA1 = ca(uri, "Insert @Temporal(TemporalType.DATE)", propertyIdDateMissingTemporalD1, propertyIdDateMissingTemporalTE1);
+
+        assertJavaCodeAction(codeActionParams1, utils, propertyIdDateMissingTemporalCA1);
     }
 
     @Test
@@ -404,11 +476,36 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = d(13, 1, 29,
+        Diagnostic idDateInvalidTemporalTypeD1 = d(13, 1, 29,
                 "The @Temporal annotation on a field or property annotated with @Id and of type java.util.Date must specify TemporalType.DATE.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidValueInTemporalAnnotation");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        assertJavaDiagnostics(diagnosticsParams, utils, idDateInvalidTemporalTypeD1);
+
+        // test quick fix
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, idDateInvalidTemporalTypeD1);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.Date;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\n" +
+                "import jakarta.persistence.Temporal;\n" +
+                "import jakarta.persistence.TemporalType;\n\n" +
+                "@Entity\n" +
+                "public class EntityInvalidTemporalType {\n\n" +
+                "\t@Id\n" +
+                "\t@Temporal(TemporalType.DATE)\n" +
+                "\tprivate Date pk;\n\n" +
+                "\tpublic Date getPk() {\n" +
+                "\t\treturn pk;\n" +
+                "\t}\n\n" +
+                "\tpublic void setPk(Date pk) {\n" +
+                "\t\tthis.pk = pk;\n" +
+                "\t}\n" +
+                "}\n";
+        TextEdit idDateInvalidTemporalTypeTE1 = te(0, 0, 24, 0, newText);
+        CodeAction idDateInvalidTemporalTypeCA1 = ca(uri, "Change @Temporal value to TemporalType.DATE", idDateInvalidTemporalTypeD1, idDateInvalidTemporalTypeTE1);
+
+        assertJavaCodeAction(codeActionParams1, utils, idDateInvalidTemporalTypeCA1);
     }
 
     @Test
@@ -423,11 +520,36 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = d(15, 1, 29,
+        Diagnostic propertyIdDateInvalidTemporalTypeD1 = d(15, 1, 29,
                 "The @Temporal annotation on a field or property annotated with @Id and of type java.util.Date must specify TemporalType.DATE.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidValueInTemporalAnnotation");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        assertJavaDiagnostics(diagnosticsParams, utils, propertyIdDateInvalidTemporalTypeD1);
+
+        // test quick fix
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, propertyIdDateInvalidTemporalTypeD1);
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.Date;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\n" +
+                "import jakarta.persistence.Temporal;\n" +
+                "import jakarta.persistence.TemporalType;\n\n" +
+                "@Entity\n" +
+                "public class EntityPropertyInvalidTemporalType {\n\n" +
+                "\tprivate Date pk;\n\n" +
+                "\t@Id\n" +
+                "\t@Temporal(TemporalType.DATE)\n" +
+                "\tpublic Date getPk() {\n" +
+                "\t\treturn pk;\n" +
+                "\t}\n\n" +
+                "\tpublic void setPk(Date pk) {\n" +
+                "\t\tthis.pk = pk;\n" +
+                "\t}\n" +
+                "}\n";
+        TextEdit te1 = te(0, 0, 24, 0, newText);
+        CodeAction ca1 = ca(uri, "Change @Temporal value to TemporalType.DATE", propertyIdDateInvalidTemporalTypeD1, te1);
+
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
     }
 
 
@@ -525,6 +647,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+
     @Test
     public void testDuplicateVersionAnnotationOnFields() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -592,4 +715,5 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, versionInHierarchyD1);
     }
+
 }
