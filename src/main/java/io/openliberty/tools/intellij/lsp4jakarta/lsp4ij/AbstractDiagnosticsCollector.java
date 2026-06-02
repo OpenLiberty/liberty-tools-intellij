@@ -125,12 +125,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     /**
      * Returns true if the given annotation matches the given annotation name and
      * false otherwise.
-     *
-     * @param unit             compilation unit of Java class.
-     * @param annotation       given annotation object.
-     * @param annotationFQName the fully qualified annotation name.
-     * @return true if the given annotation matches the given annotation name and
-     *         false otherwise.
+     * @param annotation
+     * @param annotationFQName
+     * @return
      */
     protected static boolean isMatchedAnnotation(PsiAnnotation annotation, String annotationFQName) {
         String elementName = annotation.getQualifiedName();
@@ -138,14 +135,25 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
+     * Returns true if the given annotation matches the given annotation name and
+     * false otherwise.
+     * @param annotations
+     * @param annotationFQName
+     * @return
+     */
+    protected static boolean isMatchedAnnotation(PsiAnnotation[] annotations, String annotationFQName) {
+        return Arrays.stream(annotations)
+                .anyMatch(annotation -> isMatchedAnnotation(annotation, annotationFQName));
+    }
+
+    /**
      * Returns true if the java element name matches the given fully qualified java
      * element name and false otherwise.
-     *
-     * @param unit             compilation unit of Java class.
-     * @param annotation       given annotation object.
-     * @param annotationFQName the fully qualified annotation name.
+     * @param type
+     * @param javaElementName
+     * @param javaElementFQName
      * @return true if the java element name matches the given fully qualified java
-     *         element name and false otherwise.
+     *        element name and false otherwise.
      */
     protected static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
         if (javaElementFQName.equals(javaElementName)) {
@@ -188,7 +196,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Returns matched Java element fully qualified name.
      *
      * @param type               Java class.
-     * @param javaElement        Java element name
+     * @param javaElementName        Java element name
      * @param javaElementFQNames given fully qualified name array.
      * @return Matched fully qualified name and null otherwise.
      */
