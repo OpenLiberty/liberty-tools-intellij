@@ -299,6 +299,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-annotations#PreDestroyException"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveCheckedExceptionsInThrowsQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#ResourceTypeMismatch"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveResourceAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-annotations#ResourceTypeMismatch"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.RemoveResourceAnnotationAttributeQuickFix"/>
 
         <!-- Bean Validation -->
         <javaCodeActionParticipant kind="quickfix"
@@ -367,6 +375,10 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbTransientAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#InvalidJsonBNoArgsConstructorMissing"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common.InsertDefaultPubOrProConstructorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-jsonb#InvalidJsonBNonPublicProtectedStaticNestedClass"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbChangeModifierToPublicQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
@@ -399,6 +411,16 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#RemoveMapKeyorMapKeyClass"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.DeleteConflictMapKeyQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#MissingTemporalAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.InsertTemporalAnnotationQuickFix"/>
+
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#InvalidValueInTemporalAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.ChangeTemporalValueQuickFix"/>
 
         <!-- WebSocket -->
         <javaCodeActionParticipant kind="quickfix"
@@ -524,6 +546,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveExtraDisposes"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveInvalidDisposerConflictParamAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveSingletonAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
 
 
 
