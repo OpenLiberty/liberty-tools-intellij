@@ -55,6 +55,13 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
+            // Check if the class is an interceptor or decorator
+            boolean interceptorOrDecorator = !getMatchedJavaElementNames(type,
+                    Stream.of(typeAnnotations).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                    new String[]{
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME
+                    }).isEmpty();
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
             boolean nonStaticPublicFieldPresent = false;
@@ -196,7 +203,13 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         paramsWithObserverAnnotations.add(param);
                     }
                 }
-                if (!conflictParams.isEmpty()) {
+                if (interceptorOrDecorator && !paramsWithObserverAnnotations.isEmpty()) {
+                    diagnostics.add(createDiagnostic(method, unit,
+                            Messages.getMessage("InvalidInterceptorOrDecoratorWithObserverMethod"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
+                            null,
+                            DiagnosticSeverity.Error));
+                } else if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
                 } else if (paramsWithObserverAnnotations.size() > 1) {

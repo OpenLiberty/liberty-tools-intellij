@@ -167,55 +167,59 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if (!checkedExceptions.isEmpty()) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
-                                    "@PostConstruct");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION,
-                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
-                                    DiagnosticSeverity.Error));
-                        }
-                        if (method.getParameters().length != 0) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
-                                    "@PostConstruct");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS, null,
-                                    DiagnosticSeverity.Error));
-                        }
+                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                            if (!checkedExceptions.isEmpty()) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION,
+                                        (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
+                                        DiagnosticSeverity.Error));
+                            }
+                            if (method.getParameters().length != 0) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS, null,
+                                        DiagnosticSeverity.Error));
+                            }
 
-                        if (!method.getReturnType().equals(PsiTypes.voidType())) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustBeVoid",
-                                    "@PostConstruct");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE, null,
-                                    DiagnosticSeverity.Error));
+                            if (!method.getReturnType().equals(PsiTypes.voidType())) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustBeVoid",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE, null,
+                                        DiagnosticSeverity.Error));
+                            }
                         }
                     }
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if (!checkedExceptions.isEmpty()) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
-                                    "@PreDestroy");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION,
-                                    (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
-                                    DiagnosticSeverity.Error));
-                        }
-                        if (method.getParameters().length != 0) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
-                                    "@PreDestroy");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_PARAMS, null,
-                                    DiagnosticSeverity.Error));
-                        }
+                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                            if (!checkedExceptions.isEmpty()) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION,
+                                        (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
+                                        DiagnosticSeverity.Error));
+                            }
+                            if (method.getParameters().length != 0) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_PARAMS, null,
+                                        DiagnosticSeverity.Error));
+                            }
 
-                        if (method.hasModifierProperty(PsiModifier.STATIC)) {
-                            String diagnosticMessage = Messages.getMessage("MethodMustNotBeStatic",
-                                    "@PreDestroy");
-                            diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
-                                    AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC, method.getName(),
-                                    DiagnosticSeverity.Error));
+                            if (method.hasModifierProperty(PsiModifier.STATIC)) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotBeStatic",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC, method.getName(),
+                                        DiagnosticSeverity.Error));
+                            }
                         }
                     }
                 }
