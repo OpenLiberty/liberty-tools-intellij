@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation, Pengyu Xiong and others.
+ * Copyright (c) 2020, 2026 IBM Corporation, Pengyu Xiong and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -28,6 +28,10 @@ public class ServletConstants {
     /* @WEBServlet */
     public static final String WEB_SERVLET_FQ_NAME = "jakarta.servlet.annotation.WebServlet";
     public static final String HTTP_SERVLET = "HttpServlet";
+
+    /* @DeclareRoles */
+    public static final String DECLARE_ROLES_FQ_NAME = "jakarta.annotation.security.DeclareRoles";
+    public static final String SERVLET_FQ_NAME = "jakarta.servlet.Servlet";
 
     /* @WEBFilter */
     public static final String WEBFILTER_FQ_NAME = "jakarta.servlet.annotation.WebFilter";

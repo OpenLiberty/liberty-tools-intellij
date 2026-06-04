@@ -1,4 +1,4 @@
-/** Copyright (c) 2022, 2025 IBM Corporation and others.
+/** Copyright (c) 2022, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -47,6 +47,8 @@ public class WebSocketConstants {
 
     public static final String DIAGNOSTIC_SERVER_ENDPOINT = "ChangeInvalidServerEndpoint";
     public static final String DIAGNOSTIC_SERVER_ENDPOINT_WITHOUT_SLASH = "InvalidEndpointWithoutStartingSlash";
+    public static final String DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR = "missingPublicNoArgConstructor";
+    public static final String DIAGNOSTICS_DUPLICATE_ANNOTATION = "DuplicateLifeCycleAnnotation";
 
     /*
      * https://jakarta.ee/specifications/websocket/2.0/websocket-spec-2.0.html#
@@ -79,10 +81,10 @@ public class WebSocketConstants {
     /* Annotations */
     public static final String ON_OPEN = "jakarta.websocket.OnOpen";
     public static final String ON_CLOSE = "jakarta.websocket.OnClose";
+    public static final String ON_ERROR = "jakarta.websocket.OnError";
     public static final String ON_MESSAGE = "jakarta.websocket.OnMessage";
 
     public static final String IS_ANNOTATION = "isAnnotation";
-
     /* Types */
     public static final String PATH_PARAM_ANNOTATION = "jakarta.websocket.server.PathParam";
 

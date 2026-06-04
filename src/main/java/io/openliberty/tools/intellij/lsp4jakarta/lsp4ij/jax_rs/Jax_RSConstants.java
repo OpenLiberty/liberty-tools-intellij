@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation, Matthew Shocrylas and others.
+ * Copyright (c) 2021, 2026 IBM Corporation, Matthew Shocrylas and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -30,6 +30,7 @@ public class Jax_RSConstants {
 
     public static final String PATH_ANNOTATION = "jakarta.ws.rs.Path";
     public static final String PROVIDER_ANNOTATION = "jakarta.ws.rs.ext.Provider";
+    public static final String CONSTRAINT_ANNOTATION = "jakarta.validation.Constraint";
 
     /* Source */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-jax_rs";
@@ -40,6 +41,7 @@ public class Jax_RSConstants {
     public static final String DIAGNOSTIC_CODE_UNUSED_CONSTRUCTOR = "UnusedConstructor";
     public static final String DIAGNOSTIC_CODE_AMBIGUOUS_CONSTRUCTORS = "AmbiguousConstructors";
     public static final String DIAGNOSTIC_CODE_NO_PUBLIC_CONSTRUCTORS = "NoPublicConstructors";
+    public static final String DIAGNOSTIC_CODE_INVALID_CONSTRAINT_TARGET = "InvalidConstraintTarget";
 
     public final static String[] SET_OF_METHOD_DESIGNATORS_ANNOTATIONS = { "jakarta.ws.rs.GET", "jakarta.ws.rs.POST",
             "jakarta.ws.rs.PUT", "jakarta.ws.rs.DELETE", "jakarta.ws.rs.PATCH", "jakarta.ws.rs.HEAD",
