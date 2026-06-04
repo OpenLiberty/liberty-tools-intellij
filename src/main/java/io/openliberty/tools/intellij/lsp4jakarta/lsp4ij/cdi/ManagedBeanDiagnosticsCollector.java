@@ -212,26 +212,22 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 } else if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
-                }
-                // Check for conditional observer methods on @Dependent scoped beans
-                // Beans with scope @Dependent may not have conditional observer methods.
-                // If a bean with scope @Dependent has an observer method declared notifyObserver=IF_EXISTS,
-                // the container automatically detects the problem and treats it as a definition error.
-                if (isDependent) {
-                    if (hasConditionalObserverAnnotation(type, method)) {
-                        diagnostics.add(createDiagnostic(method, unit,
-                                Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
-                                DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
-                    }
-                }
-                // Generate diagnostic for multiple observer parameters
-                // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
-                if (paramsWithObserverAnnotations.size() > 1) {
+                } else if (paramsWithObserverAnnotations.size() > 1) {
+                    // Generate diagnostic for multiple observer parameters
+                    // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
                     String paramNames = paramsWithObserverAnnotations.stream()
                             .map(PsiParameter::getName)
                             .collect(java.util.stream.Collectors.joining(", "));
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
-                                        DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
+                            DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
+                } else if (isDependent && hasConditionalObserverAnnotation(type, method)) {
+                    // Check for conditional observer methods on @Dependent scoped beans
+                    // Beans with scope @Dependent may not have conditional observer methods.
+                    // If a bean with scope @Dependent has an observer method declared notifyObserver=IF_EXISTS,
+                    // the container automatically detects the problem and treats it as a definition error.
+                    diagnostics.add(createDiagnostic(method, unit,
+                            Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
+                            DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
                 }
             }
 
