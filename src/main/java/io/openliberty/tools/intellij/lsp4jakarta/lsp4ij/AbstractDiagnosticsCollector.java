@@ -14,13 +14,19 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import org.eclipse.lsp4j.Diagnostic;
@@ -119,12 +125,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     /**
      * Returns true if the given annotation matches the given annotation name and
      * false otherwise.
-     *
-     * @param unit             compilation unit of Java class.
-     * @param annotation       given annotation object.
-     * @param annotationFQName the fully qualified annotation name.
-     * @return true if the given annotation matches the given annotation name and
-     *         false otherwise.
+     * @param annotation
+     * @param annotationFQName
+     * @return
      */
     protected static boolean isMatchedAnnotation(PsiAnnotation annotation, String annotationFQName) {
         String elementName = annotation.getQualifiedName();
@@ -132,14 +135,25 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
+     * Returns true if the given annotation matches the given annotation name and
+     * false otherwise.
+     * @param annotations
+     * @param annotationFQName
+     * @return
+     */
+    protected static boolean isMatchedAnnotation(PsiAnnotation[] annotations, String annotationFQName) {
+        return Arrays.stream(annotations)
+                .anyMatch(annotation -> isMatchedAnnotation(annotation, annotationFQName));
+    }
+
+    /**
      * Returns true if the java element name matches the given fully qualified java
      * element name and false otherwise.
-     *
-     * @param unit             compilation unit of Java class.
-     * @param annotation       given annotation object.
-     * @param annotationFQName the fully qualified annotation name.
+     * @param type
+     * @param javaElementName
+     * @param javaElementFQName
      * @return true if the java element name matches the given fully qualified java
-     *         element name and false otherwise.
+     *        element name and false otherwise.
      */
     protected static boolean isMatchedJavaElement(PsiClass type, String javaElementName, String javaElementFQName) {
         if (javaElementFQName.equals(javaElementName)) {
@@ -182,7 +196,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Returns matched Java element fully qualified name.
      *
      * @param type               Java class.
-     * @param javaElement        Java element name
+     * @param javaElementName        Java element name
      * @param javaElementFQNames given fully qualified name array.
      * @return Matched fully qualified name and null otherwise.
      */
@@ -241,4 +255,125 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         return m.isConstructor();
     }
 
+    /**
+     * isInterceptorType
+     * Method checks if the class is an Interceptor type
+     *
+     * @param type the type to check
+     * @return true if the type has @Interceptor annotation
+     */
+    public static boolean isInterceptorType(PsiClass type) {
+        return Arrays.stream(type.getAnnotations())
+                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), Constants.INTERCEPTOR_FQ_NAME));
+    }
+
+    /**
+     * Checks if type is of Interceptor type or uses interceptor-related features.
+     * Returns true if:
+     * - The type has @Interceptor annotation
+     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundConstruct, AroundTimeout)
+     * - The type or its methods use @Interceptors annotation
+     *
+     * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
+     *
+     * @param type     the type to check
+     * @param javaFile the Java file containing the type
+     * @return true if the type is an interceptor type or uses interceptor-related features
+     */
+    public static boolean isInterceptorTypeReferenced(PsiClass type, PsiJavaFile javaFile) {
+        if (type == null) {
+            return false;
+        }
+
+        // Check if the type has @Interceptor annotation (no method iteration needed)
+        if (isInterceptorType(type)) {
+            return true;
+        }
+
+        PsiMethod[] methods = type.getMethods();
+
+        // Check if the type or methods use interceptor-specific annotations
+        if (hasInterceptorMethodAnnotations(type, methods)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the type has any methods annotated with interceptor-specific annotations.
+     * Checks for: @AroundInvoke, @AroundConstruct, @AroundTimeout
+     *
+     * @param type    the type to check
+     * @param methods the methods array (pre-fetched to avoid redundant calls)
+     * @return true if any method uses interceptor-specific annotations
+     */
+    private static boolean hasInterceptorMethodAnnotations(PsiClass type, PsiMethod[] methods) {
+        String[] interceptorReferences = Constants.INTERCEPTOR_REFERENCES.toArray(String[]::new);
+
+        return Arrays.stream(methods)
+                .flatMap(method -> Arrays.stream(method.getAnnotations()))
+                .anyMatch(annotation -> {
+                    String annotationName = annotation.getQualifiedName();
+                    return getMatchedJavaElementName(type, annotationName, interceptorReferences) != null;
+                });
+    }
+
+    /**
+     * checkMethodInvokedExists
+     * This method checks if the passed method is being invoked in the declared method body
+     *
+     * @param psiMethod the method to check
+     * @param methodInvoked the name of the method to search for
+     * @param methodParentType the fully qualified name of the parent type containing the invoked method
+     * @return true if the specified method invocation exists in the method body, false otherwise
+     */
+    public boolean checkMethodInvokedExists(PsiMethod psiMethod, String methodInvoked, String methodParentType) {
+        PsiCodeBlock body = psiMethod.getBody();
+        if (body == null) {
+            return false;
+        }
+        
+        Collection<PsiMethodCallExpression> allInterceptorMethodInvocations =
+                PsiTreeUtil.findChildrenOfType(body, PsiMethodCallExpression.class);
+        
+        for (PsiMethodCallExpression call : allInterceptorMethodInvocations) {
+            if (isMatchingMethodInvocation(call, methodInvoked, methodParentType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a method call expression matches the expected method name and parent type.
+     *
+     * @param call the method call expression to check
+     * @param methodInvoked the name of the method to match
+     * @param methodTargetClass the fully qualified name of the parent type to match
+     * @return true if the method call matches both the method name and parent type, false otherwise
+     */
+    private boolean isMatchingMethodInvocation(PsiMethodCallExpression call,
+                                              String methodInvoked,
+                                              String methodTargetClass) {
+        PsiReferenceExpression methodExpr = call.getMethodExpression();
+        String methodName = methodExpr.getReferenceName();
+        
+        if (!methodInvoked.equals(methodName)) {
+            return false;
+        }
+        
+        PsiMethod target = call.resolveMethod();
+        if (target == null) {
+            return false;
+        }
+        
+        PsiClass containingClass = target.getContainingClass();
+        if (containingClass == null) {
+            return false;
+        }
+        
+        String fqn = containingClass.getQualifiedName();
+        return methodTargetClass.equals(fqn);
+    }
 }

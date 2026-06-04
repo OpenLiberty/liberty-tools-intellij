@@ -20,6 +20,7 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -31,7 +32,6 @@ import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 import java.io.File;
 import java.util.Arrays;
 
@@ -498,6 +498,525 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         d3.setData(new Gson().toJsonTree(Arrays.asList("jakarta.json.bind.annotation.JsonbProperty")));
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+    }
+
+    @Test
+    public void JsonbNonPublicStaticNestedClass() throws Exception {
+
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbStaticNestedClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Diagnostic for private static nested class SubChild
+        // Note: protected is valid according to spec, so only private and package-private should be flagged
+        Diagnostic privateClassDiagnostic = JakartaForJavaAssert.d(50, 25, 33,
+                "Static nested class SubChild must be public or protected for JSON Binding deserialization. Private and packaged private static nested classes are not supported.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNonPublicProtectedStaticNestedClass");
+
+        // Diagnostic for package-private (default) static nested class PackagePrivateChild
+        Diagnostic packagePrivateClassDiagnostic = JakartaForJavaAssert.d(88, 17, 36,
+                "Static nested class PackagePrivateChild must be public or protected for JSON Binding deserialization. Private and packaged private static nested classes are not supported.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNonPublicProtectedStaticNestedClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, privateClassDiagnostic, packagePrivateClassDiagnostic);
+
+        // Test code action "Change modifier to public" for private static nested class
+        JakartaJavaCodeActionParams privateClassCodeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, privateClassDiagnostic);
+        
+        String newTextPrivatePublic = "/*******************************************************************************\n" +
+                " * Copyright (c) 2026 IBM Corporation and others.\n" +
+                " *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n" +
+                " *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n" +
+                " *\n" +
+                " * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n" +
+                "\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n" +
+                "\n" +
+                "public class JsonbStaticNestedClass {\n" +
+                "\n" +
+                "    private String firstName;\n" +
+                "\n" +
+                "    private SubChild subChild;\n" +
+                "\n" +
+                "    public SubChild getSubChild() {\n" +
+                "        return subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setSubChild(SubChild subChild) {\n" +
+                "        this.subChild = subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public String getFirstName() {\n" +
+                "        return firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFirstName(String firstName) {\n" +
+                "        this.firstName = firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    @JsonbProperty(\"fav_lang\")\n" +
+                "    private String favoriteEditor;\n" +
+                "\n" +
+                "    public String getFavoriteEditor() {\n" +
+                "        return favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFavoriteEditor(String favoriteEditor) {\n" +
+                "        this.favoriteEditor = favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: private static nested class\n" +
+                "    public static class SubChild {\n" +
+                "\n" +
+                "        private int token;\n" +
+                "\n" +
+                "        public int getToken() {\n" +
+                "            return token;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setToken(int token) {\n" +
+                "            this.token = token;\n" +
+                "        }\n" +
+                "\n" +
+                "        private String title;\n" +
+                "\n" +
+                "        public String getTitle() {\n" +
+                "            return title;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setTitle(String title) {\n" +
+                "            this.title = title;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: protected static nested class (spec allows public or protected)\n" +
+                "    protected static class ProtectedChild {\n" +
+                "\n" +
+                "        private int id;\n" +
+                "\n" +
+                "        public int getId() {\n" +
+                "            return id;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setId(int id) {\n" +
+                "            this.id = id;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: package-private (default) static nested class\n" +
+                "    static class PackagePrivateChild {\n" +
+                "\n" +
+                "        private String description;\n" +
+                "\n" +
+                "        public String getDescription() {\n" +
+                "            return description;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setDescription(String description) {\n" +
+                "            this.description = description;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: public static nested class\n" +
+                "    public static class PublicChild {\n" +
+                "\n" +
+                "        private String name;\n" +
+                "\n" +
+                "        public String getName() {\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(String name) {\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        TextEdit privateClassTextEditPublic = JakartaForJavaAssert.te(0, 0, 114, 1, newTextPrivatePublic);
+        CodeAction privateClassCodeActionPublic = JakartaForJavaAssert.ca(uri, "Change modifier to public", privateClassDiagnostic, privateClassTextEditPublic);
+
+        // Test code action "Change modifier to protected" for private static nested class
+        String newTextPrivateProtected = "/*******************************************************************************\n" +
+                " * Copyright (c) 2026 IBM Corporation and others.\n" +
+                " *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n" +
+                " *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n" +
+                " *\n" +
+                " * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n" +
+                "\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n" +
+                "\n" +
+                "public class JsonbStaticNestedClass {\n" +
+                "\n" +
+                "    private String firstName;\n" +
+                "\n" +
+                "    private SubChild subChild;\n" +
+                "\n" +
+                "    public SubChild getSubChild() {\n" +
+                "        return subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setSubChild(SubChild subChild) {\n" +
+                "        this.subChild = subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public String getFirstName() {\n" +
+                "        return firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFirstName(String firstName) {\n" +
+                "        this.firstName = firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    @JsonbProperty(\"fav_lang\")\n" +
+                "    private String favoriteEditor;\n" +
+                "\n" +
+                "    public String getFavoriteEditor() {\n" +
+                "        return favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFavoriteEditor(String favoriteEditor) {\n" +
+                "        this.favoriteEditor = favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: private static nested class\n" +
+                "    protected static class SubChild {\n" +
+                "\n" +
+                "        private int token;\n" +
+                "\n" +
+                "        public int getToken() {\n" +
+                "            return token;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setToken(int token) {\n" +
+                "            this.token = token;\n" +
+                "        }\n" +
+                "\n" +
+                "        private String title;\n" +
+                "\n" +
+                "        public String getTitle() {\n" +
+                "            return title;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setTitle(String title) {\n" +
+                "            this.title = title;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: protected static nested class (spec allows public or protected)\n" +
+                "    protected static class ProtectedChild {\n" +
+                "\n" +
+                "        private int id;\n" +
+                "\n" +
+                "        public int getId() {\n" +
+                "            return id;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setId(int id) {\n" +
+                "            this.id = id;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: package-private (default) static nested class\n" +
+                "    static class PackagePrivateChild {\n" +
+                "\n" +
+                "        private String description;\n" +
+                "\n" +
+                "        public String getDescription() {\n" +
+                "            return description;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setDescription(String description) {\n" +
+                "            this.description = description;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: public static nested class\n" +
+                "    public static class PublicChild {\n" +
+                "\n" +
+                "        private String name;\n" +
+                "\n" +
+                "        public String getName() {\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(String name) {\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        TextEdit privateClassTextEditProtected = JakartaForJavaAssert.te(0, 0, 114, 1, newTextPrivateProtected);
+        CodeAction privateClassCodeActionProtected = JakartaForJavaAssert.ca(uri, "Change modifier to protected", privateClassDiagnostic, privateClassTextEditProtected);
+
+        // Assert both code actions are available for private static nested class
+        // Note: Quick fixes are returned in alphabetical order by class name (protected, public)
+        JakartaForJavaAssert.assertJavaCodeAction(privateClassCodeActionParams, utils, privateClassCodeActionProtected, privateClassCodeActionPublic);
+
+        // Test code action "Change modifier to public" for package-private static nested class
+        JakartaJavaCodeActionParams packagePrivateClassCodeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, packagePrivateClassDiagnostic);
+        
+        String newTextPackagePrivatePublic = "/*******************************************************************************\n" +
+                " * Copyright (c) 2026 IBM Corporation and others.\n" +
+                " *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n" +
+                " *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n" +
+                " *\n" +
+                " * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n" +
+                "\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n" +
+                "\n" +
+                "public class JsonbStaticNestedClass {\n" +
+                "\n" +
+                "    private String firstName;\n" +
+                "\n" +
+                "    private SubChild subChild;\n" +
+                "\n" +
+                "    public SubChild getSubChild() {\n" +
+                "        return subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setSubChild(SubChild subChild) {\n" +
+                "        this.subChild = subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public String getFirstName() {\n" +
+                "        return firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFirstName(String firstName) {\n" +
+                "        this.firstName = firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    @JsonbProperty(\"fav_lang\")\n" +
+                "    private String favoriteEditor;\n" +
+                "\n" +
+                "    public String getFavoriteEditor() {\n" +
+                "        return favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFavoriteEditor(String favoriteEditor) {\n" +
+                "        this.favoriteEditor = favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: private static nested class\n" +
+                "    private static class SubChild {\n" +
+                "\n" +
+                "        private int token;\n" +
+                "\n" +
+                "        public int getToken() {\n" +
+                "            return token;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setToken(int token) {\n" +
+                "            this.token = token;\n" +
+                "        }\n" +
+                "\n" +
+                "        private String title;\n" +
+                "\n" +
+                "        public String getTitle() {\n" +
+                "            return title;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setTitle(String title) {\n" +
+                "            this.title = title;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: protected static nested class (spec allows public or protected)\n" +
+                "    protected static class ProtectedChild {\n" +
+                "\n" +
+                "        private int id;\n" +
+                "\n" +
+                "        public int getId() {\n" +
+                "            return id;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setId(int id) {\n" +
+                "            this.id = id;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: package-private (default) static nested class\n" +
+                "    public static class PackagePrivateChild {\n" +
+                "\n" +
+                "        private String description;\n" +
+                "\n" +
+                "        public String getDescription() {\n" +
+                "            return description;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setDescription(String description) {\n" +
+                "            this.description = description;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: public static nested class\n" +
+                "    public static class PublicChild {\n" +
+                "\n" +
+                "        private String name;\n" +
+                "\n" +
+                "        public String getName() {\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(String name) {\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        TextEdit packagePrivateClassTextEditPublic = JakartaForJavaAssert.te(0, 0, 114, 1, newTextPackagePrivatePublic);
+        CodeAction packagePrivateClassCodeActionPublic = JakartaForJavaAssert.ca(uri, "Change modifier to public", packagePrivateClassDiagnostic, packagePrivateClassTextEditPublic);
+
+        // Test code action "Change modifier to protected" for package-private static nested class
+        String newTextPackagePrivateProtected = "/*******************************************************************************\n" +
+                " * Copyright (c) 2026 IBM Corporation and others.\n" +
+                " *\n" +
+                " * This program and the accompanying materials are made available under the\n" +
+                " * terms of the Eclipse Public License v. 2.0 which is available at\n" +
+                " * http://www.eclipse.org/legal/epl-2.0.\n" +
+                " *\n" +
+                " * SPDX-License-Identifier: EPL-2.0\n" +
+                " *\n" +
+                " * Contributors:\n" +
+                " *     IBM Corporation - initial API and implementation\n" +
+                " *******************************************************************************/\n" +
+                "package io.openliberty.sample.jakarta.jsonb;\n" +
+                "\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n" +
+                "\n" +
+                "public class JsonbStaticNestedClass {\n" +
+                "\n" +
+                "    private String firstName;\n" +
+                "\n" +
+                "    private SubChild subChild;\n" +
+                "\n" +
+                "    public SubChild getSubChild() {\n" +
+                "        return subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setSubChild(SubChild subChild) {\n" +
+                "        this.subChild = subChild;\n" +
+                "    }\n" +
+                "\n" +
+                "    public String getFirstName() {\n" +
+                "        return firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFirstName(String firstName) {\n" +
+                "        this.firstName = firstName;\n" +
+                "    }\n" +
+                "\n" +
+                "    @JsonbProperty(\"fav_lang\")\n" +
+                "    private String favoriteEditor;\n" +
+                "\n" +
+                "    public String getFavoriteEditor() {\n" +
+                "        return favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void setFavoriteEditor(String favoriteEditor) {\n" +
+                "        this.favoriteEditor = favoriteEditor;\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: private static nested class\n" +
+                "    private static class SubChild {\n" +
+                "\n" +
+                "        private int token;\n" +
+                "\n" +
+                "        public int getToken() {\n" +
+                "            return token;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setToken(int token) {\n" +
+                "            this.token = token;\n" +
+                "        }\n" +
+                "\n" +
+                "        private String title;\n" +
+                "\n" +
+                "        public String getTitle() {\n" +
+                "            return title;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setTitle(String title) {\n" +
+                "            this.title = title;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: protected static nested class (spec allows public or protected)\n" +
+                "    protected static class ProtectedChild {\n" +
+                "\n" +
+                "        private int id;\n" +
+                "\n" +
+                "        public int getId() {\n" +
+                "            return id;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setId(int id) {\n" +
+                "            this.id = id;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Invalid: package-private (default) static nested class\n" +
+                "    protected static class PackagePrivateChild {\n" +
+                "\n" +
+                "        private String description;\n" +
+                "\n" +
+                "        public String getDescription() {\n" +
+                "            return description;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setDescription(String description) {\n" +
+                "            this.description = description;\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    // Valid: public static nested class\n" +
+                "    public static class PublicChild {\n" +
+                "\n" +
+                "        private String name;\n" +
+                "\n" +
+                "        public String getName() {\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(String name) {\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        TextEdit packagePrivateClassTextEditProtected = JakartaForJavaAssert.te(0, 0, 114, 1, newTextPackagePrivateProtected);
+        CodeAction packagePrivateClassCodeActionProtected = JakartaForJavaAssert.ca(uri, "Change modifier to protected", packagePrivateClassDiagnostic, packagePrivateClassTextEditProtected);
+
+        // Assert both code actions are available for package-private static nested class
+        // Note: Quick fixes are returned in alphabetical order by class name (protected, public)
+        JakartaForJavaAssert.assertJavaCodeAction(packagePrivateClassCodeActionParams, utils, packagePrivateClassCodeActionProtected, packagePrivateClassCodeActionPublic);
     }
     
     @Test
@@ -1970,18 +2489,162 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d1 = JakartaForJavaAssert.d(4, 13, 33,
+        Diagnostic missingPubOrProConstructorParent = JakartaForJavaAssert.d(4, 13, 33,
                 "Missing Public or Protected NoArgsConstructor: Class JsonbDeserialization uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d2 = JakartaForJavaAssert.d(56, 21, 31,
+        Diagnostic missingPubOrProConstructorChild = JakartaForJavaAssert.d(56, 21, 31,
                 "Missing Public or Protected NoArgsConstructor: Class ChildClass uses JSON Binding annotations, but does not declare a public or protected no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonBNoArgsConstructorMissing");
 
-        Diagnostic d3 = JakartaForJavaAssert.d(83, 14, 22,
+        Diagnostic missingPubOrProConstructorSubChild = JakartaForJavaAssert.d(83, 14, 22,
                 "Cannot deserialize class SubChild because it is not static. Please declare the class as static for JSONB deserialization.",
                 DiagnosticSeverity.Warning, "jakarta-jsonb", "InvalidJsonBNonStaticInnerClass");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingPubOrProConstructorParent, missingPubOrProConstructorChild, missingPubOrProConstructorSubChild);
+
+        JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, missingPubOrProConstructorParent);
+        String newText1 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    protected JsonbDeserialization() {\n    }\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n" +
+                "            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        String newText2 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization() {\n    }\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n" +
+                "            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        TextEdit addProtectedConstructorParentEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText1);
+        CodeAction insertNoArgProConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorParent, addProtectedConstructorParentEdit);
+        TextEdit addPublicConstructorParentEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText2);
+        CodeAction insertNoArgPubConstructorParent = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorParent, addPublicConstructorParentEdit);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, insertNoArgProConstructorParent, insertNoArgPubConstructorParent);
+
+        JakartaJavaCodeActionParams codeActionParams2 = JakartaForJavaAssert.createCodeActionParams(uri, missingPubOrProConstructorChild);
+        String newText3 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        protected ChildClass() {\n        }\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        String newText4 = "package io.openliberty.sample.jakarta.jsonb;\n\n" +
+                "import jakarta.json.bind.annotation.JsonbProperty;\n\n" +
+                "public class JsonbDeserialization {\n\n" +
+                "    public JsonbDeserialization(String subFirstName, ChildClass child, String subfavoriteEditor) {\n" +
+                "        super();\n        this.subFirstName = subFirstName;\n        this.child = child;\n" +
+                "        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    private String subFirstName;\n\n    private ChildClass child;\n\n    private SubChild subChild;\n\n" +
+                "    public SubChild getSubChild() {\n        return subChild;\n    }\n\n" +
+                "    public void setSubChild(SubChild subChild) {\n        this.subChild = subChild;\n    }\n\n" +
+                "    public String getSubFirstName() {\n        return subFirstName;\n    }\n\n" +
+                "    public void setSubFirstName(String subFirstName) {\n        this.subFirstName = subFirstName;\n    }\n\n" +
+                "    @JsonbProperty(\"fav_lang1\")\n" +
+                "    private String subfavoriteEditor;    // Diagnostic: @JsonbProperty property uniqueness in subclass, multiple properties cannot have same property names.\n\n" +
+                "    public String getSubfavoriteEditor() {\n        return subfavoriteEditor;\n    }\n\n" +
+                "    public void setSubfavoriteEditor(String subfavoriteEditor) {\n        this.subfavoriteEditor = subfavoriteEditor;\n    }\n\n" +
+                "    public ChildClass getChild() {\n        return child;\n\n    }\n\n" +
+                "    public void setChild(ChildClass child) {\n        this.child = child;\n\n    }\n\n" +
+                "    public static class ChildClass {\n\n" +
+                "        public ChildClass() {\n        }\n\n" +
+                "        public ChildClass(int age, String name) {\n            super();\n            this.age = age;\n            this.name = name;\n        }\n\n" +
+                "        private int age;\n        private String name;\n\n" +
+                "        public int getAge() {\n            return age;\n\n        }\n\n" +
+                "        public void setAge(int age) {\n            this.age = age;\n\n        }\n\n" +
+                "        public String getName() {\n            return name;\n\n        }\n\n" +
+                "        public void setName(String name) {\n            this.name = name;\n\n        }\n    }\n\n" +
+                "    public class SubChild {\n\n        private int token;\n\n" +
+                "        public int getToken() {\n            return token;\n        }\n\n" +
+                "        public void setToken(int token) {\n            this.token = token;\n        }\n\n" +
+                "        private String title;\n\n" +
+                "        public String getTitle() {\n            return title;\n        }\n\n" +
+                "        public void setTitle(String title) {\n            this.title = title;\n        }\n    }\n}";
+
+        TextEdit addProtectedConstructorChildEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText3);
+        CodeAction insertNoArgProConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgProtectedConstructor"), missingPubOrProConstructorChild, addProtectedConstructorChildEdit);
+        TextEdit addPublicConstructorChildEdit = JakartaForJavaAssert.te(0, 0, 100, 1, newText4);
+        CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, addPublicConstructorChildEdit);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
 }

@@ -149,4 +149,15 @@ public class DiagnosticsUtils {
         }
         return false;
     }
+
+    public static List<PsiClass> collectSuperClasses(PsiClass psiClass) {
+        List<PsiClass> superClasses = new ArrayList<>();
+        PsiClass current = psiClass.getSuperClass();
+
+        while (current != null) {
+            superClasses.add(current);
+            current = current.getSuperClass();
+        }
+        return superClasses;
+    }
 }
