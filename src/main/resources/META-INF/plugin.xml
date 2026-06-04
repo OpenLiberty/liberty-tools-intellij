@@ -381,6 +381,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-jsonb#InvalidJsonBNoArgsConstructorMissing"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common.InsertDefaultPubOrProConstructorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#InvalidJsonBNonPublicProtectedStaticNestedClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbChangeModifierToPublicQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-jsonb#InvalidJsonBNonPublicProtectedStaticNestedClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbChangeModifierToProtectedQuickFix"/>
 
         <!-- Persistence -->
         <javaCodeActionParticipant kind="quickfix"

@@ -14,11 +14,9 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
-import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -27,7 +25,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JsonPropertyUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This class contains logic for Jsonb diagnostics:
@@ -172,6 +169,14 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             if (!type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
                 diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbInnerNonStatic", type.getName()),
                         JsonbConstants.DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS, null, DiagnosticSeverity.Warning));
+            }
+            // Check if static nested class is not public or protected (spec requires public or protected)
+            if (type.hasModifierProperty(PsiModifier.STATIC) && jsonbtypeParent) {
+                // Flag if not public and not protected (covers private and package-private/default)
+                if (!type.hasModifierProperty(PsiModifier.PUBLIC) && !type.hasModifierProperty(PsiModifier.PROTECTED)) {
+                    diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ErrorMessageJsonbNonPublicProtectedStaticNestedClass", type.getName()),
+                            JsonbConstants.DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS, null, DiagnosticSeverity.Error));
+                }
             }
             if (type.hasModifierProperty(PsiModifier.STATIC) && missingChildNoArgs)
                 diagnostics.add(createDiagnostic(type, unit,  Messages.getMessage("ErrorMessageJsonbNoArgConstructorMissing", type.getName()),
