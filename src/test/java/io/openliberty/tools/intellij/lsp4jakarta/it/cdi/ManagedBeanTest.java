@@ -966,15 +966,14 @@ public class ManagedBeanTest extends BaseJakartaTest {
         Diagnostic disposesObsAsync2 = d(54, 18, 53,
                 "A disposer method cannot have parameter(s) annotated with @jakarta.enterprise.event.Observes, @jakarta.enterprise.event.ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveDisposesOrConflictedAnnotations");
-        Diagnostic multiObsParams3 = d(58, 18, 52,
-                "Parameters name, name1 are annotated with @Observes or @ObservesAsync, but a method cannot contain more than one such parameter.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidMultipleObserverParams");
 
         Diagnostic obsBothAnnotations2 = d(58, 18, 52,
                 "A CDI method must not have parameter(s): name, name1 annotated with @Observes and @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidObservesObservesAsyncMethodParams");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs, multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2, disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2, multiObsParams3);
+        assertJavaDiagnostics(diagnosticsParams, utils, producesWithDisposes, producesWithObserves, producesWithAsync, producesDisposesObs,
+                multiObsParams1, producesObsAsync, producesDisposesAsync, multiObsParams2, obsBothAnnotations, producesAllThree2,
+                disposesWithObs, disposesWithAsync, producesAllThree, disposesObsAsync, disposesObsAsync2, obsBothAnnotations2);
 
         //Starting CodeAction tests
         JakartaJavaCodeActionParams paramsProducesDisposes = createCodeActionParams(uri, producesWithDisposes);
@@ -1488,5 +1487,57 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "The @Disposes annotation must not be defined on more than one parameter of a method.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "RemoveExtraDisposes");
         assertJavaDiagnostics(diagnosticsParams, utils, d);
+    }
+
+    @Test
+    public void interceptorWithObserverMethodTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/InterceptorWithObserverMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostics for interceptor with observer methods
+        // Diagnostic for method with @Observes parameter
+        Diagnostic observesDiagnostic = d(10, 16, 30,
+                "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
+
+        // Diagnostic for method with @ObservesAsync parameter
+        Diagnostic observesAsyncDiagnostic = d(15, 16, 35,
+                "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
+    }
+
+    @Test
+    public void decoratorWithObserverMethodTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/DecoratorWithObserverMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostics for decorator with observer methods
+        // Diagnostic for method with @Observes parameter
+        Diagnostic observesDiagnostic = d(13, 16, 30,
+                "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
+
+        // Diagnostic for method with @ObservesAsync parameter
+        Diagnostic observesAsyncDiagnostic = d(18, 16, 35,
+                "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
     }
 }
