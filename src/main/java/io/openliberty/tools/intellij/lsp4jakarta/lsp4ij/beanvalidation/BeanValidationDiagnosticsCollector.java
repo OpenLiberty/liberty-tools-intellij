@@ -173,7 +173,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 }
                 case VALID -> {
                     if (!isCascadableType(type)) {
-                        String source = getSource(isMethod, isField, annotationName, "InvalidValidAnnotation");
+                        String source = Messages.getMessage("InvalidValidAnnotation");
                         diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                                 source, DIAGNOSTIC_CODE_INVALID_VALID_ANNOTATION, annotationName, DiagnosticSeverity.Error));
                     }
@@ -255,26 +255,11 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             return false;
         }
 
-        // String and CharSequence are not cascadable
-        if (canonicalText.equals(STRING) || canonicalText.equals(CHAR_SEQUENCE)) {
-            return false;
-        }
-
-        // BigDecimal and BigInteger are not cascadable
-        if (canonicalText.equals(BIG_DECIMAL) || canonicalText.equals(BIG_INTEGER)) {
-            return false;
-        }
-
-        // Date/time types are not cascadable
-        if (canonicalText.equals(DATE) || canonicalText.equals(CALENDAR) ||
-            canonicalText.equals(INSTANT) || canonicalText.equals(LOCAL_DATE) ||
-            canonicalText.equals(LOCAL_DATE_TIME) || canonicalText.equals(LOCAL_TIME) ||
-            canonicalText.equals(MONTH_DAY) || canonicalText.equals(OFFSET_DATE_TIME) ||
-            canonicalText.equals(OFFSET_TIME) || canonicalText.equals(YEAR) ||
-            canonicalText.equals(YEAR_MONTH) || canonicalText.equals(ZONED_DATE_TIME) ||
-            canonicalText.equals(HIJRAH_DATE) || canonicalText.equals(JAPANESE_DATE) ||
-            canonicalText.equals(MINGUO_DATE) || canonicalText.equals(THAI_BUDDHIST_DATE)) {
-            return false;
+        // Check against known non-cascadable types
+        for (String nonCascadableType : NON_CASCADABLE_TYPES) {
+            if (canonicalText.equals(nonCascadableType)) {
+                return false;
+            }
         }
 
         // Collections and Maps are cascadable

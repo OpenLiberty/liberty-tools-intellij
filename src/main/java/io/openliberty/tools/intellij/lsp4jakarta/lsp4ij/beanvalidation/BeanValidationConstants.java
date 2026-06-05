@@ -81,4 +81,11 @@ public class BeanValidationConstants {
             .unmodifiableSet(new HashSet<String>(Arrays.asList(THAI_BUDDHIST_DATE, MINGUO_DATE, JAPANESE_DATE,
                     HIJRAH_DATE, ZONED_DATE_TIME, YEAR_MONTH, YEAR, OFFSET_TIME, OFFSET_DATE_TIME, MONTH_DAY,
                     LOCAL_TIME, LOCAL_DATE_TIME, LOCAL_DATE, INSTANT, CALENDAR, DATE)));
+
+    public final static String[] NON_CASCADABLE_TYPES = { STRING, CHAR_SEQUENCE, BIG_DECIMAL, BIG_INTEGER,
+                                                          DATE, CALENDAR, INSTANT, LOCAL_DATE,
+                                                          LOCAL_DATE_TIME, LOCAL_TIME, MONTH_DAY,
+                                                          OFFSET_DATE_TIME, OFFSET_TIME, YEAR,
+                                                          YEAR_MONTH, ZONED_DATE_TIME, HIJRAH_DATE,
+                                                          JAPANESE_DATE, MINGUO_DATE, THAI_BUDDHIST_DATE };
 }
