@@ -866,13 +866,13 @@ public class BeanValidationTest extends BaseJakartaTest {
                 "jakarta.validation.Valid");
 
         Diagnostic primitiveReturnMethod = d(57, 19, 36,
-                "The @Valid annotation cannot be used on methods returning non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation",
                 "InvalidValidAnnotationOnNonCascadableType",
                 "jakarta.validation.Valid");
 
         Diagnostic primitiveParameter = d(72, 52, 57,
-                "The @Valid annotation cannot be used on parameters with non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
+                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
                 DiagnosticSeverity.Error, "jakarta-bean-validation",
                 "InvalidValidAnnotationOnNonCascadableType",
                 "jakarta.validation.Valid");
