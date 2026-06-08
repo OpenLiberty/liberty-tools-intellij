@@ -3,11 +3,11 @@ package io.openliberty.sample.jakarta.ejb;
 import jakarta.ejb.Stateless;
 
 @Stateless
-public class InvalidStatelessBean {
+public class InvalidStatelessBeanPublic {
     private String name;
 
-    // Private constructor - should trigger diagnostic
-    private InvalidStatelessBean(String name) {
+    // Public parameterized constructor - should trigger diagnostic
+    public InvalidStatelessBeanPublic(String name) {
         this.name = name;
     }
 

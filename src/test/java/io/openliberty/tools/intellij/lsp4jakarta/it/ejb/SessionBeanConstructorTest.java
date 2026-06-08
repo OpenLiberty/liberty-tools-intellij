@@ -40,19 +40,19 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class SessionBeanConstructorTest extends BaseJakartaTest {
 
     @Test
-    public void testInvalidStatelessBean() throws Exception {
+    public void testInvalidStatelessBeanPrivate() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatelessBean.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatelessBeanPrivate.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 33,
+        Diagnostic d = d(5, 13, 40,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
@@ -63,37 +63,37 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateless;" +
                 "\n\n@Stateless" +
-                "\npublic class InvalidStatelessBean {" +
+                "\npublic class InvalidStatelessBeanPrivate {" +
                 "\n    private String name;" +
-                "\n\n    public InvalidStatelessBean() {" +
+                "\n\n    public InvalidStatelessBeanPrivate() {" +
                 "\n    }" +
                 "\n\n    // Private constructor - should trigger diagnostic" +
-                "\n    private InvalidStatelessBean(String name) {" +
+                "\n    private InvalidStatelessBeanPrivate(String name) {" +
                 "\n        this.name = name;" +
                 "\n    }" +
                 "\n\n    public String getName() {" +
                 "\n        return name;" +
                 "\n    }" +
-                "\n}";
-        TextEdit te = te(0, 0, 16, 1, newText);
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
         CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
     }
 
     @Test
-    public void testInvalidStatefulBean() throws Exception {
+    public void testInvalidStatefulBeanPrivate() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatefulBean.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatefulBeanPrivate.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 32,
+        Diagnostic d = d(5, 13, 39,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
@@ -104,37 +104,37 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateful;" +
                 "\n\n@Stateful" +
-                "\npublic class InvalidStatefulBean {" +
+                "\npublic class InvalidStatefulBeanPrivate {" +
                 "\n    private int count;" +
-                "\n\n    public InvalidStatefulBean() {" +
+                "\n\n    public InvalidStatefulBeanPrivate() {" +
                 "\n    }" +
                 "\n\n    // Private constructor - should trigger diagnostic" +
-                "\n    private InvalidStatefulBean(int count) {" +
+                "\n    private InvalidStatefulBeanPrivate(int count) {" +
                 "\n        this.count = count;" +
                 "\n    }" +
                 "\n\n    public int getCount() {" +
                 "\n        return count;" +
                 "\n    }" +
-                "\n}";
-        TextEdit te = te(0, 0, 16, 1, newText);
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
         CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
     }
 
     @Test
-    public void testInvalidSingletonBean() throws Exception {
+    public void testInvalidSingletonBeanPrivate() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidSingletonBean.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidSingletonBeanPrivate.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 33,
+        Diagnostic d = d(5, 13, 40,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
@@ -145,22 +145,145 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Singleton;" +
                 "\n\n@Singleton" +
-                "\npublic class InvalidSingletonBean {" +
+                "\npublic class InvalidSingletonBeanPrivate {" +
                 "\n    private String config;" +
-                "\n\n    public InvalidSingletonBean() {" +
+                "\n\n    public InvalidSingletonBeanPrivate() {" +
                 "\n    }" +
                 "\n\n    // Private constructor - should trigger diagnostic" +
-                "\n    private InvalidSingletonBean(String config) {" +
+                "\n    private InvalidSingletonBeanPrivate(String config) {" +
                 "\n        this.config = config;" +
                 "\n    }" +
                 "\n\n    public String getConfig() {" +
                 "\n        return config;" +
                 "\n    }" +
-                "\n}";
-        TextEdit te = te(0, 0, 16, 1, newText);
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
         CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
         assertJavaCodeAction(codeActionParams, utils, ca);
     }
+    @Test
+    public void testInvalidStatelessBeanPublic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatelessBeanPublic.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostic
+        Diagnostic d = d(5, 13, 39,
+                "Session beans must have a public no-arg constructor.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Test expected quick-fix
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Stateless;" +
+                "\n\n@Stateless" +
+                "\npublic class InvalidStatelessBeanPublic {" +
+                "\n    private String name;" +
+                "\n\n    public InvalidStatelessBeanPublic() {" +
+                "\n    }" +
+                "\n\n    // Public parameterized constructor - should trigger diagnostic" +
+                "\n    public InvalidStatelessBeanPublic(String name) {" +
+                "\n        this.name = name;" +
+                "\n    }" +
+                "\n\n    public String getName() {" +
+                "\n        return name;" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
+        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
+        assertJavaCodeAction(codeActionParams, utils, ca);
+    }
+
+    @Test
+    public void testInvalidStatefulBeanPublic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidStatefulBeanPublic.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostic
+        Diagnostic d = d(5, 13, 38,
+                "Session beans must have a public no-arg constructor.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Test expected quick-fix
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Stateful;" +
+                "\n\n@Stateful" +
+                "\npublic class InvalidStatefulBeanPublic {" +
+                "\n    private int count;" +
+                "\n\n    public InvalidStatefulBeanPublic() {" +
+                "\n    }" +
+                "\n\n    // Public parameterized constructor - should trigger diagnostic" +
+                "\n    public InvalidStatefulBeanPublic(int count) {" +
+                "\n        this.count = count;" +
+                "\n    }" +
+                "\n\n    public int getCount() {" +
+                "\n        return count;" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
+        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
+        assertJavaCodeAction(codeActionParams, utils, ca);
+    }
+
+    @Test
+    public void testInvalidSingletonBeanPublic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidSingletonBeanPublic.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostic
+        Diagnostic d = d(5, 13, 39,
+                "Session beans must have a public no-arg constructor.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Test expected quick-fix
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Singleton;" +
+                "\n\n@Singleton" +
+                "\npublic class InvalidSingletonBeanPublic {" +
+                "\n    private String config;" +
+                "\n\n    public InvalidSingletonBeanPublic() {" +
+                "\n    }" +
+                "\n\n    // Public parameterized constructor - should trigger diagnostic" +
+                "\n    public InvalidSingletonBeanPublic(String config) {" +
+                "\n        this.config = config;" +
+                "\n    }" +
+                "\n\n    public String getConfig() {" +
+                "\n        return config;" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit te = te(0, 0, 17, 0, newText);
+        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
+        assertJavaCodeAction(codeActionParams, utils, ca);
+    }
+
 
     @Test
     public void testValidStatelessBean() throws Exception {

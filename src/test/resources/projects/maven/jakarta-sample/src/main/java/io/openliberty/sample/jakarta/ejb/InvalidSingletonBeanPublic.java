@@ -3,11 +3,11 @@ package io.openliberty.sample.jakarta.ejb;
 import jakarta.ejb.Singleton;
 
 @Singleton
-public class InvalidSingletonBean {
+public class InvalidSingletonBeanPublic {
     private String config;
 
-    // Private constructor - should trigger diagnostic
-    private InvalidSingletonBean(String config) {
+    // Public parameterized constructor - should trigger diagnostic
+    public InvalidSingletonBeanPublic(String config) {
         this.config = config;
     }
 

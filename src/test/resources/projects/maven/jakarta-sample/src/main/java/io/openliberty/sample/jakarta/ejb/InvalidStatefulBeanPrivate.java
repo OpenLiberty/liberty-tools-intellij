@@ -3,11 +3,11 @@ package io.openliberty.sample.jakarta.ejb;
 import jakarta.ejb.Stateful;
 
 @Stateful
-public class InvalidStatefulBean {
+public class InvalidStatefulBeanPrivate {
     private int count;
 
     // Private constructor - should trigger diagnostic
-    private InvalidStatefulBean(int count) {
+    private InvalidStatefulBeanPrivate(int count) {
         this.count = count;
     }
 
