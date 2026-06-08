@@ -223,8 +223,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
     /**
      * isCascadableType
      * This method checks whether a type is cascadable for @Valid annotation.
-     * Non-cascadable types include: primitives, boxed types, String, and other simple types.
-     * Cascadable types include: complex objects, collections, arrays, and maps.
+     * Non-cascadable types include: primitives, primitive arrays, boxed types, String, and other simple types.
+     * Cascadable types include: complex objects, object arrays, collections, and maps.
      *
      * @param type the type to check
      * @return true if the type is cascadable, false otherwise
@@ -235,8 +235,14 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             return false;
         }
 
-        // Arrays are cascadable
+        // Check arrays: primitive arrays are NOT cascadable, object arrays are cascadable
         if (type instanceof PsiArrayType) {
+            PsiType componentType = ((PsiArrayType) type).getComponentType();
+            // If the component type is primitive, the array is not cascadable
+            if (componentType instanceof PsiPrimitiveType) {
+                return false;
+            }
+            // Object arrays are cascadable
             return true;
         }
 
@@ -255,8 +261,13 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             }
         }
 
-        // Collections and Maps are cascadable
+        // Enum types are not cascadable
         PsiClass resolvedClass = PsiUtil.resolveClassInClassTypeOnly(type);
+        if (resolvedClass != null && resolvedClass.isEnum()) {
+            return false;
+        }
+
+        // Collections and Maps are cascadable
         if (resolvedClass != null && (inheritsFrom(resolvedClass, COLLECTION_FQ) ||
                                       inheritsFrom(resolvedClass, MAP_FQ))) {
             return true;

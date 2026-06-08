@@ -64,6 +64,9 @@ public class BeanValidationConstants {
     public static final String STRING = "java.lang.String";
     public static final String BIG_INTEGER = "java.math.BigInteger";
     public static final String BIG_DECIMAL = "java.math.BigDecimal";
+    public static final String UUID = "java.util.UUID";
+    public static final String URI = "java.net.URI";
+    public static final String URL = "java.net.URL";
     public static final String COLLECTION_FQ = "java.util.Collection";
     public static final String MAP_FQ = "java.util.Map";
 
@@ -87,7 +90,8 @@ public class BeanValidationConstants {
                                                           LOCAL_DATE_TIME, LOCAL_TIME, MONTH_DAY,
                                                           OFFSET_DATE_TIME, OFFSET_TIME, YEAR,
                                                           YEAR_MONTH, ZONED_DATE_TIME, HIJRAH_DATE,
-                                                          JAPANESE_DATE, MINGUO_DATE, THAI_BUDDHIST_DATE };
+                                                          JAPANESE_DATE, MINGUO_DATE, THAI_BUDDHIST_DATE,
+                                                          UUID, URI, URL };
 
     public final static Set<String> WRAPPER_TYPES = Set.of(
             "java.lang.Boolean",

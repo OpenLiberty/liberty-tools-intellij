@@ -835,50 +835,48 @@ public class BeanValidationTest extends BaseJakartaTest {
 
         // Test diagnostics for @Valid on non-cascadable types
         // These should all produce errors
-        Diagnostic primitiveIntField = d(17, 16, 28,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
+        String msg = "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.";
+        
+        // Fields
+        Diagnostic primitiveIntField = d(20, 16, 28, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedIntegerField = d(24, 20, 32, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedByteField = d(27, 17, 26, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedShortField = d(30, 18, 28, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedLongField = d(33, 17, 26, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedFloatField = d(36, 18, 28, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedDoubleField = d(39, 19, 30, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedCharacterField = d(42, 22, 36, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedBooleanField = d(45, 20, 32, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic stringField = d(49, 19, 30, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic bigDecimalField = d(53, 23, 38, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic bigIntegerField = d(56, 23, 38, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic dateField = d(60, 17, 26, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic localDateField = d(63, 22, 36, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic uuidField = d(67, 27, 36, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic uriField = d(70, 25, 33, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic urlField = d(73, 25, 33, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic enumField = d(77, 19, 28, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic primitiveIntArray = d(81, 18, 35, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic primitiveBooleanArray = d(84, 22, 43, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic primitiveDoubleArray = d(87, 21, 41, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        
+        // Methods
+        Diagnostic primitiveReturnMethod = d(111, 19, 36, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedLongReturnMethod = d(117, 16, 34, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic primitiveArrayReturnMethod = d(123, 17, 40, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        
+        // Parameters
+        Diagnostic primitiveParameter = d(144, 52, 57, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic boxedParameter = d(149, 52, 57, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
+        Diagnostic primitiveArrayParameter = d(154, 59, 65, msg, DiagnosticSeverity.Error, "jakarta-bean-validation", "InvalidValidAnnotationOnNonCascadableType", "jakarta.validation.Valid");
 
-        Diagnostic boxedIntegerField = d(21, 20, 32,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        Diagnostic stringField = d(25, 19, 30,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        Diagnostic boxedDoubleField = d(29, 19, 30,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        Diagnostic bigDecimalField = d(33, 23, 38,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        Diagnostic primitiveReturnMethod = d(57, 19, 36,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        Diagnostic primitiveParameter = d(72, 52, 57,
-                "The @Valid annotation cannot be used on non-cascadable types (primitives, boxed types, String, etc.). It is only valid for complex types that support cascading validation.",
-                DiagnosticSeverity.Error, "jakarta-bean-validation",
-                "InvalidValidAnnotationOnNonCascadableType",
-                "jakarta.validation.Valid");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, primitiveIntField, boxedIntegerField, stringField,
-                              boxedDoubleField, bigDecimalField, primitiveReturnMethod, primitiveParameter);
+        assertJavaDiagnostics(diagnosticsParams, utils,
+                primitiveIntField, boxedIntegerField, boxedByteField, boxedShortField, boxedLongField,
+                boxedFloatField, boxedDoubleField, boxedCharacterField, boxedBooleanField, stringField,
+                bigDecimalField, bigIntegerField, dateField, localDateField, uuidField, uriField, urlField,
+                enumField, primitiveIntArray, primitiveBooleanArray, primitiveDoubleArray,
+                primitiveReturnMethod, boxedLongReturnMethod, primitiveArrayReturnMethod,
+                primitiveParameter, boxedParameter, primitiveArrayParameter);
     }
 
 }
