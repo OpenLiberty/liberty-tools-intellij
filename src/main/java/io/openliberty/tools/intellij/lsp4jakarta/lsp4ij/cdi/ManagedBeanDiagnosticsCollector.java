@@ -302,6 +302,20 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
                 }
+                
+                // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+                // They should only use @Dependent scope
+                if (interceptorOrDecorator) {
+                    List<String> foundInvalidScopes = getMatchedJavaElementNames(type,
+                            Stream.of(typeAnnotations).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                            INVALID_INTERCEPTOR_DECORATOR_SCOPES);
+                    if (!foundInvalidScopes.isEmpty()) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
+                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE, null,
+                                DiagnosticSeverity.Error));
+                    }
+                }
             }
 
             /*
