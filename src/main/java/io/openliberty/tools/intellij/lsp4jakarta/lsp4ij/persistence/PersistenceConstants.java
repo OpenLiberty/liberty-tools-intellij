@@ -44,6 +44,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_MISSING_TEMPORAL = "MissingTemporalAnnotation";
     public static final String DIAGNOSTIC_CODE_DUPLICATE_VERSION = "MultipleVersionAnnotations";
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
+    public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldType";
 
 
     /* MapKey Codes */
@@ -57,6 +58,15 @@ public class PersistenceConstants {
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
+    public static final String[] SUPPORTED_VERSION_TYPES = {
+            "int",
+            "java.lang.Integer",
+            "short",
+            "java.lang.Short",
+            "long",
+            "java.lang.Long",
+            "java.sql.Timestamp"
+    };
 
     public static final String UTIL_DATE = "java.util.Date";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
