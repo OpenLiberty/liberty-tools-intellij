@@ -244,14 +244,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         String canonicalText = type.getCanonicalText();
 
         // Boxed primitive types are not cascadable
-        if (canonicalText.equals("java.lang.Boolean") ||
-            canonicalText.equals("java.lang.Byte") ||
-            canonicalText.equals("java.lang.Character") ||
-            canonicalText.equals("java.lang.Short") ||
-            canonicalText.equals("java.lang.Integer") ||
-            canonicalText.equals("java.lang.Long") ||
-            canonicalText.equals("java.lang.Float") ||
-            canonicalText.equals("java.lang.Double")) {
+        if (WRAPPER_TYPES.contains(canonicalText)) {
             return false;
         }
 

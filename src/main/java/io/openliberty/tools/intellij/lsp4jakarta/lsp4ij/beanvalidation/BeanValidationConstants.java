@@ -88,4 +88,15 @@ public class BeanValidationConstants {
                                                           OFFSET_DATE_TIME, OFFSET_TIME, YEAR,
                                                           YEAR_MONTH, ZONED_DATE_TIME, HIJRAH_DATE,
                                                           JAPANESE_DATE, MINGUO_DATE, THAI_BUDDHIST_DATE };
+
+    public final static Set<String> WRAPPER_TYPES = Set.of(
+            "java.lang.Boolean",
+            "java.lang.Byte",
+            "java.lang.Character",
+            "java.lang.Short",
+            "java.lang.Integer",
+            "java.lang.Long",
+            "java.lang.Float",
+            "java.lang.Double"
+    );
 }
