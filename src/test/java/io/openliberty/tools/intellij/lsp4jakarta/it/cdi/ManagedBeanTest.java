@@ -1555,20 +1555,20 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics for producer fields with @Named annotation
         // Diagnostic for producer field with @Named("config")
-        Diagnostic d1 = d(12, 4, 20,
+        Diagnostic namedConfigDiagnostic = d(12, 4, 20,
                 "Producer fields must not declare a bean name using @Named annotation.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidProducerFieldWithNamedAnnotation");
 
         // Diagnostic for producer field with @Named (no value)
-        Diagnostic d2 = d(17, 4, 10,
+        Diagnostic namedGreetingDiagnostic = d(17, 4, 10,
                 "Producer fields must not declare a bean name using @Named annotation.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidProducerFieldWithNamedAnnotation");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, namedConfigDiagnostic, namedGreetingDiagnostic);
 
         // Test quickfix for first diagnostic (remove @Named("config"))
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, namedConfigDiagnostic);
+        String newTextWithoutNamedConfig = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.inject.Named;\n" +
@@ -1592,13 +1592,13 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "@Produces\n    " +
                 "private Integer count = 0;\n" +
                 "}\n";
-        TextEdit te1 = te(0, 0, 31, 0, newText1);
-        CodeAction ca1 = ca(uri, "Remove @Named", d1, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        TextEdit removeNamedConfigEdit = te(0, 0, 31, 0, newTextWithoutNamedConfig);
+        CodeAction removeNamedConfigAction = ca(uri, "Remove @Named", namedConfigDiagnostic, removeNamedConfigEdit);
+        assertJavaCodeAction(codeActionParams1, utils, removeNamedConfigAction);
 
         // Test quickfix for second diagnostic (remove @Named)
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, namedGreetingDiagnostic);
+        String newTextWithoutNamedGreeting = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
                 "import jakarta.enterprise.inject.Produces;\n" +
                 "import jakarta.inject.Named;\n" +
@@ -1622,8 +1622,8 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "@Produces\n    " +
                 "private Integer count = 0;\n" +
                 "}\n";
-        TextEdit te2 = te(0, 0, 31, 0, newText2);
-        CodeAction ca2 = ca(uri, "Remove @Named", d2, te2);
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
+        TextEdit removeNamedGreetingEdit = te(0, 0, 31, 0, newTextWithoutNamedGreeting);
+        CodeAction removeNamedGreetingAction = ca(uri, "Remove @Named", namedGreetingDiagnostic, removeNamedGreetingEdit);
+        assertJavaCodeAction(codeActionParams2, utils, removeNamedGreetingAction);
     }
 }

@@ -14,16 +14,18 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationConflictQuickFix;
 
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.NAMED_FQ_NAME;
+
 /**
  * Quick fix for removing @Named annotation from producer fields
- * 
+ *
  * Producer fields must not declare a bean name using @Named annotation.
  *
  */
 public class RemoveNamedAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
     public RemoveNamedAnnotationQuickFix() {
-        super(false, "jakarta.inject.Named");
+        super(false, NAMED_FQ_NAME);
     }
 
     @Override
