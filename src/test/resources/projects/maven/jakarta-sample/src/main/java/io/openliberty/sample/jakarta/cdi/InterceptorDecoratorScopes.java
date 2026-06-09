@@ -38,6 +38,13 @@ class ValidDecoratorWithDependent {
 class InvalidInterceptorWithMultipleScopes {
 }
 
+// Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple invalid scopes)
+@Decorator
+@Dependent
+@ApplicationScoped
+class InvalidDecoratorWithMultipleScopes {
+}
+
 // Valid: @Decorator with no scope annotation (defaults to @Dependent)
 @Decorator
 class ValidDecoratorWithNoScope {

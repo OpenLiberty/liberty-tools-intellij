@@ -78,7 +78,21 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, interceptorMultipleScopesDecl, interceptorWithMultipleScopes, decoratorWithReqScoped, interceptorWithAppScoped);
+        // Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple scopes)
+        JsonArray decoratorData = new JsonArray();
+        decoratorData.add("jakarta.enterprise.context.Dependent");
+        decoratorData.add("jakarta.enterprise.context.ApplicationScoped");
+        Diagnostic decoratorMultipleScopesDecl = d(44, 6, 40,
+                "Scope type annotations must be specified by a managed bean class at most once.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl", decoratorData);
+
+        // Invalid: @Decorator with @Dependent and @ApplicationScoped (has invalid scope)
+        Diagnostic decoratorWithMultipleScopes = d(44, 6, 40,
+                "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, interceptorMultipleScopesDecl, interceptorWithMultipleScopes,
+                decoratorMultipleScopesDecl, decoratorWithMultipleScopes, decoratorWithReqScoped, interceptorWithAppScoped);
 
         // Test quick fix for @Interceptor with @ApplicationScoped - replace with @Dependent
         JakartaJavaCodeActionParams interceptorAppScopedParams = createCodeActionParams(uri, interceptorWithAppScoped);
@@ -90,10 +104,12 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "// Valid: @Interceptor with @Dependent\n@Interceptor\n@Dependent\nclass ValidInterceptorWithDependent {\n}\n\n" +
                 "// Valid: @Decorator with @Dependent\n@Decorator\n@Dependent\nclass ValidDecoratorWithDependent {\n}\n\n" +
                 "// Invalid: @Interceptor with @Dependent and @SessionScoped (has invalid scope)\n@Interceptor\n@Dependent\n@SessionScoped\n" +
-                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
+                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple invalid scopes)\n" +
+                "@Decorator\n@Dependent\n@ApplicationScoped\nclass InvalidDecoratorWithMultipleScopes {\n}\n\n" +
+                "// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
                 "@Decorator\nclass ValidDecoratorWithNoScope {\n}\n\n// Valid: @Interceptor with no scope annotation (defaults to @Dependent)\n" +
                 "@Interceptor\nclass ValidInterceptorWithNoScope {\n}\n";
-        TextEdit interceptorAppScopedEdit = te(0, 0, 49, 0, newText1);
+        TextEdit interceptorAppScopedEdit = te(0, 0, 56, 0, newText1);
         CodeAction interceptorAppScopedAction = ca(uri, "Replace current scope with @Dependent",
                 interceptorWithAppScoped, interceptorAppScopedEdit);
         assertJavaCodeAction(interceptorAppScopedParams, utils, interceptorAppScopedAction);
@@ -108,10 +124,12 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "// Valid: @Interceptor with @Dependent\n@Interceptor\n@Dependent\nclass ValidInterceptorWithDependent {\n}\n\n" +
                 "// Valid: @Decorator with @Dependent\n@Decorator\n@Dependent\nclass ValidDecoratorWithDependent {\n}\n\n" +
                 "// Invalid: @Interceptor with @Dependent and @SessionScoped (has invalid scope)\n@Interceptor\n@Dependent\n@SessionScoped\n" +
-                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
+                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple invalid scopes)\n" +
+                "@Decorator\n@Dependent\n@ApplicationScoped\nclass InvalidDecoratorWithMultipleScopes {\n}\n\n" +
+                "// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
                 "@Decorator\nclass ValidDecoratorWithNoScope {\n}\n\n// Valid: @Interceptor with no scope annotation (defaults to @Dependent)\n" +
                 "@Interceptor\nclass ValidInterceptorWithNoScope {\n}\n";
-        TextEdit decoratorReqScopedEdit = te(0, 0, 49, 0, newText2);
+        TextEdit decoratorReqScopedEdit = te(0, 0, 56, 0, newText2);
         CodeAction decoratorReqScopedAction = ca(uri, "Replace current scope with @Dependent", decoratorWithReqScoped,
                 decoratorReqScopedEdit);
         assertJavaCodeAction(decoratorReqScopedParams, utils, decoratorReqScopedAction);
@@ -127,12 +145,35 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "// Valid: @Interceptor with @Dependent\n@Interceptor\n@Dependent\nclass ValidInterceptorWithDependent {\n}\n\n" +
                 "// Valid: @Decorator with @Dependent\n@Decorator\n@Dependent\nclass ValidDecoratorWithDependent {\n}\n\n" +
                 "// Invalid: @Interceptor with @Dependent and @SessionScoped (has invalid scope)\n@Dependent\n@Interceptor\n" +
-                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
+                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple invalid scopes)\n" +
+                "@Decorator\n@Dependent\n@ApplicationScoped\nclass InvalidDecoratorWithMultipleScopes {\n}\n\n" +
+                "// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
                 "@Decorator\nclass ValidDecoratorWithNoScope {\n}\n\n// Valid: @Interceptor with no scope annotation (defaults to @Dependent)\n" +
                 "@Interceptor\nclass ValidInterceptorWithNoScope {\n}\n";
-        TextEdit interceptorMultiScopesEdit = te(0, 0, 49, 0, newText3);
+        TextEdit interceptorMultiScopesEdit = te(0, 0, 56, 0, newText3);
         CodeAction interceptorMultiScopesAction = ca(uri, "Replace current scope with @Dependent",
                 interceptorWithMultipleScopes, interceptorMultiScopesEdit);
         assertJavaCodeAction(interceptorMultiScopesParams, utils, interceptorMultiScopesAction);
+
+        // Test quick fix for @Decorator with multiple scopes - replace with @Dependent
+        JakartaJavaCodeActionParams decoratorMultiScopesParams = createCodeActionParams(uri,
+                decoratorWithMultipleScopes);
+        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.interceptor.Interceptor;\nimport jakarta.decorator.Decorator;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\nimport jakarta.enterprise.context.SessionScoped;\n\n" +
+                "// Invalid: @Interceptor with @ApplicationScoped\n@Interceptor\n@ApplicationScoped\npublic class InterceptorDecoratorScopes {\n}\n\n" +
+                "// Invalid: @Decorator with @RequestScoped\n@Decorator\n@RequestScoped\nclass InvalidDecoratorWithRequestScoped {\n}\n\n" +
+                "// Valid: @Interceptor with @Dependent\n@Interceptor\n@Dependent\nclass ValidInterceptorWithDependent {\n}\n\n" +
+                "// Valid: @Decorator with @Dependent\n@Decorator\n@Dependent\nclass ValidDecoratorWithDependent {\n}\n\n" +
+                "// Invalid: @Interceptor with @Dependent and @SessionScoped (has invalid scope)\n@Interceptor\n@Dependent\n@SessionScoped\n" +
+                "class InvalidInterceptorWithMultipleScopes {\n}\n\n// Invalid: @Decorator with @Dependent and @ApplicationScoped (has multiple invalid scopes)\n" +
+                "@Dependent\n@Decorator\nclass InvalidDecoratorWithMultipleScopes {\n}\n\n" +
+                "// Valid: @Decorator with no scope annotation (defaults to @Dependent)\n" +
+                "@Decorator\nclass ValidDecoratorWithNoScope {\n}\n\n// Valid: @Interceptor with no scope annotation (defaults to @Dependent)\n" +
+                "@Interceptor\nclass ValidInterceptorWithNoScope {\n}\n";
+        TextEdit decoratorMultiScopesEdit = te(0, 0, 56, 0, newText4);
+        CodeAction decoratorMultiScopesAction = ca(uri, "Replace current scope with @Dependent",
+                decoratorWithMultipleScopes, decoratorMultiScopesEdit);
+        assertJavaCodeAction(decoratorMultiScopesParams, utils, decoratorMultiScopesAction);
     }
 }
