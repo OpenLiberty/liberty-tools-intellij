@@ -191,6 +191,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
                 List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
+                boolean hasDisposerAnnotation = false;
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -202,11 +203,24 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (!observesObservesAsync.isEmpty()) {
                         paramsWithObserverAnnotations.add(param);
                     }
+                    // Track parameters with @Disposes annotation for interceptor/decorator classes only
+                    if (interceptorOrDecorator && !hasDisposerAnnotation) {
+                        List<String> disposerAnnotations = getMatchedJavaElementNames(type, annotationQualifiedNames, INVALID_DISPOSER_FQ_PARAMS);
+                        if (!disposerAnnotations.isEmpty()) {
+                            hasDisposerAnnotation = true;
+                        }
+                    }
                 }
                 if (interceptorOrDecorator && !paramsWithObserverAnnotations.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit,
                             Messages.getMessage("InvalidInterceptorOrDecoratorWithObserverMethod"),
                             DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
+                            null,
+                            DiagnosticSeverity.Error));
+                } else if (interceptorOrDecorator && hasDisposerAnnotation) {
+                    diagnostics.add(createDiagnostic(method, unit,
+                            Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER,
                             null,
                             DiagnosticSeverity.Error));
                 } else if (!conflictParams.isEmpty()) {
