@@ -1,90 +1,116 @@
-/*******************************************************************************
- * Copyright (c) 2026 IBM Corporation and others.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
 package io.openliberty.sample.jakarta.jsonb;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.*;
 
-/**
- * Test class demonstrating invalid Jsonb.close() usage with concurrent threads.
- * This should trigger a diagnostic warning.
- */
 public class JsonbCloseInvalid {
 
-    /**
-     * Invalid: close() is called without proper thread synchronization.
-     * A thread is started but not joined before closing the Jsonb instance.
-     */
-    public void unsafeCloseWithThread() throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-        
-        Thread thread = new Thread(() -> {
-            // Thread might still be using jsonb
-            String json = jsonb.toJson(new Object());
+	private static final Jsonb jsonb = JsonbBuilder.create();
+
+	public static void main(String[] args) throws Exception {
+	        useThreadFactory();
+	        useExecutorService();
+	        useCompletableFuture();
+	        useThreadDirect();
+	        useTimer();
+	        reuseJsonbInstance();
+	        singleThreadedWithClose();
+	        closeAfterExecutorTermination();
+	}
+	private static void useThreadFactory() throws Exception {
+	        ThreadFactory factory = r -> new Thread(r, "custom-thread");
+	        Thread t = factory.newThread(() -> {
+	            String json = jsonb.toJson("ThreadFactory example");
+	        });
+	        t.start();
+	}
+	private static void useExecutorService() throws Exception {
+	        ExecutorService executor = Executors.newFixedThreadPool(2);
+	        executor.submit(() -> {
+	            jsonb.toJson("Executor example");
+	        });
+	}
+	private static void useCompletableFuture() throws Exception {
+	        CompletableFuture.runAsync(() -> {
+	            String json = jsonb.toJson("CompletableFuture example");
+	        });
+	}
+	private static void useThreadDirect() throws Exception {
+        Thread t = new Thread(() -> {
+            String json = jsonb.toJson("Direct Thread example");
         });
-        thread.start();
-        
-        // WARNING: close() called without waiting for thread to finish
-        jsonb.close();
+        t.start();
     }
-
-    /**
-     * Invalid: close() is called with executor service without proper shutdown.
-     */
-    public void unsafeCloseWithExecutor() throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
-        
-        executor.submit(() -> {
-            String json = jsonb.toJson(new Object());
-            return json;
-        });
-        
-        // WARNING: close() called without executor shutdown/awaitTermination
-        jsonb.close();
+	private static void useTimer() throws Exception {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                String json = jsonb.toJson("Timer example");
+            }
+        }, 1000);
     }
-
-    /**
-     * Invalid: close() with multiple thread operations and no synchronization.
-     */
-    public void unsafeCloseWithMultipleThreads() throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-        
-        Thread t1 = new Thread(() -> jsonb.toJson("data1"));
-        Thread t2 = new Thread(() -> jsonb.toJson("data2"));
-        
-        t1.start();
-        t2.start();
-        
-        // WARNING: close() called without joining threads
-        jsonb.close();
+	public static void reuseJsonbInstance() {
+        // Multiple operations with the same instance
+        for (int i = 0; i < 5; i++) {
+            String json = jsonb.toJson(new Person("Person" + i, 20 + i));
+        }
+        // No close() - instance can be reused or garbage collected naturally
     }
-
-    /**
-     * Invalid: Runnable with execute and no synchronization.
-     */
-    public void unsafeCloseWithRunnable() throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-        java.util.concurrent.Executor executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+	public static void singleThreadedWithClose() throws Exception {
+        try {
+            String json = jsonb.toJson(new Person("Jane", 25));
+        } finally {
+            // VALID: No threads, so close() is safe
+            jsonb.close();
+        }
+    }
+	public static void closeAfterExecutorTermination() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         
-        Runnable task = () -> {
-            jsonb.toJson(new Object());
-        };
-        executor.execute(task);
-        
-        // WARNING: close() called without synchronization
+        // Submit tasks that use jsonb
+        for (int i = 0; i < 10; i++) {
+            final int taskNum = i;
+            executor.submit(() -> {
+                String json = jsonb.toJson(new Person("Person" + taskNum, 20 + taskNum));
+            });
+        }
         jsonb.close();
+        // VALID: Properly shutdown and wait for termination
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES);
+        // Now it's safe to close - all tasks have completed
+    }
+	private static class Person {
+        private String name;
+        private int age;
+
+        public Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public Person() {
+            // Default constructor for JSON-B
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
     }
 }
-
-// Made with Bob

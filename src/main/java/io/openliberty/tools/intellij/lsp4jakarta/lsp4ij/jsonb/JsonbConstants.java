@@ -67,5 +67,61 @@ public class JsonbConstants {
     public static final String JOIN_METHOD = "join";
     public static final String SHUTDOWN_METHOD = "shutdown";
     public static final String AWAIT_TERMINATION_METHOD = "awaitTermination";
+    
+    // Thread-related method names for closeable diagnostics
+    public static final List<String> THREAD_METHODS = List.of(
+        "submit", "execute", "schedule", "scheduleAtFixedRate",
+        "scheduleWithFixedDelay", "runAsync", "supplyAsync",
+        "parallelStream", "newThread", "start",
+        "runLater", "invokeLater", "subscribeOn",
+        "publishOn", "observeOn", "scheduleJob", "scheduleTask",
+        "invokeAll", "invokeAny", "map", "forEach"
+    );
+    
+    // Thread-related class names for closeable diagnostics
+    public static final List<String> THREAD_CLASSES = List.of(
+        "java.util.concurrent.ExecutorService",
+        "java.util.concurrent.ThreadPoolExecutor",
+        "java.util.concurrent.ScheduledExecutorService",
+        "java.util.concurrent.ForkJoinPool",
+        "java.util.concurrent.CompletableFuture",
+        "java.util.Timer",
+        "java.lang.Thread",
+        "java.util.concurrent.Executors",
+        "java.util.concurrent.Executor",
+        "java.util.stream.Stream",
+        "javax.swing.SwingWorker",
+        "javafx.application.Platform",
+        "reactor.core.publisher.Flux",
+        "reactor.core.publisher.Mono",
+        "io.reactivex.Observable",
+        "io.reactivex.Flowable",
+        "org.quartz.Scheduler",
+        "org.springframework.scheduling.TaskScheduler"
+    );
+    
+    // Thread-related interface and class names for type hierarchy checking
+    public static final String JAVA_LANG_RUNNABLE = "java.lang.Runnable";
+    public static final String JAVA_UTIL_CONCURRENT_CALLABLE = "java.util.concurrent.Callable";
+    public static final String JAVA_UTIL_CONCURRENT_EXECUTOR = "java.util.concurrent.Executor";
+    public static final String JAVA_UTIL_CONCURRENT_EXECUTOR_SERVICE = "java.util.concurrent.ExecutorService";
+    public static final String JAVA_UTIL_CONCURRENT_SCHEDULED_EXECUTOR_SERVICE = "java.util.concurrent.ScheduledExecutorService";
+    public static final String JAVA_LANG_THREAD = "java.lang.Thread";
+    public static final String JAVA_UTIL_TIMER_TASK = "java.util.TimerTask";
+    
+    // List of all thread-related types for hierarchy checking
+    public static final List<String> THREAD_HIERARCHY_TYPES = List.of(
+        JAVA_LANG_RUNNABLE,
+        JAVA_UTIL_CONCURRENT_CALLABLE,
+        JAVA_UTIL_CONCURRENT_EXECUTOR,
+        JAVA_UTIL_CONCURRENT_EXECUTOR_SERVICE,
+        JAVA_UTIL_CONCURRENT_SCHEDULED_EXECUTOR_SERVICE,
+        JAVA_LANG_THREAD,
+        JAVA_UTIL_TIMER_TASK
+    );
+    
+    // Closeable-related constants
+    public static final String CLOSABLE_CLOSE = "java.io.Closeable";
+    public static final String AUTOCLOSABLE_CLOSE = "java.lang.AutoCloseable";
 
 }
