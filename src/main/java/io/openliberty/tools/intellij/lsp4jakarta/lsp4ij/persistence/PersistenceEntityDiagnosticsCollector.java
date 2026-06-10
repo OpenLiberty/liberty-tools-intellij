@@ -430,7 +430,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
         if (!isValidType) {
             diagnostics.add(createDiagnostic(element, unit,
-                    Messages.getMessage("InvalidVersionFieldType"),
+                    Messages.getMessage("InvalidVersionFieldOrPropertyType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
                     DiagnosticSeverity.Error));
         }

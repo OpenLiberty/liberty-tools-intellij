@@ -729,8 +729,8 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Test diagnostic for invalid @Version field type (String)
         Diagnostic invalidVersionTypeD1 = d(13, 19, 26,
-                "The @Version annotation must be applied to a field of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldType");
+                "A field or property annotated with @Version must be of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldOrPropertyType");
 
         assertJavaDiagnostics(diagnosticsParams, utils, invalidVersionTypeD1);
     }
@@ -765,8 +765,8 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Test diagnostic for invalid @Version method return type (String)
         Diagnostic invalidVersionTypeD1 = d(26, 18, 28,
-                "The @Version annotation must be applied to a field of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldType");
+                "A field or property annotated with @Version must be of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldOrPropertyType");
 
         assertJavaDiagnostics(diagnosticsParams, utils, invalidVersionTypeD1);
     }
