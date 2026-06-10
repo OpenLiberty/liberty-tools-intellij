@@ -239,11 +239,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         if (type instanceof PsiArrayType) {
             PsiType componentType = ((PsiArrayType) type).getComponentType();
             // If the component type is primitive, the array is not cascadable
-            if (componentType instanceof PsiPrimitiveType) {
-                return false;
-            }
             // Object arrays are cascadable
-            return true;
+            return !(componentType instanceof PsiPrimitiveType);
         }
 
         // Get the canonical text for comparison
