@@ -54,7 +54,7 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
         // Test expected diagnostic for interceptor with disposer method
         // Diagnostic for method with @Disposes parameter
         Diagnostic disposesDiagnostic = d(9, 16, 30,
-                "Interceptors and Decorators cannot have methods with parameters annotated with @Disposes.",
+                "Interceptors and Decorators cannot have methods with parameter(s) 'resource' annotated with @Disposes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithDisposerMethod");
 
         assertJavaDiagnostics(diagnosticsParams, utils, disposesDiagnostic);
@@ -95,7 +95,7 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
         // Test expected diagnostic for decorator with disposer method
         // Diagnostic for method with @Disposes parameter
         Diagnostic disposesDiagnostic = d(9, 16, 30,
-                "Interceptors and Decorators cannot have methods with parameters annotated with @Disposes.",
+                "Interceptors and Decorators cannot have methods with parameter(s) 'resource' annotated with @Disposes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithDisposerMethod");
 
         assertJavaDiagnostics(diagnosticsParams, utils, disposesDiagnostic);

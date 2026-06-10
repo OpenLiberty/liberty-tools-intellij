@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
@@ -191,7 +192,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
                 List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
-                boolean hasDisposerAnnotation = false;
+                List<PsiParameter> paramsWithDisposerAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -204,10 +205,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         paramsWithObserverAnnotations.add(param);
                     }
                     // Track parameters with @Disposes annotation for interceptor/decorator classes only
-                    if (interceptorOrDecorator && !hasDisposerAnnotation) {
+                    if (interceptorOrDecorator) {
                         List<String> disposerAnnotations = getMatchedJavaElementNames(type, annotationQualifiedNames, INVALID_DISPOSER_FQ_PARAMS);
                         if (!disposerAnnotations.isEmpty()) {
-                            hasDisposerAnnotation = true;
+                            paramsWithDisposerAnnotations.add(param);
                         }
                     }
                 }
@@ -217,9 +218,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
                             null,
                             DiagnosticSeverity.Error));
-                } else if (interceptorOrDecorator && hasDisposerAnnotation) {
+                } else if (interceptorOrDecorator && !paramsWithDisposerAnnotations.isEmpty()) {
+                    String paramNames = paramsWithDisposerAnnotations.stream()
+                            .map(PsiParameter::getName)
+                            .collect(java.util.stream.Collectors.joining(", "));
                     diagnostics.add(createDiagnostic(method, unit,
-                            Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod"),
+                            Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod", paramNames),
                             DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER,
                             null,
                             DiagnosticSeverity.Error));
@@ -231,7 +235,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
                     String paramNames = paramsWithObserverAnnotations.stream()
                             .map(PsiParameter::getName)
-                            .collect(java.util.stream.Collectors.joining(", "));
+                            .collect(Collectors.joining(", "));
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
                             DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 } else if (isDependent && hasConditionalObserverAnnotation(type, method)) {
