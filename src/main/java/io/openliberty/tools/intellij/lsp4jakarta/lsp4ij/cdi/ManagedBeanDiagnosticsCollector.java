@@ -140,7 +140,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     for (PsiAnnotation annotation : field.getAnnotations()) {
                         if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
                             diagnostics.add(createDiagnostic(annotation, unit,
-                                    Messages.getMessage("ProducerFieldWithNamedAnnotation"),
+                                    Messages.getMessage("ProducerFieldWithNamedAnnotation", field.getName()),
                                     DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED, null,
                                     DiagnosticSeverity.Error));
                             break;
