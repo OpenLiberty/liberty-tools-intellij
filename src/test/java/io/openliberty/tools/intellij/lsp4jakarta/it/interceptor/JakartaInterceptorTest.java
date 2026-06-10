@@ -347,12 +347,22 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
+        Diagnostic multipleFinalModifierDiagnostic = JakartaForJavaAssert.d(21, 31, 50,
+                "AroundConstruct interceptor method must not be declared as a final method.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnFinalMethod",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
+        Diagnostic multipleStaticModifierDiagnostic = JakartaForJavaAssert.d(21, 31, 50,
+                "AroundConstruct lifecycle callback interceptor method must not be declared as static except in an application client.",
+                DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
         Diagnostic invalidAbstractClassDiagnostics = JakartaForJavaAssert.d(5, 22, 51,
                 "The class InvalidAroundConstructMethods should not contain the abstract modifier. If it contains the abstract modifier, the class should not be annotated with @Interceptor.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnAbstractClass");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, proceedDiagnostics, staticModifierDiagnostic,
-                invalidAbstractClassDiagnostics);
+                 multipleFinalModifierDiagnostic, multipleStaticModifierDiagnostic, invalidAbstractClassDiagnostics);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -372,6 +382,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "\n" +
                 "    @AroundConstruct\n" +
                 "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "\n" +
@@ -402,13 +417,18 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "    }\n" +
                 "\n" +
                 "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
                 "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "}";
 
-        TextEdit removeAroundConstructOnFinalEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText6);
-        TextEdit removeFinalEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText7);
+        TextEdit removeAroundConstructOnFinalEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText6);
+        TextEdit removeFinalEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText7);
         CodeAction removeAroundConstructOnFinalAction = JakartaForJavaAssert.ca(uri, "Remove @AroundConstruct", finalModifierDiagnostic, removeAroundConstructOnFinalEdit);
         CodeAction removeFinalAction = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", finalModifierDiagnostic, removeFinalEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams1, utils, removeAroundConstructOnFinalAction, removeFinalAction);
@@ -431,6 +451,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "\n" +
                 "    @AroundConstruct\n" +
                 "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "\n" +
@@ -461,13 +486,18 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "    }\n" +
                 "\n" +
                 "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
                 "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "}";
 
-        TextEdit removeAroundConstructOnAbstractEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText8);
-        TextEdit removeAbstractEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText9);
+        TextEdit removeAroundConstructOnAbstractEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText8);
+        TextEdit removeAbstractEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText9);
         CodeAction removeAroundConstructOnAbstractAction = JakartaForJavaAssert.ca(uri, "Remove @AroundConstruct", abstractModifierDiagnostic, removeAroundConstructOnAbstractEdit);
         CodeAction removeAbstractAction = JakartaForJavaAssert.ca(uri, "Remove the 'abstract' modifier from this method", abstractModifierDiagnostic, removeAbstractEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, removeAroundConstructOnAbstractAction, removeAbstractAction);
@@ -490,6 +520,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "    public abstract Object logAbstract(InvocationContext ctx) throws Exception;\n" +
                 "\n" +
                 "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "\n" +
@@ -520,16 +555,154 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "    }\n" +
                 "\n" +
                 "    @AroundConstruct\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
                 "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
                 "        return ctx.proceed();\n" +
                 "    }\n" +
                 "}";
 
-        TextEdit removeAroundConstructOnStaticEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText10);
-        TextEdit removeStaticEdit = JakartaForJavaAssert.te(0, 0, 24, 1, newText11);
+        TextEdit removeAroundConstructOnStaticEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText10);
+        TextEdit removeStaticEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText11);
         CodeAction removeAroundConstructOnStaticAction = JakartaForJavaAssert.ca(uri, "Remove @AroundConstruct", staticModifierDiagnostic, removeAroundConstructOnStaticEdit);
         CodeAction removeStaticAction = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", staticModifierDiagnostic, removeStaticEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams3, utils, removeAroundConstructOnStaticAction, removeStaticAction);
+
+        // Test code actions for multiple modifiers
+        JakartaJavaCodeActionParams codeActionParams4 = JakartaForJavaAssert.createCodeActionParams(uri, multipleStaticModifierDiagnostic);
+        String newText12 = "package io.openliberty.sample.jakarta.interceptor;\n" +
+                "\n" +
+                "import jakarta.interceptor.AroundConstruct;\n" +
+                "import jakarta.interceptor.InvocationContext;\n" +
+                "\n" +
+                "public abstract class InvalidAroundConstructMethods {\n" +
+                "\n" +
+                "\t@AroundConstruct\n" +
+                "    public final Object logFinal(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public abstract Object logAbstract(InvocationContext ctx) throws Exception;\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "}";
+        String newText13 = "package io.openliberty.sample.jakarta.interceptor;\n" +
+                "\n" +
+                "import jakarta.interceptor.AroundConstruct;\n" +
+                "import jakarta.interceptor.InvocationContext;\n" +
+                "\n" +
+                "public abstract class InvalidAroundConstructMethods {\n" +
+                "\n" +
+                "\t@AroundConstruct\n" +
+                "    public final Object logFinal(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public abstract Object logAbstract(InvocationContext ctx) throws Exception;\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public  final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "}";
+        TextEdit removeAroundConstructOnMultipleModifiersEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText12);
+        TextEdit removeStaticOnMultipleModifiersEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText13);
+        CodeAction removeAroundConstructOnMultipleModifiersAction = JakartaForJavaAssert.ca(uri, "Remove @AroundConstruct", multipleStaticModifierDiagnostic, removeAroundConstructOnMultipleModifiersEdit);
+        CodeAction removeStaticOnMultipleModifiersAction = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", multipleStaticModifierDiagnostic, removeStaticOnMultipleModifiersEdit);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams4, utils, removeAroundConstructOnMultipleModifiersAction, removeStaticOnMultipleModifiersAction);
+
+        JakartaJavaCodeActionParams codeActionParams5 = JakartaForJavaAssert.createCodeActionParams(uri, multipleFinalModifierDiagnostic);
+        String newText14 = "package io.openliberty.sample.jakarta.interceptor;\n" +
+                "\n" +
+                "import jakarta.interceptor.AroundConstruct;\n" +
+                "import jakarta.interceptor.InvocationContext;\n" +
+                "\n" +
+                "public abstract class InvalidAroundConstructMethods {\n" +
+                "\n" +
+                "\t@AroundConstruct\n" +
+                "    public final Object logFinal(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public abstract Object logAbstract(InvocationContext ctx) throws Exception;\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "}";
+        String newText15 = "package io.openliberty.sample.jakarta.interceptor;\n" +
+                "\n" +
+                "import jakarta.interceptor.AroundConstruct;\n" +
+                "import jakarta.interceptor.InvocationContext;\n" +
+                "\n" +
+                "public abstract class InvalidAroundConstructMethods {\n" +
+                "\n" +
+                "\t@AroundConstruct\n" +
+                "    public final Object logFinal(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public abstract Object logAbstract(InvocationContext ctx) throws Exception;\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static Object logStatic(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public static Object logMulipleModifiers(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "\n" +
+                "    @AroundConstruct\n" +
+                "    public Object logValid(InvocationContext ctx) throws Exception {\n" +
+                "        return ctx.proceed();\n" +
+                "    }\n" +
+                "}";
+        TextEdit removeAroundConstructOnMultipleFinalEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText14);
+        TextEdit removeFinalOnMultipleModifiersEdit = JakartaForJavaAssert.te(0, 0, 29, 1, newText15);
+        CodeAction removeAroundConstructOnMultipleFinalAction = JakartaForJavaAssert.ca(uri, "Remove @AroundConstruct", multipleFinalModifierDiagnostic, removeAroundConstructOnMultipleFinalEdit);
+        CodeAction removeFinalOnMultipleModifiersAction = JakartaForJavaAssert.ca(uri, "Remove the 'final' modifier from this method", multipleFinalModifierDiagnostic, removeFinalOnMultipleModifiersEdit);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams5, utils, removeAroundConstructOnMultipleFinalAction, removeFinalOnMultipleModifiersAction);
     }
 
     @Test

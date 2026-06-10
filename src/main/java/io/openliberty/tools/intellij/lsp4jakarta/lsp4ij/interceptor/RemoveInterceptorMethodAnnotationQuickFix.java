@@ -31,7 +31,7 @@ public class RemoveInterceptorMethodAnnotationQuickFix extends RemoveMultipleAnn
     @Override
     protected List<List<String>> getMultipleRemoveAnnotations(Project project, List<String> annotations) {
         List<List<String>> annotationsListsToRemove = new ArrayList<List<String>>();
-        if (annotations.size() > 0 && annotations.stream().anyMatch(Constants.INTERCEPTOR_METHODS::contains)) {
+        if (!annotations.isEmpty() && annotations.stream().anyMatch(Constants.INTERCEPTOR_METHODS::contains)) {
             annotationsListsToRemove.add(annotations);
         }
         return annotationsListsToRemove;

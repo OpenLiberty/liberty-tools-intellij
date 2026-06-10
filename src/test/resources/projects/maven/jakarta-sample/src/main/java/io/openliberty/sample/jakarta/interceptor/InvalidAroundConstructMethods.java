@@ -19,6 +19,11 @@ public abstract class InvalidAroundConstructMethods {
     }
 
     @AroundConstruct
+    public static final Object logMulipleModifiers(InvocationContext ctx) throws Exception {
+        return ctx.proceed();
+    }
+
+    @AroundConstruct
     public Object logValid(InvocationContext ctx) throws Exception {
         return ctx.proceed();
     }
