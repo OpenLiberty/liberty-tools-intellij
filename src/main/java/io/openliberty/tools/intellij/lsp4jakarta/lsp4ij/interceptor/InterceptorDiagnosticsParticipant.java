@@ -25,6 +25,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Range;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.helpers.ConstructorInfoDiagnosticHelper;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ASTUtils;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.PRIORITY_FQ_NAME;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants.*;
 
 
