@@ -306,13 +306,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
                 // They should only use @Dependent scope
                 if (interceptorOrDecorator) {
-                    List<String> foundInvalidScopes = getMatchedJavaElementNames(type,
-                            Stream.of(typeAnnotations).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
-                            INVALID_INTERCEPTOR_DECORATOR_SCOPES);
+                    List<String> foundInvalidScopes = validateInterceptorDecoratorScopes(type, typeAnnotations);
                     if (!foundInvalidScopes.isEmpty()) {
                         diagnostics.add(createDiagnostic(type, unit,
                                 Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
-                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE, null,
+                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE,
+                                new Gson().toJsonTree(foundInvalidScopes),
                                 DiagnosticSeverity.Error));
                     }
                 }
@@ -523,5 +522,71 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         return Stream.of(method.getParameterList().getParameters())
                 .flatMap(param -> Stream.of(param.getAnnotations()))
                 .anyMatch(annotation -> isConditionalObserver(type, annotation));
+    }
+
+    /**
+     * validateInterceptorDecoratorScopes
+     * Validates that interceptors and decorators do not declare invalid scope annotations.
+     * Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+     * and should only use @Dependent scope. Detects both built-in CDI scopes and custom @NormalScope annotations.
+     *
+     * @param type the Java type being validated
+     * @param typeAnnotations the annotations on the type
+     * @return list of invalid scope annotation fully qualified names
+     */
+    private List<String> validateInterceptorDecoratorScopes(PsiClass type, PsiAnnotation[] typeAnnotations) {
+        List<String> foundInvalidScopes = new ArrayList<>();
+
+        // Check each annotation to see if it's an invalid scope
+        for (PsiAnnotation annotation : typeAnnotations) {
+            String annotationName = annotation.getQualifiedName();
+            if (annotationName == null) {
+                continue;
+            }
+
+            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
+            String matchedSkip = getMatchedJavaElementName(type, annotationName,
+                    new String[]{
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME,
+                            DEPENDENT_FQ_NAME
+                    });
+            if (matchedSkip != null) {
+                continue;
+            }
+
+            // Check if it's a built-in invalid scope
+            String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
+                    INVALID_INTERCEPTOR_DECORATOR_SCOPES);
+            if (matchedBuiltInScope != null) {
+                foundInvalidScopes.add(matchedBuiltInScope);
+            } else {
+                // Check if it's a custom @NormalScope annotation
+                try {
+                    PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
+                            .findClass(annotationName, type.getResolveScope());
+                    if (annotationType != null && isAnnotatedWith(annotationType, NORMAL_SCOPE_FQ_NAME)) {
+                        foundInvalidScopes.add(annotationName);
+                    }
+                } catch (Exception e) {
+                    // Ignore exceptions during annotation type resolution
+                }
+            }
+        }
+
+        return foundInvalidScopes;
+    }
+
+    /**
+     * isAnnotatedWith
+     * Checks if a class is annotated with a specific annotation.
+     *
+     * @param psiClass the class to check
+     * @param annotationFQN the fully qualified name of the annotation
+     * @return true if the class is annotated with the specified annotation
+     */
+    private boolean isAnnotatedWith(PsiClass psiClass, String annotationFQN) {
+        return Stream.of(psiClass.getAnnotations())
+                .anyMatch(annotation -> annotationFQN.equals(annotation.getQualifiedName()));
     }
 }
