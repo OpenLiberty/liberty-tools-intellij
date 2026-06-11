@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import java.util.*;
 import java.util.stream.Stream;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -540,10 +541,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         // Check each annotation to see if it's an invalid scope
         for (PsiAnnotation annotation : typeAnnotations) {
             String annotationName = annotation.getQualifiedName();
-            if (annotationName == null) {
-                continue;
-            }
-
             // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
             String matchedSkip = getMatchedJavaElementName(type, annotationName,
                     new String[]{
@@ -554,18 +551,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             if (matchedSkip != null) {
                 continue;
             }
-
             // Check if it's a built-in invalid scope
             String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
                     INVALID_INTERCEPTOR_DECORATOR_SCOPES);
             if (matchedBuiltInScope != null) {
                 foundInvalidScopes.add(matchedBuiltInScope);
             } else {
-                // Check if it's a custom @NormalScope annotation
+                // Check if it's a custom @NormalScope annotation using AnnotationUtil
                 try {
                     PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
                             .findClass(annotationName, type.getResolveScope());
-                    if (annotationType != null && isAnnotatedWith(annotationType, NORMAL_SCOPE_FQ_NAME)) {
+                    if (annotationType != null && AnnotationUtil.isAnnotated(annotationType, NORMAL_SCOPE_FQ_NAME, 0)) {
                         foundInvalidScopes.add(annotationName);
                     }
                 } catch (Exception e) {
@@ -573,20 +569,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
             }
         }
-
         return foundInvalidScopes;
-    }
-
-    /**
-     * isAnnotatedWith
-     * Checks if a class is annotated with a specific annotation.
-     *
-     * @param psiClass the class to check
-     * @param annotationFQN the fully qualified name of the annotation
-     * @return true if the class is annotated with the specified annotation
-     */
-    private boolean isAnnotatedWith(PsiClass psiClass, String annotationFQN) {
-        return Stream.of(psiClass.getAnnotations())
-                .anyMatch(annotation -> annotationFQN.equals(annotation.getQualifiedName()));
     }
 }
