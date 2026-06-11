@@ -52,13 +52,17 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		for (PsiClass type : alltypes) {
 			//Build the diagnostics if the parent class is Interceptor type and is abstract.
 			// Also, checks for missing public no-args constructor.
-      		buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
+		    		buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
+			// Check for negative priority values on @Interceptor classes
+			checkNegativePriority(unit, diagnostics, type);
 			for(PsiClass innerClass: type.getInnerClasses()){
 				//Build the diagnostics if the child class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, innerClass);
+				// Check for negative priority values on @Interceptor inner classes
+				checkNegativePriority(unit, diagnostics, innerClass);
 			}
-     }
+		   }
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
 		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
@@ -123,6 +127,56 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 							DiagnosticSeverity.Error));
 				}
 			}
+		}
+	}
+
+	/**
+		* Checks if an @Interceptor class has a @Priority annotation with a negative value.
+		* According to the Jakarta Interceptors specification, negative priority values are
+		* reserved for future use and should not be used.
+		*
+		* @param unit the Java file containing the class
+		* @param diagnostics the list to add diagnostics to
+		* @param type the class to check
+		*/
+	private void checkNegativePriority(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
+		if (!isInterceptorType(type)) {
+			return;
+		}
+
+		// Check if the class has @Priority annotation
+		PsiAnnotation priorityAnnotation = null;
+		for (PsiAnnotation annotation : type.getAnnotations()) {
+			if (isMatchedJavaElement(type, annotation.getQualifiedName(), PRIORITY_FQ_NAME)) {
+				priorityAnnotation = annotation;
+				break;
+			}
+		}
+
+		if (priorityAnnotation == null) {
+			return;
+		}
+
+		// Get the value attribute of @Priority
+		PsiAnnotationMemberValue valueAttr = priorityAnnotation.findAttributeValue("value");
+		if (valueAttr == null) {
+			return;
+		}
+
+		// Extract the numeric value
+		String valueText = valueAttr.getText();
+		try {
+			int priorityValue = Integer.parseInt(valueText);
+			if (priorityValue < 0) {
+				// Create diagnostic for negative priority
+				Range range = PositionUtils.toNameRange(priorityAnnotation);
+				Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InterceptorNegativePriority"));
+				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY, DiagnosticSeverity.Error);
+				diagnostics.add(diagnostic);
+			}
+		} catch (NumberFormatException e) {
+			// If we can't parse the value, skip the check
+			// This could be a constant reference or expression
 		}
 	}
 }

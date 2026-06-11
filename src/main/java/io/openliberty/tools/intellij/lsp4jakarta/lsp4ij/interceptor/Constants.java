@@ -27,6 +27,7 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS = "RemoveInterceptorAnnotationOnAbstractClass";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR = "RemoveInterceptorAnnotationOnNoArgsConstructor";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED = "RemoveInterceptorMethodAnnotationOnMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY = "InterceptorNegativePriority";
 
     private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
@@ -52,5 +53,7 @@ public class Constants {
     public static final String INTERCEPTOR_IMPORT = "jakarta.interceptor";
 
     public static final String INTERCEPTORS_FQ_NAME = "jakarta.interceptor.Interceptors";
+
+    public static final String PRIORITY_FQ_NAME = "jakarta.annotation.Priority";
 
 }
