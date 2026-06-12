@@ -426,7 +426,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         String typeName = elementType.getCanonicalText();
 
         // Check if type is in the list of supported types
-        boolean isValidType = Arrays.asList(PersistenceConstants.SUPPORTED_VERSION_TYPES).contains(typeName);
+        boolean isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
 
         if (!isValidType) {
             diagnostics.add(createDiagnostic(element, unit,
@@ -435,5 +435,4 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     DiagnosticSeverity.Error));
         }
     }
-
 }

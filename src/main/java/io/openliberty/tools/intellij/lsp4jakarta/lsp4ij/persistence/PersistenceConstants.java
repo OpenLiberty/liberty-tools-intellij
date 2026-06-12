@@ -13,6 +13,8 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.Set;
+
 public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
@@ -58,16 +60,9 @@ public class PersistenceConstants {
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
-    public static final String[] SUPPORTED_VERSION_TYPES = {
-            "int",
-            "java.lang.Integer",
-            "short",
-            "java.lang.Short",
-            "long",
-            "java.lang.Long",
-            "java.sql.Timestamp"
-    };
-
+    public static final Set<String> SET_OF_VALID_VERSION_TYPES = Set.of(
+            "int", "short", "long", "java.lang.Integer",
+            "java.lang.Short", "java.lang.Long", "java.sql.Timestamp");
     public static final String UTIL_DATE = "java.util.Date";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
 }
