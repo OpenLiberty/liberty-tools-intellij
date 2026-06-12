@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Collection;
 import com.intellij.psi.*;
@@ -33,6 +34,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Const
  * Interceptor diagnostic participant that manages the use of @Interceptor annotation.
  */
 public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollector {
+
+	private static final Logger LOGGER = Logger.getLogger(InterceptorDiagnosticsParticipant.class.getName());
 
 	public InterceptorDiagnosticsParticipant() {
 		super();
@@ -178,6 +181,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		} catch (NumberFormatException e) {
 			// If we can't parse the value, skip the check
 			// This could be a constant reference or expression
+			LOGGER.warning("Unable to parse the priority value");
 		}
 	}
 }
