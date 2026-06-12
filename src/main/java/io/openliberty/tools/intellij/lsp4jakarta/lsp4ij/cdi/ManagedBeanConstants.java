@@ -70,6 +70,7 @@ public class ManagedBeanConstants {
             "jakarta.enterprise.context.ApplicationScoped",
             "jakarta.enterprise.context.SessionScoped",
             "jakarta.enterprise.context.ConversationScoped",
+            "jakarta.enterprise.context.NormalScope",
             "jakarta.enterprise.context.RequestScoped"
     };
 
