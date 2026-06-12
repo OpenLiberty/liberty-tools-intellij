@@ -2647,4 +2647,29 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, addPublicConstructorChildEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
+
+    @Test
+    public void testJsonbFromJsonNullParameters() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbFromJsonNullParameter.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test null first parameter with cast: jsonb.fromJson((String) null, Person.class)
+        Diagnostic nullFirstParamWithCast = JakartaForJavaAssert.d(47, 38, 51,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test null second parameter: jsonb.fromJson(json, null)
+        Diagnostic nullSecondParam = JakartaForJavaAssert.d(57, 46, 50,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, nullFirstParamWithCast, nullSecondParam);
+    }
 }
