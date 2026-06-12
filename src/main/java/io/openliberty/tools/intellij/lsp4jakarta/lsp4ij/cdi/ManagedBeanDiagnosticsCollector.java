@@ -303,19 +303,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
                 }
-                
-                // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
-                // They should only use @Dependent scope
-                if (interceptorOrDecorator) {
-                    List<String> foundInvalidScopes = validateInterceptorDecoratorScopes(type, typeAnnotations);
-                    if (!foundInvalidScopes.isEmpty()) {
-                        diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
-                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE,
-                                new Gson().toJsonTree(foundInvalidScopes),
-                                DiagnosticSeverity.Error));
-                    }
-                }
             }
 
             /*
@@ -331,7 +318,18 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              */
             invalidParamsCheck(unit, diagnostics, type, INJECT_FQ_NAME,
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_INJECT_PARAM);
-
+            // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+            // They should only use @Dependent scope
+            if (interceptorOrDecorator) {
+                List<String> foundInvalidScopes = validateInterceptorDecoratorScopes(type, typeAnnotations);
+                if (!foundInvalidScopes.isEmpty()) {
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE,
+                            new Gson().toJsonTree(foundInvalidScopes),
+                            DiagnosticSeverity.Error));
+                }
+            }
             if (isManagedBean) {
                 /*
                  * ========= Produces and Disposes, Observes, ObservesAsync Annotations Checks=========
