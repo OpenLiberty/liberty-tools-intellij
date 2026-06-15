@@ -1,0 +1,81 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2026 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package io.openliberty.sample.jakarta.cdi;
+
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Test class for wildcard type validation in CDI bean types.
+ * According to CDI 3.0 specification section 2.2.1:
+ * "A parameterized type that contains a wildcard type parameter is not a legal bean type."
+ */
+public class WildcardBeanTypes {
+
+    // Invalid @Inject fields with wildcard types
+    @Inject
+    private List<?> wildcardList; // ERROR: wildcard type in @Inject field
+
+    @Inject
+    private List<? extends Number> extendsWildcardList; // ERROR: wildcard type in @Inject field
+
+    @Inject
+    private List<? super Integer> superWildcardList; // ERROR: wildcard type in @Inject field
+
+    @Inject
+    private Map<String, ?> wildcardMap; // ERROR: wildcard type in @Inject field
+
+    // Invalid @Produces fields with wildcard types
+    @Produces
+    private List<?> producedWildcardList; // ERROR: wildcard type in @Produces field
+
+    @Produces
+    private List<? extends Number> producedExtendsWildcardList; // ERROR: wildcard type in @Produces field
+
+    @Produces
+    private List<? super Integer> producedSuperWildcardList; // ERROR: wildcard type in @Produces field
+
+    // Invalid @Produces methods with wildcard return types
+    @Produces
+    public List<?> produceWildcardList() { // ERROR: wildcard type in @Produces method
+        return null;
+    }
+
+    @Produces
+    public List<? extends Number> produceExtendsWildcardList() { // ERROR: wildcard type in @Produces method
+        return null;
+    }
+
+    @Produces
+    public List<? super Integer> produceSuperWildcardList() { // ERROR: wildcard type in @Produces method
+        return null;
+    }
+
+    // Valid fields and methods (no wildcards)
+    @Inject
+    private List<String> validList; // OK: no wildcard
+
+    @Produces
+    private List<Integer> producedValidList = null; // OK: no wildcard
+
+    @Produces
+    public Map<String, Integer> produceValidMap() { // OK: no wildcard
+        return null;
+    }
+
+    @Inject
+    private String simpleType; // OK: not a parameterized type
+}
