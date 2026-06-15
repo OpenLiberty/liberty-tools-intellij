@@ -31,6 +31,7 @@ public class ManagedBeanConstants {
     public static final String APPLICATION_SCOPED_FQ_NAME = "jakarta.enterprise.context.ApplicationScoped";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
     public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
+    public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -38,6 +39,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE = "InvalidSingletonSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
     public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
