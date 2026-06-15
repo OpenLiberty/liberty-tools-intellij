@@ -56,11 +56,11 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
-				buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, type);
+				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					//Build the diagnostics if the child class is Interceptor type and is abstract.
 					// Also, checks for missing public no-args constructor.
-					buildAbstractAndNoArgsConstructorDiagnostics(unit, diagnostics, innerClass);
+					validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
 				}
 				PsiMethod[] allMethods = type.getMethods();
 				for (PsiMethod method : allMethods) {
@@ -128,14 +128,14 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	}
 
 	/**
-	 * buildAbstractAndNoArgsConstructorDiagnostics
+	 * validateAbstractClassAndNoArgsConstructor
 	 * Method checks if the parent or inner classes are Interceptor type and throws appropriate diagnostics
 	 *
 	 * @param unit
 	 * @param diagnostics
 	 * @param type
 	 */
-	private void buildAbstractAndNoArgsConstructorDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
+	private void validateAbstractClassAndNoArgsConstructor(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
 		ConstructorInfoDiagnosticHelper constructorInfo = ConstructorInfoDiagnosticHelper.initialize();
 		if(type.hasModifierProperty(PsiModifier.ABSTRACT)) {
 				diagnostics.add(createDiagnostic(type, unit,
