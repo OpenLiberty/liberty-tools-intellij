@@ -129,6 +129,25 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
                 }
 
+                /**
+                 * Producer fields must not declare a bean name using @Named annotation.
+                 *
+                 * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#declaring_producer_field
+                 * Section 3.3.2: A producer field may have a bean name, specified using the @Named qualifier.
+                 * However, the specification states that producer fields must not declare a bean name using @Named.
+                 */
+                if (isProducerField) {
+                    for (PsiAnnotation annotation : field.getAnnotations()) {
+                        if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                            diagnostics.add(createDiagnostic(annotation, unit,
+                                    Messages.getMessage("ProducerFieldWithNamedAnnotation", field.getName()),
+                                    DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED, null,
+                                    DiagnosticSeverity.Error));
+                            break;
+                        }
+                    }
+                }
+
             }
 
             PsiMethod[] methods = type.getMethods();
