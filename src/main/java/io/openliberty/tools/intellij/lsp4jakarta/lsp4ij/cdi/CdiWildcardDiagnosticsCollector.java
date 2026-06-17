@@ -34,9 +34,9 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanCo
  * - @Produces fields with wildcard types
  * - @Produces methods returning wildcard types
  */
-public class WildcardDiagnosticsCollector extends AbstractDiagnosticsCollector {
+public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
-    public WildcardDiagnosticsCollector() {
+    public CdiWildcardDiagnosticsCollector() {
         super();
     }
 
@@ -53,11 +53,9 @@ public class WildcardDiagnosticsCollector extends AbstractDiagnosticsCollector {
         PsiClass[] types = unit.getClasses();
         for (PsiClass type : types) {
             // Check fields for @Inject and @Produces with wildcard types
-            PsiField[] fields = type.getFields();
-            for (PsiField field : fields) {
-                PsiAnnotation[] annotations = field.getAnnotations();
-                boolean hasInject = isMatchedAnnotation(annotations, INJECT_FQ_NAME);
-                boolean hasProduces = isMatchedAnnotation(annotations, PRODUCES_FQ_NAME);
+            for (PsiField field : type.getFields()) {
+                boolean hasInject = hasAnnotation(field, INJECT_FQ_NAME);
+                boolean hasProduces = hasAnnotation(field, PRODUCES_FQ_NAME);
 
                 if (hasInject || hasProduces) {
                     PsiType fieldType = field.getType();
@@ -76,10 +74,8 @@ public class WildcardDiagnosticsCollector extends AbstractDiagnosticsCollector {
             }
 
             // Check methods for @Produces with wildcard return types
-            PsiMethod[] methods = type.getMethods();
-            for (PsiMethod method : methods) {
-                PsiAnnotation[] annotations = method.getAnnotations();
-                boolean hasProduces = isMatchedAnnotation(annotations, PRODUCES_FQ_NAME);
+            for (PsiMethod method : type.getMethods()) {
+                boolean hasProduces = hasAnnotation(method, PRODUCES_FQ_NAME);
 
                 if (hasProduces) {
                     PsiType returnType = method.getReturnType();
@@ -95,8 +91,20 @@ public class WildcardDiagnosticsCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
+     * Checks if a field or method has a specific annotation.
+     *
+     * @param element the field or method to check
+     * @param annotationFqName the fully qualified name of the annotation
+     * @return true if the element has the annotation, false otherwise
+     */
+    private boolean hasAnnotation(PsiModifierListOwner element, String annotationFqName) {
+        PsiAnnotation[] annotations = element.getAnnotations();
+        return isMatchedAnnotation(annotations, annotationFqName);
+    }
+
+    /**
      * Checks if a PsiType contains a wildcard type parameter.
-     * 
+     *
      * @param type the type to check
      * @return true if the type contains a wildcard, false otherwise
      */

@@ -43,7 +43,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
  * - @Produces methods
  */
 @RunWith(JUnit4.class)
-public class WildcardBeanTypesTest extends BaseJakartaTest {
+public class CdiWildcardBeanTypesTest extends BaseJakartaTest {
 
     @Test
     public void wildcardBeanTypes() throws Exception {
@@ -100,9 +100,45 @@ public class WildcardBeanTypesTest extends BaseJakartaTest {
                 "Wildcard types are not legal bean types. Producer methods must return concrete parameterized types without wildcards (?, ? extends, ? super).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerMethod");
 
+        // Test expected diagnostics for nested wildcard types
+        Diagnostic nestedMapListWildcard = d(85, 33, 54,
+                "Wildcard types are not legal bean types. Injection points must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic nestedMapMapWildcard = d(88, 41, 61,
+                "Wildcard types are not legal bean types. Injection points must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic arrayWildcard = d(91, 22, 35,
+                "Wildcard types are not legal bean types. Injection points must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic producerNestedMapListWildcard = d(95, 33, 62,
+                "Wildcard types are not legal bean types. Producer fields must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerField");
+
+        Diagnostic producerNestedMapMapWildcard = d(98, 41, 69,
+                "Wildcard types are not legal bean types. Producer fields must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerField");
+
+        Diagnostic producerArrayWildcard = d(101, 22, 43,
+                "Wildcard types are not legal bean types. Producer fields must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerField");
+
+        Diagnostic producerMethodNestedMapListWildcard = d(105, 32, 60,
+                "Wildcard types are not legal bean types. Producer methods must return concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerMethod");
+
+        Diagnostic producerMethodNestedMapMapWildcard = d(110, 40, 67,
+                "Wildcard types are not legal bean types. Producer methods must return concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerMethod");
+
         assertJavaDiagnostics(diagnosticsParams, utils,
                 injectWildcard, injectExtendsWildcard, injectSuperWildcard, injectMapWildcard,
                 producerFieldWildcard, producerFieldExtendsWildcard, producerFieldSuperWildcard,
-                producerMethodWildcard, producerMethodExtendsWildcard, producerMethodSuperWildcard);
+                producerMethodWildcard, producerMethodExtendsWildcard, producerMethodSuperWildcard,
+                nestedMapListWildcard, nestedMapMapWildcard, arrayWildcard,
+                producerNestedMapListWildcard, producerNestedMapMapWildcard, producerArrayWildcard,
+                producerMethodNestedMapListWildcard, producerMethodNestedMapMapWildcard);
     }
 }

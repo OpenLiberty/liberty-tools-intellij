@@ -78,4 +78,37 @@ public class WildcardBeanTypes {
 
     @Inject
     private String simpleType; // OK: not a parameterized type
+
+    // Nested wildcard types - testing recursive wildcard detection
+    
+    // Invalid @Inject fields with nested wildcard types
+    @Inject
+    private Map<String, List<?>> nestedMapListWildcard; // ERROR: nested wildcard in @Inject field
+
+    @Inject
+    private Map<String, Map<Integer, ?>> nestedMapMapWildcard; // ERROR: nested wildcard in @Inject field
+
+    @Inject
+    private List<?>[] arrayWildcard; // ERROR: array of wildcard type in @Inject field
+
+    // Invalid @Produces fields with nested wildcard types
+    @Produces
+    private Map<String, List<?>> producedNestedMapListWildcard; // ERROR: nested wildcard in @Produces field
+
+    @Produces
+    private Map<String, Map<Integer, ?>> producedNestedMapMapWildcard; // ERROR: nested wildcard in @Produces field
+
+    @Produces
+    private List<?>[] producedArrayWildcard; // ERROR: array of wildcard type in @Produces field
+
+    // Invalid @Produces methods with nested wildcard return types
+    @Produces
+    public Map<String, List<?>> produceNestedMapListWildcard() { // ERROR: nested wildcard in @Produces method
+        return null;
+    }
+
+    @Produces
+    public Map<String, Map<Integer, ?>> produceNestedMapMapWildcard() { // ERROR: nested wildcard in @Produces method
+        return null;
+    }
 }
