@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.intellij.codeInsight.AnnotationUtil;
@@ -31,6 +33,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpl
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    private static final Logger LOGGER = Logger.getLogger(ManagedBeanDiagnosticsCollector.class.getName());
 
     public ManagedBeanDiagnosticsCollector() {
         super();
@@ -582,7 +586,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         foundInvalidScopes.add(annotationName);
                     }
                 } catch (Exception e) {
-                    // Ignore exceptions during annotation type resolution
+                    LOGGER.log(Level.WARNING, "Exception during annotation type resolution for: " + annotationName, e);
                 }
             }
         }
