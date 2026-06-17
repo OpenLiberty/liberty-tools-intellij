@@ -64,6 +64,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
         boolean hasMapKeyAnnotation = false;
         boolean hasMapKeyClassAnnotation = false;
+        boolean hasMapKeyTemporalAnnotation = false;
         boolean hasTypeDiagnostics = false;
         PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
         for (PsiAnnotation annotation : allAnnotations) {
@@ -77,6 +78,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                 else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
                     mapKeyJoinCols.add(annotation);
                 }
+            }
+            // Check for @MapKeyTemporal annotation
+            if (PersistenceConstants.MAPKEYTEMPORAL.equals(annotation.getQualifiedName())) {
+                hasMapKeyTemporalAnnotation = true;
             }
         }
         if (hasMapKeyAnnotation) {
@@ -96,6 +101,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                     Messages.getMessage("MapKeyAnnotationsNotOnSameField"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ANNOTATION, null,
                     DiagnosticSeverity.Error));
+        }
+        // Validate @MapKeyTemporal annotation
+        if (hasMapKeyTemporalAnnotation) {
+            validateMapKeyTemporalAnnotation(fieldOrProperty, unit, diagnostics);
         }
         // If we have multiple MapKeyJoinColumn annotations on a single field or property we must
         // ensure each has a name and referencedColumnName
@@ -189,5 +198,38 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         String expectedFieldName = (methodName.startsWith("get") && methodName.length() > 3) ? Introspector.decapitalize(methodName.substring(3)) : null;
         PsiField expectedField = StringUtils.isNotBlank(expectedFieldName) ? type.findFieldByName(expectedFieldName, false) : null;
         return expectedField != null;
+    }
+
+    private void validateMapKeyTemporalAnnotation(PsiJvmModifiersOwner fieldOrProperty, PsiJavaFile unit,
+                                                  List<Diagnostic> diagnostics) {
+        // @MapKeyTemporal must only be applied when the map key type is Date or Calendar
+        // Specification: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a15583
+        PsiType fieldOrPropertyType = null;
+
+        if (fieldOrProperty instanceof PsiMethod method) {
+            fieldOrPropertyType = method.getReturnType();
+        } else if (fieldOrProperty instanceof PsiField field) {
+            fieldOrPropertyType = field.getType();
+        }
+
+        if (fieldOrPropertyType instanceof PsiClassType classType) {
+            // Get the Map's key type (first type parameter)
+            PsiType[] typeParameters = classType.getParameters();
+            if (typeParameters.length > 0) {
+                PsiType keyType = typeParameters[0];
+                String keyTypeName = keyType.getCanonicalText();
+
+                // Check if key type is Date or Calendar
+                boolean isValidKeyType = PersistenceConstants.UTIL_DATE.equals(keyTypeName) ||
+                        PersistenceConstants.UTIL_CALENDAR.equals(keyTypeName);
+
+                if (!isValidKeyType) {
+                    diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                            Messages.getMessage("MapKeyTemporalNotOnTemporalType"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE,
+                            null, DiagnosticSeverity.Error));
+                }
+            }
+        }
     }
 }
