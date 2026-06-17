@@ -111,4 +111,31 @@ public class JakartaJsonpTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, invalidArrayBuilderStringNull, invalidArrayBuilderNull, invalidArrayBuilderTwoParamString);
     }
+
+    @Test
+    public void manualJsonParsingToPojoPattern() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonp/ManualJsonParsingToPojoExample.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d1 = JakartaForJavaAssert.d(42, 25, 71,
+                "Manual JSON parsing with JSON-P and field-by-field mapping detected. Consider using Jakarta JSON Binding (JSON-B) for automatic object-to-JSON mapping with Jsonb.fromJson() for better performance and maintainability.",
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualParsing");
+
+        Diagnostic d2 = JakartaForJavaAssert.d(52, 24, 80,
+                "Manual JSON parsing with JSON-P and field-by-field mapping detected. Consider using Jakarta JSON Binding (JSON-B) for automatic object-to-JSON mapping with Jsonb.fromJson() for better performance and maintainability.",
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualParsing");
+
+        Diagnostic d3 = JakartaForJavaAssert.d(62, 29, 85,
+                "Manual JSON parsing with JSON-P and field-by-field mapping detected. Consider using Jakarta JSON Binding (JSON-B) for automatic object-to-JSON mapping with Jsonb.fromJson() for better performance and maintainability.",
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualParsing");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+    }
 }

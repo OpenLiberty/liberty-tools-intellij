@@ -28,4 +28,17 @@ public class JsonpConstants {
     public static final String JAKARTA_JSON_BUILDER_ADD_METHOD = "add";
     public static final String JAKARTA_JSON_ARRAY_BUILDER_FQ_NAME = "jakarta.json.JsonArrayBuilder";
     public static final int EXPRESSION_COUNT_CREATE_POINTER = 1;
+
+    /* JSON-B recommendation constants */
+    public static final String CREATE_READER = "createReader";
+    public static final String READ_OBJECT = "readObject";
+    public static final String JSON_READER_FQ_NAME = "jakarta.json.JsonReader";
+    public static final String JSON_OBJECT_FQ_NAME = "jakarta.json.JsonObject";
+    public static final String GET_STRING = "getString";
+    public static final String GET_INT = "getInt";
+    public static final String GET_BOOLEAN = "getBoolean";
+    public static final String GET_JSON_NUMBER = "getJsonNumber";
+    public static final String GET_JSON_OBJECT = "getJsonObject";
+    public static final String GET_JSON_ARRAY = "getJsonArray";
+    public static final String DIAGNOSTIC_CODE_USE_JSONB = "UseJsonbInsteadOfManualParsing";
 }
