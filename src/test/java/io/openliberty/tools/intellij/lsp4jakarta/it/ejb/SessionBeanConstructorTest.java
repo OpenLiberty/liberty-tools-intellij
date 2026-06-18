@@ -52,14 +52,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 40,
+        Diagnostic expectedDiagnostic = d(5, 13, 40,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateless;" +
                 "\n\n@Stateless" +
@@ -75,9 +75,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return name;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
     @Test
@@ -93,14 +93,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 39,
+        Diagnostic expectedDiagnostic = d(5, 13, 39,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateful;" +
                 "\n\n@Stateful" +
@@ -116,9 +116,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return count;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
     @Test
@@ -134,14 +134,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 40,
+        Diagnostic expectedDiagnostic = d(5, 13, 40,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Singleton;" +
                 "\n\n@Singleton" +
@@ -157,9 +157,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return config;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
     @Test
     public void testInvalidStatelessBeanPublic() throws Exception {
@@ -174,14 +174,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 39,
+        Diagnostic expectedDiagnostic = d(5, 13, 39,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateless;" +
                 "\n\n@Stateless" +
@@ -197,9 +197,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return name;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
     @Test
@@ -215,14 +215,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 38,
+        Diagnostic expectedDiagnostic = d(5, 13, 38,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Stateful;" +
                 "\n\n@Stateful" +
@@ -238,9 +238,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return count;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
     @Test
@@ -256,14 +256,14 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostic
-        Diagnostic d = d(5, 13, 39,
+        Diagnostic expectedDiagnostic = d(5, 13, 39,
                 "Session beans must have a public no-arg constructor.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "MissingPublicNoArgConstructor");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test expected quick-fix
-        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;" +
                 "\n\nimport jakarta.ejb.Singleton;" +
                 "\n\n@Singleton" +
@@ -279,9 +279,9 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
                 "\n        return config;" +
                 "\n    }" +
                 "\n}\n";
-        TextEdit te = te(0, 0, 17, 0, newText);
-        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
-        assertJavaCodeAction(codeActionParams, utils, ca);
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Add a no-arg public constructor to this class", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
 
