@@ -55,6 +55,13 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
         }
     }
 
+    /**
+     * Validates that a decorator class declares exactly one @Delegate injection point.
+     * 
+     * @param type
+     * @param unit
+     * @param diagnostics
+     */
     private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
         String[] typeAnnotations = Stream.of(type.getAnnotations())
                 .map(PsiAnnotation::getQualifiedName)
@@ -85,6 +92,19 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
             }
         }
 
+        reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
+    }
+
+    /**
+     * reportInvalidDelegateCountDiagnostics
+     * Reports diagnostics when a decorator has an invalid number of @Delegate injection points.
+     *
+     * @param type
+     * @param unit
+     * @param diagnostics
+     * @param delegateElements
+     */
+    private void reportInvalidDelegateCountDiagnostics(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics, List<PsiElement> delegateElements) {
         int delegateCount = delegateElements.size();
         if (delegateCount == 0) {
             diagnostics.add(createDiagnostic(type, unit,

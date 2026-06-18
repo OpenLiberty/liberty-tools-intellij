@@ -70,21 +70,21 @@ public class DecoratorDiagnosticsTest extends BaseJakartaTest {
 
         // Expected diagnostics for multiple @Delegate injection points
         // Diagnostic on the field delegate (line 17, "fieldDelegate")
-        Diagnostic d1 = d(16, 28, 41,
+        Diagnostic fieldDelegateDiagnostic = d(16, 28, 41,
                 "A decorator must declare exactly one injection point annotated with @Delegate, but found 3.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
 
         // Diagnostic on the constructor parameter delegate (line 21, "constructorDelegate")
-        Diagnostic d2 = d(20, 68, 87,
+        Diagnostic constructorDelegateDiagnostic = d(20, 68, 87,
                 "A decorator must declare exactly one injection point annotated with @Delegate, but found 3.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
 
         // Diagnostic on the method parameter delegate (line 26, "methodDelegate")
-        Diagnostic d3 = d(25, 60, 74,
+        Diagnostic methodDelegateDiagnostic = d(25, 60, 74,
                 "A decorator must declare exactly one injection point annotated with @Delegate, but found 3.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        assertJavaDiagnostics(diagnosticsParams, utils, fieldDelegateDiagnostic, constructorDelegateDiagnostic, methodDelegateDiagnostic);
     }
 
     /**
@@ -113,23 +113,21 @@ public class DecoratorDiagnosticsTest extends BaseJakartaTest {
 
         // Expected diagnostic for missing @Delegate injection point (from DecoratorDiagnosticsCollector)
         // Diagnostic on the class declaration (line 8, "DecoratorWithObserverMethod")
-        Diagnostic d1 = d(7, 13, 40,
+        Diagnostic missingDelegateDiagnostic = d(7, 13, 40,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
 
         // Additional diagnostics from other collectors for @Observes and @ObservesAsync
         // Diagnostic on @Observes parameter (line 14, "observerMethod")
-        Diagnostic d2 = d(13, 16, 30,
+        Diagnostic observesMethodDiagnostic = d(13, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
         // Diagnostic on @ObservesAsync parameter (line 19, "observerAsyncMethod")
-        Diagnostic d3 = d(18, 16, 35,
+        Diagnostic observesAsyncMethodDiagnostic = d(18, 16, 35,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+        assertJavaDiagnostics(diagnosticsParams, utils, missingDelegateDiagnostic, observesMethodDiagnostic, observesAsyncMethodDiagnostic);
     }
 }
-
-// Made with Bob
