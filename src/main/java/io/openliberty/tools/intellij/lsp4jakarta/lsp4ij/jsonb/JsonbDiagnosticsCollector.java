@@ -94,8 +94,6 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             Set<String> uniquePropertyNames = new LinkedHashSet<String>();
             //Checks for class level JSONB Annotations
             boolean jsonbtypeParent = isJsonbtypeParent(type);
-            // Check if class has Jsonb field for closeable diagnostics
-            boolean jsonbTypeClosable = hasJsonbField(type);
             for (PsiField field : type.getFields()) {
                 //If class not annotated with JSONB, find if fields are.
                 if (!jsonbtypeParent) {
@@ -105,11 +103,6 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 collectJsonbTransientFieldDiagnostics(unit, type, diagnostics, field);
                 collectJsonbTransientAccessorDiagnostics(unit, type, diagnostics, field);
                 collectJsonbUniquePropertyNames(uniquePropertyNames, field);
-            }
-            // Collect diagnostics for Jsonb closeable thread safety issues
-            // Only check classes that have Jsonb fields or Jsonb annotations
-            if (jsonbTypeClosable || jsonbtypeParent) {
-                collectClosableDiagnostics(unit, diagnostics);
             }
 			for (PsiClass innerClass : innerClasses) {
 				childHasValidNoArgsConstructor = false;
@@ -132,6 +125,8 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 				generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, true,
 						false, missingChildNoArgsConstructor, innerClass);
 			}
+            // Collect diagnostics for Jsonb closeable thread safety issues
+            collectClosableDiagnostics(unit, diagnostics);
             // Collect diagnostics for duplicate property names with fields annotated @JsonbProperty
             collectJsonbPropertyUniquenessDiagnostics(unit, diagnostics, uniquePropertyNames, type);
 			// Parent class conditions for no-args
@@ -361,28 +356,6 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
-     * Checks if a class has a field of type jakarta.json.bind.Jsonb.
-     *
-     * @param type the class to check
-     * @return true if the class has a Jsonb field
-     */
-    private boolean hasJsonbField(PsiClass type) {
-        for (PsiField field : type.getFields()) {
-            PsiType fieldType = field.getType();
-            if (fieldType instanceof PsiClassType) {
-                PsiClass fieldClass = ((PsiClassType) fieldType).resolve();
-                if (fieldClass != null) {
-                    String qualifiedName = fieldClass.getQualifiedName();
-                    if (JsonbConstants.JAKARTA_JSON_BIND_JSONB.equals(qualifiedName)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Collects diagnostics for Jsonb closeable thread safety issues.
      * Detects methods that use thread sources without properly closing Jsonb instances.
      *
@@ -403,60 +376,56 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @param diagnostics the list to add diagnostics to
      */
     private void collectClosableDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Find all method call expressions in the file
         Collection<PsiMethodCallExpression> allMethodInvocations =
             com.intellij.psi.util.PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
-        
+
         Map<PsiMethod, JsonbThreadSafetyAnalysis> analysisMap = new HashMap<>();
-        
-        // Cache method resolutions to avoid repeated expensive lookups
         Map<PsiMethodCallExpression, PsiMethod> methodCache = new HashMap<>(allMethodInvocations.size());
-        
-        // Pre-resolve all methods in one pass for performance
+
         for (PsiMethodCallExpression mi : allMethodInvocations) {
             PsiMethod method = mi.resolveMethod();
             if (method != null) {
                 methodCache.put(mi, method);
             }
         }
-        
-        // Analyze all method invocations and group by enclosing method
+
         for (PsiMethodCallExpression mi : allMethodInvocations) {
             PsiMethod enclosingMethod = com.intellij.psi.util.PsiTreeUtil.getParentOfType(mi, PsiMethod.class);
             if (enclosingMethod != null) {
                 JsonbThreadSafetyAnalysis analysis = analysisMap.computeIfAbsent(
                     enclosingMethod, k -> new JsonbThreadSafetyAnalysis());
-                
+
                 PsiMethod resolvedMethod = methodCache.get(mi);
                 if (resolvedMethod != null) {
                     PsiClass declaringClass = resolvedMethod.getContainingClass();
                     if (declaringClass != null) {
                         String fqName = declaringClass.getQualifiedName();
-                        
-                        // Check if this method uses Jsonb
+
                         if (!analysis.methodUsesJsonb && JsonbConstants.JAKARTA_JSON_BIND_JSONB.equals(fqName)) {
                             analysis.methodUsesJsonb = true;
                         }
-                        
-                        // Check if this is a close() invocation
+
                         if (!analysis.hasClose && isCloseInvocation(mi, resolvedMethod)) {
                             analysis.hasClose = true;
                         }
-                        
-                        // Check if this is a thread source invocation
+
                         if (isThreadSourceInvocation(mi, resolvedMethod)) {
                             analysis.threadSourceCount++;
+                        }
+
+                        if (!analysis.hasLocalJsonbInstance && isLocalJsonbCreation(mi, resolvedMethod)) {
+                            analysis.hasLocalJsonbInstance = true;
                         }
                     }
                 }
             }
         }
-        
-        // Generate diagnostics for methods that use Jsonb, have thread sources, but no close
+
         for (Map.Entry<PsiMethod, JsonbThreadSafetyAnalysis> entry : analysisMap.entrySet()) {
             PsiMethod method = entry.getKey();
             JsonbThreadSafetyAnalysis analysis = entry.getValue();
-            if (analysis.methodUsesJsonb && !analysis.hasClose && analysis.threadSourceCount > 0) {
+            if (analysis.methodUsesJsonb && !analysis.hasClose &&
+                analysis.threadSourceCount > 0 && analysis.hasLocalJsonbInstance) {
                 diagnostics.add(createDiagnostic(
                     method.getNameIdentifier(),
                     unit,
@@ -467,6 +436,38 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 ));
             }
         }
+    }
+
+    /**
+     * Checks if a method invocation creates a local Jsonb instance.
+     * Detects both JsonbBuilder.create() and JsonbBuilder.build() patterns.
+     * This distinguishes between local instances (which should be closed) and
+     * global/field instances (which should NOT be closed in individual methods).
+     *
+     * @param mi the method invocation to check
+     * @param resolvedMethod the pre-resolved method (for performance)
+     * @return true if this creates a local Jsonb instance
+     */
+    private boolean isLocalJsonbCreation(PsiMethodCallExpression mi, PsiMethod resolvedMethod) {
+        String methodName = mi.getMethodExpression().getReferenceName();
+
+        if (!JsonbConstants.JSONB_CREATE_METHOD.equals(methodName) &&
+            !JsonbConstants.JSONB_BUILD_METHOD.equals(methodName)) {
+            return false;
+        }
+
+        PsiClass declaringClass = resolvedMethod.getContainingClass();
+        if (declaringClass == null) {
+            return false;
+        }
+
+        String fqName = declaringClass.getQualifiedName();
+        if (fqName == null) {
+            return false;
+        }
+
+        return JsonbConstants.JAKARTA_JSONB_BUILDER.equals(fqName) ||
+               JsonbConstants.JSONB_BUILDER_SHORT.equals(fqName);
     }
 
     /**
@@ -537,9 +538,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             return false;
         }
         
-        // Check if class is in the list of thread classes from constants
-        // Use contains() to match class names that may be part of a longer qualified name
-        return JsonbConstants.THREAD_CLASSES.stream().anyMatch(fqName::contains);
+        return JsonbConstants.THREAD_CLASSES.stream().anyMatch(fqName::equals);
     }
 
     /**
