@@ -552,7 +552,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
      * and should only use @Dependent scope. Detects both built-in CDI scopes and custom @NormalScope annotations.
      *
-     * @param type the Java type being validated
+     * @param type            the Java type being validated
      * @param typeAnnotations the annotations on the type
      * @return list of invalid scope annotation fully qualified names
      */
@@ -562,22 +562,19 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         // Check each annotation to see if it's an invalid scope
         for (PsiAnnotation annotation : typeAnnotations) {
             String annotationName = annotation.getQualifiedName();
-            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
-            String matchedSkip = getMatchedJavaElementName(type, annotationName,
-                    new String[]{
-                            INTERCEPTOR_FQ_NAME,
-                            DECORATOR_FQ_NAME,
-                            DEPENDENT_FQ_NAME
-                    });
-            if (matchedSkip != null) {
-                continue;
-            }
+            
             // Check if it's a built-in invalid scope
             String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
                     INVALID_INTERCEPTOR_DECORATOR_SCOPES);
             if (matchedBuiltInScope != null) {
                 foundInvalidScopes.add(matchedBuiltInScope);
-            } else {
+            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
+            } else if (null == getMatchedJavaElementName(type, annotationName,
+                    new String[]{
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME,
+                            DEPENDENT_FQ_NAME
+                    })) {
                 // Check if it's a custom @NormalScope annotation using AnnotationUtil
                 try {
                     PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
