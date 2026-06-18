@@ -215,20 +215,17 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         if (fieldOrPropertyType instanceof PsiClassType classType) {
             // Get the Map's key type (first type parameter)
             PsiType[] typeParameters = classType.getParameters();
-            if (typeParameters.length > 0) {
-                PsiType keyType = typeParameters[0];
-                String keyTypeName = keyType.getCanonicalText();
+            String keyTypeName = typeParameters.length > 0 ? typeParameters[0].getCanonicalText() : null;
 
-                // Check if key type is Date or Calendar
-                boolean isValidKeyType = PersistenceConstants.UTIL_DATE.equals(keyTypeName) ||
-                        PersistenceConstants.UTIL_CALENDAR.equals(keyTypeName);
+            // Check if key type is Date or Calendar
+            boolean isValidKeyType = PersistenceConstants.UTIL_DATE.equals(keyTypeName) ||
+                    PersistenceConstants.UTIL_CALENDAR.equals(keyTypeName);
 
-                if (!isValidKeyType) {
-                    diagnostics.add(createDiagnostic(fieldOrProperty, unit,
-                            Messages.getMessage("MapKeyTemporalNotOnTemporalType"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE,
-                            null, DiagnosticSeverity.Error));
-                }
+            if (!isValidKeyType) {
+                diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                        Messages.getMessage("MapKeyTemporalNotOnTemporalType"),
+                        PersistenceConstants.DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE,
+                        null, DiagnosticSeverity.Error));
             }
         }
     }
