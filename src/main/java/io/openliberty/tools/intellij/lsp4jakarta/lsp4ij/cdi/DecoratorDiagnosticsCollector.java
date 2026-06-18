@@ -57,7 +57,7 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
     /**
      * Validates that a decorator class declares exactly one @Delegate injection point.
-     * 
+     *
      * @param type
      * @param unit
      * @param diagnostics
@@ -111,10 +111,7 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
                     Messages.getMessage("DecoratorWithInvalidDelegateCount"),
                     DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
                     DiagnosticSeverity.Error));
-            return;
-        }
-
-        if (delegateCount > 1) {
+        } else if(delegateCount > 1) {
             String message = Messages.getMessage("DecoratorWithMultipleDelegates", delegateCount);
             for (PsiElement delegateElement : delegateElements) {
                 diagnostics.add(createDiagnostic(delegateElement, unit, message,
