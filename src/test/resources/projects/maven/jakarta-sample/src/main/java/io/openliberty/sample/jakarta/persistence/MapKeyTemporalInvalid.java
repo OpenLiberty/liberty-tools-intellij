@@ -37,4 +37,9 @@ public class MapKeyTemporalInvalid {
     public Map<Integer, String> getIntegerEvents() {
         return this.integerEvents;
     }
+
+    // Invalid: FQN String key without import
+    @ElementCollection
+    @MapKeyTemporal(TemporalType.DATE)
+    private Map<java.lang.String, String> fqnStringEvents;
 }

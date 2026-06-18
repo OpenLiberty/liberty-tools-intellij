@@ -39,4 +39,16 @@ public class MapKeyTemporalValid {
     public Map<Calendar, String> getCalendarEvents() {
         return this.calendarEvents;
     }
+
+    // Valid: FQN Date key without import
+    @ElementCollection
+    @MapKeyTemporal(TemporalType.DATE)
+    private Map<java.util.Date, String> fqnDateEvents;
+
+    // Valid: FQN Calendar key without import
+    @ElementCollection
+    @MapKeyTemporal(TemporalType.TIMESTAMP)
+    public Map<java.util.Calendar, String> getFqnCalendarEvents() {
+        return null;
+    }
 }

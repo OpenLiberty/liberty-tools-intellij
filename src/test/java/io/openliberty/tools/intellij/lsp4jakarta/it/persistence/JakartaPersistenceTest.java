@@ -836,8 +836,13 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
 
+        // Invalid: FQN String key (field)
+        Diagnostic invalidFqnStringKeyField = d(43, 42, 57,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
         assertJavaDiagnostics(diagnosticsParamsInvalid, utils, invalidStringKeyField, invalidIntegerKeyField,
-                invalidStringKeyMethod, invalidIntegerKeyMethod);
+                invalidStringKeyMethod, invalidIntegerKeyMethod, invalidFqnStringKeyField);
 
         // Test quickfix for removing @MapKeyTemporal annotation
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uriInvalid, invalidStringKeyField);
@@ -871,10 +876,14 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "    @MapKeyTemporal(TemporalType.TIMESTAMP)\n" +
                 "    public Map<Integer, String> getIntegerEvents() {\n" +
                 "        return this.integerEvents;\n" +
-                "    }\n" +
+                "    }\n\n" +
+                "    // Invalid: FQN String key without import\n" +
+                "    @ElementCollection\n" +
+                "    @MapKeyTemporal(TemporalType.DATE)\n" +
+                "    private Map<java.lang.String, String> fqnStringEvents;\n" +
                 "}\n";
         
-        TextEdit te = te(0, 0, 40, 0, newText);
+        TextEdit te = te(0, 0, 45, 0, newText);
         CodeAction ca = ca(uriInvalid, "Remove @MapKeyTemporal", invalidStringKeyField, te);
         
         assertJavaCodeAction(codeActionParams, utils, ca);
