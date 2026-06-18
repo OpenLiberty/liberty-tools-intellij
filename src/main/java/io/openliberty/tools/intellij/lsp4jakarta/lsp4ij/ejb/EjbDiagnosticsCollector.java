@@ -43,8 +43,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
 
-        PsiClass[] types = unit.getClasses();
-        for (PsiClass type : types) {
+        for (PsiClass type : unit.getClasses()) {
             List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
                     Stream.of(type.getAnnotations())
                             .map(annotation -> annotation.getQualifiedName())
