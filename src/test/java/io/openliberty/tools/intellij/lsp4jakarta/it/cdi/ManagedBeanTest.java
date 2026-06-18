@@ -1528,6 +1528,11 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostics for decorator with observer methods
+        // Diagnostic for missing @Delegate injection point (from DecoratorDiagnosticsCollector)
+        Diagnostic delegateDiagnostic = d(7, 13, 40,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+
         // Diagnostic for method with @Observes parameter
         Diagnostic observesDiagnostic = d(13, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
@@ -1538,7 +1543,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, delegateDiagnostic, observesDiagnostic, observesAsyncDiagnostic);
     }
 
     @Test
