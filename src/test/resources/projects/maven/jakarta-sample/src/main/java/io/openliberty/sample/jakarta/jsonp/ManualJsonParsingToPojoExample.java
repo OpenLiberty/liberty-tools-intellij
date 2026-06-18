@@ -15,6 +15,8 @@ package io.openliberty.sample.jakarta.jsonp;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.io.StringReader;
 
 public class ManualJsonParsingToPojoExample {
@@ -70,5 +72,11 @@ public class ManualJsonParsingToPojoExample {
         user.setAge(jsonObject.getInt("age"));
         
         return user;
+    }
+
+    // Valid: Using JSON-B for direct POJO deserialization - no diagnostic expected
+    public User parseUserWithJsonb(String jsonString) {
+        Jsonb jsonb = JsonbBuilder.create();
+        return jsonb.fromJson(jsonString, User.class);
     }
 }
