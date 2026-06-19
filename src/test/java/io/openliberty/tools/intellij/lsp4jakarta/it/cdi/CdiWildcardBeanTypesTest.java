@@ -35,10 +35,11 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 
 /**
  * Test class for wildcard type validation in CDI bean types.
- * 
+ *
  * Tests that wildcard types (?, ? extends, ? super) are properly detected
  * and reported as errors in:
  * - @Inject fields
+ * - @Inject method parameters
  * - @Produces fields
  * - @Produces methods
  */
@@ -133,12 +134,49 @@ public class CdiWildcardBeanTypesTest extends BaseJakartaTest {
                 "Wildcard types are not legal bean types. Producer methods must return concrete parameterized types without wildcards (?, ? extends, ? super).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInProducerMethod");
 
+        // Test expected diagnostics for @Inject methods with wildcard parameter types
+        Diagnostic injectMethodWildcard = d(116, 40, 44,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodExtendsWildcard = d(120, 62, 66,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodSuperWildcard = d(124, 59, 63,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodMapWildcard = d(128, 46, 49,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodNestedWildcard = d(132, 55, 58,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodArrayWildcard = d(136, 43, 48,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        Diagnostic injectMethodMultiDimArrayWildcard = d(140, 61, 66,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
+        // Test for mixed parameters - only wildcard parameter should be flagged
+        Diagnostic injectMethodMixedParams = d(154, 67, 79,
+                "Wildcard types are not legal bean types. Injection method parameters must use concrete parameterized types without wildcards (?, ? extends, ? super).",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidWildcardTypeInInjectField");
+
         assertJavaDiagnostics(diagnosticsParams, utils,
                 injectWildcard, injectExtendsWildcard, injectSuperWildcard, injectMapWildcard,
                 producerFieldWildcard, producerFieldExtendsWildcard, producerFieldSuperWildcard,
                 producerMethodWildcard, producerMethodExtendsWildcard, producerMethodSuperWildcard,
                 nestedMapListWildcard, nestedMapMapWildcard, arrayWildcard,
                 producerNestedMapListWildcard, producerNestedMapMapWildcard, producerArrayWildcard,
-                producerMethodNestedMapListWildcard, producerMethodNestedMapMapWildcard);
+                producerMethodNestedMapListWildcard, producerMethodNestedMapMapWildcard,
+                injectMethodWildcard, injectMethodExtendsWildcard, injectMethodSuperWildcard,
+                injectMethodMapWildcard, injectMethodNestedWildcard, injectMethodArrayWildcard,
+                injectMethodMultiDimArrayWildcard, injectMethodMixedParams);
     }
 }

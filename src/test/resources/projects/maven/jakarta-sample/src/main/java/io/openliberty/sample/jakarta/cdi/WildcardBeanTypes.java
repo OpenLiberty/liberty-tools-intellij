@@ -111,4 +111,47 @@ public class WildcardBeanTypes {
     public Map<String, Map<Integer, ?>> produceNestedMapMapWildcard() { // ERROR: nested wildcard in @Produces method
         return null;
     }
+
+    // Invalid @Inject methods with wildcard parameter types
+    @Inject
+    public void setWildcardList(List<?> list) { // ERROR: wildcard type in @Inject method parameter
+    }
+
+    @Inject
+    public void setExtendsWildcardList(List<? extends Number> list) { // ERROR: wildcard type in @Inject method parameter
+    }
+
+    @Inject
+    public void setSuperWildcardList(List<? super Integer> list) { // ERROR: wildcard type in @Inject method parameter
+    }
+
+    @Inject
+    public void setWildcardMap(Map<String, ?> map) { // ERROR: wildcard type in @Inject method parameter
+    }
+
+    @Inject
+    public void setNestedWildcard(Map<String, List<?>> map) { // ERROR: nested wildcard in @Inject method parameter
+    }
+
+    @Inject
+    public void setArrayWildcard(List<?>[] array) { // ERROR: array of wildcard type in @Inject method parameter
+    }
+
+    @Inject
+    public void setMultiDimensionalArrayWildcard(List<?>[][] array) { // ERROR: multi-dimensional array of wildcard type in @Inject method parameter
+    }
+
+    // Valid @Inject methods (no wildcards)
+    @Inject
+    public void setValidList(List<String> list) { // OK: no wildcard
+    }
+
+    @Inject
+    public void setValidMap(Map<String, Integer> map) { // OK: no wildcard
+    }
+
+    // Multiple parameters - only the wildcard ones should be flagged
+    @Inject
+    public void setMixedParameters(List<String> validList, List<?> wildcardList) { // ERROR: second parameter has wildcard
+    }
 }
