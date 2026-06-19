@@ -84,7 +84,7 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
 
         // Test diagnostic for wrong scope (only one diagnostic on class name)
         Diagnostic d1 = JakartaForJavaAssert.d(11, 13, 44,
-                "A class annotated with @LdapIdentityStoreDefinition must be annotated with @ApplicationScoped, not @RequestScoped.",
+                "A class annotated with @LdapIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @RequestScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
@@ -140,7 +140,7 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
 
         // Test diagnostic for wrong scope (only one diagnostic on class name)
         Diagnostic d1 = JakartaForJavaAssert.d(11, 13, 48,
-                "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped, not @RequestScoped.",
+                "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @RequestScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
