@@ -36,9 +36,8 @@ public class Constants {
         "jakarta.enterprise.context.RequestScoped",
         "jakarta.enterprise.context.SessionScoped",
         "jakarta.enterprise.context.NormalScope",
-        "jakarta.Interceptor",
-        "jakarta.Decorator",
-        "jakarta.enterprise.inject.Stereotype"
+        "jakarta.interceptor.Interceptor",
+        "jakarta.decorator.Decorator"
     ));
     
     /* Diagnostic Source */

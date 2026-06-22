@@ -145,4 +145,44 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
     }
+
+    @Test
+    public void ldapIdentityStoreWithInterceptorScopeTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/security/identitystore/LdapIdentityStoreWithInterceptorScope.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for @Interceptor scope annotation
+        Diagnostic wrongScopeDiagnostic = JakartaForJavaAssert.d(11, 13, 50,
+                "A class annotated with @LdapIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @Interceptor.",
+                DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
+    }
+
+    @Test
+    public void databaseIdentityStoreWithDecoratorScopeTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/security/identitystore/DatabaseIdentityStoreWithDecoratorScope.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for @Decorator scope annotation
+        Diagnostic wrongScopeDiagnostic = JakartaForJavaAssert.d(11, 13, 52,
+                "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @Decorator.",
+                DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
+    }
 }
