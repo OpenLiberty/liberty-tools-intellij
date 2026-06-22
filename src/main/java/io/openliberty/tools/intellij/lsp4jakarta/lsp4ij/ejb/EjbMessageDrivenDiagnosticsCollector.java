@@ -12,10 +12,10 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.Constants.DIAGNOSTIC_CODE;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.Constants.DIAGNOSTIC_SOURCE;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.Constants.MESSAGE_DRIVEN_FQ_NAME;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.Constants.MESSAGE_LISTENER_FQ_NAME;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.DIAGNOSTIC_CODE;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.DIAGNOSTIC_SOURCE;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.MESSAGE_DRIVEN_FQ_NAME;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.MESSAGE_LISTENER_FQ_NAME;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;

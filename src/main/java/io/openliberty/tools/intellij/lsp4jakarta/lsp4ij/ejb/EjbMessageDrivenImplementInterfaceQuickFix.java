@@ -12,7 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.Constants.MESSAGE_LISTENER_FQ_NAME;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.MESSAGE_LISTENER_FQ_NAME;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -74,7 +74,10 @@ public class EjbMessageDrivenImplementInterfaceQuickFix implements IJavaCodeActi
         final PsiElement node = context.getCoveredNode();
         final PsiClass parentType = getBinding(node);
 
-        assert parentType != null;
+        if (parentType == null) {
+            return toResolve;
+        }
+        
         ChangeCorrectionProposal proposal = new ImplementInterfaceProposal(
                 context.getCompilationUnit(), parentType, context.getASTRoot(),
                 MESSAGE_LISTENER_FQ_NAME, 0, context.getSource().getCompilationUnit());

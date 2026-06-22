@@ -21,7 +21,6 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
-import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.Diagnostic;
@@ -33,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import  static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 /**
  * Tests for Jakarta EE Enterprise Beans (EJB) @MessageDriven diagnostics.
  * 
@@ -58,7 +58,7 @@ public class EjbMessageDrivenTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // No diagnostics expected for valid message-driven bean
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+        assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
     @Test
@@ -74,14 +74,14 @@ public class EjbMessageDrivenTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for missing MessageListener interface (on annotation closing line)
-        Diagnostic expectedDiagnostic = JakartaForJavaAssert.d(12, 13, 46,
+        Diagnostic expectedDiagnostic = d(12, 13, 46,
                 "A class annotated with @MessageDriven must implement the jakarta.jms.MessageListener interface.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "ImplementMessageListener");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+     assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test code action to implement MessageListener interface
-        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, expectedDiagnostic);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;\n" +
                 "\n" +
                 "import jakarta.ejb.MessageDriven;\n" +
@@ -109,9 +109,9 @@ public class EjbMessageDrivenTest extends BaseJakartaTest {
                 "        }\n" +
                 "    }\n" +
                 "}";
-        TextEdit textEdit = JakartaForJavaAssert.te(0, 0, 25, 1, newText);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils,
-                JakartaForJavaAssert.ca(uri, "Let 'MessageDrivenBeanMissingInterface' implement 'MessageListener'", expectedDiagnostic, textEdit));
+        TextEdit textEdit = te(0, 0, 25, 1, newText);
+     assertJavaCodeAction(codeActionParams, utils,
+             ca(uri, "Let 'MessageDrivenBeanMissingInterface' implement 'MessageListener'", expectedDiagnostic, textEdit));
     }
 
     @Test
@@ -127,14 +127,14 @@ public class EjbMessageDrivenTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for wrong interface (on annotation closing line)
-        Diagnostic expectedDiagnostic = JakartaForJavaAssert.d(11, 13, 44,
+        Diagnostic expectedDiagnostic = d(11, 13, 44,
                 "A class annotated with @MessageDriven must implement the jakarta.jms.MessageListener interface.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "ImplementMessageListener");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+     assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
 
         // Test code action to implement MessageListener interface
-        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, expectedDiagnostic);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
         String newText = "package io.openliberty.sample.jakarta.ejb;\n" +
                 "\n" +
                 "import jakarta.ejb.MessageDriven;\n" +
@@ -155,8 +155,8 @@ public class EjbMessageDrivenTest extends BaseJakartaTest {
                 "        System.out.println(\"This is not a message listener method\");\n" +
                 "    }\n" +
                 "}";
-        TextEdit textEdit = JakartaForJavaAssert.te(0, 0, 17, 1, newText);
-        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils,
-                JakartaForJavaAssert.ca(uri, "Let 'MessageDrivenBeanWrongInterface' implement 'MessageListener'", expectedDiagnostic, textEdit));
+        TextEdit textEdit = te(0, 0, 17, 1, newText);
+     assertJavaCodeAction(codeActionParams, utils,
+             ca(uri, "Let 'MessageDrivenBeanWrongInterface' implement 'MessageListener'", expectedDiagnostic, textEdit));
     }
 }

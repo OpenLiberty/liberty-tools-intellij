@@ -15,7 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 /**
  * Constants for Jakarta Enterprise Beans (EJB) diagnostics.
  */
-public class Constants {
+public class EjbConstants {
 
     /* Annotations */
     public static final String MESSAGE_DRIVEN_FQ_NAME = "jakarta.ejb.MessageDriven";
