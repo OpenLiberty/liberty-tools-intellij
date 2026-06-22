@@ -466,8 +466,8 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             return false;
         }
 
-        return JsonbConstants.JAKARTA_JSONB_BUILDER.equals(fqName) ||
-               JsonbConstants.JSONB_BUILDER_SHORT.equals(fqName);
+        // PsiClass.getQualifiedName() always returns fully qualified names
+        return JsonbConstants.JAKARTA_JSONB_BUILDER.equals(fqName);
     }
 
     /**

@@ -123,8 +123,7 @@ public class JsonbConstants {
     // Closeable-related constants
     public static final String JAKARTA_JSONB_BIND = "jakarta.json.bind.";
     public static final String JAKARTA_JSON_BIND_JSONB = JAKARTA_JSONB_BIND + JSONB_PREFIX;
-    public static final String JSONB_BUILDER_SHORT = "JsonbBuilder";
-    public static final String JAKARTA_JSONB_BUILDER = JAKARTA_JSONB_BIND + JSONB_BUILDER_SHORT;
+    public static final String JAKARTA_JSONB_BUILDER = JAKARTA_JSONB_BIND + "JsonbBuilder";
     public static final String JSONB_CREATE_METHOD = "create";
     public static final String JSONB_BUILD_METHOD = "build";
     public static final String CLOSE_METHOD = "close";
