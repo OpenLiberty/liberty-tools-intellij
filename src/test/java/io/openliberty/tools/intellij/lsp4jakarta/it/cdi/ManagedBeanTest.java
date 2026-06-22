@@ -1528,7 +1528,7 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostics for decorator with observer methods
-        // Diagnostic for missing @Delegate injection point (from DecoratorDiagnosticsCollector)
+        // Diagnostic for missing @Delegate injection point (from CdiDecoratorDiagnosticsCollector)
         Diagnostic delegateDiagnostic = d(7, 13, 40,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");

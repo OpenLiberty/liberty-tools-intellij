@@ -34,8 +34,8 @@ import java.util.Arrays;
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
 /**
- * Tests for DecoratorDiagnosticsCollector that validates decorator delegate injection points.
- * 
+ * Tests for CdiDecoratorDiagnosticsCollector that validates decorator delegate injection points.
+ *
  * Tests cover two main scenarios:
  * 1. Decorator with no @Delegate injection point (should produce error)
  * 2. Decorator with multiple @Delegate injection points (should produce error on each delegate)
@@ -111,7 +111,7 @@ public class DecoratorDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Expected diagnostic for missing @Delegate injection point (from DecoratorDiagnosticsCollector)
+        // Expected diagnostic for missing @Delegate injection point (from CdiDecoratorDiagnosticsCollector)
         // Diagnostic on the class declaration (line 8, "DecoratorWithObserverMethod")
         Diagnostic missingDelegateDiagnostic = d(7, 13, 40,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",

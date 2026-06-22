@@ -29,19 +29,14 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.DECORATOR_FQ_NAME;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.DELEGATE_FQ_NAME;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE;
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.DIAGNOSTIC_SOURCE;
-
 /**
  * CDI diagnostics collector that validates decorator delegate injection points.
  */
-public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector {
+public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
     @Override
     protected String getDiagnosticSource() {
-        return DIAGNOSTIC_SOURCE;
+        return ManagedBeanConstants.DIAGNOSTIC_SOURCE;
     }
 
     @Override
@@ -66,7 +61,7 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
         String[] typeAnnotations = Stream.of(type.getAnnotations())
                 .map(PsiAnnotation::getQualifiedName)
                 .toArray(String[]::new);
-        if (getMatchedJavaElementNames(type, typeAnnotations, new String[] { DECORATOR_FQ_NAME }).isEmpty()) {
+        if (getMatchedJavaElementNames(type, typeAnnotations, new String[] { ManagedBeanConstants.DECORATOR_FQ_NAME }).isEmpty()) {
             return;
         }
 
@@ -76,7 +71,7 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
             String[] fieldAnnotations = Stream.of(field.getAnnotations())
                     .map(PsiAnnotation::getQualifiedName)
                     .toArray(String[]::new);
-            if (!getMatchedJavaElementNames(type, fieldAnnotations, new String[] { DELEGATE_FQ_NAME }).isEmpty()) {
+            if (!getMatchedJavaElementNames(type, fieldAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
                 delegateElements.add(field);
             }
         }
@@ -86,7 +81,7 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
                 String[] parameterAnnotations = Stream.of(parameter.getAnnotations())
                         .map(PsiAnnotation::getQualifiedName)
                         .toArray(String[]::new);
-                if (!getMatchedJavaElementNames(type, parameterAnnotations, new String[] { DELEGATE_FQ_NAME }).isEmpty()) {
+                if (!getMatchedJavaElementNames(type, parameterAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
                     delegateElements.add(parameter);
                 }
             }
@@ -108,14 +103,14 @@ public class DecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector 
         int delegateCount = delegateElements.size();
         if (delegateCount == 0) {
             diagnostics.add(createDiagnostic(type, unit,
-                    Messages.getMessage("DecoratorWithInvalidDelegateCount"),
-                    DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
+                    Messages.getMessage("MissingDelegateInDecorator"),
+                    ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
                     DiagnosticSeverity.Error));
         } else if(delegateCount > 1) {
             String message = Messages.getMessage("DecoratorWithMultipleDelegates", delegateCount);
             for (PsiElement delegateElement : delegateElements) {
                 diagnostics.add(createDiagnostic(delegateElement, unit, message,
-                        DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
+                        ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
                         DiagnosticSeverity.Error));
             }
         }
