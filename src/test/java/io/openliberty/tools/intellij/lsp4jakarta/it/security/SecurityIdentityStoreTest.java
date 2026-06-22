@@ -63,11 +63,11 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for missing @ApplicationScoped (on class name)
-        Diagnostic d1 = JakartaForJavaAssert.d(9, 13, 54,
+        Diagnostic missingApplicationScopedDiagnostic = JakartaForJavaAssert.d(9, 13, 54,
                 "A class annotated with @LdapIdentityStoreDefinition must be annotated with @ApplicationScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "MissingApplicationScopedOnIdentityStoreDefinition");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingApplicationScopedDiagnostic);
     }
 
     @Test
@@ -83,11 +83,11 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for wrong scope (only one diagnostic on class name)
-        Diagnostic d1 = JakartaForJavaAssert.d(11, 13, 44,
+        Diagnostic wrongScopeDiagnostic = JakartaForJavaAssert.d(11, 13, 44,
                 "A class annotated with @LdapIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @RequestScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
     }
 
     @Test
@@ -119,11 +119,11 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for missing @ApplicationScoped (on class name)
-        Diagnostic d1 = JakartaForJavaAssert.d(9, 13, 58,
+        Diagnostic missingApplicationScopedDiagnostic = JakartaForJavaAssert.d(9, 13, 58,
                 "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "MissingApplicationScopedOnIdentityStoreDefinition");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingApplicationScopedDiagnostic);
     }
 
     @Test
@@ -139,10 +139,10 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for wrong scope (only one diagnostic on class name)
-        Diagnostic d1 = JakartaForJavaAssert.d(11, 13, 48,
+        Diagnostic wrongScopeDiagnostic = JakartaForJavaAssert.d(11, 13, 48,
                 "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @RequestScoped.",
                 DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
     }
 }
