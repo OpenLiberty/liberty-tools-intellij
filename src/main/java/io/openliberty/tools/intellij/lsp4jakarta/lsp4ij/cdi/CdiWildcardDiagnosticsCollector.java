@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -51,12 +52,11 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
         if (unit == null)
             return;
 
-        PsiClass[] types = unit.getClasses();
-        for (PsiClass type : types) {
+        for (PsiClass type : unit.getClasses()) {
             // Check fields for @Inject and @Produces with wildcard types
             for (PsiField field : type.getFields()) {
-                boolean hasInject = hasAnnotation(field, INJECT_FQ_NAME);
-                boolean hasProduces = hasAnnotation(field, PRODUCES_FQ_NAME);
+                boolean hasInject = AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME);
+                boolean hasProduces = AnnotationUtils.hasAnnotation(field, PRODUCES_FQ_NAME);
 
                 // Use if-else since @Inject and @Produces don't appear on the same field
                 if (hasInject) {
@@ -80,8 +80,8 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
             // Check methods for @Inject and @Produces with wildcard types
             for (PsiMethod method : type.getMethods()) {
-                boolean hasInject = hasAnnotation(method, INJECT_FQ_NAME);
-                boolean hasProduces = hasAnnotation(method, PRODUCES_FQ_NAME);
+                boolean hasInject = AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME);
+                boolean hasProduces = AnnotationUtils.hasAnnotation(method, PRODUCES_FQ_NAME);
 
                 // Use if-else since @Inject and @Produces don't appear on the same method
                 if (hasInject) {
@@ -107,18 +107,6 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
             }
         }
-    }
-
-    /**
-     * Checks if a field or method has a specific annotation.
-     *
-     * @param element the field or method to check
-     * @param annotationFqName the fully qualified name of the annotation
-     * @return true if the element has the annotation, false otherwise
-     */
-    private boolean hasAnnotation(PsiModifierListOwner element, String annotationFqName) {
-        PsiAnnotation[] annotations = element.getAnnotations();
-        return isMatchedAnnotation(annotations, annotationFqName);
     }
 
     /**
