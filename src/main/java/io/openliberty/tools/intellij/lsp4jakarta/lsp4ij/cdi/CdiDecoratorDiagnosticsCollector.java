@@ -89,7 +89,8 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                 if (!getMatchedJavaElementNames(type, parameterAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
                     delegateElements.add(parameter);
                     // Validate that @Delegate injection point has @Inject annotation on the method
-                    validateDelegateInjectionPoint(type, unit, diagnostics, parameter, methodAnnotations);
+                    // Report diagnostic on the method, not the parameter
+                    validateDelegateInjectionPoint(type, unit, diagnostics, method, methodAnnotations);
                 }
             }
         }

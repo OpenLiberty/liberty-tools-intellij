@@ -226,7 +226,31 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Expected diagnostic on field without @Inject
+        // Expected diagnostic 1: InvalidManagedBeanConstructor on constructor
+        // Line 52 (0-based: 51), constructor name starts at column 11, ends at column 48
+        Diagnostic constructorManagedBeanDiagnostic = d(51, 11, 48,
+                "The @Inject annotation must define a managed bean constructor that takes parameters, or the managed bean must resolve to having a no-arg constructor instead.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidManagedBeanConstructor");
+
+        // Expected diagnostic 2: InvalidDelegateInjectionPoint on constructor
+        // Line 52 (0-based: 51), constructor name starts at column 11, ends at column 48
+        Diagnostic constructorParamDiagnostic = d(51, 11, 48,
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateInjectionPoint");
+
+        // Expected diagnostic 3: InvalidDelegateInjectionPoint on method
+        // Line 33 (0-based: 32), method name "setDelegate" starts at column 16, ends at column 27
+        Diagnostic methodParamDiagnostic = d(32, 16, 27,
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateInjectionPoint");
+
+        // Expected diagnostic 4: InvalidDelegateInjectionPoint on field
         // Line 16 (0-based: 15), field name "delegate" starts at column 27, ends at column 35
         Diagnostic fieldDiagnostic = d(15, 27, 35,
                 "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
@@ -234,48 +258,160 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "jakarta-cdi",
                 "InvalidDelegateInjectionPoint");
 
-        // Expected diagnostic on method parameter without @Inject on method
-        // Line 33 (0-based: 32), parameter name "delegate" starts at column 53, ends at column 61
-        Diagnostic methodParamDiagnostic = d(32, 53, 61,
-                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
-                DiagnosticSeverity.Error,
-                "jakarta-cdi",
-                "InvalidDelegateInjectionPoint");
+        assertJavaDiagnostics(diagnosticsParams, utils, constructorManagedBeanDiagnostic, constructorParamDiagnostic, methodParamDiagnostic, fieldDiagnostic);
 
-        // Expected diagnostic on constructor parameter without @Inject on constructor
-        // Line 52 (0-based: 51), parameter name "delegate" starts at column 74, ends at column 82
-        Diagnostic constructorParamDiagnostic = d(51, 74, 82,
-                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
-                DiagnosticSeverity.Error,
-                "jakarta-cdi",
-                "InvalidDelegateInjectionPoint");
+        // Test quickfix for field - InsertAnnotationMissingQuickFix rewrites the entire file
+        JakartaJavaCodeActionParams fieldCodeActionParams = createCodeActionParams(uri, fieldDiagnostic);
+        String fieldFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "/**\n * Invalid: @Delegate on field without @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedField implements PaymentService {\n\n" +
+                "    @Inject\n    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on method parameter without @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on constructor parameter without @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    public DelegateOnNonInjectedConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on field with @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnInjectedField implements PaymentService {\n\n" +
+                "    @Inject\n    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on constructor parameter with @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public ValidDelegateOnConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on method parameter with @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n";
+        TextEdit fieldTextEdit = te(0, 0, 117, 0, fieldFixedContent);
+        CodeAction fieldInsertInjectAction = ca(uri, "Insert @Inject", fieldDiagnostic, fieldTextEdit);
+        assertJavaCodeAction(fieldCodeActionParams, utils, fieldInsertInjectAction);
 
-        // Also expect InvalidManagedBeanConstructor diagnostic for the constructor
-        Diagnostic constructorDiagnostic = d(51, 11, 48,
-                "The @Inject annotation must define a managed bean constructor that takes parameters, or the managed bean must resolve to having a no-arg constructor instead.",
-                DiagnosticSeverity.Error,
-                "jakarta-cdi",
-                "InvalidManagedBeanConstructor");
+        // Test quickfix for method - InsertAnnotationMissingQuickFix rewrites the entire file
+        JakartaJavaCodeActionParams methodCodeActionParams = createCodeActionParams(uri, methodParamDiagnostic);
+        String methodFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "/**\n * Invalid: @Delegate on field without @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedField implements PaymentService {\n\n" +
+                "    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on method parameter without @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on constructor parameter without @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    public DelegateOnNonInjectedConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on field with @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnInjectedField implements PaymentService {\n\n" +
+                "    @Inject\n    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on constructor parameter with @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public ValidDelegateOnConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on method parameter with @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n";
+        TextEdit methodTextEdit = te(0, 0, 117, 0, methodFixedContent);
+        CodeAction methodInsertInjectAction = ca(uri, "Insert @Inject", methodParamDiagnostic, methodTextEdit);
+        assertJavaCodeAction(methodCodeActionParams, utils, methodInsertInjectAction);
 
-        assertJavaDiagnostics(diagnosticsParams, utils, fieldDiagnostic, methodParamDiagnostic, constructorParamDiagnostic, constructorDiagnostic);
-
-        // Test quickfix for field
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, fieldDiagnostic);
-        TextEdit te1 = te(14, 4, 15, 4, "@Inject\n    @Delegate\n");
-        CodeAction ca1 = ca(uri, "Insert @Inject", fieldDiagnostic, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
-
-        // Test quickfix for method parameter
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, methodParamDiagnostic);
-        TextEdit te2 = te(32, 4, 33, 4, "@Inject\n    public void setDelegate(@Delegate PaymentService delegate) {\n");
-        CodeAction ca2 = ca(uri, "Insert @Inject", methodParamDiagnostic, te2);
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
-
-        // Test quickfix for constructor parameter
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, constructorParamDiagnostic);
-        TextEdit te3 = te(51, 4, 52, 4, "@Inject\n    public DelegateOnNonInjectedConstructorParam(@Delegate PaymentService delegate) {\n");
-        CodeAction ca3 = ca(uri, "Insert @Inject", constructorParamDiagnostic, te3);
-        assertJavaCodeAction(codeActionParams3, utils, ca3);
+        // Test quickfix for constructor - InsertAnnotationMissingQuickFix rewrites the entire file
+        JakartaJavaCodeActionParams constructorCodeActionParams = createCodeActionParams(uri, constructorParamDiagnostic);
+        String constructorFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "/**\n * Invalid: @Delegate on field without @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedField implements PaymentService {\n\n" +
+                "    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on method parameter without @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Invalid: @Delegate on constructor parameter without @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass DelegateOnNonInjectedConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n    public DelegateOnNonInjectedConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on field with @Inject\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnInjectedField implements PaymentService {\n\n" +
+                "    @Inject\n    @Delegate\n    private PaymentService delegate;\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on constructor parameter with @Inject on constructor\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnConstructorParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public ValidDelegateOnConstructorParam(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n\n" +
+                "/**\n * Valid: @Delegate on method parameter with @Inject on method\n */\n" +
+                "@Decorator\n@Dependent\nclass ValidDelegateOnMethodParam implements PaymentService {\n\n" +
+                "    private PaymentService delegate;\n\n" +
+                "    @Inject\n" +
+                "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
+                "        this.delegate = delegate;\n    }\n\n" +
+                "    @Override\n    public void processPayment(double amount) {\n" +
+                "        delegate.processPayment(amount);\n    }\n}\n";
+        TextEdit constructorTextEdit = te(0, 0, 117, 0, constructorFixedContent);
+        CodeAction constructorInsertInjectAction = ca(uri, "Insert @Inject", constructorParamDiagnostic, constructorTextEdit);
+        assertJavaCodeAction(constructorCodeActionParams, utils, constructorInsertInjectAction);
     }
 
 }
