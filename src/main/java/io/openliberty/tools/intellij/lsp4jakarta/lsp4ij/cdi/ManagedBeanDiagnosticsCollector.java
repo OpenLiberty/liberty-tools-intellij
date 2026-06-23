@@ -211,7 +211,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // observer_methods
                 Set<String> conflictParams = new HashSet<>();
                 List<PsiParameter> paramsWithObserverAnnotations = new ArrayList<>();
-                List<PsiParameter> paramsWithDisposerAnnotations = new ArrayList<>();
                 for (PsiParameter param : method.getParameterList().getParameters()) {
                     String[] annotationQualifiedNames = Stream.of(param.getAnnotations()).map(annotation -> annotation.getQualifiedName()).toArray(String[]::new);
                     String[] conflictedParamAnnotations = INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS.toArray(String[]::new);
@@ -223,13 +222,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     if (!observesObservesAsync.isEmpty()) {
                         paramsWithObserverAnnotations.add(param);
                     }
-                    // Track parameters with @Disposes annotation for interceptor/decorator classes only
-                    if (interceptorOrDecorator) {
-                        List<String> disposerAnnotations = getMatchedJavaElementNames(type, annotationQualifiedNames, INVALID_DISPOSER_FQ_PARAMS);
-                        if (!disposerAnnotations.isEmpty()) {
-                            paramsWithDisposerAnnotations.add(param);
-                        }
-                    }
                 }
                 if (interceptorOrDecorator && !paramsWithObserverAnnotations.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit,
@@ -237,16 +229,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
                             null,
                             DiagnosticSeverity.Error));
-                } else if (interceptorOrDecorator && !paramsWithDisposerAnnotations.isEmpty()) {
-                    String paramNames = paramsWithDisposerAnnotations.stream()
-                            .map(PsiParameter::getName)
-                            .collect(java.util.stream.Collectors.joining(", "));
-                    diagnostics.add(createDiagnostic(method, unit,
-                            Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod", paramNames),
-                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER,
-                            null,
-                            DiagnosticSeverity.Error));
-                } else if (!conflictParams.isEmpty()) {
+                }  else if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
                 } else if (paramsWithObserverAnnotations.size() > 1) {
@@ -266,6 +249,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
                             DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
                 }
+                // Check for @Disposes in interceptors/decorators
+                if (interceptorOrDecorator) {
+                    List<String> disposesParams = getDisposesParamNames(type, method);
+                    if (!disposesParams.isEmpty()) {
+                        String paramNames = String.join(", ", disposesParams);
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod", paramNames),
+                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER, null, DiagnosticSeverity.Error));
+                    }
+                }
+                
             }
 
             if (isManagedBean && constructorMethods.size() > 0) {
@@ -546,5 +540,26 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         return Stream.of(method.getParameterList().getParameters())
                 .flatMap(param -> Stream.of(param.getAnnotations()))
                 .anyMatch(annotation -> isConditionalObserver(type, annotation));
+    }
+
+    /**
+     * getDisposesParamNames
+     * Returns a list of parameter names that are annotated with @Disposes.
+     *
+     * @param type the type
+     * @param method the method to check
+     * @return list of parameter names annotated with @Disposes
+     */
+    private List<String> getDisposesParamNames(PsiClass type, PsiMethod method) {
+        List<String> paramNames = new ArrayList<>();
+        for (PsiParameter param : method.getParameterList().getParameters()) {
+            for (PsiAnnotation annotation : param.getAnnotations()) {
+                if (isMatchedJavaElement(type, annotation.getQualifiedName(), DISPOSES_FQ_NAME)) {
+                    paramNames.add(param.getName());
+                    break;
+                }
+            }
+        }
+        return paramNames;
     }
 }
