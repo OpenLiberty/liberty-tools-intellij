@@ -229,7 +229,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER,
                             null,
                             DiagnosticSeverity.Error));
-                }  else if (!conflictParams.isEmpty()) {
+                } else if (!conflictParams.isEmpty()) {
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanObservesAndObservesAsyncParam", String.join(", ", conflictParams)),
                             DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT, null, DiagnosticSeverity.Error));
                 } else if (paramsWithObserverAnnotations.size() > 1) {
