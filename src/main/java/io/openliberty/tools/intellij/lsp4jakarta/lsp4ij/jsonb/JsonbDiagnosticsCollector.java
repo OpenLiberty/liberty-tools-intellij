@@ -397,26 +397,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
                 PsiMethod resolvedMethod = methodCache.get(mi);
                 if (resolvedMethod != null) {
-                    PsiClass declaringClass = resolvedMethod.getContainingClass();
-                    if (declaringClass != null) {
-                        String fqName = declaringClass.getQualifiedName();
-
-                        if (!analysis.methodUsesJsonb && JsonbConstants.JAKARTA_JSON_BIND_JSONB.equals(fqName)) {
-                            analysis.methodUsesJsonb = true;
-                        }
-
-                        if (!analysis.hasClose && isCloseInvocation(mi, resolvedMethod)) {
-                            analysis.hasClose = true;
-                        }
-
-                        if (isThreadSourceInvocation(mi, resolvedMethod)) {
-                            analysis.threadSourceCount++;
-                        }
-
-                        if (!analysis.hasLocalJsonbInstance && isLocalJsonbCreation(mi, resolvedMethod)) {
-                            analysis.hasLocalJsonbInstance = true;
-                        }
-                    }
+                    getJsonbThreadClosableDetails(mi, resolvedMethod, analysis);
                 }
             }
         }
@@ -434,6 +415,49 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     null,
                     DiagnosticSeverity.Warning
                 ));
+            }
+        }
+    }
+
+    /**
+     * Analyzes a method invocation to collect Jsonb-related closeable details for thread safety diagnostics.
+     *
+     * <p>This method updates the provided {@link JsonbThreadSafetyAnalysis} object by checking if the
+     * method invocation:
+     * <ul>
+     * <li>Uses Jsonb API (jakarta.json.bind.Jsonb)</li>
+     * <li>Creates a local Jsonb instance (JsonbBuilder.create() or build())</li>
+     * <li>Calls close() on a Jsonb instance</li>
+     * <li>Uses thread sources (ExecutorService, Thread, etc.)</li>
+     * </ul>
+     *
+     * <p>All checks are performed for each method invocation to ensure complete analysis,
+     * as Jsonb usage detection happens during the same iteration. The resolvedMethod parameter
+     * is pre-resolved for performance optimization.
+     *
+     * @param mi the method call expression to analyze
+     * @param resolvedMethod the pre-resolved method for performance (from method cache)
+     * @param analysis the thread safety analysis object to update with findings
+     */
+    private void getJsonbThreadClosableDetails(PsiMethodCallExpression mi, PsiMethod resolvedMethod, JsonbThreadSafetyAnalysis analysis) {
+        PsiClass declaringClass = resolvedMethod.getContainingClass();
+        if (declaringClass != null) {
+            String fqName = declaringClass.getQualifiedName();
+
+            if (!analysis.methodUsesJsonb && JsonbConstants.JAKARTA_JSON_BIND_JSONB.equals(fqName)) {
+                analysis.methodUsesJsonb = true;
+            }
+
+            if (!analysis.hasClose && isCloseInvocation(mi, resolvedMethod)) {
+                analysis.hasClose = true;
+            }
+
+            if (isThreadSourceInvocation(mi, resolvedMethod)) {
+                analysis.threadSourceCount++;
+            }
+
+            if (!analysis.hasLocalJsonbInstance && isLocalJsonbCreation(mi, resolvedMethod)) {
+                analysis.hasLocalJsonbInstance = true;
             }
         }
     }
@@ -555,13 +579,13 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         }
         
         // Check if implements thread-related interfaces
-        for (PsiClass iface : psiClass.getInterfaces()) {
-            String ifaceName = iface.getQualifiedName();
+        for (PsiClass interfaceClass : psiClass.getInterfaces()) {
+            String ifaceName = interfaceClass.getQualifiedName();
             if (ifaceName != null && JsonbConstants.THREAD_HIERARCHY_TYPES.contains(ifaceName)) {
                 return true;
             }
             // Recursively check interface hierarchy
-            if (isThreadRelatedType(iface)) {
+            if (isThreadRelatedType(interfaceClass)) {
                 return true;
             }
         }
