@@ -138,11 +138,11 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     private void validateDelegateInjectionPoint(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
                                                 PsiElement element, String[] annotations) {
         // Check if @Inject annotation is present
-        if (getMatchedJavaElementNames(type, annotations, new String[] { INJECT_FQ_NAME }).isEmpty()) {
+        if (getMatchedJavaElementNames(type, annotations, new String[] { ManagedBeanConstants.INJECT_FQ_NAME }).isEmpty()) {
             // If @Inject is not present, report a diagnostic
             diagnostics.add(createDiagnostic(element, unit,
                     Messages.getMessage("InvalidDelegateInjectionPoint"),
-                    DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT, null,
+                    ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT, null,
                     DiagnosticSeverity.Error));
         }
     }

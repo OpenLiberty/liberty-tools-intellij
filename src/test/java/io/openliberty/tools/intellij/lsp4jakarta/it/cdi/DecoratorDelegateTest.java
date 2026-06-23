@@ -22,8 +22,11 @@ import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -205,4 +208,74 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         // No diagnostics expected for valid decorator with method injection
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    /**
+     * Test that @Delegate on a field without @Inject triggers a diagnostic and offers quickfix.
+     *
+     * Expected: Error on field indicating @Delegate must be on an injected field.
+     */
+    @Test
+    public void testDelegateOnNonInjectedField() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/InvalidDelegateLocations.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Expected diagnostic on field without @Inject
+        // Line 16 (0-based: 15), field name "delegate" starts at column 27, ends at column 35
+        Diagnostic fieldDiagnostic = d(15, 27, 35,
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateInjectionPoint");
+
+        // Expected diagnostic on method parameter without @Inject on method
+        // Line 33 (0-based: 32), parameter name "delegate" starts at column 53, ends at column 61
+        Diagnostic methodParamDiagnostic = d(32, 53, 61,
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateInjectionPoint");
+
+        // Expected diagnostic on constructor parameter without @Inject on constructor
+        // Line 52 (0-based: 51), parameter name "delegate" starts at column 74, ends at column 82
+        Diagnostic constructorParamDiagnostic = d(51, 74, 82,
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor. Using it anywhere else is invalid.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateInjectionPoint");
+
+        // Also expect InvalidManagedBeanConstructor diagnostic for the constructor
+        Diagnostic constructorDiagnostic = d(51, 11, 48,
+                "The @Inject annotation must define a managed bean constructor that takes parameters, or the managed bean must resolve to having a no-arg constructor instead.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidManagedBeanConstructor");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, fieldDiagnostic, methodParamDiagnostic, constructorParamDiagnostic, constructorDiagnostic);
+
+        // Test quickfix for field
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, fieldDiagnostic);
+        TextEdit te1 = te(14, 4, 15, 4, "@Inject\n    @Delegate\n");
+        CodeAction ca1 = ca(uri, "Insert @Inject", fieldDiagnostic, te1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
+
+        // Test quickfix for method parameter
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, methodParamDiagnostic);
+        TextEdit te2 = te(32, 4, 33, 4, "@Inject\n    public void setDelegate(@Delegate PaymentService delegate) {\n");
+        CodeAction ca2 = ca(uri, "Insert @Inject", methodParamDiagnostic, te2);
+        assertJavaCodeAction(codeActionParams2, utils, ca2);
+
+        // Test quickfix for constructor parameter
+        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, constructorParamDiagnostic);
+        TextEdit te3 = te(51, 4, 52, 4, "@Inject\n    public DelegateOnNonInjectedConstructorParam(@Delegate PaymentService delegate) {\n");
+        CodeAction ca3 = ca(uri, "Insert @Inject", constructorParamDiagnostic, te3);
+        assertJavaCodeAction(codeActionParams3, utils, ca3);
+    }
+
 }
