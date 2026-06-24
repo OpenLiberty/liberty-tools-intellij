@@ -144,6 +144,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnAbstractMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
 
+        Diagnostic duplicateAroundInvoke1 = JakartaForJavaAssert.d(13, 27, 38,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
         Diagnostic proceedDiagnostic = JakartaForJavaAssert.d(13, 27, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
@@ -157,8 +162,19 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "The class InvalidAroundInvokeMethods should not contain the abstract modifier. If it contains the abstract modifier, the class should not be annotated with @Interceptor.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnAbstractClass");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, proceedDiagnostic, staticModifierDiagnostic,
-                invalidAbstractClassDiagnostic);
+        // Test diagnostics for duplicate interceptor methods (skip first occurrence)
+        Diagnostic duplicateAroundInvoke2 = JakartaForJavaAssert.d(16, 25, 34,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
+        Diagnostic duplicateAroundInvoke3 = JakartaForJavaAssert.d(21, 18, 26,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, duplicateAroundInvoke1,
+                proceedDiagnostic, staticModifierDiagnostic, invalidAbstractClassDiagnostic, duplicateAroundInvoke2, duplicateAroundInvoke3);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -338,6 +354,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnAbstractMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
+        Diagnostic duplicateAroundConstruct1 = JakartaForJavaAssert.d(13, 27, 38,
+                "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
         Diagnostic proceedDiagnostics = JakartaForJavaAssert.d(13, 27, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
@@ -346,6 +367,10 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "AroundConstruct lifecycle callback interceptor method must not be declared as static except in an application client.",
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
+        Diagnostic invalidAbstractClassDiagnostics = JakartaForJavaAssert.d(5, 22, 51,
+                "The class InvalidAroundConstructMethods should not contain the abstract modifier. If it contains the abstract modifier, the class should not be annotated with @Interceptor.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnAbstractClass");
 
         Diagnostic multipleFinalModifierDiagnostic = JakartaForJavaAssert.d(21, 31, 50,
                 "AroundConstruct interceptor method must not be declared as a final method.",
@@ -357,12 +382,25 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
-        Diagnostic invalidAbstractClassDiagnostics = JakartaForJavaAssert.d(5, 22, 51,
-                "The class InvalidAroundConstructMethods should not contain the abstract modifier. If it contains the abstract modifier, the class should not be annotated with @Interceptor.",
-                DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnAbstractClass");
+        // Test diagnostics for duplicate interceptor methods (skip first occurrence)
+        Diagnostic duplicateAroundConstruct2 = JakartaForJavaAssert.d(16, 25, 34,
+                "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, proceedDiagnostics, staticModifierDiagnostic,
-                 multipleFinalModifierDiagnostic, multipleStaticModifierDiagnostic, invalidAbstractClassDiagnostics);
+        Diagnostic duplicateAroundConstruct3 = JakartaForJavaAssert.d(21, 31, 50,
+                "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
+        Diagnostic duplicateAroundConstruct4 = JakartaForJavaAssert.d(26, 18, 26,
+                "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, duplicateAroundConstruct1,
+                proceedDiagnostics, staticModifierDiagnostic, invalidAbstractClassDiagnostics, multipleFinalModifierDiagnostic, multipleStaticModifierDiagnostic,
+                duplicateAroundConstruct2, duplicateAroundConstruct3, duplicateAroundConstruct4);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -728,6 +766,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnAbstractMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
 
+        Diagnostic duplicateAroundTimeout1 = JakartaForJavaAssert.d(13, 27, 38,
+                "Only one method with @AroundTimeout annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
+
         Diagnostic proceedDiagnostic = JakartaForJavaAssert.d(13, 27, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
@@ -741,8 +784,19 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "The class InvalidAroundTimeoutMethods should not contain the abstract modifier. If it contains the abstract modifier, the class should not be annotated with @Interceptor.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnAbstractClass");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, proceedDiagnostic, staticModifierDiagnostic,
-                invalidAbstractClassDiagnostic);
+        // Test diagnostics for duplicate interceptor methods (skip first occurrence)
+        Diagnostic duplicateAroundTimeout2 = JakartaForJavaAssert.d(16, 25, 34,
+                "Only one method with @AroundTimeout annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
+
+        Diagnostic duplicateAroundTimeout3 = JakartaForJavaAssert.d(21, 18, 26,
+                "Only one method with @AroundTimeout annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, duplicateAroundTimeout1, proceedDiagnostic,
+                staticModifierDiagnostic, invalidAbstractClassDiagnostic, duplicateAroundTimeout2, duplicateAroundTimeout3);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -950,6 +1004,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnAbstractMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
 
+        Diagnostic duplicatePostConstruct1 = JakartaForJavaAssert.d(15, 27, 38,
+                "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
+
         Diagnostic proceedDiagnostic = JakartaForJavaAssert.d(15, 27, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
@@ -959,8 +1018,20 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
 
+        // Test diagnostics for duplicate interceptor methods (skip first occurrence)
+        Diagnostic duplicatePostConstruct2 = JakartaForJavaAssert.d(18, 25, 34,
+                "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
+
+        Diagnostic duplicatePostConstruct3 = JakartaForJavaAssert.d(23, 18, 26,
+                "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
+
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, abstractClassDiagnostic, finalModifierDiagnostic,
-                abstractModifierDiagnostic, proceedDiagnostic, staticModifierDiagnostic);
+                abstractModifierDiagnostic, duplicatePostConstruct1, proceedDiagnostic, staticModifierDiagnostic,
+                duplicatePostConstruct2, duplicatePostConstruct3);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -1144,6 +1215,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnAbstractMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
 
+        Diagnostic duplicatePreDestroy1 = JakartaForJavaAssert.d(15, 27, 38,
+                "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
+
         Diagnostic proceedDiagnostic = JakartaForJavaAssert.d(15, 27, 38,
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
@@ -1153,8 +1229,20 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMethodAnnotationOnStaticMethod",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
 
+        // Test diagnostics for duplicate interceptor methods (skip first occurrence)
+        Diagnostic duplicatePreDestroy2 = JakartaForJavaAssert.d(18, 25, 34,
+                "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
+
+        Diagnostic duplicatePreDestroy3 = JakartaForJavaAssert.d(23, 18, 26,
+                "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
+
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, abstractClassDiagnostic, finalModifierDiagnostic,
-                abstractModifierDiagnostic, proceedDiagnostic, staticModifierDiagnostic);
+                abstractModifierDiagnostic, duplicatePreDestroy1, proceedDiagnostic, staticModifierDiagnostic,
+                duplicatePreDestroy2, duplicatePreDestroy3);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -1308,5 +1396,79 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         CodeAction removePreDestroyOnStaticAction = JakartaForJavaAssert.ca(uri, "Remove @PreDestroy", staticModifierDiagnostic, removePreDestroyOnStaticEdit);
         CodeAction removeStaticAction = JakartaForJavaAssert.ca(uri, "Remove the 'static' modifier from this method", staticModifierDiagnostic, removeStaticEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams3, utils, removePreDestroyOnStaticAction, removeStaticAction);
+    }
+
+    @Test
+    public void testMultipleInterceptorMethodsOfSameType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/MultipleInterceptorMethodsOfSameType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for multiple @AroundInvoke methods
+        Diagnostic aroundInvokeDuplicate1 = JakartaForJavaAssert.d(32, 18, 22,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
+        Diagnostic aroundInvokeDuplicate2 = JakartaForJavaAssert.d(37, 18, 22,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
+        // Test diagnostics for multiple @AroundTimeout methods
+        Diagnostic aroundTimeoutDuplicate = JakartaForJavaAssert.d(48, 18, 26,
+                "Only one method with @AroundTimeout annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
+
+        // Test diagnostics for multiple @PostConstruct methods
+        Diagnostic postConstructDuplicate = JakartaForJavaAssert.d(59, 16, 21,
+                "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
+
+        // Test diagnostics for multiple @PreDestroy methods
+        Diagnostic preDestroyDuplicate = JakartaForJavaAssert.d(70, 16, 24,
+                "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
+
+        // Test diagnostics for multiple @AroundConstruct methods
+        Diagnostic aroundConstructDuplicate = JakartaForJavaAssert.d(81, 16, 26,
+                "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
+
+        // Test diagnostics for nested class with multiple @AroundInvoke methods
+        Diagnostic nestedAroundInvokeDuplicate = JakartaForJavaAssert.d(94, 22, 29,
+                "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
+                new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundInvokeDuplicate1, aroundInvokeDuplicate2,
+                aroundTimeoutDuplicate, postConstructDuplicate, preDestroyDuplicate,
+                aroundConstructDuplicate, nestedAroundInvokeDuplicate);
+    }
+
+    @Test
+    public void testValidInterceptorOneMethodPerType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/ValidInterceptorOneMethodPerType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Assert NO diagnostics for valid code with one method per type
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 }
