@@ -30,4 +30,3 @@ class CustomMethodClass {
     private String value;
 }
 
-// Made with Bob

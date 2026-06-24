@@ -36,4 +36,3 @@ class CustomClass {
     private String value;
 }
 
-// Made with Bob
