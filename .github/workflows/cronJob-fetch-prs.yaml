@@ -1,12 +1,14 @@
-name: Cron Job
+name: Fetch LSP4IJ PRs
 
 on:
-  workflow_dispatch:
-#  Temporarily turn off the LSP4IJ integration till https://github.com/OpenLiberty/liberty-tools-intellij/issues/1457 is resolved.
-#  schedule:
-#    # The job runs at 9:30 AM UTC every Monday through Friday, which is 3:00 PM IST and 4:30 AM EST.
-#    # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
-#    - cron: '30 9 * * 1-5'
+  workflow_call:
+    outputs:
+      pr_details:
+        description: "JSON array of PR details (number, sha, link)"
+        value: ${{ jobs.fetch_all_pull_request_shas.outputs.pr_details }}
+      is_empty:
+        description: "Whether the PR list is empty"
+        value: ${{ jobs.fetch_all_pull_request_shas.outputs.is_empty }}
 
 jobs:
   fetch_all_pull_request_shas:
@@ -86,68 +88,3 @@ jobs:
           else
             echo "is_empty=false" >> $GITHUB_OUTPUT
           fi
-
-  # Run the LTI Tests against each open lsp4ij PRs
-  call-build-workflow-for-each-merge-commit-sha:
-    needs: fetch_all_pull_request_shas
-    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
-    uses: ./.github/workflows/build.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9', '24.0.12-lsp4ijFix' ] # Can specify tags or branches such as '24.0.6' and 'main'
-        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
-    with:
-      useLocalPlugin: true
-      refLsp4ij: ${{ matrix.pr_details.sha }}
-      lsp4ijBranch: PR-${{ matrix.pr_details.number }}
-      refLTITag: ${{ matrix.tag }}
-    name: Run PR
-
-  # Run the LTI Tests against lsp4ij main branch
-  call-build-workflow-for-lsp4ij-main-branch:
-    uses: ./.github/workflows/build.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        # Existing LTI release tags and branches can be added to obtain build results.If the tag array is empty, it will default to 'main'. However, if there is at least one tag or branch in the tag array and you need to run on 'main' as well, make sure to add 'main' to the array.
-        tag: [ 'main', '24.0.9', '24.0.12-lsp4ijFix' ]
-    with:
-      useLocalPlugin: true
-      refLsp4ij: main
-      lsp4ijBranch: main
-      refLTITag: ${{ matrix.tag }}
-    name: Run Lsp4ij Main
-
-  # Send slack notification for build results
-  call-build-workflow-slack-notification:
-    runs-on: ubuntu-latest
-    needs: [ call-build-workflow-for-lsp4ij-main-branch, call-build-workflow-for-each-merge-commit-sha ]
-    if: always()
-    steps:
-      - name: Send Slack Notification
-        run: |
-          STATUS="Failure"
-          JOB_STATUS_MAIN="${{ needs.call-build-workflow-for-lsp4ij-main-branch.result }}"
-          JOB_STATUS_PR="${{ needs.call-build-workflow-for-each-merge-commit-sha.result }}"
-          if [[ "$JOB_STATUS_MAIN" == "success" ]] && [[ "$JOB_STATUS_PR" == "success" ]]; then
-            STATUS="Success"
-          fi
-          echo "Final status: $STATUS"
-          payload=$(jq -n \
-            --arg status "$STATUS" \
-            --arg branch "${{ github.ref }}" \
-            --arg build_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            '
-            {
-              "Status": $status,
-              "Branch": $branch,
-              "Build_url": $build_url
-            }')
-          
-          curl -X POST -H 'Content-type: application/json' --data "$payload" "$NOTIFY_BUILD_RESULT" || echo "Slack notification failed with status code: $?"
-
-        env:
-          NOTIFY_BUILD_RESULT: ${{ secrets.NOTIFY_BUILD_RESULT }}
-    name: Run Slack Notification
