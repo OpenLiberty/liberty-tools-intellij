@@ -105,6 +105,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(method,type,diagnostics,unit);
+                        
+                        //Validate @Id type
+                        validateIdType(method, unit, diagnostics);
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
@@ -136,6 +139,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(field,type,diagnostics,unit);
+                        
+                        //Validate @Id type
+                        validateIdType(field, unit, diagnostics);
                     }
 
                     // Check superclass hierarchy for primary key in @MappedSuperclass
@@ -432,6 +438,62 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             diagnostics.add(createDiagnostic(element, unit,
                     Messages.getMessage("InvalidVersionFieldOrPropertyType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+    
+    /**
+     * Validates that a field or method annotated with @Id has a valid identifier type.
+     * For fields: validates the field type
+     * For methods: validates the return type
+     * Valid types: primitives (byte, short, int, long, char), wrapper types (Byte, Short, Integer, Long, Character),
+     * String, java.util.Date, java.sql.Date, java.math.BigDecimal, java.math.BigInteger
+     * Invalid types: arrays, collections, custom classes, etc.
+     *
+     * @param element     the field or method annotated with @Id
+     * @param unit        compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     */
+    private void validateIdType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Check if element has @Id annotation
+        if (!isMatchedAnnotation(element.getAnnotations(), PersistenceConstants.ID)) {
+            return;
+        }
+        
+        PsiType elementType = null;
+        PsiElement targetElement = element;
+        
+        // Get the type based on whether it's a field or method
+        if (element instanceof PsiField) {
+            elementType = ((PsiField) element).getType();
+        } else if (element instanceof PsiMethod) {
+            PsiMethod method = (PsiMethod) element;
+            elementType = method.getReturnType();
+            // For methods, use the method name identifier as the target for the diagnostic
+            if (method.getNameIdentifier() != null) {
+                targetElement = method.getNameIdentifier();
+            }
+        }
+        
+        // If we couldn't determine the type, skip validation
+        if (elementType == null) {
+            return;
+        }
+        
+        // Check if type is an array (arrays are not valid @Id types)
+        boolean isArrayType = elementType instanceof PsiArrayType;
+        
+        // Get canonical type name for validation
+        String typeName = elementType.getCanonicalText();
+        
+        // Check if type is in the list of valid @Id types
+        boolean isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
+        
+        // Create diagnostic if type is invalid
+        if (!isValidType) {
+            diagnostics.add(createDiagnostic(targetElement, unit,
+                    Messages.getMessage("InvalidIdType"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
                     DiagnosticSeverity.Error));
         }
     }
