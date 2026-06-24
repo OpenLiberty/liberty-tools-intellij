@@ -21,7 +21,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 public class RemoveMapKeyTemporalAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
     public RemoveMapKeyTemporalAnnotationQuickFix() {
-        super(false, "jakarta.persistence.MapKeyTemporal");
+        super(false, PersistenceConstants.MAPKEYTEMPORAL);
     }
 
     @Override
