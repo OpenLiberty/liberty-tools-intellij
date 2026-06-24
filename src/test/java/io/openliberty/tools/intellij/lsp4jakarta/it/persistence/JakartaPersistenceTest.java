@@ -816,27 +816,28 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for invalid @Id field types
-        Diagnostic d1 = d(12, 24, 32,
+        Diagnostic customClassIdDiagnostic = d(12, 24, 32,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        Diagnostic d2 = d(16, 25, 31,
+        Diagnostic listIdDiagnostic = d(16, 25, 31,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        Diagnostic d3 = d(20, 18, 25,
+        Diagnostic arrayIdDiagnostic = d(20, 18, 25,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        Diagnostic d4 = d(24, 21, 34,
+        Diagnostic stringArrayIdDiagnostic = d(24, 21, 34,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        Diagnostic d5 = d(28, 17, 23,
+        Diagnostic uuidIdDiagnostic = d(28, 17, 23,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassIdDiagnostic, listIdDiagnostic,
+                arrayIdDiagnostic, stringArrayIdDiagnostic, uuidIdDiagnostic);
     }
 
     @Test
@@ -852,15 +853,15 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for invalid @Id method return types
-        Diagnostic d1 = d(17, 29, 40,
+        Diagnostic customClassMethodDiagnostic = d(17, 29, 40,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        Diagnostic d2 = d(23, 24, 33,
+        Diagnostic listMethodDiagnostic = d(23, 24, 33,
                 "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassMethodDiagnostic, listMethodDiagnostic);
     }
 
     @Test
