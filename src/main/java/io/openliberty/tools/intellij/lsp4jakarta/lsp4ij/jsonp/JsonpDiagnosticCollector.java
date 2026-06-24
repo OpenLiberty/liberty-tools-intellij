@@ -21,7 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common.PsiMethodCallUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 

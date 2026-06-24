@@ -11,7 +11,7 @@
  *     IBM Corporation, Archana Iyer - initial API and implementation
  *******************************************************************************/
 
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.common;
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbConstants;
