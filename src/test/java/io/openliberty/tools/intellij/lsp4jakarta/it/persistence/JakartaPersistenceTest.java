@@ -803,4 +803,80 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Test
+    public void testInvalidIdTypeOnField() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id field types
+        Diagnostic d1 = d(12, 24, 32,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic d2 = d(16, 25, 31,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic d3 = d(20, 18, 25,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic d4 = d(24, 21, 34,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic d5 = d(28, 17, 23,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+    }
+
+    @Test
+    public void testInvalidIdTypeOnMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdTypeOnMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id method return types
+        Diagnostic d1 = d(17, 29, 40,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic d2 = d(23, 24, 33,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testValidIdTypes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidIdTypes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Id types
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
