@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PersistenceConstants {
     /* Annotation Constants */
@@ -47,6 +49,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_DUPLICATE_VERSION = "MultipleVersionAnnotations";
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
     public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldOrPropertyType";
+    public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
 
 
     /* MapKey Codes */
@@ -63,6 +66,26 @@ public class PersistenceConstants {
     public static final Set<String> SET_OF_VALID_VERSION_TYPES = Set.of(
             "int", "short", "long", "java.lang.Integer",
             "java.lang.Short", "java.lang.Long", "java.sql.Timestamp");
+    
+    /* Valid @Id type sets */
+    private static final Set<String> VALID_ID_PRIMITIVES = Set.of(
+            "byte", "short", "int", "long", "char");
+    private static final Set<String> VALID_ID_WRAPPERS = Set.of(
+            "java.lang.Byte", "java.lang.Short", "java.lang.Integer",
+            "java.lang.Long", "java.lang.Character");
+    private static final Set<String> VALID_ID_DATES = Set.of(
+            "java.util.Date", "java.sql.Date");
+    private static final Set<String> VALID_ID_BIG_NUMBERS = Set.of(
+            "java.math.BigDecimal", "java.math.BigInteger");
+    private static final Set<String> VALID_ID_STRING = Set.of("java.lang.String");
+    
+    // Combined set for easy validation using streams
+    public static final Set<String> SET_OF_VALID_ID_TYPES = Stream.of(
+            VALID_ID_PRIMITIVES, VALID_ID_WRAPPERS, VALID_ID_DATES,
+            VALID_ID_BIG_NUMBERS, VALID_ID_STRING)
+            .flatMap(Set::stream)
+            .collect(Collectors.toUnmodifiableSet());
+    
     public static final String UTIL_DATE = "java.util.Date";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
 }
