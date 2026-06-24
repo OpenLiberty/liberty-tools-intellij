@@ -26,7 +26,10 @@ public class Constants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-interceptor";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS = "RemoveInterceptorAnnotationOnAbstractClass";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR = "RemoveInterceptorAnnotationOnNoArgsConstructor";
-    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED = "RemoveInterceptorMethodAnnotationOnMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED = "InvalidInterceptorMethodsProceedMissing";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_FINAL = "InvalidInterceptorMethodAnnotationOnFinalMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ABSTRACT = "InvalidInterceptorMethodAnnotationOnAbstractMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_STATIC = "InvalidInterceptorMethodAnnotationOnStaticMethod";
 
     private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
@@ -49,8 +52,6 @@ public class Constants {
 
     public static final String PROCEED = "proceed";
 
-    public static final String INTERCEPTOR_IMPORT = "jakarta.interceptor";
-
-    public static final String INTERCEPTORS_FQ_NAME = "jakarta.interceptor.Interceptors";
+    public static final Set<String> LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS = Set.of(AROUND_CONSTRUCT_FQ_NAME, PRE_DESTROY_FQ_NAME, POST_CONSTRUCT_FQ_NAME);
 
 }

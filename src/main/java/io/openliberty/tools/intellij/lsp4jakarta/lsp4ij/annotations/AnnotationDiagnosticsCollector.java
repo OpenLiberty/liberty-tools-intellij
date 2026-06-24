@@ -167,7 +167,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                        if(!isInterceptorTypeReferenced(method.getContainingClass())) {
                             if (!checkedExceptions.isEmpty()) {
                                 String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                         "@PostConstruct");
@@ -196,7 +196,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                        if(!isInterceptorTypeReferenced(method.getContainingClass())) {
                             if (!checkedExceptions.isEmpty()) {
                                 String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                         "@PreDestroy");

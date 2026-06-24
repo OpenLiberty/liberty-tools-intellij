@@ -74,6 +74,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         // find @Version annotation usage on methods
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(method);
+                            // Validate @Version method return type
+                            validateVersionType(method, unit, diagnostics);
                         }
 
                         if (isConstructorMethod(method)) {
@@ -110,6 +112,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         // find @Version annotation usage on fields
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(field);
+                            // Validate @Version field type
+                            validateVersionType(field, unit, diagnostics);
                         }
 
                         // If a field is static, we do not care about it, we care about all other field
@@ -394,4 +398,41 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         return false;
     }
 
+    /**
+     * Validates that a field or method annotated with @Version has a supported type.
+     * For fields: validates the field type
+     * For methods: validates the return type
+     * Supported types: int, Integer, short, Short, long, Long, java.sql.Timestamp
+     *
+     * @param element     the field or method annotated with @Version
+     * @param unit        compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     */
+    private void validateVersionType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiType elementType = null;
+        
+        // Get the type based on whether it's a field or method
+        if (element instanceof PsiField) {
+            elementType = ((PsiField) element).getType();
+        } else if (element instanceof PsiMethod) {
+            elementType = ((PsiMethod) element).getReturnType();
+        }
+        
+        // If we couldn't determine the type, skip validation
+        if (elementType == null) {
+            return;
+        }
+        
+        String typeName = elementType.getCanonicalText();
+
+        // Check if type is in the list of supported types
+        boolean isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
+
+        if (!isValidType) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage("InvalidVersionFieldOrPropertyType"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
 }
