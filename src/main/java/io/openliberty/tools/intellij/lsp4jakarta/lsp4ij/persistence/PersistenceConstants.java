@@ -30,6 +30,9 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String NAMEDENTITYGRAPH = "jakarta.persistence.NamedEntityGraph";
+    public static final String NAMEDQUERY = "jakarta.persistence.NamedQuery";
+    public static final String NAMEDNATIVEQUERY = "jakarta.persistence.NamedNativeQuery";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
@@ -58,6 +61,9 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
     public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
+    public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY = "NamedEntityGraphOnNonEntityClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS = "NamedQueryOnInvalidClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS = "NamedNativeQueryOnInvalidClass";
 
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
