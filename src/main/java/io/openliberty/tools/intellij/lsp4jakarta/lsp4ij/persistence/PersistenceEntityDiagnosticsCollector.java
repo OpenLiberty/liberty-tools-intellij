@@ -13,6 +13,13 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -20,12 +27,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author ankushsharma
@@ -55,10 +56,54 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation MappedSuperclassAnnotation = null;
+                PsiAnnotation NamedEntityGraphAnnotation = null;
+                PsiAnnotation NamedQueryAnnotation = null;
+                PsiAnnotation NamedNativeQueryAnnotation = null;
+
                 for (PsiAnnotation annotation : allAnnotations) {
-                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
+                    String qualifiedName = annotation.getQualifiedName();
+                    if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.MAPPEDSUPERCLASS)) {
+                        MappedSuperclassAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDENTITYGRAPH)) {
+                        NamedEntityGraphAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDQUERY)) {
+                        NamedQueryAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDNATIVEQUERY)) {
+                        NamedNativeQueryAnnotation = annotation;
                     }
+                }
+
+                boolean hasEntity = EntityAnnotation != null;
+                boolean hasMappedSuperclass = MappedSuperclassAnnotation != null;
+
+                if (NamedEntityGraphAnnotation != null && !hasEntity) {
+                    JsonArray diagnosticsData = new JsonArray();
+                    diagnosticsData.add(PersistenceConstants.NAMEDENTITYGRAPH);
+                    diagnostics.add(createDiagnostic(NamedEntityGraphAnnotation, unit,
+                            Messages.getMessage("NamedEntityGraphOnNonEntityClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY,
+                            diagnosticsData, DiagnosticSeverity.Error));
+                }
+
+                if (NamedQueryAnnotation != null && !hasEntity && !hasMappedSuperclass) {
+                    JsonArray diagnosticsData = new JsonArray();
+                    diagnosticsData.add(PersistenceConstants.NAMEDQUERY);
+                    diagnostics.add(createDiagnostic(NamedQueryAnnotation, unit,
+                            Messages.getMessage("NamedQueryOnInvalidClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS,
+                            diagnosticsData, DiagnosticSeverity.Error));
+                }
+
+                if (NamedNativeQueryAnnotation != null && !hasEntity && !hasMappedSuperclass) {
+                    JsonArray diagnosticsData = new JsonArray();
+                    diagnosticsData.add(PersistenceConstants.NAMEDNATIVEQUERY);
+                    diagnostics.add(createDiagnostic(NamedNativeQueryAnnotation, unit,
+                            Messages.getMessage("NamedNativeQueryOnInvalidClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS,
+                            diagnosticsData, DiagnosticSeverity.Error));
                 }
 
                 if (EntityAnnotation != null) {

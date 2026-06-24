@@ -426,6 +426,19 @@
                                    targetDiagnostic="jakarta-persistence#InvalidValueInTemporalAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.ChangeTemporalValueQuickFix"/>
 
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#NamedEntityGraphOnNonEntityClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#NamedQueryOnInvalidClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-persistence#NamedNativeQueryOnInvalidClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+
         <!-- WebSocket -->
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
