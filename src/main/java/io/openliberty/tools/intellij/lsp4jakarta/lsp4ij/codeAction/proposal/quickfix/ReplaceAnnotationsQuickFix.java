@@ -60,7 +60,7 @@ public abstract class ReplaceAnnotationsQuickFix extends InsertAnnotationMissing
      */
     private List<String> extractAnnotationsFromDiagnostic(Diagnostic diagnostic) {
         JsonArray diagnosticData = (JsonArray) diagnostic.getData();
-        if (diagnosticData == null || diagnosticData.size() == 0) {
+        if (diagnosticData == null || diagnosticData.isEmpty()) {
             return null;
         }
 
@@ -79,12 +79,8 @@ public abstract class ReplaceAnnotationsQuickFix extends InsertAnnotationMissing
         if (annotationsToRemove == null) {
             return;
         }
-
-        // Get the code action label from subclass
-        String name = getCodeActionLabel(annotationsToRemove);
-
         // Create code action
-        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, name, getParticipantId()));
+        codeActions.add(JDTUtils.createCodeAction(context, diagnostic, getCodeActionLabel(annotationsToRemove), getParticipantId()));
     }
 
     /**
@@ -93,30 +89,21 @@ public abstract class ReplaceAnnotationsQuickFix extends InsertAnnotationMissing
     @Override
     public CodeAction resolveCodeAction(JavaCodeActionResolveContext context) {
         final CodeAction toResolve = context.getUnresolved();
-        String name = toResolve.getTitle();
-
         // Get the diagnostic to extract annotations to remove
         Diagnostic diagnostic = toResolve.getDiagnostics().get(0);
         List<String> annotationsToRemove = extractAnnotationsFromDiagnostic(diagnostic);
-
         if (annotationsToRemove == null) {
             return toResolve;
         }
-
         // Convert to array of fully qualified names for ReplaceAnnotationProposal
         String[] fqNames = annotationsToRemove.toArray(new String[0]);
-
-        PsiElement node = context.getCoveringNode();
-        PsiModifierListOwner parentType = PsiTreeUtil.getParentOfType(node, PsiClass.class);
-
+        PsiModifierListOwner parentType = PsiTreeUtil.getParentOfType(context.getCoveringNode(), PsiClass.class);
         // Create a proposal that replaces all annotations
-        ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(name, context.getCompilationUnit(),
+        ChangeCorrectionProposal proposal = new ReplaceAnnotationProposal(toResolve.getTitle(), context.getCompilationUnit(),
                 context.getASTRoot(), parentType, 0, getAnnotations()[0],
                 context.getSource().getCompilationUnit(), fqNames);
-
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER,
                 "Unable to create workspace edit for code action to replace annotations");
-
         return toResolve;
     }
 
