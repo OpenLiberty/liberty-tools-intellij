@@ -20,6 +20,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -99,6 +100,6 @@ public class EjbMessageDrivenDiagnosticsCollector extends AbstractDiagnosticsCol
         }
         
         // Check if the class implements MessageListener (directly or through inheritance)
-        return type.isInheritor(messageListenerClass, true);
+        return DiagnosticsUtils.inheritsFrom(type, messageListenerClass);
     }
 }
