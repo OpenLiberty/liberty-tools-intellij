@@ -14,13 +14,13 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Collection;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ASTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -36,8 +36,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Const
  * Interceptor diagnostic participant that manages the use of @Interceptor annotation.
  */
 public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollector {
-
-	private static final Logger LOGGER = Logger.getLogger(InterceptorDiagnosticsParticipant.class.getName());
 
 	public InterceptorDiagnosticsParticipant() {
 		super();
@@ -194,14 +192,14 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	}
 
 	/**
-		* Checks if an @Interceptor class has a @Priority annotation with a negative value.
-		* According to the Jakarta Interceptors specification, negative priority values are
-		* reserved for future use and should not be used.
-		*
-		* @param unit the Java file containing the class
-		* @param diagnostics the list to add diagnostics to
-		* @param type the class to check
-		*/
+	 * Checks if an @Interceptor class has a @Priority annotation with a negative value.
+	 * According to the Jakarta Interceptors specification, negative priority values are
+	 * reserved for future use and should not be used.
+	 *
+	 * @param unit the Java file containing the class
+	 * @param diagnostics the list to add diagnostics to
+	 * @param type the class to check
+	 */
 	private void checkNegativePriority(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
 		if (!isInterceptorType(type)) {
 			return;
@@ -220,27 +218,11 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			return;
 		}
 
-		// Get the value attribute of @Priority
-		PsiAnnotationMemberValue valueAttr = priorityAnnotation.findAttributeValue("value");
-		if (valueAttr == null) {
-			return;
-		}
-
-		// Extract the numeric value
-		String valueText = valueAttr.getText();
-		try {
-			int priorityValue = Integer.parseInt(valueText);
-			if (priorityValue < 0) {
-				// Create diagnostic for negative priority
-				Range range = PositionUtils.toNameRange(priorityAnnotation);
-				Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InterceptorNegativePriority"));
-				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY, DiagnosticSeverity.Error);
-				diagnostics.add(diagnostic);
-			}
-		} catch (NumberFormatException e) {
-			// If we can't parse the value, skip the check
-			// This could be a constant reference or expression
-			LOGGER.warning("Unable to parse the priority value");
+		if (DiagnosticsUtils.isNegativePriorityValue(priorityAnnotation)) {
+			Range range = PositionUtils.toNameRange(priorityAnnotation);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InterceptorNegativePriority"));
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY, DiagnosticSeverity.Error);
+			diagnostics.add(diagnostic);
 		}
 	}
 }
