@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.intellij.codeInsight.AnnotationUtil;
@@ -31,6 +33,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpl
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    private static final Logger LOGGER = Logger.getLogger(ManagedBeanDiagnosticsCollector.class.getName());
 
     public ManagedBeanDiagnosticsCollector() {
         super();
@@ -558,22 +562,19 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         // Check each annotation to see if it's an invalid scope
         for (PsiAnnotation annotation : typeAnnotations) {
             String annotationName = annotation.getQualifiedName();
-            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
-            String matchedSkip = getMatchedJavaElementName(type, annotationName,
-                    new String[]{
-                            INTERCEPTOR_FQ_NAME,
-                            DECORATOR_FQ_NAME,
-                            DEPENDENT_FQ_NAME
-                    });
-            if (matchedSkip != null) {
-                continue;
-            }
+            
             // Check if it's a built-in invalid scope
             String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
                     INVALID_INTERCEPTOR_DECORATOR_SCOPES);
             if (matchedBuiltInScope != null) {
                 foundInvalidScopes.add(matchedBuiltInScope);
-            } else {
+            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
+            } else if (null == getMatchedJavaElementName(type, annotationName,
+                    new String[]{
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME,
+                            DEPENDENT_FQ_NAME
+                    })) {
                 // Check if it's a custom @NormalScope annotation using AnnotationUtil
                 try {
                     PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
@@ -582,7 +583,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         foundInvalidScopes.add(annotationName);
                     }
                 } catch (Exception e) {
-                    // Ignore exceptions during annotation type resolution
+                    LOGGER.log(Level.WARNING, "Exception during annotation type resolution for: " + annotationName, e);
                 }
             }
         }
