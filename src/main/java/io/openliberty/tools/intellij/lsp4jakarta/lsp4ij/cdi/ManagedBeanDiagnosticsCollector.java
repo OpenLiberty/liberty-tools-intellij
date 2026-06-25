@@ -15,8 +15,11 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -31,6 +34,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpl
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    private static final Logger LOGGER = Logger.getLogger(ManagedBeanDiagnosticsCollector.class.getName());
 
     public ManagedBeanDiagnosticsCollector() {
         super();
@@ -348,7 +353,18 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              */
             invalidParamsCheck(unit, diagnostics, type, INJECT_FQ_NAME,
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_INJECT_PARAM);
-
+            // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+            // They should only use @Dependent scope
+            if (interceptorOrDecorator) {
+                List<String> foundInvalidScopes = validateInterceptorDecoratorScopes(type, typeAnnotations);
+                if (!foundInvalidScopes.isEmpty()) {
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE,
+                            new Gson().toJsonTree(foundInvalidScopes),
+                            DiagnosticSeverity.Error));
+                }
+            }
             if (isManagedBean) {
                 /*
                  * ========= Produces and Disposes, Observes, ObservesAsync Annotations Checks=========
@@ -546,7 +562,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * getDisposesParamNames
      * Returns a list of parameter names that are annotated with @Disposes.
      *
-     * @param type the type
+     * @param type   the type
      * @param method the method to check
      * @return list of parameter names annotated with @Disposes
      */
@@ -561,5 +577,53 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
         }
         return paramNames;
+    }
+
+    /**
+     * validateInterceptorDecoratorScopes
+     * Validates that interceptors and decorators do not declare invalid scope
+     * annotations.
+     * Interceptors and decorators must not have normal scopes (ApplicationScoped,
+     * SessionScoped, etc.)
+     * and should only use @Dependent scope. Detects both built-in CDI scopes and
+     * custom @NormalScope annotations.
+     *
+     * @param type            the Java type being validated
+     * @param typeAnnotations the annotations on the type
+     * @return list of invalid scope annotation fully qualified names
+     */
+    private List<String> validateInterceptorDecoratorScopes(PsiClass type, PsiAnnotation[] typeAnnotations) {
+        List<String> foundInvalidScopes = new ArrayList<>();
+
+        // Check each annotation to see if it's an invalid scope
+        for (PsiAnnotation annotation : typeAnnotations) {
+            String annotationName = annotation.getQualifiedName();
+
+            // Check if it's a built-in invalid scope
+            String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
+                    INVALID_INTERCEPTOR_DECORATOR_SCOPES);
+            if (matchedBuiltInScope != null) {
+                foundInvalidScopes.add(matchedBuiltInScope);
+                // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not
+                // scopes we're checking
+            } else if (null == getMatchedJavaElementName(type, annotationName,
+                    new String[] {
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME,
+                            DEPENDENT_FQ_NAME
+                    })) {
+                // Check if it's a custom @NormalScope annotation using AnnotationUtil
+                try {
+                    PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
+                            .findClass(annotationName, type.getResolveScope());
+                    if (annotationType != null && AnnotationUtil.isAnnotated(annotationType, NORMAL_SCOPE_FQ_NAME, 0)) {
+                        foundInvalidScopes.add(annotationName);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Exception during annotation type resolution for: " + annotationName, e);
+                }
+            }
+        }
+        return foundInvalidScopes;
     }
 }
