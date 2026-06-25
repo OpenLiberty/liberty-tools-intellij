@@ -17,13 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameter;
+import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
@@ -64,32 +58,34 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
         if (getMatchedJavaElementNames(type, typeAnnotations, new String[] { ManagedBeanConstants.DECORATOR_FQ_NAME }).isEmpty()) {
             return;
         }
-
         List<PsiElement> delegateElements = new ArrayList<>();
-
-        for (PsiField field : type.getFields()) {
-            String[] fieldAnnotations = Stream.of(field.getAnnotations())
-                    .map(PsiAnnotation::getQualifiedName)
-                    .toArray(String[]::new);
-            if (!getMatchedJavaElementNames(type, fieldAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
-                delegateElements.add(field);
-            }
-        }
-
+        collectDelegates(type.getFields(), type, delegateElements);
         for (PsiMethod method : type.getMethods()) {
-            for (PsiParameter parameter : method.getParameterList().getParameters()) {
-                String[] parameterAnnotations = Stream.of(parameter.getAnnotations())
-                        .map(PsiAnnotation::getQualifiedName)
-                        .toArray(String[]::new);
-                if (!getMatchedJavaElementNames(type, parameterAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
-                    delegateElements.add(parameter);
-                }
-            }
+            collectDelegates(method.getParameterList().getParameters(), type, delegateElements);
         }
-
         reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
     }
 
+    /**
+     * collectDelegates
+     * Helper method to collect delegates from any Java elements
+     *
+     * @param elements
+     * @param type
+     * @param delegateElements
+     */
+    private void collectDelegates(PsiModifierListOwner[] elements, PsiClass type, List<PsiElement> delegateElements) {
+        for (PsiModifierListOwner element : elements) {
+            String[] annotations = Stream.of(element.getAnnotations())
+                    .map(PsiAnnotation::getQualifiedName)
+                    .toArray(String[]::new);
+
+            if (!getMatchedJavaElementNames(type, annotations,
+                    new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
+                delegateElements.add(element);
+            }
+        }
+    }
     /**
      * reportInvalidDelegateCountDiagnostics
      * Reports diagnostics when a decorator has an invalid number of @Delegate injection points.
