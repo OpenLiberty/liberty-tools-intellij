@@ -213,20 +213,35 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     /**
      * Returns matched Java element fully qualified names.
+     * This is the core implementation that accepts Collections for maximum flexibility.
      *
      * @param type               the type representing the class
-     * @param javaElementNames   Java element names
+     * @param javaElementNames   Java element names collection (Set or List)
+     * @param javaElementFQNames given fully qualified name collection (Set or List)
+     * @return matched Java element fully qualified names
+     */
+    protected static List<String> getMatchedJavaElementNames(PsiClass type, Collection<String> javaElementNames,
+                                                             Collection<String> javaElementFQNames) {
+        return javaElementFQNames.stream().filter(fqName -> {
+            boolean anyMatch = javaElementNames.stream().anyMatch(name -> {
+                return isMatchedJavaElement(type, name, fqName);
+            });
+            return anyMatch;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns matched Java element fully qualified names.
+     * Convenience overload that accepts arrays and delegates to the Collection-based method.
+     *
+     * @param type               the type representing the class
+     * @param javaElementNames   Java element names array
      * @param javaElementFQNames given fully qualified name array
      * @return matched Java element fully qualified names
      */
     protected static List<String> getMatchedJavaElementNames(PsiClass type, String[] javaElementNames,
                                                              String[] javaElementFQNames) {
-        return Stream.of(javaElementFQNames).filter(fqName -> {
-            boolean anyMatch = Stream.of(javaElementNames).anyMatch(name -> {
-                return isMatchedJavaElement(type, name, fqName);
-            });
-            return anyMatch;
-        }).collect(Collectors.toList());
+        return getMatchedJavaElementNames(type, Arrays.asList(javaElementNames), Arrays.asList(javaElementFQNames));
     }
 
     /**
