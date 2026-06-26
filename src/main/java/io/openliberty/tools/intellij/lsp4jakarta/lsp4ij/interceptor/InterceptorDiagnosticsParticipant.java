@@ -14,6 +14,8 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.Collection;
 import com.google.gson.Gson;
@@ -211,7 +213,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	private void validateDuplicateInterceptorMethods(java.util.Map<String, List<PsiMethod>> methodsByAnnotationType,
 													  PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		// Check for duplicate interceptor method annotations
-		for (java.util.Map.Entry<String, List<PsiMethod>> entry : methodsByAnnotationType.entrySet()) {
+		for (Entry<String, List<PsiMethod>> entry : methodsByAnnotationType.entrySet()) {
 			List<PsiMethod> methods = entry.getValue();
 			if (methods.size() > 1) {
 				String annotationFQN = entry.getKey();
@@ -240,7 +242,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	private void validateDuplicateInterceptorMethodsForClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		PsiMethod[] allMethods = type.getMethods();
 		// Create a separate map for this class to avoid mixing with parent class methods
-		java.util.Map<String, List<PsiMethod>> methodsByAnnotationType = new java.util.HashMap<>();
+		Map<String, List<PsiMethod>> methodsByAnnotationType = new java.util.HashMap<>();
 		for (PsiMethod method : allMethods) {
 			detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
 		}
