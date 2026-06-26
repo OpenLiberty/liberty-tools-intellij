@@ -30,6 +30,8 @@ public class ManagedBeanConstants {
     public static final String SINGLETON_FQ_NAME = "jakarta.ejb.Singleton";
     public static final String APPLICATION_SCOPED_FQ_NAME = "jakarta.enterprise.context.ApplicationScoped";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
+    public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
+    public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -37,6 +39,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE = "InvalidSingletonSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
     public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -48,6 +51,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER = "InvalidInterceptorOrDecoratorWithObserverMethod";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
     public static final String DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS = "InvalidMultipleObserverParams";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE = "InvalidInterceptorOrDecorator";
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
@@ -62,6 +66,15 @@ public class ManagedBeanConstants {
                     "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
                     "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
                     "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype"));
+
+    // Scopes that are invalid for interceptors and decorators (they must use @Dependent only)
+    public static final String[] INVALID_INTERCEPTOR_DECORATOR_SCOPES = {
+            "jakarta.enterprise.context.ApplicationScoped",
+            "jakarta.enterprise.context.SessionScoped",
+            "jakarta.enterprise.context.ConversationScoped",
+            "jakarta.enterprise.context.NormalScope",
+            "jakarta.enterprise.context.RequestScoped"
+    };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
 }

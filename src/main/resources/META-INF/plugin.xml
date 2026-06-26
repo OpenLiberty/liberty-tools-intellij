@@ -161,6 +161,12 @@
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.InterceptorDiagnosticsParticipant"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.security.SecurityIdentityStoreDiagnosticsCollector"/>
 
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
@@ -574,6 +580,42 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidProducerFieldWithNamedAnnotation"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveNamedAnnotationQuickFix"/>
+
+        <!-- Interceptor -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnFinalMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnFinalMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.RemoveInterceptorMethodAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnStaticMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveStaticModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnStaticMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.RemoveInterceptorMethodAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnAbstractMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-interceptor#InvalidInterceptorMethodAnnotationOnAbstractMethod"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.RemoveInterceptorMethodAnnotationQuickFix"/>
+
+        <!-- EJB -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#MissingPublicNoArgConstructor"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.InsertPublicNoArgConstructorQuickFix"/>
 
         <configSourceProvider
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers.MicroProfileConfigSourceProvider"/>

@@ -715,5 +715,92 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, versionInHierarchyD1);
     }
+    @Test
+    public void testInvalidVersionFieldType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidVersionFieldType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for invalid @Version field type (String)
+        Diagnostic invalidVersionTypeD1 = d(13, 19, 26,
+                "A field or property annotated with @Version must be of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldOrPropertyType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidVersionTypeD1);
+    }
+
+    @Test
+    public void testValidVersionFieldType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidVersionFieldType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Version field type (int)
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+    
+    @Test
+    public void testInvalidVersionMethodType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidVersionMethodType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for invalid @Version method return type (String)
+        Diagnostic invalidVersionTypeD1 = d(26, 18, 28,
+                "A field or property annotated with @Version must be of type int, Integer, short, Short, long, Long, or java.sql.Timestamp.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidVersionFieldOrPropertyType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidVersionTypeD1);
+    }
+
+    @Test
+    public void testValidVersionMethodType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidVersionMethodType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Version method return type (long)
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testValidVersionTimestampType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidVersionTimestamp.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Version method return type (Timestamp)
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 
 }
