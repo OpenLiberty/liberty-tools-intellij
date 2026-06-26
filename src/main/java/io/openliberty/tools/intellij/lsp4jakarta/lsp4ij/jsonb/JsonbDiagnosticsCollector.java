@@ -372,25 +372,16 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         }
         // Find all method call expressions in the file
         Collection<PsiMethodCallExpression> allMethodInvocations = PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
-        List<PsiMethodCallExpression> fromJsonInvocations = new ArrayList<>();
-        // Filter for fromJson() method calls
-        for (PsiMethodCallExpression mi : allMethodInvocations) {
-            if (PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonbConstants.JSONB_FROM_JSON_PACKAGE)) {
-                fromJsonInvocations.add(mi);
-            }
-        }
-        // Create diagnostics for fromJson() calls with null parameters
-        for (PsiMethodCallExpression methodCall : fromJsonInvocations) {
-            PsiExpression[] args = methodCall.getArgumentList().getExpressions();
-            for (PsiExpression arg : args) {
-                if (PsiMethodCallUtils.isInvalidNullArgument(arg)) {
+        allMethodInvocations.stream()
+                .filter(mi -> PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonbConstants.JSONB_FROM_JSON_PACKAGE))
+                .flatMap(mi -> Arrays.stream(mi.getArgumentList().getExpressions()))
+                .filter(PsiMethodCallUtils::isInvalidNullArgument)
+                .forEach(arg -> {
                     String msg = Messages.getMessage("ErrorMessageJsonbFromJsonNullParameter");
                     Range range = PositionUtils.toNameRange(arg);
                     Diagnostic diagnostic = new Diagnostic(range, msg);
                     completeDiagnostic(diagnostic, JsonbConstants.DIAGNOSTIC_CODE_FROM_JSON_NULL_PARAMETER);
                     diagnostics.add(diagnostic);
-                }
-            }
-        }
+                });
     }
 }
