@@ -292,7 +292,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "class DecoratorWithMixedScopes {\n" +
                 "}\n";
         TextEdit replaceMultipleScopesEdit = te(0, 0, 105, 0, newText2);
-        CodeAction replaceMultipleScopesAction = ca(uri, "Replace @ApplicationScoped, @SessionScoped with @Dependent", interceptorMultiScope, replaceMultipleScopesEdit);
+        CodeAction replaceMultipleScopesAction = ca(uri, "Replace @ApplicationScoped and @SessionScoped with @Dependent", interceptorMultiScope, replaceMultipleScopesEdit);
         assertJavaCodeAction(createCodeActionParams(uri, interceptorMultiScope), utils, replaceMultipleScopesAction);
 
         // Test quickfix for decorator with @ApplicationScoped (line 62)
