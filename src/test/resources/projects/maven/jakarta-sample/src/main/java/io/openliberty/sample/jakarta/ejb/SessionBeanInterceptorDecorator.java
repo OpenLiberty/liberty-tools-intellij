@@ -46,5 +46,3 @@ class SingletonWithDecorator {
 @Stateless
 class ValidStatelessBean {
 }
-
-// Made with Bob
