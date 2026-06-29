@@ -44,5 +44,5 @@ class SingletonWithDecorator {
 
 // Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error
 @Stateless
-class ValidStatelessBean {
+class ValidStatelessBeanNoConflict {
 }

@@ -121,7 +121,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeInterceptorEdit1 = te(0, 0, 48, 0, removeInterceptorFromStateless);
         CodeAction removeInterceptorAction1 = ca(uri, "Remove @Interceptor", statelessWithInterceptor, removeInterceptorEdit1);
@@ -164,7 +164,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeStatelessEdit1b = te(0, 0, 48, 0, removeStatelessFromInterceptor);
         CodeAction removeStatelessAction1b = ca(uri, "Remove @Stateless", statelessWithInterceptor, removeStatelessEdit1b);
@@ -210,7 +210,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeDecoratorEdit2 = te(0, 0, 48, 0, removeDecoratorFromStateless);
         CodeAction removeDecoratorAction2 = ca(uri, "Remove @Decorator", statelessWithDecorator, removeDecoratorEdit2);
@@ -253,7 +253,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeStatelessEdit2b = te(0, 0, 48, 0, removeStatelessFromDecorator);
         CodeAction removeStatelessAction2b = ca(uri, "Remove @Stateless", statelessWithDecorator, removeStatelessEdit2b);
@@ -299,7 +299,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeInterceptorEdit3 = te(0, 0, 48, 0, removeInterceptorFromStateful);
         CodeAction removeInterceptorAction3 = ca(uri, "Remove @Interceptor", statefulWithInterceptor, removeInterceptorEdit3);
@@ -342,7 +342,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeStatefulEdit3b = te(0, 0, 48, 0, removeStatefulFromInterceptor);
         CodeAction removeStatefulAction3b = ca(uri, "Remove @Stateful", statefulWithInterceptor, removeStatefulEdit3b);
@@ -388,7 +388,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeDecoratorEdit4 = te(0, 0, 48, 0, removeDecoratorFromSingleton);
         CodeAction removeDecoratorAction4 = ca(uri, "Remove @Decorator", singletonWithDecorator, removeDecoratorEdit4);
@@ -431,7 +431,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
                 "@Stateless\n" +
-                "class ValidStatelessBean {\n" +
+                "class ValidStatelessBeanNoConflict {\n" +
                 "}\n";
         TextEdit removeSingletonEdit4b = te(0, 0, 48, 0, removeSingletonFromDecorator);
         CodeAction removeSingletonAction4b = ca(uri, "Remove @Singleton", singletonWithDecorator, removeSingletonEdit4b);
