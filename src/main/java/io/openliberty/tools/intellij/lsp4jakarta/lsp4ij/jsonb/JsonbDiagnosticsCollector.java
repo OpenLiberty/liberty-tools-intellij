@@ -14,7 +14,6 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb;
 
 import java.util.*;
-
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -26,6 +25,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JsonPropertyUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+
 
 /**
  * This class contains logic for Jsonb diagnostics:
@@ -385,7 +385,7 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             PsiMethod enclosingMethod = PsiTreeUtil.getParentOfType(mi, PsiMethod.class);
             if (enclosingMethod != null) {
                 JsonbThreadSafetyAnalysis analysis = analysisMap.computeIfAbsent(enclosingMethod, k -> new JsonbThreadSafetyAnalysis());
-                PsiMethod resolvedMethod = methodCache.computeIfAbsent(mi, m -> m.resolveMethod());
+                PsiMethod resolvedMethod = JsonPropertyUtils.getResolvedMethod(mi, methodCache);
                 if (resolvedMethod != null) {
                     getJsonbThreadClosableDetails(mi, resolvedMethod, analysis);
                 }
