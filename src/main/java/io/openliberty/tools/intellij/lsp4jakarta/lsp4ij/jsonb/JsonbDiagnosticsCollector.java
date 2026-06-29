@@ -17,6 +17,7 @@ import java.util.*;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -377,31 +378,19 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      */
     private void collectClosableDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         Collection<PsiMethodCallExpression> allMethodInvocations =
-            com.intellij.psi.util.PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
-
+            PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
         Map<PsiMethod, JsonbThreadSafetyAnalysis> analysisMap = new HashMap<>();
         Map<PsiMethodCallExpression, PsiMethod> methodCache = new HashMap<>(allMethodInvocations.size());
-
         for (PsiMethodCallExpression mi : allMethodInvocations) {
-            PsiMethod method = mi.resolveMethod();
-            if (method != null) {
-                methodCache.put(mi, method);
-            }
-        }
-
-        for (PsiMethodCallExpression mi : allMethodInvocations) {
-            PsiMethod enclosingMethod = com.intellij.psi.util.PsiTreeUtil.getParentOfType(mi, PsiMethod.class);
+            PsiMethod enclosingMethod = PsiTreeUtil.getParentOfType(mi, PsiMethod.class);
             if (enclosingMethod != null) {
-                JsonbThreadSafetyAnalysis analysis = analysisMap.computeIfAbsent(
-                    enclosingMethod, k -> new JsonbThreadSafetyAnalysis());
-
-                PsiMethod resolvedMethod = methodCache.get(mi);
+                JsonbThreadSafetyAnalysis analysis = analysisMap.computeIfAbsent(enclosingMethod, k -> new JsonbThreadSafetyAnalysis());
+                PsiMethod resolvedMethod = methodCache.computeIfAbsent(mi, m -> m.resolveMethod());
                 if (resolvedMethod != null) {
                     getJsonbThreadClosableDetails(mi, resolvedMethod, analysis);
                 }
             }
         }
-
         for (Map.Entry<PsiMethod, JsonbThreadSafetyAnalysis> entry : analysisMap.entrySet()) {
             PsiMethod method = entry.getKey();
             JsonbThreadSafetyAnalysis analysis = entry.getValue();
