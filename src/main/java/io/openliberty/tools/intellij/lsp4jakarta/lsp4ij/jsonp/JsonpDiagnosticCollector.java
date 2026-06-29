@@ -21,7 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiMethodCallUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiJsonBJsonPMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
@@ -49,13 +49,13 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         List<PsiMethodCallExpression> createArrayBuilderMethodInvocations = new ArrayList<>();
 
         for (PsiMethodCallExpression mi : allMethodInvocations) {
-            if (PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonpConstants.JSON_FQ_NAME)) {
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JSON_FQ_NAME)) {
                 createPointerInvocations.add(mi);
             }
-            if (PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_FQ_NAME)){
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_FQ_NAME)){
                 createObjectBuilderMethodInvocations.add(mi);
             }
-            if (PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonpConstants.JAKARTA_JSON_ARRAY_BUILDER_FQ_NAME)){
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JAKARTA_JSON_ARRAY_BUILDER_FQ_NAME)){
                 createArrayBuilderMethodInvocations.add(mi);
             }
         }
@@ -94,15 +94,15 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
                                                        List<PsiMethodCallExpression> builderMethodInvocations,
                                                        String msg, String errCode) {
         for(PsiMethodCallExpression m: builderMethodInvocations){
-            if(PsiMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
+            if(PsiJsonBJsonPMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
                 PsiExpression arg = m.getArgumentList().getExpressions()[0];
                 if(isInvalidArgumentCreatePointer(arg)) {
                     buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                 }
-            } else if(PsiMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
+            } else if(PsiJsonBJsonPMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
                 PsiExpression[] args = m.getArgumentList().getExpressions();
                 for(PsiExpression arg : args) {
-                    if(PsiMethodCallUtils.isInvalidNullArgument(arg)) {
+                    if(PsiJsonBJsonPMethodCallUtils.isInvalidNullArgument(arg)) {
                         buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                     }
                 }

@@ -25,7 +25,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JsonPropertyUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiMethodCallUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiJsonBJsonPMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
@@ -373,9 +373,9 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         // Find all method call expressions in the file
         Collection<PsiMethodCallExpression> allMethodInvocations = PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
         allMethodInvocations.stream()
-                .filter(mi -> PsiMethodCallUtils.isMatchedMethodFQName(mi, JsonbConstants.JSONB_FROM_JSON_PACKAGE))
+                .filter(mi -> PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonbConstants.JSONB_FROM_JSON_PACKAGE))
                 .flatMap(mi -> Arrays.stream(mi.getArgumentList().getExpressions()))
-                .filter(PsiMethodCallUtils::isInvalidNullArgument)
+                .filter(PsiJsonBJsonPMethodCallUtils::isInvalidNullArgument)
                 .forEach(arg -> {
                     String msg = Messages.getMessage("ErrorMessageJsonbFromJsonNullParameter");
                     Range range = PositionUtils.toNameRange(arg);

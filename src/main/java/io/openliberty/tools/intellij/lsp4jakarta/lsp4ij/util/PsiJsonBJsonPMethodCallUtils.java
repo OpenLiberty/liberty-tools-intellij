@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Utility class for common PSI method call operations.
  */
-public class PsiMethodCallUtils {
+public class PsiJsonBJsonPMethodCallUtils {
 
     /**
      * Checks if an expression is a null literal or a cast expression containing a null literal.
@@ -38,14 +38,14 @@ public class PsiMethodCallUtils {
     }
 
     /**
-     * isMatchedMethodFQName
+     * isMatchedJsonBJsonPMethodsFQName
      * Method is used to identify passed method invocations
      *
      * @param mce
      * @param methodParentTypeFQ
      * @return boolean
      */
-    public static boolean isMatchedMethodFQName(PsiMethodCallExpression mce, String methodParentTypeFQ) {
+    public static boolean isMatchedJsonBJsonPMethodsFQName(PsiMethodCallExpression mce, String methodParentTypeFQ) {
         PsiMethod method = mce.resolveMethod();
         String methodName = getMethodNameFromCallExpression(mce, method);
         String containingClassName = getContainingClassName(mce, method);
