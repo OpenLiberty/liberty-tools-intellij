@@ -47,14 +47,57 @@ public class PsiMethodCallUtils {
      */
     public static boolean isMatchedMethodFQName(PsiMethodCallExpression mce, String methodParentTypeFQ) {
         PsiMethod method = mce.resolveMethod();
-        if(getMethodName(method).equals(JsonpConstants.CREATE_POINTER)){
+        String methodName = getMethodNameFromCallExpression(mce, method);
+        String containingClassName = getContainingClassName(mce, method);
+        if (methodName == null || containingClassName == null) {
+            return false;
+        }
+        // Check if it's a createPointer method with specific argument count
+        if (methodName.equals(JsonpConstants.CREATE_POINTER)) {
             return mce.getArgumentList().getExpressionCount() == JsonpConstants.EXPRESSION_COUNT_CREATE_POINTER
-                    && methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
-        } else if(getMethodName(method).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD) ||
-                getMethodName(method).equals(JsonbConstants.FROM_JSON_METHOD)){
-            return methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
+                    && methodParentTypeFQ.equals(containingClassName);
+        }
+        // Check if it's an add or fromJson method
+        if (methodName.equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD) ||
+                methodName.equals(JsonbConstants.FROM_JSON_METHOD)) {
+            return methodParentTypeFQ.equals(containingClassName);
         }
         return false;
+    }
+    
+    /**
+     * Get the method name from a method call expression.
+     * If the method cannot be resolved, attempts to get the name from the method reference.
+     *
+     * @param mce the method call expression
+     * @param method the resolved method (may be null)
+     * @return the method name, or null if it cannot be determined
+     */
+    private static String getMethodNameFromCallExpression(PsiMethodCallExpression mce, PsiMethod method) {
+        getMethodName(method);
+        // Method couldn't be resolved, try to get name from the reference
+        PsiReferenceExpression methodExpression = mce.getMethodExpression();
+        return methodExpression.getReferenceName();
+    }
+    
+    /**
+     * Get the fully qualified name of the class containing the method.
+     * If the method cannot be resolved, attempts to get it from the qualifier type.
+     *
+     * @param mce the method call expression
+     * @param method the resolved method (may be null)
+     * @return the fully qualified class name, or null if it cannot be determined
+     */
+    private static String getContainingClassName(PsiMethodCallExpression mce, PsiMethod method) {
+        if (method != null && method.getContainingClass() != null) {
+            return method.getContainingClass().getQualifiedName();
+        }
+        // Method couldn't be resolved, try to get the type from the qualifier
+        PsiExpression qualifier = mce.getMethodExpression().getQualifierExpression();
+        if (qualifier != null) {
+            return qualifier.getType() != null? qualifier.getType().getCanonicalText(): null;
+        }
+        return null;
     }
 
     /**

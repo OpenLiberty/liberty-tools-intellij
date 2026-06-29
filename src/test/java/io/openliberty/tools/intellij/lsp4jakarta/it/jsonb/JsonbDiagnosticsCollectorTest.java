@@ -2670,6 +2670,21 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
                 "The parameter of the fromJson() method must not be null.",
                 DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, nullFirstParamWithCast, nullSecondParam);
+        // Test both parameters null: jsonb.fromJson(null, null) - first null
+        Diagnostic nullBothParamsFirst = JakartaForJavaAssert.d(65, 40, 44,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test both parameters null: jsonb.fromJson(null, null) - second null
+        Diagnostic nullBothParamsSecond = JakartaForJavaAssert.d(65, 46, 50,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test null first parameter without cast: jsonb.fromJson(null, Person.class)
+        Diagnostic nullFirstParamNoCast = JakartaForJavaAssert.d(74, 38, 42,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, nullFirstParamWithCast, nullSecondParam, nullBothParamsFirst, nullBothParamsSecond, nullFirstParamNoCast);
     }
 }
