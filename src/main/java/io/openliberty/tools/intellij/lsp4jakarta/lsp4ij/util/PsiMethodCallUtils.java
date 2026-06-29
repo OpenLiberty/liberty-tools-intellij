@@ -64,7 +64,7 @@ public class PsiMethodCallUtils {
      * @return
      */
     public static String getMethodName(PsiMethod method) {
-        if(method != null && method.getClass() != null){
+        if(method != null){
             return method.getName();
         }
         return StringUtils.EMPTY;
