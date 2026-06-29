@@ -13,12 +13,12 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 
-import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationConflictQuickFix;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
@@ -51,22 +51,10 @@ public class RemoveInterceptorOrDecoratorQuickFix extends RemoveAnnotationConfli
         if (parentType != null) {
             for (String annotation : getAnnotations()) {
                 // Check if this annotation is present on the class
-                if (hasAnnotation(parentType, annotation)) {
+                if (AnnotationUtils.hasAnnotation(parentType, annotation)) {
                     removeAnnotation(diagnostic, context, codeActions, annotation);
                 }
             }
         }
-    }
-
-    /**
-     * Check if the class has the specified annotation.
-     */
-    private boolean hasAnnotation(PsiClass psiClass, String annotationFQN) {
-        for (PsiAnnotation annotation : psiClass.getAnnotations()) {
-            if (annotationFQN.equals(annotation.getQualifiedName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
