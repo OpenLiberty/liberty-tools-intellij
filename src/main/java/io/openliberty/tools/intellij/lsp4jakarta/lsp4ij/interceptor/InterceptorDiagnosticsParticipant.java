@@ -13,11 +13,14 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor;
 
-import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
@@ -66,7 +69,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 				PsiMethod[] allMethods = type.getMethods();
 				// Track methods by interceptor annotation type to detect duplicates
-				java.util.Map<String, List<PsiMethod>> methodsByAnnotationType = new java.util.HashMap<>();
+				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
 				for (PsiMethod method : allMethods) {
 					List<String> interceptorTypeMethodAnnotations = detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
 					boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
@@ -210,7 +213,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param unit                    the compilation unit
 	 * @param diagnostics             the list to add diagnostics to
 	 */
-	private void validateDuplicateInterceptorMethods(java.util.Map<String, List<PsiMethod>> methodsByAnnotationType,
+	private void validateDuplicateInterceptorMethods(Map<String, List<PsiMethod>> methodsByAnnotationType,
 													  PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		// Check for duplicate interceptor method annotations
 		for (Entry<String, List<PsiMethod>> entry : methodsByAnnotationType.entrySet()) {
@@ -223,7 +226,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				// Report diagnostic for all duplicate methods (skip the first one)
 				for (int i = 1; i < methods.size(); i++) {
 					PsiMethod method = methods.get(i);
-					JsonArray annotationData = (JsonArray) new Gson().toJsonTree(java.util.Arrays.asList(annotationFQN));
+					JsonArray annotationData = (JsonArray) new Gson().toJsonTree(Arrays.asList(annotationFQN));
 					diagnostics.add(createDiagnostic(method, unit, msg,
 							DIAGNOSTIC_CODE_DUPLICATE_INTERCEPTOR_METHOD, annotationData, DiagnosticSeverity.Error));
 				}
@@ -242,7 +245,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	private void validateDuplicateInterceptorMethodsForClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		PsiMethod[] allMethods = type.getMethods();
 		// Create a separate map for this class to avoid mixing with parent class methods
-		Map<String, List<PsiMethod>> methodsByAnnotationType = new java.util.HashMap<>();
+		Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
 		for (PsiMethod method : allMethods) {
 			detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
 		}
@@ -260,11 +263,11 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		* @return the list of interceptor annotation FQNs found on the method
 		*/
 	private List<String> detectInterceptorMethodsAndDuplicates(PsiClass type, PsiMethod method,
-													  java.util.Map<String, List<PsiMethod>> methodsByAnnotationType) {
+													  Map<String, List<PsiMethod>> methodsByAnnotationType) {
 		List<String> interceptorTypeMethodAnnotations = containsAnyMatchingAnnotations(type, method, Constants.INTERCEPTOR_METHODS);
 		// Track methods for duplicate detection
 		for (String annotationFQN : interceptorTypeMethodAnnotations) {
-			methodsByAnnotationType.computeIfAbsent(annotationFQN, k -> new java.util.ArrayList<>()).add(method);
+			methodsByAnnotationType.computeIfAbsent(annotationFQN, k -> new ArrayList<>()).add(method);
 		}
 		return interceptorTypeMethodAnnotations;
 	}
