@@ -121,6 +121,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.CdiDecoratorDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
@@ -584,6 +587,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidProducerFieldWithNamedAnnotation"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveNamedAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidDelegateInjectionPoint"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertInjectAnnotationQuickFix"/>
 
         <!-- Interceptor -->
         <javaCodeActionParticipant kind="quickfix"
