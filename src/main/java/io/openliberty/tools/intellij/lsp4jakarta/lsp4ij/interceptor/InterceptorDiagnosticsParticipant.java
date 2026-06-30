@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ASTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -62,11 +63,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
-				for (PsiClass innerClass : type.getInnerClasses()) {
-					//Build the diagnostics if the child class is Interceptor type and is abstract.
-					// Also, checks for missing public no-args constructor.
-					validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
-				}
+                checkNegativePriority(unit, diagnostics, type);
+                for (PsiClass innerClass : type.getInnerClasses()) {
+    				//Build the diagnostics if the child class is Interceptor type and is abstract.
+     				// Also, checks for missing public no-args constructor.
+    				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
+                    checkNegativePriority(unit, diagnostics, innerClass);
+                }
 				PsiMethod[] allMethods = type.getMethods();
 				// Track methods by interceptor annotation type to detect duplicates
 				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
@@ -205,7 +208,42 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	}
 
 	/**
-	 * Validates that a class does not have multiple methods with the same interceptor annotation type.
+	 * Checks if an @Interceptor class has a @Priority annotation with a negative value.
+	 * According to the Jakarta Interceptors specification, negative priority values are
+	 * reserved for future use and should not be used.
+	 *
+	 * @param unit the Java file containing the class
+	 * @param diagnostics the list to add diagnostics to
+	 * @param type the class to check
+	 */
+	private void checkNegativePriority(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
+		if (!isInterceptorType(type)) {
+			return;
+		}
+
+		// Check if the class has @Priority annotation
+		PsiAnnotation priorityAnnotation = null;
+		for (PsiAnnotation annotation : type.getAnnotations()) {
+			if (isMatchedJavaElement(type, annotation.getQualifiedName(), PRIORITY_FQ_NAME)) {
+				priorityAnnotation = annotation;
+				break;
+			}
+		}
+
+		if (priorityAnnotation == null) {
+			return;
+		}
+
+		if (DiagnosticsUtils.isNegativePriorityValue(priorityAnnotation)) {
+			Range range = PositionUtils.toNameRange(priorityAnnotation);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InterceptorNegativePriority"));
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY, DiagnosticSeverity.Error);
+			diagnostics.add(diagnostic);
+		}
+	}
+  
+  /**
+   * Validates that a class does not have multiple methods with the same interceptor annotation type.
 	 * According to Jakarta Interceptors specification, up to one interceptor method of each type may be
 	 * defined in the same class.
 	 *
@@ -270,5 +308,5 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			methodsByAnnotationType.computeIfAbsent(annotationFQN, k -> new ArrayList<>()).add(method);
 		}
 		return interceptorTypeMethodAnnotations;
-	}
+  }
 }
