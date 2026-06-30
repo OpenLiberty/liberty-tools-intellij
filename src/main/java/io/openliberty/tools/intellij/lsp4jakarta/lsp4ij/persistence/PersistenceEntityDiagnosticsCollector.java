@@ -75,7 +75,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(method);
                             // Validate @Version method return type
-                            validateVersionType(method, unit, diagnostics);
+                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.VERSION);
+                        }
+                        // find @Id annotation usage on methods
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.ID)) {
+                            // Validate @Id method return type
+                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.ID);
                         }
 
                         if (isConstructorMethod(method)) {
@@ -106,8 +111,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(method,type,diagnostics,unit);
                         
-                        //Validate @Id type
-                        validateIdType(method, unit, diagnostics);
+
                     }
 
                     // Go through the instance variables and make sure no instance vars are final
@@ -116,7 +120,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(field);
                             // Validate @Version field type
-                            validateVersionType(field, unit, diagnostics);
+                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.VERSION);
+                        }
+                        // find @Id annotation usage on methods
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.ID)) {
+                            // Validate @Id field return type
+                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.ID);
                         }
 
                         // If a field is static, we do not care about it, we care about all other field
@@ -140,8 +149,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(field,type,diagnostics,unit);
                         
-                        //Validate @Id type
-                        validateIdType(field, unit, diagnostics);
+
                     }
 
                     // Check superclass hierarchy for primary key in @MappedSuperclass
@@ -404,97 +412,47 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         return false;
     }
 
-    /**
-     * Validates that a field or method annotated with @Version has a supported type.
-     * For fields: validates the field type
-     * For methods: validates the return type
-     * Supported types: int, Integer, short, Short, long, Long, java.sql.Timestamp
-     *
-     * @param element     the field or method annotated with @Version
-     * @param unit        compilation unit of Java class
-     * @param diagnostics list to add diagnostics to
-     */
-    private void validateVersionType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+
+    private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics, String candidate) {
         PsiType elementType = null;
-        
+
         // Get the type based on whether it's a field or method
         if (element instanceof PsiField) {
             elementType = ((PsiField) element).getType();
         } else if (element instanceof PsiMethod) {
             elementType = ((PsiMethod) element).getReturnType();
         }
-        
+
         // If we couldn't determine the type, skip validation
         if (elementType == null) {
             return;
         }
-        
-        String typeName = elementType.getCanonicalText();
 
-        // Check if type is in the list of supported types
-        boolean isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
-
-        if (!isValidType) {
-            diagnostics.add(createDiagnostic(element, unit,
-                    Messages.getMessage("InvalidVersionFieldOrPropertyType"),
-                    PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
-                    DiagnosticSeverity.Error));
-        }
-    }
-    
-    /**
-     * Validates that a field or method annotated with @Id has a valid identifier type.
-     * For fields: validates the field type
-     * For methods: validates the return type
-     * Valid types: primitives (byte, short, int, long, char), wrapper types (Byte, Short, Integer, Long, Character),
-     * String, java.util.Date, java.sql.Date, java.math.BigDecimal, java.math.BigInteger
-     * Invalid types: arrays, collections, custom classes, etc.
-     *
-     * @param element     the field or method annotated with @Id
-     * @param unit        compilation unit of Java class
-     * @param diagnostics list to add diagnostics to
-     */
-    private void validateIdType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Check if element has @Id annotation
-        if (!isMatchedAnnotation(element.getAnnotations(), PersistenceConstants.ID)) {
-            return;
-        }
-        
-        PsiType elementType = null;
-        PsiElement targetElement = element;
-        
-        // Get the type based on whether it's a field or method
-        if (element instanceof PsiField) {
-            elementType = ((PsiField) element).getType();
-        } else if (element instanceof PsiMethod) {
-            PsiMethod method = (PsiMethod) element;
-            elementType = method.getReturnType();
-            // For methods, use the method name identifier as the target for the diagnostic
-            if (method.getNameIdentifier() != null) {
-                targetElement = method.getNameIdentifier();
-            }
-        }
-        
-        // If we couldn't determine the type, skip validation
-        if (elementType == null) {
-            return;
-        }
-        
-        // Check if type is an array (arrays are not valid @Id types)
-        boolean isArrayType = elementType instanceof PsiArrayType;
-        
         // Get canonical type name for validation
         String typeName = elementType.getCanonicalText();
-        
-        // Check if type is in the list of valid @Id types
-        boolean isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
-        
-        // Create diagnostic if type is invalid
-        if (!isValidType) {
-            diagnostics.add(createDiagnostic(targetElement, unit,
-                    Messages.getMessage("InvalidIdType"),
-                    PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
-                    DiagnosticSeverity.Error));
+
+        boolean isValidType = false;
+        if(candidate.equals(PersistenceConstants.ID)){
+            // Check if type is an array (arrays are not valid @Id types)
+            boolean isArrayType = elementType instanceof PsiArrayType;
+            // Check if type is in the list of valid @Id types
+            isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
+            // Create diagnostic if type is invalid
+            if (!isValidType) {
+                diagnostics.add(createDiagnostic(element, unit,
+                        Messages.getMessage("InvalidIdType"),
+                        PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
+                        DiagnosticSeverity.Error));
+            }
+        }else if(candidate.equals(PersistenceConstants.VERSION)){
+            isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
+            if (!isValidType) {
+                diagnostics.add(createDiagnostic(element, unit,
+                        Messages.getMessage("InvalidVersionFieldOrPropertyType"),
+                        PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
+                        DiagnosticSeverity.Error));
+            }
         }
+
     }
 }

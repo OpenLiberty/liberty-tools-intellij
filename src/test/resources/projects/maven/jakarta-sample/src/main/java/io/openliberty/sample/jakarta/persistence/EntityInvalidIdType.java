@@ -3,6 +3,8 @@ package io.openliberty.sample.jakarta.persistence;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -27,6 +29,12 @@ public class EntityInvalidIdType {
     // Invalid: UUID (not in Jakarta Persistence 3.0 spec)
     @Id
     private UUID uuidId;
+
+    @Id
+    private Set<String> setId;
+
+    @Id
+    private Map<String, String> mapId;
 
     public EntityInvalidIdType() {
     }
