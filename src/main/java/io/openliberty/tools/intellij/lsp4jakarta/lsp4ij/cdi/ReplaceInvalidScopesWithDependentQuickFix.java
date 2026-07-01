@@ -16,7 +16,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.ReplaceAnnotationsQuickFix;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 
@@ -65,8 +64,8 @@ public class ReplaceInvalidScopesWithDependentQuickFix extends ReplaceAnnotation
         if (names.isEmpty()) return "";
         if (names.size() == 1) return names.get(0);
 
-        return String.join(", ", names.subList(0, names.size() - 1))
-                + " and " + names.get(names.size() - 1);
+        String allButLast = String.join(", ", names.subList(0, names.size() - 1));
+        return String.join(" and ", allButLast, names.getLast());
     }
 }
 
