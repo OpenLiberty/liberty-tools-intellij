@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.tree.IElementType;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -159,5 +160,42 @@ public class DiagnosticsUtils {
             current = current.getSuperClass();
         }
         return superClasses;
+    }
+
+    /**
+     * Returns {@code true} if the given {@code @Priority} annotation carries a
+     * negative integer value.
+     *
+     * <p>Handles two PSI representations of a negative integer literal:
+     * <ul>
+     *   <li>A {@link PsiPrefixExpression} with a {@code MINUS} operator wrapping a
+     *       {@link PsiLiteralExpression} (e.g. {@code -1}).</li>
+     *   <li>A raw text value that can be parsed as a negative integer.</li>
+     * </ul>
+     *
+     * @param priorityAnnotation the {@code @Priority} annotation to inspect;
+     *                           must not be {@code null}
+     * @return {@code true} if the priority value is negative; {@code false} otherwise
+     */
+    public static boolean isNegativePriorityValue(PsiAnnotation priorityAnnotation) {
+        PsiAnnotationMemberValue valueAttr = priorityAnnotation.findAttributeValue("value");
+        if (valueAttr == null) {
+            return false;
+        }
+
+        // Case 1: literal negative integer written as -<number> (PsiPrefixExpression)
+        if (valueAttr instanceof PsiPrefixExpression prefix) {
+            IElementType op = prefix.getOperationSign().getTokenType();
+            if (JavaTokenType.MINUS.equals(op) && prefix.getOperand() instanceof PsiLiteralExpression literal) {
+                return literal.getValue() instanceof Integer;
+            }
+        }
+
+        // Case 2: fall back to text-based parsing (covers numeric constant expressions)
+        try {
+            return Integer.parseInt(valueAttr.getText()) < 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

@@ -249,7 +249,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * validatePriority
      * This method validates priority values to check whether any negative values
      * have been applied.
-     * 
+     *
      * @param unit
      * @param diagnostics
      * @param element
@@ -260,21 +260,13 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
             PsiElement element,
             PsiAnnotation annotation) {
 
-        // Priority is valid only for elements that are either classes or method
-        // parameters.
+        // Priority is valid only for elements that are either classes or method parameters.
         if (element instanceof PsiClass || element instanceof PsiParameter) {
-            PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
-            if (value instanceof PsiPrefixExpression prefix
-                    && prefix.getOperand() instanceof PsiLiteralExpression literal &&
-                    literal.getValue() instanceof Integer) {
-                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())) {
-                    String diagnosticMessage = Messages.getMessage(
-                            "PriorityShouldBeNonNegative");
-                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
-                            AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE, null,
-                            DiagnosticSeverity.Warning));
-                }
-
+            if (DiagnosticsUtils.isNegativePriorityValue(annotation)) {
+                String diagnosticMessage = Messages.getMessage("PriorityShouldBeNonNegative");
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE, null,
+                        DiagnosticSeverity.Warning));
             }
         }
     }
