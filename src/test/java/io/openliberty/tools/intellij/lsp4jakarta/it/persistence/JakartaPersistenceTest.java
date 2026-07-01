@@ -803,4 +803,89 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Test
+    public void testInvalidIdTypeOnField() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id field types
+        Diagnostic customClassIdDiagnostic = d(14, 24, 32,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic listIdDiagnostic = d(18, 25, 31,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic arrayIdDiagnostic = d(22, 18, 25,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic stringArrayIdDiagnostic = d(26, 21, 34,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic uuidIdDiagnostic = d(30, 17, 23,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic setIdDiagnostic = d(33, 24, 29,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic mapIdDiagnostic = d(36, 32, 37,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassIdDiagnostic, listIdDiagnostic,
+                arrayIdDiagnostic, stringArrayIdDiagnostic, uuidIdDiagnostic, setIdDiagnostic, mapIdDiagnostic);
+    }
+
+    @Test
+    public void testInvalidIdTypeOnMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdTypeOnMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id method return types
+        Diagnostic customClassMethodDiagnostic = d(17, 29, 40,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic listMethodDiagnostic = d(23, 24, 33,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassMethodDiagnostic, listMethodDiagnostic);
+    }
+
+    @Test
+    public void testValidIdTypes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidIdTypes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Id types
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
