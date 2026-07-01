@@ -22,8 +22,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -116,6 +118,453 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 interceptorMultiScopeDecl, interceptorMultiScope, decoratorAppScoped, decoratorSessionScoped,
                 decoratorMultiScopeDecl, decoratorMultiScope, interceptorCustomScope, decoratorCustomScope,
                 interceptorMixedScopes, decoratorMixedScopes);
+
+        // Test quickfix for interceptor with @ApplicationScoped (line 41)
+        String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.SessionScoped;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\n" +
+                "import jakarta.enterprise.context.ConversationScoped;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// ========== Valid Interceptors ==========\n\n" +
+                "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Interceptor\n" +
+                "@Dependent\n" +
+                "class ValidInterceptorWithDependent {\n" +
+                "}\n\n" +
+                "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Interceptor\n" +
+                "class ValidInterceptorWithNoScope {\n" +
+                "}\n\n" +
+                "// ========== Valid Decorators ==========\n\n" +
+                "// Valid decorator with explicit @Dependent scope\n" +
+                "@Decorator\n" +
+                "@Dependent\n" +
+                "class ValidDecoratorWithDependent {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Valid decorator with no scope (defaults to @Dependent)\n" +
+                "@Decorator\n" +
+                "class ValidDecoratorWithNoScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Dependent\n" +
+                "@Interceptor\n" +
+                "class InterceptorWithApplicationScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with @SessionScoped\n" +
+                "@Interceptor\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithSessionScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithMultipleIllegalScopes {\n" +
+                "}\n\n" +
+                "// ========== Invalid Decorators with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid decorator with @ApplicationScoped\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "class DecoratorWithApplicationScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with @SessionScoped\n" +
+                "@Decorator\n" +
+                "@SessionScoped\n" +
+                "class DecoratorWithSessionScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with multiple scopes including illegal ones\n" +
+                "@Decorator\n" +
+                "@RequestScoped\n" +
+                "@ConversationScoped\n" +
+                "class DecoratorWithMultipleIllegalScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with custom normal scope\n" +
+                "@Interceptor\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithCustomNormalScope {\n" +
+                "}\n\n" +
+                "// Invalid decorator with custom normal scope\n" +
+                "@Decorator\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithCustomNormalScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithMixedScopes {\n" +
+                "}\n\n" +
+                "// Invalid decorator with both built-in and custom normal scopes\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithMixedScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n";
+        TextEdit replaceAppScopedEdit = te(0, 0, 128, 0, newText1);
+        CodeAction replaceAppScopedAction = ca(uri, "Replace @ApplicationScoped with @Dependent", interceptorAppScoped, replaceAppScopedEdit);
+        assertJavaCodeAction(createCodeActionParams(uri, interceptorAppScoped), utils, replaceAppScopedAction);
+
+        // Test quickfix for interceptor with multiple scopes (line 54)
+        String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\n" +
+                "import jakarta.enterprise.context.ConversationScoped;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// ========== Valid Interceptors ==========\n\n" +
+                "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Interceptor\n" +
+                "@Dependent\n" +
+                "class ValidInterceptorWithDependent {\n" +
+                "}\n\n" +
+                "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Interceptor\n" +
+                "class ValidInterceptorWithNoScope {\n" +
+                "}\n\n" +
+                "// ========== Valid Decorators ==========\n\n" +
+                "// Valid decorator with explicit @Dependent scope\n" +
+                "@Decorator\n" +
+                "@Dependent\n" +
+                "class ValidDecoratorWithDependent {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Valid decorator with no scope (defaults to @Dependent)\n" +
+                "@Decorator\n" +
+                "class ValidDecoratorWithNoScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "class InterceptorWithApplicationScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with @SessionScoped\n" +
+                "@Interceptor\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithSessionScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Dependent\n" +
+                "@Interceptor\n" +
+                "class InterceptorWithMultipleIllegalScopes {\n" +
+                "}\n\n" +
+                "// ========== Invalid Decorators with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid decorator with @ApplicationScoped\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "class DecoratorWithApplicationScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with @SessionScoped\n" +
+                "@Decorator\n" +
+                "@SessionScoped\n" +
+                "class DecoratorWithSessionScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with multiple scopes including illegal ones\n" +
+                "@Decorator\n" +
+                "@RequestScoped\n" +
+                "@ConversationScoped\n" +
+                "class DecoratorWithMultipleIllegalScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with custom normal scope\n" +
+                "@Interceptor\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithCustomNormalScope {\n" +
+                "}\n\n" +
+                "// Invalid decorator with custom normal scope\n" +
+                "@Decorator\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithCustomNormalScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithMixedScopes {\n" +
+                "}\n\n" +
+                "// Invalid decorator with both built-in and custom normal scopes\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithMixedScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n";
+        TextEdit replaceMultipleScopesEdit = te(0, 0, 128, 0, newText2);
+        CodeAction replaceMultipleScopesAction = ca(uri, "Replace @ApplicationScoped and @SessionScoped with @Dependent", interceptorMultiScope, replaceMultipleScopesEdit);
+        assertJavaCodeAction(createCodeActionParams(uri, interceptorMultiScope), utils, replaceMultipleScopesAction);
+
+        // Test quickfix for decorator with @ApplicationScoped (line 62)
+        String newText3 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.SessionScoped;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\n" +
+                "import jakarta.enterprise.context.ConversationScoped;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// ========== Valid Interceptors ==========\n\n" +
+                "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Interceptor\n" +
+                "@Dependent\n" +
+                "class ValidInterceptorWithDependent {\n" +
+                "}\n\n" +
+                "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Interceptor\n" +
+                "class ValidInterceptorWithNoScope {\n" +
+                "}\n\n" +
+                "// ========== Valid Decorators ==========\n\n" +
+                "// Valid decorator with explicit @Dependent scope\n" +
+                "@Decorator\n" +
+                "@Dependent\n" +
+                "class ValidDecoratorWithDependent {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Valid decorator with no scope (defaults to @Dependent)\n" +
+                "@Decorator\n" +
+                "class ValidDecoratorWithNoScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "class InterceptorWithApplicationScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with @SessionScoped\n" +
+                "@Interceptor\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithSessionScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithMultipleIllegalScopes {\n" +
+                "}\n\n" +
+                "// ========== Invalid Decorators with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid decorator with @ApplicationScoped\n" +
+                "@Dependent\n" +
+                "@Decorator\n" +
+                "class DecoratorWithApplicationScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with @SessionScoped\n" +
+                "@Decorator\n" +
+                "@SessionScoped\n" +
+                "class DecoratorWithSessionScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with multiple scopes including illegal ones\n" +
+                "@Decorator\n" +
+                "@RequestScoped\n" +
+                "@ConversationScoped\n" +
+                "class DecoratorWithMultipleIllegalScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with custom normal scope\n" +
+                "@Interceptor\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithCustomNormalScope {\n" +
+                "}\n\n" +
+                "// Invalid decorator with custom normal scope\n" +
+                "@Decorator\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithCustomNormalScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithMixedScopes {\n" +
+                "}\n\n" +
+                "// Invalid decorator with both built-in and custom normal scopes\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithMixedScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n";
+        TextEdit replaceDecoratorAppScopedEdit = te(0, 0, 128, 0, newText3);
+        CodeAction replaceDecoratorAppScopedAction = ca(uri, "Replace @ApplicationScoped with @Dependent", decoratorAppScoped, replaceDecoratorAppScopedEdit);
+        assertJavaCodeAction(createCodeActionParams(uri, decoratorAppScoped), utils, replaceDecoratorAppScopedAction);
+
+        // Test quickfix for interceptor with custom scope (line 83)
+        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.enterprise.context.SessionScoped;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\n" +
+                "import jakarta.enterprise.context.ConversationScoped;\n" +
+                "import jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// ========== Valid Interceptors ==========\n\n" +
+                "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Interceptor\n" +
+                "@Dependent\n" +
+                "class ValidInterceptorWithDependent {\n" +
+                "}\n\n" +
+                "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Interceptor\n" +
+                "class ValidInterceptorWithNoScope {\n" +
+                "}\n\n" +
+                "// ========== Valid Decorators ==========\n\n" +
+                "// Valid decorator with explicit @Dependent scope\n" +
+                "@Decorator\n" +
+                "@Dependent\n" +
+                "class ValidDecoratorWithDependent {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Valid decorator with no scope (defaults to @Dependent)\n" +
+                "@Decorator\n" +
+                "class ValidDecoratorWithNoScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "class InterceptorWithApplicationScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with @SessionScoped\n" +
+                "@Interceptor\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithSessionScoped {\n" +
+                "}\n\n" +
+                "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@SessionScoped\n" +
+                "class InterceptorWithMultipleIllegalScopes {\n" +
+                "}\n\n" +
+                "// ========== Invalid Decorators with Built-in Normal Scopes ==========\n\n" +
+                "// Invalid decorator with @ApplicationScoped\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "class DecoratorWithApplicationScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with @SessionScoped\n" +
+                "@Decorator\n" +
+                "@SessionScoped\n" +
+                "class DecoratorWithSessionScoped {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid decorator with multiple scopes including illegal ones\n" +
+                "@Decorator\n" +
+                "@RequestScoped\n" +
+                "@ConversationScoped\n" +
+                "class DecoratorWithMultipleIllegalScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
+                "// Invalid interceptor with custom normal scope\n" +
+                "@Dependent\n" +
+                "@Interceptor\n" +
+                "class InterceptorWithCustomNormalScope {\n" +
+                "}\n\n" +
+                "// Invalid decorator with custom normal scope\n" +
+                "@Decorator\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithCustomNormalScope {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n\n" +
+                "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Interceptor\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class InterceptorWithMixedScopes {\n" +
+                "}\n\n" +
+                "// Invalid decorator with both built-in and custom normal scopes\n" +
+                "@Decorator\n" +
+                "@ApplicationScoped\n" +
+                "@CustomNormalScope\n" +
+                "class DecoratorWithMixedScopes {\n" +
+                "    @Inject\n" +
+                "    @Delegate\n" +
+                "    private Object delegate;\n" +
+                "}\n";
+        TextEdit replaceCustomScopeEdit = te(0, 0, 128, 0, newText4);
+        CodeAction replaceCustomScopeAction = ca(uri, "Replace @CustomNormalScope with @Dependent", interceptorCustomScope, replaceCustomScopeEdit);
+        assertJavaCodeAction(createCodeActionParams(uri, interceptorCustomScope), utils, replaceCustomScopeAction);
     }
 
     private JsonArray createJsonArray(String... values) {
