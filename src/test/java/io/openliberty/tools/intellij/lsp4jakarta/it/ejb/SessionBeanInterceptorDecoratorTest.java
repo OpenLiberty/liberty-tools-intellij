@@ -55,6 +55,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // All 6 invalid session beans should trigger diagnostics
+        // Additionally, @Decorator annotated classes also trigger CDI diagnostics about missing @Delegate
         Diagnostic statelessWithInterceptor = d(11, 13, 44,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
@@ -62,6 +63,10 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         Diagnostic statelessWithDecorator = d(17, 6, 28,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+
+        Diagnostic statelessWithDecoratorCDI = d(17, 6, 28,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
 
         Diagnostic statefulWithInterceptor = d(23, 6, 29,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
@@ -71,6 +76,10 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
 
+        Diagnostic statefulWithDecoratorCDI = d(29, 6, 27,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+
         Diagnostic singletonWithInterceptor = d(35, 6, 30,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
@@ -79,8 +88,16 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, statelessWithInterceptor, statelessWithDecorator, 
-                statefulWithInterceptor, statefulWithDecorator, singletonWithInterceptor, singletonWithDecorator);
+        Diagnostic singletonWithDecoratorCDI = d(41, 6, 28,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, statelessWithInterceptor,
+                statelessWithDecoratorCDI, statelessWithDecorator,
+                statefulWithInterceptor,
+                statefulWithDecoratorCDI, statefulWithDecorator,
+                singletonWithInterceptor,
+                singletonWithDecoratorCDI, singletonWithDecorator);
 
         // Quick Fix 1a: Remove @Interceptor from @Stateless bean
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, statelessWithInterceptor);
