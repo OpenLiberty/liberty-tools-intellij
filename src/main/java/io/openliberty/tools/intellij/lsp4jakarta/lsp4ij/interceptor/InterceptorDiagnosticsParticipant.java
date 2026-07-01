@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ASTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -57,11 +58,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
-				for (PsiClass innerClass : type.getInnerClasses()) {
-					//Build the diagnostics if the child class is Interceptor type and is abstract.
-					// Also, checks for missing public no-args constructor.
-					validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
-				}
+                checkNegativePriority(unit, diagnostics, type);
+                for (PsiClass innerClass : type.getInnerClasses()) {
+    				//Build the diagnostics if the child class is Interceptor type and is abstract.
+     				// Also, checks for missing public no-args constructor.
+    				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
+                    checkNegativePriority(unit, diagnostics, innerClass);
+                }
 				PsiMethod[] allMethods = type.getMethods();
 				for (PsiMethod method : allMethods) {
 					List<String> interceptorTypeMethodAnnotations = containsAnyMatchingAnnotations(type, method, Constants.INTERCEPTOR_METHODS);
@@ -91,7 +94,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 					}
 				}
 			}
-     	}
+		   }
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
 		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
@@ -186,5 +189,40 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	private String getSimpleAnnotationNames(List<String> annotations) {
 		List<String> simpleAnnotationNames = annotations.stream().map(name -> JDTUtils.getSimpleName(name)).distinct().collect(Collectors.toList());
 		return String.join(", ", simpleAnnotationNames);
+	}
+
+	/**
+	 * Checks if an @Interceptor class has a @Priority annotation with a negative value.
+	 * According to the Jakarta Interceptors specification, negative priority values are
+	 * reserved for future use and should not be used.
+	 *
+	 * @param unit the Java file containing the class
+	 * @param diagnostics the list to add diagnostics to
+	 * @param type the class to check
+	 */
+	private void checkNegativePriority(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
+		if (!isInterceptorType(type)) {
+			return;
+		}
+
+		// Check if the class has @Priority annotation
+		PsiAnnotation priorityAnnotation = null;
+		for (PsiAnnotation annotation : type.getAnnotations()) {
+			if (isMatchedJavaElement(type, annotation.getQualifiedName(), PRIORITY_FQ_NAME)) {
+				priorityAnnotation = annotation;
+				break;
+			}
+		}
+
+		if (priorityAnnotation == null) {
+			return;
+		}
+
+		if (DiagnosticsUtils.isNegativePriorityValue(priorityAnnotation)) {
+			Range range = PositionUtils.toNameRange(priorityAnnotation);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InterceptorNegativePriority"));
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY, DiagnosticSeverity.Error);
+			diagnostics.add(diagnostic);
+		}
 	}
 }
