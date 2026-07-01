@@ -178,11 +178,16 @@ public class SecurityIdentityStoreTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Test diagnostic for @Decorator scope annotation
+        // Test diagnostic for @Decorator missing @Delegate injection point (from jakarta-cdi)
+        Diagnostic decoratorDelegateDiagnostic = JakartaForJavaAssert.d(11, 13, 52,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+
+        // Test diagnostic for @Decorator scope annotation (from jakarta-security)
         Diagnostic wrongScopeDiagnostic = JakartaForJavaAssert.d(11, 13, 52,
                 "A class annotated with @DatabaseIdentityStoreDefinition must be annotated with @ApplicationScoped, instead of @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-security", "InvalidScopeOnIdentityStoreDefinition");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, wrongScopeDiagnostic);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, decoratorDelegateDiagnostic, wrongScopeDiagnostic);
     }
 }
