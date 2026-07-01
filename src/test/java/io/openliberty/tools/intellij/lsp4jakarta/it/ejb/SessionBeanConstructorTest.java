@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.it.ejb;
 
+import com.google.gson.Gson;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -298,5 +299,186 @@ public class SessionBeanConstructorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testValidStatelessBeanNoConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/ValidStatelessBeanNoConstructor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostic expected: a class with no explicit constructors has a default public no-arg constructor
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testConflictingStatelessStateful() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidConflictingStatelessStateful.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic conflictingDiagnostic = d(7, 13, 48,
+                "A class cannot be annotated with multiple session bean types: @Stateless, @Stateful.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "ConflictingSessionBeanAnnotations");
+        conflictingDiagnostic.setData(new Gson().toJsonTree(Arrays.asList("jakarta.ejb.Stateless", "jakarta.ejb.Stateful")));
+
+        assertJavaDiagnostics(diagnosticsParams, utils, conflictingDiagnostic);
+
+        // Test quick-fix code actions: one action per annotation to keep
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, conflictingDiagnostic);
+
+        // Keep @Stateless, remove @Stateful (line 6, 0-indexed)
+        String keepStatelessText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Stateful;" +
+                "\nimport jakarta.ejb.Stateless;" +
+                "\n\n@Stateless" +
+                "\npublic class InvalidConflictingStatelessStateful {" +
+                "\n\n    public InvalidConflictingStatelessStateful() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeStatefulEdit = te(0, 0, 16, 0, keepStatelessText);
+        CodeAction keepStatelessAction = ca(uri, "Remove @Stateful", conflictingDiagnostic, removeStatefulEdit);
+
+        // Keep @Stateful, remove @Stateless (line 5, 0-indexed)
+        String keepStatefulText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Stateful;" +
+                "\nimport jakarta.ejb.Stateless;" +
+                "\n\n@Stateful" +
+                "\npublic class InvalidConflictingStatelessStateful {" +
+                "\n\n    public InvalidConflictingStatelessStateful() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeStatelessEdit = te(0, 0, 16, 0, keepStatefulText);
+        CodeAction keepStatefulAction = ca(uri, "Remove @Stateless", conflictingDiagnostic, removeStatelessEdit);
+
+        assertJavaCodeAction(codeActionParams, utils, keepStatelessAction, keepStatefulAction);
+    }
+
+    @Test
+    public void testConflictingStatelessSingleton() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidConflictingStatelessSingleton.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic conflictingDiagnostic = d(7, 13, 49,
+                "A class cannot be annotated with multiple session bean types: @Stateless, @Singleton.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "ConflictingSessionBeanAnnotations");
+        conflictingDiagnostic.setData(new Gson().toJsonTree(Arrays.asList("jakarta.ejb.Stateless", "jakarta.ejb.Singleton")));
+
+        assertJavaDiagnostics(diagnosticsParams, utils, conflictingDiagnostic);
+
+        // Test quick-fix code actions
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, conflictingDiagnostic);
+
+        // Keep @Stateless, remove @Singleton (line 6, 0-indexed)
+        String keepStatelessText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Singleton;" +
+                "\nimport jakarta.ejb.Stateless;" +
+                "\n\n@Stateless" +
+                "\npublic class InvalidConflictingStatelessSingleton {" +
+                "\n\n    public InvalidConflictingStatelessSingleton() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeSingletonEdit = te(0, 0, 16, 0, keepStatelessText);
+        CodeAction keepStatelessAction = ca(uri, "Remove @Singleton", conflictingDiagnostic, removeSingletonEdit);
+
+        // Keep @Singleton, remove @Stateless (line 5, 0-indexed)
+        String keepSingletonText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Singleton;" +
+                "\nimport jakarta.ejb.Stateless;" +
+                "\n\n@Singleton" +
+                "\npublic class InvalidConflictingStatelessSingleton {" +
+                "\n\n    public InvalidConflictingStatelessSingleton() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeStatelessEdit = te(0, 0, 16, 0, keepSingletonText);
+        CodeAction keepSingletonAction = ca(uri, "Remove @Stateless", conflictingDiagnostic, removeStatelessEdit);
+
+        assertJavaCodeAction(codeActionParams, utils, keepStatelessAction, keepSingletonAction);
+    }
+
+    @Test
+    public void testConflictingStatefulSingleton() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidConflictingStatefulSingleton.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic conflictingDiagnostic = d(7, 13, 48,
+                "A class cannot be annotated with multiple session bean types: @Stateful, @Singleton.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "ConflictingSessionBeanAnnotations");
+        conflictingDiagnostic.setData(new Gson().toJsonTree(Arrays.asList("jakarta.ejb.Stateful", "jakarta.ejb.Singleton")));
+
+        assertJavaDiagnostics(diagnosticsParams, utils, conflictingDiagnostic);
+
+        // Test quick-fix code actions
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, conflictingDiagnostic);
+
+        // Keep @Stateful, remove @Singleton (line 6, 0-indexed)
+        String keepStatefulText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Singleton;" +
+                "\nimport jakarta.ejb.Stateful;" +
+                "\n\n@Stateful" +
+                "\npublic class InvalidConflictingStatefulSingleton {" +
+                "\n\n    public InvalidConflictingStatefulSingleton() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeSingletonEdit = te(0, 0, 16, 0, keepStatefulText);
+        CodeAction keepStatefulAction = ca(uri, "Remove @Singleton", conflictingDiagnostic, removeSingletonEdit);
+
+        // Keep @Singleton, remove @Stateful (line 5, 0-indexed)
+        String keepSingletonText = "package io.openliberty.sample.jakarta.ejb;" +
+                "\n\nimport jakarta.ejb.Singleton;" +
+                "\nimport jakarta.ejb.Stateful;" +
+                "\n\n@Singleton" +
+                "\npublic class InvalidConflictingStatefulSingleton {" +
+                "\n\n    public InvalidConflictingStatefulSingleton() {" +
+                "\n    }" +
+                "\n\n    public String hello() {" +
+                "\n        return \"Hello\";" +
+                "\n    }" +
+                "\n}\n";
+        TextEdit removeStatefulEdit = te(0, 0, 16, 0, keepSingletonText);
+        CodeAction keepSingletonAction = ca(uri, "Remove @Stateful", conflictingDiagnostic, removeStatefulEdit);
+
+        assertJavaCodeAction(codeActionParams, utils, keepStatefulAction, keepSingletonAction);
     }
 }
