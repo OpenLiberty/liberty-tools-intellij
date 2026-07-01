@@ -58,8 +58,11 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 PsiAnnotation EntityAnnotation = null;
                 PsiAnnotation MappedSuperclassAnnotation = null;
                 PsiAnnotation NamedEntityGraphAnnotation = null;
+                PsiAnnotation NamedEntityGraphsAnnotation = null;
                 PsiAnnotation NamedQueryAnnotation = null;
+                PsiAnnotation NamedQueriesAnnotation = null;
                 PsiAnnotation NamedNativeQueryAnnotation = null;
+                PsiAnnotation NamedNativeQueriesAnnotation = null;
 
                 for (PsiAnnotation annotation : allAnnotations) {
                     String qualifiedName = annotation.getQualifiedName();
@@ -69,42 +72,46 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         MappedSuperclassAnnotation = annotation;
                     } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDENTITYGRAPH)) {
                         NamedEntityGraphAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDENTITYGRAPHS)) {
+                        NamedEntityGraphsAnnotation = annotation;
                     } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDQUERY)) {
                         NamedQueryAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDQUERIES)) {
+                        NamedQueriesAnnotation = annotation;
                     } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDNATIVEQUERY)) {
                         NamedNativeQueryAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDNATIVEQUERIES)) {
+                        NamedNativeQueriesAnnotation = annotation;
                     }
                 }
 
                 boolean hasEntity = EntityAnnotation != null;
                 boolean hasMappedSuperclass = MappedSuperclassAnnotation != null;
 
-                if (NamedEntityGraphAnnotation != null && !hasEntity) {
-                    JsonArray diagnosticsData = new JsonArray();
-                    diagnosticsData.add(PersistenceConstants.NAMEDENTITYGRAPH);
-                    diagnostics.add(createDiagnostic(NamedEntityGraphAnnotation, unit,
-                            Messages.getMessage("NamedEntityGraphOnNonEntityClass"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY,
-                            diagnosticsData, DiagnosticSeverity.Error));
-                }
+                // Validate named JPA annotations are on correct class types
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedEntityGraphAnnotation, !hasEntity,
+                        PersistenceConstants.NAMEDENTITYGRAPH, "NamedEntityGraphOnNonEntityClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY, unit, diagnostics);
 
-                if (NamedQueryAnnotation != null && !hasEntity && !hasMappedSuperclass) {
-                    JsonArray diagnosticsData = new JsonArray();
-                    diagnosticsData.add(PersistenceConstants.NAMEDQUERY);
-                    diagnostics.add(createDiagnostic(NamedQueryAnnotation, unit,
-                            Messages.getMessage("NamedQueryOnInvalidClass"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS,
-                            diagnosticsData, DiagnosticSeverity.Error));
-                }
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedEntityGraphsAnnotation, !hasEntity,
+                        PersistenceConstants.NAMEDENTITYGRAPHS, "NamedEntityGraphsOnNonEntityClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPHS_ON_NON_ENTITY, unit, diagnostics);
 
-                if (NamedNativeQueryAnnotation != null && !hasEntity && !hasMappedSuperclass) {
-                    JsonArray diagnosticsData = new JsonArray();
-                    diagnosticsData.add(PersistenceConstants.NAMEDNATIVEQUERY);
-                    diagnostics.add(createDiagnostic(NamedNativeQueryAnnotation, unit,
-                            Messages.getMessage("NamedNativeQueryOnInvalidClass"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS,
-                            diagnosticsData, DiagnosticSeverity.Error));
-                }
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedQueryAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDQUERY, "NamedQueryOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedQueriesAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDQUERIES, "NamedQueriesOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedNativeQueryAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDNATIVEQUERY, "NamedNativeQueryOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedNativeQueriesAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDNATIVEQUERIES, "NamedNativeQueriesOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS, unit, diagnostics);
 
                 if (EntityAnnotation != null) {
                     // Define boolean requirements for the diagnostics
@@ -225,6 +232,30 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         // We do not do anything if the found unit is null
     }
 
+
+    /**
+     * Adds a diagnostic for a named JPA annotation if the given condition is true.
+     *
+     * @param annotation     the named JPA annotation (e.g. @NamedEntityGraph), or null if not present
+     * @param condition      true if the diagnostic should be added (i.e. class does not meet requirements)
+     * @param annotationFQN  the fully qualified annotation name, used as diagnostic data
+     * @param messageKey     the message key for the diagnostic message
+     * @param diagnosticCode the diagnostic code
+     * @param unit           the compilation unit
+     * @param diagnostics    the list to add the diagnostic to
+     */
+    private void addNamedJPAAnnotationDiagnosticIfNeeded(PsiAnnotation annotation, boolean condition,
+                                                         String annotationFQN, String messageKey,
+                                                         String diagnosticCode, PsiJavaFile unit,
+                                                         List<Diagnostic> diagnostics) {
+        if (annotation != null && condition) {
+            JsonArray diagnosticsData = new JsonArray();
+            diagnosticsData.add(annotationFQN);
+            diagnostics.add(createDiagnostic(annotation, unit,
+                    Messages.getMessage(messageKey),
+                    diagnosticCode, diagnosticsData, DiagnosticSeverity.Error));
+        }
+    }
 
     /**
      * Validates @Version annotation usage in entity classes.

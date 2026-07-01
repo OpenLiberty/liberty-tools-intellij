@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
- * Quick fix for removing named JPA annotations (@NamedEntityGraph, @NamedQuery, @NamedNativeQuery)
+ * Quick fix for removing named JPA annotations
+ * (@NamedEntityGraph, @NamedEntityGraphs, @NamedQuery, @NamedQueries, @NamedNativeQuery, @NamedNativeQueries)
  * when they are applied to a class that does not meet the annotation requirements.
  */
 public class RemoveNamedJPAAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
