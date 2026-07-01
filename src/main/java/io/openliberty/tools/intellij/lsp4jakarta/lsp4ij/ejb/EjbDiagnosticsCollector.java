@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 import com.google.gson.Gson;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -73,7 +74,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                                                            List<String> sessionBeanAnnotations,
                                                            List<Diagnostic> diagnostics) {
         String annotationNames = sessionBeanAnnotations.stream()
-                .map(fqName -> "@" + fqName.substring(fqName.lastIndexOf('.') + 1))
+                .map(fqName -> "@" + JDTUtils.getSimpleName(fqName))
                 .collect(Collectors.joining(", "));
         String message = Messages.getMessage("SessionBeanConflictingAnnotations", annotationNames);
         diagnostics.add(createDiagnostic(type, unit, message,
