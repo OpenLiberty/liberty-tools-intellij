@@ -14,16 +14,10 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameter;
+import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
@@ -53,49 +47,65 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     /**
      * Validates that a decorator class declares exactly one @Delegate injection point.
      *
-     * @param type
-     * @param unit
-     * @param diagnostics
+     * @param type       the class being validated
+     * @param unit       the compilation unit
+     * @param diagnostics list to collect diagnostics
      */
     private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String[] typeAnnotations = Stream.of(type.getAnnotations())
+        String[] typeAnnotations = Arrays.stream(type.getAnnotations())
                 .map(PsiAnnotation::getQualifiedName)
                 .toArray(String[]::new);
-        if (getMatchedJavaElementNames(type, typeAnnotations, new String[] { ManagedBeanConstants.DECORATOR_FQ_NAME }).isEmpty()) {
+
+        if (getMatchedJavaElementNames(type, typeAnnotations,
+                new String[]{ManagedBeanConstants.DECORATOR_FQ_NAME}).isEmpty()) {
             return;
         }
 
         List<PsiElement> delegateElements = new ArrayList<>();
 
+        // Fields
         for (PsiField field : type.getFields()) {
-            String[] fieldAnnotations = Stream.of(field.getAnnotations())
-                    .map(PsiAnnotation::getQualifiedName)
-                    .toArray(String[]::new);
-            if (!getMatchedJavaElementNames(type, fieldAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
-                delegateElements.add(field);
-                // Validate that @Delegate injection point has @Inject annotation
-                validateDelegateInjectionPoint(type, unit, diagnostics, field, fieldAnnotations);
-            }
+            processDelegate(type, unit, diagnostics, field, field, delegateElements);
         }
 
+        // Methods + parameters
         for (PsiMethod method : type.getMethods()) {
-            String[] methodAnnotations = Stream.of(method.getAnnotations())
+            String[] methodAnnotations = Arrays.stream(method.getAnnotations())
                     .map(PsiAnnotation::getQualifiedName)
                     .toArray(String[]::new);
+
             for (PsiParameter parameter : method.getParameterList().getParameters()) {
-                String[] parameterAnnotations = Stream.of(parameter.getAnnotations())
-                        .map(PsiAnnotation::getQualifiedName)
-                        .toArray(String[]::new);
-                if (!getMatchedJavaElementNames(type, parameterAnnotations, new String[] { ManagedBeanConstants.DELEGATE_FQ_NAME }).isEmpty()) {
-                    delegateElements.add(parameter);
-                    // Validate that @Delegate injection point has @Inject annotation on the method
-                    // Report diagnostic on the method, not the parameter
-                    validateDelegateInjectionPoint(type, unit, diagnostics, method, methodAnnotations);
-                }
+                processDelegate(type, unit, diagnostics, method, parameter, delegateElements, methodAnnotations);
             }
         }
 
         reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
+    }
+
+    /**
+     * Unified delegate processing for fields and parameters.
+     *
+     * @param owner          element to report diagnostics on (field or method)
+     * @param element        actual element annotated with @Delegate
+     * @param reusableAnnots optional precomputed annotations (e.g. method annotations)
+     */
+    private void processDelegate(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                 PsiElement owner, PsiElement element, List<PsiElement> delegateElements,
+                                 String... reusableAnnots) {
+
+        String[] annotations = (element instanceof PsiModifierListOwner)
+                ? Arrays.stream(((PsiModifierListOwner) element).getAnnotations())
+                .map(PsiAnnotation::getQualifiedName)
+                .toArray(String[]::new)
+                : new String[0];
+
+        if (!getMatchedJavaElementNames(type, annotations,
+                new String[]{ManagedBeanConstants.DELEGATE_FQ_NAME}).isEmpty()) {
+            delegateElements.add(element);
+            validateDelegateInjectionPoint(type, unit, diagnostics,
+                    owner,
+                    reusableAnnots.length > 0 ? reusableAnnots : annotations);
+        }
     }
 
     /**
