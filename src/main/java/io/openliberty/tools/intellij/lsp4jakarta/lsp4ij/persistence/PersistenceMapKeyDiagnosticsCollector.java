@@ -64,6 +64,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         List<PsiAnnotation> mapKeyJoinCols = new ArrayList<PsiAnnotation>();
         boolean hasMapKeyAnnotation = false;
         boolean hasMapKeyClassAnnotation = false;
+        boolean hasMapKeyEnumeratedAnnotation = false;
         boolean hasTypeDiagnostics = false;
         PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
         for (PsiAnnotation annotation : allAnnotations) {
@@ -74,9 +75,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                     hasMapKeyAnnotation = true;
                 else if (PersistenceConstants.MAPKEYCLASS.equals(matchedAnnotation))
                     hasMapKeyClassAnnotation = true;
-                else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation)) {
+                else if (PersistenceConstants.MAPKEYJOINCOLUMN.equals(matchedAnnotation))
                     mapKeyJoinCols.add(annotation);
-                }
+                else if (PersistenceConstants.MAPKEYENUMERATED.equals(matchedAnnotation))
+                    hasMapKeyEnumeratedAnnotation = true;
             }
         }
         if (hasMapKeyAnnotation) {
@@ -102,11 +104,15 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         if (mapKeyJoinCols.size() > 1) {
             validateMapKeyJoinColumnAnnotations(mapKeyJoinCols, fieldOrProperty, unit, diagnostics);
         }
+        // Spec section 11.1.34: @MapKeyEnumerated must only be applied to a Map-typed
+        // element collection or relationship, and the map key type must be an enum.
+        if (hasMapKeyEnumeratedAnnotation) {
+            validateMapKeyEnumerated(fieldOrProperty, unit, diagnostics);
+        }
     }
 
     private boolean collectTypeDiagnostics(PsiJvmModifiersOwner fieldOrProperty, String attribute, PsiJavaFile unit,
                                            List<Diagnostic> diagnostics) {
-        final String MAP_INTERFACE_FQDN = "java.util.Map";
         boolean hasTypeDiagnostics = false;
         PsiType fieldOrPropertyType = null;
         boolean isMapOrSubtype = false;
@@ -124,7 +130,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         }
         if (fieldOrPropertyType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
-            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, MAP_INTERFACE_FQDN);
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, PersistenceConstants.MAP_INTERFACE_FQDN);
         }
         if (!isMapOrSubtype) {
             hasTypeDiagnostics = true;
@@ -151,6 +157,68 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
                         PersistenceConstants.DIAGNOSTIC_CODE_MISSING_ATTRIBUTES, null, DiagnosticSeverity.Error));
             }
         });
+    }
+
+    /**
+     * Validates {@code @MapKeyEnumerated} usage per spec section 11.1.34.
+     * Two checks:
+     * 1. The field/property type must be {@code java.util.Map} (or a subtype).
+     * 2. The map key type parameter must resolve to an enum type; this includes
+     *    raw Map (no type params), unbounded/lower-bounded wildcards, and concrete
+     *    non-enum types.
+     */
+    private void validateMapKeyEnumerated(PsiJvmModifiersOwner fieldOrProperty, PsiJavaFile unit,
+                                          List<Diagnostic> diagnostics) {
+        PsiType elementType = (fieldOrProperty instanceof PsiMethod m)
+                ? m.getReturnType()
+                : (fieldOrProperty instanceof PsiField f) ? f.getType() : null;
+
+        if (elementType == null) {
+            return;
+        }
+
+        // Check 1: must be a Map (or subtype) — rejects List, Set, String, primitives, arrays, …
+        if (!(elementType instanceof PsiClassType classType)
+                || !InheritanceUtil.isInheritor(classType.resolve(), PersistenceConstants.MAP_INTERFACE_FQDN)) {
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                    Messages.getMessage("MapKeyEnumeratedOnNonMapType"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP, null,
+                    DiagnosticSeverity.Error));
+            return;
+        }
+
+        // Check 2: the map key type parameter must be an enum.
+        // Flag if: raw Map, unbounded/lower-bounded wildcard, non-enum concrete type,
+        // upper-bounded wildcard whose bound is not an enum, or any other key form.
+        PsiType[] typeParams = classType.getParameters();
+        boolean keyIsEnum = typeParams.length >= 1 && isEnumKeyType(typeParams[0]);
+        if (!keyIsEnum) {
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                    Messages.getMessage("MapKeyEnumeratedOnNonEnumType"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_ENUM, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Returns {@code true} only when {@code keyType} is definitively an enum type.
+     * Concrete class types, upper-bounded wildcards whose bound is an enum, and
+     * all other forms (raw, unbound wildcard, lower-bounded wildcard, type variable)
+     * return {@code false}.
+     */
+    private boolean isEnumKeyType(PsiType keyType) {
+        if (keyType instanceof PsiClassType keyClassType) {
+            PsiClass keyClass = keyClassType.resolve();
+            return keyClass != null && keyClass.isEnum();
+        }
+        if (keyType instanceof PsiWildcardType wildcardType && wildcardType.isExtends()) {
+            PsiType bound = wildcardType.getBound();
+            if (bound instanceof PsiClassType boundClassType) {
+                PsiClass boundClass = boundClassType.resolve();
+                return boundClass != null && boundClass.isEnum();
+            }
+        }
+        return false;
     }
 
     private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, PsiJavaFile unit,
