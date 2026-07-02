@@ -1528,6 +1528,11 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test expected diagnostics for decorator with observer methods
+        // Diagnostic for missing @Delegate injection point (from CdiDecoratorDiagnosticsCollector)
+        Diagnostic delegateDiagnostic = d(7, 13, 40,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+
         // Diagnostic for method with @Observes parameter
         Diagnostic observesDiagnostic = d(13, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
@@ -1538,6 +1543,92 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, observesDiagnostic, observesAsyncDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, delegateDiagnostic, observesDiagnostic, observesAsyncDiagnostic);
+    }
+
+    @Test
+    public void producerFieldWithNamed() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/ProducerFieldWithNamed.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test expected diagnostics for producer fields with @Named annotation
+        // Diagnostic for producer field with @Named("config")
+        Diagnostic namedConfigDiagnostic = d(12, 4, 20,
+                "Producer field 'config' must not declare a bean name using @Named annotation.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidProducerFieldWithNamedAnnotation");
+
+        // Diagnostic for producer field with @Named (no value)
+        Diagnostic namedGreetingDiagnostic = d(17, 4, 10,
+                "Producer field 'greeting' must not declare a bean name using @Named annotation.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidProducerFieldWithNamedAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, namedConfigDiagnostic, namedGreetingDiagnostic);
+
+        // Test quickfix for first diagnostic (remove @Named("config"))
+        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, namedConfigDiagnostic);
+        String newTextWithoutNamedConfig = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.enterprise.inject.Produces;\n" +
+                "import jakarta.inject.Named;\n" +
+                "import java.util.Properties;\n\n" +
+                "@ApplicationScoped\n" +
+                "public class ProducerFieldWithNamed {\n    \n    " +
+                "// Invalid: Producer field with @Named annotation\n    " +
+                "@Produces\n    " +
+                "private Properties config = new Properties();\n    \n    " +
+                "// Invalid: Producer field with @Named annotation (no value)\n    " +
+                "@Produces\n    " +
+                "@Named\n    " +
+                "private String greeting = \"Hello\"; \n    \n    " +
+                "// Valid: Producer method with @Named annotation (methods are allowed)\n    " +
+                "@Produces\n    " +
+                "@Named(\"message\")\n    " +
+                "public String getMessage() {\n        " +
+                "return \"Valid producer method\";\n    " +
+                "}\n    \n    " +
+                "// Valid: Producer field without @Named annotation\n    " +
+                "@Produces\n    " +
+                "private Integer count = 0;\n" +
+                "}\n";
+        TextEdit removeNamedConfigEdit = te(0, 0, 31, 0, newTextWithoutNamedConfig);
+        CodeAction removeNamedConfigAction = ca(uri, "Remove @Named", namedConfigDiagnostic, removeNamedConfigEdit);
+        assertJavaCodeAction(codeActionParams1, utils, removeNamedConfigAction);
+
+        // Test quickfix for second diagnostic (remove @Named)
+        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, namedGreetingDiagnostic);
+        String newTextWithoutNamedGreeting = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.enterprise.inject.Produces;\n" +
+                "import jakarta.inject.Named;\n" +
+                "import java.util.Properties;\n\n" +
+                "@ApplicationScoped\n" +
+                "public class ProducerFieldWithNamed {\n    \n    " +
+                "// Invalid: Producer field with @Named annotation\n    " +
+                "@Produces\n    " +
+                "@Named(\"config\")\n    " +
+                "private Properties config = new Properties();\n    \n    " +
+                "// Invalid: Producer field with @Named annotation (no value)\n    " +
+                "@Produces\n    " +
+                "private String greeting = \"Hello\"; \n    \n    " +
+                "// Valid: Producer method with @Named annotation (methods are allowed)\n    " +
+                "@Produces\n    " +
+                "@Named(\"message\")\n    " +
+                "public String getMessage() {\n        " +
+                "return \"Valid producer method\";\n    " +
+                "}\n    \n    " +
+                "// Valid: Producer field without @Named annotation\n    " +
+                "@Produces\n    " +
+                "private Integer count = 0;\n" +
+                "}\n";
+        TextEdit removeNamedGreetingEdit = te(0, 0, 31, 0, newTextWithoutNamedGreeting);
+        CodeAction removeNamedGreetingAction = ca(uri, "Remove @Named", namedGreetingDiagnostic, removeNamedGreetingEdit);
+        assertJavaCodeAction(codeActionParams2, utils, removeNamedGreetingAction);
     }
 }
