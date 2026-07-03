@@ -483,6 +483,40 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
+     * Common method to check if a method invocation matches expected method names and declaring class names.
+     * This reusable method extracts the common pattern used across multiple invocation checks.
+     *
+     * @param mi the method invocation to check
+     * @param resolvedMethod the pre-resolved method (for performance)
+     * @param expectedMethodNames set of expected method names (can be null to skip method name check)
+     * @param expectedClassNames set of expected fully qualified class names
+     * @return true if the invocation matches the criteria
+     */
+    private boolean isMethodInvocationMatch(PsiMethodCallExpression mi, PsiMethod resolvedMethod,
+                                           Set<String> expectedMethodNames, Set<String> expectedClassNames) {
+        String methodName = mi.getMethodExpression().getReferenceName();
+        
+        // Check method name if expected names are provided
+        if (expectedMethodNames != null && !expectedMethodNames.isEmpty()) {
+            if (methodName == null || !expectedMethodNames.contains(methodName)) {
+                return false;
+            }
+        }
+        
+        PsiClass declaringClass = resolvedMethod.getContainingClass();
+        if (declaringClass == null) {
+            return false;
+        }
+        
+        String fqName = declaringClass.getQualifiedName();
+        if (fqName == null) {
+            return false;
+        }
+        
+        return expectedClassNames.contains(fqName);
+    }
+
+    /**
      * Checks if a method invocation creates a local Jsonb instance.
      * Detects both JsonbBuilder.create() and JsonbBuilder.build() patterns.
      * This distinguishes between local instances (which should be closed) and
@@ -493,25 +527,9 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @return true if this creates a local Jsonb instance
      */
     private boolean isLocalJsonbCreation(PsiMethodCallExpression mi, PsiMethod resolvedMethod) {
-        String methodName = mi.getMethodExpression().getReferenceName();
-
-        if (!JsonbConstants.JSONB_CREATE_METHOD.equals(methodName) &&
-            !JsonbConstants.JSONB_BUILD_METHOD.equals(methodName)) {
-            return false;
-        }
-
-        PsiClass declaringClass = resolvedMethod.getContainingClass();
-        if (declaringClass == null) {
-            return false;
-        }
-
-        String fqName = declaringClass.getQualifiedName();
-        if (fqName == null) {
-            return false;
-        }
-
-        // PsiClass.getQualifiedName() always returns fully qualified names
-        return JsonbConstants.JAKARTA_JSONB_BUILDER.equals(fqName);
+        Set<String> expectedMethods = Set.of(JsonbConstants.JSONB_CREATE_METHOD, JsonbConstants.JSONB_BUILD_METHOD);
+        Set<String> expectedClasses = Set.of(JsonbConstants.JAKARTA_JSONB_BUILDER);
+        return isMethodInvocationMatch(mi, resolvedMethod, expectedMethods, expectedClasses);
     }
 
     /**
@@ -522,20 +540,13 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
      * @return true if this is a close invocation on Jsonb, Closeable, or AutoCloseable
      */
     private boolean isCloseInvocation(PsiMethodCallExpression mi, PsiMethod resolvedMethod) {
-        String name = mi.getMethodExpression().getReferenceName();
-        if (!JsonbConstants.CLOSE_METHOD.equals(name)) {
-            return false;
-        }
-        
-        PsiClass declaringClass = resolvedMethod.getContainingClass();
-        if (declaringClass == null) {
-            return false;
-        }
-        
-        String fqName = declaringClass.getQualifiedName();
-        return JsonbConstants.JAKARTA_JSON_BIND_JSONB.equals(fqName) ||
-               JsonbConstants.CLOSABLE_CLOSE.equals(fqName) ||
-               JsonbConstants.AUTOCLOSABLE_CLOSE.equals(fqName);
+        Set<String> expectedMethods = Set.of(JsonbConstants.CLOSE_METHOD);
+        Set<String> expectedClasses = Set.of(
+            JsonbConstants.JAKARTA_JSON_BIND_JSONB,
+            JsonbConstants.CLOSABLE_CLOSE,
+            JsonbConstants.AUTOCLOSABLE_CLOSE
+        );
+        return isMethodInvocationMatch(mi, resolvedMethod, expectedMethods, expectedClasses);
     }
 
     /**
@@ -551,38 +562,17 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (declaringClass == null) {
             return false;
         }
-        
-        String name = mi.getMethodExpression().getReferenceName();
+        String methodName = mi.getMethodExpression().getReferenceName();
         String fqName = declaringClass.getQualifiedName();
-        
-        // Check known thread methods and classes
-        if (isThreadSource(name, fqName)) {
+        // Check known thread methods and classes using the common method
+        if (methodName != null && fqName != null &&
+            JsonbConstants.THREAD_METHODS.contains(methodName) &&
+            isMethodInvocationMatch(mi, resolvedMethod, new HashSet<>(JsonbConstants.THREAD_METHODS),
+                                   new HashSet<>(JsonbConstants.THREAD_CLASSES))) {
             return true;
         }
-        
         // Check if declaring class extends/implements thread-related types
         return isThreadRelatedType(declaringClass);
-    }
-
-    /**
-     * Determines if a method name and fully qualified class name represent a thread source.
-     * Uses constants from JsonbConstants for thread methods and classes.
-     *
-     * @param methodName the method name
-     * @param fqName the fully qualified class name
-     * @return true if this is a thread source method
-     */
-    private boolean isThreadSource(String methodName, String fqName) {
-        if (methodName == null || fqName == null) {
-            return false;
-        }
-        
-        // Check if method name is in the list of thread methods from constants
-        if (!JsonbConstants.THREAD_METHODS.contains(methodName)) {
-            return false;
-        }
-        
-        return JsonbConstants.THREAD_CLASSES.stream().anyMatch(fqName::equals);
     }
 
     /**
