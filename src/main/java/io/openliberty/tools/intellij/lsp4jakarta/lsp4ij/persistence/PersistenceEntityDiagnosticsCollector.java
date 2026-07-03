@@ -340,7 +340,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
         if (id != null) {
 
-            if (typeFQ != null && typeFQ.equals(PersistenceConstants.UTIL_DATE)) {
+            if (PersistenceConstants.UTIL_DATE.equals(typeFQ)) {
                 if (temporal != null) {
                     if (!isValidTemporalDateValue(temporal.findAttributeValue("value"))) {
                         // Add diagnostics for invalid type
@@ -432,7 +432,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         String typeName = elementType.getCanonicalText();
 
         boolean isValidType = false;
-        if(candidate.equals(PersistenceConstants.ID)){
+        if(PersistenceConstants.ID.equals(candidate)){
             // Check if type is an array (arrays are not valid @Id types)
             boolean isArrayType = elementType instanceof PsiArrayType;
             // Check if type is in the list of valid @Id types
@@ -444,7 +444,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
                         DiagnosticSeverity.Error));
             }
-        }else if(candidate.equals(PersistenceConstants.VERSION)){
+        }else if(PersistenceConstants.VERSION.equals(candidate)){
             isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
             if (!isValidType) {
                 diagnostics.add(createDiagnostic(element, unit,
