@@ -65,7 +65,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
         // Fields
         for (PsiField field : type.getFields()) {
-            processDelegate(type, unit, diagnostics, field, field, delegateElements);
+            validateDelegate(type, unit, diagnostics, field, field, delegateElements);
         }
 
         // Methods + parameters
@@ -75,7 +75,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                     .toArray(String[]::new);
 
             for (PsiParameter parameter : method.getParameterList().getParameters()) {
-                processDelegate(type, unit, diagnostics, method, parameter, delegateElements, methodAnnotations);
+                validateDelegate(type, unit, diagnostics, method, parameter, delegateElements, methodAnnotations);
             }
         }
 
@@ -89,7 +89,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * @param element        actual element annotated with @Delegate
      * @param reusableAnnots optional precomputed annotations (e.g. method annotations)
      */
-    private void processDelegate(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
+    private void validateDelegate(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
                                  PsiElement owner, PsiElement element, List<PsiElement> delegateElements,
                                  String... reusableAnnots) {
 
