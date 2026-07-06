@@ -413,6 +413,14 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     }
 
 
+    /**
+     * Validates that a field or method annotated with @Id/@Version has a supported type.
+     *
+     * @param element the field or method to validate
+     * @param unit compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     * @param candidate Check @Id/@Version
+     */
     private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics, String candidate) {
         PsiType elementType = null;
 
