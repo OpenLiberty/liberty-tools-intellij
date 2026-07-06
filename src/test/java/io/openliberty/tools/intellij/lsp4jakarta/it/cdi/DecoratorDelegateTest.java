@@ -414,4 +414,42 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         assertJavaCodeAction(constructorCodeActionParams, utils, constructorInsertInjectAction);
     }
 
+    /**
+     * Test that decorators with invalid delegate type assignability trigger diagnostics.
+     *
+     * The file contains multiple test cases:
+     * - InvalidDelegateType: delegate type (Logger) doesn't implement PaymentService
+     * - InvalidDelegateTypePrimitive: delegate type (String) doesn't implement PaymentService
+     *
+     * Expected: Errors on both delegate fields indicating type mismatch.
+     */
+    @Test
+    public void testDecoratorWithInvalidDelegateType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/DecoratorDelegateTypeAssignability.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Expected diagnostic on InvalidDelegateType class (line 18, 0-based: 17)
+        Diagnostic invalidTypeDiagnostic1 = d(17, 19, 27,
+                "The delegate type 'Logger' must implement or extend all decorated types. Missing: PaymentService",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypePrimitive class (line 72, 0-based: 71)
+        Diagnostic invalidTypeDiagnostic2 = d(71, 19, 27,
+                "The delegate type 'String' must implement or extend all decorated types. Missing: PaymentService",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidTypeDiagnostic1, invalidTypeDiagnostic2);
+    }
+
 }
