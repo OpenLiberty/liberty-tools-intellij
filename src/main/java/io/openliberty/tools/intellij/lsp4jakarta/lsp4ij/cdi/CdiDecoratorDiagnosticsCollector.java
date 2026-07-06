@@ -16,8 +16,10 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
@@ -80,6 +82,11 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
         }
 
         reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
+
+        // Validate delegate type assignability (Section 8.1.3 of CDI spec)
+        if (delegateElements.size() == 1) {
+            validateDelegateTypeAssignability(type, delegateElements.get(0), unit, diagnostics);
+        }
     }
 
     /**
@@ -132,6 +139,123 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                         DiagnosticSeverity.Error));
             }
         }
+    }
+
+    /**
+     * Validates that the delegate type implements or extends all decorated types of the decorator.
+     *
+     * Per CDI 3.0 specification section 8.1.3:
+     * "The delegate type of a decorator must implement or extend every decorated type
+     * (with exactly the same type parameters). If the delegate type does not implement
+     * or extend a decorated type of the decorator (or specifies different type parameters),
+     * the container automatically detects the problem and treats it as a definition error."
+     *
+     * @param decoratorType the decorator class
+     * @param delegateElement the delegate injection point (field or parameter)
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateDelegateTypeAssignability(PsiClass decoratorType, PsiElement delegateElement,
+                                                   PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        try {
+            PsiType delegateType = null;
+            if (delegateElement instanceof PsiField) {
+                delegateType = ((PsiField) delegateElement).getType();
+            } else if (delegateElement instanceof PsiParameter) {
+                delegateType = ((PsiParameter) delegateElement).getType();
+            }
+
+            if (delegateType == null) {
+                return; // Cannot resolve delegate type, skip validation
+            }
+
+            // Resolve the delegate type to a PsiClass
+            PsiClass delegateClass = null;
+            if (delegateType instanceof PsiClassType) {
+                delegateClass = ((PsiClassType) delegateType).resolve();
+            }
+
+            if (delegateClass == null) {
+                return; // Cannot resolve delegate type, skip validation
+            }
+
+            // Get all decorated types (interfaces and superclasses of the decorator)
+            List<String> decoratedTypes = getDecoratedTypes(decoratorType);
+            if (decoratedTypes.isEmpty()) {
+                return; // No decorated types to validate against
+            }
+
+            // Check if delegate type implements/extends all decorated types
+            List<String> missingTypes = new ArrayList<>();
+            for (String decoratedTypeFQN : decoratedTypes) {
+                // Use InheritanceUtil.isInheritor for checking
+                if (!InheritanceUtil.isInheritor(delegateClass, decoratedTypeFQN)) {
+                    missingTypes.add(decoratedTypeFQN);
+                }
+            }
+
+            // Report diagnostic if delegate type doesn't implement all decorated types
+            if (!missingTypes.isEmpty()) {
+                // Use simple class names for better readability
+                String delegateTypeSimpleName = delegateClass.getName();
+                String missingTypesStr = missingTypes.stream()
+                        .map(this::getSimpleName)
+                        .collect(Collectors.joining(", "));
+                String message = Messages.getMessage("InvalidDecoratorDelegateTypeAssignability",
+                        delegateTypeSimpleName, missingTypesStr);
+                diagnostics.add(createDiagnostic(delegateElement, unit, message,
+                        ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
+                        null, DiagnosticSeverity.Error));
+            }
+        } catch (Exception e) {
+            // Log and skip validation on error
+        }
+    }
+
+    /**
+     * Gets all decorated types of the decorator (interfaces and superclasses, excluding Object).
+     *
+     * @param decoratorType the decorator class
+     * @return list of decorated type fully qualified names
+     */
+    private List<String> getDecoratedTypes(PsiClass decoratorType) {
+        List<String> decoratedTypes = new ArrayList<>();
+
+        // Get all interfaces implemented by the decorator
+        PsiClass[] interfaces = decoratorType.getInterfaces();
+        for (PsiClass interfaceClass : interfaces) {
+            if (interfaceClass != null) {
+                String fqName = interfaceClass.getQualifiedName();
+                if (fqName != null) {
+                    decoratedTypes.add(fqName);
+                }
+            }
+        }
+
+        // Get superclass (excluding java.lang.Object)
+        PsiClass superClass = decoratorType.getSuperClass();
+        if (superClass != null) {
+            String fqName = superClass.getQualifiedName();
+            if (fqName != null && !fqName.equals("java.lang.Object")) {
+                decoratedTypes.add(fqName);
+            }
+        }
+
+        return decoratedTypes;
+    }
+
+    /**
+     * Gets the simple name from a fully qualified class name.
+     *
+     * @param fqName the fully qualified name
+     * @return the simple name
+     */
+    private String getSimpleName(String fqName) {
+        if (fqName == null) {
+            return "";
+        }
+        int lastDot = fqName.lastIndexOf('.');
+        return lastDot >= 0 ? fqName.substring(lastDot + 1) : fqName;
     }
 
     /**
