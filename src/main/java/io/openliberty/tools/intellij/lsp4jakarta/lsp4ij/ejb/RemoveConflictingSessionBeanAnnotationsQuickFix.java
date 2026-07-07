@@ -50,10 +50,10 @@ public class RemoveConflictingSessionBeanAnnotationsQuickFix extends RemoveAnnot
                 .mapToObj(idx -> diagnosticData.get(idx).getAsString())
                 .collect(Collectors.toList());
         for (String annotation : annotations) {
-            List<String> resultingAnnotations = new ArrayList<>(annotations);
-            resultingAnnotations.remove(annotation);
+            List<String> annotationsToRemove = new ArrayList<>(annotations);
+            annotationsToRemove.remove(annotation);
             removeAnnotation(diagnostic, context, codeActions,
-                    resultingAnnotations.toArray(new String[] {}));
+                    annotationsToRemove.toArray(new String[] {}));
         }
         return codeActions;
     }
