@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -241,7 +242,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
                     String paramNames = paramsWithObserverAnnotations.stream()
                             .map(PsiParameter::getName)
-                            .collect(java.util.stream.Collectors.joining(", "));
+                            .collect(Collectors.joining(", "));
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
                             DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 } else if (isDependent && hasConditionalObserverAnnotation(type, method)) {
@@ -253,6 +254,17 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
                             DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
                 }
+                // Check for @Disposes in interceptors/decorators
+                if (interceptorOrDecorator) {
+                    List<String> disposesParams = getDisposesParamNames(type, method);
+                    if (!disposesParams.isEmpty()) {
+                        String paramNames = String.join(", ", disposesParams);
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod", paramNames),
+                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER, null, DiagnosticSeverity.Error));
+                    }
+                }
+                
             }
 
             if (isManagedBean && constructorMethods.size() > 0) {
@@ -547,6 +559,27 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     }
 
     /**
+     * getDisposesParamNames
+     * Returns a list of parameter names that are annotated with @Disposes.
+     *
+     * @param type   the type
+     * @param method the method to check
+     * @return list of parameter names annotated with @Disposes
+     */
+    private List<String> getDisposesParamNames(PsiClass type, PsiMethod method) {
+        List<String> paramNames = new ArrayList<>();
+        for (PsiParameter param : method.getParameterList().getParameters()) {
+            for (PsiAnnotation annotation : param.getAnnotations()) {
+                if (isMatchedJavaElement(type, annotation.getQualifiedName(), DISPOSES_FQ_NAME)) {
+                    paramNames.add(param.getName());
+                    break;
+                }
+            }
+        }
+        return paramNames;
+    }
+
+    /**
      * validateInterceptorDecoratorScopes
      * Validates that interceptors and decorators do not declare invalid scope annotations.
      * Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
@@ -562,15 +595,14 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         // Check each annotation to see if it's an invalid scope
         for (PsiAnnotation annotation : typeAnnotations) {
             String annotationName = annotation.getQualifiedName();
-            
             // Check if it's a built-in invalid scope
             String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
                     INVALID_INTERCEPTOR_DECORATOR_SCOPES);
             if (matchedBuiltInScope != null) {
                 foundInvalidScopes.add(matchedBuiltInScope);
-            // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
+                // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
             } else if (null == getMatchedJavaElementName(type, annotationName,
-                    new String[]{
+                    new String[] {
                             INTERCEPTOR_FQ_NAME,
                             DECORATOR_FQ_NAME,
                             DEPENDENT_FQ_NAME
