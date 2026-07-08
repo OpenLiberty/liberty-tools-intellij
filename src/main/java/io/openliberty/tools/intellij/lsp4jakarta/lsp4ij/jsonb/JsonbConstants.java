@@ -28,6 +28,7 @@ public class JsonbConstants {
     public static final String DIAGNOSTIC_CODE_NO_ARGS_CONSTRUCTOR_MISSING = "InvalidJsonBNoArgsConstructorMissing";
     public static final String DIAGNOSTIC_CODE_NON_STATIC_INNER_CLASS = "InvalidJsonBNonStaticInnerClass";
     public static final String DIAGNOSTIC_CODE_NON_PUBLIC_PROTECTED_STATIC_NESTED_CLASS = "InvalidJsonBNonPublicProtectedStaticNestedClass";
+    public static final String DIAGNOSTIC_CODE_FROM_JSON_NULL_PARAMETER = "InvalidJsonbFromJsonNullParameter";
 
     /* Annotation Constants */
     public static final String JSONB_PACKAGE = "jakarta.json.bind.annotation.";
@@ -56,4 +57,7 @@ public class JsonbConstants {
             JSONB_DATE_FORMAT, JSONB_NILLABLE, JSONB_NUMBER_FORMAT, JSONB_PROPERTY, JSONB_PROPERTY_ORDER,
             JSONB_TYPE_ADAPTER, JSONB_TYPE_DESERIALIZER, JSONB_TYPE_SERIALIZER, JSONB_VISIBILITY);
 
+    /* Jsonb fromJson constants */
+    public static final String JSONB_FROM_JSON_PACKAGE = "jakarta.json.bind.Jsonb";
+    public static final String FROM_JSON_METHOD = "fromJson";
 }

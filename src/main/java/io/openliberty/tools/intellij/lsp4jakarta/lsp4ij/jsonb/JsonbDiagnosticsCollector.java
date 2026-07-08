@@ -17,14 +17,18 @@ import java.util.*;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
+import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JsonPropertyUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiJsonBJsonPMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.Range;
 
 /**
  * This class contains logic for Jsonb diagnostics:
@@ -132,8 +136,11 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 			// Jsonb deseriazation diagnostics
 			generateJsonbDeserializerDiagnostics(unit, diagnostics, jsonbtypeParent, false,
 					missingParentNoArgsConstructor, false, type);
-        }
-    }
+			     }
+			     
+			     // Collect diagnostics for Jsonb.fromJson() method invocations with null parameters
+			     collectJsonbFromJsonNullParameterDiagnostics(unit, diagnostics);
+			 }
 
     /**
      * @param element
@@ -350,5 +357,31 @@ public class JsonbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     && !annotationName.equals(JsonbConstants.JSONB_TRANSIENT_FQ_NAME))
                 return true;
         return false;
+    }
+
+    /**
+     * Collects diagnostics for Jsonb.fromJson() method invocations where null is passed as a parameter.
+     * According to the Jakarta JSON Binding specification, the fromJson() method must not accept null parameters.
+     *
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void collectJsonbFromJsonNullParameterDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        if (unit == null) {
+            return;
+        }
+        // Find all method call expressions in the file
+        Collection<PsiMethodCallExpression> allMethodInvocations = PsiTreeUtil.findChildrenOfType(unit, PsiMethodCallExpression.class);
+        allMethodInvocations.stream()
+                .filter(mi -> PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonbConstants.JSONB_FROM_JSON_PACKAGE))
+                .flatMap(mi -> Arrays.stream(mi.getArgumentList().getExpressions()))
+                .filter(PsiJsonBJsonPMethodCallUtils::isInvalidNullArgument)
+                .forEach(arg -> {
+                    String msg = Messages.getMessage("ErrorMessageJsonbFromJsonNullParameter");
+                    Range range = PositionUtils.toNameRange(arg);
+                    Diagnostic diagnostic = new Diagnostic(range, msg);
+                    completeDiagnostic(diagnostic, JsonbConstants.DIAGNOSTIC_CODE_FROM_JSON_NULL_PARAMETER);
+                    diagnostics.add(diagnostic);
+                });
     }
 }
