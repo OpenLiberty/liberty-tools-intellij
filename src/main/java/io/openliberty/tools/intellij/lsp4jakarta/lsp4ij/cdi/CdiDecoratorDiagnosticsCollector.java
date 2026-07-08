@@ -16,11 +16,14 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -29,6 +32,8 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
  * CDI diagnostics collector that validates decorator delegate injection points.
  */
 public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    private static final Logger LOGGER = Logger.getLogger(CdiDecoratorDiagnosticsCollector.class.getName());
 
     @Override
     protected String getDiagnosticSource() {
@@ -199,7 +204,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                 // Use simple class names for better readability
                 String delegateTypeSimpleName = delegateClass.getName();
                 String missingTypesStr = missingTypes.stream()
-                        .map(this::getSimpleName)
+                        .map(JDTUtils::getSimpleName)
                         .collect(Collectors.joining(", "));
                 String message = Messages.getMessage("InvalidDecoratorDelegateTypeAssignability",
                         delegateTypeSimpleName, missingTypesStr);
@@ -208,7 +213,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                         null, DiagnosticSeverity.Error));
             }
         } catch (Exception e) {
-            // Log and skip validation on error
+            LOGGER.log(Level.WARNING, "Exception during delegate type assignability validation", e);
         }
     }
 
@@ -242,20 +247,6 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
         }
 
         return decoratedTypes;
-    }
-
-    /**
-     * Gets the simple name from a fully qualified class name.
-     *
-     * @param fqName the fully qualified name
-     * @return the simple name
-     */
-    private String getSimpleName(String fqName) {
-        if (fqName == null) {
-            return "";
-        }
-        int lastDot = fqName.lastIndexOf('.');
-        return lastDot >= 0 ? fqName.substring(lastDot + 1) : fqName;
     }
 
     /**
