@@ -52,63 +52,63 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 41: Invalid interceptor with @ApplicationScoped
-        Diagnostic interceptorAppScoped = d(41, 6, 38, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 49: Invalid interceptor with @ApplicationScoped
+        Diagnostic interceptorAppScoped = d(49, 6, 38, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped"));
 
-        // Line 47: Invalid interceptor with @SessionScoped
-        Diagnostic interceptorSessionScoped = d(47, 6, 34, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 55: Invalid interceptor with @SessionScoped
+        Diagnostic interceptorSessionScoped = d(55, 6, 34, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.SessionScoped"));
 
-        // Line 54: Invalid interceptor with multiple scopes - InvalidScopeDecl
-        Diagnostic interceptorMultiScopeDecl = d(54, 6, 42, "Scope type annotations must be specified by a managed bean class at most once.",
+        // Line 62: Invalid interceptor with multiple scopes - InvalidScopeDecl
+        Diagnostic interceptorMultiScopeDecl = d(62, 6, 42, "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl",
                 createJsonArray("jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.ApplicationScoped"));
 
-        // Line 54: Invalid interceptor with multiple scopes - InvalidInterceptorOrDecorator
-        Diagnostic interceptorMultiScope = d(54, 6, 42, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 62: Invalid interceptor with multiple scopes - InvalidInterceptorOrDecorator
+        Diagnostic interceptorMultiScope = d(62, 6, 42, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped", "jakarta.enterprise.context.SessionScoped"));
 
-        // Line 62: Invalid decorator with @ApplicationScoped
-        Diagnostic decoratorAppScoped = d(62, 6, 36, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 70: Invalid decorator with @ApplicationScoped
+        Diagnostic decoratorAppScoped = d(70, 6, 36, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped"));
 
-        // Line 68: Invalid decorator with @SessionScoped
-        Diagnostic decoratorSessionScoped = d(68, 6, 32, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 79: Invalid decorator with @SessionScoped
+        Diagnostic decoratorSessionScoped = d(79, 6, 32, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.SessionScoped"));
 
-        // Line 75: Invalid decorator with multiple scopes - InvalidScopeDecl
-        Diagnostic decoratorMultiScopeDecl = d(75, 6, 40, "Scope type annotations must be specified by a managed bean class at most once.",
+        // Line 89: Invalid decorator with multiple scopes - InvalidScopeDecl
+        Diagnostic decoratorMultiScopeDecl = d(89, 6, 40, "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl",
                 createJsonArray("jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped"));
 
-        // Line 75: Invalid decorator with multiple scopes - InvalidInterceptorOrDecorator
-        Diagnostic decoratorMultiScope = d(75, 6, 40, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 89: Invalid decorator with multiple scopes - InvalidInterceptorOrDecorator
+        Diagnostic decoratorMultiScope = d(89, 6, 40, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.RequestScoped", "jakarta.enterprise.context.ConversationScoped"));
 
-        // Line 83: Invalid interceptor with custom normal scope
-        Diagnostic interceptorCustomScope = d(83, 6, 38, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 100: Invalid interceptor with custom normal scope
+        Diagnostic interceptorCustomScope = d(100, 6, 38, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("io.openliberty.sample.jakarta.cdi.CustomNormalScope"));
 
-        // Line 89: Invalid decorator with custom normal scope
-        Diagnostic decoratorCustomScope = d(89, 6, 36, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 106: Invalid decorator with custom normal scope
+        Diagnostic decoratorCustomScope = d(106, 6, 36, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("io.openliberty.sample.jakarta.cdi.CustomNormalScope"));
 
-        // Line 96: Invalid interceptor with mixed scopes
-        Diagnostic interceptorMixedScopes = d(96, 6, 32, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 116: Invalid interceptor with mixed scopes
+        Diagnostic interceptorMixedScopes = d(116, 6, 32, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped", "io.openliberty.sample.jakarta.cdi.CustomNormalScope"));
 
-        // Line 103: Invalid decorator with mixed scopes
-        Diagnostic decoratorMixedScopes = d(103, 6, 30, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
+        // Line 123: Invalid decorator with mixed scopes
+        Diagnostic decoratorMixedScopes = d(123, 6, 30, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped", "io.openliberty.sample.jakarta.cdi.CustomNormalScope"));
 
