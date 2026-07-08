@@ -55,9 +55,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation InheritanceAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
+                    }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
+                        InheritanceAnnotation = annotation;
                     }
                 }
 
@@ -174,6 +178,20 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                 PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
                                 DiagnosticSeverity.Error));
                     }
+
+                    // @Inheritance on a non-root entity (entity ancestor exists in the chain)
+                    if (InheritanceAnnotation != null && hasEntityAncestor(type)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("InheritanceAnnotationOnNonRootEntity"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT, null,
+                                DiagnosticSeverity.Error));
+                    }
+                } else if (InheritanceAnnotation != null) {
+                    // @Inheritance present but @Entity is missing
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY, null,
+                            DiagnosticSeverity.Error));
                 }
             }
         }
@@ -263,6 +281,24 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Walk the full superclass chain of the given type and return true if any
+     * ancestor class carries the {@code @Entity} annotation.
+     * Non-entity abstract gaps in the chain are transparent to JPA (spec section
+     * 2.11.3), so the walk must continue past them.
+     *
+     * @param type the class to inspect
+     * @return true if an {@code @Entity}-annotated ancestor exists
+     */
+    private boolean hasEntityAncestor(PsiClass type) {
+        for (PsiClass ancestor : DiagnosticsUtils.collectSuperClasses(type)) {
+            if (isMatchedAnnotation(ancestor.getAnnotations(), PersistenceConstants.ENTITY)) {
+                return true;
             }
         }
         return false;
