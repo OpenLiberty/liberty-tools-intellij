@@ -201,13 +201,9 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
             // Report diagnostic if delegate type doesn't implement all decorated types
             if (!missingTypes.isEmpty()) {
-                // Use simple class names for better readability
                 String delegateTypeSimpleName = delegateClass.getName();
-                String missingTypesStr = missingTypes.stream()
-                        .map(JDTUtils::getSimpleName)
-                        .collect(Collectors.joining(", "));
                 String message = Messages.getMessage("InvalidDecoratorDelegateTypeAssignability",
-                        delegateTypeSimpleName, missingTypesStr);
+                        delegateTypeSimpleName);
                 diagnostics.add(createDiagnostic(delegateElement, unit, message,
                         ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
                         null, DiagnosticSeverity.Error));
