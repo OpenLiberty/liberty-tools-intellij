@@ -53,7 +53,7 @@ public class JakartaFacesTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-faces",
                 "FacesValidatorAnnotatedClassNoValidatorInterfaceImpl");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, expecteDiagnostic);
     }
 
     @Test
