@@ -50,6 +50,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_INJECT_MULTIPLE_METHOD_PARAM = "InvalidInjectAnnotationOnMultipleMethodParams";
     public static final String DIAGNOSTIC_OBSERVES_OBSERVESASYNC_PARAM_CONFLICT = "InvalidObservesObservesAsyncMethodParams";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER = "InvalidInterceptorOrDecoratorWithObserverMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER = "InvalidInterceptorOrDecoratorWithDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
     public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
