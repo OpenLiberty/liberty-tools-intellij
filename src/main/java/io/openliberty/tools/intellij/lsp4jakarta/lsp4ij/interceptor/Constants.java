@@ -30,6 +30,8 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_FINAL = "InvalidInterceptorMethodAnnotationOnFinalMethod";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ABSTRACT = "InvalidInterceptorMethodAnnotationOnAbstractMethod";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_STATIC = "InvalidInterceptorMethodAnnotationOnStaticMethod";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY = "InterceptorNegativePriority";
+    public static final String DIAGNOSTIC_CODE_DUPLICATE_INTERCEPTOR_METHOD = "InvalidMultipleInterceptorMethodsOfSameType";
 
     private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
@@ -53,5 +55,7 @@ public class Constants {
     public static final String PROCEED = "proceed";
 
     public static final Set<String> LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS = Set.of(AROUND_CONSTRUCT_FQ_NAME, PRE_DESTROY_FQ_NAME, POST_CONSTRUCT_FQ_NAME);
+
+    public static final String PRIORITY_FQ_NAME = "jakarta.annotation.Priority";
 
 }
