@@ -803,4 +803,121 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    // =========================================================================
+    // @Inheritance Diagnostic Tests
+    // =========================================================================
+
+    @Test
+    public void testInheritanceOnPlainClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Inheritance without @Entity on a plain abstract class — Diagnostic 1
+        Diagnostic inheritanceOnNonEntityError = d(7, 22, 44,
+                "A class using the @Inheritance annotation must also be annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonEntityClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonEntityError);
+    }
+
+    @Test
+    public void testInheritanceOnMappedSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnMappedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @MappedSuperclass is not @Entity — @Inheritance must not appear here — Diagnostic 1
+        Diagnostic inheritanceOnMappedSuperclassError = d(10, 22, 51,
+                "A class using the @Inheritance annotation must also be annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonEntityClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnMappedSuperclassError);
+    }
+
+    @Test
+    public void testInheritanceOnNonRootEntity() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonRootEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Entity + @Inheritance but a direct @Entity parent exists — Diagnostic 2
+        Diagnostic inheritanceOnNonRootError = d(10, 13, 39,
+                "A class using the @Inheritance annotation must be the root of the entity class hierarchy.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonRootEntity");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonRootError);
+    }
+
+    @Test
+    public void testInheritanceOnNonRootEntityWithAbstractGap() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonRootEntityWithGap.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Entity + @Inheritance but @Entity ancestor is hidden behind a non-entity
+        // abstract gap — requires full superclass chain traversal — Diagnostic 2
+        Diagnostic inheritanceOnNonRootWithGapError = d(11, 13, 46,
+                "A class using the @Inheritance annotation must be the root of the entity class hierarchy.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonRootEntity");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonRootWithGapError);
+    }
+
+    @Test
+    public void testInheritanceOnRootEntityIsValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnRootEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @Entity + @Inheritance on the root class with no @Entity ancestor
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testInheritanceOnRootEntityExtendsMappedSuperclassIsValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnRootEntityExtendsMappedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @Entity + @Inheritance extending @MappedSuperclass — no @Entity ancestor
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
