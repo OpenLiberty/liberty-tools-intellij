@@ -62,17 +62,17 @@ public class NamedQualifierInjectionPointTest extends BaseJakartaTest {
 
         // Line 29 (0-based: 28): @Named on constructor parameter without value
         Diagnostic constructorParamDiagnostic = d(28, 40, 46,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 36 (0-based: 35): @Named on method parameter without value
         Diagnostic methodParamDiagnostic = d(35, 28, 34,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 43 (0-based: 42): @Named on initializer method parameter without value
         Diagnostic initializerParamDiagnostic = d(42, 27, 33,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         assertJavaDiagnostics(diagnosticsParams, utils, constructorParamDiagnostic, methodParamDiagnostic, initializerParamDiagnostic);
@@ -260,32 +260,32 @@ public class NamedQualifierInjectionPointTest extends BaseJakartaTest {
 
         // Line 22 (0-based: 21): @Named on constructor parameter without value
         Diagnostic constructorDiagnostic = d(21, 31, 37,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 36 (0-based: 35): @Named on method parameter without value
         Diagnostic methodDiagnostic = d(35, 28, 34,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 49 (0-based: 48): First @Named in nested class with multiple params
         Diagnostic nestedClass1Diagnostic = d(48, 37, 43,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 49 (0-based: 48): Second @Named in nested class with multiple params
         Diagnostic nestedClass2Diagnostic = d(48, 61, 67,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 57 (0-based: 56): @Named without value in mixed params nested class
         Diagnostic mixedParamDiagnostic = d(56, 60, 66,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         // Line 64 (0-based: 63): @Named on initializer method parameter without value
         Diagnostic initializerDiagnostic = d(63, 27, 33,
-                "@Named annotation on constructor or method parameter must specify a value attribute. Field injection points can omit the value, but constructor and method parameters cannot.",
+                "The @Named annotation on this injection point must specify a value. Only field injection points can omit the value (field name is assumed).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidNamedAnnotationOnNonFieldInjectionPoint");
 
         assertJavaDiagnostics(diagnosticsParams, utils, constructorDiagnostic, methodDiagnostic,
