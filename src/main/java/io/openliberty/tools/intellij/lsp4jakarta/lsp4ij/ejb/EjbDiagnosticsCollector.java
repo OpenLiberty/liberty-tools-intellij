@@ -44,15 +44,76 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
             return;
 
         for (PsiClass type : unit.getClasses()) {
-            List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
-                    Stream.of(type.getAnnotations())
-                            .map(annotation -> annotation.getQualifiedName())
-                            .toArray(String[]::new),
-                    SESSION_BEAN_ANNOTATIONS);
+            checkClass(type, unit, diagnostics);
+        }
+    }
 
-            if (!sessionBeanAnnotations.isEmpty()) {
-                validateSessionBeanConstructor(type, unit, diagnostics);
-            }
+    /**
+     * Checks a class and all its inner classes for session bean violations.
+     *
+     * @param type the class to check
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void checkClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
+                Stream.of(type.getAnnotations())
+                        .map(annotation -> annotation.getQualifiedName())
+                        .toArray(String[]::new),
+                SESSION_BEAN_ANNOTATIONS);
+
+        if (!sessionBeanAnnotations.isEmpty()) {
+            validateSessionBeanClass(type, unit, diagnostics);
+            validateSessionBeanConstructor(type, unit, diagnostics);
+        }
+
+        for (PsiClass innerClass : type.getInnerClasses()) {
+            checkClass(innerClass, unit, diagnostics);
+        }
+    }
+
+    /**
+     * Validates that a session bean class is public, not final, not abstract, and top-level.
+     *
+     * @param type the class to validate
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Must be a top-level class
+        if (type.getContainingClass() != null) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBeTopLevel"),
+                    DIAGNOSTIC_CODE_NOT_TOP_LEVEL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must be public
+        if (!type.hasModifierProperty(PsiModifier.PUBLIC)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBePublic"),
+                    DIAGNOSTIC_CODE_NOT_PUBLIC_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be final
+        if (type.hasModifierProperty(PsiModifier.FINAL)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeFinal"),
+                    DIAGNOSTIC_CODE_IS_FINAL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be abstract
+        if (type.hasModifierProperty(PsiModifier.ABSTRACT)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeAbstract"),
+                    DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
         }
     }
 
