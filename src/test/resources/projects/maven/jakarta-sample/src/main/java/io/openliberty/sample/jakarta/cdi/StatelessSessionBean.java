@@ -14,23 +14,23 @@ public class StatelessSessionBean {
 // Invalid: Stateless with SessionScoped
 @Stateless
 @SessionScoped
-class StatelessWithSessionScoped {
+public class StatelessWithSessionScoped {
 }
 
 // Invalid: Stateless with multiple scopes including Dependent
 @Stateless
 @Dependent
 @RequestScoped
-class StatelessWithMultipleScopes {
+public class StatelessWithMultipleScopes {
 }
 
 // Valid: Stateless with no explicit scope (defaults to @Dependent)
 @Stateless
-class StatelessWithNoScope {
+public class StatelessWithNoScope {
 }
 
 // Valid: Stateless with only Dependent
 @Stateless
 @Dependent
-class StatelessWithDependent {
+public class StatelessWithDependent {
 }
