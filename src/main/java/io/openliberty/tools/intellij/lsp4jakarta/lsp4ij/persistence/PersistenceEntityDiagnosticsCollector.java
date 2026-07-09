@@ -281,11 +281,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     private boolean hasVersionInParentEntity(PsiClass type) {
         // Get all superclasses recursively
         Set<PsiClass> hierarchy = new LinkedHashSet<>(PsiClassImplUtil.getAllSuperClassesRecursively(type));
-        boolean versionInParent = false;
         for (PsiClass superClass : hierarchy) {
             // Skip Object class or same class
-            if (superClass.getQualifiedName() != null &&
-                    superClass.getQualifiedName().equals(PersistenceConstants.OBJECT) || type.equals(superClass)) {
+            if ((superClass.getQualifiedName() != null &&
+                    superClass.getQualifiedName().equals(PersistenceConstants.OBJECT)) || type.equals(superClass)) {
                 continue;
             }
 
