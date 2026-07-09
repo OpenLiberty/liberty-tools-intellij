@@ -237,7 +237,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         // Expected diagnostic 2: InvalidDelegateInjectionPoint on constructor
         // Line 52 (0-based: 51), constructor name starts at column 11, ends at column 48
         Diagnostic constructorParamDiagnostic = d(51, 11, 48,
-                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor.",
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor method.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
                 "InvalidDelegateInjectionPoint");
@@ -245,7 +245,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         // Expected diagnostic 3: InvalidDelegateInjectionPoint on method
         // Line 33 (0-based: 32), method name "setDelegate" starts at column 16, ends at column 27
         Diagnostic methodParamDiagnostic = d(32, 16, 27,
-                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor.",
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor method.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
                 "InvalidDelegateInjectionPoint");
@@ -253,7 +253,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         // Expected diagnostic 4: InvalidDelegateInjectionPoint on field
         // Line 16 (0-based: 15), field name "delegate" starts at column 27, ends at column 35
         Diagnostic fieldDiagnostic = d(15, 27, 35,
-                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor.",
+                "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor method.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
                 "InvalidDelegateInjectionPoint");
