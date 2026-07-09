@@ -207,13 +207,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     if (!embeddedIdMembers.isEmpty() && !idMembers.isEmpty()) {
                         for (PsiJvmModifiersOwner member : embeddedIdMembers) {
                             diagnostics.add(createDiagnostic(member, unit,
-                                    Messages.getMessage("MixedIdentifierAnnotations"),
+                                    Messages.getMessage("MixedIdentifierAnnotationsEmbeddedId"),
                                     PersistenceConstants.DIAGNOSTIC_CODE_MIXED_IDENTIFIER, null,
                                     DiagnosticSeverity.Error));
                         }
                         for (PsiJvmModifiersOwner member : idMembers) {
                             diagnostics.add(createDiagnostic(member, unit,
-                                    Messages.getMessage("MixedIdentifierAnnotations"),
+                                    Messages.getMessage("MixedIdentifierAnnotationsId"),
                                     PersistenceConstants.DIAGNOSTIC_CODE_MIXED_IDENTIFIER, null,
                                     DiagnosticSeverity.Error));
                         }
