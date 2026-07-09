@@ -26,6 +26,7 @@ public class PersistenceConstants {
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
+    public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
@@ -63,6 +64,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_FIELD_NOT_EXIST = "InvalidMapKeyAnnotationsFieldNotFound";
     public static final String DIAGNOSTIC_CODE_INVALID_RETURN_TYPE = "InvalidReturnTypeOfMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "InvalidTypeOfField";
+    public static final String DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE = "MapKeyTemporalNotOnTemporalType";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
@@ -70,5 +72,6 @@ public class PersistenceConstants {
             "int", "short", "long", "java.lang.Integer",
             "java.lang.Short", "java.lang.Long", "java.sql.Timestamp");
     public static final String UTIL_DATE = "java.util.Date";
+    public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
 }
