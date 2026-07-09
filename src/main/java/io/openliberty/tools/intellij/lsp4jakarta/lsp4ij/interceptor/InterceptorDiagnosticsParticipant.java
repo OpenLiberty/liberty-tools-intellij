@@ -341,7 +341,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			Range range = PositionUtils.toNameRange(type.getNameIdentifier());
 			String msg = Messages.getMessage("InvalidInterceptorMissingInterceptorBinding");
 			Diagnostic diagnostic = new Diagnostic(range, msg);
-			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Error);
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Warning);
 			diagnostics.add(diagnostic);
 		}
 	}
