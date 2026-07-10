@@ -43,7 +43,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
     @Test
-    public void testSessionBeanWithInterceptorOrDecoratorDiagnosticsAndQuickFixes() throws Exception {
+    public void testInvalidSessionBeanWithInterceptorOrDecoratorDiagnosticsAndQuickFixes() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
@@ -58,11 +58,11 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // Additionally, @Decorator annotated classes also trigger CDI diagnostics about missing @Delegate
         Diagnostic statelessWithInterceptor = d(11, 13, 44,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic statelessWithDecorator = d(17, 6, 28,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic statelessWithDecoratorCDI = d(17, 6, 28,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",
@@ -70,11 +70,11 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         Diagnostic statefulWithInterceptor = d(23, 6, 29,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic statefulWithDecorator = d(29, 6, 27,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic statefulWithDecoratorCDI = d(29, 6, 27,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",
@@ -82,11 +82,11 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         Diagnostic singletonWithInterceptor = d(35, 6, 30,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic singletonWithDecorator = d(41, 6, 28,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "SessionBeanWithInterceptorOrDecorator");
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         Diagnostic singletonWithDecoratorCDI = d(41, 6, 28,
                 "A decorator must declare exactly one injection point annotated with @Delegate.",

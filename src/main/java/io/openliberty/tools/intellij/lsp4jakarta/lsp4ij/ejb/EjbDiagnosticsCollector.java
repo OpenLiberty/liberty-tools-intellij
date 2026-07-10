@@ -90,7 +90,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
         if (!invalidAnnotations.isEmpty()) {
             diagnostics.add(createDiagnostic(type, unit,
-                    Messages.getMessage("SessionBeanWithInterceptorOrDecorator"),
+                    Messages.getMessage("InvalidSessionBeanWithInterceptorOrDecorator"),
                     DIAGNOSTIC_CODE_SESSION_BEAN_INTERCEPTOR_DECORATOR,
                     null,
                     DiagnosticSeverity.Error));
