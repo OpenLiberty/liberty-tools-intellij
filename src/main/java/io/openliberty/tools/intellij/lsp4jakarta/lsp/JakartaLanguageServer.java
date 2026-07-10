@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat, Inc. and others.
+ * Copyright (c) 2020, 2026 Red Hat, Inc. and others.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -12,9 +12,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.application.PluginPathManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
@@ -34,8 +32,8 @@ public class JakartaLanguageServer extends OSProcessStreamConnectionProvider {
 
     public JakartaLanguageServer() {
         String javaHome = System.getProperty("java.home");
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lsp4JakartaServerPath = new File(descriptor.getPluginPath().toFile(), JAR_DIR + LANGUAGESERVER_JAR);
+        File pluginPath = PluginPathManager.getPluginHome("open-liberty.intellij");
+        File lsp4JakartaServerPath = new File(pluginPath, JAR_DIR + LANGUAGESERVER_JAR);
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.JAKARTA_LANG_SERVER)){
             return;
         }

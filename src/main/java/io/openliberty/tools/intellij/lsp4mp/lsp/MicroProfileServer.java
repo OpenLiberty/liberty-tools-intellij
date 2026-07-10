@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat, Inc.
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,9 +11,7 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.application.PluginPathManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.Constants;
@@ -36,8 +34,8 @@ public class MicroProfileServer extends OSProcessStreamConnectionProvider {
 
     public MicroProfileServer() {
         String javaHome = System.getProperty("java.home");
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lsp4mpServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
+        File pluginPath = PluginPathManager.getPluginHome("open-liberty.intellij");
+        File lsp4mpServerPath = new File(pluginPath, "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.MICROPROFILE_SERVER)){
             return;
         }
