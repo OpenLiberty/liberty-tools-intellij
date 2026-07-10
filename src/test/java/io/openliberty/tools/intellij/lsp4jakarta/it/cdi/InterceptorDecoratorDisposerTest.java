@@ -92,13 +92,18 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Test expected diagnostic for decorator with disposer method
+        // Test expected diagnostics for decorator with disposer method
+        // Diagnostic for missing @Delegate injection point (on class name)
+        Diagnostic noDelegateDiagnostic = d(6, 13, 40,
+                "A decorator must declare exactly one injection point annotated with @Delegate.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+        
         // Diagnostic for method with @Disposes parameter
         Diagnostic disposesDiagnostic = d(9, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameter(s) 'resource' annotated with @Disposes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithDisposerMethod");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, disposesDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, noDelegateDiagnostic, disposesDiagnostic);
 
         // Test code actions
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, disposesDiagnostic);
