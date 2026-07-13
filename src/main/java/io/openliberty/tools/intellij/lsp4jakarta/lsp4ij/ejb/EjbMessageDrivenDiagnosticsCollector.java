@@ -12,7 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.DIAGNOSTIC_CODE;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.DIAGNOSTIC_CODE_MISSING_MESSAGELISTENER;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.DIAGNOSTIC_SOURCE;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.MESSAGE_DRIVEN_FQ_NAME;
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.MESSAGE_LISTENER_FQ_NAME;
@@ -72,7 +72,7 @@ public class EjbMessageDrivenDiagnosticsCollector extends AbstractDiagnosticsCol
                         type,
                         unit,
                         Messages.getMessage("MessageDrivenMustImplementMessageListener"),
-                        DIAGNOSTIC_CODE,
+                        DIAGNOSTIC_CODE_MISSING_MESSAGELISTENER,
                         null,
                         DiagnosticSeverity.Error
                     ));
