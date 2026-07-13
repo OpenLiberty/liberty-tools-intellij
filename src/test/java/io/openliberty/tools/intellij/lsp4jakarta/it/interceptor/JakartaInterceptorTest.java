@@ -1516,11 +1516,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostic for missing interceptor binding
-        Diagnostic d1 = JakartaForJavaAssert.d(11, 13, 45,
+        Diagnostic missingBindingDiagnostic = JakartaForJavaAssert.d(11, 13, 45,
                 "An interceptor declared using @Interceptor must specify at least one interceptor binding annotation.",
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMissingInterceptorBinding");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingBindingDiagnostic);
     }
 
     @Test
