@@ -120,21 +120,24 @@ public class SessionBeanModifierTest extends BaseJakartaTest {
     }
 
     /**
-     * ValidSessionBeans.java — no diagnostics expected for any of the three
-     * valid session bean classes.
+     * Valid session beans — no diagnostics expected for any of the three individual files.
      */
     @Test
     public void testValidSessionBeans() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/ValidSessionBeans.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        assertJavaDiagnostics(diagnosticsParams, utils);
+        for (String fileName : new String[]{
+                "ValidStatelessBeanExplicit.java",
+                "ValidStatefulBeanNoConstructor.java",
+                "ValidSingletonBeanExplicit.java"}) {
+            VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                    ModuleUtilCore.getModuleDirPath(module)
+                            + "/src/main/java/io/openliberty/sample/jakarta/ejb/sessionbean/" + fileName);
+            String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+            JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+            diagnosticsParams.setUris(Arrays.asList(uri));
+            assertJavaDiagnostics(diagnosticsParams, utils);
+        }
     }
 }
