@@ -39,89 +39,136 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class StatelessSessionBeanTest extends BaseJakartaTest {
 
+    private static final String CDI_SESSIONBEAN_PATH =
+            "/src/main/java/io/openliberty/sample/jakarta/cdi/sessionbean/";
+
+    private String getUri(Module module, String fileName) {
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + CDI_SESSIONBEAN_PATH + fileName);
+        return VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+    }
+
+    /**
+     * StatelessSessionBean.java — line 8: "public class StatelessSessionBean {" → col 13..33
+     */
     @Test
-    public void statelessSessionBeanWithIllegalScope() throws Exception {
+    public void testStatelessWithRequestScoped() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/cdi/StatelessSessionBean.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+        String uri = getUri(module, "StatelessSessionBean.java");
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Test expected diagnostics (order matches actual diagnostic order: line 23, 16, 10)
-        Diagnostic withRequestScoped = d(23, 13, 40,
+        Diagnostic illegalRequestScope = d(8, 13, 33,
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
-        Diagnostic withSessionScoped = d(16, 13, 39,
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalRequestScope);
+
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, illegalRequestScope);
+
+        String removeText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n\n" +
+                "// Invalid: Stateless with RequestScoped\n" +
+                "@RequestScoped\npublic class StatelessSessionBean {\n}\n";
+        String replaceText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.Dependent;\n\n" +
+                "// Invalid: Stateless with RequestScoped\n" +
+                "@Dependent\n@Stateless\npublic class StatelessSessionBean {\n}\n";
+
+        TextEdit removeStateless = te(0, 0, 10, 0, removeText);
+        TextEdit replaceWithDependent = te(0, 0, 10, 0, replaceText);
+        CodeAction removeStatelessAction = ca(uri, "Remove @Stateless", illegalRequestScope, removeStateless);
+        CodeAction replaceWithDependentAction = ca(uri, "Replace current scope with @Dependent", illegalRequestScope, replaceWithDependent);
+        assertJavaCodeAction(codeActionParams, utils, removeStatelessAction, replaceWithDependentAction);
+    }
+
+    /**
+     * StatelessWithSessionScoped.java — line 8: "public class StatelessWithSessionScoped {" → col 13..39
+     */
+    @Test
+    public void testStatelessWithSessionScoped() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+        String uri = getUri(module, "StatelessWithSessionScoped.java");
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic illegalSessionScope = d(8, 13, 39,
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
-        Diagnostic withDependentAndRequest = d(10, 13, 33,
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalSessionScope);
+
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, illegalSessionScope);
+
+        String removeText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.SessionScoped;\n\n" +
+                "// Invalid: Stateless with SessionScoped\n" +
+                "@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n";
+        String replaceText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.Dependent;\n\n" +
+                "// Invalid: Stateless with SessionScoped\n" +
+                "@Dependent\n@Stateless\npublic class StatelessWithSessionScoped {\n}\n";
+
+        TextEdit removeStateless = te(0, 0, 10, 0, removeText);
+        TextEdit replaceWithDependent = te(0, 0, 10, 0, replaceText);
+        CodeAction removeStatelessAction = ca(uri, "Remove @Stateless", illegalSessionScope, removeStateless);
+        CodeAction replaceWithDependentAction = ca(uri, "Replace current scope with @Dependent", illegalSessionScope, replaceWithDependent);
+        assertJavaCodeAction(codeActionParams, utils, removeStatelessAction, replaceWithDependentAction);
+    }
+
+    /**
+     * StatelessWithMultipleScopes.java — line 10: "public class StatelessWithMultipleScopes {" → col 13..40
+     */
+    @Test
+    public void testStatelessWithMultipleScopes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+        String uri = getUri(module, "StatelessWithMultipleScopes.java");
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic illegalMultipleScopes = d(10, 13, 40,
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, withRequestScoped, withSessionScoped, withDependentAndRequest);
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, withRequestScoped);
-        String newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
-                "import jakarta.enterprise.context.SessionScoped;\nimport jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n" +
-                "@Stateless\n@RequestScoped\npublic class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@Stateless\n@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n" +
-                "@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        String newText0 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.Dependent;\n" +
-                "import jakarta.enterprise.context.SessionScoped;\n\n// Invalid: Stateless with RequestScoped\n" +
-                "@Stateless\n@RequestScoped\npublic class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@Stateless\n@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Dependent\n@Stateless\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n" +
-                "@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        TextEdit removeStateless1 = te(0, 0, 36, 0, newText);
-        TextEdit replaceWithDependent1 = te(0, 0, 36, 0, newText0);
-        CodeAction removeStatelessAction1 = ca(uri, "Remove @Stateless", withRequestScoped, removeStateless1);
-        CodeAction replaceWithDependentAction1 = ca(uri, "Replace current scope with @Dependent", withRequestScoped, replaceWithDependent1);
-        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction1, replaceWithDependentAction1);
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalMultipleScopes);
 
-        codeActionParams1 = createCodeActionParams(uri, withSessionScoped);
-        newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
-                "import jakarta.enterprise.context.SessionScoped;\nimport jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n" +
-                "@Stateless\n@RequestScoped\npublic class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Stateless\n@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        newText0 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
-                "import jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n@Stateless\n@RequestScoped\n" +
-                "public class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@Dependent\n@Stateless\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Stateless\n@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        TextEdit removeStateless2 = te(0, 0, 36, 0, newText);
-        TextEdit replaceWithDependent2 = te(0, 0, 36, 0, newText0);
-        CodeAction removeStatelessAction2 = ca(uri, "Remove @Stateless", withSessionScoped, removeStateless2);
-        CodeAction replaceWithDependentAction2 = ca(uri, "Replace current scope with @Dependent", withSessionScoped, replaceWithDependent2);
-        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction2, replaceWithDependentAction2);
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, illegalMultipleScopes);
 
-        codeActionParams1 = createCodeActionParams(uri, withDependentAndRequest);
-        newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
-                "import jakarta.enterprise.context.SessionScoped;\nimport jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n" +
-                "@RequestScoped\npublic class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@Stateless\n@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Stateless\n@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        newText0 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.SessionScoped;\n" +
-                "import jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n" +
-                "@Dependent\n@Stateless\npublic class StatelessSessionBean {\n}\n\n// Invalid: Stateless with SessionScoped\n" +
-                "@Stateless\n@SessionScoped\npublic class StatelessWithSessionScoped {\n}\n\n// Invalid: Stateless with multiple scopes including Dependent\n" +
-                "@Stateless\n@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n\n// Valid: Stateless with no explicit scope (defaults to @Dependent)\n" +
-                "@Stateless\npublic class StatelessWithNoScope {\n}\n\n// Valid: Stateless with only Dependent\n@Stateless\n@Dependent\npublic class StatelessWithDependent {\n}\n";
-        TextEdit removeStateless3 = te(0, 0, 36, 0, newText);
-        TextEdit replaceWithDependent3 = te(0, 0, 36, 0, newText0);
-        CodeAction removeStatelessAction3 = ca(uri, "Remove @Stateless", withDependentAndRequest, removeStateless3);
-        CodeAction replaceWithDependentAction3 = ca(uri, "Replace current scope with @Dependent", withDependentAndRequest, replaceWithDependent3);
-        assertJavaCodeAction(codeActionParams1, utils, removeStatelessAction3, replaceWithDependentAction3);
+        String removeText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.Dependent;\n" +
+                "import jakarta.enterprise.context.RequestScoped;\n\n" +
+                "// Invalid: Stateless with multiple scopes including Dependent\n" +
+                "@Dependent\n@RequestScoped\npublic class StatelessWithMultipleScopes {\n}\n";
+        String replaceText = "package io.openliberty.sample.jakarta.cdi.sessionbean;\n\n" +
+                "import jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.Dependent;\n\n" +
+                "// Invalid: Stateless with multiple scopes including Dependent\n" +
+                "@Dependent\n@Stateless\npublic class StatelessWithMultipleScopes {\n}\n";
+
+        TextEdit removeStateless = te(0, 0, 12, 0, removeText);
+        TextEdit replaceWithDependent = te(0, 0, 12, 0, replaceText);
+        CodeAction removeStatelessAction = ca(uri, "Remove @Stateless", illegalMultipleScopes, removeStateless);
+        CodeAction replaceWithDependentAction = ca(uri, "Replace current scope with @Dependent", illegalMultipleScopes, replaceWithDependent);
+        assertJavaCodeAction(codeActionParams, utils, removeStatelessAction, replaceWithDependentAction);
+    }
+
+    /**
+     * StatelessWithNoScope.java and StatelessWithDependent.java — no diagnostics expected.
+     */
+    @Test
+    public void testStatelessValidBeans() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        for (String fileName : new String[]{"StatelessWithNoScope.java", "StatelessWithDependent.java"}) {
+            JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+            diagnosticsParams.setUris(Arrays.asList(getUri(module, fileName)));
+            assertJavaDiagnostics(diagnosticsParams, utils);
+        }
     }
 }
