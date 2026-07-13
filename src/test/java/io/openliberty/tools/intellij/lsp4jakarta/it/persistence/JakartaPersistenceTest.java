@@ -803,4 +803,100 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Test
+    public void testMapKeyTemporalValidation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // Test invalid cases
+        VirtualFile javaFileInvalid = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyTemporalInvalid.java");
+        String uriInvalid = VfsUtilCore.virtualToIoFile(javaFileInvalid).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParamsInvalid = new JakartaJavaDiagnosticsParams();
+        diagnosticsParamsInvalid.setUris(Arrays.asList(uriInvalid));
+
+        // Invalid: map key is String (field)
+        Diagnostic invalidStringKeyField = d(19, 32, 44,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
+        // Invalid: map key is Integer (field)
+        Diagnostic invalidIntegerKeyField = d(24, 33, 46,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
+        // Invalid: map key is String (method)
+        Diagnostic invalidStringKeyMethod = d(29, 31, 46,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
+        // Invalid: map key is Integer (method)
+        Diagnostic invalidIntegerKeyMethod = d(36, 32, 48,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
+        // Invalid: FQN String key (field)
+        Diagnostic invalidFqnStringKeyField = d(43, 42, 57,
+                "@MapKeyTemporal can only be used when the map key type is java.util.Date or java.util.Calendar.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyTemporalNotOnTemporalType");
+
+        assertJavaDiagnostics(diagnosticsParamsInvalid, utils, invalidStringKeyField, invalidIntegerKeyField,
+                invalidStringKeyMethod, invalidIntegerKeyMethod, invalidFqnStringKeyField);
+
+        // Test quickfix for removing @MapKeyTemporal annotation
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uriInvalid, invalidStringKeyField);
+        
+        String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import java.util.Map;\n\n" +
+                "import jakarta.persistence.ElementCollection;\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.Id;\n" +
+                "import jakarta.persistence.MapKeyTemporal;\n" +
+                "import jakarta.persistence.TemporalType;\n\n" +
+                "@Entity\n" +
+                "public class MapKeyTemporalInvalid {\n\n" +
+                "    @Id\n" +
+                "    private Long id;\n\n" +
+                "    // Invalid: map key is String\n" +
+                "    @ElementCollection\n" +
+                "    private Map<String, String> stringEvents;\n\n" +
+                "    // Invalid: map key is Integer\n" +
+                "    @ElementCollection\n" +
+                "    @MapKeyTemporal(TemporalType.DATE)\n" +
+                "    private Map<Integer, String> integerEvents;\n\n" +
+                "    // Invalid: getter with String key\n" +
+                "    @ElementCollection\n" +
+                "    @MapKeyTemporal(TemporalType.DATE)\n" +
+                "    public Map<String, String> getStringEvents() {\n" +
+                "        return this.stringEvents;\n" +
+                "    }\n\n" +
+                "    // Invalid: getter with Integer key\n" +
+                "    @ElementCollection\n" +
+                "    @MapKeyTemporal(TemporalType.TIMESTAMP)\n" +
+                "    public Map<Integer, String> getIntegerEvents() {\n" +
+                "        return this.integerEvents;\n" +
+                "    }\n\n" +
+                "    // Invalid: FQN String key without import\n" +
+                "    @ElementCollection\n" +
+                "    @MapKeyTemporal(TemporalType.DATE)\n" +
+                "    private Map<java.lang.String, String> fqnStringEvents;\n" +
+                "}\n";
+        
+        TextEdit te = te(0, 0, 45, 0, newText);
+        CodeAction ca = ca(uriInvalid, "Remove @MapKeyTemporal", invalidStringKeyField, te);
+        
+        assertJavaCodeAction(codeActionParams, utils, ca);
+
+        // Test valid cases - should have no diagnostics
+        VirtualFile javaFileValid = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyTemporalValid.java");
+        String uriValid = VfsUtilCore.virtualToIoFile(javaFileValid).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParamsValid = new JakartaJavaDiagnosticsParams();
+        diagnosticsParamsValid.setUris(Arrays.asList(uriValid));
+
+        assertJavaDiagnostics(diagnosticsParamsValid, utils);
+    }
+
 }
