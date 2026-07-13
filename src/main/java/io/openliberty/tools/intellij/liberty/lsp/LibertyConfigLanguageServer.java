@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Start Liberty Language Server
@@ -32,8 +33,7 @@ public class LibertyConfigLanguageServer extends OSProcessStreamConnectionProvid
 
     public LibertyConfigLanguageServer() {
         String javaHome = System.getProperty("java.home");
-        File pluginPath = PluginPathManager.getPluginHome("open-liberty.intellij");
-        File libertyServerPath = new File(pluginPath, "lib/server/liberty-langserver-jar-with-dependencies.jar");
+        File libertyServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/liberty-langserver-jar-with-dependencies.jar"));
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
             return;
         }

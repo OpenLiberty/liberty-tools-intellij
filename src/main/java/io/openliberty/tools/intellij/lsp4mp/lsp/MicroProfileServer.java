@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusServer.java
@@ -34,8 +35,7 @@ public class MicroProfileServer extends OSProcessStreamConnectionProvider {
 
     public MicroProfileServer() {
         String javaHome = System.getProperty("java.home");
-        File pluginPath = PluginPathManager.getPluginHome("open-liberty.intellij");
-        File lsp4mpServerPath = new File(pluginPath, "lib/server/org.eclipse.lsp4mp.ls-uber.jar");
+        File lsp4mpServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar"));
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.MICROPROFILE_SERVER)){
             return;
         }

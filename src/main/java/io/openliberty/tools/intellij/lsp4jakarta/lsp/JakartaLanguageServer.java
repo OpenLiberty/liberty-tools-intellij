@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class JakartaLanguageServer extends OSProcessStreamConnectionProvider {
     private static final String JAR_DIR = "lib/server/";
@@ -32,8 +33,7 @@ public class JakartaLanguageServer extends OSProcessStreamConnectionProvider {
 
     public JakartaLanguageServer() {
         String javaHome = System.getProperty("java.home");
-        File pluginPath = PluginPathManager.getPluginHome("open-liberty.intellij");
-        File lsp4JakartaServerPath = new File(pluginPath, JAR_DIR + LANGUAGESERVER_JAR);
+        File lsp4JakartaServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), JAR_DIR + LANGUAGESERVER_JAR));
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.JAKARTA_LANG_SERVER)){
             return;
         }
