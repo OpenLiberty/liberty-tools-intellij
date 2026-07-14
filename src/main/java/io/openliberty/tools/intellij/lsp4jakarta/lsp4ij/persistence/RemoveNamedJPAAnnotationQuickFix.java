@@ -31,8 +31,6 @@ import java.util.stream.StreamSupport;
  */
 public class RemoveNamedJPAAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
-    private String[] annotations = null;
-
     public RemoveNamedJPAAnnotationQuickFix() {
         super();
     }
@@ -44,23 +42,17 @@ public class RemoveNamedJPAAnnotationQuickFix extends RemoveAnnotationConflictQu
 
     @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
+        List<CodeAction> codeActions = new ArrayList<>();
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);
 
         JsonArray diagnosticData = (JsonArray) diagnostic.getData();
-        annotations = StreamSupport.stream(diagnosticData.spliterator(), false)
+        String[] annotations = StreamSupport.stream(diagnosticData.spliterator(), false)
                 .map(JsonElement::getAsString).toArray(String[]::new);
 
         if (parentType != null) {
-            List<CodeAction> codeActions = new ArrayList<>();
             removeAnnotation(diagnostic, context, codeActions, annotations);
-            return codeActions;
         }
-        return null;
-    }
-
-    @Override
-    public String[] getAnnotations() {
-        return annotations;
+        return codeActions;
     }
 }
