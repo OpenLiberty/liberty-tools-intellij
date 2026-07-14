@@ -913,12 +913,12 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Invalid: map key is String, not an enum (field stringKeyMap, line 22)
         Diagnostic stringKeyMapNonEnumD = d(21, 32, 44,
-                "@MapKeyEnumerated can only be applied when the map key type is an enum.",
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
 
         // Invalid: map key is Integer, not an enum (field intKeyMap, line 27)
         Diagnostic intKeyMapNonEnumD = d(26, 33, 42,
-                "@MapKeyEnumerated can only be applied when the map key type is an enum.",
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
 
         // Invalid: field type is List, not Map (field listField, line 32)
@@ -928,12 +928,12 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Invalid: raw Map — key type not verifiable as enum (field rawMap, line 37)
         Diagnostic rawMapNonEnumD = d(36, 16, 22,
-                "@MapKeyEnumerated can only be applied when the map key type is an enum.",
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
 
         // Invalid: unbounded wildcard key — cannot guarantee enum (field wildcardKeyMap, line 42)
         Diagnostic wildcardKeyMapNonEnumD = d(41, 27, 41,
-                "@MapKeyEnumerated can only be applied when the map key type is an enum.",
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
 
         // Invalid: method return type is String, not Map (method getStringField, line 47)
@@ -943,7 +943,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Invalid: method returns Map with non-enum key (method getStringKeyMap, line 54)
         Diagnostic stringKeyMethodNonEnumD = d(53, 31, 46,
-                "@MapKeyEnumerated can only be applied when the map key type is an enum.",
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
 
         assertJavaDiagnostics(diagnosticsParams, utils,

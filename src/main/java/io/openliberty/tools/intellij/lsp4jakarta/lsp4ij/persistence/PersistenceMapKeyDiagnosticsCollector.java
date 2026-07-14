@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -200,7 +201,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         // Flag if: raw Map, unbounded/lower-bounded wildcard, non-enum concrete type,
         // upper-bounded wildcard whose bound is not an enum, or any other key form.
         PsiType[] typeParams = classType.getParameters();
-        boolean keyIsEnum = typeParams.length >= 1 && isEnumKeyType(typeParams[0]);
+        boolean keyIsEnum = typeParams.length >= 1 && DiagnosticsUtils.isEnumKeyType(typeParams[0]);
         if (!keyIsEnum) {
             diagnostics.add(createDiagnostic(fieldOrProperty, unit,
                     Messages.getMessage("MapKeyEnumeratedOnNonEnumType"),
@@ -209,26 +210,6 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         }
     }
 
-    /**
-     * Returns {@code true} only when {@code keyType} is definitively an enum type.
-     * Concrete class types, upper-bounded wildcards whose bound is an enum, and
-     * all other forms (raw, unbound wildcard, lower-bounded wildcard, type variable)
-     * return {@code false}.
-     */
-    private boolean isEnumKeyType(PsiType keyType) {
-        if (keyType instanceof PsiClassType keyClassType) {
-            PsiClass keyClass = keyClassType.resolve();
-            return keyClass != null && keyClass.isEnum();
-        }
-        if (keyType instanceof PsiWildcardType wildcardType && wildcardType.isExtends()) {
-            PsiType bound = wildcardType.getBound();
-            if (bound instanceof PsiClassType boundClassType) {
-                PsiClass boundClass = boundClassType.resolve();
-                return boundClass != null && boundClass.isEnum();
-            }
-        }
-        return false;
-    }
 
     private void collectAccessorDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, PsiJavaFile unit,
                                             List<Diagnostic> diagnostics) {
