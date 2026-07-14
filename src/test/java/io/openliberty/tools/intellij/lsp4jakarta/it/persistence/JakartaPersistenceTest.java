@@ -899,4 +899,307 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParamsValid, utils);
     }
 
+    // -------------------------------------------------------------------------
+    // PersistenceContext injection rules (§7.6 and §7.6.3)
+    // -------------------------------------------------------------------------
+
+    /**
+     * @PersistenceContext in a plain Java class (no managed component annotation)
+     * must produce a diagnostic.
+     * Spec §7.6: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a11791
+     */
+    @Test
+    public void persistenceContextInPlainClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInPlainClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 11 (0-based), col 26–28 → field name "em"
+        Diagnostic notInManagedComponentDiag = d(11, 26, 28,
+                "@PersistenceContext can only be used in a container-managed component such as a CDI bean, EJB, or Servlet.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "PersistenceContextNotInManagedComponent");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, notInManagedComponentDiag);
+    }
+
+    /** @PersistenceContext in a CDI @ApplicationScoped bean — no diagnostic expected. */
+    @Test
+    public void persistenceContextInCdiBeanValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInCdiBeanValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @PersistenceContext in a CDI @Dependent bean — no diagnostic expected. */
+    @Test
+    public void persistenceContextInDependentBeanValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInDependentBeanValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @PersistenceContext in a @Stateless EJB — no diagnostic expected. */
+    @Test
+    public void persistenceContextInEjbValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInEjbValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @PersistenceContext in a @WebServlet servlet — no diagnostic expected. */
+    @Test
+    public void persistenceContextInServletValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInServletValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @PersistenceContext in a @WebFilter component — no diagnostic expected. */
+    @Test
+    public void persistenceContextInWebFilterValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInWebFilterValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @PersistenceContext in a @WebListener component — no diagnostic expected. */
+    @Test
+    public void persistenceContextInWebListenerValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInWebListenerValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * @PersistenceContext(type=EXTENDED) in a @Stateful EJB — no diagnostic expected.
+     * Spec §7.6.3: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a11810
+     */
+    @Test
+    public void persistenceContextExtendedInStatefulValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextExtendedInStateful.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * @PersistenceContext(type=EXTENDED) in a @Stateless EJB must produce a diagnostic.
+     * Spec §7.6.3: EXTENDED context can only be initiated within a @Stateful session bean.
+     */
+    @Test
+    public void persistenceContextExtendedInStatelessInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextExtendedInStateless.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 15 (0-based), col 26–28 → field name "em"
+        Diagnostic extendedInStatelessDiag = d(15, 26, 28,
+                "PersistenceContextType.EXTENDED can only be used in a @Stateful EJB session bean.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "ExtendedPersistenceContextInNonStatefulBean");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, extendedInStatelessDiag);
+    }
+
+    /**
+     * @PersistenceContext in an @Entity class — invalid; @Entity is NOT a managed injection
+     * component. A diagnostic must be produced.
+     * Spec §7.6: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a11791
+     */
+    @Test
+    public void persistenceContextInEntityClassInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInEntityClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // field "em" at 0-based line 17, col 26-28
+        Diagnostic notInManagedComponentDiag = d(17, 26, 28,
+                "@PersistenceContext can only be used in a container-managed component such as a CDI bean, EJB, or Servlet.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "PersistenceContextNotInManagedComponent");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, notInManagedComponentDiag);
+    }
+
+    /**
+     * Plain class with two @PersistenceContext fields — each field must independently
+     * produce a diagnostic.
+     * Spec §7.6: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a11791
+     */
+    @Test
+    public void persistenceContextMultipleFieldsInPlainClassInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextMultipleFieldsInPlainClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // "emA" at 0-based line 11, col 26-29
+        Diagnostic emANotInManagedComponentDiag = d(11, 26, 29,
+                "@PersistenceContext can only be used in a container-managed component such as a CDI bean, EJB, or Servlet.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "PersistenceContextNotInManagedComponent");
+
+        // "emB" at 0-based line 14, col 26-29
+        Diagnostic emBNotInManagedComponentDiag = d(14, 26, 29,
+                "@PersistenceContext can only be used in a container-managed component such as a CDI bean, EJB, or Servlet.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "PersistenceContextNotInManagedComponent");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, emANotInManagedComponentDiag, emBNotInManagedComponentDiag);
+    }
+
+    /**
+     * @PersistenceContext(type=EXTENDED) in a @Singleton EJB — invalid per §7.6.3.
+     * EXTENDED context can only be initiated within a @Stateful session bean.
+     */
+    @Test
+    public void persistenceContextExtendedInSingletonInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextExtendedInSingleton.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // "em" at 0-based line 14, col 26-28
+        Diagnostic extendedInSingletonDiag = d(14, 26, 28,
+                "PersistenceContextType.EXTENDED can only be used in a @Stateful EJB session bean.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "ExtendedPersistenceContextInNonStatefulBean");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, extendedInSingletonDiag);
+    }
+
+    /**
+     * @PersistenceContext(type=EXTENDED) in a CDI @ApplicationScoped bean — invalid per §7.6.3.
+     * EXTENDED is an EJB-only concept; CDI beans cannot use it.
+     */
+    @Test
+    public void persistenceContextExtendedInCdiBeanInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextExtendedInCdiBean.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // "em" at 0-based line 14, col 26-28
+        Diagnostic extendedInCdiBeanDiag = d(14, 26, 28,
+                "PersistenceContextType.EXTENDED can only be used in a @Stateful EJB session bean.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "ExtendedPersistenceContextInNonStatefulBean");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, extendedInCdiBeanDiag);
+    }
+
+    /** @Stateful EJB with default (TRANSACTION) type — no diagnostic expected. */
+    @Test
+    public void persistenceContextTransactionInStatefulValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextTransactionInStateful.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** @Singleton EJB with default (TRANSACTION) type — no diagnostic expected. */
+    @Test
+    public void persistenceContextInSingletonValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/context/PersistenceContextInSingletonValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
