@@ -36,81 +36,107 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class SessionBeanModifierTest extends BaseJakartaTest {
 
-    /**
-     * InvalidSessionBeanModifiers.java — tests for non-public, final, abstract violations.
-     *
-     * Line 14 (0-based): "class NotPublicStatelessBean {"
-     *   → name "NotPublicStatelessBean" col 6..28 → InvalidModifierNotPublic
-     *
-     * Line 21 (0-based): "public final class FinalStatelessBean {"
-     *   → name "FinalStatelessBean" col 19..37 → InvalidModifierFinal
-     *
-     * Line 28 (0-based): "abstract class AbstractStatefulBean {"
-     *   → name "AbstractStatefulBean" col 15..35 → InvalidModifierNotPublic + InvalidModifierAbstract
-     *
-     * Line 35 (0-based): "final class FinalNotPublicSingletonBean {"
-     *   → name "FinalNotPublicSingletonBean" col 12..39 → InvalidModifierNotPublic + InvalidModifierFinal
-     */
-    @Test
-    public void testInvalidSessionBeanModifiers() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+    private static final String EJB_SESSIONBEAN_PATH =
+            "/src/main/java/io/openliberty/sample/jakarta/ejb/sessionbean/";
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/InvalidSessionBeanModifiers.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        // NotPublicStatelessBean — not public
-        Diagnostic notPublic = d(14, 6, 28,
-                "A session bean class must be declared public.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierNotPublic");
-
-        // FinalStatelessBean — final
-        Diagnostic isFinal = d(21, 19, 37,
-                "A session bean class must not be declared final.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierFinal");
-
-        // AbstractStatefulBean — not public and abstract
-        Diagnostic abstractNotPublic = d(28, 15, 35,
-                "A session bean class must be declared public.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierNotPublic");
-        Diagnostic isAbstract = d(28, 15, 35,
-                "A session bean class must not be declared abstract.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierAbstract");
-
-        // FinalNotPublicSingletonBean — not public and final
-        Diagnostic finalNotPublic = d(35, 12, 39,
-                "A session bean class must be declared public.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierNotPublic");
-        Diagnostic finalIsFinal = d(35, 12, 39,
-                "A session bean class must not be declared final.",
-                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierFinal");
-
-        assertJavaDiagnostics(diagnosticsParams, utils,
-                notPublic, isFinal, abstractNotPublic, isAbstract, finalNotPublic, finalIsFinal);
+    private String getUri(Module module, String fileName) {
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + EJB_SESSIONBEAN_PATH + fileName);
+        return VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
     }
 
     /**
-     * NestedSessionBeanWrapper.java — tests that a nested session bean triggers
-     * InvalidNotTopLevelClass.
-     *
-     * Line 12 (0-based): "    public class NestedStatefulBean {"
-     *   → name "NestedStatefulBean" col 18..36 → InvalidNotTopLevelClass
+     * NotPublicStatelessBean.java — line 6 (0-based):
+     *   "class NotPublicStatelessBean {"
+     *   → name "NotPublicStatelessBean" col 6..28 → InvalidModifierNotPublic
+     */
+    @Test
+    public void testNotPublicStatelessBean() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(getUri(module, "NotPublicStatelessBean.java")));
+
+        Diagnostic notPublic = d(6, 6, 28,
+                "A session bean class must be declared public.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierNotPublic");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, notPublic);
+    }
+
+    /**
+     * FinalStatelessBean.java — line 6 (0-based):
+     *   "public final class FinalStatelessBean {"
+     *   → name "FinalStatelessBean" col 19..37 → InvalidModifierFinal
+     */
+    @Test
+    public void testFinalStatelessBean() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(getUri(module, "FinalStatelessBean.java")));
+
+        Diagnostic isFinal = d(6, 19, 37,
+                "A session bean class must not be declared final.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierFinal");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, isFinal);
+    }
+
+    /**
+     * AbstractStatefulBean.java — line 6 (0-based):
+     *   "public abstract class AbstractStatefulBean {"
+     *   → name "AbstractStatefulBean" col 22..42 → InvalidModifierAbstract
+     */
+    @Test
+    public void testAbstractStatefulBean() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(getUri(module, "AbstractStatefulBean.java")));
+
+        Diagnostic isAbstract = d(6, 22, 42,
+                "A session bean class must not be declared abstract.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierAbstract");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, isAbstract);
+    }
+
+    /**
+     * FinalNotPublicSingletonBean.java — line 6 (0-based):
+     *   "public final class FinalNotPublicSingletonBean {"
+     *   → name "FinalNotPublicSingletonBean" col 19..46 → InvalidModifierFinal
+     */
+    @Test
+    public void testFinalNotPublicSingletonBean() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(getUri(module, "FinalNotPublicSingletonBean.java")));
+
+        Diagnostic isFinal = d(6, 19, 46,
+                "A session bean class must not be declared final.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidModifierFinal");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, isFinal);
+    }
+
+    /**
+     * NestedSessionBeanWrapper.java — line 12 (0-based):
+     *   "    public class NestedStatefulBean {"
+     *   → name "NestedStatefulBean" col 17..35 → InvalidNotTopLevelClass
      */
     @Test
     public void testNestedSessionBeanNotTopLevel() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/NestedSessionBeanWrapper.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Arrays.asList(getUri(module, "NestedSessionBeanWrapper.java")));
 
         Diagnostic notTopLevel = d(12, 17, 35,
                 "A session bean class must be a top-level class.",
@@ -120,7 +146,7 @@ public class SessionBeanModifierTest extends BaseJakartaTest {
     }
 
     /**
-     * Valid session beans — no diagnostics expected for any of the three individual files.
+     * Valid session beans — no diagnostics expected for any of the three files.
      */
     @Test
     public void testValidSessionBeans() throws Exception {
@@ -131,12 +157,8 @@ public class SessionBeanModifierTest extends BaseJakartaTest {
                 "ValidStatelessBeanExplicit.java",
                 "ValidStatefulBeanNoConstructor.java",
                 "ValidSingletonBeanExplicit.java"}) {
-            VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                    ModuleUtilCore.getModuleDirPath(module)
-                            + "/src/main/java/io/openliberty/sample/jakarta/ejb/sessionbean/" + fileName);
-            String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
             JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-            diagnosticsParams.setUris(Arrays.asList(uri));
+            diagnosticsParams.setUris(Arrays.asList(getUri(module, fileName)));
             assertJavaDiagnostics(diagnosticsParams, utils);
         }
     }
