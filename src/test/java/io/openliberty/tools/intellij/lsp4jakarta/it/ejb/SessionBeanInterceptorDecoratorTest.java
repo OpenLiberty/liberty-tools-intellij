@@ -119,14 +119,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidStatelessWithDecorator {" -> name cols [6, 35)
-        Diagnostic d = d(10, 6, 35,
+        Diagnostic noInterceptor = d(10, 6, 35,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, noInterceptor);
 
         // Quick fix: Remove @Decorator
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, noInterceptor);
 
         String removeDecorator =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -143,7 +143,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
-        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", noInterceptor, teRemoveDecorator);
 
         String removeStateless =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -160,7 +160,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveStateless = te(0, 0, 17, 0, removeStateless);
-        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", d, teRemoveStateless);
+        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", noInterceptor, teRemoveStateless);
 
         assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveStateless);
     }
@@ -182,14 +182,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidStatefulWithInterceptor {" -> name cols [6, 36)
-        Diagnostic d = d(8, 6, 36,
+        Diagnostic noInterceptorInStateFul = d(8, 6, 36,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, noInterceptorInStateFul);
 
         // Quick fix: Remove @Interceptor
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, noInterceptorInStateFul);
 
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -202,7 +202,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
-        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", noInterceptorInStateFul, teRemoveInterceptor);
 
         String removeStateful =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -215,7 +215,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveStateful = te(0, 0, 12, 0, removeStateful);
-        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", d, teRemoveStateful);
+        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", noInterceptorInStateFul, teRemoveStateful);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateful);
     }
@@ -237,14 +237,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidStatefulWithDecorator {" -> name cols [6, 34)
-        Diagnostic d = d(10, 6, 34,
+        Diagnostic noDecoratorStateFul = d(10, 6, 34,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, noDecoratorStateFul);
 
         // Quick fix: Remove @Decorator
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, noDecoratorStateFul);
 
         String removeDecorator =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -261,7 +261,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
-        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", noDecoratorStateFul, teRemoveDecorator);
 
         String removeStateful =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -278,7 +278,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveStateful = te(0, 0, 17, 0, removeStateful);
-        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", d, teRemoveStateful);
+        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", noDecoratorStateFul, teRemoveStateful);
 
         assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveStateful);
     }
@@ -300,14 +300,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidSingletonWithInterceptor {" -> name cols [6, 37)
-        Diagnostic d = d(8, 6, 37,
+        Diagnostic interceptorSingleton = d(8, 6, 37,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, interceptorSingleton);
 
         // Quick fix: Remove @Interceptor
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, interceptorSingleton);
 
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -320,7 +320,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
-        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", interceptorSingleton, teRemoveInterceptor);
 
         String removeSingleton =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -333,7 +333,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveSingleton = te(0, 0, 12, 0, removeSingleton);
-        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", d, teRemoveSingleton);
+        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", interceptorSingleton, teRemoveSingleton);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveSingleton);
     }
@@ -355,14 +355,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidSingletonWithDecorator {" -> name cols [6, 35)
-        Diagnostic d = d(10, 6, 35,
+        Diagnostic decoratorSingleton = d(10, 6, 35,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, decoratorSingleton);
 
         // Quick fix: Remove @Decorator
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, decoratorSingleton);
 
         String removeDecorator =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -379,7 +379,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
-        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", decoratorSingleton, teRemoveDecorator);
 
         String removeSingleton =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -396,7 +396,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveSingleton = te(0, 0, 17, 0, removeSingleton);
-        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", d, teRemoveSingleton);
+        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", decoratorSingleton, teRemoveSingleton);
 
         assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveSingleton);
     }
