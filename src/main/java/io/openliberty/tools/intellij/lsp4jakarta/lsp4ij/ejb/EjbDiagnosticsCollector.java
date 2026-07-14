@@ -20,7 +20,6 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
 
@@ -54,18 +53,6 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 validateSessionBeanConstructor(type, unit, diagnostics);
             }
         }
-    }
-
-    /**
-     * Extracts the qualified names of all annotations on a class.
-     *
-     * @param type the class to extract annotation names from
-     * @return array of fully qualified annotation names
-     */
-    private String[] getAnnotationNames(PsiClass type) {
-        return Stream.of(type.getAnnotations())
-                .map(annotation -> annotation.getQualifiedName())
-                .toArray(String[]::new);
     }
 
     /**
