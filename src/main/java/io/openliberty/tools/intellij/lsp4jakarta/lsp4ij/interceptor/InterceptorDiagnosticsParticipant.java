@@ -316,12 +316,12 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		return interceptorTypeMethodAnnotations;
   }
   
-  /**
-		* Checks if an interceptor class has at least one interceptor binding annotation.
-		*
-		* An interceptor declared using @Interceptor must specify at least one interceptor binding.
-		* If an interceptor does not declare any interceptor binding, non-portable behavior results.
-		*
+	   /**
+	    * Checks if an interceptor class has at least one interceptor binding annotation.
+	    * According to Jakarta Interceptors 2.0 specification, an interceptor declared using
+	    * interceptor annotation must specify at least one interceptor binding annotation to
+	    * enable the container to match it with target components.
+		* 
 		* @param type the class to check
 		* @param unit the Java file containing the class
 		* @param diagnostics the list to add diagnostics to
