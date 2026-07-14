@@ -19,17 +19,29 @@ public class EntityValidIdTypes {
     @Id
     private long longId;
 
-    // Valid: primitive byte
-    @Id
-    private byte byteId;
-
     // Valid: primitive short
     @Id
     private short shortId;
 
+    // Valid: primitive byte
+    @Id
+    private byte byteId;
+
     // Valid: primitive char
     @Id
     private char charId;
+
+    // Valid: primitive boolean
+    @Id
+    private boolean booleanId;
+
+    // Valid: primitive float
+    @Id
+    private float floatId;
+
+    // Valid: primitive double
+    @Id
+    private double doubleId;
 
     // Valid: wrapper Integer
     @Id
@@ -39,17 +51,29 @@ public class EntityValidIdTypes {
     @Id
     private Long longWrapperId;
 
-    // Valid: wrapper Byte
-    @Id
-    private Byte byteWrapperId;
-
     // Valid: wrapper Short
     @Id
     private Short shortWrapperId;
 
+    // Valid: wrapper Byte
+    @Id
+    private Byte byteWrapperId;
+
     // Valid: wrapper Character
     @Id
     private Character charWrapperId;
+
+    // Valid: wrapper Boolean
+    @Id
+    private Boolean booleanWrapperId;
+
+    // Valid: wrapper Float
+    @Id
+    private Float floatWrapperId;
+
+    // Valid: wrapper Double
+    @Id
+    private Double doubleWrapperId;
 
     // Valid: String
     @Id
@@ -75,4 +99,3 @@ public class EntityValidIdTypes {
     public EntityValidIdTypes() {
     }
 }
-

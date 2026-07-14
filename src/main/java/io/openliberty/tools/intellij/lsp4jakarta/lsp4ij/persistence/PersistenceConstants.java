@@ -71,10 +71,10 @@ public class PersistenceConstants {
     
     /* Valid @Id type sets */
     private static final Set<String> VALID_ID_PRIMITIVES = Set.of(
-            "byte", "short", "int", "long", "char");
+            "int", "long", "short", "byte", "char", "boolean", "float", "double");
     private static final Set<String> VALID_ID_WRAPPERS = Set.of(
             "java.lang.Byte", "java.lang.Short", "java.lang.Integer",
-            "java.lang.Long", "java.lang.Character");
+            "java.lang.Long", "java.lang.Character","java.lang.Boolean", "java.lang.Float", "java.lang.Double");
     private static final Set<String> VALID_ID_DATES = Set.of(
             "java.util.Date", "java.sql.Date");
     private static final Set<String> VALID_ID_BIG_NUMBERS = Set.of(
