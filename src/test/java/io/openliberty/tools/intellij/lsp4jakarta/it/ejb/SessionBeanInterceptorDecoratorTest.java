@@ -37,422 +37,385 @@ import java.util.Arrays;
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
 /**
- * Tests for session beans annotated with @Interceptor or @Decorator
+ * Tests for session beans annotated with @Interceptor or @Decorator.
+ * Each test case targets a dedicated single-class source file under
+ * src/main/java/io/openliberty/sample/jakarta/ejb/interceptordecorator/.
  */
 @RunWith(JUnit4.class)
 public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
+    private static final String BASE_PATH =
+            "/src/main/java/io/openliberty/sample/jakarta/ejb/interceptordecorator/";
+
+    // ---------------------------------------------------------------------------
+    // Test case 1: @Stateless + @Interceptor -> InvalidStatelessWithInterceptor
+    // ---------------------------------------------------------------------------
     @Test
-    public void testInvalidSessionBeanWithInterceptorOrDecoratorDiagnosticsAndQuickFixes() throws Exception {
+    public void testInvalidStatelessWithInterceptor() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/ejb/SessionBeanInterceptorDecorator.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidStatelessWithInterceptor.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // All 6 invalid session beans should trigger diagnostics
-        // Additionally, @Decorator annotated classes also trigger CDI diagnostics about missing @Delegate
-        Diagnostic statelessWithInterceptor = d(11, 13, 44,
+        // class decl is line 9 (1-based) = index 8 (0-based)
+        // "class InvalidStatelessWithInterceptor {" -> name cols [6, 37)
+        Diagnostic d = d(8, 6, 37,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic statelessWithDecorator = d(17, 6, 28,
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Quick fix: Remove @Interceptor
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+
+        String removeInterceptor =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateless;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Stateless with @Interceptor\n" +
+                "@Stateless\n" +
+                "class InvalidStatelessWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+
+        String removeStateless =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateless;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Stateless with @Interceptor\n" +
+                "@Interceptor\n" +
+                "class InvalidStatelessWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveStateless = te(0, 0, 12, 0, removeStateless);
+        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", d, teRemoveStateless);
+
+        assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateless);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 2: @Stateless + @Decorator -> InvalidStatelessWithDecorator
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testInvalidStatelessWithDecorator() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidStatelessWithDecorator.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // class decl is line 11 (1-based) = index 10 (0-based)
+        // "class InvalidStatelessWithDecorator {" -> name cols [6, 35)
+        Diagnostic d = d(10, 6, 35,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic statelessWithDecoratorCDI = d(17, 6, 28,
-                "A decorator must declare exactly one injection point annotated with @Delegate.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        Diagnostic statefulWithInterceptor = d(23, 6, 29,
+        // Quick fix: Remove @Decorator
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+
+        String removeDecorator =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateless;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Stateless with @Decorator\n" +
+                "@Stateless\n" +
+                "class InvalidStatelessWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
+
+        String removeStateless =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateless;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Stateless with @Decorator\n" +
+                "@Decorator\n" +
+                "class InvalidStatelessWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveStateless = te(0, 0, 17, 0, removeStateless);
+        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", d, teRemoveStateless);
+
+        assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveStateless);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 3: @Stateful + @Interceptor -> InvalidStatefulWithInterceptor
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testInvalidStatefulWithInterceptor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidStatefulWithInterceptor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // class decl is line 9 (1-based) = index 8 (0-based)
+        // "class InvalidStatefulWithInterceptor {" -> name cols [6, 36)
+        Diagnostic d = d(8, 6, 36,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic statefulWithDecorator = d(29, 6, 27,
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Quick fix: Remove @Interceptor
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+
+        String removeInterceptor =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateful;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Stateful with @Interceptor\n" +
+                "@Stateful\n" +
+                "class InvalidStatefulWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+
+        String removeStateful =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateful;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Stateful with @Interceptor\n" +
+                "@Interceptor\n" +
+                "class InvalidStatefulWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveStateful = te(0, 0, 12, 0, removeStateful);
+        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", d, teRemoveStateful);
+
+        assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateful);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 4: @Stateful + @Decorator -> InvalidStatefulWithDecorator
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testInvalidStatefulWithDecorator() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidStatefulWithDecorator.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // class decl is line 11 (1-based) = index 10 (0-based)
+        // "class InvalidStatefulWithDecorator {" -> name cols [6, 34)
+        Diagnostic d = d(10, 6, 34,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic statefulWithDecoratorCDI = d(29, 6, 27,
-                "A decorator must declare exactly one injection point annotated with @Delegate.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        Diagnostic singletonWithInterceptor = d(35, 6, 30,
+        // Quick fix: Remove @Decorator
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+
+        String removeDecorator =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateful;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Stateful with @Decorator\n" +
+                "@Stateful\n" +
+                "class InvalidStatefulWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
+
+        String removeStateful =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Stateful;\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Stateful with @Decorator\n" +
+                "@Decorator\n" +
+                "class InvalidStatefulWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveStateful = te(0, 0, 17, 0, removeStateful);
+        CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", d, teRemoveStateful);
+
+        assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveStateful);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 5: @Singleton + @Interceptor -> InvalidSingletonWithInterceptor
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testInvalidSingletonWithInterceptor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidSingletonWithInterceptor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // class decl is line 9 (1-based) = index 8 (0-based)
+        // "class InvalidSingletonWithInterceptor {" -> name cols [6, 37)
+        Diagnostic d = d(8, 6, 37,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic singletonWithDecorator = d(41, 6, 28,
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Quick fix: Remove @Interceptor
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+
+        String removeInterceptor =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Singleton;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Singleton with @Interceptor\n" +
+                "@Singleton\n" +
+                "class InvalidSingletonWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+
+        String removeSingleton =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
+                "import jakarta.ejb.Singleton;\n" +
+                "import jakarta.interceptor.Interceptor;\n\n" +
+                "// Invalid: @Singleton with @Interceptor\n" +
+                "@Interceptor\n" +
+                "class InvalidSingletonWithInterceptor {\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
+                "}\n";
+        TextEdit teRemoveSingleton = te(0, 0, 12, 0, removeSingleton);
+        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", d, teRemoveSingleton);
+
+        assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveSingleton);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 6: @Singleton + @Decorator -> InvalidSingletonWithDecorator
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testInvalidSingletonWithDecorator() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidSingletonWithDecorator.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // class decl is line 11 (1-based) = index 10 (0-based)
+        // "class InvalidSingletonWithDecorator {" -> name cols [6, 35)
+        Diagnostic d = d(10, 6, 35,
                 "Session beans cannot be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        Diagnostic singletonWithDecoratorCDI = d(41, 6, 28,
-                "A decorator must declare exactly one injection point annotated with @Delegate.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDecoratorDelegateInjectionPoints");
+        assertJavaDiagnostics(diagnosticsParams, utils, d);
 
-        assertJavaDiagnostics(diagnosticsParams, utils, statelessWithInterceptor,
-                statelessWithDecoratorCDI, statelessWithDecorator,
-                statefulWithInterceptor,
-                statefulWithDecoratorCDI, statefulWithDecorator,
-                singletonWithInterceptor,
-                singletonWithDecoratorCDI, singletonWithDecorator);
+        // Quick fix: Remove @Decorator
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
 
-        // Quick Fix 1a: Remove @Interceptor from @Stateless bean
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, statelessWithInterceptor);
-        String removeInterceptorFromStateless = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
+        String removeDecorator =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Singleton with @Decorator\n" +
                 "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
+                "class InvalidSingletonWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
                 "}\n";
-        TextEdit removeInterceptorEdit1 = te(0, 0, 48, 0, removeInterceptorFromStateless);
-        CodeAction removeInterceptorAction1 = ca(uri, "Remove @Interceptor", statelessWithInterceptor, removeInterceptorEdit1);
-        
-        // Quick Fix 1b: Remove @Stateless from bean with @Interceptor
-        String removeStatelessFromInterceptor = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeStatelessEdit1b = te(0, 0, 48, 0, removeStatelessFromInterceptor);
-        CodeAction removeStatelessAction1b = ca(uri, "Remove @Stateless", statelessWithInterceptor, removeStatelessEdit1b);
-        
-        assertJavaCodeAction(codeActionParams1, utils, removeInterceptorAction1, removeStatelessAction1b);
+        TextEdit teRemoveDecorator = te(0, 0, 17, 0, removeDecorator);
+        CodeAction caRemoveDecorator = ca(uri, "Remove @Decorator", d, teRemoveDecorator);
 
-        // Quick Fix 2: Remove @Decorator from @Stateless bean
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, statelessWithDecorator);
-        String removeDecoratorFromStateless = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
+        String removeSingleton =
+                "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
+                "import jakarta.decorator.Decorator;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Singleton with @Decorator\n" +
                 "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
+                "class InvalidSingletonWithDecorator {\n" +
+                "    @Inject @Delegate\n" +
+                "    private Object delegate;\n\n" +
+                "    public void businessMethod() {\n" +
+                "    }\n" +
                 "}\n";
-        TextEdit removeDecoratorEdit2 = te(0, 0, 48, 0, removeDecoratorFromStateless);
-        CodeAction removeDecoratorAction2 = ca(uri, "Remove @Decorator", statelessWithDecorator, removeDecoratorEdit2);
-        
-        // Quick Fix 2b: Remove @Stateless from bean with @Decorator
-        String removeStatelessFromDecorator = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeStatelessEdit2b = te(0, 0, 48, 0, removeStatelessFromDecorator);
-        CodeAction removeStatelessAction2b = ca(uri, "Remove @Stateless", statelessWithDecorator, removeStatelessEdit2b);
-        
-        assertJavaCodeAction(codeActionParams2, utils, removeDecoratorAction2, removeStatelessAction2b);
+        TextEdit teRemoveSingleton = te(0, 0, 17, 0, removeSingleton);
+        CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", d, teRemoveSingleton);
 
-        // Quick Fix 3: Remove @Interceptor from @Stateful bean
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, statefulWithInterceptor);
-        String removeInterceptorFromStateful = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeInterceptorEdit3 = te(0, 0, 48, 0, removeInterceptorFromStateful);
-        CodeAction removeInterceptorAction3 = ca(uri, "Remove @Interceptor", statefulWithInterceptor, removeInterceptorEdit3);
-        
-        // Quick Fix 3b: Remove @Stateful from bean with @Interceptor
-        String removeStatefulFromInterceptor = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeStatefulEdit3b = te(0, 0, 48, 0, removeStatefulFromInterceptor);
-        CodeAction removeStatefulAction3b = ca(uri, "Remove @Stateful", statefulWithInterceptor, removeStatefulEdit3b);
-        
-        assertJavaCodeAction(codeActionParams3, utils, removeInterceptorAction3, removeStatefulAction3b);
+        assertJavaCodeAction(caParams, utils, caRemoveDecorator, caRemoveSingleton);
+    }
 
-        // Quick Fix 4: Remove @Decorator from @Singleton bean
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, singletonWithDecorator);
-        String removeDecoratorFromSingleton = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Singleton\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeDecoratorEdit4 = te(0, 0, 48, 0, removeDecoratorFromSingleton);
-        CodeAction removeDecoratorAction4 = ca(uri, "Remove @Decorator", singletonWithDecorator, removeDecoratorEdit4);
-        
-        // Quick Fix 4b: Remove @Singleton from bean with @Decorator
-        String removeSingletonFromDecorator = "package io.openliberty.sample.jakarta.ejb;\n\n" +
-                "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n" +
-                "import jakarta.decorator.Decorator;\n\n" +
-                "// Test case 1: Stateless with @Interceptor - should report error\n" +
-                "@Stateless\n" +
-                "@Interceptor\n" +
-                "public class SessionBeanInterceptorDecorator {\n" +
-                "}\n\n" +
-                "// Test case 2: Stateless with @Decorator - should report error\n" +
-                "@Stateless\n" +
-                "@Decorator\n" +
-                "class StatelessWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 3: Stateful with @Interceptor - should report error\n" +
-                "@Stateful\n" +
-                "@Interceptor\n" +
-                "class StatefulWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 4: Stateful with @Decorator - should report error\n" +
-                "@Stateful\n" +
-                "@Decorator\n" +
-                "class StatefulWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 5: Singleton with @Interceptor - should report error\n" +
-                "@Singleton\n" +
-                "@Interceptor\n" +
-                "class SingletonWithInterceptor {\n" +
-                "}\n\n" +
-                "// Test case 6: Singleton with @Decorator - should report error\n" +
-                "@Decorator\n" +
-                "class SingletonWithDecorator {\n" +
-                "}\n\n" +
-                "// Test case 7: Valid Stateless without @Interceptor or @Decorator - should NOT report error\n" +
-                "@Stateless\n" +
-                "class ValidStatelessBeanNoConflict {\n" +
-                "}\n";
-        TextEdit removeSingletonEdit4b = te(0, 0, 48, 0, removeSingletonFromDecorator);
-        CodeAction removeSingletonAction4b = ca(uri, "Remove @Singleton", singletonWithDecorator, removeSingletonEdit4b);
-        
-        assertJavaCodeAction(codeActionParams4, utils, removeDecoratorAction4, removeSingletonAction4b);
+    // ---------------------------------------------------------------------------
+    // Test case 7: Valid @Stateless only -> ValidSessionBean (no diagnostics)
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testValidSessionBean() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "ValidSessionBean.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
     }
 }
