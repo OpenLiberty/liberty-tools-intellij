@@ -846,7 +846,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Test quickfix for removing @MapKeyTemporal annotation
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uriInvalid, invalidStringKeyField);
-
+        
         String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
                 "import java.util.Map;\n\n" +
                 "import jakarta.persistence.ElementCollection;\n" +
@@ -882,10 +882,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "    @MapKeyTemporal(TemporalType.DATE)\n" +
                 "    private Map<java.lang.String, String> fqnStringEvents;\n" +
                 "}\n";
-
+        
         TextEdit te = te(0, 0, 45, 0, newText);
         CodeAction ca = ca(uriInvalid, "Remove @MapKeyTemporal", invalidStringKeyField, te);
-
+        
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         // Test valid cases - should have no diagnostics
