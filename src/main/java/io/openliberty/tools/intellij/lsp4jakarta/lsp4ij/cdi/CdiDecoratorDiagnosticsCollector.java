@@ -14,7 +14,6 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.intellij.psi.*;
@@ -52,12 +51,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * @param diagnostics list to collect diagnostics
      */
     private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String[] typeAnnotations = Arrays.stream(type.getAnnotations())
-                .map(PsiAnnotation::getQualifiedName)
-                .toArray(String[]::new);
-
-        if (getMatchedJavaElementNames(type, typeAnnotations,
-                new String[]{ManagedBeanConstants.DECORATOR_FQ_NAME}).isEmpty()) {
+        if (!isMatchedAnnotation(type.getAnnotations(), ManagedBeanConstants.DECORATOR_FQ_NAME)) {
             return;
         }
 
@@ -70,9 +64,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
         // Methods + parameters
         for (PsiMethod method : type.getMethods()) {
-            String[] methodAnnotations = Arrays.stream(method.getAnnotations())
-                    .map(PsiAnnotation::getQualifiedName)
-                    .toArray(String[]::new);
+            PsiAnnotation[] methodAnnotations = method.getAnnotations();
 
             for (PsiParameter parameter : method.getParameterList().getParameters()) {
                 validateDelegate(type, unit, diagnostics, method, parameter, delegateElements, methodAnnotations);
@@ -91,16 +83,13 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      */
     private void validateDelegate(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
                                  PsiElement owner, PsiElement element, List<PsiElement> delegateElements,
-                                 String... reusableAnnots) {
+                                 PsiAnnotation... reusableAnnots) {
 
-        String[] annotations = (element instanceof PsiModifierListOwner)
-                ? Arrays.stream(((PsiModifierListOwner) element).getAnnotations())
-                .map(PsiAnnotation::getQualifiedName)
-                .toArray(String[]::new)
-                : new String[0];
+        PsiAnnotation[] annotations = (element instanceof PsiModifierListOwner)
+                ? ((PsiModifierListOwner) element).getAnnotations()
+                : new PsiAnnotation[0];
 
-        if (!getMatchedJavaElementNames(type, annotations,
-                new String[]{ManagedBeanConstants.DELEGATE_FQ_NAME}).isEmpty()) {
+        if (isMatchedAnnotation(annotations, ManagedBeanConstants.DELEGATE_FQ_NAME)) {
             delegateElements.add(element);
             validateDelegateInjectionPoint(type, unit, diagnostics,
                     owner,
@@ -147,9 +136,9 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * @param annotations the annotations to check for @Inject (field annotations for fields, method annotations for parameters)
      */
     private void validateDelegateInjectionPoint(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
-                                                PsiElement element, String[] annotations) {
+                                                PsiElement element, PsiAnnotation[] annotations) {
         // Check if @Inject annotation is present
-        if (getMatchedJavaElementNames(type, annotations, new String[] { ManagedBeanConstants.INJECT_FQ_NAME }).isEmpty()) {
+        if (!isMatchedAnnotation(annotations, ManagedBeanConstants.INJECT_FQ_NAME)) {
             // If @Inject is not present, report a diagnostic
             diagnostics.add(createDiagnostic(element, unit,
                     Messages.getMessage("InvalidDelegateInjectionPoint"),
