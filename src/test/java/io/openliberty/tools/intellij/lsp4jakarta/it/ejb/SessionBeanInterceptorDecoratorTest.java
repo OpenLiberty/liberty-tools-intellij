@@ -64,7 +64,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidStatelessWithInterceptor {" -> name cols [6, 37)
-        Diagnostic d = d(8, 6, 37,
+        Diagnostic diagnostic = d(8, 6, 37,
                 "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
