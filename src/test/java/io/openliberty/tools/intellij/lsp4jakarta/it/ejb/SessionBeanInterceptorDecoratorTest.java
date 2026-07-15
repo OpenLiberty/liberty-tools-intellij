@@ -64,14 +64,14 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidStatelessWithInterceptor {" -> name cols [6, 37)
-        Diagnostic diagnostic = d(8, 6, 37,
+        Diagnostic sessionBeanWithInterceptorOrDecorator = d(8, 6, 37,
                 "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, sessionBeanWithInterceptorOrDecorator);
 
         // Quick fix: Remove @Interceptor
-        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, d);
+        JakartaJavaCodeActionParams caParams = createCodeActionParams(uri, sessionBeanWithInterceptorOrDecorator);
 
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -84,7 +84,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
-        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", d, teRemoveInterceptor);
+        CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", sessionBeanWithInterceptorOrDecorator, teRemoveInterceptor);
 
         String removeStateless =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
@@ -97,7 +97,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
         TextEdit teRemoveStateless = te(0, 0, 12, 0, removeStateless);
-        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", d, teRemoveStateless);
+        CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", sessionBeanWithInterceptorOrDecorator, teRemoveStateless);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateless);
     }
