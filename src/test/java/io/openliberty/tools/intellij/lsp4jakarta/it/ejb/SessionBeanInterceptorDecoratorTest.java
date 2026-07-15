@@ -65,7 +65,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidStatelessWithInterceptor {" -> name cols [6, 37)
         Diagnostic d = d(8, 6, 37,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, d);
@@ -120,7 +120,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidStatelessWithDecorator {" -> name cols [6, 35)
         Diagnostic noInterceptor = d(10, 6, 35,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, noInterceptor);
@@ -183,7 +183,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidStatefulWithInterceptor {" -> name cols [6, 36)
         Diagnostic noInterceptorInStateFul = d(8, 6, 36,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, noInterceptorInStateFul);
@@ -238,7 +238,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidStatefulWithDecorator {" -> name cols [6, 34)
         Diagnostic noDecoratorStateFul = d(10, 6, 34,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, noDecoratorStateFul);
@@ -301,7 +301,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 9 (1-based) = index 8 (0-based)
         // "class InvalidSingletonWithInterceptor {" -> name cols [6, 37)
         Diagnostic interceptorSingleton = d(8, 6, 37,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, interceptorSingleton);
@@ -356,7 +356,7 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         // class decl is line 11 (1-based) = index 10 (0-based)
         // "class InvalidSingletonWithDecorator {" -> name cols [6, 35)
         Diagnostic decoratorSingleton = d(10, 6, 35,
-                "Session beans cannot be annotated with @Interceptor or @Decorator.",
+                "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, decoratorSingleton);
