@@ -54,13 +54,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
-                PsiAnnotation InheritanceAnnotation = null;
+                PsiAnnotation inheritanceAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
                     }
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
-                        InheritanceAnnotation = annotation;
+                        inheritanceAnnotation = annotation;
                     }
                 }
 
@@ -179,13 +179,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     }
 
                     // @Inheritance on a non-root entity (entity ancestor exists in the chain)
-                    if (InheritanceAnnotation != null && hasEntityAncestor(type)) {
+                    if (inheritanceAnnotation != null && hasEntitySupertype(type)) {
                         diagnostics.add(createDiagnostic(type, unit,
                                 Messages.getMessage("InheritanceAnnotationOnNonRootEntity"),
                                 PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT, null,
                                 DiagnosticSeverity.Error));
                     }
-                } else if (InheritanceAnnotation != null) {
+                } else if (inheritanceAnnotation != null) {
                     // @Inheritance present but @Entity is missing
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
@@ -294,7 +294,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @param type the class to inspect
      * @return true if an {@code @Entity}-annotated ancestor exists
      */
-    private boolean hasEntityAncestor(PsiClass type) {
+    private boolean hasEntitySupertype(PsiClass type) {
         for (PsiClass ancestor : DiagnosticsUtils.collectSuperClasses(type)) {
             if (isMatchedAnnotation(ancestor.getAnnotations(), PersistenceConstants.ENTITY)) {
                 return true;
