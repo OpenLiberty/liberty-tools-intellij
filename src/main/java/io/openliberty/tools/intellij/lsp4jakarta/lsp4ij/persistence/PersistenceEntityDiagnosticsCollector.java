@@ -46,11 +46,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            PsiClass[] alltypes;
+            List<PsiClass> allTypes = new ArrayList<>();
             PsiAnnotation[] allAnnotations;
-
-            alltypes = unit.getClasses();
-            for (PsiClass type : alltypes) {
+            collectAllClasses(unit.getClasses(), allTypes);
+            for (PsiClass type : allTypes) {
                 allAnnotations = type.getAnnotations();
 
                 /* ============ Entity Annotation Diagnostics =========== */
@@ -469,6 +468,20 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     Messages.getMessage("InvalidVersionFieldOrPropertyType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
                     DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Recursively collects all classes including nested classes
+     *
+     * @param classes Array of top-level classes
+     * @param allClasses List to collect all classes into
+     */
+    private void collectAllClasses(PsiClass[] classes, List<PsiClass> allClasses) {
+        for (PsiClass clazz : classes) {
+            allClasses.add(clazz);
+            // Recursively collect inner classes
+            collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
 }
