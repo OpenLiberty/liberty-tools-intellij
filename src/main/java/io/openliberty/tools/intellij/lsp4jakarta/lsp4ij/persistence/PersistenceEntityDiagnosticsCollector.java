@@ -46,177 +46,156 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            for (PsiClass type : unit.getClasses()) {
-                collectDiagnosticsForClassTree(type, unit, diagnostics);
+            PsiClass[] alltypes;
+            PsiAnnotation[] allAnnotations;
+
+            alltypes = unit.getClasses();
+            for (PsiClass type : alltypes) {
+                allAnnotations = type.getAnnotations();
+
+                /* ============ Entity Annotation Diagnostics =========== */
+                PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation InheritanceAnnotation = null;
+                for (PsiAnnotation annotation : allAnnotations) {
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
+                        EntityAnnotation = annotation;
+                    }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
+                        InheritanceAnnotation = annotation;
+                    }
+                }
+
+                if (EntityAnnotation != null) {
+                    // Define boolean requirements for the diagnostics
+                    boolean hasPublicOrProtectedNoArgConstructor = false;
+                    boolean hasArgConstructor = false;
+                    boolean isEntityClassFinal = false;
+                    boolean hasPrimaryKey = false;
+                    List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
+
+                    // Get the Methods of the annotated Class
+                    for (PsiMethod method : type.getMethods()) {
+                        // find @Version annotation usage on methods
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
+                            versionAnnotatedElements.add(method);
+                            // Validate @Version method return type
+                            validateVersionType(method, unit, diagnostics);
+                        }
+
+                        if (isConstructorMethod(method)) {
+                            // We have found a method that is a constructor
+                            if (method.getParameterList().getParametersCount() > 0) {
+                                hasArgConstructor = true;
+                                continue;
+                            }
+                            // Don't need to perform subtractions to check flags because eclipse notifies on
+                            // illegal constructor modifiers
+                            if (!method.hasModifierProperty(PsiModifier.PUBLIC) && !method.hasModifierProperty(PsiModifier.PROTECTED))
+                                continue;
+                            hasPublicOrProtectedNoArgConstructor = true;
+                        }
+                        // All Methods of this class should not be final
+                        if (method.hasModifierProperty(PsiModifier.FINAL)) {
+                            diagnostics.add(createDiagnostic(method, unit,
+                                    Messages.getMessage("EntityNoFinalMethods"),
+                                    PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS, method.getReturnType().getInternalCanonicalText(),
+                                    DiagnosticSeverity.Error));
+                        }
+
+                        // Check if any method has @Id or @EmbeddedId annotation
+                        if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, method.getAnnotations())) {
+                            hasPrimaryKey = true;
+                        }
+
+                        //Validate @Id and @Temporal annotations
+                        validatePKDateTemporal(method,type,diagnostics,unit);
+                    }
+
+                    // Go through the instance variables and make sure no instance vars are final
+                    for (PsiField field : type.getFields()) {
+                        // find @Version annotation usage on fields
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
+                            versionAnnotatedElements.add(field);
+                            // Validate @Version field type
+                            validateVersionType(field, unit, diagnostics);
+                        }
+
+                        // If a field is static, we do not care about it, we care about all other field
+                        if (field.hasModifierProperty(PsiModifier.STATIC)) {
+                            continue;
+                        }
+
+                        // If we find a non-static variable that is final, this is a problem
+                        if (field.hasModifierProperty(PsiModifier.FINAL)) {
+                            diagnostics.add(createDiagnostic(field, unit,
+                                    Messages.getMessage("EntityNoFinalVariables"),
+                                    PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
+                                    DiagnosticSeverity.Error));
+                        }
+
+                        // Check if any field has @Id or @EmbeddedId annotation
+                        if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, field.getAnnotations())) {
+                            hasPrimaryKey = true;
+                        }
+
+                        //Validate @Id and @Temporal annotations
+                        validatePKDateTemporal(field,type,diagnostics,unit);
+                    }
+
+                    // Check superclass hierarchy for primary key in @MappedSuperclass
+                    if (!hasPrimaryKey) {
+                        hasPrimaryKey = hasPrimaryKeyInSuperclass(type);
+
+                    }
+
+                    // Ensure that the Entity class is not given a final modifier
+                    if (type.hasModifierProperty(PsiModifier.FINAL))
+                        isEntityClassFinal = true;
+
+                    // Create Diagnostics if needed
+                    if (!hasPublicOrProtectedNoArgConstructor && hasArgConstructor) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("EntityNoArgConstructor"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR, null,
+                                DiagnosticSeverity.Error));
+                    }
+
+                    if (isEntityClassFinal) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("EntityNoFinalClass"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS, type.getQualifiedName(),
+                                DiagnosticSeverity.Error));
+                    }
+
+                    // Validate @Version annotation usage
+                    if(!versionAnnotatedElements.isEmpty()){
+                        validateVersionAnnotation(versionAnnotatedElements,type, unit, diagnostics);
+                    }
+
+                    if (!hasPrimaryKey) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("EntityMissingPrimaryKey"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
+                                DiagnosticSeverity.Error));
+                    }
+
+                    // @Inheritance on a non-root entity (entity ancestor exists in the chain)
+                    if (InheritanceAnnotation != null && hasEntityAncestor(type)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("InheritanceAnnotationOnNonRootEntity"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT, null,
+                                DiagnosticSeverity.Error));
+                    }
+                } else if (InheritanceAnnotation != null) {
+                    // @Inheritance present but @Entity is missing
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY, null,
+                            DiagnosticSeverity.Error));
+                }
             }
         }
         // We do not do anything if the found unit is null
-    }
-
-    /**
-     * Recursively validates a class and all of its nested/inner classes at any
-     * depth for Jakarta Persistence entity diagnostics.
-     *
-     * @param type        the class to validate
-     * @param unit        compilation unit of the Java file
-     * @param diagnostics list to add diagnostics to
-     */
-    private void collectDiagnosticsForClassTree(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        validateEntityClass(type, unit, diagnostics);
-        for (PsiClass innerClass : type.getInnerClasses()) {
-            collectDiagnosticsForClassTree(innerClass, unit, diagnostics);
-        }
-    }
-
-    /**
-     * Validate a single class for all Jakarta Persistence entity diagnostics.
-     *
-     * @param type        the class to validate
-     * @param unit        compilation unit of the Java file
-     * @param diagnostics list to add diagnostics to
-     */
-    private void validateEntityClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        PsiAnnotation[] allAnnotations = type.getAnnotations();
-
-        /* ============ Entity Annotation Diagnostics =========== */
-        PsiAnnotation EntityAnnotation = null;
-        PsiAnnotation inheritanceAnnotation = null;
-        for (PsiAnnotation annotation : allAnnotations) {
-            if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
-                EntityAnnotation = annotation;
-            }
-            if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
-                inheritanceAnnotation = annotation;
-            }
-        }
-
-        if (EntityAnnotation != null) {
-            // Define boolean requirements for the diagnostics
-            boolean hasPublicOrProtectedNoArgConstructor = false;
-            boolean hasArgConstructor = false;
-            boolean isEntityClassFinal = false;
-            boolean hasPrimaryKey = false;
-            List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
-
-            // Get the Methods of the annotated Class
-            for (PsiMethod method : type.getMethods()) {
-                // find @Version annotation usage on methods
-                if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
-                    versionAnnotatedElements.add(method);
-                    // Validate @Version method return type
-                    validateVersionType(method, unit, diagnostics);
-                }
-
-                if (isConstructorMethod(method)) {
-                    // We have found a method that is a constructor
-                    if (method.getParameterList().getParametersCount() > 0) {
-                        hasArgConstructor = true;
-                        continue;
-                    }
-                    // Don't need to perform subtractions to check flags because eclipse notifies on
-                    // illegal constructor modifiers
-                    if (!method.hasModifierProperty(PsiModifier.PUBLIC) && !method.hasModifierProperty(PsiModifier.PROTECTED))
-                        continue;
-                    hasPublicOrProtectedNoArgConstructor = true;
-                }
-                // All Methods of this class should not be final
-                if (method.hasModifierProperty(PsiModifier.FINAL)) {
-                    diagnostics.add(createDiagnostic(method, unit,
-                            Messages.getMessage("EntityNoFinalMethods"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_FINAL_METHODS, method.getReturnType().getInternalCanonicalText(),
-                            DiagnosticSeverity.Error));
-                }
-
-                // Check if any method has @Id or @EmbeddedId annotation
-                if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, method.getAnnotations())) {
-                    hasPrimaryKey = true;
-                }
-
-                // Validate @Id and @Temporal annotations
-                validatePKDateTemporal(method, type, diagnostics, unit);
-            }
-
-            // Go through the instance variables and make sure no instance vars are final
-            for (PsiField field : type.getFields()) {
-                // find @Version annotation usage on fields
-                if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
-                    versionAnnotatedElements.add(field);
-                    // Validate @Version field type
-                    validateVersionType(field, unit, diagnostics);
-                }
-
-                // If a field is static, we do not care about it, we care about all other fields
-                if (field.hasModifierProperty(PsiModifier.STATIC)) {
-                    continue;
-                }
-
-                // If we find a non-static variable that is final, this is a problem
-                if (field.hasModifierProperty(PsiModifier.FINAL)) {
-                    diagnostics.add(createDiagnostic(field, unit,
-                            Messages.getMessage("EntityNoFinalVariables"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_FINAL_VARIABLES, field.getType().getInternalCanonicalText(),
-                            DiagnosticSeverity.Error));
-                }
-
-                // Check if any field has @Id or @EmbeddedId annotation
-                if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, field.getAnnotations())) {
-                    hasPrimaryKey = true;
-                }
-
-                // Validate @Id and @Temporal annotations
-                validatePKDateTemporal(field, type, diagnostics, unit);
-            }
-
-            // Check superclass hierarchy for primary key in @MappedSuperclass
-            if (!hasPrimaryKey) {
-                hasPrimaryKey = hasPrimaryKeyInSuperclass(type);
-            }
-
-            // Ensure that the Entity class is not given a final modifier
-            if (type.hasModifierProperty(PsiModifier.FINAL))
-                isEntityClassFinal = true;
-
-            // Create Diagnostics if needed
-            if (!hasPublicOrProtectedNoArgConstructor && hasArgConstructor) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("EntityNoArgConstructor"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_MISSING_EMPTY_CONSTRUCTOR, null,
-                        DiagnosticSeverity.Error));
-            }
-
-            if (isEntityClassFinal) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("EntityNoFinalClass"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_FINAL_CLASS, type.getQualifiedName(),
-                        DiagnosticSeverity.Error));
-            }
-
-            // Validate @Version annotation usage
-            if (!versionAnnotatedElements.isEmpty()) {
-                validateVersionAnnotation(versionAnnotatedElements, type, unit, diagnostics);
-            }
-
-            if (!hasPrimaryKey) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("EntityMissingPrimaryKey"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
-                        DiagnosticSeverity.Error));
-            }
-
-            // @Inheritance on a non-root entity (entity ancestor exists in the chain)
-            if (inheritanceAnnotation != null && hasEntitySupertype(type)) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("InheritanceAnnotationOnNonRootEntity"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT, null,
-                        DiagnosticSeverity.Error));
-            }
-        } else if (inheritanceAnnotation != null) {
-            // @Inheritance present but @Entity is missing
-            diagnostics.add(createDiagnostic(type, unit,
-                    Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
-                    PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY, null,
-                    DiagnosticSeverity.Error));
-        }
     }
 
 
@@ -316,7 +295,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @param type the class to inspect
      * @return true if an {@code @Entity}-annotated ancestor exists
      */
-    private boolean hasEntitySupertype(PsiClass type) {
+    private boolean hasEntityAncestor(PsiClass type) {
         for (PsiClass ancestor : DiagnosticsUtils.collectSuperClasses(type)) {
             if (isMatchedAnnotation(ancestor.getAnnotations(), PersistenceConstants.ENTITY)) {
                 return true;
