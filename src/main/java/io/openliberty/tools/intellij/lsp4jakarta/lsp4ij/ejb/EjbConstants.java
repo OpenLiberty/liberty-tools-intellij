@@ -38,9 +38,16 @@ public class EjbConstants {
             AFTER_COMPLETION_FQ_NAME
     };
 
+    public static final String[] SESSION_SYNC_NO_PARAM_ANNOTATIONS = {
+            AFTER_BEGIN_FQ_NAME,
+            BEFORE_COMPLETION_FQ_NAME
+    };
+
     public static final String DIAGNOSTIC_SOURCE = "jakarta-ejb";
     public static final String DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR = "MissingPublicNoArgConstructor";
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_FINAL = "InvalidSessionSyncMethodFinal";
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_STATIC = "InvalidSessionSyncMethodStatic";
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NON_VOID = "InvalidSessionSyncMethodNonVoid";
+    public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NO_PARAM = "InvalidSessionSyncMethodNoParamAnnotation";
+    public static final String DIAGNOSTIC_CODE_INVALID_AFTER_COMPLETION_PARAMS = "InvalidAfterCompletionMethodParams";
 }
