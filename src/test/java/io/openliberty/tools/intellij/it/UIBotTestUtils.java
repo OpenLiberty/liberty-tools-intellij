@@ -2317,20 +2317,26 @@ public class UIBotTestUtils {
         int retryCount = 0;
         int maxRetries = 5;
 
+        // The popup truncates long config names with an ellipsis (e.g. "toolBarDebu…dMavenMP").
+        // Use the first 10 characters of cfgName as a stable prefix guaranteed to appear before
+        // any truncation point, making the match independent of name length or screen width.
+        String matchPrefix = cfgName.length() > 10 ? cfgName.substring(0, 10) : cfgName;
+
         while (!configFound && retryCount < maxRetries) {
             cfgSelectBox.click();
 
-            ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
-            List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
-
-            if (configs != null && !configs.isEmpty()) {
-                for (RemoteText cfg : configs) {
-                    if (cfg.getText().equals(cfgName)) {
-                        cfg.click();
+            try {
+                ContainerFixture cfgSelectPaneList = projectFrame.getMyList();
+                List<RemoteText> entries = cfgSelectPaneList.findAllText();
+                for (RemoteText entry : entries) {
+                    if (entry.getText().contains(matchPrefix)) {
+                        entry.click();
                         configFound = true;
                         break;
                     }
                 }
+            } catch (WaitForConditionTimeoutException e) {
+                // popup did not appear — retry
             }
             if (!configFound) {
                 retryCount++;
