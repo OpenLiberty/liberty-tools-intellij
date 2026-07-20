@@ -32,4 +32,6 @@ public class EjbConstants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-ejb";
     public static final String DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR = "MissingPublicNoArgConstructor";
     public static final String DIAGNOSTIC_CODE_SESSION_BEAN_INTERCEPTOR_DECORATOR = "InvalidSessionBeanWithInterceptorOrDecorator";
+    public static final String DIAGNOSTIC_CODE_FINALIZE_METHOD = "SessionBeanFinalizeMethod";
+    public static final String FINALIZE_METHOD_NAME = "finalize";
 }
