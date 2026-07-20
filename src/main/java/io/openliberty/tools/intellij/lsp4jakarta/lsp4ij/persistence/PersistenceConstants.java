@@ -29,6 +29,12 @@ public class PersistenceConstants {
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
+    public static final String TABLEGENERATOR = "jakarta.persistence.TableGenerator";
+    public static final String TABLEGENERATORS = "jakarta.persistence.TableGenerators";
+    public static final String SEQUENCEGENERATOR = "jakarta.persistence.SequenceGenerator";
+    public static final String SEQUENCEGENERATORS = "jakarta.persistence.SequenceGenerators";
+    public static final String SECONDARYTABLE = "jakarta.persistence.SecondaryTable";
+    public static final String SECONDARYTABLES = "jakarta.persistence.SecondaryTables";
 
     /* Annotation Fields */
     public static final String NAME = "name";
@@ -49,6 +55,14 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
     public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldOrPropertyType";
 
+
+    /* Generator / SecondaryTable Codes */
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME = "TableGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING = "TableGeneratorsMissingTableGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME = "SequenceGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING = "SequenceGeneratorsMissingSequenceGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME = "SecondaryTableInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING = "SecondaryTablesMissingSecondaryTableMapping";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_ANNOTATION = "RemoveMapKeyorMapKeyClass";
