@@ -43,4 +43,6 @@ public class EjbConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_FINAL = "InvalidSessionSyncMethodFinal";
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_STATIC = "InvalidSessionSyncMethodStatic";
     public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NON_VOID = "InvalidSessionSyncMethodNonVoid";
+    public static final String DIAGNOSTIC_CODE_FINALIZE_METHOD = "SessionBeanFinalizeMethod";
+    public static final String FINALIZE_METHOD_NAME = "finalize";
 }
