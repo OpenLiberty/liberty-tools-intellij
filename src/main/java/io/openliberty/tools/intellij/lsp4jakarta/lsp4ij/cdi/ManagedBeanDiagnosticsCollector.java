@@ -23,6 +23,7 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -53,7 +54,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
         // Get all classes including nested classes
         List<PsiClass> allTypes = new ArrayList<>();
-        collectAllClasses(unit.getClasses(), allTypes);
+        PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
 
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
         for (PsiClass type : allTypes) {
@@ -444,20 +445,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Recursively collects all classes including nested classes
-     *
-     * @param classes Array of top-level classes
-     * @param allClasses List to collect all classes into
-     */
-    private void collectAllClasses(PsiClass[] classes, List<PsiClass> allClasses) {
-        for (PsiClass clazz : classes) {
-            allClasses.add(clazz);
-            // Recursively collect inner classes
-            collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
 
