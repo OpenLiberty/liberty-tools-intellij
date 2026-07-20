@@ -65,6 +65,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (!sessionBeanAnnotations.isEmpty()) {
             validateSessionBeanClass(type, unit, diagnostics);
             validateSessionBeanConstructor(type, unit, diagnostics);
+            validateSessionBeanFinalizeMethod(type, unit, diagnostics);
         }
 
         for (PsiClass innerClass : type.getInnerClasses()) {
@@ -114,10 +115,6 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS,
                     null,
                     DiagnosticSeverity.Error));
-            if (!sessionBeanAnnotations.isEmpty()) {
-                validateSessionBeanConstructor(type, unit, diagnostics);
-                validateSessionBeanFinalizeMethod(type, unit, diagnostics);
-            }
         }
     }
 
