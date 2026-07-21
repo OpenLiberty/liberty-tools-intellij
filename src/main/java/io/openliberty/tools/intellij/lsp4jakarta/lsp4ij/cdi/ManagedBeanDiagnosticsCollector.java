@@ -585,7 +585,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
      * and should only use @Dependent scope. Detects both built-in CDI scopes and custom @NormalScope annotations.
      *
-     * @param type            the Java type being validated
+     * @param type the Java type being validated
      * @param typeAnnotations the annotations on the type
      * @return list of invalid scope annotation fully qualified names
      */
