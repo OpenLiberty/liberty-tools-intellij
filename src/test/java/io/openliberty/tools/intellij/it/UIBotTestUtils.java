@@ -2320,17 +2320,43 @@ public class UIBotTestUtils {
         while (!configFound && retryCount < maxRetries) {
             cfgSelectBox.click();
 
-            ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
-            List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
+            try {
+                ContainerFixture cfgSelectPaneList = projectFrame.getMyList();
 
-            if (configs != null && !configs.isEmpty()) {
-                for (RemoteText cfg : configs) {
-                    if (cfg.getText().equals(cfgName)) {
-                        cfg.click();
-                        configFound = true;
+                // Read the full (untruncated) item names from the JList model server-side.
+                // The popup renders long names with an ellipsis, so getText() on a RemoteText
+                // entry cannot be used for a reliable exact match. callJs executes in the IDE
+                // process where the model always holds the full string, independent of how the
+                // component paints it on screen.
+                String modelNames = cfgSelectPaneList.callJs(
+                        "var model = component.getModel();" +
+                        "var names = [];" +
+                        "for (var i = 0; i < model.getSize(); i++) {" +
+                        "    var item = model.getElementAt(i);" +
+                        "    names.push(item != null ? item.toString() : '');" +
+                        "}" +
+                        "names.join('\\n');",
+                        true);
+
+                String[] modelNameArray = modelNames.split("\n", -1);
+                int matchIndex = -1;
+                for (int i = 0; i < modelNameArray.length; i++) {
+                    if (cfgName.equals(modelNameArray[i])) {
+                        matchIndex = i;
                         break;
                     }
                 }
+
+                if (matchIndex >= 0) {
+                    // Click the rendered entry at the matched model index.
+                    List<RemoteText> entries = cfgSelectPaneList.findAllText();
+                    if (matchIndex < entries.size()) {
+                        entries.get(matchIndex).click();
+                        configFound = true;
+                    }
+                }
+            } catch (WaitForConditionTimeoutException e) {
+                // popup did not appear — retry
             }
             if (!configFound) {
                 retryCount++;
