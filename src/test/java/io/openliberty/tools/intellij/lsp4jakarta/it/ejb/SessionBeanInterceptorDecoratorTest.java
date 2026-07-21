@@ -418,4 +418,40 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    // ---------------------------------------------------------------------------
+    // Test case 8: @Decorator only (no session bean annotation) -> no diagnostics
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testValidDecorator() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "ValidDecorator.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Test case 9: @Interceptor only (no session bean annotation) -> no diagnostics
+    // ---------------------------------------------------------------------------
+    @Test
+    public void testValidInterceptor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "ValidInterceptor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
