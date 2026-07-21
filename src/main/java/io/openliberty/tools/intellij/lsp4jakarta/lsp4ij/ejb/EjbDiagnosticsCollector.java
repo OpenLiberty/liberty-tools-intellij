@@ -16,9 +16,11 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,33 +45,21 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
 
-        for (PsiClass type : unit.getClasses()) {
-            checkClass(type, unit, diagnostics);
-        }
-    }
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
 
-    /**
-     * Checks a class and all its inner classes for session bean violations.
-     *
-     * @param type the class to check
-     * @param unit the compilation unit
-     * @param diagnostics the list to add diagnostics to
-     */
-    private void checkClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
-                Stream.of(type.getAnnotations())
-                        .map(annotation -> annotation.getQualifiedName())
-                        .toArray(String[]::new),
-                SESSION_BEAN_ANNOTATIONS);
+        for (PsiClass type : allClasses) {
+            List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
+                    Stream.of(type.getAnnotations())
+                            .map(PsiAnnotation::getQualifiedName)
+                            .toArray(String[]::new),
+                    SESSION_BEAN_ANNOTATIONS);
 
-        if (!sessionBeanAnnotations.isEmpty()) {
-            validateSessionBeanClass(type, unit, diagnostics);
-            validateSessionBeanConstructor(type, unit, diagnostics);
-            validateSessionBeanFinalizeMethod(type, unit, diagnostics);
-        }
-
-        for (PsiClass innerClass : type.getInnerClasses()) {
-            checkClass(innerClass, unit, diagnostics);
+            if (!sessionBeanAnnotations.isEmpty()) {
+                validateSessionBeanClass(type, unit, diagnostics);
+                validateSessionBeanConstructor(type, unit, diagnostics);
+                validateSessionBeanFinalizeMethod(type, unit, diagnostics);
+            }
         }
     }
 
