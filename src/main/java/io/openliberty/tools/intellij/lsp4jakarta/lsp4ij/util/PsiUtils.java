@@ -16,6 +16,8 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 
+import java.util.List;
+
 /**
  * Utility class for PSI element operations.
  */
@@ -43,6 +45,19 @@ public class PsiUtils {
         
         // Try to find a class
         return PsiTreeUtil.getParentOfType(node, PsiClass.class);
+    }
+
+    /**
+     * Recursively collects all classes including nested (inner) classes.
+     *
+     * @param classes   array of top-level or inner classes to start from
+     * @param allClasses list that accumulates every class encountered
+     */
+    public static void collectAllClasses(PsiClass[] classes, List<PsiClass> allClasses) {
+        for (PsiClass clazz : classes) {
+            allClasses.add(clazz);
+            collectAllClasses(clazz.getInnerClasses(), allClasses);
+        }
     }
 }
 
