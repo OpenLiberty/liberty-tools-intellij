@@ -23,6 +23,7 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -51,9 +52,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         if (unit == null)
             return;
 
-        PsiClass[] types = unit.getClasses();
+        // Get all classes including nested classes
+        List<PsiClass> allTypes = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
+
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
-        for (PsiClass type : types) {
+        for (PsiClass type : allTypes) {
             PsiAnnotation[] typeAnnotations = type.getAnnotations();
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
@@ -264,7 +268,31 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER, null, DiagnosticSeverity.Error));
                     }
                 }
-                
+
+
+                /**
+                 * Validate @Named annotation on constructor and method parameters
+                 *
+                 * According to CDI specification, @Named on non-field injection points
+                 * (constructor or method parameters) must specify a value attribute.
+                 *
+                 * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#named_at_injection_point
+                 */
+                if (isConstructorMethod(method) || isInjectMethod) {
+                    for (PsiParameter param : method.getParameterList().getParameters()) {
+                        for (PsiAnnotation annotation : param.getAnnotations()) {
+                            if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                                String namedValue = AnnotationUtils.getAnnotationMemberValue(annotation, "value");
+                                if (namedValue == null || namedValue.trim().isEmpty()) {
+                                    diagnostics.add(createDiagnostic(annotation, unit,
+                                            Messages.getMessage("InvalidNamedAnnotationOnNonFieldInjectionPoint"),
+                                            DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION, null,
+                                            DiagnosticSeverity.Error));
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (isManagedBean && constructorMethods.size() > 0) {
