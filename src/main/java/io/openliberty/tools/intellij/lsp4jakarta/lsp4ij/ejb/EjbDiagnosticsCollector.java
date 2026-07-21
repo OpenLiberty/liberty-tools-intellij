@@ -58,6 +58,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     validateConflictingSessionBeanAnnotations(type, unit, sessionBeanAnnotations, diagnostics);
                 }
                 validateSessionBeanConstructor(type, unit, diagnostics);
+                validateSessionBeanFinalizeMethod(type, unit, diagnostics);
             }
         }
     }
@@ -123,6 +124,33 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR,
                     null,
                     DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Validates that a session bean does not define or override the finalize() method.
+     *
+     * According to the Jakarta EE Enterprise Beans specification, session bean classes
+     * must not override or define the finalize() method. The container manages the
+     * lifecycle and cleanup of session beans.
+     *
+     * @param type the class to validate
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanFinalizeMethod(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Check all methods in the class
+        for (PsiMethod method : type.getMethods()) {
+            // Check if this is the finalize() method
+            if (FINALIZE_METHOD_NAME.equals(method.getName()) &&
+                    method.getParameterList().getParametersCount() == 0) {
+                // Report diagnostic for finalize() method
+                diagnostics.add(createDiagnostic(method, unit,
+                        Messages.getMessage("SessionBeanFinalizeMethod"),
+                        DIAGNOSTIC_CODE_FINALIZE_METHOD,
+                        null,
+                        DiagnosticSeverity.Error));
+            }
         }
     }
 }
