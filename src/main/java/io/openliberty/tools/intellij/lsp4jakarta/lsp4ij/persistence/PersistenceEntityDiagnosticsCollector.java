@@ -18,6 +18,7 @@ import com.intellij.psi.impl.PsiClassImplUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -48,7 +49,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         if (unit != null) {
             List<PsiClass> allTypes = new ArrayList<>();
             PsiAnnotation[] allAnnotations;
-            collectAllClasses(unit.getClasses(), allTypes);
+            PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
             for (PsiClass type : allTypes) {
                 allAnnotations = type.getAnnotations();
 
@@ -468,20 +469,6 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     Messages.getMessage("InvalidVersionFieldOrPropertyType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
                     DiagnosticSeverity.Error));
-        }
-    }
-
-    /**
-     * Recursively collects all classes including nested classes
-     *
-     * @param classes Array of top-level classes
-     * @param allClasses List to collect all classes into
-     */
-    private void collectAllClasses(PsiClass[] classes, List<PsiClass> allClasses) {
-        for (PsiClass clazz : classes) {
-            allClasses.add(clazz);
-            // Recursively collect inner classes
-            collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
 }
