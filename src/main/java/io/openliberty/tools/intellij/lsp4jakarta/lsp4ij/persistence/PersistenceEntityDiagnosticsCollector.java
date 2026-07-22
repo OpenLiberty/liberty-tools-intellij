@@ -296,12 +296,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @return true if an {@code @Entity}-annotated ancestor exists
      */
     private boolean hasEntitySupertype(PsiClass type) {
-        for (PsiClass ancestor : DiagnosticsUtils.collectSuperClasses(type)) {
-            if (isMatchedAnnotation(ancestor.getAnnotations(), PersistenceConstants.ENTITY)) {
-                return true;
-            }
-        }
-        return false;
+        return DiagnosticsUtils.collectSuperClasses(type).stream()
+                .anyMatch(superType -> isMatchedAnnotation(
+                        superType.getAnnotations(),
+                        PersistenceConstants.ENTITY));
     }
 
     /**
