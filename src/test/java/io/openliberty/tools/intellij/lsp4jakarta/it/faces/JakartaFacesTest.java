@@ -48,12 +48,12 @@ public class JakartaFacesTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected: diagnostic on class name (line 5, col 13..35 — "DontImplementValidator")
-        Diagnostic expecteDiagnostic = d(5, 13, 35,
+        Diagnostic diagnostic = d(5, 13, 35,
                 "Classes annotated with @FacesValidator must implement the jakarta.faces.validator.Validator interface.",
                 DiagnosticSeverity.Error, "jakarta-faces",
                 "FacesValidatorAnnotatedClassNoValidatorInterfaceImpl");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, expecteDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, diagnostic);
     }
 
     @Test
@@ -69,6 +69,60 @@ public class JakartaFacesTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // expected: no diagnostics for a compliant class
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void facesValidatorInheritedValidatorImpl() throws Exception {
+        // The inherited implementation must be recognised — no diagnostic expected.
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/faces/InheritedValidatorImpl.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void facesValidatorAbstractClassMissingInterface() throws Exception {
+        // Validator. Abstract classes are not exempt — diagnostic must be raised.
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/faces/AbstractFacesValidator.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // expected: diagnostic on class name (line 9, col 22..44) — 0-based
+        Diagnostic diagnostic = d(9, 22, 44,
+                "Classes annotated with @FacesValidator must implement the jakarta.faces.validator.Validator interface.",
+                DiagnosticSeverity.Error, "jakarta-faces",
+                "FacesValidatorAnnotatedClassNoValidatorInterfaceImpl");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, diagnostic);
+    }
+
+    @Test
+    public void facesValidatorRawValidatorInterface() throws Exception {
+        // Implementing raw Validator (without generic type parameter). Should NOT produce a diagnostic.
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/faces/RawValidatorImpl.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 }
