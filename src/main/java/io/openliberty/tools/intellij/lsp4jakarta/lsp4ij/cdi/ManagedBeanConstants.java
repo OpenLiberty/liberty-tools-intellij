@@ -41,6 +41,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
     public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
+    public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -58,6 +59,9 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS = "InvalidMultipleObserverParams";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE = "InvalidInterceptorOrDecorator";
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
+    public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT = "InvalidWildcardTypeInInjectField";
+    public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
+    public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
