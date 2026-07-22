@@ -78,6 +78,11 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             validateVersionType(method, unit, diagnostics);
                         }
 
+                        // Validate @Embedded property accessor: return type must be annotated with @Embeddable
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.EMBEDDED)) {
+                            validateEmbeddedType(method, unit, diagnostics);
+                        }
+
                         if (isConstructorMethod(method)) {
                             // We have found a method that is a constructor
                             if (method.getParameterList().getParametersCount() > 0) {
@@ -114,6 +119,11 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             versionAnnotatedElements.add(field);
                             // Validate @Version field type
                             validateVersionType(field, unit, diagnostics);
+                        }
+
+                        // Validate @Embedded field: declared type must be annotated with @Embeddable
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.EMBEDDED)) {
+                            validateEmbeddedType(field, unit, diagnostics);
                         }
 
                         // If a field is static, we do not care about it, we care about all other field
@@ -432,6 +442,42 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             diagnostics.add(createDiagnostic(element, unit,
                     Messages.getMessage("InvalidVersionFieldOrPropertyType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_INVALID_VERSION_TYPE, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Validates that a field or method annotated with @Embedded has a declared type
+     * that is itself annotated with @Embeddable.
+     * For fields: validates the field type's class
+     * For methods: validates the method's return type's class
+     *
+     * @param element     the field or method annotated with @Embedded
+     * @param unit        compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     */
+    private void validateEmbeddedType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiClass embeddedClass = null;
+
+        if (element instanceof PsiField field) {
+            if (field.getType() instanceof PsiClassType classType) {
+                embeddedClass = classType.resolve();
+            }
+        } else if (element instanceof PsiMethod method) {
+            PsiType returnType = method.getReturnType();
+            if (returnType instanceof PsiClassType classType) {
+                embeddedClass = classType.resolve();
+            }
+        }
+
+        if (embeddedClass == null) {
+            return;
+        }
+
+        if (!isMatchedAnnotation(embeddedClass.getAnnotations(), PersistenceConstants.EMBEDDABLE)) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage("EmbeddedTypeNotAnnotatedWithEmbeddable", embeddedClass.getName()),
+                    PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE, null,
                     DiagnosticSeverity.Error));
         }
     }
