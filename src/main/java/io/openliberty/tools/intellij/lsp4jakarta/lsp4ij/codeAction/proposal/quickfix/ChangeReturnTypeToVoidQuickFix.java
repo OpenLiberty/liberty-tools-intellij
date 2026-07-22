@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 IBM Corporation and others.
+ * Copyright (c) 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Yijia Jing
+ *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix;
 
@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 
 /**
  * Generic quick fix that changes the return type of a method to void.
- * Uses ModifyReturnTypeProposal.
  */
 public class ChangeReturnTypeToVoidQuickFix implements IJavaCodeActionParticipant {
 

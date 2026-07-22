@@ -160,12 +160,8 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
-
-        // Line 12 (0-based): "    @AfterCompletion"
-        // Line 13 (0-based): "    public boolean afterComplete(boolean committed) {"
-        // method name "afterComplete": "    public boolean " = 19 chars (4+7+8)
         Diagnostic expectedDiagnostic = d(13, 19, 32,
-                "@AfterCompletion session synchronization method must return void.",
+                "@AfterCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
 
         assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
@@ -192,6 +188,175 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
         CodeAction expectedCodeAction = ca(uri, "Change return type to void", expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    // -----------------------------------------------------------------------
+    // Diagnostic + QuickFix: mixed illegal modifiers on session synchronization methods
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testMixedModifiersSessionSyncMethodDiagnosticsAndQuickFixes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidMixedModifiersSessionSyncMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+        Diagnostic finalOnBeginSync = d(16, 29, 43,
+                "@AfterBegin session synchronization method must not be declared as final.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodFinal");
+        Diagnostic staticOnBeginSync = d(16, 29, 43,
+                "@AfterBegin session synchronization method must not be declared as static.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodStatic");
+
+        Diagnostic staticOnBeforeCommit = d(21, 26, 43,
+                "@BeforeCompletion session synchronization method must not be declared as static.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodStatic");
+        Diagnostic nonVoidOnBeforeCommit = d(21, 26, 43,
+                "@BeforeCompletion session synchronization method must be of type void.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
+        
+        Diagnostic finalOnAfterComplete = d(27, 21, 39,
+                "@AfterCompletion session synchronization method must not be declared as final.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodFinal");
+        Diagnostic nonVoidOnAfterComplete = d(27, 21, 39,
+                "@AfterCompletion session synchronization method must be of type void.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
+
+        // Engine emits diagnostics in reverse method order (last method first)
+        assertJavaDiagnostics(diagnosticsParams, utils,
+                finalOnAfterComplete, nonVoidOnAfterComplete,
+                staticOnBeforeCommit, nonVoidOnBeforeCommit,
+                finalOnBeginSync, staticOnBeginSync);
+
+        // Shared file header used in all expected fixed texts
+        final String fileHeader = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterBegin;\n"
+                + "import jakarta.ejb.BeforeCompletion;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - session synchronization methods with mixed illegal modifiers.\n"
+                + " * Each method combines more than one violation to exercise multiple diagnostics on a single method.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidMixedModifiersSessionSyncMethod {\n"
+                + "\n"
+                + "    // Errors: must not be declared final AND must not be declared static\n"
+                + "    @AfterBegin\n";
+        final String fileFooter = "\n"
+                + "    // Errors: must not be declared static AND must be of type void\n"
+                + "    @BeforeCompletion\n"
+                + "    public static boolean beforeCommitMixed() {\n"
+                + "        return false;\n"
+                + "    }\n"
+                + "\n"
+                + "    // Errors: must not be declared final AND must be of type void\n"
+                + "    @AfterCompletion\n"
+                + "    public final int afterCompleteMixed(boolean committed) {\n"
+                + "        return 0;\n"
+                + "    }\n"
+                + "}\n";
+
+        // QuickFix 1: remove 'final' from beginSyncMixed — "public static final void" -> "public static void"
+        JakartaJavaCodeActionParams caFinalOnBeginSync = createCodeActionParams(uri, finalOnBeginSync);
+        TextEdit teFinalOnBeginSync = te(0, 0, 31, 0,
+                fileHeader
+                + "    public static void beginSyncMixed() {\n"
+                + "    }\n"
+                + fileFooter);
+        assertJavaCodeAction(caFinalOnBeginSync, utils,
+                ca(uri, "Remove the 'final' modifier from this method", finalOnBeginSync, teFinalOnBeginSync));
+
+        // QuickFix 2: remove 'static' from beginSyncMixed — engine leaves a double space: "public  final void"
+        JakartaJavaCodeActionParams caStaticOnBeginSync = createCodeActionParams(uri, staticOnBeginSync);
+        TextEdit teStaticOnBeginSync = te(0, 0, 31, 0,
+                fileHeader
+                + "    public  final void beginSyncMixed() {\n"
+                + "    }\n"
+                + fileFooter);
+        assertJavaCodeAction(caStaticOnBeginSync, utils,
+                ca(uri, "Remove the 'static' modifier from this method", staticOnBeginSync, teStaticOnBeginSync));
+
+        // Shared middle section (between beginSyncMixed and afterCompleteMixed) used in fixes 3 & 4
+        final String beginSyncFixed = "    public static final void beginSyncMixed() {\n"
+                + "    }\n"
+                + "\n"
+                + "    // Errors: must not be declared static AND must be of type void\n"
+                + "    @BeforeCompletion\n";
+        final String afterCompletionBlock = "\n"
+                + "    // Errors: must not be declared final AND must be of type void\n"
+                + "    @AfterCompletion\n"
+                + "    public final int afterCompleteMixed(boolean committed) {\n"
+                + "        return 0;\n"
+                + "    }\n"
+                + "}\n";
+
+        // QuickFix 3: remove 'static' from beforeCommitMixed — "public static boolean" -> "public boolean"
+        JakartaJavaCodeActionParams caStaticOnBeforeCommit = createCodeActionParams(uri, staticOnBeforeCommit);
+        TextEdit teStaticOnBeforeCommit = te(0, 0, 31, 0,
+                fileHeader
+                + beginSyncFixed
+                + "    public boolean beforeCommitMixed() {\n"
+                + "        return false;\n"
+                + "    }\n"
+                + afterCompletionBlock);
+        assertJavaCodeAction(caStaticOnBeforeCommit, utils,
+                ca(uri, "Remove the 'static' modifier from this method", staticOnBeforeCommit, teStaticOnBeforeCommit));
+
+        // QuickFix 4: change return type of beforeCommitMixed to void — only return type changes, body kept as-is
+        JakartaJavaCodeActionParams caNonVoidOnBeforeCommit = createCodeActionParams(uri, nonVoidOnBeforeCommit);
+        TextEdit teNonVoidOnBeforeCommit = te(0, 0, 31, 0,
+                fileHeader
+                + beginSyncFixed
+                + "    public static void beforeCommitMixed() {\n"
+                + "        return false;\n"
+                + "    }\n"
+                + afterCompletionBlock);
+        assertJavaCodeAction(caNonVoidOnBeforeCommit, utils,
+                ca(uri, "Change return type to void", nonVoidOnBeforeCommit, teNonVoidOnBeforeCommit));
+
+        // Shared section before afterCompleteMixed used in fixes 5 & 6
+        final String beforeAfterCompletionBlock = "    public static final void beginSyncMixed() {\n"
+                + "    }\n"
+                + "\n"
+                + "    // Errors: must not be declared static AND must be of type void\n"
+                + "    @BeforeCompletion\n"
+                + "    public static boolean beforeCommitMixed() {\n"
+                + "        return false;\n"
+                + "    }\n"
+                + "\n"
+                + "    // Errors: must not be declared final AND must be of type void\n"
+                + "    @AfterCompletion\n";
+
+        // QuickFix 5: remove 'final' from afterCompleteMixed — "public final int" -> "public int"
+        JakartaJavaCodeActionParams caFinalOnAfterComplete = createCodeActionParams(uri, finalOnAfterComplete);
+        TextEdit teFinalOnAfterComplete = te(0, 0, 31, 0,
+                fileHeader
+                + beforeAfterCompletionBlock
+                + "    public int afterCompleteMixed(boolean committed) {\n"
+                + "        return 0;\n"
+                + "    }\n"
+                + "}\n");
+        assertJavaCodeAction(caFinalOnAfterComplete, utils,
+                ca(uri, "Remove the 'final' modifier from this method", finalOnAfterComplete, teFinalOnAfterComplete));
+
+        // QuickFix 6: change return type of afterCompleteMixed to void — only return type changes, body kept as-is
+        JakartaJavaCodeActionParams caNonVoidOnAfterComplete = createCodeActionParams(uri, nonVoidOnAfterComplete);
+        TextEdit teNonVoidOnAfterComplete = te(0, 0, 31, 0,
+                fileHeader
+                + beforeAfterCompletionBlock
+                + "    public final void afterCompleteMixed(boolean committed) {\n"
+                + "        return 0;\n"
+                + "    }\n"
+                + "}\n");
+        assertJavaCodeAction(caNonVoidOnAfterComplete, utils,
+                ca(uri, "Change return type to void", nonVoidOnAfterComplete, teNonVoidOnAfterComplete));
     }
 
     // -----------------------------------------------------------------------
