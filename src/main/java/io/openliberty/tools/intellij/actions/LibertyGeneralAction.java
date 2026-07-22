@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -30,6 +31,7 @@ import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public abstract class LibertyGeneralAction extends AnAction {
@@ -177,7 +179,19 @@ public abstract class LibertyGeneralAction extends AnAction {
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
+        // Check hasRunningCommands on background thread to avoid EDT access violation
+        AtomicBoolean hasRunningCommands = new AtomicBoolean(false);
+        if (widget != null) {
+            try {
+                ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                    hasRunningCommands.set(widget.hasRunningCommands());
+                }).get();
+            } catch (Exception e) {
+                LOGGER.error("Error checking terminal running commands", e);
+            }
+        }
+        
+        if (widget == null || (!createWidget && !hasRunningCommands.get())) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
