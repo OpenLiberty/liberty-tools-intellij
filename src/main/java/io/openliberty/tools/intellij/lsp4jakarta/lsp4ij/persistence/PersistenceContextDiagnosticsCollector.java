@@ -65,31 +65,54 @@ public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsC
         }
 
         for (PsiClass type : unit.getClasses()) {
+            // Check @PersistenceContext on the type itself
+            PsiAnnotation typeAnnotation = type.getAnnotation(PersistenceConstants.PERSISTENCE_CONTEXT);
+            if (typeAnnotation != null) {
+                checkAnnotation(type, unit, type, diagnostics);
+            }
+
+            // Check @PersistenceContext on fields
             for (PsiField field : type.getFields()) {
-                // Only fields annotated with @PersistenceContext are of interest.
-                PsiAnnotation pcAnnotation = field.getAnnotation(PersistenceConstants.PERSISTENCE_CONTEXT);
-                if (pcAnnotation == null) {
-                    continue;
-                }
-
-                // Rule 1: the enclosing class must be a container-managed component.
-                if (!isManagedComponent(type)) {
-                    diagnostics.add(createDiagnostic(field, unit,
-                            Messages.getMessage("PersistenceContextNotInManagedComponent"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT,
-                            null, DiagnosticSeverity.Error));
-                    continue; // Rule 2 is irrelevant when Rule 1 fires.
-                }
-
-                // Rule 2: PersistenceContextType.EXTENDED is only valid in a @Stateful EJB.
-                if (isExtendedContext(pcAnnotation)
-                        && !isMatchedAnnotation(type.getAnnotations(), EjbConstants.STATEFUL_FQ_NAME)) {
-                    diagnostics.add(createDiagnostic(field, unit,
-                            Messages.getMessage("ExtendedPersistenceContextInNonStatefulBean"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL,
-                            null, DiagnosticSeverity.Error));
+                PsiAnnotation fieldAnnotation = field.getAnnotation(PersistenceConstants.PERSISTENCE_CONTEXT);
+                if (fieldAnnotation != null) {
+                    checkAnnotation(field, unit, type, diagnostics);
                 }
             }
+
+            // Check @PersistenceContext on methods
+            for (PsiMethod method : type.getMethods()) {
+                PsiAnnotation methodAnnotation = method.getAnnotation(PersistenceConstants.PERSISTENCE_CONTEXT);
+                if (methodAnnotation != null) {
+                    checkAnnotation(method, unit, type, diagnostics);
+                }
+            }
+        }
+    }
+
+    /**
+     * Applies both diagnostic rules for a single {@code @PersistenceContext} occurrence
+     * on the given PSI element (type, field, or method).
+     */
+    private void checkAnnotation(PsiModifierListOwner element, PsiJavaFile unit, PsiClass type,
+                                 List<Diagnostic> diagnostics) {
+        // Rule 1: the enclosing class must be a container-managed component.
+        if (!isManagedComponent(type)) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage("PersistenceContextNotInManagedComponent"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT,
+                    null, DiagnosticSeverity.Error));
+            return; // Rule 2 is irrelevant when Rule 1 fires.
+        }
+
+        // Rule 2: PersistenceContextType.EXTENDED is only valid in a @Stateful EJB.
+        PsiAnnotation pcAnnotation = element.getAnnotation(PersistenceConstants.PERSISTENCE_CONTEXT);
+        if (pcAnnotation != null
+                && isExtendedContext(pcAnnotation)
+                && !isMatchedAnnotation(type.getAnnotations(), EjbConstants.STATEFUL_FQ_NAME)) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage("ExtendedPersistenceContextInNonStatefulBean"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL,
+                    null, DiagnosticSeverity.Error));
         }
     }
 
