@@ -35,8 +35,11 @@ public class EjbConstants {
     public static final String DIAGNOSTIC_SOURCE = "jakarta-ejb";
     public static final String DIAGNOSTIC_CODE_MISSING_MESSAGELISTENER = "ImplementMessageListener";
     public static final String DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR = "MissingPublicNoArgConstructor";
+    public static final String DIAGNOSTIC_CODE_NOT_PUBLIC_CLASS = "InvalidModifierNotPublic";
+    public static final String DIAGNOSTIC_CODE_IS_FINAL_CLASS = "InvalidModifierFinal";
+    public static final String DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS = "InvalidModifierAbstract";
+    public static final String DIAGNOSTIC_CODE_NOT_TOP_LEVEL_CLASS = "InvalidNotTopLevelClass";
     public static final String DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS = "ConflictingSessionBeanAnnotations";
     public static final String DIAGNOSTIC_CODE_FINALIZE_METHOD = "SessionBeanFinalizeMethod";
-
     public static final String FINALIZE_METHOD_NAME = "finalize";
 }

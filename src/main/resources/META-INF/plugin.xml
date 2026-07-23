@@ -547,7 +547,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveStatelessAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidStatelessSessionBeanScope"
@@ -599,7 +599,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveSingletonAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidSingletonSessionBeanScope"
@@ -644,6 +644,34 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.RemoveInterceptorMethodAnnotationQuickFix"/>
 
         <!-- EJB -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierNotPublic"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbChangeModifierToPublicQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierNotPublic"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierFinal"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveFinalModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierFinal"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierAbstract"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAbstractModifierQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidModifierAbstract"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidNotTopLevelClass"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-ejb#MissingPublicNoArgConstructor"
