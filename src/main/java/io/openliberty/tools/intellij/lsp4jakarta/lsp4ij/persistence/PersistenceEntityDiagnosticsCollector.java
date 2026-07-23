@@ -18,6 +18,7 @@ import com.intellij.psi.impl.PsiClassImplUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -46,18 +47,21 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     @Override
     public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
         if (unit != null) {
-            PsiClass[] alltypes;
+            List<PsiClass> allTypes = new ArrayList<>();
             PsiAnnotation[] allAnnotations;
-
-            alltypes = unit.getClasses();
-            for (PsiClass type : alltypes) {
+            PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
+            for (PsiClass type : allTypes) {
                 allAnnotations = type.getAnnotations();
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation inheritanceAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
+                    }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
+                        inheritanceAnnotation = annotation;
                     }
                 }
 
@@ -174,6 +178,20 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                 PersistenceConstants.DIAGNOSTIC_CODE_MISSING_PRIMARY_KEY, null,
                                 DiagnosticSeverity.Error));
                     }
+
+                    // @Inheritance on a non-root entity (entity ancestor exists in the chain)
+                    if (inheritanceAnnotation != null && hasEntitySupertype(type)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("InheritanceAnnotationOnNonRootEntity"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT, null,
+                                DiagnosticSeverity.Error));
+                    }
+                } else if (inheritanceAnnotation != null) {
+                    // @Inheritance present but @Entity is missing
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY, null,
+                            DiagnosticSeverity.Error));
                 }
             }
         }
@@ -266,6 +284,22 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
         return false;
+    }
+
+    /**
+     * Walk the full superclass chain of the given type and return true if any
+     * ancestor class carries the {@code @Entity} annotation.
+     * Non-entity abstract gaps in the chain are transparent to JPA (spec section
+     * 2.11.3), so the walk must continue past them.
+     *
+     * @param type the class to inspect
+     * @return true if an {@code @Entity}-annotated ancestor exists
+     */
+    private boolean hasEntitySupertype(PsiClass type) {
+        return DiagnosticsUtils.collectSuperClasses(type).stream()
+                .anyMatch(superType -> isMatchedAnnotation(
+                        superType.getAnnotations(),
+                        PersistenceConstants.ENTITY));
     }
 
     /**
