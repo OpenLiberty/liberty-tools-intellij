@@ -39,6 +39,7 @@ public class EjbConstants {
     public static final String DIAGNOSTIC_CODE_IS_FINAL_CLASS = "InvalidModifierFinal";
     public static final String DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS = "InvalidModifierAbstract";
     public static final String DIAGNOSTIC_CODE_NOT_TOP_LEVEL_CLASS = "InvalidNotTopLevelClass";
+    public static final String DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS = "ConflictingSessionBeanAnnotations";
     public static final String DIAGNOSTIC_CODE_FINALIZE_METHOD = "SessionBeanFinalizeMethod";
     public static final String FINALIZE_METHOD_NAME = "finalize";
 }

@@ -13,8 +13,10 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 
+import com.google.gson.Gson;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -22,6 +24,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
@@ -57,6 +60,9 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
             if (!sessionBeanAnnotations.isEmpty()) {
                 validateSessionBeanClass(type, unit, diagnostics);
+                if (sessionBeanAnnotations.size() > 1) {
+                    validateConflictingSessionBeanAnnotations(type, unit, sessionBeanAnnotations, diagnostics);
+                }
                 validateSessionBeanConstructor(type, unit, diagnostics);
                 validateSessionBeanFinalizeMethod(type, unit, diagnostics);
             }
@@ -106,6 +112,27 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     null,
                     DiagnosticSeverity.Error));
         }
+    }    
+
+    /**
+     * Validates that a session bean class does not have more than one session bean stereotype annotation.
+     *
+     * @param type                   the class to validate
+     * @param unit                   the compilation unit
+     * @param sessionBeanAnnotations the list of conflicting session bean annotations found
+     * @param diagnostics            the list to add diagnostics to
+     */
+    private void validateConflictingSessionBeanAnnotations(PsiClass type, PsiJavaFile unit,
+                                                           List<String> sessionBeanAnnotations,
+                                                           List<Diagnostic> diagnostics) {
+        String annotationNames = sessionBeanAnnotations.stream()
+                .map(fqName -> "@" + JDTUtils.getSimpleName(fqName))
+                .collect(Collectors.joining(", "));
+        String message = Messages.getMessage("SessionBeanConflictingAnnotations", annotationNames);
+        diagnostics.add(createDiagnostic(type, unit, message,
+                DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS,
+                new Gson().toJsonTree(sessionBeanAnnotations),
+                DiagnosticSeverity.Error));
     }
 
     /**
