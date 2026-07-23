@@ -1,4 +1,4 @@
-package io.openliberty.sample.jakarta.cdi;
+package io.openliberty.sample.jakarta.cdi.decorator;
 
 import io.openliberty.sample.jakarta.cdi.decorator.PaymentService;
 import jakarta.decorator.Delegate;

@@ -470,7 +470,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
      * annotated @Delegate, the container automatically detects the problem and treats it as a
      * definition error.
      *
-     * Expected: Error on the field "service" in NotADecorator.
+     * Expected: Error on the field "service" in NotADecoratorWithDelegate.
      */
     @Test
     public void testDelegateOutsideDecoratorClass() throws Exception {
@@ -501,7 +501,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Delegate used outside a decorator class (class is not annotated with @Decorator)\n" +
                 "@ApplicationScoped\n" +
-                "public class NotADecorator {\n\n" +
+                "public class NotADecoratorWithDelegate {\n\n" +
                 "    // Invalid: @Delegate on a field in a non-decorator class\n" +
                 "    @Inject\n" +
                 "    private PaymentService service;\n\n" +
@@ -548,7 +548,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
         // Test quickfix for method parameter: Remove @Delegate
         JakartaJavaCodeActionParams methodCodeActionParams = createCodeActionParams(uri, methodParamDelegateError);
-        String methodParamFixedContent = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String methodParamFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
                 "import io.openliberty.sample.jakarta.cdi.decorator.PaymentService;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -571,7 +571,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
         // Test quickfix for constructor parameter: Remove @Delegate
         JakartaJavaCodeActionParams constructorCodeActionParams = createCodeActionParams(uri, constructorParamDelegateError);
-        String constructorParamFixedContent = "package io.openliberty.sample.jakarta.cdi;\n\n" +
+        String constructorParamFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
                 "import io.openliberty.sample.jakarta.cdi.decorator.PaymentService;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +

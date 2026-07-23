@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 
 // Invalid: @Delegate used outside a decorator class (class is not annotated with @Decorator)
 @ApplicationScoped
-public class NotADecorator {
+public class NotADecoratorWithDelegate {
 
     // Invalid: @Delegate on a field in a non-decorator class
     @Inject
