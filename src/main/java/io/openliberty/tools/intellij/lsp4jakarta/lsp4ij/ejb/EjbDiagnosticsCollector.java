@@ -23,7 +23,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
 
