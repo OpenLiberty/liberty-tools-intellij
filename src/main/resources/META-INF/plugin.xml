@@ -650,6 +650,14 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.InsertPublicNoArgConstructorQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidSessionBeanWithInterceptorOrDecorator"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveInterceptorOrDecoratorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidSessionBeanWithInterceptorOrDecorator"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveSessionBeanAnnotationQuickFix"/>
+      <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-ejb#SessionBeanFinalizeMethod"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveFinalizeMethodQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
