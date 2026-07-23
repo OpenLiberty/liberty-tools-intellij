@@ -1221,4 +1221,104 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils,
                 secondaryTableFirstEmptyNameInContainer, secondaryTableSecondEmptyNameInContainer);
     }
+
+    // -------------------------------------------------------------------------
+    // Valid cases — no diagnostics expected
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testTableGeneratorValidNameOnTypeFieldAndMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorValidNameOnTypeFieldMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all @TableGenerator names are non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testTableGeneratorsValidNamesOnTypeFieldAndMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsValidNamesOnTypeFieldMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all nested @TableGenerator names are non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testSequenceGeneratorValidNameOnTypeFieldAndMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorValidNameOnTypeFieldMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all @SequenceGenerator names are non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testSequenceGeneratorsValidNamesOnTypeFieldAndMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorsValidNamesOnTypeFieldMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all nested @SequenceGenerator names are non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testSecondaryTableValidName() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTableValidName.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — @SecondaryTable name is non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testSecondaryTablesValidNames() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTablesValidNames.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all nested @SecondaryTable names are non-empty
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
