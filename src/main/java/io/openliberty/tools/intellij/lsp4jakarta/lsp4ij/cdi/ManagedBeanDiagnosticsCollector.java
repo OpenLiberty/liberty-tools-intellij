@@ -72,6 +72,25 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             INTERCEPTOR_FQ_NAME,
                             DECORATOR_FQ_NAME
                     }).isEmpty();
+
+            // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#direct_and_indirect_specialization
+            // A specialized bean must not declare an explicit bean name using @Named.
+            // The name is inherited from the bean it specializes.
+            boolean isSpecializes = !getMatchedJavaElementNames(type,
+                    Stream.of(typeAnnotations).map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
+                    new String[]{ SPECIALIZES_FQ_NAME }).isEmpty();
+            if (isSpecializes) {
+                for (PsiAnnotation annotation : typeAnnotations) {
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                        diagnostics.add(createDiagnostic(annotation, unit,
+                                Messages.getMessage("SpecializedBeanWithNamedAnnotation", type.getName()),
+                                DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED, null,
+                                DiagnosticSeverity.Error));
+                        break;
+                    }
+                }
+            }
+
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
             boolean nonStaticPublicFieldPresent = false;
