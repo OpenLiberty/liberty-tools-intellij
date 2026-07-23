@@ -846,7 +846,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Test quickfix for removing @MapKeyTemporal annotation
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uriInvalid, invalidStringKeyField);
-        
+
         String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
                 "import java.util.Map;\n\n" +
                 "import jakarta.persistence.ElementCollection;\n" +
@@ -882,10 +882,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "    @MapKeyTemporal(TemporalType.DATE)\n" +
                 "    private Map<java.lang.String, String> fqnStringEvents;\n" +
                 "}\n";
-        
+
         TextEdit te = te(0, 0, 45, 0, newText);
         CodeAction ca = ca(uriInvalid, "Remove @MapKeyTemporal", invalidStringKeyField, te);
-        
+
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         // Test valid cases - should have no diagnostics
@@ -897,6 +897,74 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         diagnosticsParamsValid.setUris(Arrays.asList(uriValid));
 
         assertJavaDiagnostics(diagnosticsParamsValid, utils);
+    }
+
+    @Test
+    public void testMapKeyEnumeratedInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyEnumeratedInvalid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Invalid: map key is String, not an enum (field stringKeyMap, line 22)
+        Diagnostic stringKeyMapNonEnumD = d(21, 32, 44,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: map key is Integer, not an enum (field intKeyMap, line 27)
+        Diagnostic intKeyMapNonEnumD = d(26, 33, 42,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: field type is List, not Map (field listField, line 32)
+        Diagnostic listFieldNonMapD = d(31, 25, 34,
+                "@MapKeyEnumerated can only be applied to a field or property of type java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonMapType");
+
+        // Invalid: raw Map — key type not verifiable as enum (field rawMap, line 37)
+        Diagnostic rawMapNonEnumD = d(36, 16, 22,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: unbounded wildcard key — cannot guarantee enum (field wildcardKeyMap, line 42)
+        Diagnostic wildcardKeyMapNonEnumD = d(41, 27, 41,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: method return type is String, not Map (method getStringField, line 47)
+        Diagnostic stringReturnNonMapD = d(46, 18, 32,
+                "@MapKeyEnumerated can only be applied to a field or property of type java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonMapType");
+
+        // Invalid: method returns Map with non-enum key (method getStringKeyMap, line 54)
+        Diagnostic stringKeyMethodNonEnumD = d(53, 31, 46,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils,
+                stringKeyMapNonEnumD, intKeyMapNonEnumD, listFieldNonMapD,
+                rawMapNonEnumD, wildcardKeyMapNonEnumD, stringReturnNonMapD, stringKeyMethodNonEnumD);
+    }
+
+    @Test
+    public void testMapKeyEnumeratedValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyEnumeratedValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all @MapKeyEnumerated usages have enum map keys
+        assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
 }
