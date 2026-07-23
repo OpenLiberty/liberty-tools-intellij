@@ -142,9 +142,8 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         Tree tree = new Tree(top);
         tree.setName(Constants.LIBERTY_TREE);
         tree.setRootVisible(false);
-        TreeDataProvider newDataProvider = new TreeDataProvider();
-        DataManager.registerDataProvider(tree, newDataProvider);
-        TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
+        TreeDataProvider treeDataProvider = new TreeDataProvider();
+        UiDataProvider.wrapComponent(tree, treeDataProvider);
 
         treeDataProvider.setProjectMap(projectMap);
 
