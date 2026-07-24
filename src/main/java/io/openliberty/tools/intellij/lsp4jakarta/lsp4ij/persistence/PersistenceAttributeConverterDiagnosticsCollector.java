@@ -44,14 +44,8 @@ public class PersistenceAttributeConverterDiagnosticsCollector extends AbstractD
             alltypes = unit.getClasses();
             for (PsiClass type : alltypes) {
                 allAnnotations = type.getAnnotations();
-                boolean isConverterAnnotated = false;
-                for (PsiAnnotation annotation : allAnnotations) {
-                    if (isMatchedJavaElement(type, annotation.getQualifiedName(),
-                            PersistenceConstants.CONVERTER)) {
-                        isConverterAnnotated = true;
-                        break;
-                    }
-                }
+                boolean isConverterAnnotated = isMatchedAnnotation(allAnnotations,
+                        PersistenceConstants.CONVERTER);
 
                 String[] interfaces = { PersistenceConstants.ATTRIBUTE_CONVERTER };
                 boolean isImplemented = doesImplementInterfaces(type, interfaces);
