@@ -444,6 +444,11 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DiagnosticSeverity.Error));
                     }
                 }
+
+                // A disposer method is only valid if the bean class declares a producer
+                // method or field whose return type is assignable to the @Disposes parameter.
+                // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#disposer_method_resolution
+                checkOrphanDisposerMethods(unit, diagnostics, type, methods, fields);
             }
         }
     }
@@ -523,6 +528,75 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
             }
         }
+    }
+
+    /**
+     * Checks whether any non-constructor method in the type has exactly one {@code @Disposes}
+     * parameter whose erased type has no matching {@code @Produces} producer (method or field)
+     * in the same class. Such a disposer is an orphan and the container must treat it as a
+     * definition error.
+     *
+     * <p>Methods with more than one {@code @Disposes} parameter are skipped — they are already
+     * flagged by {@code DIAGNOSTIC_CODE_REDUNDANT_DISPOSES}.
+     *
+     * @param unit        the PSI Java file
+     * @param diagnostics the list to add diagnostic errors to
+     * @param type        the bean class being analysed
+     * @param methods     all methods declared on the type
+     * @param fields      all fields declared on the type
+     */
+    private void checkOrphanDisposerMethods(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                            PsiClass type, PsiMethod[] methods, PsiField[] fields) {
+        // Collect the FQ type names produced by @Produces methods and fields.
+        // Uses isMatchedJavaElement directly — same pattern as getDisposesParamNames.
+        Set<String> producerTypes = new HashSet<>();
+        for (PsiMethod m : methods) {
+            if (!isConstructorMethod(m) && hasProducesAnnotation(type, m.getAnnotations())) {
+                String fqn = m.getReturnType() != null ? m.getReturnType().getCanonicalText() : null;
+                if (fqn != null) producerTypes.add(fqn);
+            }
+        }
+        for (PsiField f : fields) {
+            if (hasProducesAnnotation(type, f.getAnnotations())) {
+                producerTypes.add(f.getType().getCanonicalText());
+            }
+        }
+
+        // Flag disposer methods whose @Disposes parameter type has no matching producer.
+        for (PsiMethod method : methods) {
+            if (isConstructorMethod(method)) continue;
+
+            // Reuse getDisposesParamNames to find @Disposes parameters; skip if 0 or >1 (>1 is a separate error).
+            List<String> disposesNames = getDisposesParamNames(type, method);
+            if (disposesNames.size() != 1) continue;
+
+            // Locate the ILocalVariable for the single @Disposes param to read its type.
+            PsiParameter disposesParam = Stream.of(method.getParameterList().getParameters())
+                    .filter(p -> p.getName().equals(disposesNames.get(0)))
+                    .findFirst().orElse(null);
+            if (disposesParam == null) continue;
+
+            String fqn = disposesParam.getType().getCanonicalText();
+            if (!producerTypes.contains(fqn)) {
+                diagnostics.add(createDiagnostic(method, unit,
+                        Messages.getMessage("InvalidOrphanDisposerMethod",
+                                disposesParam.getType().getPresentableText()),
+                        DIAGNOSTIC_CODE_ORPHAN_DISPOSER, null, DiagnosticSeverity.Error));
+            }
+        }
+    }
+
+    /**
+     * Returns {@code true} if any annotation in the array resolves to
+     * {@code jakarta.enterprise.inject.Produces} via {@link #isMatchedJavaElement}.
+     */
+    private boolean hasProducesAnnotation(PsiClass type, PsiAnnotation[] annotations) {
+        for (PsiAnnotation ann : annotations) {
+            if (isMatchedJavaElement(type, ann.getQualifiedName(), PRODUCES_FQ_NAME)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String createInvalidInjectLabel(Set<String> invalidAnnotations) {
