@@ -64,13 +64,13 @@ public class CdiSpecializesTest extends BaseJakartaTest {
 
         // Line 24 (1-based) = line 23 (0-based)
         // "SpecializesWithNonBeanSuperclass" starts at col 13, ends at col 45
-        Diagnostic d = d(23, 13, 45,
+        Diagnostic unscopedSuperclassDiagnostic = d(23, 13, 45,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI scope managed bean (e.g., @ApplicationScoped, @RequestScoped, @Dependent etc).",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
                 "InvalidSpecializesAnnotationOnNonBeanSuperclass");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, unscopedSuperclassDiagnostic);
     }
 
     /**
@@ -93,5 +93,37 @@ public class CdiSpecializesTest extends BaseJakartaTest {
 
         // No diagnostics expected — direct superclass is a CDI bean
         assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Tests that a class annotated with @Specializes whose direct superclass has no scope
+     * annotation triggers a diagnostic, even though the grandparent class IS a valid CDI bean.
+     *
+     * CDI spec 3.1.4 requires only the *direct* (immediate) superclass to be a bean.
+     * A scoped grandparent does NOT satisfy this requirement.
+     *
+     * Expected: Error on the class name of SpecializesWithGrandparentBeanOnly.
+     */
+    @Test
+    public void testSpecializesWithGrandparentBeanOnly() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithGrandparentBeanOnly.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 26 (1-based) = line 25 (0-based)
+        // "SpecializesWithGrandparentBeanOnly" starts at col 13, ends at col 47 (34 chars)
+        Diagnostic scopedGrandparentOnlyDiagnostic = d(25, 13, 47,
+                "A bean annotated with @Specializes must directly extend the bean class of another CDI scope managed bean (e.g., @ApplicationScoped, @RequestScoped, @Dependent etc).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesAnnotationOnNonBeanSuperclass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, scopedGrandparentOnlyDiagnostic);
     }
 }
