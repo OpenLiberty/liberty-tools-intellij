@@ -62,7 +62,7 @@ public class PersistenceConstants {
 
     /* PersistenceContext Codes */
     public static final String PERSISTENCE_CONTEXT = "jakarta.persistence.PersistenceContext";
-    public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "EXTENDED";
+    public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
     public static final String DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT = "PersistenceContextNotInManagedComponent";
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
 

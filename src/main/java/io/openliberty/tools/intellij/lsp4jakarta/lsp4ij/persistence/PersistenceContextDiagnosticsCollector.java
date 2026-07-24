@@ -161,6 +161,6 @@ public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsC
             return false;
         }
         String text = typeValue.getText();
-        return text != null && text.endsWith(PersistenceConstants.PERSISTENCE_CONTEXT_TYPE_EXTENDED);
+        return text != null && text.equals(PersistenceConstants.PERSISTENCE_CONTEXT_TYPE_EXTENDED);
     }
 }
