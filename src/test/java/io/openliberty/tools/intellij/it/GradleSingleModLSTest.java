@@ -13,6 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+/**
+ * Tests Liberty Config Language Server features for Gradle single module projects.
+ *
+ * GHA tag - Liberty-Config-Language-Server
+ */
 public class GradleSingleModLSTest extends SingleModLibertyLSTestCommon {
 
     /**
