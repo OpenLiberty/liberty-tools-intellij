@@ -1503,12 +1503,12 @@ public class ManagedBeanTest extends BaseJakartaTest {
 
         // Test expected diagnostics for interceptor with observer methods
         // Diagnostic for method with @Observes parameter
-        Diagnostic observesDiagnostic = d(10, 16, 30,
+        Diagnostic observesDiagnostic = d(12, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 
         // Diagnostic for method with @ObservesAsync parameter
-        Diagnostic observesAsyncDiagnostic = d(15, 16, 35,
+        Diagnostic observesAsyncDiagnostic = d(17, 16, 35,
                 "Interceptors and Decorators cannot have methods with parameters annotated with @Observes or @ObservesAsync.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithObserverMethod");
 

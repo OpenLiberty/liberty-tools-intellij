@@ -23,7 +23,6 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -52,10 +51,10 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics
-        Diagnostic d1 = JakartaForJavaAssert.d(5, 13, 31,
+        Diagnostic d1 = JakartaForJavaAssert.d(6, 13, 31,
                 "Missing Public NoArgsConstructor. Class InvalidInterceptor is of Interceptor type, but does not declare a public no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnNoArgsConstructor");
-        Diagnostic d2 = JakartaForJavaAssert.d(32, 14, 37,
+        Diagnostic d2 = JakartaForJavaAssert.d(34, 14, 37,
                 "Missing Public NoArgsConstructor. Class InnerInvalidInterceptor is of Interceptor type, but does not declare a public no-argument constructor.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "RemoveInterceptorAnnotationOnNoArgsConstructor");
 
@@ -1413,16 +1412,16 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Test diagnostics for negative priority values
         // There are 3 diagnostics total:
-        // 1. WARNING from annotations for line 8 (general negative priority warning)
-        // 2. ERROR from interceptor for line 8 (interceptor-specific negative priority error)
-        // 3. ERROR from interceptor for line 18 (inner class interceptor-specific negative priority error)
-        Diagnostic negativePriorityWarningOuterClass = JakartaForJavaAssert.d(8, 0, 16,
+        // 1. WARNING from annotations for line 9 (general negative priority warning)
+        // 2. ERROR from interceptor for line 9 (interceptor-specific negative priority error)
+        // 3. ERROR from interceptor for line 20 (inner class interceptor-specific negative priority error)
+        Diagnostic negativePriorityWarningOuterClass = JakartaForJavaAssert.d(9, 0, 16,
                 "Priority values should generally be non-negative, with negative values reserved for special meanings such as \"undefined\" or \"not specified\".",
                 DiagnosticSeverity.Warning, "jakarta-annotations", "PriorityShouldBeNonNegative");
-        Diagnostic negativePriorityErrorOuterClass = JakartaForJavaAssert.d(8, 0, 16,
+        Diagnostic negativePriorityErrorOuterClass = JakartaForJavaAssert.d(9, 0, 16,
                 "Interceptor priority values must not be negative. Negative values are reserved for future use by the specification.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InterceptorNegativePriority");
-        Diagnostic negativePriorityErrorInnerClass = JakartaForJavaAssert.d(18, 4, 19,
+        Diagnostic negativePriorityErrorInnerClass = JakartaForJavaAssert.d(20, 4, 19,
                 "Interceptor priority values must not be negative. Negative values are reserved for future use by the specification.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InterceptorNegativePriority");
 
@@ -1443,42 +1442,42 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Test diagnostics for multiple @AroundInvoke methods
-        Diagnostic aroundInvokeDuplicate1 = JakartaForJavaAssert.d(32, 18, 22,
+        Diagnostic aroundInvokeDuplicate1 = JakartaForJavaAssert.d(33, 18, 22,
                 "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
 
-        Diagnostic aroundInvokeDuplicate2 = JakartaForJavaAssert.d(37, 18, 22,
+        Diagnostic aroundInvokeDuplicate2 = JakartaForJavaAssert.d(38, 18, 22,
                 "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
 
         // Test diagnostics for multiple @AroundTimeout methods
-        Diagnostic aroundTimeoutDuplicate = JakartaForJavaAssert.d(48, 18, 26,
+        Diagnostic aroundTimeoutDuplicate = JakartaForJavaAssert.d(49, 18, 26,
                 "Only one method with @AroundTimeout annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundTimeout")));
 
         // Test diagnostics for multiple @PostConstruct methods
-        Diagnostic postConstructDuplicate = JakartaForJavaAssert.d(59, 16, 21,
+        Diagnostic postConstructDuplicate = JakartaForJavaAssert.d(60, 16, 21,
                 "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct")));
 
         // Test diagnostics for multiple @PreDestroy methods
-        Diagnostic preDestroyDuplicate = JakartaForJavaAssert.d(70, 16, 24,
+        Diagnostic preDestroyDuplicate = JakartaForJavaAssert.d(71, 16, 24,
                 "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy")));
 
         // Test diagnostics for multiple @AroundConstruct methods
-        Diagnostic aroundConstructDuplicate = JakartaForJavaAssert.d(81, 16, 26,
+        Diagnostic aroundConstructDuplicate = JakartaForJavaAssert.d(82, 16, 26,
                 "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
         // Test diagnostics for nested class with multiple @AroundInvoke methods
-        Diagnostic nestedAroundInvokeDuplicate = JakartaForJavaAssert.d(94, 22, 29,
+        Diagnostic nestedAroundInvokeDuplicate = JakartaForJavaAssert.d(96, 22, 29,
                 "Only one method with @AroundInvoke annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundInvoke")));
@@ -1502,5 +1501,100 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Assert NO diagnostics for valid code with one method per type
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+  
+    @Test
+    public void testInterceptorMissingBindingAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidInterceptorMissingBinding.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostic for missing interceptor binding
+        Diagnostic missingBindingDiagnostic = JakartaForJavaAssert.d(11, 13, 45,
+                "An interceptor declared using @Interceptor must specify at least one interceptor binding annotation.",
+                DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMissingInterceptorBinding");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingBindingDiagnostic);
+    }
+
+    @Test
+    public void testInterceptorWithValidBindingAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/ValidInterceptorWithBinding.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Assert NO diagnostics for valid interceptor with binding
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testFinalClassWithInterceptorBindingAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InterceptorBindingClassModifiers.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 28: final class InvalidFinalInterceptorBindingClass {
+        Diagnostic finalClassDiagnostic = JakartaForJavaAssert.d(28, 12, 47,
+                "A component class that declares or inherits a class-level interceptor binding must not be declared final.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidFinalInterceptorBindingClass");
+
+        // Line 43: public final Object intercept(...) - non-static, non-private final method
+        Diagnostic finalInterceptDiagnostic = JakartaForJavaAssert.d(42, 24, 33,
+                "A component class that declares or inherits a class-level interceptor binding must not have a non-static, non-private final method 'intercept'.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMethodOnInterceptorBindingClass");
+
+        // Line 48: protected final void helper() - non-static, non-private final method
+        // private final (line 52) and static final (line 56) do NOT trigger diagnostics
+        Diagnostic finalHelperDiagnostic = JakartaForJavaAssert.d(47, 25, 31,
+                "A component class that declares or inherits a class-level interceptor binding must not have a non-static, non-private final method 'helper'.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMethodOnInterceptorBindingClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                finalClassDiagnostic, finalInterceptDiagnostic, finalHelperDiagnostic);
+    }
+
+    @Test
+    public void testFinalClassAndMethodWithClassLevelInterceptorBinding() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidInterceptorModifiersOnClassMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 17: public final class InvalidInterceptorModifiersOnClassMethod {
+        Diagnostic finalClassDiagnostic = JakartaForJavaAssert.d(5, 19, 59,
+                "A component class that declares or inherits a class-level interceptor binding must not be declared final.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidFinalInterceptorBindingClass");
+
+        // Line 19: \tpublic final void processPayment() { (non-static, non-private final - triggers diagnostic)
+        // Lines 23 and 26 (private final / static final) do NOT trigger diagnostics
+        Diagnostic finalMethodDiagnostic = JakartaForJavaAssert.d(7, 19, 33,
+                "A component class that declares or inherits a class-level interceptor binding must not have a non-static, non-private final method 'processPayment'.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMethodOnInterceptorBindingClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                finalClassDiagnostic, finalMethodDiagnostic);
     }
 }
