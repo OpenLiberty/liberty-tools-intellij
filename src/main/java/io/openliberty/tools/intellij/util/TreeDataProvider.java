@@ -10,34 +10,27 @@
 
 package io.openliberty.tools.intellij.util;
 
-import com.intellij.openapi.actionSystem.DataProvider;
+import com.intellij.openapi.actionSystem.DataSink;
+import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TreeDataProvider implements DataProvider {
+public class TreeDataProvider implements UiDataProvider {
 
     public VirtualFile currentFile;
     public String projectName;
     public Constants.ProjectType projectType;
     public HashMap<String, ArrayList<Object>> map = new HashMap<String, ArrayList<Object>>();
 
-    @Nullable
     @Override
-    public Object getData(@NotNull String dataId) {
-        if (dataId.equals(Constants.LIBERTY_BUILD_FILE_DATAKEY.getName())) {
-            return this.currentFile;
-        } else if (dataId.equals(Constants.LIBERTY_PROJECT_NAME)) {
-            return this.projectName;
-        } else if (dataId.equals(Constants.LIBERTY_PROJECT_TYPE)) {
-            return this.projectType;
-        } else if (dataId.equals(Constants.LIBERTY_PROJECT_MAP)) {
-            return this.map;
-        }
-        return null;
+    public void uiDataSnapshot(@NotNull DataSink sink) {
+        sink.set(Constants.LIBERTY_BUILD_FILE_DATAKEY, this.currentFile);
+        sink.set(Constants.LIBERTY_PROJECT_NAME, this.projectName);
+        sink.set(Constants.LIBERTY_PROJECT_TYPE, this.projectType);
+        sink.set(Constants.LIBERTY_PROJECT_MAP, this.map);
     }
 
     public void saveData(@NotNull VirtualFile file, @NotNull String projectName, @NotNull Constants.ProjectType projectType) {

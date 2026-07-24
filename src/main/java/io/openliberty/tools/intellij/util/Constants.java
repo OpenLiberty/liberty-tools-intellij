@@ -52,9 +52,9 @@ public final class Constants {
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
     public static final DataKey<VirtualFile> LIBERTY_BUILD_FILE_DATAKEY = DataKey.create("LIBERTY_BUILD_FILE");
-    public static final String LIBERTY_PROJECT_NAME = "LIBERTY_PROJECT_NAME";
-    public static final String LIBERTY_PROJECT_TYPE = "LIBERTY_PROJECT_TYPE";
-    public static final String LIBERTY_PROJECT_MAP = "LIBERTY_PROJECT_MAP";
+    public static final DataKey<String> LIBERTY_PROJECT_NAME = DataKey.create("LIBERTY_PROJECT_NAME");
+    public static final DataKey<ProjectType> LIBERTY_PROJECT_TYPE = DataKey.create("LIBERTY_PROJECT_TYPE");
+    public static final DataKey<HashMap<String, ArrayList<Object>>> LIBERTY_PROJECT_MAP = DataKey.create("LIBERTY_PROJECT_MAP");
     public static final String LIBERTY_DASHBOARD_TREE = "LIBERTY_DASHBOARD_TREE";
     public static final String LIBERTY_ACTION_TOOLBAR = "LIBERTY_ACTION_TOOLBAR";
 
