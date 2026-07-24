@@ -16,6 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class ManagedBeanConstants {
     /* Annotation Constants */
@@ -33,6 +34,7 @@ public class ManagedBeanConstants {
     public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
+    public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -60,6 +62,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT = "InvalidWildcardTypeInInjectField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
+    public static final String DIAGNOSTIC_CODE_INVALID_SPECIALIZES = "InvalidSpecializesAnnotationOnNonBeanSuperclass";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
@@ -73,6 +76,10 @@ public class ManagedBeanConstants {
                     "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
                     "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
                     "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype"));
+
+    /** All CDI scope FQ names plus @NormalScope, pre-computed for use in annotation checks. */
+    public static final String[] ALL_SCOPE_FQ_NAMES = Stream.concat(
+            SCOPE_FQ_NAMES.stream(), Stream.of(NORMAL_SCOPE_FQ_NAME)).toArray(String[]::new);
 
     // Scopes that are invalid for interceptors and decorators (they must use @Dependent only)
     public static final String[] INVALID_INTERCEPTOR_DECORATOR_SCOPES = {
