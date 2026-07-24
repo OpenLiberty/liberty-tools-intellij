@@ -22,7 +22,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.ServletConstants
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -132,11 +131,10 @@ public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsC
         PsiAnnotation[] typeAnnotations = type.getAnnotations();
 
         // CDI scopes
-        if (typeAnnotations.length > 0
-                && Arrays.stream(typeAnnotations)
-                         .map(PsiAnnotation::getQualifiedName)
-                         .anyMatch(fqn -> fqn != null && ManagedBeanConstants.SCOPE_FQ_NAMES.contains(fqn))) {
-            return true;
+        for (String scopeFqn : ManagedBeanConstants.SCOPE_FQ_NAMES) {
+            if (isMatchedAnnotation(typeAnnotations, scopeFqn)) {
+                return true;
+            }
         }
 
         // EJB session beans
