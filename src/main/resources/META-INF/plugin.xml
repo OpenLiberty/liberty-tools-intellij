@@ -151,6 +151,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceMapKeyDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceContextDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.servlet.FilterDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
