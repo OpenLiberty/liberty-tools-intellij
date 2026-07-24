@@ -115,10 +115,6 @@ public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsC
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers — using existing shared infrastructure wherever possible
-    // -------------------------------------------------------------------------
-
     /**
      * Returns {@code true} when the given class is a container-managed component:
      * a CDI bean (any CDI scope from {@link ManagedBeanConstants#SCOPE_FQ_NAMES}),
