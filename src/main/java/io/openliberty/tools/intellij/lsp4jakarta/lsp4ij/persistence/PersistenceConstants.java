@@ -74,4 +74,6 @@ public class PersistenceConstants {
     public static final String UTIL_DATE = "java.util.Date";
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
+
+    public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
 }

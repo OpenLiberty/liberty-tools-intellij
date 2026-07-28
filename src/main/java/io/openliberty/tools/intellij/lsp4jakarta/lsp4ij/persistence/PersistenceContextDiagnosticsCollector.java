@@ -45,8 +45,7 @@ import java.util.List;
  */
 public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
-    /** FQN of HttpServlet, used with {@link DiagnosticsUtils#inheritsFrom}. */
-    private static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
+    
 
     public PersistenceContextDiagnosticsCollector() {
         super();
@@ -148,7 +147,7 @@ public class PersistenceContextDiagnosticsCollector extends AbstractDiagnosticsC
         }
 
         // Subclass of HttpServlet
-        return DiagnosticsUtils.inheritsFrom(type, HTTP_SERVLET_FQ_NAME);
+        return DiagnosticsUtils.inheritsFrom(type, PersistenceConstants.HTTP_SERVLET_FQ_NAME);
     }
 
     /**
