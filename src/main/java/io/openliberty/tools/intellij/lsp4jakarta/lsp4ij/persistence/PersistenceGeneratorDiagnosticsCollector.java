@@ -102,28 +102,41 @@ public class PersistenceGeneratorDiagnosticsCollector extends AbstractDiagnostic
      */
     private void validateAnnotation(PsiAnnotation annotation, PsiClass type,
                                     PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String qualifiedName = annotation.getQualifiedName();
-        if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.TABLEGENERATOR)) {
-            validateNameAttribute(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
-        } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.SEQUENCEGENERATOR)) {
-            validateNameAttribute(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
-        } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.SECONDARYTABLE)) {
-            validateNameAttribute(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
-        } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.TABLEGENERATORS)) {
-            validateNonEmptyMappingArray(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING,
-                    PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
-        } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.SEQUENCEGENERATORS)) {
-            validateNonEmptyMappingArray(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
-        } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.SECONDARYTABLES)) {
-            validateNonEmptyMappingArray(annotation, unit, diagnostics,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING,
-                    PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
+        String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                PersistenceConstants.GENERATOR_ANNOTATIONS);
+        if (matched == null) {
+            return;
+        }
+        switch (matched) {
+            case PersistenceConstants.TABLEGENERATOR:
+                validateNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SEQUENCEGENERATOR:
+                validateNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SECONDARYTABLE:
+                validateNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.TABLEGENERATORS:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SEQUENCEGENERATORS:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SECONDARYTABLES:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
+                break;
+            default:
+                break;
         }
     }
 
@@ -142,11 +155,11 @@ public class PersistenceGeneratorDiagnosticsCollector extends AbstractDiagnostic
     private void validateNameAttribute(PsiAnnotation annotation, PsiJavaFile unit,
                                        List<Diagnostic> diagnostics,
                                        String errorCode) {
-        PsiAnnotationMemberValue nameValue = annotation.findAttributeValue(PersistenceConstants.NAME);
+        PsiAnnotationMemberValue mappingName = annotation.findAttributeValue(PersistenceConstants.NAME);
         boolean nameIsEmpty = true;
-        if (nameValue instanceof PsiLiteralExpression literal) {
-            Object val = literal.getValue();
-            if (val instanceof String str && !str.isBlank()) {
+        if (mappingName instanceof PsiLiteralExpression literal) {
+            Object mappingNameValue = literal.getValue();
+            if (mappingNameValue instanceof String str && !str.isBlank()) {
                 nameIsEmpty = false;
             }
         }
@@ -176,8 +189,8 @@ public class PersistenceGeneratorDiagnosticsCollector extends AbstractDiagnostic
     private void validateNonEmptyMappingArray(PsiAnnotation annotation, PsiJavaFile unit,
                                               List<Diagnostic> diagnostics,
                                               String emptyMappingCode, String emptyNameCode) {
-        PsiAnnotationMemberValue valueAttr = annotation.findAttributeValue("value");
-        boolean isEmpty = (valueAttr == null) || (valueAttr instanceof PsiArrayInitializerMemberValue array
+        PsiAnnotationMemberValue mappingArrayValue = annotation.findAttributeValue(PersistenceConstants.VALUE);
+        boolean isEmpty = (mappingArrayValue == null) || (mappingArrayValue instanceof PsiArrayInitializerMemberValue array
                 && array.getInitializers().length == 0);
         if (isEmpty) {
             diagnostics.add(createDiagnostic(annotation, unit,
@@ -187,10 +200,10 @@ public class PersistenceGeneratorDiagnosticsCollector extends AbstractDiagnostic
         }
         // Iterate nested annotations inside the container's value array
         PsiAnnotationMemberValue[] elements;
-        if (valueAttr instanceof PsiArrayInitializerMemberValue array) {
+        if (mappingArrayValue instanceof PsiArrayInitializerMemberValue array) {
             elements = array.getInitializers();
         } else {
-            elements = new PsiAnnotationMemberValue[]{ valueAttr };
+            elements = new PsiAnnotationMemberValue[]{ mappingArrayValue };
         }
         for (PsiAnnotationMemberValue element : elements) {
             if (element instanceof PsiAnnotation nested) {

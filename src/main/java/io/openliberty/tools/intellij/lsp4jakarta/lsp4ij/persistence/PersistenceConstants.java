@@ -36,6 +36,11 @@ public class PersistenceConstants {
     public static final String SECONDARYTABLE = "jakarta.persistence.SecondaryTable";
     public static final String SECONDARYTABLES = "jakarta.persistence.SecondaryTables";
 
+    public static final String[] GENERATOR_ANNOTATIONS = {
+        TABLEGENERATOR, TABLEGENERATORS, SEQUENCEGENERATOR, SEQUENCEGENERATORS, SECONDARYTABLE, SECONDARYTABLES
+    };
+    public static final String VALUE = "value";
+
     /* Annotation Fields */
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
