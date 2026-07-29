@@ -41,6 +41,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
     public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
+    public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -52,6 +53,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_OBSERVER = "InvalidInterceptorOrDecoratorWithObserverMethod";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER = "InvalidInterceptorOrDecoratorWithDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
+    public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
     public static final String DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS = "InvalidMultipleObserverParams";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE = "InvalidInterceptorOrDecorator";
