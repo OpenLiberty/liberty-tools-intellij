@@ -1,9 +1,11 @@
 package io.openliberty.sample.jakarta.cdi;
 
+import io.openliberty.sample.jakarta.interceptor.Monitored;
 import jakarta.interceptor.Interceptor;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 
+@Monitored
 @Interceptor
 public class InterceptorWithObserverMethod {
     
