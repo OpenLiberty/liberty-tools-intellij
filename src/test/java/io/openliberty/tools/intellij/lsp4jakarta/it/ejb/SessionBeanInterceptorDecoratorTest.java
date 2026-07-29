@@ -62,9 +62,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // class decl is line 9 (1-based) = index 8 (0-based)
+        // class decl is line 9 (1-based) = index 10 (0-based)
         // "class InvalidStatelessWithInterceptor {" -> name cols [6, 37)
-        Diagnostic sessionBeanWithInterceptorOrDecorator = d(8, 6, 37,
+        Diagnostic sessionBeanWithInterceptorOrDecorator = d(10, 6, 37,
                 "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
@@ -76,27 +76,31 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Stateless with @Interceptor\n" +
                 "@Stateless\n" +
+                "@Monitored\n" +
                 "class InvalidStatelessWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        TextEdit teRemoveInterceptor = te(0, 0, 14, 0, removeInterceptor);
         CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", sessionBeanWithInterceptorOrDecorator, teRemoveInterceptor);
 
         String removeStateless =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Stateless;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Stateless with @Interceptor\n" +
                 "@Interceptor\n" +
+                "@Monitored\n" +
                 "class InvalidStatelessWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveStateless = te(0, 0, 12, 0, removeStateless);
+        TextEdit teRemoveStateless = te(0, 0, 14, 0, removeStateless);
         CodeAction caRemoveStateless = ca(uri, "Remove @Stateless", sessionBeanWithInterceptorOrDecorator, teRemoveStateless);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateless);
@@ -180,9 +184,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // class decl is line 9 (1-based) = index 8 (0-based)
+        // class decl is line 9 (1-based) = index 10 (0-based)
         // "class InvalidStatefulWithInterceptor {" -> name cols [6, 36)
-        Diagnostic noInterceptorInStateFul = d(8, 6, 36,
+        Diagnostic noInterceptorInStateFul = d(10, 6, 36,
                 "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
@@ -194,27 +198,31 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Stateful with @Interceptor\n" +
                 "@Stateful\n" +
+                "@Monitored\n" +
                 "class InvalidStatefulWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        TextEdit teRemoveInterceptor = te(0, 0, 14, 0, removeInterceptor);
         CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", noInterceptorInStateFul, teRemoveInterceptor);
 
         String removeStateful =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Stateful;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Stateful with @Interceptor\n" +
                 "@Interceptor\n" +
+                "@Monitored\n" +
                 "class InvalidStatefulWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveStateful = te(0, 0, 12, 0, removeStateful);
+        TextEdit teRemoveStateful = te(0, 0, 14, 0, removeStateful);
         CodeAction caRemoveStateful = ca(uri, "Remove @Stateful", noInterceptorInStateFul, teRemoveStateful);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveStateful);
@@ -298,9 +306,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // class decl is line 9 (1-based) = index 8 (0-based)
+        // class decl is line 9 (1-based) = index 10 (0-based)
         // "class InvalidSingletonWithInterceptor {" -> name cols [6, 37)
-        Diagnostic interceptorSingleton = d(8, 6, 37,
+        Diagnostic interceptorSingleton = d(10, 6, 37,
                 "Session beans must not be annotated with @Interceptor or @Decorator.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionBeanWithInterceptorOrDecorator");
 
@@ -312,27 +320,31 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
         String removeInterceptor =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Singleton with @Interceptor\n" +
                 "@Singleton\n" +
+                "@Monitored\n" +
                 "class InvalidSingletonWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveInterceptor = te(0, 0, 12, 0, removeInterceptor);
+        TextEdit teRemoveInterceptor = te(0, 0, 14, 0, removeInterceptor);
         CodeAction caRemoveInterceptor = ca(uri, "Remove @Interceptor", interceptorSingleton, teRemoveInterceptor);
 
         String removeSingleton =
                 "package io.openliberty.sample.jakarta.ejb.interceptordecorator;\n\n" +
                 "import jakarta.ejb.Singleton;\n" +
-                "import jakarta.interceptor.Interceptor;\n\n" +
+                "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n\n" +
                 "// Invalid: @Singleton with @Interceptor\n" +
                 "@Interceptor\n" +
+                "@Monitored\n" +
                 "class InvalidSingletonWithInterceptor {\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
-        TextEdit teRemoveSingleton = te(0, 0, 12, 0, removeSingleton);
+        TextEdit teRemoveSingleton = te(0, 0, 14, 0, removeSingleton);
         CodeAction caRemoveSingleton = ca(uri, "Remove @Singleton", interceptorSingleton, teRemoveSingleton);
 
         assertJavaCodeAction(caParams, utils, caRemoveInterceptor, caRemoveSingleton);

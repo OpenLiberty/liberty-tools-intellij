@@ -122,6 +122,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
         // Test quickfix for interceptor with @ApplicationScoped (line 41)
         String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.SessionScoped;\n" +
@@ -131,11 +132,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -158,15 +161,18 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
                 "@Dependent\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -200,6 +206,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -213,6 +220,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -227,13 +235,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceAppScopedEdit = te(0, 0, 128, 0, newText1);
+        TextEdit replaceAppScopedEdit = te(0, 0, 136, 0, newText1);
         CodeAction replaceAppScopedAction = ca(uri, "Replace @ApplicationScoped with @Dependent", interceptorAppScoped, replaceAppScopedEdit);
         assertJavaCodeAction(createCodeActionParams(uri, interceptorAppScoped), utils, replaceAppScopedAction);
 
         // Test quickfix for interceptor with multiple scopes (line 54)
         String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.RequestScoped;\n" +
@@ -242,11 +251,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -268,17 +279,20 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
                 "@Dependent\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class InterceptorWithMultipleIllegalScopes {\n" +
                 "}\n\n" +
@@ -310,6 +324,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -323,6 +338,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -337,13 +353,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceMultipleScopesEdit = te(0, 0, 128, 0, newText2);
+        TextEdit replaceMultipleScopesEdit = te(0, 0, 136, 0, newText2);
         CodeAction replaceMultipleScopesAction = ca(uri, "Replace @ApplicationScoped and @SessionScoped with @Dependent", interceptorMultiScope, replaceMultipleScopesEdit);
         assertJavaCodeAction(createCodeActionParams(uri, interceptorMultiScope), utils, replaceMultipleScopesAction);
 
         // Test quickfix for decorator with @ApplicationScoped (line 62)
         String newText3 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.SessionScoped;\n" +
@@ -353,11 +370,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -379,16 +398,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -422,6 +444,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -435,6 +458,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -449,13 +473,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceDecoratorAppScopedEdit = te(0, 0, 128, 0, newText3);
+        TextEdit replaceDecoratorAppScopedEdit = te(0, 0, 136, 0, newText3);
         CodeAction replaceDecoratorAppScopedAction = ca(uri, "Replace @ApplicationScoped with @Dependent", decoratorAppScoped, replaceDecoratorAppScopedEdit);
         assertJavaCodeAction(createCodeActionParams(uri, decoratorAppScoped), utils, replaceDecoratorAppScopedAction);
 
         // Test quickfix for interceptor with custom scope (line 83)
         String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -466,11 +491,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -492,16 +519,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -536,6 +566,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
                 "@Dependent\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
                 "}\n\n" +
@@ -548,6 +579,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -562,13 +594,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceCustomScopeEdit = te(0, 0, 128, 0, newText4);
+        TextEdit replaceCustomScopeEdit = te(0, 0, 136, 0, newText4);
         CodeAction replaceCustomScopeAction = ca(uri, "Replace @CustomNormalScope with @Dependent", interceptorCustomScope, replaceCustomScopeEdit);
         assertJavaCodeAction(createCodeActionParams(uri, interceptorCustomScope), utils, replaceCustomScopeAction);
 
         // Test quickfix for interceptor with @SessionScoped (line 47)
         String newText5 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -578,11 +611,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -604,16 +639,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
                 "@Dependent\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -647,6 +685,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -660,6 +699,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -674,13 +714,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceInterceptorSessionScopedEdit = te(0, 0, 128, 0, newText5);
+        TextEdit replaceInterceptorSessionScopedEdit = te(0, 0, 136, 0, newText5);
         CodeAction replaceInterceptorSessionScopedAction = ca(uri, "Replace @SessionScoped with @Dependent", interceptorSessionScoped, replaceInterceptorSessionScopedEdit);
         assertJavaCodeAction(createCodeActionParams(uri, interceptorSessionScoped), utils, replaceInterceptorSessionScopedAction);
 
         // Test quickfix for decorator with @SessionScoped (line 71)
         String newText6 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -690,11 +731,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -716,16 +759,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -759,6 +805,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -772,6 +819,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -786,13 +834,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceDecoratorSessionScopedEdit = te(0, 0, 128, 0, newText6);
+        TextEdit replaceDecoratorSessionScopedEdit = te(0, 0, 136, 0, newText6);
         CodeAction replaceDecoratorSessionScopedAction = ca(uri, "Replace @SessionScoped with @Dependent", decoratorSessionScoped, replaceDecoratorSessionScopedEdit);
         assertJavaCodeAction(createCodeActionParams(uri, decoratorSessionScoped), utils, replaceDecoratorSessionScopedAction);
 
         // Test quickfix for decorator with multiple scopes (line 81)
         String newText7 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -801,11 +850,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -827,16 +878,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -869,6 +923,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -882,6 +937,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -896,13 +952,14 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceDecoratorMultipleScopesEdit = te(0, 0, 128, 0, newText7);
+        TextEdit replaceDecoratorMultipleScopesEdit = te(0, 0, 136, 0, newText7);
         CodeAction replaceDecoratorMultipleScopesAction = ca(uri, "Replace @RequestScoped and @ConversationScoped with @Dependent", decoratorMultiScope, replaceDecoratorMultipleScopesEdit);
         assertJavaCodeAction(createCodeActionParams(uri, decoratorMultiScope), utils, replaceDecoratorMultipleScopesAction);
 
         // Test quickfix for decorator with custom scope (line 98)
         String newText8 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.decorator.Decorator;\n" +
                 "import jakarta.decorator.Delegate;\n" +
                 "import jakarta.enterprise.context.ApplicationScoped;\n" +
@@ -913,11 +970,13 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// ========== Valid Interceptors ==========\n\n" +
                 "// Valid interceptor with explicit @Dependent scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@Dependent\n" +
                 "class ValidInterceptorWithDependent {\n" +
                 "}\n\n" +
                 "// Valid interceptor with no scope (defaults to @Dependent)\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "class ValidInterceptorWithNoScope {\n" +
                 "}\n\n" +
@@ -939,16 +998,19 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors with Built-in Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with @ApplicationScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "class InterceptorWithApplicationScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with @SessionScoped\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@SessionScoped\n" +
                 "class InterceptorWithSessionScoped {\n" +
                 "}\n\n" +
                 "// Invalid interceptor with multiple scopes including illegal ones\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@SessionScoped\n" +
@@ -982,6 +1044,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "}\n\n" +
                 "// ========== Invalid Interceptors/Decorators with Custom Normal Scopes ==========\n\n" +
                 "// Invalid interceptor with custom normal scope\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@CustomNormalScope\n" +
                 "class InterceptorWithCustomNormalScope {\n" +
@@ -995,6 +1058,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    private Object delegate;\n" +
                 "}\n\n" +
                 "// Invalid interceptor with both built-in and custom normal scopes\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "@ApplicationScoped\n" +
                 "@CustomNormalScope\n" +
@@ -1009,7 +1073,7 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 "    @Delegate\n" +
                 "    private Object delegate;\n" +
                 "}\n";
-        TextEdit replaceDecoratorCustomScopeEdit = te(0, 0, 128, 0, newText8);
+        TextEdit replaceDecoratorCustomScopeEdit = te(0, 0, 136, 0, newText8);
         CodeAction replaceDecoratorCustomScopeAction = ca(uri, "Replace @CustomNormalScope with @Dependent", decoratorCustomScope, replaceDecoratorCustomScopeEdit);
         assertJavaCodeAction(createCodeActionParams(uri, decoratorCustomScope), utils, replaceDecoratorCustomScopeAction);
     }
