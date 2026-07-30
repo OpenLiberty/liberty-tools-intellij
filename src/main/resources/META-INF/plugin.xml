@@ -127,6 +127,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.CdiWildcardDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.CdiObserverMethodDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
@@ -620,6 +623,14 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidNamedAnnotationOnNonFieldInjectionPoint"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertNamedValueAttributeQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidObserverMethodWithoutNotify"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertNotifyMethodQuickFix$NotifyEvent"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidObserverMethodWithoutNotify"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertNotifyMethodQuickFix$NotifyEventContext"/>
 
         <!-- Interceptor -->
         <javaCodeActionParticipant kind="quickfix"
