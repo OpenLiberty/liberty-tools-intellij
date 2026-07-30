@@ -579,8 +579,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             String fqn = disposesParam.getType().getCanonicalText();
             if (!producerTypes.contains(fqn)) {
                 diagnostics.add(createDiagnostic(method, unit,
-                        Messages.getMessage("InvalidOrphanDisposerMethod",
-                                disposesParam.getType().getPresentableText()),
+                        Messages.getMessage("InvalidOrphanDisposerMethod"),
                         DIAGNOSTIC_CODE_ORPHAN_DISPOSER, null, DiagnosticSeverity.Error));
             }
         }
