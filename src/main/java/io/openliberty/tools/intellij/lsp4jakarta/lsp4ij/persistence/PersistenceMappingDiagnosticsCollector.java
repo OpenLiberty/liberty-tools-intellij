@@ -88,8 +88,14 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
 
             // 2. Field-level annotations (@Embedded / @ElementCollection target)
             for (PsiField field : type.getFields()) {
-                validateOverridesOnField(field, type, unit, ATTRIBUTE_DESC, diagnostics);
-                validateOverridesOnField(field, type, unit, ASSOCIATION_DESC, diagnostics);
+                validateOverridesOnMember(field, type, unit, ATTRIBUTE_DESC, diagnostics);
+                validateOverridesOnMember(field, type, unit, ASSOCIATION_DESC, diagnostics);
+            }
+
+            // 3. Method-level annotations (property-based access)
+            for (PsiMethod method : type.getMethods()) {
+                validateOverridesOnMember(method, type, unit, ATTRIBUTE_DESC, diagnostics);
+                validateOverridesOnMember(method, type, unit, ASSOCIATION_DESC, diagnostics);
             }
         }
     }
@@ -171,13 +177,18 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     }
 
     // -----------------------------------------------------------------------
-    // Field-level: resolve name against @Embedded type or @ElementCollection map
+    // Field / method-level: resolve name against @Embedded type or @ElementCollection map
     // -----------------------------------------------------------------------
 
-    private void validateOverridesOnField(PsiField field, PsiClass declaringType,
-                                          PsiJavaFile unit, OverrideDescriptor desc,
-                                          List<Diagnostic> diagnostics) {
-        PsiAnnotation[] annotations = field.getAnnotations();
+    /**
+     * Validates override annotations on a field or getter method (property-based access).
+     * The type is resolved via {@link #getMemberType(PsiJvmModifiersOwner)} — {@code field.getType()}
+     * for fields, {@code method.getReturnType()} for methods — keeping the rest of the logic identical.
+     */
+    private void validateOverridesOnMember(PsiJvmModifiersOwner member, PsiClass declaringType,
+                                           PsiJavaFile unit, OverrideDescriptor desc,
+                                           List<Diagnostic> diagnostics) {
+        PsiAnnotation[] annotations = member.getAnnotations();
         boolean hasEmbedded = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDED);
         boolean hasElementCollection = isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION);
 
@@ -190,39 +201,49 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             if (isMatchedJavaElement(declaringType, fqn, desc.singleFqn)) {
                 String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
-                    validateNameOnField(name, annotation, field, declaringType,
-                            hasElementCollection, desc, unit, diagnostics);
+                    validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
                 }
             } else if (isMatchedJavaElement(declaringType, fqn, desc.containerFqn)) {
                 for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
                     String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
-                        validateNameOnField(name, nested, field, declaringType,
-                                hasElementCollection, desc, unit, diagnostics);
+                        validateNameOnMember(name, nested, member, hasElementCollection, desc, unit, diagnostics);
                     }
                 }
             }
         }
     }
 
-    private void validateNameOnField(String name, PsiAnnotation annotation, PsiField field,
-                                     PsiClass declaringType, boolean isElementCollection,
-                                     OverrideDescriptor desc, PsiJavaFile unit,
-                                     List<Diagnostic> diagnostics) {
-        PsiType fieldType = field.getType();
-        if (!(fieldType instanceof PsiClassType)) {
+    private void validateNameOnMember(String name, PsiAnnotation annotation,
+                                      PsiJvmModifiersOwner member, boolean isElementCollection,
+                                      OverrideDescriptor desc, PsiJavaFile unit,
+                                      List<Diagnostic> diagnostics) {
+        PsiType memberType = getMemberType(member);
+        if (!(memberType instanceof PsiClassType)) {
             return;
         }
-        PsiClassType classType = (PsiClassType) fieldType;
+        PsiClassType classType = (PsiClassType) memberType;
         PsiClass resolvedClass = classType.resolve();
 
         if (isElementCollection
                 && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQN)) {
             validateNameOnMapField(name, annotation, classType, desc, unit, diagnostics);
         } else if (resolvedClass != null) {
-            // @Embedded: resolve name against the embeddable type
             validateNameAgainstType(name, name, annotation, resolvedClass, desc, unit, diagnostics);
         }
+    }
+
+    /**
+     * Returns the declared type of a field or the return type of a method.
+     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
+     */
+    private PsiType getMemberType(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField) {
+            return ((PsiField) member).getType();
+        } else if (member instanceof PsiMethod) {
+            return ((PsiMethod) member).getReturnType();
+        }
+        return null;
     }
 
     /**
