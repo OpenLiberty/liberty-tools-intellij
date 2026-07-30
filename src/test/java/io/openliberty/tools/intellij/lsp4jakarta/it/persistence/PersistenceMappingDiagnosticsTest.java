@@ -461,4 +461,86 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, divisionNotInDepartmentWithTeam);
     }
+
+    // -----------------------------------------------------------------------
+    // @AttributeOverride — method-level (property-based access)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void validPropertyBasedAttributeOverride_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/ValidPropertyBasedOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
+    @Test
+    public void invalidPropertyBasedAttributeOverride_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/InvalidPropertyBasedOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 30 (0-based 29): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
+        Diagnostic zipcodeNotInAddress = d(29, 4, 77,
+                "The name \"zipcode\" in @AttributeOverride does not match any declared field or property in \"Address\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, zipcodeNotInAddress);
+    }
+
+    // -----------------------------------------------------------------------
+    // @AssociationOverride — method-level (property-based access)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void validPropertyBasedAssociationOverride_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/ValidPropertyBasedOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
+    @Test
+    public void invalidPropertyBasedAssociationOverride_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidPropertyBasedOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 30 (0-based 29): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+        Diagnostic directorNotInDepartment = d(29, 4, 87,
+                "The name \"director\" in @AssociationOverride does not match any declared field or property in \"Department\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, directorNotInDepartment);
+    }
 }
