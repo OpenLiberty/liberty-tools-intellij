@@ -162,11 +162,11 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	private void validateAbstractClassAndNoArgsConstructor(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type) {
 		ConstructorInfoDiagnosticHelper constructorInfo = ConstructorInfoDiagnosticHelper.initialize();
 		if(type.hasModifierProperty(PsiModifier.ABSTRACT)) {
-			diagnostics.add(createDiagnostic(type, unit,
-					Messages.getMessage("InvalidInterceptorAbstractClass", type.getName()),
-					DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS, null,
-					DiagnosticSeverity.Error));
-		}
+				diagnostics.add(createDiagnostic(type, unit,
+						Messages.getMessage("InvalidInterceptorAbstractClass", type.getName()),
+						DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS, null,
+						DiagnosticSeverity.Error));
+			}
 		else {
 			for (PsiMethod method : type.getMethods()) {
 				//Checks if method is a constructor and has valid no-args constructor
@@ -318,29 +318,29 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			methodsByAnnotationType.computeIfAbsent(annotationFQN, k -> new ArrayList<>()).add(method);
 		}
 		return interceptorTypeMethodAnnotations;
-	}
-
-	/**
-	 * Checks if an interceptor class has at least one interceptor binding annotation.
-	 * According to Jakarta Interceptors 2.0 specification, an interceptor declared using
-	 * interceptor annotation must specify at least one interceptor binding annotation to
-	 * enable the container to match it with target components.
-	 *
-	 * @param type the class to check
-	 * @param unit the Java file containing the class
-	 * @param diagnostics the list to add diagnostics to
-	 */
+  }
+  
+	   /**
+	    * Checks if an interceptor class has at least one interceptor binding annotation.
+	    * According to Jakarta Interceptors 2.0 specification, an interceptor declared using
+	    * interceptor annotation must specify at least one interceptor binding annotation to
+	    * enable the container to match it with target components.
+		* 
+		* @param type the class to check
+		* @param unit the Java file containing the class
+		* @param diagnostics the list to add diagnostics to
+		*/
 	private void checkInterceptorBinding(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		boolean hasInterceptorBinding = false;
 		PsiAnnotation[] annotations = type.getAnnotations();
-
+		
 		for (PsiAnnotation annotation : annotations) {
 			if (AnnotationUtil.hasMetaAnnotation(annotation, type, INTERCEPTOR_BINDING_FQ_NAME)) {
 				hasInterceptorBinding = true;
 				break;
 			}
 		}
-
+		
 		if (!hasInterceptorBinding) {
 			Range range = PositionUtils.toNameRange(type.getNameIdentifier());
 			String msg = Messages.getMessage("InvalidInterceptorMissingInterceptorBinding");
