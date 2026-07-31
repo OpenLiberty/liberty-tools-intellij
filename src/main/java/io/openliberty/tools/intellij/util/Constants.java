@@ -55,8 +55,8 @@ public final class Constants {
     public static final DataKey<String> LIBERTY_PROJECT_NAME = DataKey.create("LIBERTY_PROJECT_NAME");
     public static final DataKey<ProjectType> LIBERTY_PROJECT_TYPE = DataKey.create("LIBERTY_PROJECT_TYPE");
     public static final DataKey<HashMap<String, ArrayList<Object>>> LIBERTY_PROJECT_MAP = DataKey.create("LIBERTY_PROJECT_MAP");
-    public static final String LIBERTY_DASHBOARD_TREE = "LIBERTY_DASHBOARD_TREE";
     public static final String LIBERTY_ACTION_TOOLBAR = "LIBERTY_ACTION_TOOLBAR";
+    public static final String LIBERTY_TREE_DATA_PROVIDER_KEY = "LibertyTreeDataProvider";
 
     /**
      * Constants for Action IDs
