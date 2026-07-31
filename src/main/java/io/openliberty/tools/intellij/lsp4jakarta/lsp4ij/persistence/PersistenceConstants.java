@@ -31,15 +31,15 @@ public class PersistenceConstants {
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
-    public static final String TABLEGENERATOR = "jakarta.persistence.TableGenerator";
-    public static final String TABLEGENERATORS = "jakarta.persistence.TableGenerators";
-    public static final String SEQUENCEGENERATOR = "jakarta.persistence.SequenceGenerator";
-    public static final String SEQUENCEGENERATORS = "jakarta.persistence.SequenceGenerators";
-    public static final String SECONDARYTABLE = "jakarta.persistence.SecondaryTable";
-    public static final String SECONDARYTABLES = "jakarta.persistence.SecondaryTables";
+    public static final String TABLE_GENERATOR = "jakarta.persistence.TableGenerator";
+    public static final String TABLE_GENERATORS = "jakarta.persistence.TableGenerators";
+    public static final String SEQUENCE_GENERATOR = "jakarta.persistence.SequenceGenerator";
+    public static final String SEQUENCE_GENERATORS = "jakarta.persistence.SequenceGenerators";
+    public static final String SECONDARY_TABLE = "jakarta.persistence.SecondaryTable";
+    public static final String SECONDARY_TABLES = "jakarta.persistence.SecondaryTables";
 
     public static final String[] GENERATOR_ANNOTATIONS = {
-        TABLEGENERATOR, TABLEGENERATORS, SEQUENCEGENERATOR, SEQUENCEGENERATORS, SECONDARYTABLE, SECONDARYTABLES
+            TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
     };
     public static final String VALUE = "value";
 

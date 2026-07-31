@@ -492,29 +492,29 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             return;
         }
         switch (matched) {
-            case PersistenceConstants.TABLEGENERATOR:
+            case PersistenceConstants.TABLE_GENERATOR:
                 validateGeneratorNameAttribute(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
                 break;
-            case PersistenceConstants.SEQUENCEGENERATOR:
+            case PersistenceConstants.SEQUENCE_GENERATOR:
                 validateGeneratorNameAttribute(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
                 break;
-            case PersistenceConstants.SECONDARYTABLE:
+            case PersistenceConstants.SECONDARY_TABLE:
                 validateGeneratorNameAttribute(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
                 break;
-            case PersistenceConstants.TABLEGENERATORS:
+            case PersistenceConstants.TABLE_GENERATORS:
                 validateNonEmptyMappingArray(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING,
                         PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
                 break;
-            case PersistenceConstants.SEQUENCEGENERATORS:
+            case PersistenceConstants.SEQUENCE_GENERATORS:
                 validateNonEmptyMappingArray(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING,
                         PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
                 break;
-            case PersistenceConstants.SECONDARYTABLES:
+            case PersistenceConstants.SECONDARY_TABLES:
                 validateNonEmptyMappingArray(annotation, unit, diagnostics,
                         PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING,
                         PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
