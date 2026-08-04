@@ -60,11 +60,16 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
+        Diagnostic withSessionScopedMissingSerializable = d(16, 6, 32,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+
         Diagnostic withDependentAndRequest = d(10, 13, 33,
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, withRequestScoped, withSessionScoped, withDependentAndRequest);
+        assertJavaDiagnostics(diagnosticsParams, utils, withRequestScoped, withSessionScoped,
+                withSessionScopedMissingSerializable, withDependentAndRequest);
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, withRequestScoped);
         String newText = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.ejb.Stateless;\nimport jakarta.enterprise.context.RequestScoped;\n" +
                 "import jakarta.enterprise.context.SessionScoped;\nimport jakarta.enterprise.context.Dependent;\n\n// Invalid: Stateless with RequestScoped\n" +
