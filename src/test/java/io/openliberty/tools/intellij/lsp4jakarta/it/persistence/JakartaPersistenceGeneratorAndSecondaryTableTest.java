@@ -93,6 +93,23 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
     }
 
     @Test
+    public void testTableGeneratorsEmptyArrayOnNonEntityClass() throws Exception {
+        // Confirms that the empty-array branch in validateNonEmptyMappingArray is only reached for @Entity-annotated classes.
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsEmptyArrayNoEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — class is not annotated with @Entity
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
     public void testTableGeneratorsWithEmptyNameOnTypeFieldAndMethod() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());

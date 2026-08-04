@@ -53,9 +53,6 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             for (PsiClass type : alltypes) {
                 allAnnotations = type.getAnnotations();
 
-                // TYPE-level: @SecondaryTable/s, @TableGenerator/s, @SequenceGenerator/s
-                Arrays.stream(allAnnotations).forEach(annotation -> validateGeneratorAnnotation(annotation, type, unit, diagnostics));
-
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
@@ -65,6 +62,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 }
 
                 if (EntityAnnotation != null) {
+                    // TYPE-level: @SecondaryTable/s, @TableGenerator/s, @SequenceGenerator/s
+                    Arrays.stream(allAnnotations).forEach(annotation -> validateGeneratorAnnotation(annotation, type, unit, diagnostics));
+
                     // Define boolean requirements for the diagnostics
                     boolean hasPublicOrProtectedNoArgConstructor = false;
                     boolean hasArgConstructor = false;
@@ -487,7 +487,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     private void validateGeneratorAnnotation(PsiAnnotation annotation, PsiClass type,
                                              PsiJavaFile unit, List<Diagnostic> diagnostics) {
         String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                PersistenceConstants.GENERATOR_ANNOTATIONS);
+                PersistenceConstants.GENERATOR_AND_TABLE_ANNOTATIONS);
         if (matched == null) {
             return;
         }
