@@ -21,38 +21,44 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
- * Quick fix for removing named JPA annotations
- * (@NamedEntityGraph, @NamedEntityGraphs, @NamedQuery, @NamedQueries, @NamedNativeQuery, @NamedNativeQueries)
- * when they are applied to a class that does not meet the annotation requirements.
+ * Quick fix that removes annotations listed in the diagnostic data.
+ * The annotation class names to remove are read from {@link Diagnostic#getData()}
+ * (a {@link JsonArray} of strings) rather than being hardcoded.
  */
-public class RemoveNamedJPAAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
+public class RemoveNamedAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
 
-    public RemoveNamedJPAAnnotationQuickFix() {
+    public RemoveNamedAnnotationQuickFix() {
         super();
     }
 
     @Override
     public String getParticipantId() {
-        return RemoveNamedJPAAnnotationQuickFix.class.getName();
+        return RemoveNamedAnnotationQuickFix.class.getName();
     }
 
     @Override
     public List<? extends CodeAction> getCodeActions(JavaCodeActionContext context, Diagnostic diagnostic) {
-        List<CodeAction> codeActions = new ArrayList<>();
+        // The annotations to remove are supplied by the diagnostics collector via
+        // diagnostic.getData() as a JsonArray of fully qualified annotation name strings.
+        if (!(diagnostic.getData() instanceof JsonArray diagnosticData) || diagnosticData.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         PsiElement node = context.getCoveredNode();
         PsiElement parentType = getBinding(node);
+        if (parentType == null) {
+            return Collections.emptyList();
+        }
 
-        JsonArray diagnosticData = (JsonArray) diagnostic.getData();
+        List<CodeAction> codeActions = new ArrayList<>();
         String[] annotations = StreamSupport.stream(diagnosticData.spliterator(), false)
                 .map(JsonElement::getAsString).toArray(String[]::new);
-
-        if (parentType != null) {
-            removeAnnotation(diagnostic, context, codeActions, annotations);
-        }
+        removeAnnotation(diagnostic, context, codeActions, annotations);
         return codeActions;
     }
 }

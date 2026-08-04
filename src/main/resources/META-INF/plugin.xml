@@ -460,7 +460,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedEntityGraphOnNonEntityClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedEntityGraphOnNonEntityClass"
@@ -468,7 +468,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedEntityGraphsOnNonEntityClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedEntityGraphsOnNonEntityClass"
@@ -476,7 +476,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedQueryOnInvalidClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedQueryOnInvalidClass"
@@ -484,7 +484,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedQueriesOnInvalidClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedQueriesOnInvalidClass"
@@ -492,7 +492,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedNativeQueryOnInvalidClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedNativeQueryOnInvalidClass"
@@ -500,7 +500,7 @@
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedNativeQueriesOnInvalidClass"
-                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedJPAAnnotationQuickFix"/>
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveNamedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#NamedNativeQueriesOnInvalidClass"
