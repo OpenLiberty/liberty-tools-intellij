@@ -16,7 +16,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class ManagedBeanConstants {
     /* Annotation Constants */
@@ -35,7 +34,6 @@ public class ManagedBeanConstants {
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
-    public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -79,10 +77,6 @@ public class ManagedBeanConstants {
                     "jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped",
                     "jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.NormalScope",
                     "jakarta.Interceptor", "jakarta.Decorator", "jakarta.enterprise.inject.Stereotype"));
-
-    /** All CDI scope FQ names plus @NormalScope, pre-computed for use in annotation checks. */
-    public static final String[] ALL_SCOPE_FQ_NAMES = Stream.concat(
-            SCOPE_FQ_NAMES.stream(), Stream.of(NORMAL_SCOPE_FQ_NAME)).toArray(String[]::new);
 
     // Scopes that are invalid for interceptors and decorators (they must use @Dependent only)
     public static final String[] INVALID_INTERCEPTOR_DECORATOR_SCOPES = {

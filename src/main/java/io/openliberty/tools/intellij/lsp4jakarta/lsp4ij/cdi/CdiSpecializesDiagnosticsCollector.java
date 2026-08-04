@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
+import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -53,6 +54,19 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
         for (PsiClass type : unit.getClasses()) {
             if (AnnotationUtils.hasAnnotation(type, SPECIALIZES_FQ_NAME)) {
                 validateSpecializes(type, unit, diagnostics);
+                // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#direct_and_indirect_specialization
+                // A specialized bean must not declare an explicit bean name using @Named.
+                // The name is inherited from the bean it specializes.
+                PsiAnnotation[] typeAnnotations = type.getAnnotations();
+                for (PsiAnnotation annotation : typeAnnotations) {
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                        diagnostics.add(createDiagnostic(annotation, unit,
+                                Messages.getMessage("SpecializedBeanWithNamedAnnotation", type.getName()),
+                                DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED, null,
+                                DiagnosticSeverity.Error));
+                        break;
+                    }
+                }
             }
         }
     }
@@ -74,7 +88,7 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
         // (null superclass or unscoped superclass) is a definition error.
         PsiClass superclass = type.getSuperClass();
         boolean directSuperclassIsBean = superclass != null
-                && AnnotationUtils.hasAnyAnnotation(superclass, ALL_SCOPE_FQ_NAMES);
+                && AnnotationUtils.hasAnyAnnotation(superclass, SCOPE_FQ_NAMES.toArray(String[]::new));
 
         if (!directSuperclassIsBean) {
             diagnostics.add(createDiagnostic(type, unit,
