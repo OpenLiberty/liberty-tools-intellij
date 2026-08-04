@@ -65,6 +65,9 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         Diagnostic dSessionScopedClass = d(17, 6, 31,
                 "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data2);
+        Diagnostic dSessionScopedMissingSerializable = d(17, 6, 31,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
         // Test case 6: Singleton with mixed valid and invalid scopes (RequestScoped + ApplicationScoped)
         JsonArray data3 = new JsonArray();
@@ -88,6 +91,9 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         Diagnostic dMixedInvalidAndDependentInvalidScope = d(48, 6, 43,
                 "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", data4);
+        Diagnostic dMixedInvalidAndDependentMissingSerializable = d(48, 6, 43,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
         
         JsonArray data4b = new JsonArray();
         data4b.add("jakarta.enterprise.context.Dependent");
@@ -107,10 +113,12 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils,
                 dRequestScopedAnnotation,
                 dSessionScopedClass,
+                dSessionScopedMissingSerializable,
                 dMixedInvalidAndApplicationScopedInvalidScope,
                 dMixedInvalidAndApplicationScopedMultipleScopes,
                 dMixedInvalidAndDependentInvalidScope,
                 dMixedInvalidAndDependentMultipleScopes,
+                dMixedInvalidAndDependentMissingSerializable,
                 dBothValidScopesMultipleScopes);
 
         // Test code actions for dRequestScopedAnnotation (Test case 1)
