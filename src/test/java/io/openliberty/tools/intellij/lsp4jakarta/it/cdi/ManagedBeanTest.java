@@ -98,70 +98,56 @@ public class ManagedBeanTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // test expected diagnostic
-        Diagnostic d1 = d(6, 13, 37,
+        Diagnostic d1 = d(37, 6, 36,
+                "Scope type annotations must be specified by a managed bean class at most once.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
+        d1.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.RequestScoped")));
+        Diagnostic d2 = d(37, 6, 36,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+        Diagnostic d3 = d(27, 6, 33,
                 "The @Dependent annotation must be the only scope defined by a Managed bean class of generic type.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
-        Diagnostic d2 = d(7, 15, 16,
-                "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
-        Diagnostic d3 = d(17, 6, 27,
-                "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
+        Diagnostic genericManagedBeanMissingSerializable = d(27, 6, 33,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
         Diagnostic d4 = d(18, 15, 16,
                 "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
-
-        Diagnostic d5 = d(27, 6, 33,
+        Diagnostic d5 = d(17, 6, 27,
+                "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
+        Diagnostic d6 = d(17, 6, 27,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+        Diagnostic d7 = d(7, 15, 16,
+                "The @Dependent annotation must be the only scope defined by a managed bean with a non-static public field.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
+        Diagnostic d8 = d(6, 13, 37,
                 "The @Dependent annotation must be the only scope defined by a Managed bean class of generic type.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidManagedBeanAnnotation");
 
-        Diagnostic d6 = d(37, 6, 36,
-                "Scope type annotations must be specified by a managed bean class at most once.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl");
-        d6.setData(new Gson().toJsonTree(Arrays.asList("jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.RequestScoped")));
-
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5, d6);
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, genericManagedBeanMissingSerializable, d4, d5, d6, d7, d8);
 
         String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n" +
-                "@Dependent\n@RequestScoped\n@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
-                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
+                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
+                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n" +
+                "@RequestScoped\n@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n" +
+                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
         String newText2 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n" +
-                "@Dependent\n@RequestScoped\n@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
+                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
+                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
                 "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n@SessionScoped\n" +
                 "class ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n" +
+                "@RequestScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
         String newText3 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n" +
-                "@Dependent\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
-                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
-                "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
-                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
-        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n" +
-                "class NonGenericManagedBean {\n    public int a;\n\n    " +
-                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n@SessionScoped\n" +
-                "class ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
-                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
-        String newText5 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
                 "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
                 "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
                 "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
@@ -170,36 +156,31 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
                 "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
-        String newText61 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
-                "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
-                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
-                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
-                "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
-                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@SessionScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+        String newText4 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n@Dependent\n" +
+                "@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n" +
+                "class NonGenericManagedBean {\n    public int a;\n\n    public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n" +
+                "@RequestScoped\n@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
-        String newText62 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
+        String newText5 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
                 "@Dependent\n@RequestScoped\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
-                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
-                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
-                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\nclass NonGenericManagedBean {\n    " +
+                "public int a;\n\n    public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
                 "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
-                "class ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
 
         // Assert for the diagnostic d1
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
-        TextEdit te1 = te(0, 0, 43, 1, newText1);
-        CodeAction ca1 = ca(uri, "Replace current scope with @Dependent", d1, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        TextEdit removeRequestScopedTextEdit = te(0, 0, 43, 1, newText1);
+        CodeAction removeRequestScopedCodeAction = ca(uri, "Remove @RequestScoped", d1, removeRequestScopedTextEdit);
+        TextEdit removeSessionScopedTextEdit = te(0, 0, 43, 1, newText2);
+        CodeAction removeSessionScopedCodeAction = ca(uri, "Remove @SessionScoped", d1, removeSessionScopedTextEdit);
+        assertJavaCodeAction(codeActionParams1, utils, removeRequestScopedCodeAction, removeSessionScopedCodeAction);
 
-        // Assert for the diagnostic d2
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, d2);
-        TextEdit te2 = te(0, 0, 43, 1, newText2);
-        CodeAction ca2 = ca(uri, "Replace current scope with @Dependent", d2, te2);
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
 
         // Assert for the diagnostic d3
         JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
@@ -219,14 +200,61 @@ public class ManagedBeanTest extends BaseJakartaTest {
         CodeAction ca5 = ca(uri, "Replace current scope with @Dependent", d5, te5);
         assertJavaCodeAction(codeActionParams5, utils, ca5);
 
-        // Assert for the diagnostic d6
-        JakartaJavaCodeActionParams codeActionParams6 = createCodeActionParams(uri, d6);
-        TextEdit te61 = te(0, 0, 43, 1, newText61);
-        CodeAction ca61 = ca(uri, "Remove @RequestScoped", d6, te61);
-        TextEdit te62 = te(0, 0, 43, 1, newText62);
-        CodeAction ca62 = ca(uri, "Remove @SessionScoped", d6, te62);
-        assertJavaCodeAction(codeActionParams6, utils, ca61, ca62);
     }
+
+    @Test
+    public void sessionScopedWithoutSerializable() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SessionScopedWithoutSerializable.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic sessionScopedMissingSerializable = d(6, 13, 45,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, sessionScopedMissingSerializable);
+    }
+
+    @Test
+    public void conversationScopedWithoutSerializable() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/ConversationScopedWithoutSerializable.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic conversationScopedMissingSerializable = d(6, 13, 50,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, conversationScopedMissingSerializable);
+    }
+
+    @Test
+    public void sessionScopedWithSerializable() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SessionScopedWithSerializable.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 
     @Test
     public void scopeDeclaration() throws Exception {
