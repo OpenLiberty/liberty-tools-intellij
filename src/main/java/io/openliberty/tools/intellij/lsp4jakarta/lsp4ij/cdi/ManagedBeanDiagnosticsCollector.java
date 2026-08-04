@@ -63,6 +63,13 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
+            Stream.of(typeAnnotations)
+                    .filter(annotation -> io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil.hasMetaAnnotation(annotation, type,
+                            NORMAL_SCOPE_FQ_NAME))
+                    .map(PsiAnnotation::getQualifiedName)
+                    .filter(Objects::nonNull)
+                    .filter(annotationName -> !managedBeanAnnotations.contains(annotationName))
+                    .forEach(managedBeanAnnotations::add);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
@@ -558,18 +565,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         if (!io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil.hasMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME)) {
             return null;
         }
-
         String annotationName = annotation.getQualifiedName();
         if (annotationName == null) {
             return null;
         }
-
         PsiClass annotationClass = JavaPsiFacade.getInstance(type.getProject())
                 .findClass(annotationName, type.getResolveScope());
         if (annotationClass == null) {
             return null;
         }
-
         return AnnotationUtil.findAnnotation(annotationClass, NORMAL_SCOPE_FQ_NAME);
     }
 

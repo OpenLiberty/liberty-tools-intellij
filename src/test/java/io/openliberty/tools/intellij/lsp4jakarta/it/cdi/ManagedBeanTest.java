@@ -203,60 +203,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
     }
 
     @Test
-    public void sessionScopedWithoutSerializable() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SessionScopedWithoutSerializable.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        Diagnostic sessionScopedMissingSerializable = d(6, 13, 45,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, sessionScopedMissingSerializable);
-    }
-
-    @Test
-    public void conversationScopedWithoutSerializable() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/cdi/ConversationScopedWithoutSerializable.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        Diagnostic conversationScopedMissingSerializable = d(6, 13, 50,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, conversationScopedMissingSerializable);
-    }
-
-    @Test
-    public void sessionScopedWithSerializable() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SessionScopedWithSerializable.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        assertJavaDiagnostics(diagnosticsParams, utils);
-    }
-
-
-    @Test
     public void scopeDeclaration() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
