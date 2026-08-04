@@ -51,7 +51,9 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
             return;
         }
         for (PsiClass type : unit.getClasses()) {
-            validateSpecializes(type, unit, diagnostics);
+            if (AnnotationUtils.hasAnnotation(type, SPECIALIZES_FQ_NAME)) {
+                validateSpecializes(type, unit, diagnostics);
+            }
         }
     }
 
@@ -67,11 +69,6 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
      * @param diagnostics the list to add diagnostics to
      */
     private void validateSpecializes(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Only validate classes annotated with @Specializes
-        if (!AnnotationUtils.hasAnnotation(type, SPECIALIZES_FQ_NAME)) {
-            return;
-        }
-
         // Per CDI spec 3.1.4, only the direct (immediate) superclass must be a bean.
         // A resolved superclass with any CDI scope annotation is valid; anything else
         // (null superclass or unscoped superclass) is a definition error.
