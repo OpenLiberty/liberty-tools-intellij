@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -184,26 +185,55 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      * Validates override annotations on a field or getter method (property-based access).
      * The type is resolved via {@link #getMemberType(PsiJvmModifiersOwner)} — {@code field.getType()}
      * for fields, {@code method.getReturnType()} for methods — keeping the rest of the logic identical.
+     *
+     * <p>For {@code @AttributeOverride} / {@code @AttributeOverrides}: if the member
+     * lacks {@code @Embedded}, {@code @EmbeddedId}, or {@code @ElementCollection},
+     * a diagnostic is emitted for each such annotation — the override has no valid target.
      */
     private void validateOverridesOnMember(PsiJvmModifiersOwner member, PsiClass declaringType,
                                            PsiJavaFile unit, OverrideDescriptor desc,
                                            List<Diagnostic> diagnostics) {
         PsiAnnotation[] annotations = member.getAnnotations();
         boolean hasEmbedded = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDED);
+        boolean hasEmbeddedId = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDEDID);
         boolean hasElementCollection = isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION);
+        boolean hasValidTarget = hasEmbedded || hasEmbeddedId || hasElementCollection;
 
-        if (!hasEmbedded && !hasElementCollection) {
-            return;
-        }
+        // Only @AttributeOverride carries the @Embedded/@EmbeddedId/@ElementCollection
+        // restriction at the field/method level.
+        boolean isAttributeOverrideDesc = PersistenceConstants.ATTRIBUTE_OVERRIDE.equals(desc.singleFqn);
 
         for (PsiAnnotation annotation : annotations) {
             String fqn = annotation.getQualifiedName();
-            if (isMatchedJavaElement(declaringType, fqn, desc.singleFqn)) {
+            boolean isSingle = isMatchedJavaElement(declaringType, fqn, desc.singleFqn);
+            boolean isContainer = isMatchedJavaElement(declaringType, fqn, desc.containerFqn);
+
+            if (!isSingle && !isContainer) {
+                continue;
+            }
+
+            if (isAttributeOverrideDesc && !hasValidTarget) {
+                // @AttributeOverride / @AttributeOverrides on a field or method that is not
+                // @Embedded, @EmbeddedId, or @ElementCollection — no valid override target.
+                diagnostics.add(createDiagnostic(annotation, unit,
+                        Messages.getMessage("AttributeOverrideOnNonEmbeddedField", JDTUtils.getSimpleName(fqn)),
+                        PersistenceConstants.DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED,
+                        null, DiagnosticSeverity.Error));
+                // Skip name-resolution: there is no embeddable type to resolve against.
+                continue;
+            }
+
+            if (!hasEmbedded && !hasElementCollection) {
+                // For @AssociationOverride: member has no supported target annotation — skip.
+                continue;
+            }
+
+            if (isSingle) {
                 String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
                 }
-            } else if (isMatchedJavaElement(declaringType, fqn, desc.containerFqn)) {
+            } else {
                 for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
                     String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
