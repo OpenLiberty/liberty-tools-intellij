@@ -197,7 +197,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, rawEventFieldDiagnostic);
         TextEdit te1 = te(0, 0, 68, 0, rawEventFieldFixed);
         CodeAction ca1 = ca(uri, "Remove @Inject", rawEventFieldDiagnostic, te1);
-    `        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        assertJavaCodeAction(codeActionParams1, utils, ca1);
 
         // --- Quickfix 2: setRawEvent method (line 31-32, 0-based: @Inject on line 31) ---
         String setRawEventFixed =
