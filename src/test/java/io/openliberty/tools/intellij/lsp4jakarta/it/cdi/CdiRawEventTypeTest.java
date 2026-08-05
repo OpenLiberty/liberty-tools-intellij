@@ -59,6 +59,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class CdiRawEventTypeTest extends BaseJakartaTest {
 
+    private static final String REMOVE_INJECT = "Remove @Inject";
+
     @Test
     public void rawEventInjectionPointDiagnostics() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
@@ -196,7 +198,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, rawEventFieldDiagnostic);
         TextEdit te1 = te(0, 0, 68, 0, rawEventFieldFixed);
-        CodeAction ca1 = ca(uri, "Remove @Inject", rawEventFieldDiagnostic, te1);
+        CodeAction ca1 = ca(uri, REMOVE_INJECT, rawEventFieldDiagnostic, te1);
         assertJavaCodeAction(codeActionParams1, utils, ca1);
 
         // --- Quickfix 2: setRawEvent method (line 31-32, 0-based: @Inject on line 31) ---
@@ -271,7 +273,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, rawEventMethodParamDiagnostic);
         TextEdit te2 = te(0, 0, 68, 0, setRawEventFixed);
-        CodeAction ca2 = ca(uri, "Remove @Inject", rawEventMethodParamDiagnostic, te2);
+        CodeAction ca2 = ca(uri, REMOVE_INJECT, rawEventMethodParamDiagnostic, te2);
         assertJavaCodeAction(codeActionParams2, utils, ca2);
 
         // --- Quickfix 3: setMixed method (line 41-42, 0-based: @Inject on line 41) ---
@@ -346,7 +348,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, rawEventMixedParamDiagnostic);
         TextEdit te3 = te(0, 0, 68, 0, setMixedFixed);
-        CodeAction ca3 = ca(uri, "Remove @Inject", rawEventMixedParamDiagnostic, te3);
+        CodeAction ca3 = ca(uri, REMOVE_INJECT, rawEventMixedParamDiagnostic, te3);
         assertJavaCodeAction(codeActionParams3, utils, ca3);
 
         // --- Quickfix 4: setMultipleRawEvents method (line 46-47, 0-based: @Inject on line 46) ---
@@ -421,7 +423,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, rawEventMultipleParamsDiagnostic);
         TextEdit te4 = te(0, 0, 68, 0, setMultipleRawEventsFixed);
-        CodeAction ca4 = ca(uri, "Remove @Inject", rawEventMultipleParamsDiagnostic, te4);
+        CodeAction ca4 = ca(uri, REMOVE_INJECT, rawEventMultipleParamsDiagnostic, te4);
         assertJavaCodeAction(codeActionParams4, utils, ca4);
 
         // --- Quickfix 5: rawEventInInner field in nested class (line 58-59, 0-based: @Inject on line 58) ---
@@ -496,7 +498,7 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, rawEventNestedClassDiagnostic);
         TextEdit te5 = te(0, 0, 68, 0, rawEventInInnerFixed);
-        CodeAction ca5 = ca(uri, "Remove @Inject", rawEventNestedClassDiagnostic, te5);
+        CodeAction ca5 = ca(uri, REMOVE_INJECT, rawEventNestedClassDiagnostic, te5);
         assertJavaCodeAction(codeActionParams5, utils, ca5);
     }
 }
