@@ -116,9 +116,14 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 "Interceptor methods must always call the InvocationContext.proceed method.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundInvokeInvalidProceed, aroundConstructInvalidProceed,
-                aroundTimeoutInvalidProceed, postConstructInvalidProceed, preDestroyInvalidProceed, aroundInvokeInvalidProceedChild,
-                postConstructInvalidProceedChild, preDestroyInvalidProceedChild);
+        Diagnostic aroundConstructInTargetClassProceed = JakartaForJavaAssert.d(23, 18, 41,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                preDestroyInvalidProceedChild, postConstructInvalidProceedChild, aroundInvokeInvalidProceedChild,
+                preDestroyInvalidProceed, postConstructInvalidProceed, aroundTimeoutInvalidProceed,
+                aroundConstructInTargetClassProceed, aroundConstructInvalidProceed, aroundInvokeInvalidProceed);
     }
 
     @Test
@@ -398,9 +403,28 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidMultipleInterceptorMethodsOfSameType",
                 new Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct")));
 
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, finalModifierDiagnostic, abstractModifierDiagnostic, duplicateAroundConstruct1,
-                proceedDiagnostics, staticModifierDiagnostic, invalidAbstractClassDiagnostics, multipleFinalModifierDiagnostic, multipleStaticModifierDiagnostic,
-                duplicateAroundConstruct2, duplicateAroundConstruct3, duplicateAroundConstruct4);
+        Diagnostic targetClassFinal = JakartaForJavaAssert.d(8, 24, 32,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+        Diagnostic targetClassAbstract = JakartaForJavaAssert.d(13, 27, 38,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+        Diagnostic targetClassStatic = JakartaForJavaAssert.d(16, 25, 34,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+        Diagnostic targetClassMultipleModifiers = JakartaForJavaAssert.d(21, 31, 50,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+        Diagnostic targetClassValid = JakartaForJavaAssert.d(26, 18, 26,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                duplicateAroundConstruct4, targetClassValid,
+                multipleFinalModifierDiagnostic, multipleStaticModifierDiagnostic, duplicateAroundConstruct3, targetClassMultipleModifiers,
+                staticModifierDiagnostic, duplicateAroundConstruct2, targetClassStatic,
+                abstractModifierDiagnostic, duplicateAroundConstruct1, targetClassAbstract, proceedDiagnostics,
+                finalModifierDiagnostic, targetClassFinal, invalidAbstractClassDiagnostics);
 
         // Test code actions for final modifier
         JakartaJavaCodeActionParams codeActionParams1 = JakartaForJavaAssert.createCodeActionParams(uri, finalModifierDiagnostic);
@@ -1537,5 +1561,43 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Assert NO diagnostics for valid interceptor with binding
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testAroundConstructInTargetClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidAroundConstructInTargetClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic aroundConstructInTargetClass = JakartaForJavaAssert.d(14, 18, 27,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInTargetClass);
+    }
+
+    @Test
+    public void testAroundConstructInSuperclassOfTargetClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidAroundConstructInSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic aroundConstructInSuperclass = JakartaForJavaAssert.d(14, 18, 27,
+                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInSuperclass);
     }
 }

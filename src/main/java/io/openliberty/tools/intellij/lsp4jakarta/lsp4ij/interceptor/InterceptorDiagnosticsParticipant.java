@@ -103,24 +103,29 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
-				
+	
 				// Process inner classes for duplicate interceptor method annotations
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
 				}
+	
+				// Check: @AroundConstruct must not appear in target classes (classes without @Interceptor)
+				if (!isInterceptorType(type)) {
+					checkAroundConstructInTargetClass(type, unit, diagnostics);
+				}
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
-		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
+		for (PsiMethod invokeMethod : methodsMissingProceedInvocation) {
 			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-    }
+	}
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
@@ -343,6 +348,32 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			Diagnostic diagnostic = new Diagnostic(range, msg);
 			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Warning);
 			diagnostics.add(diagnostic);
+		}
+	}
+
+	/**
+	* Checks if a non-interceptor class (target class) or one of its superclasses
+	* declares a method annotated with {@code @AroundConstruct}.
+	* According to the Jakarta Interceptors 2.0 specification, around-construct
+	* interceptor methods may only be declared in interceptor classes and/or their
+	* superclasses. Declaring them in a target class or its superclasses is invalid.
+	*
+	* @param type        the type to check
+	* @param unit        the compilation unit
+	* @param diagnostics the list to add diagnostics to
+	*/
+	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		for (PsiMethod method : type.getMethods()) {
+			for (PsiAnnotation annotation : method.getModifierList().getAnnotations()) {
+				if (isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)) {
+					Range range = PositionUtils.toNameRange(method);
+					String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
+					Diagnostic diagnostic = new Diagnostic(range, msg);
+					completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
+					diagnostics.add(diagnostic);
+					break;
+				}
+			}
 		}
 	}
 }
