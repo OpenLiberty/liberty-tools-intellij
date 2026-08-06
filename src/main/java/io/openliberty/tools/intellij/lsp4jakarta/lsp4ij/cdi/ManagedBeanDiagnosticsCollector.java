@@ -63,14 +63,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
-            Stream.of(typeAnnotations)
-                    .filter(annotation -> io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil.hasMetaAnnotation(annotation, type,
-                            NORMAL_SCOPE_FQ_NAME))
-                    .map(PsiAnnotation::getQualifiedName)
-                    .filter(Objects::nonNull)
-                    .filter(annotationName -> !managedBeanAnnotations.contains(annotationName))
-                    .forEach(managedBeanAnnotations::add);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
+            boolean hasPassivatingScope = hasPassivatingScope(type);
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
             // Check if the class is an interceptor or decorator
@@ -395,6 +389,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
 
                 // A managed bean in a passivating scope must implement Serializable.
+                validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
+            } else if (hasPassivatingScope) {
+                // For custom-scoped beans not recognized as managed beans, still validate passivating scope.
                 validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
             }
 
