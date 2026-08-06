@@ -51,6 +51,8 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
     public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldOrPropertyType";
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
+    public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
+    public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
 
 
     /* MapKey Codes */
@@ -68,7 +70,7 @@ public class PersistenceConstants {
     public static final Set<String> SET_OF_VALID_VERSION_TYPES = Set.of(
             "int", "short", "long", "java.lang.Integer",
             "java.lang.Short", "java.lang.Long", "java.sql.Timestamp");
-    
+
     /* Valid @Id type sets */
     private static final Set<String> VALID_ID_PRIMITIVES = Set.of(
             "int", "long", "short", "byte", "char", "boolean", "float", "double");
@@ -80,14 +82,14 @@ public class PersistenceConstants {
     private static final Set<String> VALID_ID_BIG_NUMBERS = Set.of(
             "java.math.BigDecimal", "java.math.BigInteger");
     private static final Set<String> VALID_ID_STRING = Set.of("java.lang.String");
-    
+
     // Combined set for easy validation using streams
     public static final Set<String> SET_OF_VALID_ID_TYPES = Stream.of(
             VALID_ID_PRIMITIVES, VALID_ID_WRAPPERS, VALID_ID_DATES,
             VALID_ID_BIG_NUMBERS, VALID_ID_STRING)
             .flatMap(Set::stream)
             .collect(Collectors.toUnmodifiableSet());
-    
+
     public static final String UTIL_DATE = "java.util.Date";
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
