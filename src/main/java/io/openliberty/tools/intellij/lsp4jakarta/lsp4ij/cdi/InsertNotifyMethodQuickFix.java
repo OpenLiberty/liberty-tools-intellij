@@ -20,6 +20,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddMethodProposal;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddMethodProposal.MethodParam;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.IJavaCodeActionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionResolveContext;
@@ -110,19 +111,13 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         String typeArgSimple = simpleName(typeArgFQName);
         String label = Messages.getMessage(labelKey, typeArgSimple);
 
-        String paramTypeFQName;
-        String paramName;
-        String typeArgParam;
+        MethodParam param;
         if (!isEventContext) {
             // notify(AuditEvent event)
-            paramTypeFQName = typeArgFQName;
-            paramName = "event";
-            typeArgParam = null;
+            param = new MethodParam(typeArgFQName, "event");
         } else {
             // notify(EventContext<AuditEvent> eventContext)
-            paramTypeFQName = ManagedBeanConstants.EVENT_CONTEXT_FQ_NAME;
-            paramName = "eventContext";
-            typeArgParam = typeArgFQName;
+            param = new MethodParam(ManagedBeanConstants.EVENT_CONTEXT_FQ_NAME, "eventContext", typeArgFQName);
         }
 
         ChangeCorrectionProposal proposal = new AddMethodProposal(
@@ -132,10 +127,10 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
                 parentType,
                 0,
                 "notify",
-                paramTypeFQName,
-                paramName,
-                typeArgParam,
-                true /* addOverride */);
+                "void",
+                "public",
+                Collections.singletonList("java.lang.Override"),
+                Collections.singletonList(param));
 
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER,
                 "Unable to create workspace edit for code action to insert notify method override");
