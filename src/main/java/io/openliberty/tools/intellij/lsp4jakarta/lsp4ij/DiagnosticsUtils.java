@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -197,5 +198,50 @@ public class DiagnosticsUtils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns {@code true} if the given annotation array represents an injection point that uses
+     * the {@code @Default} qualifier (explicitly or implicitly).
+     *
+     * <p>An injection point has the {@code @Default} qualifier when:
+     * <ul>
+     *   <li>No qualifier annotations are present other than {@code @Default} itself
+     *       (the container implicitly adds {@code @Default} and {@code @Any}), OR</li>
+     *   <li>{@code @Default} is explicitly declared.</li>
+     * </ul>
+     * An injection point does <em>not</em> have {@code @Default} when a custom qualifier
+     * (i.e. any qualifier other than {@code @Default} or {@code @Any}) is present.
+     *
+     * @param type        the declaring class (used for import resolution)
+     * @param annotations the annotations on the injection point
+     * @return {@code true} if the injection point has the {@code @Default} qualifier
+     */
+    public static boolean hasDefaultQualifier(PsiClass type, PsiAnnotation[] annotations) {
+        boolean hasExplicitDefault = false;
+        boolean hasCustomQualifier = false;
+
+        for (PsiAnnotation annotation : annotations) {
+            String fqn = annotation.getQualifiedName();
+            if (isMatchedJavaElement(type, fqn, CommonConstants.INJECT_FQ_NAME)) {
+                continue; // @Inject is not a qualifier
+            }
+            if (isMatchedJavaElement(type, fqn, CommonConstants.CDI_DEFAULT_FQ_NAME)) {
+                hasExplicitDefault = true;
+            } else if (isMatchedJavaElement(type, fqn, CommonConstants.CDI_ANY_FQ_NAME)) {
+                // @Any is not a custom qualifier; ignore
+            } else {
+                // Check if this annotation is a CDI qualifier (meta-annotated with @Qualifier)
+                PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
+                        .findClass(fqn, GlobalSearchScope.allScope(type.getProject()));
+                if (annotationType != null && AnnotationUtil.isAnnotated(
+                        annotationType, "jakarta.inject.Qualifier", 0)) {
+                    hasCustomQualifier = true;
+                }
+            }
+        }
+
+        // If a custom qualifier is present, @Default is not implicitly added
+        return !hasCustomQualifier || hasExplicitDefault;
     }
 }
