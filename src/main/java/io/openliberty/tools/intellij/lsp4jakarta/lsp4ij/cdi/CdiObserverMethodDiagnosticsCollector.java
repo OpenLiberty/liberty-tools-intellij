@@ -41,8 +41,6 @@ import java.util.List;
  */
 public class CdiObserverMethodDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
-    private static final String NOTIFY_METHOD_NAME = "notify";
-
     /**
      * {@inheritDoc}
      *
@@ -93,7 +91,7 @@ public class CdiObserverMethodDiagnosticsCollector extends AbstractDiagnosticsCo
         // Check whether the class declares any method named "notify".
         boolean hasNotifyOverride = false;
         for (PsiMethod method : type.getMethods()) {
-            if (NOTIFY_METHOD_NAME.equals(method.getName()) && !method.isConstructor()) {
+            if (ManagedBeanConstants.NOTIFY_METHOD_NAME.equals(method.getName()) && !method.isConstructor()) {
                 hasNotifyOverride = true;
                 break;
             }

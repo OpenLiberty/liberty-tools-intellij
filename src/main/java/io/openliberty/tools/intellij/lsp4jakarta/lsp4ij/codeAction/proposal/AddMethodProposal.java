@@ -25,9 +25,6 @@ import java.util.List;
  * <p>Supports configurable return type, modifier, method-level annotations,
  * and a list of parameters (each optionally wrapping its type in a generic
  * type argument).
- *
- * <p>Used to insert required {@code notify} overrides on custom
- * {@code ObserverMethod} implementations.
  */
 public class AddMethodProposal extends ASTRewriteCorrectionProposal {
 

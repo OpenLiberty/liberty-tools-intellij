@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -198,4 +199,40 @@ public class DiagnosticsUtils {
             return false;
         }
     }
+
+    /**
+     * Returns the fully-qualified name of the type argument {@code T} from
+     * {@code ObserverMethod<T>} declared on the given class.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @return the FQN of the first type argument of {@code ObserverMethod<T>},
+     *         or {@code "java.lang.Object"} if it cannot be resolved
+     */
+    public static String resolveObserverMethodTypeArgFQName(PsiClass classBinding) {
+        for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
+            PsiClass iface = ifaceType.resolve();
+            if (iface != null && ManagedBeanConstants.OBSERVER_METHOD_FQ_NAME.equals(iface.getQualifiedName())) {
+                PsiType[] typeArgs = ifaceType.getParameters();
+                if (typeArgs.length > 0) {
+                    return typeArgs[0].getCanonicalText();
+                }
+            }
+        }
+        return "java.lang.Object";
+    }
+
+    /**
+     * Returns the simple (unqualified) name of the type argument {@code T} from
+     * {@code ObserverMethod<T>} declared on the given class.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @return the simple name of the type argument, e.g. {@code "AuditEvent"},
+     *         or {@code "Object"} if it cannot be resolved
+     */
+    public static String resolveObserverMethodTypeArgSimpleName(PsiClass classBinding) {
+        String fqn = resolveObserverMethodTypeArgFQName(classBinding);
+        int dot = fqn.lastIndexOf('.');
+        return dot >= 0 ? fqn.substring(dot + 1) : fqn;
+    }
+
 }

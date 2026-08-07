@@ -13,10 +13,9 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.AddMethodProposal;
@@ -84,7 +83,7 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         if (parentType == null) {
             return Collections.emptyList();
         }
-        String typeArgSimple = resolveTypeArgSimpleName(parentType);
+        String typeArgSimple = DiagnosticsUtils.resolveObserverMethodTypeArgSimpleName(parentType);
         String label = Messages.getMessage(labelKey, typeArgSimple);
         return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
@@ -107,8 +106,8 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
             return toResolve;
         }
 
-        String typeArgFQName = resolveTypeArgFQName(parentType);
-        String typeArgSimple = simpleName(typeArgFQName);
+        String typeArgFQName = DiagnosticsUtils.resolveObserverMethodTypeArgFQName(parentType);
+        String typeArgSimple = DiagnosticsUtils.resolveObserverMethodTypeArgSimpleName(parentType);
         String label = Messages.getMessage(labelKey, typeArgSimple);
 
         MethodParam param;
@@ -135,50 +134,6 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER,
                 "Unable to create workspace edit for code action to insert notify method override");
         return toResolve;
-    }
-
-    /**
-     * Returns the fully-qualified name of the type argument {@code T} from
-     * {@code ObserverMethod<T>} declared on the given class.
-     *
-     * @param classBinding the class whose {@code implements} list is inspected
-     * @return the FQN of the first type argument of {@code ObserverMethod<T>},
-     *         or {@code "java.lang.Object"} if it cannot be resolved
-     */
-    private static String resolveTypeArgFQName(PsiClass classBinding) {
-        for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
-            PsiClass iface = ifaceType.resolve();
-            if (iface != null && ManagedBeanConstants.OBSERVER_METHOD_FQ_NAME.equals(iface.getQualifiedName())) {
-                PsiType[] typeArgs = ifaceType.getParameters();
-                if (typeArgs.length > 0) {
-                    return typeArgs[0].getCanonicalText();
-                }
-            }
-        }
-        return "java.lang.Object";
-    }
-
-    /**
-     * Returns the simple (unqualified) name of the type argument {@code T} from
-     * {@code ObserverMethod<T>} declared on the given class.
-     *
-     * @param classBinding the class whose {@code implements} list is inspected
-     * @return the simple name of the type argument, e.g. {@code "AuditEvent"},
-     *         or {@code "Object"} if it cannot be resolved
-     */
-    private static String resolveTypeArgSimpleName(PsiClass classBinding) {
-        return simpleName(resolveTypeArgFQName(classBinding));
-    }
-
-    /**
-     * Returns the simple (unqualified) name for a fully-qualified class name.
-     *
-     * @param fqn a fully-qualified class name, e.g. {@code "jakarta.enterprise.inject.spi.EventContext"}
-     * @return the portion after the last {@code '.'}, or {@code fqn} itself if no dot is present
-     */
-    private static String simpleName(String fqn) {
-        int dot = fqn.lastIndexOf('.');
-        return dot >= 0 ? fqn.substring(dot + 1) : fqn;
     }
 
     // -------------------------------------------------------------------------
