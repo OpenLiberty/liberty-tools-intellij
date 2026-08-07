@@ -156,6 +156,9 @@ public abstract class SingleModJakartaLSTestCommon {
         String privateString = "private Response getProperties() {";
         String flaggedString = "getProperties";
 
+        UIBotTestUtils.clickOnWindowPaneStripeButton(remoteRobot, "Language Servers");
+        UIBotTestUtils.enableDebugTraceInLS(remoteRobot);
+
         Path pathToSrc = Paths.get(projectsPath, projectName, "src", "main", "java", "io", "openliberty", "mp", "sample", "system", "SystemResource2.java");
         String quickfixChooserString = "Make method public";
 
@@ -183,6 +186,7 @@ public abstract class SingleModJakartaLSTestCommon {
         finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.captureLSPConsoleLog(remoteRobot);
         }
     }
 

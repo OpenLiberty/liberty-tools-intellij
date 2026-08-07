@@ -161,6 +161,9 @@ public abstract class SingleModMPLSTestCommon {
         String quickfixChooserString = "Insert " + livenessString;
         String mainQuickFixActionStr  = "Generate OpenAPI Annotations for 'ServiceLiveHealthCheck'";
 
+        UIBotTestUtils.clickOnWindowPaneStripeButton(remoteRobot, "Language Servers");
+        UIBotTestUtils.enableMPDebugTraceInLS(remoteRobot);
+
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "ServiceLiveHealthCheck.java");
 
@@ -185,6 +188,7 @@ public abstract class SingleModMPLSTestCommon {
         } finally {
             // Replace modified content with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+            UIBotTestUtils.captureLSPConsoleLog(remoteRobot);
         }
     }
 
@@ -296,6 +300,9 @@ public abstract class SingleModMPLSTestCommon {
 
         Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
 
+        UIBotTestUtils.clickOnWindowPaneStripeButton(remoteRobot, "Language Servers");
+        UIBotTestUtils.enableMPDebugTraceInLS(remoteRobot);
+
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
 
@@ -314,6 +321,7 @@ public abstract class SingleModMPLSTestCommon {
         } finally {
             // Replace modified microprofile-config.properties with the original content
             UIBotTestUtils.pasteOnActiveWindow(remoteRobot, true);
+            UIBotTestUtils.captureLSPConsoleLog(remoteRobot);
         }
 
     }
