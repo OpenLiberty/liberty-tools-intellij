@@ -270,4 +270,83 @@ public class CdiSpecializesTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    /**
+     * Tests that a class annotated with @Specializes with no superclass at all
+     * triggers a diagnostic error.
+     *
+     * @Specializes requires directly extending a bean class. A class with no
+     * superclass cannot satisfy this requirement.
+     */
+    @Test
+    public void testSpecializesWithNoSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithNoSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic noSuperclassDiagnostic = d(23, 13, 40,
+                "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesAnnotationOnNonBeanSuperclass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, noSuperclassDiagnostic);
+    }
+
+    /**
+     * Tests that a class annotated with @Specializes that only implements an
+     * interface (no extends clause) triggers a diagnostic error.
+     *
+     * Implementing an interface does not satisfy the CDI spec requirement that
+     * the bean class must directly extend another bean class.
+     */
+    @Test
+    public void testSpecializesWithInterfaceOnly() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithInterfaceOnly.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic interfaceOnlyDiagnostic = d(23, 13, 41,
+                "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesAnnotationOnNonBeanSuperclass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, interfaceOnlyDiagnostic);
+    }
+
+    /**
+     * Tests that a class annotated with @Specializes that extends a valid CDI bean
+     * AND implements an interface does NOT trigger a diagnostic.
+     *
+     * The presence of the interface is irrelevant — what matters is that the direct
+     * superclass is a valid CDI bean.
+     */
+    @Test
+    public void testSpecializesWithBeanSuperclassAndInterface() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithBeanSuperclassAndInterface.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — direct superclass is a valid CDI bean
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
