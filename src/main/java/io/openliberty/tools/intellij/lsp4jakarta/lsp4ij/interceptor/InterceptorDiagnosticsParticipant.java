@@ -66,13 +66,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
-				checkNegativePriority(unit, diagnostics, type);
-				for (PsiClass innerClass : type.getInnerClasses()) {
-					//Build the diagnostics if the child class is Interceptor type and is abstract.
-					// Also, checks for missing public no-args constructor.
-					validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
-					checkNegativePriority(unit, diagnostics, innerClass);
-				}
+                checkNegativePriority(unit, diagnostics, type);
+                for (PsiClass innerClass : type.getInnerClasses()) {
+    				//Build the diagnostics if the child class is Interceptor type and is abstract.
+     				// Also, checks for missing public no-args constructor.
+    				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, innerClass);
+                    checkNegativePriority(unit, diagnostics, innerClass);
+                }
 				PsiMethod[] allMethods = type.getMethods();
 				// Track methods by interceptor annotation type to detect duplicates
 				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
@@ -107,7 +107,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
-
+				
 				// Process inner classes for duplicate interceptor method annotations
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					if (isInterceptorTypeReferenced(innerClass)) {
@@ -124,7 +124,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-	}
+    }
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
@@ -198,8 +198,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param severity                        the diagnostic severity
 	 */
 	private void addInvalidModifierDiagnostic(PsiMethod method, PsiJavaFile unit, List<Diagnostic> diagnostics,
-											  List<String> interceptorTypeMethodAnnotations, String messageKey,
-											  String diagnosticCode, DiagnosticSeverity severity) {
+											   List<String> interceptorTypeMethodAnnotations, String messageKey,
+											   String diagnosticCode, DiagnosticSeverity severity) {
 		String msg = Messages.getMessage(messageKey, getSimpleAnnotationNames(interceptorTypeMethodAnnotations));
 		JsonArray annotationData = (JsonArray) new Gson().toJsonTree(interceptorTypeMethodAnnotations);
 		diagnostics.add(createDiagnostic(method, unit, msg, diagnosticCode, annotationData, severity));
@@ -251,9 +251,9 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			diagnostics.add(diagnostic);
 		}
 	}
-
-	/**
-	 * Validates that a class does not have multiple methods with the same interceptor annotation type.
+  
+  /**
+   * Validates that a class does not have multiple methods with the same interceptor annotation type.
 	 * According to Jakarta Interceptors specification, up to one interceptor method of each type may be
 	 * defined in the same class.
 	 *
@@ -262,7 +262,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param diagnostics             the list to add diagnostics to
 	 */
 	private void validateDuplicateInterceptorMethods(Map<String, List<PsiMethod>> methodsByAnnotationType,
-													 PsiJavaFile unit, List<Diagnostic> diagnostics) {
+													  PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		// Check for duplicate interceptor method annotations
 		for (Entry<String, List<PsiMethod>> entry : methodsByAnnotationType.entrySet()) {
 			List<PsiMethod> methods = entry.getValue();
@@ -270,7 +270,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				String annotationFQN = entry.getKey();
 				String simpleAnnotationName = JDTUtils.getSimpleName(annotationFQN);
 				String msg = Messages.getMessage("InvalidMultipleInterceptorMethodsOfSameType", "@" + simpleAnnotationName);
-
+				
 				// Report diagnostic for all duplicate methods (skip the first one)
 				for (int i = 1; i < methods.size(); i++) {
 					PsiMethod method = methods.get(i);
@@ -302,16 +302,16 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	}
 
 	/**
-	 * Tracks a method by its interceptor annotation types in the provided map.
-	 * This is used to detect duplicate interceptor methods of the same type.
-	 *
-	 * @param type                    the class containing the method
-	 * @param method                  the method to track
-	 * @param methodsByAnnotationType the map to track methods by annotation type
-	 * @return the list of interceptor annotation FQNs found on the method
-	 */
+		* Tracks a method by its interceptor annotation types in the provided map.
+		* This is used to detect duplicate interceptor methods of the same type.
+		*
+		* @param type                    the class containing the method
+		* @param method                  the method to track
+		* @param methodsByAnnotationType the map to track methods by annotation type
+		* @return the list of interceptor annotation FQNs found on the method
+		*/
 	private List<String> detectInterceptorMethodsAndDuplicates(PsiClass type, PsiMethod method,
-															   Map<String, List<PsiMethod>> methodsByAnnotationType) {
+													  Map<String, List<PsiMethod>> methodsByAnnotationType) {
 		List<String> interceptorTypeMethodAnnotations = containsAnyMatchingAnnotations(type, method, Constants.INTERCEPTOR_METHODS);
 		// Track methods for duplicate detection
 		for (String annotationFQN : interceptorTypeMethodAnnotations) {
