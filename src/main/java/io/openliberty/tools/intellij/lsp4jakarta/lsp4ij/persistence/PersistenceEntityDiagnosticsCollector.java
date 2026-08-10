@@ -504,7 +504,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
         if (!isMatchedAnnotation(embeddedClass.getAnnotations(), PersistenceConstants.EMBEDDABLE)) {
             diagnostics.add(createDiagnostic(element, unit,
-                    Messages.getMessage("EmbeddedTypeNotAnnotatedWithEmbeddable", embeddedClass.getName()),
+                    Messages.getMessage(PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE, embeddedClass.getName()),
                     PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE, null,
                     DiagnosticSeverity.Error));
         }
