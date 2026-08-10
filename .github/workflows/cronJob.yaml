@@ -10,7 +10,6 @@ on:
 
 jobs:
   fetch_all_pull_request_shas:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}

@@ -7,7 +7,6 @@ on:
 
 jobs:
   fetch_all_pull_requests_and_notify_using_condition_and_cron:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     env:
