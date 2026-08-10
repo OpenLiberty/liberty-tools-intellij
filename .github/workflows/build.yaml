@@ -90,36 +90,22 @@ jobs:
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
-  determine_test_groups:
-    if: always()
-    runs-on: ubuntu-latest
-    name: Determine Test Groups
-    outputs:
-      test-groups: ${{ steps.set-groups.outputs.test-groups }}
-    env:
-      LSP4JAKARTA_TEST_GROUPS: '["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]'
-      DEFAULT_TEST_GROUPS: '["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]'
-    steps:
-      - name: Set test groups based on target branch
-        id: set-groups
-        run: |
-          BASE_REF="${{ github.base_ref }}"
-          if [[ "$BASE_REF" == lsp4jakarta-*-integration* || "$BASE_REF" == lsp4jakarta-*-release* ]]; then
-            echo "test-groups=$LSP4JAKARTA_TEST_GROUPS" >> $GITHUB_OUTPUT
-          else
-            echo "test-groups=$DEFAULT_TEST_GROUPS" >> $GITHUB_OUTPUT
-          fi
-
   build:
-    needs: [ fetch_merge_commit_sha_from_lsp4ij_PR, determine_test_groups ]
-    if: always()
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # For PRs to lsp4jakarta integration/release branches, skip test groups not in the LSP4Jakarta subset.
+    if: |
+      !startsWith(github.base_ref, 'lsp4jakarta-') ||
+      matrix.test-group == 'LSP4Jakarta-Unit' ||
+      matrix.test-group == 'Gradle-Language-Server' ||
+      matrix.test-group == 'Gradle-MP-Language-Server' ||
+      matrix.test-group == 'Gradle-Jakarta-Language-Server'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: ${{ fromJson(needs.determine_test_groups.outputs.test-groups) }}
+        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
