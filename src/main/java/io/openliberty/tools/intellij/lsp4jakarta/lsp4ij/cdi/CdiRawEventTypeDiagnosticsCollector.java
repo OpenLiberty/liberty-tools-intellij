@@ -75,7 +75,7 @@ public class CdiRawEventTypeDiagnosticsCollector extends AbstractDiagnosticsColl
     private void collectForClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
         // Check @Inject fields for raw Event type
         for (PsiField field : type.getFields()) {
-            if (AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME) && isRawEventType(field.getType())) {
+            if (isRawEventType(field.getType()) && AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME)) {
                 diagnostics.add(createDiagnostic(field, unit,
                         Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
                         DIAGNOSTIC_CODE_RAW_EVENT, null,
@@ -87,17 +87,19 @@ public class CdiRawEventTypeDiagnosticsCollector extends AbstractDiagnosticsColl
         // The diagnostic is placed on the method element so that the
         // RemoveAnnotationConflictQuickFix can correctly locate and remove @Inject.
         for (PsiMethod method : type.getMethods()) {
-            if (AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
-                for (PsiParameter param : method.getParameterList().getParameters()) {
-                    if (isRawEventType(param.getType())) {
-                        diagnostics.add(createDiagnostic(method, unit,
-                                Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
-                                DIAGNOSTIC_CODE_RAW_EVENT, null,
-                                DiagnosticSeverity.Error));
-                        // One diagnostic per method — the entire @Inject must be removed
-                        break;
-                    }
+            PsiParameter[] params = method.getParameterList().getParameters();
+            boolean hasRawEventParam = false;
+            for (PsiParameter param : params) {
+                if (isRawEventType(param.getType())) {
+                    hasRawEventParam = true;
+                    break;
                 }
+            }
+            if (hasRawEventParam && AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
+                diagnostics.add(createDiagnostic(method, unit,
+                        Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
+                        DIAGNOSTIC_CODE_RAW_EVENT, null,
+                        DiagnosticSeverity.Error));
             }
         }
 
