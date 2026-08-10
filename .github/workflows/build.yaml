@@ -112,6 +112,7 @@ jobs:
 
   build:
     needs: [ fetch_merge_commit_sha_from_lsp4ij_PR, determine_test_groups ]
+    if: always()
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
