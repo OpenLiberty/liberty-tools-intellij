@@ -61,7 +61,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
 			// Check 693: component class with class-level interceptor binding constraints
-			checkClassLevelInterceptorBindingConstraints(type, unit, diagnostics);
+			checkInterceptorBindingConstraints(type, unit, diagnostics);
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
@@ -364,7 +364,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		* @param unit        the compilation unit
 		* @param diagnostics the list to add diagnostics to
 		*/
-	private void checkClassLevelInterceptorBindingConstraints(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+	private void checkInterceptorBindingConstraints(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
 		if (!hasClassLevelInterceptorBinding(type)) {
 			return;
 		}
