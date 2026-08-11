@@ -75,7 +75,6 @@ jobs:
           fi
 
   fetch_merge_commit_sha_from_lsp4ij_PR:
-    needs: detect_release_branch
     # Only run when the 'run-ci' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
     if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
     runs-on: ubuntu-latest
