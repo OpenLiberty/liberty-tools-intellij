@@ -98,12 +98,6 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # For release-branch PRs, only run the four Jakarta/LS test groups.
-    # github.base_ref and github.head_ref are non-empty only on pull_request events;
-    # on push/workflow_call/workflow_dispatch they are empty so the condition is always true.
-    if: |
-      (github.base_ref != 'lsp4jakarta-0.2.7-release-branch' && github.head_ref != 'lsp4jakarta-0.2.7-release-branch') ||
-      contains(fromJSON('["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]'), matrix.test-group)
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
