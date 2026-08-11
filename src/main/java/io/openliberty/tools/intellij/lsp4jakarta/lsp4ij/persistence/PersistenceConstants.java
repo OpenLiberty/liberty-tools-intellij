@@ -21,6 +21,7 @@ public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
@@ -59,6 +60,9 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
 
 
+    public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
+    public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_ENUM = "MapKeyEnumeratedOnNonEnumType";
@@ -70,6 +74,12 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_RETURN_TYPE = "InvalidReturnTypeOfMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "InvalidTypeOfField";
     public static final String DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE = "MapKeyTemporalNotOnTemporalType";
+
+    /* PersistenceContext Codes */
+    public static final String PERSISTENCE_CONTEXT = "jakarta.persistence.PersistenceContext";
+    public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
+    public static final String DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT = "PersistenceContextNotInManagedComponent";
+    public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
@@ -99,4 +109,6 @@ public class PersistenceConstants {
     public static final String UTIL_DATE = "java.util.Date";
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
+
+    public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
 }
