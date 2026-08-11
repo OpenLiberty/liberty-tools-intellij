@@ -155,46 +155,70 @@ jobs:
       REF_LTI_TAG: ${{ inputs.refLTITag }}
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
+      # For release-branch PRs, skip test groups not in the allowed set.
+      # Uses a step output flag because job-level if: evaluates before matrix expansion
+      # and cannot access matrix context reliably.
+      - name: 'Check if test group is allowed'
+        id: check_allowed
+        run: |
+          BASE_REF="${{ github.base_ref }}"
+          HEAD_REF="${{ github.head_ref }}"
+          TEST_GROUP="${{ matrix.test-group }}"
+          RELEASE_BRANCH="lsp4jakarta-0.2.7-release-branch"
+          ALLOWED_GROUPS="LSP4Jakarta-Unit Gradle-Language-Server Gradle-MP-Language-Server Gradle-Jakarta-Language-Server"
+          if [[ "$BASE_REF" == "$RELEASE_BRANCH" || "$HEAD_REF" == "$RELEASE_BRANCH" ]]; then
+            if echo "$ALLOWED_GROUPS" | grep -qw "$TEST_GROUP"; then
+              echo "run=true" >> $GITHUB_OUTPUT
+            else
+              echo "run=false" >> $GITHUB_OUTPUT
+              echo "Skipping '$TEST_GROUP' — not in the allowed set for $RELEASE_BRANCH PRs."
+            fi
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
+          fi
       - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
+        if: steps.check_allowed.outputs.run == 'true' && contains(matrix.os, 'windows')
         uses: al-cheb/configure-pagefile-action@v1.4
         with:
           minimum-size: 8GB
           maximum-size: 10GB
           disk-root: "C:"
       - name: 'Checkout liberty-tools-intellij'
+        if: steps.check_allowed.outputs.run == 'true'
         uses: actions/checkout@v4
         with:
           path: liberty-tools-intellij
           ref: ${{ env.REF_LTI_TAG }}
       - name: 'Install required integration test software'
+        if: steps.check_allowed.outputs.run == 'true'
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/setup.sh
 
       # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
       - name: 'Checkout lsp4ij'
-        if: ${{ inputs.useLocalPlugin == true }}
+        if: steps.check_allowed.outputs.run == 'true' && inputs.useLocalPlugin == true
         uses: actions/checkout@v4
         with:
           repository: redhat-developer/lsp4ij
           path: lsp4ij
           ref: ${{ env.REF_LSP4IJ }}
       - name: 'Build Lsp4ij'
-        if: ${{ inputs.useLocalPlugin == true }}
+        if: steps.check_allowed.outputs.run == 'true' && inputs.useLocalPlugin == true
         working-directory: ./lsp4ij
         run: bash ./gradlew buildPlugin
       # This step is retained to support the 24.0.9 tag running in the cron job, as it requires an unzipped LSP4IJ.
       - name: 'Unzip lsp4ij file'
-        if: ${{ inputs.useLocalPlugin == true }}
+        if: steps.check_allowed.outputs.run == 'true' && inputs.useLocalPlugin == true
         working-directory: ./lsp4ij/build/distributions
         run: |
           unzip -o '*.zip' -d .
 
       - name: 'Build Liberty-Tools-Intellij'
+        if: steps.check_allowed.outputs.run == 'true'
         working-directory: ./liberty-tools-intellij
         run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
       - name: 'Archive artifacts'
-        if: ${{ runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure() }}
+        if: steps.check_allowed.outputs.run == 'true' && runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure()
         uses: actions/upload-artifact@v4.3.4
         with:
           name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
@@ -204,11 +228,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: 'Run tests'
+        if: steps.check_allowed.outputs.run == 'true'
         id: run_tests
         working-directory: ./liberty-tools-intellij
         run: bash ./src/test/resources/ci/scripts/run.sh
       - name: 'Archive Test logs and reports'
-        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
+        if: steps.check_allowed.outputs.run == 'true' && failure() && steps.run_tests.conclusion == 'failure'
         uses: actions/upload-artifact@v4.3.4
         with:
           name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
