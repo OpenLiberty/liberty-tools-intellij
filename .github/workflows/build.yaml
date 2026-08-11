@@ -44,15 +44,6 @@ on:
         type: string
         required: false
         default: main
-  push:
-    # Restricted to main to avoid triggering workflows on forks.
-    branches: [ main ]
-  # Runs only when the 'run-ci' label is applied to the PR, preventing CI from triggering on every push.
-  # To re-trigger after new commits, remove and re-add the label.
-  pull_request:
-    types: [ labeled ]
-    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
-
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
     # Only run when the 'run-ci' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
