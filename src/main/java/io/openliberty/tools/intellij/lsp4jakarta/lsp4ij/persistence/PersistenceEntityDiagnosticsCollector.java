@@ -72,6 +72,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     boolean isEntityClassFinal = false;
                     boolean hasPrimaryKey = false;
                     List<PsiJvmModifiersOwner> versionAnnotatedElements = new ArrayList<>();
+                    List<PsiJvmModifiersOwner> embeddedIdMembers = new ArrayList<>();
+                    List<PsiJvmModifiersOwner> idMembers = new ArrayList<>();
 
                     // Get the Methods of the annotated Class
                     for (PsiMethod method : type.getMethods()) {
@@ -112,6 +114,14 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             hasPrimaryKey = true;
                         }
 
+                        // Track @EmbeddedId and @Id members for identifier conflict checks
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
+                            embeddedIdMembers.add(method);
+                        }
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.ID)) {
+                            idMembers.add(method);
+                        }
+
                         //Validate @Id and @Temporal annotations
                         validatePKDateTemporal(method,type,diagnostics,unit);
                         
@@ -148,6 +158,14 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         // Check if any field has @Id or @EmbeddedId annotation
                         if (!hasPrimaryKey && hasPrimaryKeyAnnotation(type, field.getAnnotations())) {
                             hasPrimaryKey = true;
+                        }
+
+                        // Track @EmbeddedId and @Id members for identifier conflict checks
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
+                            embeddedIdMembers.add(field);
+                        }
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.ID)) {
+                            idMembers.add(field);
                         }
 
                         //Validate @Id and @Temporal annotations
@@ -193,6 +211,32 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                 DiagnosticSeverity.Error));
                     }
 
+                    // Multiple @EmbeddedId annotations on the same entity
+                    if (embeddedIdMembers.size() > 1) {
+                        for (PsiJvmModifiersOwner member : embeddedIdMembers) {
+                            diagnostics.add(createDiagnostic(member, unit,
+                                    Messages.getMessage("MultipleEmbeddedIdAnnotations"),
+                                    PersistenceConstants.DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID, null,
+                                    DiagnosticSeverity.Error));
+                        }
+                    }
+
+                    // @Id and @EmbeddedId mixed on the same entity
+                    if (!embeddedIdMembers.isEmpty() && !idMembers.isEmpty()) {
+                        for (PsiJvmModifiersOwner member : embeddedIdMembers) {
+                            diagnostics.add(createDiagnostic(member, unit,
+                                    Messages.getMessage("MixedIdentifierAnnotationsEmbeddedId"),
+                                    PersistenceConstants.DIAGNOSTIC_CODE_MIXED_IDENTIFIER, null,
+                                    DiagnosticSeverity.Error));
+                        }
+                        for (PsiJvmModifiersOwner member : idMembers) {
+                            diagnostics.add(createDiagnostic(member, unit,
+                                    Messages.getMessage("MixedIdentifierAnnotationsId"),
+                                    PersistenceConstants.DIAGNOSTIC_CODE_MIXED_IDENTIFIER, null,
+                                    DiagnosticSeverity.Error));
+                        }
+                    }
+
                     // @Inheritance on a non-root entity (entity ancestor exists in the chain)
                     if (inheritanceAnnotation != null && hasEntitySupertype(type)) {
                         diagnostics.add(createDiagnostic(type, unit,
@@ -206,6 +250,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             Messages.getMessage("InheritanceAnnotationOnNonEntityClass"),
                             PersistenceConstants.DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY, null,
                             DiagnosticSeverity.Error));
+
                 }
             }
         }
@@ -269,11 +314,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
     private boolean hasVersionInParentEntity(PsiClass type) {
         // Get all superclasses recursively
         Set<PsiClass> hierarchy = new LinkedHashSet<>(PsiClassImplUtil.getAllSuperClassesRecursively(type));
-        boolean versionInParent = false;
         for (PsiClass superClass : hierarchy) {
             // Skip Object class or same class
-            if (superClass.getQualifiedName() != null &&
-                    superClass.getQualifiedName().equals(PersistenceConstants.OBJECT) || type.equals(superClass)) {
+            if ((superClass.getQualifiedName() != null &&
+                    superClass.getQualifiedName().equals(PersistenceConstants.OBJECT)) || type.equals(superClass)) {
                 continue;
             }
 

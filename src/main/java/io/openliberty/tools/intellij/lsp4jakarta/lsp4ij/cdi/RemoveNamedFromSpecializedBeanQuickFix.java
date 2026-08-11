@@ -14,21 +14,24 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveAnnotationConflictQuickFix;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.STATELESS_FQ_NAME;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.NAMED_FQ_NAME;
 
 /**
+ * Removes the @Named annotation from a bean annotated with @Specializes.
  *
- * Quick fix for removing @Stateless annotation
+ * <p>Per CDI 3.0 §4.3, a specialized bean inherits its bean name from the bean it
+ * specializes. Declaring @Named on a specialized bean is therefore invalid.</p>
  *
+ * @see <a href="https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#direct_and_indirect_specialization">CDI 3.0 §4.3</a>
  */
-public class RemoveStatelessAnnotationQuickFix extends RemoveAnnotationConflictQuickFix {
+public class RemoveNamedFromSpecializedBeanQuickFix extends RemoveAnnotationConflictQuickFix {
 
-    public RemoveStatelessAnnotationQuickFix() {
-        super(false, STATELESS_FQ_NAME);
+    public RemoveNamedFromSpecializedBeanQuickFix() {
+        super(false, NAMED_FQ_NAME);
     }
 
     @Override
     public String getParticipantId() {
-        return RemoveStatelessAnnotationQuickFix.class.getName();
+        return RemoveNamedFromSpecializedBeanQuickFix.class.getName();
     }
 }

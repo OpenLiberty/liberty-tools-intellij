@@ -18,12 +18,13 @@ import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
 
@@ -46,20 +47,98 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
 
-        for (PsiClass type : unit.getClasses()) {
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
+
+        for (PsiClass type : allClasses) {
+            String[] typeAnnotations = getAnnotationNames(type);
             List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
-                    Stream.of(type.getAnnotations())
-                            .map(annotation -> annotation.getQualifiedName())
-                            .toArray(String[]::new),
+                    typeAnnotations,
                     SESSION_BEAN_ANNOTATIONS);
 
             if (!sessionBeanAnnotations.isEmpty()) {
+                validateSessionBeanClass(type, unit, diagnostics);
+                validateSessionBeanInterceptorDecorator(type, typeAnnotations, unit, diagnostics);
                 if (sessionBeanAnnotations.size() > 1) {
                     validateConflictingSessionBeanAnnotations(type, unit, sessionBeanAnnotations, diagnostics);
                 }
                 validateSessionBeanConstructor(type, unit, diagnostics);
                 validateSessionBeanFinalizeMethod(type, unit, diagnostics);
             }
+        }
+    }
+
+    /**
+     * Validates that a session bean class is public, not final, not abstract, and top-level.
+     *
+     * @param type the class to validate
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Must be a top-level class
+        if (type.getContainingClass() != null) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBeTopLevel"),
+                    DIAGNOSTIC_CODE_NON_TOP_LEVEL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must be public
+        if (!type.hasModifierProperty(PsiModifier.PUBLIC)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBePublic"),
+                    DIAGNOSTIC_CODE_NOT_PUBLIC_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be final
+        if (type.hasModifierProperty(PsiModifier.FINAL)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeFinal"),
+                    DIAGNOSTIC_CODE_IS_FINAL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be abstract
+        if (type.hasModifierProperty(PsiModifier.ABSTRACT)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeAbstract"),
+                    DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Validates that a session bean does not have @Interceptor or @Decorator annotations.
+     *
+     * A diagnostic is reported if the session bean class is annotated with
+     * @Interceptor or @Decorator, as these annotations are not allowed on session beans.
+     *
+     * @param type the class to validate
+     * @param typeAnnotations the annotation names already extracted from the type
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanInterceptorDecorator(PsiClass type, String[] typeAnnotations,
+                                                         PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        List<String> invalidAnnotations = getMatchedJavaElementNames(type,
+                typeAnnotations,
+                new String[] {
+                        INTERCEPTOR_FQ_NAME,
+                        DECORATOR_FQ_NAME
+                });
+
+        if (!invalidAnnotations.isEmpty()) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("InvalidSessionBeanWithInterceptorOrDecorator"),
+                    DIAGNOSTIC_CODE_SESSION_BEAN_INTERCEPTOR_DECORATOR,
+                    null,
+                    DiagnosticSeverity.Error));
         }
     }
 
@@ -86,11 +165,11 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
     /**
      * Validates that a session bean has a public no-arg constructor.
-     * 
+     *
      * A diagnostic is reported if:
      * - The class has explicit constructors AND
      * - None of them are public no-arg constructors
-     * 
+     *
      * If the class has no explicit constructors, Java provides a default
      * public no-arg constructor, so no diagnostic is needed.
      *
