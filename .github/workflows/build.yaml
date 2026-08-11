@@ -22,6 +22,11 @@ on:
         type: string
         required: true
         default: main
+      testGroups:
+        description: 'JSON array of test groups to run'
+        type: string
+        required: false
+        default: '["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]'
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -92,20 +97,13 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # For PRs to lsp4jakarta integration/release branches, skip test groups not in the LSP4Jakarta subset.
-    if: |
-      !startsWith(github.base_ref, 'lsp4jakarta-') ||
-      matrix.test-group == 'LSP4Jakarta-Unit' ||
-      matrix.test-group == 'Gradle-Language-Server' ||
-      matrix.test-group == 'Gradle-MP-Language-Server' ||
-      matrix.test-group == 'Gradle-Jakarta-Language-Server'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
+        test-group: ${{ fromJson(inputs.testGroups || '["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]') }}
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
