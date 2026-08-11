@@ -45,12 +45,18 @@ on:
         required: false
         default: main
   push:
-    branches: '**'
+    # Restricted to main to avoid triggering workflows on forks.
+    branches: [ main ]
+  # Runs only when the 'run-ci' label is applied to the PR, preventing CI from triggering on every push.
+  # To re-trigger after new commits, remove and re-add the label.
   pull_request:
+    types: [ labeled ]
     branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
+    # Only run when the 'run-ci' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
@@ -92,10 +98,10 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # For push/PR events targeting lsp4jakarta integration/release branches, only run the LSP4Jakarta subset.
-    # For all other triggers (push to main, PRs to main, workflow_dispatch, workflow_call), run all groups.
+    # For PRs targeting lsp4jakarta integration/release branches, only run the LSP4Jakarta subset.
+    # For all other triggers (PRs to main, push to main, workflow_dispatch, workflow_call), run all groups.
     if: |
-      !(startsWith(github.ref_name, 'lsp4jakarta-') || startsWith(github.base_ref, 'lsp4jakarta-')) ||
+      !(startsWith(github.base_ref, 'lsp4jakarta-')) ||
       matrix.test-group == 'LSP4Jakarta-Unit' ||
       matrix.test-group == 'Gradle-Language-Server' ||
       matrix.test-group == 'Gradle-MP-Language-Server' ||
