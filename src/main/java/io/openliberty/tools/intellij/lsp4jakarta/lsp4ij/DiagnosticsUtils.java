@@ -201,6 +201,27 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Returns {@code true} only when {@code keyType} is definitively an enum type.
+     * Concrete class types, upper-bounded wildcards whose bound is an enum, and
+     * all other forms (raw, unbound wildcard, lower-bounded wildcard, type variable)
+     * return {@code false}.
+     */
+    public static boolean isEnumKeyType(PsiType keyType) {
+        if (keyType instanceof PsiClassType keyClassType) {
+            PsiClass keyClass = keyClassType.resolve();
+            return keyClass != null && keyClass.isEnum();
+        }
+        if (keyType instanceof PsiWildcardType wildcardType && wildcardType.isExtends()) {
+            PsiType bound = wildcardType.getBound();
+            if (bound instanceof PsiClassType boundClassType) {
+                PsiClass boundClass = boundClassType.resolve();
+                return boundClass != null && boundClass.isEnum();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the given annotation array represents an injection point that uses
      * the {@code @Default} qualifier (explicitly or implicitly).
      *
