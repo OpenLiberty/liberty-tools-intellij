@@ -78,31 +78,32 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
 				for (PsiMethod method : allMethods) {
 					List<String> interceptorTypeMethodAnnotations = detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
-					if(!interceptorTypeMethodAnnotations.isEmpty()) {
-						boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
-						boolean isAbstract = method.hasModifierProperty(PsiModifier.ABSTRACT);
-						boolean isStatic = method.hasModifierProperty(PsiModifier.STATIC);
-						String msg;
-						DiagnosticSeverity severity = null;
-						if (isFinal) {
-							addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
-									"InvalidInterceptorMethodAnnotationFinalMethod", DIAGNOSTIC_CODE_INTERCEPTOR_FINAL,
-									DiagnosticSeverity.Error);
-						}
-						if (isAbstract) {
-							addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
-									"InvalidInterceptorMethodAnnotationAbstractMethod", DIAGNOSTIC_CODE_INTERCEPTOR_ABSTRACT,
-									DiagnosticSeverity.Error);
-						}
-						if (isStatic) {
-							boolean isLifecycleCallback = !containsAnyMatchingAnnotations(type, method, LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS).isEmpty();
-							String messageKey = isLifecycleCallback
-									? "InvalidLifecycleCallbackMethodAnnotationStaticMethod"
-									: "InvalidInterceptorMethodAnnotationStaticMethod";
-							severity = isLifecycleCallback ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
-							addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
-									messageKey, DIAGNOSTIC_CODE_INTERCEPTOR_STATIC, severity);
-						}
+					if(interceptorTypeMethodAnnotations.isEmpty()) {
+						continue;
+					}
+					boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
+					boolean isAbstract = method.hasModifierProperty(PsiModifier.ABSTRACT);
+					boolean isStatic = method.hasModifierProperty(PsiModifier.STATIC);
+					String msg;
+					DiagnosticSeverity severity = null;
+					if (isFinal) {
+						addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
+								"InvalidInterceptorMethodAnnotationFinalMethod", DIAGNOSTIC_CODE_INTERCEPTOR_FINAL,
+								DiagnosticSeverity.Error);
+					}
+					if (isAbstract) {
+						addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
+								"InvalidInterceptorMethodAnnotationAbstractMethod", DIAGNOSTIC_CODE_INTERCEPTOR_ABSTRACT,
+								DiagnosticSeverity.Error);
+					}
+					if (isStatic) {
+						boolean isLifecycleCallback = !containsAnyMatchingAnnotations(type, method, LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS).isEmpty();
+						String messageKey = isLifecycleCallback
+								? "InvalidLifecycleCallbackMethodAnnotationStaticMethod"
+								: "InvalidInterceptorMethodAnnotationStaticMethod";
+						severity = isLifecycleCallback ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+						addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
+								messageKey, DIAGNOSTIC_CODE_INTERCEPTOR_STATIC, severity);
 					}
 				}
 				// Check for duplicate interceptor method annotations
