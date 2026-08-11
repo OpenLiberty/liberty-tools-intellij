@@ -222,17 +222,21 @@ public class DiagnosticsUtils {
     }
 
     /**
-     * Returns the fully-qualified name of the type argument {@code T} from
-     * {@code ObserverMethod<T>} declared on the given class.
+     * Returns the fully-qualified name of the first type argument from a parameterised
+     * superinterface on the given class.
+     *
+     * <p>For example, given a class that implements {@code ObserverMethod<AuditEvent>},
+     * this method returns {@code "AuditEvent"} when called with
+     * {@code interfaceFQName = "jakarta.enterprise.inject.spi.ObserverMethod"}.
      *
      * @param classBinding the class whose {@code implements} list is inspected
-     * @return the FQN of the first type argument of {@code ObserverMethod<T>},
-     *         or {@code "java.lang.Object"} if it cannot be resolved
+     * @param interfaceFQName the fully-qualified name of the superinterface to search for
+     * @return the FQN of the first type argument, or {@code "java.lang.Object"} if not found
      */
-    public static String resolveObserverMethodTypeArgFQName(PsiClass classBinding) {
+    public static String resolveTypeArgumentFQName(PsiClass classBinding, String interfaceFQName) {
         for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
             PsiClass iface = ifaceType.resolve();
-            if (iface != null && ManagedBeanConstants.OBSERVER_METHOD_FQ_NAME.equals(iface.getQualifiedName())) {
+            if (iface != null && interfaceFQName.equals(iface.getQualifiedName())) {
                 PsiType[] typeArgs = ifaceType.getParameters();
                 if (typeArgs.length > 0) {
                     return typeArgs[0].getCanonicalText();
@@ -240,20 +244,6 @@ public class DiagnosticsUtils {
             }
         }
         return "java.lang.Object";
-    }
-
-    /**
-     * Returns the simple (unqualified) name of the type argument {@code T} from
-     * {@code ObserverMethod<T>} declared on the given class.
-     *
-     * @param classBinding the class whose {@code implements} list is inspected
-     * @return the simple name of the type argument, e.g. {@code "AuditEvent"},
-     *         or {@code "Object"} if it cannot be resolved
-     */
-    public static String resolveObserverMethodTypeArgSimpleName(PsiClass classBinding) {
-        String fqn = resolveObserverMethodTypeArgFQName(classBinding);
-        int dot = fqn.lastIndexOf('.');
-        return dot >= 0 ? fqn.substring(dot + 1) : fqn;
     }
 
 }

@@ -83,7 +83,7 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         if (parentType == null) {
             return Collections.emptyList();
         }
-        String typeArgSimple = DiagnosticsUtils.resolveObserverMethodTypeArgSimpleName(parentType);
+        String typeArgSimple = resolveTypeArgSimpleName(parentType);
         String label = Messages.getMessage(labelKey, typeArgSimple);
         return Collections.singletonList(JDTUtils.createCodeAction(context, diagnostic, label, getParticipantId()));
     }
@@ -106,8 +106,8 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
             return toResolve;
         }
 
-        String typeArgFQName = DiagnosticsUtils.resolveObserverMethodTypeArgFQName(parentType);
-        String typeArgSimple = DiagnosticsUtils.resolveObserverMethodTypeArgSimpleName(parentType);
+        String typeArgFQName = resolveTypeArgFQName(parentType);
+        String typeArgSimple = resolveTypeArgSimpleName(parentType);
         String label = Messages.getMessage(labelKey, typeArgSimple);
 
         MethodParam param;
@@ -134,6 +134,32 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER,
                 "Unable to create workspace edit for code action to insert notify method override");
         return toResolve;
+    }
+
+    /**
+     * Returns the fully-qualified name of the type argument {@code T} from
+     * {@code ObserverMethod<T>} declared on the given class.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @return the FQN of the first type argument of {@code ObserverMethod<T>},
+     *         or {@code "java.lang.Object"} if it cannot be resolved
+     */
+    private String resolveTypeArgFQName(PsiClass classBinding) {
+        return DiagnosticsUtils.resolveTypeArgumentFQName(classBinding, ManagedBeanConstants.OBSERVER_METHOD_FQ_NAME);
+    }
+
+    /**
+     * Returns the simple (unqualified) name of the type argument {@code T} from
+     * {@code ObserverMethod<T>} declared on the given class.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @return the simple name of the type argument, e.g. {@code "AuditEvent"},
+     *         or {@code "Object"} if it cannot be resolved
+     */
+    private String resolveTypeArgSimpleName(PsiClass classBinding) {
+        String fqn = resolveTypeArgFQName(classBinding);
+        int dot = fqn.lastIndexOf('.');
+        return dot >= 0 ? fqn.substring(dot + 1) : fqn;
     }
 
     // -------------------------------------------------------------------------
