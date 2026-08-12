@@ -98,7 +98,9 @@ jobs:
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
   configure-matrix:
-    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # Run independently - does not depend on fetch_merge_commit_sha_from_lsp4ij_PR
+    # so it is never skipped due to the label guard on that job.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta-tests'
     runs-on: ubuntu-latest
     name: Configure Test Matrix
     outputs:
@@ -108,9 +110,9 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ github.event.label.name }}" == "run-lsp4jakarta-tests" ]; then
-            echo 'test-groups=["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]' >> $GITHUB_OUTPUT
+            echo 'test-groups=["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]' >> "${GITHUB_OUTPUT}"
           else
-            echo 'test-groups=["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]' >> $GITHUB_OUTPUT
+            echo 'test-groups=["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]' >> "${GITHUB_OUTPUT}"
           fi
 
   build:
