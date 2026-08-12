@@ -51,12 +51,12 @@ on:
   # To re-trigger after new commits, remove and re-add the label.
   pull_request:
     types: [ labeled ]
-    branches: [ main ]
+    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
-    # Only run when the 'run-ci' or 'run-lsp4jakarta' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
-    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta'
+    # Only run when the 'run-ci' or 'run-lsp4jakarta-it' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta-it'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
@@ -98,7 +98,7 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # Run for all triggers except when 'run-lsp4jakarta' label is applied (that uses build_lsp4jakarta below).
+    # Run for all test-groups when 'run-ci' label is applied.
     if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
@@ -219,8 +219,8 @@ jobs:
 
   build_lsp4jakarta:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # Only runs when 'run-lsp4jakarta' label is applied.
-    if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta'
+    # Runs subset of test-groups for lsp4jakarta PRs when 'run-lsp4jakarta-it' label is applied.
+    if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta-it'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
