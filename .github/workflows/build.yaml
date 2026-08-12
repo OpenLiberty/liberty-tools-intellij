@@ -51,16 +51,17 @@ on:
   # To re-trigger after new commits, remove and re-add the label.
   pull_request:
     types: [ labeled ]
-    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
+    branches: [ main ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
-    # Only run when the 'run-ci' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
-    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
+    # Only run when the 'run-ci' or 'run-lsp4jakarta' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
       checkout_name: ${{ steps.extract.outputs.checkout_name }}
+      test_groups: ${{ steps.set_test_groups.outputs.test_groups }}
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
@@ -96,23 +97,32 @@ jobs:
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
+      - name: Set test groups
+        id: set_test_groups
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.event.label.name }}" == "run-lsp4jakarta" ]; then
+            echo 'test_groups=["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]' >> $GITHUB_OUTPUT
+          else
+            echo 'test_groups=["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]' >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Debug event and test groups
+        shell: bash
+        run: |
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.event.label.name=${{ github.event.label.name }}"
+          echo "test_groups=${{ steps.set_test_groups.outputs.test_groups }}"
+
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
-    # For PRs targeting lsp4jakarta integration/release branches, only run the LSP4Jakarta subset.
-    # For all other triggers (PRs to main, push to main, workflow_dispatch, workflow_call), run all groups.
-    if: |
-      !(startsWith(github.base_ref, 'lsp4jakarta-')) ||
-      matrix.test-group == 'LSP4Jakarta-Unit' ||
-      matrix.test-group == 'Gradle-Language-Server' ||
-      matrix.test-group == 'Gradle-MP-Language-Server' ||
-      matrix.test-group == 'Gradle-Jakarta-Language-Server'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
+        test-group: ${{ fromJson(needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.test_groups) }}
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
@@ -163,6 +173,12 @@ jobs:
       REF_LTI_TAG: ${{ inputs.refLTITag }}
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
+      - name: Debug matrix
+        run: |
+          echo "runtime=${{ matrix.runtime }}"
+          echo "os=${{ matrix.os }}"
+          echo "test-group=${{ matrix.test-group }}"
+          echo "test-class=${{ matrix.test-class }}"
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
         uses: al-cheb/configure-pagefile-action@v1.4
