@@ -61,7 +61,6 @@ jobs:
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
       checkout_name: ${{ steps.extract.outputs.checkout_name }}
-      test_groups: ${{ steps.set_test_groups.outputs.test_groups }}
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
       REF_LSP4IJ: ${{ inputs.refLsp4ij }}
@@ -97,32 +96,17 @@ jobs:
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
-      - name: Set test groups
-        id: set_test_groups
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.event.label.name }}" == "run-lsp4jakarta" ]; then
-            echo 'test_groups=["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]' >> $GITHUB_OUTPUT
-          else
-            echo 'test_groups=["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]' >> $GITHUB_OUTPUT
-          fi
-      
-      - name: Debug event and test groups
-        shell: bash
-        run: |
-          echo "github.event_name=${{ github.event_name }}"
-          echo "github.event.label.name=${{ github.event.label.name }}"
-          echo "test_groups=${{ steps.set_test_groups.outputs.test_groups }}"
-
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # Run for all triggers except when 'run-lsp4jakarta' label is applied (that uses build_lsp4jakarta below).
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: ${{ fromJson(needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.test_groups) }}
+        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
@@ -173,12 +157,105 @@ jobs:
       REF_LTI_TAG: ${{ inputs.refLTITag }}
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
-      - name: Debug matrix
+      - name: Configure pagefile
+        if: contains(matrix.os, 'windows')
+        uses: al-cheb/configure-pagefile-action@v1.4
+        with:
+          minimum-size: 8GB
+          maximum-size: 10GB
+          disk-root: "C:"
+      - name: 'Checkout liberty-tools-intellij'
+        uses: actions/checkout@v4
+        with:
+          path: liberty-tools-intellij
+          ref: ${{ env.REF_LTI_TAG }}
+      - name: 'Install required integration test software'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/setup.sh
+
+      # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
+      - name: 'Checkout lsp4ij'
+        if: ${{ inputs.useLocalPlugin == true }}
+        uses: actions/checkout@v4
+        with:
+          repository: redhat-developer/lsp4ij
+          path: lsp4ij
+          ref: ${{ env.REF_LSP4IJ }}
+      - name: 'Build Lsp4ij'
+        if: ${{ inputs.useLocalPlugin == true }}
+        working-directory: ./lsp4ij
+        run: bash ./gradlew buildPlugin
+      # This step is retained to support the 24.0.9 tag running in the cron job, as it requires an unzipped LSP4IJ.
+      - name: 'Unzip lsp4ij file'
+        if: ${{ inputs.useLocalPlugin == true }}
+        working-directory: ./lsp4ij/build/distributions
         run: |
-          echo "runtime=${{ matrix.runtime }}"
-          echo "os=${{ matrix.os }}"
-          echo "test-group=${{ matrix.test-group }}"
-          echo "test-class=${{ matrix.test-class }}"
+          unzip -o '*.zip' -d .
+
+      - name: 'Build Liberty-Tools-Intellij'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
+      - name: 'Archive artifacts'
+        if: ${{ runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure() }}
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          path: |
+            ./**/*liberty-tools-intellij*.zip
+            ./**/libs/*liberty-tools-intellij*.jar
+          if-no-files-found: warn
+          retention-days: 7
+      - name: 'Run tests'
+        id: run_tests
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/run.sh
+      - name: 'Archive Test logs and reports'
+        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          path: |
+            liberty-tools-intellij/build/reports/
+
+  build_lsp4jakarta:
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # Only runs when 'run-lsp4jakarta' label is applied.
+    if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta'
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [ linux, mac, windows ]
+        test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
+        exclude:
+          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
+          - runtime: mac
+            test-group: LSP4Jakarta-Unit
+          - runtime: windows
+            test-group: LSP4Jakarta-Unit
+        include:
+          - runtime: linux
+            os: ubuntu-latest
+          - runtime: mac
+            os: macOS-14
+          - runtime: windows
+            os: windows-latest
+          - test-group: Gradle-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
+          - test-group: Gradle-MP-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
+          - test-group: Gradle-Jakarta-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
+          - test-group: LSP4Jakarta-Unit
+            test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
+    env:
+      USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
+      REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
+      REF_LTI_TAG: ${{ inputs.refLTITag }}
+      TEST_CLASS: ${{ matrix.test-class }}
+    steps:
       - name: Configure pagefile
         if: contains(matrix.os, 'windows')
         uses: al-cheb/configure-pagefile-action@v1.4
