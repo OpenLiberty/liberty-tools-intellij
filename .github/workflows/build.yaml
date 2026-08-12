@@ -47,7 +47,8 @@ on:
   push:
     # Restricted to main to avoid triggering workflows on forks.
     branches: [ main ]
-  # Runs only when the 'run-ci' label is applied to the PR, preventing CI from triggering on every push.
+  # Runs only when the 'run-ci' or 'run-lsp4jakarta-tests' label is applied to the PR,
+  # preventing CI from triggering on every push.
   # To re-trigger after new commits, remove and re-add the label.
   pull_request:
     types: [ labeled ]
@@ -55,8 +56,8 @@ on:
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
-    # Only run when the 'run-ci' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
-    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
+    # Only run when 'run-ci' or 'run-lsp4jakarta-tests' label is applied; ignored for push and workflow_call/workflow_dispatch triggers.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta-tests'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
@@ -96,15 +97,31 @@ jobs:
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
           echo "checkout_name=$checkout_name" >> $GITHUB_OUTPUT
 
-  build:
+  configure-matrix:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    runs-on: ubuntu-latest
+    name: Configure Test Matrix
+    outputs:
+      test-groups: ${{ steps.set-matrix.outputs.test-groups }}
+    steps:
+      - name: Set test groups based on label
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.label.name }}" == "run-lsp4jakarta-tests" ]; then
+            echo 'test-groups=["LSP4Jakarta-Unit","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server"]' >> $GITHUB_OUTPUT
+          else
+            echo 'test-groups=["LSP4Jakarta-Unit","Maven-MicroProfile","Gradle-MicroProfile","Maven-Custom-Liberty-Install","Gradle-Custom-Liberty-Install","Maven-MP-Config","Gradle-MP-Config","Maven-MP-SID","Gradle-MP-SID","Maven-NLT-REST","Gradle-NLT-REST","Gradle-Language-Server","Gradle-MP-Language-Server","Gradle-Jakarta-Language-Server","Maven-Multi-Module-MP"]' >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: [ fetch_merge_commit_sha_from_lsp4ij_PR, configure-matrix ]
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
         runtime: [ linux, mac, windows ]
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
+        test-group: ${{ fromJSON(needs.configure-matrix.outputs.test-groups) }}
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
