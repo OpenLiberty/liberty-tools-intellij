@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -115,7 +115,7 @@ public class DebugModeHandler {
      * @param debugPort JVM port to connect to
      */
     public void createAndRunDebugConfiguration(LibertyModule libertyModule, int debugPort) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(libertyModule.getProject(), LocalizedResourceUtil.getMessage("liberty.run.config.title"), true) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(libertyModule.getProject(), LibertyBundles.message("liberty.run.config.title"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 createAndRunDebugConfiguration(indicator, libertyModule, debugPort);
@@ -131,7 +131,7 @@ public class DebugModeHandler {
      * @param debugPort     JVM port to connect to
      */
     private void createAndRunDebugConfiguration(ProgressIndicator indicator, LibertyModule libertyModule, int debugPort) {
-        indicator.setText(LocalizedResourceUtil.getMessage("attaching.debugger"));
+        indicator.setText(LibertyBundles.message("attaching.debugger"));
         try {
             String debugPortStr = waitForSocketActivation(indicator, libertyModule, DEFAULT_ATTACH_HOST, debugPort);
             if (debugPortStr == null) {
@@ -146,8 +146,8 @@ public class DebugModeHandler {
         } catch (Exception e) {
             // do not show error if debug attachment was cancelled by user
             if (!(e instanceof ProcessCanceledException)) {
-                LOGGER.warn(LocalizedResourceUtil.getMessage("cannot.attach.debugger"), e);
-                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(e.getMessage(), LocalizedResourceUtil.getMessage("cannot.attach.debugger")));
+                LOGGER.warn(LibertyBundles.message("cannot.attach.debugger"), e);
+                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(e.getMessage(), LibertyBundles.message("cannot.attach.debugger")));
             }
         }
     }
@@ -216,7 +216,7 @@ public class DebugModeHandler {
             }
             TimeUnit.SECONDS.sleep(retryInc);
         }
-        throw new Exception(LocalizedResourceUtil.getMessage("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
+        throw new Exception(LibertyBundles.message("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,7 +15,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,7 +30,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("liberty.project.remove");
+        return LibertyBundles.message("liberty.project.remove");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         String projectName = libertyModule.getName();
         final int result = Messages.showYesNoDialog(
-                LocalizedResourceUtil.getMessage("liberty.project.remove.confirmation.dialog.message", projectName),
+                LibertyBundles.message("liberty.project.remove.confirmation.dialog.message", projectName),
                 getChooseDialogTitle(),
                 LibertyPluginIcons.libertyIcon_40);
         // Remove the project only if the user confirms it.
@@ -58,11 +58,11 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     public String getChooseDialogTitle() {
-        return LocalizedResourceUtil.getMessage("liberty.project.remove.dialog.title");
+        return LibertyBundles.message("liberty.project.remove.dialog.title");
     }
 
     @Override
     public String getChooseDialogMessage() {
-        return LocalizedResourceUtil.getMessage("liberty.project.remove.dialog.message");
+        return LibertyBundles.message("liberty.project.remove.dialog.message");
     }
 }

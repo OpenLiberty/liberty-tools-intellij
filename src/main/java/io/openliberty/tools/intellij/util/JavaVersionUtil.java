@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -30,7 +30,7 @@ public class JavaVersionUtil {
     public static boolean isJavaHomeValid(String javaHome, String serverType) {
 
         if (javaHome == null) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LibertyBundles.message("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
@@ -38,14 +38,14 @@ public class JavaVersionUtil {
 
         File javaHomeDir = new File(javaHome);
         if (!javaHomeDir.exists()) {
-            String errorMessage = LocalizedResourceUtil.getMessage("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LibertyBundles.message("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
         }
 
         if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage = LocalizedResourceUtil.getMessage("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LibertyBundles.message("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
@@ -56,7 +56,7 @@ public class JavaVersionUtil {
     private static void notifyError(String errMsg, Project project) {
 
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                LocalizedResourceUtil.getMessage("java.runtime.error.message"),
+                LibertyBundles.message("java.runtime.error.message"),
                 errMsg, NotificationType.WARNING);
         notif.setIcon(LibertyPluginIcons.libertyIcon);
         Notifications.Bus.notify(notif, project);

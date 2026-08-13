@@ -62,7 +62,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 }, modalityState);
             } else {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+                    JBTextArea jbTextArea = new JBTextArea(LibertyBundles.message("no.liberty.projects.detected"));
                     jbTextArea.setEditable(false);
                     jbTextArea.setBackground(getBackground());
                     jbTextArea.setLineWrap(true);

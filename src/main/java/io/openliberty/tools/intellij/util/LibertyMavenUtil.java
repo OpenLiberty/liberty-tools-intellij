@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -232,12 +232,12 @@ public class LibertyMavenUtil {
         String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
         File wrapper = new File(buildFile.getParent().getPath(), mvnw);
         if (!wrapper.exists()){
-            String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.does.not.exist");
+            String translatedMessage = LibertyBundles.message("maven.wrapper.does.not.exist");
             throw new LibertyException("A Maven wrapper for the project could not be found. Make sure to configure a " +
                     "valid Maven wrapper or change the build preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
         }
         if (!wrapper.canExecute()) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("maven.wrapper.cannot.execute");
+            String translatedMessage = LibertyBundles.message("maven.wrapper.cannot.execute");
             throw new LibertyException("Could not execute Maven wrapper because the process does not have permission to " +
                     "execute it. Consider giving executable permission for the Maven wrapper file or changing the build " +
                     "preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
@@ -259,7 +259,7 @@ public class LibertyMavenUtil {
         File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
         // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("maven.invalid.build.preference");
+            String translatedMessage = LibertyBundles.message("maven.invalid.build.preference");
             throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);
         }
 
@@ -286,14 +286,14 @@ public class LibertyMavenUtil {
                             " -classpath " + LibertyProjectUtil.includeEscapeToString(classworldsPath) +
                             " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
                 } else {
-                    String translatedMessage = LocalizedResourceUtil.getMessage("maven.cannot.execute", mavenExecutable.getAbsolutePath());
+                    String translatedMessage = LibertyBundles.message("maven.cannot.execute", mavenExecutable.getAbsolutePath());
                     throw new LibertyException(String.format("Could not execute Maven from %s because the process does not "+
                             "have permission to execute it. Consider giving executable permission for the Maven executable or " +
                             "configure IntelliJ to use the Maven wrapper.", mavenExecutable.getAbsolutePath()), translatedMessage);
                 }
             }
         } else {
-            String translatedMessage = LocalizedResourceUtil.getMessage("maven.does.not.exist", mavenExecutable.getAbsolutePath());
+            String translatedMessage = LibertyBundles.message("maven.does.not.exist", mavenExecutable.getAbsolutePath());
             throw new LibertyException(String.format("Could not execute the Maven executable %s. Make sure a valid path is configured " +
                     "inside IntelliJ Maven preferences.", mavenExecutable.getAbsolutePath()), translatedMessage);
         }

@@ -25,7 +25,7 @@ import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
@@ -53,7 +53,7 @@ public abstract class LibertyGeneralAction extends AnAction {
         Project project = e.getProject();
         if (project == null) {
             // TODO prompt user to select project
-            String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
+            String msg = LibertyBundles.message("liberty.project.does.not.resolve", actionCmd);
             notifyError(msg, project);
             LOGGER.warn(msg);
             return;
@@ -89,8 +89,8 @@ public abstract class LibertyGeneralAction extends AnAction {
                     // are interested in from list
                     LibertyProjectChooserDialog libertyChooserDiag = new LibertyProjectChooserDialog(
                             project,
-                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.message", actionCmd),
-                            LocalizedResourceUtil.getMessage("liberty.project.file.selection.dialog.title"),
+                            LibertyBundles.message("liberty.project.file.selection.dialog.message", actionCmd),
+                            LibertyBundles.message("liberty.project.file.selection.dialog.title"),
                             LibertyPluginIcons.libertyIcon_40,
                             projectNames,
                             projectNamesTooltips,
@@ -110,7 +110,7 @@ public abstract class LibertyGeneralAction extends AnAction {
 
         // If the module associated with this action could not be found, deliver error message.
         if (libertyModule == null) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.build.file.does.not.resolve", actionCmd, project.getName());
+            String msg = LibertyBundles.message("liberty.build.file.does.not.resolve", actionCmd, project.getName());
             notifyError(msg, project);
             LOGGER.warn(msg);
             return;
@@ -118,7 +118,7 @@ public abstract class LibertyGeneralAction extends AnAction {
 
         Constants.ProjectType projectType = libertyModule.getProjectType();
         if (projectType == null) {
-            String msg = LocalizedResourceUtil.getMessage("liberty.project.type.invalid", actionCmd, libertyModule.getName());
+            String msg = LibertyBundles.message("liberty.project.type.invalid", actionCmd, libertyModule.getName());
             notifyError(msg, project);
             LOGGER.warn(msg);
             return;
@@ -160,7 +160,7 @@ public abstract class LibertyGeneralAction extends AnAction {
      */
     protected void notifyError(String errMsg, Project project) {
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                LocalizedResourceUtil.getMessage("liberty.action.cannot.start"), errMsg, NotificationType.WARNING);
+                LibertyBundles.message("liberty.action.cannot.start"), errMsg, NotificationType.WARNING);
         notif.setIcon(LibertyPluginIcons.libertyIcon);
         Notifications.Bus.notify(notif, project);
     }
@@ -186,9 +186,9 @@ public abstract class LibertyGeneralAction extends AnAction {
         if (widget == null || (!createWidget && !computeOffEdt(widget::hasRunningCommands))) {
             String msg;
             if (createWidget) {
-                msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
+                msg = LibertyBundles.message("liberty.terminal.cannot.resolve", actionCmd, project.getName());
             } else {
-                msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, project.getName(), System.lineSeparator());
+                msg = LibertyBundles.message("liberty.dev.not.started.notification.content", actionCmd, project.getName(), System.lineSeparator());
             }
             notifyError(msg, project);
             LOGGER.warn(msg);

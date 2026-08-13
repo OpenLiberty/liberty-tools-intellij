@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,7 +26,7 @@ import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -58,7 +58,7 @@ public class RefreshLibertyToolbar extends AnAction {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
         Content content = libertyDevToolWindow.getContentManager().findContent(
-                LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"));
+                LibertyBundles.message("liberty.tool.window.display.name"));
 
         SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
 
@@ -92,7 +92,7 @@ public class RefreshLibertyToolbar extends AnAction {
                 scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
                 simpleToolWindowPanel.setContent(scrollPane);
             } else {
-                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
+                JBTextArea jbTextArea = new JBTextArea(LibertyBundles.message("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
                 jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
                 jbTextArea.setLineWrap(true);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
@@ -24,7 +24,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("run.tests.liberty.dev");
+        return LibertyBundles.message("run.tests.liberty.dev");
     }
 
     @Override

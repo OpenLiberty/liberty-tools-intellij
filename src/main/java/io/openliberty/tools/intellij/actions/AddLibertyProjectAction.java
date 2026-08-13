@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,7 +28,7 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add");
+        return LibertyBundles.message("liberty.project.add");
     }
 
     @Override
@@ -48,11 +48,11 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     public String getChooseDialogTitle() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add.dialog.title");
+        return LibertyBundles.message("liberty.project.add.dialog.title");
     }
 
     @Override
     public String getChooseDialogMessage() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add.dialog.message");
+        return LibertyBundles.message("liberty.project.add.dialog.message");
     }
 }

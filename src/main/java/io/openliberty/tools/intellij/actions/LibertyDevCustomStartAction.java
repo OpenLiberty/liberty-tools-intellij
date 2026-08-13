@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,7 +20,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
-import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LibertyBundles;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -36,7 +36,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("start.liberty.dev.custom.params");
+        return LibertyBundles.message("start.liberty.dev.custom.params");
     }
 
     @Override
