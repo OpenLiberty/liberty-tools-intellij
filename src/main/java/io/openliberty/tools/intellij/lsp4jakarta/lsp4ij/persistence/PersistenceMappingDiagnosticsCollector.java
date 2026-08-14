@@ -16,6 +16,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -109,13 +110,13 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         for (PsiAnnotation annotation : type.getAnnotations()) {
             String fqn = annotation.getQualifiedName();
             if (isMatchedJavaElement(type, fqn, desc.singleFqn)) {
-                String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
+                String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnSuperclassChain(name, annotation, type, desc, unit, diagnostics);
                 }
             } else if (isMatchedJavaElement(type, fqn, desc.containerFqn)) {
-                for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
-                    String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
+                for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
+                    String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
                         validateNameOnSuperclassChain(name, nested, type, desc, unit, diagnostics);
                     }
@@ -132,8 +133,9 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     private void validateNameOnSuperclassChain(String name, PsiAnnotation annotation,
                                                PsiClass type, OverrideDescriptor desc,
                                                PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        if (!existsInSuperclassChain(type, name)) {
-            String targetName = getFirstMappedSuperclassName(type);
+        PsiClass mappedSuperClass = findMappedSuperclassWithField(type, name);
+        if (mappedSuperClass==null) {
+            String targetName = resolveSuperclassChainName(type);
             diagnostics.add(createDiagnostic(annotation, unit,
                     Messages.getMessage(desc.msgNotFound, name, targetName),
                     desc.errorCode, null, DiagnosticSeverity.Error));
@@ -144,18 +146,18 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      * Returns {@code true} if a field named {@code name} (supporting dot-notation)
      * exists anywhere in the {@code @MappedSuperclass} supertype chain of {@code type}.
      */
-    private boolean existsInSuperclassChain(PsiClass type, String name) {
+    private PsiClass findMappedSuperclassWithField(PsiClass type, String name) {
         PsiClass current = type.getSuperClass();
         while (current != null
                 && !PersistenceConstants.OBJECT.equals(current.getQualifiedName())) {
             if (isMatchedAnnotation(current.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS)) {
                 if (fieldExistsInType(current, name)) {
-                    return true;
+                    return current;
                 }
             }
             current = current.getSuperClass();
         }
-        return false;
+        return null;
     }
 
     /**
@@ -174,6 +176,15 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass superClass = type.getSuperClass();
         return (superClass != null && superClass.getName() != null)
                 ? superClass.getName() : "superclass";
+    }
+
+    /**
+     * Returns a human-readable name for the first {@code @MappedSuperclass} in the
+     * supertype chain, falling back to the immediate superclass name.
+     */
+    private String resolveSuperclassChainName(PsiClass type) {
+        String superclassName = type.getSuperClass()!=null?type.getSuperClass().getName():null;
+        return superclassName != null ? superclassName : type.getQualifiedName();
     }
 
     // -----------------------------------------------------------------------
@@ -199,13 +210,13 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         for (PsiAnnotation annotation : annotations) {
             String fqn = annotation.getQualifiedName();
             if (isMatchedJavaElement(declaringType, fqn, desc.singleFqn)) {
-                String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
+                String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
                 }
             } else if (isMatchedJavaElement(declaringType, fqn, desc.containerFqn)) {
-                for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
-                    String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
+                for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
+                    String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
                         validateNameOnMember(name, nested, member, hasElementCollection, desc, unit, diagnostics);
                     }
@@ -300,7 +311,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                                          PsiClass targetType, OverrideDescriptor desc,
                                          PsiJavaFile unit, List<Diagnostic> diagnostics) {
         int dot = name.indexOf('.');
-        if (dot == -1) {
+        if (dot == PersistenceConstants.NOT_FOUND) {
             if (!hasFieldInType(targetType, name)) {
                 String message = fullName.equals(name)
                         ? Messages.getMessage(desc.msgNotFound, name, targetType.getName())
@@ -335,7 +346,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      */
     private boolean fieldExistsInType(PsiClass type, String name) {
         int dot = name.indexOf('.');
-        if (dot == -1) {
+        if (dot == PersistenceConstants.NOT_FOUND) {
             return hasFieldInType(type, name);
         }
         String first = name.substring(0, dot);
@@ -359,47 +370,5 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         return type.findFieldByName(fieldName, false) != null;
     }
 
-    /**
-     * Extracts the string value of a named annotation attribute, stripping surrounding quotes.
-     * Returns {@code null} if the attribute is absent or not a string literal.
-     */
-    private String getAnnotationStringValue(PsiAnnotation annotation, String attributeName) {
-        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
-        if (value == null) {
-            return null;
-        }
-        String text = value.getText();
-        if (text != null && text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
-            return text.substring(1, text.length() - 1);
-        }
-        return null;
-    }
 
-    /**
-     * Returns the nested single-annotation instances from a container annotation's
-     * {@code value} attribute (e.g. the entries inside {@code @AttributeOverrides}).
-     */
-    private PsiAnnotation[] getNestedAnnotations(PsiAnnotation container) {
-        PsiAnnotationMemberValue value = container.findAttributeValue("value");
-        if (value instanceof PsiArrayInitializerMemberValue) {
-            PsiAnnotationMemberValue[] initializers =
-                    ((PsiArrayInitializerMemberValue) value).getInitializers();
-            int count = 0;
-            PsiAnnotation[] buf = new PsiAnnotation[initializers.length];
-            for (PsiAnnotationMemberValue item : initializers) {
-                if (item instanceof PsiAnnotation) {
-                    buf[count++] = (PsiAnnotation) item;
-                }
-            }
-            if (count == initializers.length) {
-                return buf;
-            }
-            PsiAnnotation[] trimmed = new PsiAnnotation[count];
-            System.arraycopy(buf, 0, trimmed, 0, count);
-            return trimmed;
-        } else if (value instanceof PsiAnnotation) {
-            return new PsiAnnotation[]{(PsiAnnotation) value};
-        }
-        return PsiAnnotation.EMPTY_ARRAY;
-    }
 }

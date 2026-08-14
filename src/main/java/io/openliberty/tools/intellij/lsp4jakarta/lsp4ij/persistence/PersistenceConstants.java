@@ -51,6 +51,9 @@ public class PersistenceConstants {
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
 
+    /* String search constants */
+    public static final int NOT_FOUND = -1;
+
     /* Source */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-persistence";
 

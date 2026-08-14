@@ -224,5 +224,57 @@ public class AnnotationValueExpressionUtil {
         logUnableToCreateDefaultValue();
         return factory.createExpressionFromText("null", annotation);
     }
+
+    /**
+     * Returns the nested single-annotation instances from a container annotation's
+     * {@code value} attribute (e.g. the entries inside {@code @AttributeOverrides}).
+     *
+     * @param container the container annotation (e.g. {@code @AttributeOverrides})
+     * @return an array of nested annotations, or an empty array if none found
+     */
+    public static PsiAnnotation[] getNestedAnnotations(PsiAnnotation container) {
+        PsiAnnotationMemberValue value = container.findAttributeValue("value");
+        if (value instanceof PsiArrayInitializerMemberValue) {
+            PsiAnnotationMemberValue[] initializers =
+                    ((PsiArrayInitializerMemberValue) value).getInitializers();
+            int count = 0;
+            PsiAnnotation[] buf = new PsiAnnotation[initializers.length];
+            for (PsiAnnotationMemberValue item : initializers) {
+                if (item instanceof PsiAnnotation) {
+                    buf[count++] = (PsiAnnotation) item;
+                }
+            }
+            if (count == initializers.length) {
+                return buf;
+            }
+            PsiAnnotation[] trimmed = new PsiAnnotation[count];
+            System.arraycopy(buf, 0, trimmed, 0, count);
+            return trimmed;
+        } else if (value instanceof PsiAnnotation) {
+            return new PsiAnnotation[]{(PsiAnnotation) value};
+        }
+        return PsiAnnotation.EMPTY_ARRAY;
+    }
+
+    /**
+     * Extracts the string value of a named annotation attribute, stripping surrounding quotes.
+     * Returns {@code null} if the attribute is absent or not a string literal.
+     *
+     * @param annotation the annotation to extract the value from
+     * @param attributeName the name of the attribute
+     * @return the string value without quotes, or {@code null} if the attribute is absent or not a string literal
+     */
+    public static String getAnnotationStringValue(PsiAnnotation annotation, String attributeName) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (value == null) {
+            return null;
+        }
+        String text = value.getText();
+        if (text != null && text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+            return text.substring(1, text.length() - 1);
+        }
+        return null;
+    }
 }
+
 
