@@ -10,7 +10,7 @@
  * Contributors:
  *     IBM Corporation - initial implementation
  *******************************************************************************/
-package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.security;
 
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.ReplaceAnnotationsQuickFix;
@@ -18,16 +18,18 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 import java.util.List;
 
 /**
- * Quickfix for InvalidInterceptorOrDecorator diagnostic.
- * Replaces all invalid scope annotations with @Dependent.
+ * Quickfix for {@code InvalidScopeOnIdentityStoreDefinition} diagnostic.
+ *
+ * <p>Replaces the invalid scope annotation(s) with {@code @ApplicationScoped} on a class
+ * annotated with {@code @LdapIdentityStoreDefinition} or {@code @DatabaseIdentityStoreDefinition}.</p>
  */
-public class ReplaceInvalidScopesWithDependentQuickFix extends ReplaceAnnotationsQuickFix {
+public class ReplaceWithApplicationScopedAnnotationQuickFix extends ReplaceAnnotationsQuickFix {
 
     /**
      * Constructor.
      */
-    public ReplaceInvalidScopesWithDependentQuickFix() {
-        super(ManagedBeanConstants.DEPENDENT_FQ_NAME);
+    public ReplaceWithApplicationScopedAnnotationQuickFix() {
+        super(Constants.APPLICATION_SCOPED_FQ_NAME);
     }
 
     /**
@@ -35,7 +37,7 @@ public class ReplaceInvalidScopesWithDependentQuickFix extends ReplaceAnnotation
      */
     @Override
     public String getParticipantId() {
-        return ReplaceInvalidScopesWithDependentQuickFix.class.getName();
+        return ReplaceWithApplicationScopedAnnotationQuickFix.class.getName();
     }
 
     /**
@@ -43,7 +45,6 @@ public class ReplaceInvalidScopesWithDependentQuickFix extends ReplaceAnnotation
      */
     @Override
     protected String getCodeActionLabel(List<String> annotationsToRemove) {
-        return Messages.getMessage("ReplaceAnnotationWith", formatAnnotationNames(annotationsToRemove), "@Dependent");
+        return Messages.getMessage("ReplaceAnnotationWith", formatAnnotationNames(annotationsToRemove), "@ApplicationScoped");
     }
 }
-

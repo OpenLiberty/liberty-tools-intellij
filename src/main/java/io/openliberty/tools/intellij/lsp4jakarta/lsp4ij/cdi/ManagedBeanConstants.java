@@ -63,6 +63,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT = "InvalidWildcardTypeInInjectField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
+    public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
 
     // ObserverMethod notify validation
     public static final String OBSERVER_METHOD_FQ_NAME = "jakarta.enterprise.inject.spi.ObserverMethod";
