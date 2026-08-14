@@ -16,12 +16,13 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-
 import java.util.List;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
@@ -64,48 +65,36 @@ public class CdiRawEventTypeDiagnosticsCollector extends AbstractDiagnosticsColl
             return;
         }
 
-        for (PsiClass type : unit.getClasses()) {
-            collectForClass(type, unit, diagnostics);
-        }
-    }
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
 
-    /**
-     * Recursively collects raw-Event diagnostics for a class and all its inner classes.
-     */
-    private void collectForClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Check @Inject fields for raw Event type
-        for (PsiField field : type.getFields()) {
-            if (isRawEventType(field.getType()) && AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME)) {
-                diagnostics.add(createDiagnostic(field, unit,
-                        Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
-                        DIAGNOSTIC_CODE_RAW_EVENT, null,
-                        DiagnosticSeverity.Error));
-            }
-        }
-
-        // Check parameters of @Inject methods for raw Event type.
-        // The diagnostic is placed on the method element so that the
-        // RemoveAnnotationConflictQuickFix can correctly locate and remove @Inject.
-        for (PsiMethod method : type.getMethods()) {
-            PsiParameter[] params = method.getParameterList().getParameters();
-            boolean hasRawEventParam = false;
-            for (PsiParameter param : params) {
-                if (isRawEventType(param.getType())) {
-                    hasRawEventParam = true;
-                    break;
+        for (PsiClass type : allClasses) {
+            // Check @Inject fields for raw Event type
+            for (PsiField field : type.getFields()) {
+                if (isRawEventType(field.getType()) && AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME)) {
+                    diagnostics.add(createDiagnostic(field, unit,
+                            Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
+                            DIAGNOSTIC_CODE_RAW_EVENT, null,
+                            DiagnosticSeverity.Error));
                 }
             }
-            if (hasRawEventParam && AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
-                diagnostics.add(createDiagnostic(method, unit,
-                        Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
-                        DIAGNOSTIC_CODE_RAW_EVENT, null,
-                        DiagnosticSeverity.Error));
-            }
-        }
 
-        // Recurse into inner/nested classes
-        for (PsiClass inner : type.getInnerClasses()) {
-            collectForClass(inner, unit, diagnostics);
+            for (PsiMethod method : type.getMethods()) {
+                PsiParameter[] params = method.getParameterList().getParameters();
+                boolean hasRawEventParam = false;
+                for (PsiParameter param : params) {
+                    if (isRawEventType(param.getType())) {
+                        hasRawEventParam = true;
+                        break;
+                    }
+                }
+                if (hasRawEventParam && AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
+                    diagnostics.add(createDiagnostic(method, unit,
+                            Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
+                            DIAGNOSTIC_CODE_RAW_EVENT, null,
+                            DiagnosticSeverity.Error));
+                }
+            }
         }
     }
 
