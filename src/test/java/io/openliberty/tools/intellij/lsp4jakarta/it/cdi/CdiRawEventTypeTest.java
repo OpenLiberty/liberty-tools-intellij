@@ -75,41 +75,26 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
 
         // --- Invalid cases ---
 
-        // Line 17 (0-based): "    @Inject" / Line 18: "    Event rawEvent;"
-        // Field name "rawEvent": col 10-18
         Diagnostic rawEventFieldDiagnostic = d(17, 10, 18,
                 "An injection point of raw type Event is not valid. Specify a type parameter, for example Event<String> or Event<MyType>.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidRawEventTypeInjectionPoint");
 
-        // Line 32 (0-based): "    public void setRawEvent(Event event) {"
-        // Method name "setRawEvent": col 16-27
         Diagnostic rawEventMethodParamDiagnostic = d(32, 16, 27,
                 "An injection point of raw type Event is not valid. Specify a type parameter, for example Event<String> or Event<MyType>.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidRawEventTypeInjectionPoint");
 
-        // Line 42 (0-based): "    public void setMixed(String name, Event rawEvent) {"
-        // Edge case: mixed params — one diagnostic on method name "setMixed": col 16-24
         Diagnostic rawEventMixedParamDiagnostic = d(42, 16, 24,
                 "An injection point of raw type Event is not valid. Specify a type parameter, for example Event<String> or Event<MyType>.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidRawEventTypeInjectionPoint");
 
-        // Line 47 (0-based): "    public void setMultipleRawEvents(Event first, Event second) {"
-        // Edge case: two raw Event params — only ONE diagnostic; method name "setMultipleRawEvents": col 16-36
         Diagnostic rawEventMultipleParamsDiagnostic = d(47, 16, 36,
                 "An injection point of raw type Event is not valid. Specify a type parameter, for example Event<String> or Event<MyType>.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidRawEventTypeInjectionPoint");
 
-        // Line 59 (0-based): "        Event rawEventInInner;" in nested class Inner
-        // Field name "rawEventInInner": col 14-29
         Diagnostic rawEventNestedClassDiagnostic = d(59, 14, 29,
                 "An injection point of raw type Event is not valid. Specify a type parameter, for example Event<String> or Event<MyType>.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidRawEventTypeInjectionPoint");
 
-        // Assert all 5 invalid diagnostics; valid cases must produce no additional diagnostics:
-        //   - Event<String> and Event<OrderCreated> fields — valid
-        //   - Event notInjectedRawEvent (no @Inject) — not an injection point
-        //   - setTypedEvent(Event<String>) method — valid
-        //   - produceRawEvent() return type — not an injection point
         assertJavaDiagnostics(diagnosticsParams, utils,
                 rawEventFieldDiagnostic,
                 rawEventMethodParamDiagnostic,
@@ -117,16 +102,6 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 rawEventMultipleParamsDiagnostic,
                 rawEventNestedClassDiagnostic);
 
-        // -----------------------------------------------------------------------
-        // Quickfix: "Remove @Inject" — one per invalid injection point
-        // -----------------------------------------------------------------------
-
-        // The file has 69 lines (1-based), so 0-based last line = 68, last col = 1.
-        // Each quickfix removes one "@Inject\n    " (or "        @Inject\n        " for inner)
-        // from the source file.
-
-        // --- Quickfix 1: rawEvent field (line 16-17, 0-based: @Inject on line 16) ---
-        // After removal: line 16 (@Inject) + following newline are gone, field line shifts up
         String rawEventFieldFixed =
                 "package io.openliberty.sample.jakarta.cdi;\n" +
                 "\n" +
@@ -196,12 +171,11 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
 
-        JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, rawEventFieldDiagnostic);
-        TextEdit te1 = te(0, 0, 68, 0, rawEventFieldFixed);
-        CodeAction ca1 = ca(uri, REMOVE_INJECT, rawEventFieldDiagnostic, te1);
-        assertJavaCodeAction(codeActionParams1, utils, ca1);
+        JakartaJavaCodeActionParams rawEventFieldCodeActionParams = createCodeActionParams(uri, rawEventFieldDiagnostic);
+        TextEdit removeRawEventFieldInjectEdit = te(0, 0, 68, 0, rawEventFieldFixed);
+        CodeAction removeRawEventFieldInjectAction = ca(uri, REMOVE_INJECT, rawEventFieldDiagnostic, removeRawEventFieldInjectEdit);
+        assertJavaCodeAction(rawEventFieldCodeActionParams, utils, removeRawEventFieldInjectAction);
 
-        // --- Quickfix 2: setRawEvent method (line 31-32, 0-based: @Inject on line 31) ---
         String setRawEventFixed =
                 "package io.openliberty.sample.jakarta.cdi;\n" +
                 "\n" +
@@ -271,12 +245,11 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
 
-        JakartaJavaCodeActionParams codeActionParams2 = createCodeActionParams(uri, rawEventMethodParamDiagnostic);
-        TextEdit te2 = te(0, 0, 68, 0, setRawEventFixed);
-        CodeAction ca2 = ca(uri, REMOVE_INJECT, rawEventMethodParamDiagnostic, te2);
-        assertJavaCodeAction(codeActionParams2, utils, ca2);
+        JakartaJavaCodeActionParams setRawEventCodeActionParams = createCodeActionParams(uri, rawEventMethodParamDiagnostic);
+        TextEdit removeSetRawEventInjectEdit = te(0, 0, 68, 0, setRawEventFixed);
+        CodeAction removeSetRawEventInjectAction = ca(uri, REMOVE_INJECT, rawEventMethodParamDiagnostic, removeSetRawEventInjectEdit);
+        assertJavaCodeAction(setRawEventCodeActionParams, utils, removeSetRawEventInjectAction);
 
-        // --- Quickfix 3: setMixed method (line 41-42, 0-based: @Inject on line 41) ---
         String setMixedFixed =
                 "package io.openliberty.sample.jakarta.cdi;\n" +
                 "\n" +
@@ -346,12 +319,11 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
 
-        JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, rawEventMixedParamDiagnostic);
-        TextEdit te3 = te(0, 0, 68, 0, setMixedFixed);
-        CodeAction ca3 = ca(uri, REMOVE_INJECT, rawEventMixedParamDiagnostic, te3);
-        assertJavaCodeAction(codeActionParams3, utils, ca3);
+        JakartaJavaCodeActionParams setMixedCodeActionParams = createCodeActionParams(uri, rawEventMixedParamDiagnostic);
+        TextEdit removeSetMixedInjectEdit = te(0, 0, 68, 0, setMixedFixed);
+        CodeAction removeSetMixedInjectAction = ca(uri, REMOVE_INJECT, rawEventMixedParamDiagnostic, removeSetMixedInjectEdit);
+        assertJavaCodeAction(setMixedCodeActionParams, utils, removeSetMixedInjectAction);
 
-        // --- Quickfix 4: setMultipleRawEvents method (line 46-47, 0-based: @Inject on line 46) ---
         String setMultipleRawEventsFixed =
                 "package io.openliberty.sample.jakarta.cdi;\n" +
                 "\n" +
@@ -421,12 +393,11 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
 
-        JakartaJavaCodeActionParams codeActionParams4 = createCodeActionParams(uri, rawEventMultipleParamsDiagnostic);
-        TextEdit te4 = te(0, 0, 68, 0, setMultipleRawEventsFixed);
-        CodeAction ca4 = ca(uri, REMOVE_INJECT, rawEventMultipleParamsDiagnostic, te4);
-        assertJavaCodeAction(codeActionParams4, utils, ca4);
+        JakartaJavaCodeActionParams setMultipleRawEventsCodeActionParams = createCodeActionParams(uri, rawEventMultipleParamsDiagnostic);
+        TextEdit removeSetMultipleRawEventsInjectEdit = te(0, 0, 68, 0, setMultipleRawEventsFixed);
+        CodeAction removeSetMultipleRawEventsInjectAction = ca(uri, REMOVE_INJECT, rawEventMultipleParamsDiagnostic, removeSetMultipleRawEventsInjectEdit);
+        assertJavaCodeAction(setMultipleRawEventsCodeActionParams, utils, removeSetMultipleRawEventsInjectAction);
 
-        // --- Quickfix 5: rawEventInInner field in nested class (line 58-59, 0-based: @Inject on line 58) ---
         String rawEventInInnerFixed =
                 "package io.openliberty.sample.jakarta.cdi;\n" +
                 "\n" +
@@ -496,9 +467,9 @@ public class CdiRawEventTypeTest extends BaseJakartaTest {
                 "    }\n" +
                 "}\n";
 
-        JakartaJavaCodeActionParams codeActionParams5 = createCodeActionParams(uri, rawEventNestedClassDiagnostic);
-        TextEdit te5 = te(0, 0, 68, 0, rawEventInInnerFixed);
-        CodeAction ca5 = ca(uri, REMOVE_INJECT, rawEventNestedClassDiagnostic, te5);
-        assertJavaCodeAction(codeActionParams5, utils, ca5);
+        JakartaJavaCodeActionParams rawEventInInnerCodeActionParams = createCodeActionParams(uri, rawEventNestedClassDiagnostic);
+        TextEdit removeRawEventInInnerInjectEdit = te(0, 0, 68, 0, rawEventInInnerFixed);
+        CodeAction removeRawEventInInnerInjectAction = ca(uri, REMOVE_INJECT, rawEventNestedClassDiagnostic, removeRawEventInInnerInjectEdit);
+        assertJavaCodeAction(rawEventInInnerCodeActionParams, utils, removeRawEventInInnerInjectAction);
     }
 }

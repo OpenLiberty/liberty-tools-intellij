@@ -22,7 +22,6 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
@@ -59,9 +58,9 @@ public class CdiRawEventTypeDiagnosticsCollector extends AbstractDiagnosticsColl
         if (unit == null)
             return;
 
-        // Determine once whether jakarta.enterprise.event.Event is imported in this file
-        boolean eventImported = isEventImported(unit);
-        if (!eventImported) {
+        // Early exit: if jakarta.enterprise.event.Event is not imported, no raw-Event
+        // injection point can exist in this file.
+        if (!PsiUtils.isImportedJavaElement(unit, EVENT_FQ_NAME)) {
             return;
         }
 
@@ -71,74 +70,28 @@ public class CdiRawEventTypeDiagnosticsCollector extends AbstractDiagnosticsColl
         for (PsiClass type : allClasses) {
             // Check @Inject fields for raw Event type
             for (PsiField field : type.getFields()) {
-                if (isRawEventType(field.getType()) && AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME)) {
+                if (PsiUtils.isRawEventType(field.getType()) && AnnotationUtils.hasAnnotation(field, INJECT_FQ_NAME)) {
                     diagnostics.add(createDiagnostic(field, unit,
-                            Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
+                            Messages.getMessage(DIAGNOSTIC_CODE_RAW_EVENT),
                             DIAGNOSTIC_CODE_RAW_EVENT, null,
                             DiagnosticSeverity.Error));
                 }
             }
 
+            // Check parameters of @Inject methods for raw Event type.
             for (PsiMethod method : type.getMethods()) {
-                PsiParameter[] params = method.getParameterList().getParameters();
-                boolean hasRawEventParam = false;
-                for (PsiParameter param : params) {
-                    if (isRawEventType(param.getType())) {
-                        hasRawEventParam = true;
+                for (PsiParameter param : method.getParameterList().getParameters()) {
+                    if (PsiUtils.isRawEventType(param.getType()) && AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage(DIAGNOSTIC_CODE_RAW_EVENT),
+                                DIAGNOSTIC_CODE_RAW_EVENT, null,
+                                DiagnosticSeverity.Error));
+                        // One diagnostic per method is sufficient — the whole @Inject must be removed
                         break;
                     }
                 }
-                if (hasRawEventParam && AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
-                    diagnostics.add(createDiagnostic(method, unit,
-                            Messages.getMessage("InvalidRawEventTypeInjectionPoint"),
-                            DIAGNOSTIC_CODE_RAW_EVENT, null,
-                            DiagnosticSeverity.Error));
-                }
             }
         }
     }
 
-    /**
-     * Returns {@code true} if {@code jakarta.enterprise.event.Event} is imported
-     * (explicitly or via on-demand) in the given file.
-     *
-     * @param unit the Java file to check
-     * @return {@code true} if the Event type is imported
-     */
-    private boolean isEventImported(PsiJavaFile unit) {
-        PsiImportList importList = unit.getImportList();
-        if (importList == null) {
-            return false;
-        }
-        String eventPackage = EVENT_FQ_NAME.substring(0, EVENT_FQ_NAME.lastIndexOf('.'));
-        return Arrays.stream(importList.getImportStatements())
-                .anyMatch(stmt -> {
-                    String name = stmt.getQualifiedName();
-                    if (name == null) return false;
-                    return EVENT_FQ_NAME.equals(name) || (stmt.isOnDemand() && eventPackage.equals(name));
-                });
-    }
-
-    /**
-     * Returns {@code true} if the given {@link PsiType} is the raw (unparameterized)
-     * {@code Event} type.
-     *
-     * <p>Called only after confirming that {@code jakarta.enterprise.event.Event} is
-     * imported in the file, so a simple name + zero-parameter check is sufficient.
-     *
-     * @param type the PSI type to check
-     * @return {@code true} if the type is a raw {@code Event}; {@code false} otherwise
-     */
-    private boolean isRawEventType(PsiType type) {
-        if (!(type instanceof PsiClassType)) {
-            return false;
-        }
-        PsiClassType classType = (PsiClassType) type;
-        // Raw type has no type arguments
-        if (classType.getParameterCount() != 0) {
-            return false;
-        }
-        // Import confirmed — check simple name only
-        return "Event".equals(classType.getClassName());
-    }
 }
