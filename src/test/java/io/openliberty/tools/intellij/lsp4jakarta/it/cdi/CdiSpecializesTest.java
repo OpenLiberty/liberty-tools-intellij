@@ -349,4 +349,60 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         // No diagnostics expected — direct superclass is a valid CDI bean
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    /**
+     * Tests that a class annotated with @Specializes that extends a bean annotated
+     * with a custom normal scope does NOT trigger a diagnostic.
+     *
+     * CDI spec allows user-defined scope annotations annotated with @NormalScope.
+     * A superclass carrying such a custom scope is a valid CDI bean, so @Specializes
+     * must be accepted without a diagnostic.
+     */
+    @Test
+    public void testSpecializesWithCustomScopedSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithCustomScopedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — direct superclass is annotated with a custom @NormalScope-based scope
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Tests that a class annotated with @Specializes that extends a class carrying a
+     * plain custom annotation (NOT meta-annotated with @NormalScope) triggers a diagnostic.
+     *
+     * The superclass is not a CDI bean because its annotation lacks the @NormalScope
+     * meta-annotation, so @Specializes is invalid.
+     *
+     * Expected: Error on class name indicating the direct superclass is not a bean.
+     */
+    @Test
+    public void testSpecializesWithNonNormalScopedSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithNonNormalScopedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 25 (1-based) = line 24 (0-based)
+        // "SpecializesWithNonNormalScopedSuperclass" starts at col 13, length 40, end col 53
+        Diagnostic nonNormalScopeDiagnostic = d(24, 13, 53,
+                "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesAnnotationOnNonBeanSuperclass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, nonNormalScopeDiagnostic);
+    }
 }
