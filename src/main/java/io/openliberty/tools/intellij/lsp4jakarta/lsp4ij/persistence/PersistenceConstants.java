@@ -33,6 +33,17 @@ public class PersistenceConstants {
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
+    public static final String TABLE_GENERATOR = "jakarta.persistence.TableGenerator";
+    public static final String TABLE_GENERATORS = "jakarta.persistence.TableGenerators";
+    public static final String SEQUENCE_GENERATOR = "jakarta.persistence.SequenceGenerator";
+    public static final String SEQUENCE_GENERATORS = "jakarta.persistence.SequenceGenerators";
+    public static final String SECONDARY_TABLE = "jakarta.persistence.SecondaryTable";
+    public static final String SECONDARY_TABLES = "jakarta.persistence.SecondaryTables";
+
+    public static final String[] GENERATOR_AND_TABLE_ANNOTATIONS = {
+            TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
+    };
+    public static final String VALUE = "value";
 
     /* Type Constants */
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
@@ -62,6 +73,14 @@ public class PersistenceConstants {
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+    
+    /* Generator / SecondaryTable Codes */
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME = "TableGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING = "TableGeneratorsMissingTableGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME = "SequenceGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING = "SequenceGeneratorsMissingSequenceGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME = "SecondaryTableInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING = "SecondaryTablesMissingSecondaryTableMapping";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
