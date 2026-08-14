@@ -59,5 +59,18 @@ public class PsiUtils {
             collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
+
+    /**
+     * Returns the declared type of a field or the return type of a method.
+     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
+     */
+    public static PsiType getMemberType(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField) {
+            return ((PsiField) member).getType();
+        } else if (member instanceof PsiMethod) {
+            return ((PsiMethod) member).getReturnType();
+        }
+        return null;
+    }
 }
 

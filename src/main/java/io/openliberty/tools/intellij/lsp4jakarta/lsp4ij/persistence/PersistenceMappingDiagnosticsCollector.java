@@ -17,6 +17,7 @@ import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -161,24 +162,6 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     }
 
     /**
-     * Returns the simple name of the first {@code @MappedSuperclass} in the supertype
-     * chain, falling back to the immediate superclass name.
-     */
-    private String getFirstMappedSuperclassName(PsiClass type) {
-        PsiClass current = type.getSuperClass();
-        while (current != null
-                && !PersistenceConstants.OBJECT.equals(current.getQualifiedName())) {
-            if (isMatchedAnnotation(current.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS)) {
-                return current.getName() != null ? current.getName() : "superclass";
-            }
-            current = current.getSuperClass();
-        }
-        PsiClass superClass = type.getSuperClass();
-        return (superClass != null && superClass.getName() != null)
-                ? superClass.getName() : "superclass";
-    }
-
-    /**
      * Returns a human-readable name for the first {@code @MappedSuperclass} in the
      * supertype chain, falling back to the immediate superclass name.
      */
@@ -192,9 +175,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     // -----------------------------------------------------------------------
 
     /**
-     * Validates override annotations on a field or getter method (property-based access).
-     * The type is resolved via {@link #getMemberType(PsiJvmModifiersOwner)} — {@code field.getType()}
-     * for fields, {@code method.getReturnType()} for methods — keeping the rest of the logic identical.
+     * Validates override annotations on a field or method (property-based access).
      */
     private void validateOverridesOnMember(PsiJvmModifiersOwner member, PsiClass declaringType,
                                            PsiJavaFile unit, OverrideDescriptor desc,
@@ -229,7 +210,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                                       PsiJvmModifiersOwner member, boolean isElementCollection,
                                       OverrideDescriptor desc, PsiJavaFile unit,
                                       List<Diagnostic> diagnostics) {
-        PsiType memberType = getMemberType(member);
+        PsiType memberType = PsiUtils.getMemberType(member);
         if (!(memberType instanceof PsiClassType)) {
             return;
         }
@@ -244,18 +225,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         }
     }
 
-    /**
-     * Returns the declared type of a field or the return type of a method.
-     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
-     */
-    private PsiType getMemberType(PsiJvmModifiersOwner member) {
-        if (member instanceof PsiField) {
-            return ((PsiField) member).getType();
-        } else if (member instanceof PsiMethod) {
-            return ((PsiMethod) member).getReturnType();
-        }
-        return null;
-    }
+
 
     /**
      * Handles {@code @ElementCollection} map fields: requires {@code "key."} or
