@@ -16,7 +16,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb;
 import com.google.gson.Gson;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -24,12 +24,12 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
 
 /**
- * EJB diagnostic collector for session beans.
+ * EJB diagnostic collector for session beans and session synchronization methods.
  */
 public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
@@ -64,6 +64,11 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 }
                 validateSessionBeanConstructor(type, unit, diagnostics);
                 validateSessionBeanFinalizeMethod(type, unit, diagnostics);
+
+                // Validate session synchronization methods (@AfterBegin, @BeforeCompletion, @AfterCompletion)
+                for (PsiMethod method : type.getMethods()) {
+                    validateSessionSyncMethod(type, method, unit, diagnostics);
+                }
             }
         }
     }
@@ -114,6 +119,55 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
     }
 
     /**
+     * Validates that a method annotated with a session synchronization annotation
+     * ({@code @AfterBegin}, {@code @BeforeCompletion}, {@code @AfterCompletion}) is
+     * not declared final, not declared static, and returns void.
+     *
+     * @param type        the declaring class
+     * @param method      the method to validate
+     * @param unit        the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionSyncMethod(PsiClass type, PsiMethod method, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        List<String> matchedAnnotations = getMatchedJavaElementNames(type,
+                Stream.of(method.getAnnotations())
+                        .map(PsiAnnotation::getQualifiedName)
+                        .toArray(String[]::new),
+                SESSION_SYNC_ANNOTATIONS);
+
+        if (matchedAnnotations.isEmpty()) {
+            return;
+        }
+
+        String annotationNames = DiagnosticsUtils.getSimpleAnnotationNames(matchedAnnotations, "@");
+
+        if (method.hasModifierProperty(PsiModifier.FINAL)) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSessionSyncMethodFinal", annotationNames),
+                    DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_FINAL,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        if (method.hasModifierProperty(PsiModifier.STATIC)) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSessionSyncMethodStatic", annotationNames),
+                    DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_STATIC,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        PsiType returnType = method.getReturnType();
+        if (returnType != null && !returnType.equals(PsiTypes.voidType())) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSessionSyncMethodNonVoid", annotationNames),
+                    DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NON_VOID,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
      * Validates that a session bean does not have @Interceptor or @Decorator annotations.
      *
      * A diagnostic is reported if the session bean class is annotated with
@@ -153,9 +207,7 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
     private void validateConflictingSessionBeanAnnotations(PsiClass type, PsiJavaFile unit,
                                                            List<String> sessionBeanAnnotations,
                                                            List<Diagnostic> diagnostics) {
-        String annotationNames = sessionBeanAnnotations.stream()
-                .map(fqName -> "@" + JDTUtils.getSimpleName(fqName))
-                .collect(Collectors.joining(", "));
+        String annotationNames = DiagnosticsUtils.getSimpleAnnotationNames(sessionBeanAnnotations, "@");
         String message = Messages.getMessage("SessionBeanConflictingAnnotations", annotationNames);
         diagnostics.add(createDiagnostic(type, unit, message,
                 DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS,
