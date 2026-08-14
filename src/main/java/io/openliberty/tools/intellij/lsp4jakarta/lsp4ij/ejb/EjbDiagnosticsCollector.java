@@ -18,9 +18,11 @@ import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,13 +47,17 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
         if (unit == null)
             return;
 
-        for (PsiClass type : unit.getClasses()) {
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
+
+        for (PsiClass type : allClasses) {
             String[] typeAnnotations = getAnnotationNames(type);
             List<String> sessionBeanAnnotations = getMatchedJavaElementNames(type,
                     typeAnnotations,
                     SESSION_BEAN_ANNOTATIONS);
 
             if (!sessionBeanAnnotations.isEmpty()) {
+                validateSessionBeanClass(type, unit, diagnostics);
                 validateSessionBeanInterceptorDecorator(type, typeAnnotations, unit, diagnostics);
                 if (sessionBeanAnnotations.size() > 1) {
                     validateConflictingSessionBeanAnnotations(type, unit, sessionBeanAnnotations, diagnostics);
@@ -59,6 +65,51 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                 validateSessionBeanConstructor(type, unit, diagnostics);
                 validateSessionBeanFinalizeMethod(type, unit, diagnostics);
             }
+        }
+    }
+
+    /**
+     * Validates that a session bean class is public, not final, not abstract, and top-level.
+     *
+     * @param type the class to validate
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSessionBeanClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Must be a top-level class
+        if (type.getContainingClass() != null) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBeTopLevel"),
+                    DIAGNOSTIC_CODE_NON_TOP_LEVEL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must be public
+        if (!type.hasModifierProperty(PsiModifier.PUBLIC)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustBePublic"),
+                    DIAGNOSTIC_CODE_NOT_PUBLIC_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be final
+        if (type.hasModifierProperty(PsiModifier.FINAL)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeFinal"),
+                    DIAGNOSTIC_CODE_IS_FINAL_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Must not be abstract
+        if (type.hasModifierProperty(PsiModifier.ABSTRACT)) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("SessionBeanMustNotBeAbstract"),
+                    DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS,
+                    null,
+                    DiagnosticSeverity.Error));
         }
     }
 
