@@ -23,9 +23,4 @@ public class CommonConstants {
     public static final String DIAGNOSTIC_CODE_RETURN_TYPE_MUST_BE_VOID = "ReturnTypeMustBeVoid";
     public static final String DIAGNOSTIC_CODE_METHOD_MUST_BE_PUBLIC = "MethodMustBePublic";
     public static final String DIAGNOSTIC_CODE_FIELD_MUST_EXIST_IN_SETTER = "FieldMustExistInSetter";
-
-    /* Shared Jakarta annotation FQ names used across multiple diagnostic modules */
-    public static final String INJECT_FQ_NAME = "jakarta.inject.Inject";
-    public static final String CDI_DEFAULT_FQ_NAME = "jakarta.enterprise.inject.Default";
-    public static final String CDI_ANY_FQ_NAME = "jakarta.enterprise.inject.Any";
 }

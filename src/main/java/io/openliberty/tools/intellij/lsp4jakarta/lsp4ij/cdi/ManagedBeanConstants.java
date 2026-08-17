@@ -21,6 +21,8 @@ public class ManagedBeanConstants {
     /* Annotation Constants */
     public static final String PRODUCES_FQ_NAME = "jakarta.enterprise.inject.Produces";
     public static final String INJECT_FQ_NAME = "jakarta.inject.Inject";
+    public static final String CDI_DEFAULT_FQ_NAME = "jakarta.enterprise.inject.Default";
+    public static final String CDI_ANY_FQ_NAME = "jakarta.enterprise.inject.Any";
     public static final String DISPOSES_FQ_NAME = "jakarta.enterprise.inject.Disposes";
     public static final String OBSERVES_FQ_NAME = "jakarta.enterprise.event.Observes";
     public static final String OBSERVES_ASYNC_FQ_NAME = "jakarta.enterprise.event.ObservesAsync";

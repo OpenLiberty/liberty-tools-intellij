@@ -27,6 +27,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -58,6 +59,7 @@ public class UserTransactionInjectTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/UserTransactionInjectedInCdiBean.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -138,6 +140,7 @@ public class UserTransactionInjectTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/ValidUserTransactionUsage.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();

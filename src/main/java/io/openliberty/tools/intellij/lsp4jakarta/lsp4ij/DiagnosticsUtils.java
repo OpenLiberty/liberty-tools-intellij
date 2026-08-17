@@ -19,6 +19,8 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
+
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
@@ -260,12 +262,15 @@ public class DiagnosticsUtils {
 
         for (PsiAnnotation annotation : annotations) {
             String fqn = annotation.getQualifiedName();
-            if (isMatchedJavaElement(type, fqn, CommonConstants.INJECT_FQ_NAME)) {
+            if (fqn == null) {
+                continue; // unresolved annotation — skip
+            }
+            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.INJECT_FQ_NAME)) {
                 continue; // @Inject is not a qualifier
             }
-            if (isMatchedJavaElement(type, fqn, CommonConstants.CDI_DEFAULT_FQ_NAME)) {
+            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_DEFAULT_FQ_NAME)) {
                 hasExplicitDefault = true;
-            } else if (isMatchedJavaElement(type, fqn, CommonConstants.CDI_ANY_FQ_NAME)) {
+            } else if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_ANY_FQ_NAME)) {
                 // @Any is not a custom qualifier; ignore
             } else {
                 // Check if this annotation is a CDI qualifier (meta-annotated with @Qualifier)
