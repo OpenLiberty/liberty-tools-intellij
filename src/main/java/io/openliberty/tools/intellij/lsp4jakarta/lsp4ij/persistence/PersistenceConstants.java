@@ -25,6 +25,21 @@ public class PersistenceConstants {
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
+    public static final String EMBEDDABLE = "jakarta.persistence.Embeddable";
+    public static final String EMBEDDED = "jakarta.persistence.Embedded";
+    public static final String ELEMENT_COLLECTION = "jakarta.persistence.ElementCollection";
+    public static final String ATTRIBUTE_OVERRIDE = "jakarta.persistence.AttributeOverride";
+    public static final String ATTRIBUTE_OVERRIDES = "jakarta.persistence.AttributeOverrides";
+    public static final String ASSOCIATION_OVERRIDE = "jakarta.persistence.AssociationOverride";
+    public static final String ASSOCIATION_OVERRIDES = "jakarta.persistence.AssociationOverrides";
+
+    /* java.util.Map interface */
+    public static final String MAP_INTERFACE_FQN = "java.util.Map";
+
+    /* @ElementCollection map prefix constants */
+    public static final String MAP_KEY_PREFIX = "key.";
+    public static final String MAP_VALUE_PREFIX = "value.";
+
     public static final String MAPKEY = "jakarta.persistence.MapKey";
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
@@ -33,9 +48,6 @@ public class PersistenceConstants {
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
-
-    /* Type Constants */
-    public static final String MAP_INTERFACE_FQDN = "java.util.Map";
 
     /* Annotation Fields */
     public static final String NAME = "name";
@@ -75,6 +87,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "InvalidTypeOfField";
     public static final String DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE = "MapKeyTemporalNotOnTemporalType";
 
+
     /* PersistenceContext Codes */
     public static final String PERSISTENCE_CONTEXT = "jakarta.persistence.PersistenceContext";
     public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
@@ -82,6 +95,13 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
+
+    /* AttributeOverride / AssociationOverride Codes */
+    public static final String DIAGNOSTIC_CODE_INVALID_ATTRIBUTE_OVERRIDE_NAME = "InvalidAttributeOverrideName";
+    public static final String DIAGNOSTIC_CODE_INVALID_ASSOCIATION_OVERRIDE_NAME = "InvalidAssociationOverrideName";
+    public static final String DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED = "AttributeOverrideOnNonEmbeddedField";
+
+
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
     public static final Set<String> SET_OF_VALID_VERSION_TYPES = Set.of(
             "int", "short", "long", "java.lang.Integer",
