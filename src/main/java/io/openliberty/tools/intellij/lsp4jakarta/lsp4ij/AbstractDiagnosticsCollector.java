@@ -298,10 +298,13 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Checks if type is of Interceptor type or uses interceptor-related features.
      * Returns true if:
      * - The type has @Interceptor annotation
-     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundConstruct, AroundTimeout)
+     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundTimeout)
      * - The type or its methods use @Interceptors annotation
      *
      * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
+     * Note: AroundConstruct is intentionally excluded — per spec it may only appear in interceptor
+     * classes and their superclasses, so the check for its misuse in target classes is handled
+     * independently in InterceptorDiagnosticsParticipant.
      *
      * @param type     the type to check
      * @return true if the type is an interceptor type or uses interceptor-related features
@@ -328,7 +331,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     /**
      * Checks if the type has any methods annotated with interceptor-specific annotations.
-     * Checks for: @AroundInvoke, @AroundConstruct, @AroundTimeout
+     * Checks for: @AroundInvoke, @AroundTimeout
      *
      * @param type    the type to check
      * @param methods the methods array (pre-fetched to avoid redundant calls)

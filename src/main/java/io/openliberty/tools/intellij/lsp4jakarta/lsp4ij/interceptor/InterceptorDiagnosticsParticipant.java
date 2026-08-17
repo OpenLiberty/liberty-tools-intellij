@@ -111,10 +111,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 					}
 				}
 	
-				// Check: @AroundConstruct must not appear in target classes (classes without @Interceptor)
-				if (!isInterceptorType(type)) {
-					checkAroundConstructInTargetClass(type, unit, diagnostics);
-				}
+			}
+	
+			// @AroundConstruct is only valid in classes declared with @Interceptor (and their superclasses).
+			// A class with @AroundInvoke or @AroundTimeout but no @Interceptor is still a target class
+			// for this check — only @Interceptor annotation exempts @AroundConstruct usage.
+			if (!isInterceptorType(type)) {
+				checkAroundConstructInTargetClass(type, unit, diagnostics);
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);

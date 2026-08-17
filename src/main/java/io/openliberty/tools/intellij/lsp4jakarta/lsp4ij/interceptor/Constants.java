@@ -51,7 +51,7 @@ public class Constants {
     /**
      * Interceptor-specific method annotations (excludes PostConstruct and PreDestroy as they belong to annotations module)
      */
-    public static final Set<String> INTERCEPTOR_REFERENCES = Set.of(AROUND_INVOKE_FQ_NAME, AROUND_CONSTRUCT_FQ_NAME, AROUND_TIMEOUT_FQ_NAME);
+    public static final Set<String> INTERCEPTOR_REFERENCES = Set.of(AROUND_INVOKE_FQ_NAME, AROUND_TIMEOUT_FQ_NAME);
 
     public static final String JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT = "jakarta.interceptor.InvocationContext";
 
