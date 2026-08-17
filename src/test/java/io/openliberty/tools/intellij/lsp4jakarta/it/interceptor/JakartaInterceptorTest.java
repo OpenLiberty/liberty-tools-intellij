@@ -1538,4 +1538,158 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         // Assert NO diagnostics for valid interceptor with binding
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
+    @Test
+    public void testInvalidLifecycleCallbackMethodSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidLifecycleCallbackMethodSignature.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        String sig = "Lifecycle callback interceptor methods declared in an interceptor class or its superclass must have one of the signatures: void <METHOD>(InvocationContext) or Object <METHOD>(InvocationContext).";
+        String dup_ac = "Only one method with @AroundConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.";
+        String dup_pc = "Only one method with @PostConstruct annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.";
+        String dup_pd = "Only one method with @PreDestroy annotation is allowed per class. Multiple methods with the same interceptor annotation type are not permitted.";
+        String proceed = "Interceptor methods must always call the InvocationContext.proceed method.";
+        String SIG = "InvalidLifecycleCallbackInterceptorMethodSignature";
+        String DUP = "InvalidMultipleInterceptorMethodsOfSameType";
+        String PRO = "InvalidInterceptorMethodsProceedMissing";
+
+        // Engine emits diagnostics in reverse source order (highest line first),
+        // with sig+dup+proceed interleaved per method, then proceed diagnostics appended.
+        // Exact actual order from engine output:
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                // line 86 — aroundConstructMultipleParams (4th @AroundConstruct — dup)
+                JakartaForJavaAssert.d(86, 16, 45, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(86, 16, 45, dup_ac,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct"))),
+                // line 80 — postConstructMultipleParams (4th @PostConstruct — dup)
+                JakartaForJavaAssert.d(80, 16, 43, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(80, 16, 43, dup_pc,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct"))),
+                // line 74 — preDestroyMultipleParams (4th @PreDestroy — dup)
+                JakartaForJavaAssert.d(74, 16, 40, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(74, 16, 40, dup_pd,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy"))),
+                // line 66 — aroundConstructInvalidReturnType (3rd @AroundConstruct — dup)
+                JakartaForJavaAssert.d(66, 18, 50, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(66, 18, 50, dup_ac,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct"))),
+                // line 60 — aroundConstructObjectWrongParam (2nd @AroundConstruct — dup + proceed)
+                JakartaForJavaAssert.d(60, 18, 49, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(60, 18, 49, dup_ac,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.interceptor.AroundConstruct"))),
+                JakartaForJavaAssert.d(60, 18, 49, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO),
+                // line 56 — aroundConstructVoidWrongParam (1st @AroundConstruct — proceed)
+                JakartaForJavaAssert.d(56, 16, 45, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(56, 16, 45, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO),
+                // line 48 — postConstructInvalidReturnType (3rd @PostConstruct — dup)
+                JakartaForJavaAssert.d(48, 18, 48, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(48, 18, 48, dup_pc,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct"))),
+                // line 42 — postConstructObjectWrongParam (2nd @PostConstruct — dup + proceed)
+                JakartaForJavaAssert.d(42, 18, 47, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(42, 18, 47, dup_pc,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PostConstruct"))),
+                JakartaForJavaAssert.d(42, 18, 47, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO),
+                // line 38 — postConstructVoidWrongParam (1st @PostConstruct — proceed)
+                JakartaForJavaAssert.d(38, 16, 43, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(38, 16, 43, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO),
+                // line 30 — preDestroyInvalidReturnType (3rd @PreDestroy — dup)
+                JakartaForJavaAssert.d(30, 18, 45, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(30, 18, 45, dup_pd,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy"))),
+                // line 24 — preDestroyObjectWrongParam (2nd @PreDestroy — dup + proceed)
+                JakartaForJavaAssert.d(24, 18, 44, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(24, 18, 44, dup_pd,DiagnosticSeverity.Error, "jakarta-interceptor", DUP,
+                        new com.google.gson.Gson().toJsonTree(Arrays.asList("jakarta.annotation.PreDestroy"))),
+                JakartaForJavaAssert.d(24, 18, 44, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO),
+                // line 20 — preDestroyVoidWrongParam (1st @PreDestroy — proceed)
+                JakartaForJavaAssert.d(20, 16, 40, sig,   DiagnosticSeverity.Error, "jakarta-interceptor", SIG),
+                JakartaForJavaAssert.d(20, 16, 40, proceed,DiagnosticSeverity.Error, "jakarta-interceptor", PRO));
+    }
+
+    @Test
+    public void testValidLifecycleCallbackMethodSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/ValidLifecycleCallbackMethodSignature.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // void/Object + InvocationContext on all three lifecycle annotations — no diagnostic expected
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNonLifecycleAnnotationsDoNotTriggerSignatureDiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/NonLifecycleInterceptorAnnotations.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @AroundInvoke and @AroundTimeout must NOT trigger InvalidLifecycleCallbackInterceptorMethodSignature
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testSuperClassWithInvalidLifecycleCallbackMethodSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InterceptorSubClassWithInvalidSuperClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        String signatureMsg = "Lifecycle callback interceptor methods declared in an interceptor class or its superclass must have one of the signatures: void <METHOD>(InvocationContext) or Object <METHOD>(InvocationContext).";
+        String proceedMsg = "Interceptor methods must always call the InvocationContext.proceed method.";
+
+        // InterceptorSuperClassBase has @AroundConstruct so it is interceptor-referenced;
+        // the lifecycle signature check fires directly on its own methods.
+        // Engine order: line 28 (AroundConstruct), line 22 (PostConstruct), line 18 sig + proceed (PreDestroy)
+        Diagnostic aroundConstructInvalidReturn = JakartaForJavaAssert.d(28, 18, 46, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+        Diagnostic postConstructInvalidReturn = JakartaForJavaAssert.d(22, 18, 44, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+        Diagnostic preDestroyWrongParamSig = JakartaForJavaAssert.d(18, 16, 36, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+        Diagnostic preDestroyWrongParamProceed = JakartaForJavaAssert.d(18, 16, 36, proceedMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                aroundConstructInvalidReturn, postConstructInvalidReturn,
+                preDestroyWrongParamSig, preDestroyWrongParamProceed);
+    }
+
+    @Test
+    public void testSuperClassWithValidLifecycleCallbackMethodSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InterceptorSubClassWithValidSuperClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // All lifecycle callback methods in InterceptorSuperClassValidBase have valid signatures
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
