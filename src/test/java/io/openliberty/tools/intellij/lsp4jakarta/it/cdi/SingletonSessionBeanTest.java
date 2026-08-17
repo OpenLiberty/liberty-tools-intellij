@@ -104,8 +104,11 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         Diagnostic illegalSessionScope = d(8, 13, 38,
                 "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataSessionScoped);
+        Diagnostic missingSerializable = d(8, 13, 38,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, illegalSessionScope);
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalSessionScope, missingSerializable);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, illegalSessionScope);
 
@@ -202,8 +205,11 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         Diagnostic multipleScopesDecl = d(10, 13, 50,
                 "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl", dataMultipleScopes);
+        Diagnostic missingSerializable = d(10, 13, 50,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, illegalScopeWithDependent, multipleScopesDecl);
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalScopeWithDependent, multipleScopesDecl, missingSerializable);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, multipleScopesDecl);
 
