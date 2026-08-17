@@ -30,6 +30,12 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String CONVERT = "jakarta.persistence.Convert";
+    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
+    public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
+    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
+    public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
+    public static final String ENUMERATED = "jakarta.persistence.Enumerated";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
@@ -40,6 +46,13 @@ public class PersistenceConstants {
     /* Annotation Fields */
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
+    public static final String CONVERTER = "converter";
+    public static final String DISABLE_CONVERSION = "disableConversion";
+
+    /* @Convert restricted-target annotations */
+    public static final String[] CONVERT_RESTRICTED_ANNOTATIONS = {
+        ID, VERSION, ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY, ENUMERATED, TEMPORAL
+    };
 
     /* Source */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-persistence";
@@ -80,6 +93,11 @@ public class PersistenceConstants {
     public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
     public static final String DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT = "PersistenceContextNotInManagedComponent";
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
+
+    /* @Convert Codes */
+    public static final String DIAGNOSTIC_CODE_CONVERT_MISSING_CONVERTER_OR_DISABLE = "InvalidConvertAnnotationMissingConverterOrDisable";
+    public static final String DIAGNOSTIC_CODE_CONVERT_ON_RESTRICTED_TARGET = "InvalidConvertAnnotationOnRestrictedTarget";
+    public static final String DIAGNOSTIC_CODE_CONVERT_MULTIPLE_ON_SAME_ATTRIBUTE = "MultipleConvertAnnotationOnSameAttribute";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
