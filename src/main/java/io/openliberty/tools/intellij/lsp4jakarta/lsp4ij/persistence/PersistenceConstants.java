@@ -100,6 +100,14 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_ATTRIBUTE_OVERRIDE_NAME = "InvalidAttributeOverrideName";
     public static final String DIAGNOSTIC_CODE_INVALID_ASSOCIATION_OVERRIDE_NAME = "InvalidAssociationOverrideName";
     public static final String DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED = "AttributeOverrideOnNonEmbeddedField";
+    public static final String DIAGNOSTIC_CODE_ASSOCIATION_OVERRIDE_INVALID_TARGET = "AssociationOverrideOnInvalidTarget";
+    public static final String DIAGNOSTIC_CODE_ASSOCIATION_OVERRIDE_BOTH_JOIN = "AssociationOverrideBothJoinColumnsAndJoinTable";
+    public static final String DIAGNOSTIC_CODE_ASSOCIATION_OVERRIDES_EMPTY = "AssociationOverridesEmptyContainer";
+    public static final String DIAGNOSTIC_CODE_ASSOCIATION_OVERRIDES_DUPLICATE_NAME = "AssociationOverridesDuplicateName";
+
+    /* @AssociationOverride attribute name constants */
+    public static final String JOIN_COLUMNS = "joinColumns";
+    public static final String JOIN_TABLE = "joinTable";
 
 
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
