@@ -65,9 +65,9 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 24 (1-based) = line 23 (0-based)
+        // Line 12 (1-based) = line 11 (0-based)
         // "SpecializesWithNonBeanSuperclass" starts at col 13, ends at col 45
-        Diagnostic unscopedSuperclassDiagnostic = d(23, 13, 45,
+        Diagnostic unscopedSuperclassDiagnostic = d(11, 13, 45,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
@@ -99,6 +99,28 @@ public class CdiSpecializesTest extends BaseJakartaTest {
     }
 
     /**
+     * Tests that a class annotated with @Specializes that extends a valid CDI bean
+     * annotated with @Dependent does NOT trigger a diagnostic.
+     *
+     * @Dependent is a built-in CDI scope, so @Specializes must be accepted without a diagnostic.
+     */
+    @Test
+    public void testSpecializesWithDependentScopedSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesWithDependentScopedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — direct superclass is annotated with @Dependent
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
      * Tests that a class annotated with @Specializes whose direct superclass has no scope
      * annotation triggers a diagnostic, even though the grandparent class IS a valid CDI bean.
      *
@@ -119,9 +141,9 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 26 (1-based) = line 25 (0-based)
+        // Line 14 (1-based) = line 13 (0-based)
         // "SpecializesWithGrandparentBeanOnly" starts at col 13, ends at col 47 (34 chars)
-        Diagnostic scopedGrandparentOnlyDiagnostic = d(25, 13, 47,
+        Diagnostic scopedGrandparentOnlyDiagnostic = d(13, 13, 47,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
@@ -290,7 +312,7 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic noSuperclassDiagnostic = d(23, 13, 40,
+        Diagnostic noSuperclassDiagnostic = d(11, 13, 40,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
@@ -318,7 +340,7 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic interfaceOnlyDiagnostic = d(23, 13, 41,
+        Diagnostic interfaceOnlyDiagnostic = d(11, 13, 41,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
@@ -395,9 +417,9 @@ public class CdiSpecializesTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 25 (1-based) = line 24 (0-based)
+        // Line 13 (1-based) = line 12 (0-based)
         // "SpecializesWithNonNormalScopedSuperclass" starts at col 13, length 40, end col 53
-        Diagnostic nonNormalScopeDiagnostic = d(24, 13, 53,
+        Diagnostic nonNormalScopeDiagnostic = d(12, 13, 53,
                 "A bean annotated with @Specializes must directly extend the bean class of another CDI managed bean with a scope annotation.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
