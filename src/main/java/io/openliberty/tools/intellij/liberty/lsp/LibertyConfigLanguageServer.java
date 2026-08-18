@@ -1,0 +1,64 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at https://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package io.openliberty.tools.intellij.liberty.lsp;
+
+import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.application.PluginPathManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
+import io.openliberty.tools.intellij.util.JavaVersionUtil;
+import io.openliberty.tools.intellij.util.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Start Liberty Language Server
+ * Adapted from https://github.com/redhat-developer/intellij-quarkus/blob/2585eb422beeb69631076d2c39196d6eca2f5f2e/src/main/java/com/redhat/devtools/intellij/quarkus/lsp/QuarkusServer.java
+ */
+public class LibertyConfigLanguageServer extends OSProcessStreamConnectionProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibertyConfigLanguageServer.class);
+
+    public LibertyConfigLanguageServer() {
+        String javaHome = System.getProperty("java.home");
+        File libertyServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/liberty-langserver-jar-with-dependencies.jar"));
+        if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.LIBERTY_CONFIG_SERVER)){
+            return;
+        }
+        if (libertyServerPath.exists()) {
+            ArrayList<String> params = new ArrayList<>();
+            params.add(javaHome + File.separator + "bin" + File.separator + "java");
+
+            // Uncomment next line to attach debugger to LCLS at port 1064, debug params must come before -jar
+            // params.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1064");
+            params.add("-jar");
+            params.add(libertyServerPath.getAbsolutePath());
+            setCommandLine(new GeneralCommandLine(params));
+        } else {
+            LOGGER.warn(String.format("Unable to start the Liberty language server, Liberty language server path: %s does not exist", libertyServerPath));
+        }
+
+    }
+
+    @Override
+    public Object getInitializationOptions(VirtualFile rootUri) {
+        Map<String, Object> root = new HashMap<>();
+        Map<String, Object> extendedClientCapabilities = new HashMap<>();
+        extendedClientCapabilities.put("completion", new HashMap<>());
+        extendedClientCapabilities.put("shouldLanguageServerExitOnShutdown", Boolean.TRUE);
+        root.put("extendedClientCapabilities", extendedClientCapabilities);
+        return root;
+    }
+}

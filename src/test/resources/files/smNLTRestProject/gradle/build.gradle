@@ -1,0 +1,56 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+version '1.0-SNAPSHOT'
+group 'test'
+
+sourceCompatibility = 17
+targetCompatibility = 17
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// configure liberty-gradle-plugin
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        // Sonatype repo for getting the latest binary scanner jar snapshot
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:3.5.2"
+    }
+}
+
+dependencies {
+    // provided dependencies
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:5.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.jboss.resteasy:resteasy-client:6.0.0.Final'
+    testImplementation 'org.jboss.resteasy:resteasy-json-binding-provider:6.0.0.Final'
+    testImplementation 'org.glassfish:jakarta.json:2.0.1'
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        displayGranularity 1
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+        events 'PASSED', 'FAILED', 'SKIPPED'
+    }
+}
+
+test.dependsOn 'libertyStart'
+clean.dependsOn 'libertyStop'

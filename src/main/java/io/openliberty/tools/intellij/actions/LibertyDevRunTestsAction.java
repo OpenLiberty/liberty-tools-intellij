@@ -1,38 +1,41 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2024 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import io.openliberty.tools.intellij.LibertyPluginIcons;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
 
-    public LibertyDevRunTestsAction() {
-        setActionCmd("run tests with Liberty dev mode");
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("run.tests.liberty.dev");
     }
 
     @Override
-    protected void executeLibertyAction() {
-        String runTestsCommand = " ";
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, projectName, false);
-
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+        ShellTerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
         if (widget == null) {
-            Notification notif = new Notification("Liberty"
-                    , LibertyPluginIcons.libertyIcon
-                    , "Liberty dev mode has not been started"
-                    , ""
-                    , "Liberty dev mode has not been started on " + projectName
-                    + ". \nStart Liberty dev mode from the Liberty tool window."
-                    , NotificationType.WARNING
-                    , NotificationListener.URL_OPENING_LISTENER);
-            Notifications.Bus.notify(notif, project);
-            log.error("Cannot run tests, corresponding project terminal does not exist.");
             return;
         }
+        String runTestsCommand = " ";
         LibertyActionUtil.executeCommand(widget, runTestsCommand);
     }
 

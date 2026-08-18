@@ -1,26 +1,28 @@
-# Contributing to Open Liberty Tools IntelliJ
+# Contributing to Liberty Tools for IntelliJ IDEA
 
 We welcome contributions, and request you follow these guidelines.
+
+> Note: Starting with the [0.0.8 early release](https://github.com/OpenLiberty/liberty-tools-intellij/releases/tag/0.0.8), Java 17 (bundled with IntelliJ IDEA version 2022.2+) and a minimum version of IntelliJ IDEA version 2022.2 are required to run Liberty Tools for IntelliJ IDEA.
 
  - [Raising issues](#raising-issues)
  - [Legal](#legal)
  - [Coding Standards](#coding-standards)
+ - [Developing](DEVELOPING.md)
 
+### Raising issues
 
-## Raising issues
+Please raise any bug reports on the [issue tracker](https://github.com/OpenLiberty/liberty-tools-intellij/issues). Be sure to search the list to see if your issue has already been raised.
 
-Please raise any bug reports on the [issue tracker](https://github.com/OpenLiberty/open-liberty-tools-intellij/issues). Be sure to search the list to see if your issue has already been raised.
-
-A good bug report is one that make it easy for us to understand what you were trying to do and what went wrong. Provide as much context as possible so we can try to recreate the issue.
+A good bug report makes it easy for us to understand what you were trying to do and what went wrong. Provide as much context as possible so we can try to recreate the issue.
 
 ### Legal
 
-In order to make contribution as easy as possible, we follow the same approach as the [Developer's Certificate of Origin 1.1 (DCO)](https://developercertificate.org/) - that the Linux® Kernel [community](https://elinux.org/Developer_Certificate_Of_Origin) uses to manage code contributions.
+In order to make contribution as easy as possible, we follow the [Developer's Certificate of Origin 1.1 (DCO)](https://developercertificate.org/) process for code contributions. We ask you to certify your contributions by signing off in your pull requests.
 
-We simply ask that when submitting a pull request for review, the developer
+When you submit a pull request for review, you
 must include a sign-off statement in the commit message.
 
-Here is an example Signed-off-by line, which indicates that the
+The following example includes a `Signed-off-by` line, which indicates that the
 submitter accepts the DCO:
 
 ```text
@@ -39,4 +41,9 @@ git commit -s
 This project follows Eclipse standard Java language [coding conventions](https://wiki.eclipse.org/Coding_Conventions).
 
 Please note:
+ - all PRs must be approved by two reviewers before being merged
  - all PRs must have passing builds
+
+### Developing
+
+To learn how to set up, run, and test your development environment, see [Developing Liberty Tools for IntelliJ IDEA](DEVELOPING.md).

@@ -1,0 +1,92 @@
+/*******************************************************************************
+* Copyright (c) 2021 Red Hat Inc. and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+* which is available at https://www.apache.org/licenses/LICENSE-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+*
+* Contributors:
+*     Red Hat Inc. - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.providers;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSource;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PropertiesConfigSource;
+
+/**
+ * Provides the META-INF/microprofile-config.properties configuration source
+ *
+ * @author datho7561
+ */
+public class MicroProfileConfigSourceProvider implements IConfigSourceProvider {
+
+	private static final String META_INF_FOLDER = "META-INF";
+
+	private static final String MICROPROFILE_CONFIG_PROPERTIES_FILE_NAME = "microprofile-config.properties";
+
+	public static final String MICROPROFILE_CONFIG_PROPERTIES_FILE = META_INF_FOLDER + "/"
+			+ MICROPROFILE_CONFIG_PROPERTIES_FILE_NAME;
+
+	private static final Pattern PER_PROFILE_FILE_NAME_PTN = Pattern
+			.compile("microprofile-config-([A-Za-z]+)\\.properties");
+
+	@Override
+	public List<IConfigSource> getConfigSources(Module javaProject, VirtualFile outputFolder) {
+		List<IConfigSource> configSources = new ArrayList<>();
+		List<VirtualFile> folders = new ArrayList<>();
+		folders.addAll(Arrays.asList(ModuleRootManager.getInstance(javaProject).getSourceRoots(false)));
+		if (outputFolder != null) {
+			folders.add(outputFolder);
+		}
+		Set<String> fileNames = new HashSet<>();
+		for(VirtualFile folder : folders) {
+			VirtualFile metaInfDir = folder.findChild(META_INF_FOLDER);
+			if (metaInfDir != null && metaInfDir.exists() && metaInfDir.isDirectory()) {
+				for (VirtualFile file : metaInfDir.getChildren()) {
+					if (!file.isDirectory() && !fileNames.contains(file.getName())) {
+						String fileName = file.getName();
+						IConfigSource configSource = createConfigSource(fileName, javaProject);
+						if (configSource != null) {
+							configSources.add(configSource);
+							fileNames.add(file.getName());
+						}
+					}
+				}
+			}
+		}
+		return configSources;
+	}
+
+	private static IConfigSource createConfigSource(String fileName, Module javaProject) {
+		if (MICROPROFILE_CONFIG_PROPERTIES_FILE_NAME.equals(fileName)) {
+			return new PropertiesConfigSource(META_INF_FOLDER + "/" + fileName, javaProject);
+		}
+		Matcher m = PER_PROFILE_FILE_NAME_PTN.matcher(fileName);
+		if (m.matches()) {
+			return new PropertiesConfigSource(META_INF_FOLDER + "/" + fileName, m.group(1), 101, javaProject);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isConfigSource(String fileName) {
+		return MICROPROFILE_CONFIG_PROPERTIES_FILE_NAME.equals(fileName)
+				| PER_PROFILE_FILE_NAME_PTN.matcher(fileName).matches();
+	}
+
+}

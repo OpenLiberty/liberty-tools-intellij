@@ -1,0 +1,452 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.intellij.psi.*;
+import com.intellij.psi.util.PsiUtil;
+import com.redhat.devtools.lsp4ij.internal.StringUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils.*;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.annotations.AnnotationConstants.*;
+
+/**
+ *
+ * jararta.annotation Diagnostics
+ *
+ * <li>Diagnostic 1: @Generated 'date' attribute does not follow ISO 8601.</li>
+ * <li>Diagnostic 2: @Resource 'name' attribute missing (when annotation is used
+ * on a class).</li>
+ * <li>Diagnostic 3: @Resource 'type' attribute missing (when annotation is used
+ * on a class).</li>
+ * <li>Diagnostic 4: @PostConstruct method has parameters.</li>
+ * <li>Diagnostic 5: @PostConstruct method is not void.</li>
+ * <li>Diagnostic 6: @PostConstruct method throws checked exception(s).</li>
+ * <li>Diagnostic 7: @PreDestroy method has parameters.</li>
+ * <li>Diagnostic 8: @PreDestroy method is static.</li>
+ * <li>Diagnostic 9: @PreDestroy method throws checked exception(s).</li>
+ *
+ * @see <a href="https://jakarta.ee/specifications/annotations/2.0/annotations-spec-2.0.html#annotations">...</a>
+ *
+ */
+public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    
+    private static final String[] VALID_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME };
+    private static final String[] VALID_TYPE_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME, AnnotationConstants.PRIORITY_FQ_NAME };
+    private static final String[] VALID_FIELD_ANNOTATION = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME};
+    private static final String[] VALID_METHOD_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME,
+            AnnotationConstants.POST_CONSTRUCT_FQ_NAME, AnnotationConstants.PRE_DESTROY_FQ_NAME,
+            AnnotationConstants.RESOURCE_FQ_NAME };
+    private static final String[] VALID_METHOD_PARAM_ANNOTATIONS = { AnnotationConstants.GENERATED_FQ_NAME, AnnotationConstants.PRIORITY_FQ_NAME };
+
+    public AnnotationDiagnosticsCollector() {
+        super();
+    }
+
+    @Override
+    protected String getDiagnosticSource() {
+        return AnnotationConstants.DIAGNOSTIC_SOURCE;
+    }
+
+    @Override
+    public void collectDiagnostics(PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        if (unit != null) {
+            ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables = new ArrayList<Tuple.Two<PsiAnnotation, PsiElement>>();
+
+            PsiPackage psiPackage = JavaPsiFacade.getInstance(unit.getProject())
+                    .findPackage(unit.getPackageName());
+            if (psiPackage != null) {
+                processAnnotations(psiPackage, annotatables, VALID_ANNOTATIONS);
+            }
+
+            PsiClass[] types = unit.getClasses();
+            for (PsiClass type : types) {
+                // Type
+                processAnnotations(type, annotatables, VALID_TYPE_ANNOTATIONS);
+                // Method
+                PsiMethod[] methods = type.getMethods();
+                for (PsiMethod method : methods) {
+                    processAnnotations(method, annotatables, VALID_METHOD_ANNOTATIONS);
+                    // method parameters
+                    PsiParameter[] parameters = method.getParameterList().getParameters();
+                    for (PsiParameter parameter : parameters) {
+                        processAnnotations(parameter, annotatables, VALID_METHOD_PARAM_ANNOTATIONS);
+                    }
+                }
+                // Field
+                PsiField[] fields = type.getFields();
+                for (PsiField field : fields) {
+                    processAnnotations(field, annotatables, VALID_FIELD_ANNOTATION);
+                }
+            }
+
+            for (Tuple.Two<PsiAnnotation, PsiElement> annotatable : annotatables) {
+                PsiAnnotation annotation = annotatable.getFirst();
+                PsiElement element = annotatable.getSecond();
+
+                if (isMatchedAnnotation(annotation, AnnotationConstants.GENERATED_FQ_NAME)) {
+                    for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
+                        if ("value".equals(pair.getAttributeName())) {
+                            validateGeneratedName(unit, diagnostics, pair, annotation);
+                        }
+                        // If date element exists and is non-empty, it must follow ISO 8601 format.
+                        if (pair.getAttributeName().equals("date")) {
+                            String date = pair.getLiteralValue();
+                            if (date != null && !date.equals("")) {
+                                if (!Pattern.matches(AnnotationConstants.ISO_8601_REGEX, date)) {
+                                    String diagnosticMessage = Messages.getMessage(
+                                            "AnnotationMustDefineAttributeFollowing8601", "@Generated", "date");
+                                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                                            AnnotationConstants.DIAGNOSTIC_CODE_DATE_FORMAT, null,
+                                            DiagnosticSeverity.Error));
+                                }
+                            }
+                        }
+                    }
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.RESOURCE_FQ_NAME)) {
+                    if (element instanceof PsiClass type) {
+                        Boolean nameEmpty = true;
+                        Boolean typeEmpty = true;
+                        for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
+                            if (pair.getAttributeName().equals("name")) {
+                                nameEmpty = false;
+                            }
+                            if (pair.getAttributeName().equals("type")) {
+                                typeEmpty = false;
+                            }
+                        }
+                        String diagnosticMessage;
+                        if (nameEmpty) {
+                            diagnosticMessage = Messages.getMessage("AnnotationMustDefineAttribute",
+                                    "@Resource", "name");
+                            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_NAME_ATTRIBUTE, null,
+                                    DiagnosticSeverity.Error));
+                        }
+
+                        if (typeEmpty) {
+                            diagnosticMessage = Messages.getMessage("AnnotationMustDefineAttribute",
+                                    "@Resource", "type");
+                            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                                    AnnotationConstants.DIAGNOSTIC_CODE_MISSING_RESOURCE_TYPE_ATTRIBUTE, null,
+                                    DiagnosticSeverity.Error));
+                        }
+                    } else if (element instanceof PsiMethod) {
+                        validateResourceMethods(unit, diagnostics, (PsiMethod) element, annotation);
+                    } else if (element instanceof PsiField) {
+                        validateResourceFields(unit, diagnostics, (PsiField) element, annotation);
+                    }
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRIORITY_FQ_NAME)) {
+                    validatePriority(unit, diagnostics, element, annotation);
+                }
+                if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
+                    if (element instanceof PsiMethod method) {
+                        List<String> checkedExceptions = getCheckedExceptionPresent(method);
+                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                            if (!checkedExceptions.isEmpty()) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_EXCEPTION,
+                                        (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
+                                        DiagnosticSeverity.Error));
+                            }
+                            if (method.getParameters().length != 0) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_PARAMS, null,
+                                        DiagnosticSeverity.Error));
+                            }
+
+                            if (!method.getReturnType().equals(PsiTypes.voidType())) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustBeVoid",
+                                        "@PostConstruct");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_POSTCONSTRUCT_RETURN_TYPE, null,
+                                        DiagnosticSeverity.Error));
+                            }
+                        }
+                    }
+                } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
+                    if (element instanceof PsiMethod method) {
+                        List<String> checkedExceptions = getCheckedExceptionPresent(method);
+                        if(!isInterceptorTypeReferenced(method.getContainingClass(), unit)) {
+                            if (!checkedExceptions.isEmpty()) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_EXCEPTION,
+                                        (JsonArray) (new Gson().toJsonTree(checkedExceptions)),
+                                        DiagnosticSeverity.Error));
+                            }
+                            if (method.getParameters().length != 0) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotHaveParameters",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_PARAMS, null,
+                                        DiagnosticSeverity.Error));
+                            }
+
+                            if (method.hasModifierProperty(PsiModifier.STATIC)) {
+                                String diagnosticMessage = Messages.getMessage("MethodMustNotBeStatic",
+                                        "@PreDestroy");
+                                diagnostics.add(createDiagnostic(method, unit, diagnosticMessage,
+                                        AnnotationConstants.DIAGNOSTIC_CODE_PREDESTROY_STATIC, method.getName(),
+                                        DiagnosticSeverity.Error));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * validateResourceFields
+     * This method is responsible for finding diagnostics in fields annotated with @Resource.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validateResourceFields(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiField element, PsiAnnotation annotation) {
+        if(!isAnnotationTypeCompatible(annotation, element.getType())){
+            String diagnosticMessage = Messages.getMessage("ResourceTypeMismatchField");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_RETURN_TYPE_MISMATCH, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * validatePriority
+     * This method validates priority values to check whether any negative values
+     * have been applied.
+     * 
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validatePriority(PsiJavaFile unit,
+            List<Diagnostic> diagnostics,
+            PsiElement element,
+            PsiAnnotation annotation) {
+
+        // Priority is valid only for elements that are either classes or method
+        // parameters.
+        if (element instanceof PsiClass || element instanceof PsiParameter) {
+            PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
+            if (value instanceof PsiPrefixExpression prefix
+                    && prefix.getOperand() instanceof PsiLiteralExpression literal &&
+                    literal.getValue() instanceof Integer) {
+                if (JavaTokenType.MINUS.equals(prefix.getOperationSign().getTokenType())) {
+                    String diagnosticMessage = Messages.getMessage(
+                            "PriorityShouldBeNonNegative");
+                    diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                            AnnotationConstants.DIAGNOSTIC_CODE_PRIORITY_SHOULD_BE_NON_NEGATIVE, null,
+                            DiagnosticSeverity.Warning));
+                }
+
+            }
+        }
+    }
+
+    /**
+     * validateResourceMethods
+     * This method is responsible for finding diagnostics in methods annotated with @Resource.
+     * @param unit
+     * @param diagnostics
+     * @param element
+     * @param annotation
+     */
+    private void validateResourceMethods(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiMethod element, PsiAnnotation annotation) {
+        String methodName = element.getName();
+        String diagnosticMessage = null;
+        List<String> errorCodes = validateSetterMethod(element, element.getContainingClass());
+        if(errorCodes.isEmpty()){
+            PsiParameter param = element.getParameterList().getParameter(0);
+            if (!isAnnotationTypeCompatible(annotation, param.getType())){
+                diagnosticMessage = Messages.getMessage("ResourceTypeMismatchParameter");
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        "ResourceTypeMismatch", null,
+                        DiagnosticSeverity.Error));
+            }
+        } else {
+            for (String errorCode : errorCodes) {
+                diagnosticMessage = Messages.getMessage(errorCode,
+                        "@Resource", methodName);
+                diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                        errorCode, null,
+                        DiagnosticSeverity.Error));
+            }
+        }
+    }
+
+    /**
+     * isAnnotationTypeCompatible
+     * Create diagnostics if the type specified by a particular annotation is compatible with
+     * the type of the corresponding field or method parameter.
+     *
+     * @param annotation
+     * @param type
+     * @return
+     */
+    private boolean isAnnotationTypeCompatible(PsiAnnotation annotation, PsiType type) {
+        PsiAnnotationMemberValue typeValue = annotation.findDeclaredAttributeValue("type");
+        if (typeValue instanceof PsiClassObjectAccessExpression) {
+            PsiType psiResourceType = ((PsiClassObjectAccessExpression) typeValue).getOperand().getType();
+                PsiClass psiTypeClass = PsiUtil.resolveClassInType(type);
+                PsiClass psiResourceClass = PsiUtil.resolveClassInType(psiResourceType);
+            return inheritsFrom(psiResourceClass, psiTypeClass);
+        }
+        return true;
+    }
+
+    private void processAnnotations(PsiJvmModifiersOwner psiModifierOwner,
+                                    ArrayList<Tuple.Two<PsiAnnotation, PsiElement>> annotatables,
+                                    String[] validAnnotations) {
+        PsiAnnotation[] annotations = psiModifierOwner.getAnnotations();
+        for (PsiAnnotation annotation : annotations) {
+            if (isValidAnnotation(annotation.getQualifiedName(), validAnnotations))
+                annotatables.add(new Tuple.Two<>(annotation, psiModifierOwner));
+        }
+    }
+
+    private static boolean isValidAnnotation(String annotationName, String[] validAnnotations) {
+        if (annotationName != null) {
+            for (String fqName : validAnnotations) {
+                if (fqName.equals(annotationName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * getCheckedExceptionPresent
+     * This method scans the exception signatures to identify if any checked exceptions are declared.
+     *
+     * @param method the PSI method
+     * @return list of fully qualified names of checked exceptions
+     */
+    private List<String> getCheckedExceptionPresent(PsiMethod method) {
+        List<String> checkedExceptions = new ArrayList<>();
+        for (PsiClassType type : method.getThrowsList().getReferencedTypes()) {
+            PsiClass exceptionClass = type.resolve();
+            /*
+             * A checked exception is any class that extends java.lang.Exception but not
+             * java.lang.RuntimeException.
+             * An unchecked exception is any class that extends java.lang.RuntimeException
+             * or java.lang.Error.
+             */
+            if (exceptionClass != null && extendsException(exceptionClass) && notExtendsRuntimeException(exceptionClass)) {
+                checkedExceptions.add(exceptionClass.getQualifiedName());
+            }
+        }
+        return checkedExceptions;
+    }
+
+    /**
+     * extendsException
+     *
+     * @param exceptionClass The root type of which the super-types are checked.
+     * @return true if Exception is the superType of the given exception type.
+     */
+    private static boolean extendsException(PsiClass exceptionClass) {
+        return DiagnosticsUtils.inheritsFrom(exceptionClass, EXCEPTION);
+    }
+
+    /**
+     * notExtendsRuntimeException
+     *
+     * @param exceptionClass The root type of which the super-types are checked.
+     * @return true if RuntimeException is not the superType of the given exception type.
+     */
+    private static boolean notExtendsRuntimeException(PsiClass exceptionClass) {
+        return !DiagnosticsUtils.inheritsFrom(exceptionClass, RUNTIME_EXCEPTION);
+    }
+
+    /**
+     * validateGeneratedName
+     * Validates the 'value' attribute of the @Generated annotation.
+     *
+     * @param unit
+     * @param diagnostics
+     * @param pair
+     * @param annotation
+     */
+    private void validateGeneratedName(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiNameValuePair pair, PsiAnnotation annotation) {
+        PsiAnnotationMemberValue value = pair.getValue();
+        if (value instanceof PsiLiteralExpression literal) {
+            Object val = literal.getValue();
+            if (val instanceof String str) {
+                validateGeneratedName(str, annotation, diagnostics, unit);
+            }
+
+        } else if (value instanceof PsiArrayInitializerMemberValue array) {
+            for (PsiAnnotationMemberValue mv : array.getInitializers()) {
+                if (mv instanceof PsiLiteralExpression literal) {
+                    Object val = literal.getValue();
+                    if (val instanceof String str) {
+                        validateGeneratedName(str, annotation, diagnostics, unit);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * validateGeneratedName
+     * Validates a single generator name value from the @Generated annotation.
+     *
+     * @param name
+     * @param annotation
+     * @param diagnostics
+     * @param unit
+     */
+    private void validateGeneratedName(
+            String name,
+            PsiAnnotation annotation,
+            List<Diagnostic> diagnostics, PsiJavaFile unit) {
+
+        if (StringUtils.isBlank(name)) {
+            String diagnosticMessage = Messages.getMessage("GeneratedValueCannotBeEmpty", "@Generated", "value");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_EMPTY, null,
+                    DiagnosticSeverity.Error));
+        } else if (!name.matches(GENERATED_NAME_REGEX)){
+            String diagnosticMessage = Messages.getMessage("GeneratedValueMustBeValidIdentifier", "@Generated", "value");
+            diagnostics.add(createDiagnostic(annotation, unit, diagnosticMessage,
+                    AnnotationConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_INVALID_FORMAT, null,
+                    DiagnosticSeverity.Warning));
+        }
+    }
+}

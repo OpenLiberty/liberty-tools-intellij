@@ -1,15 +1,27 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2025 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +36,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ViewTestReport extends LibertyGeneralAction {
+    protected static final Logger LOGGER = Logger.getInstance(ViewTestReport.class);
 
-    public ViewTestReport() {
-        setActionCmd("view Gradle test report");
+    /**
+     * Returns the name of the action command being processed.
+     *
+     * @return The name of the action command being processed.
+     */
+    protected String getActionCommandName() {
+        return LocalizedResourceUtil.getMessage("view.gradle.test.report");
     }
 
     @Override
-    protected void executeLibertyAction() {
+    protected List<Constants.ProjectType> getSupportedProjectTypes() {
+        return List.of(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
+    }
+
+    @Override
+    protected void executeLibertyAction(LibertyModule libertyModule) {
+        Project project = libertyModule.getProject();
+        VirtualFile buildFile = libertyModule.getBuildFile();
+
         // get path to project folder
         final VirtualFile parentFile = buildFile.getParent();
 
@@ -40,7 +66,7 @@ public class ViewTestReport extends LibertyGeneralAction {
         try {
             testReportDest = getTestReportDestination(buildFile);
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            LOGGER.debug(ioException);
         }
 
         if (testReportDest != null) {
@@ -49,28 +75,27 @@ public class ViewTestReport extends LibertyGeneralAction {
                 try {
                     testReportFile = findCustomTestReport(parentFile);
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    LOGGER.debug(ioException);
                 }
             }
         }
 
         if (testReportFile == null || !testReportFile.exists()) {
             // if does not exist look in default location: "build", "reports", "tests", "test", "index.html"
-            testReportFile = Paths.get(parentFile.getCanonicalPath(), "build", "reports", "tests", "test", "index.html").normalize().toAbsolutePath().toFile();
+            testReportFile = Paths.get(parentFile.getPath(), "build", "reports", "tests", "test", "index.html").normalize().toAbsolutePath().toFile();
         }
 
         VirtualFile testReportVirtualFile = LocalFileSystem.getInstance().findFileByIoFile(testReportFile);
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
-            Notification notif = new Notification("Liberty"
-                    , LibertyPluginIcons.libertyIcon
-                    , "Gradle Test Report Does Not Exist"
-                    , ""
-                    , "Test report (" + testReportFile.getAbsolutePath() + ") does not exist.  " +
-                    "Run tests to generate a test report.  Ensure your test report is generating at the correct location."
-                    , NotificationType.ERROR
-                    , NotificationListener.URL_OPENING_LISTENER);
+            String displayName = parentFile.toNioPath().relativize(testReportFile.toPath()).toString();
+            Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
+                    LocalizedResourceUtil.getMessage("gradle.test.report.does.not.exist"),
+                    LocalizedResourceUtil.getMessage("test.report.does.not.exist", displayName),
+                    NotificationType.ERROR);
+            notif.setIcon(LibertyPluginIcons.libertyIcon);
+
             Notifications.Bus.notify(notif, project);
-            log.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
+            LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
             return;
         }
 
@@ -79,7 +104,7 @@ public class ViewTestReport extends LibertyGeneralAction {
     }
 
     private String getTestReportDestination(VirtualFile file) throws IOException {
-        String buildFile = LibertyGradleUtil.fileToString(file.getCanonicalPath());
+        String buildFile = LibertyGradleUtil.fileToString(file.getPath());
         String testReportRegex = "(?<=reports.html.destination[\\s\\=|\\=]).*([\"|'])(.*)([\"|'])";
 
         Pattern pattern = Pattern.compile(testReportRegex);
@@ -97,7 +122,7 @@ public class ViewTestReport extends LibertyGeneralAction {
     private File findCustomTestReport(VirtualFile parentFile) throws IOException {
         // look for the most recently modified index.html files in the workspace
         ArrayList<File> customTestReports = new ArrayList<File>();
-        try (Stream<Path> walk = Files.walk(Paths.get(parentFile.getCanonicalPath()))
+        try (Stream<Path> walk = Files.walk(Paths.get(parentFile.getPath()))
                 .filter(Files::isRegularFile)) {
             List<String> result = walk.map(x -> x.toString())
                     // exclude files from {bin, classes, target} dirs
@@ -128,7 +153,7 @@ public class ViewTestReport extends LibertyGeneralAction {
                 return customTestReports.get(0);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.debug(e);
         }
 
         return null;

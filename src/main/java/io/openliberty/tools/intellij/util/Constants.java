@@ -1,34 +1,57 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2025 IBM Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
-import java.util.HashMap;
+import com.intellij.openapi.actionSystem.DataKey;
+import com.intellij.openapi.vfs.VirtualFile;
+
+import java.util.*;
 
 public final class Constants {
+    public static final int REQUIRED_JAVA_VERSION = 21;
     public static final String LIBERTY_DEV_DASHBOARD_ID = "Liberty";
-    public static final String LIBERTY_GRADLE_PROJECT = "Liberty Gradle Project";
-    public static final String LIBERTY_MAVEN_PROJECT = "Liberty Maven Project";
+    public enum ProjectType {
+        LIBERTY_GRADLE_PROJECT,
+        LIBERTY_MAVEN_PROJECT;
+    }
 
-    public static final String LIBERTY_DEV_START = "Start dev mode";
-    public static final String LIBERTY_DEV_CUSTOM_START = "Start dev mode...";
-    public static final String LIBERTY_DEV_START_CONTAINER = "Start dev mode in a container";
-    public static final String LIBERTY_DEV_STOP = "Stop dev mode";
-    public static final String LIBERTY_DEV_TESTS = "Run dev mode tests";
+    public static final String LIBERTY_MAVEN_START_CMD = " io.openliberty.tools:liberty-maven-plugin:dev ";
+    public static final String LIBERTY_MAVEN_START_CONTAINER_CMD = " io.openliberty.tools:liberty-maven-plugin:devc ";
+    public static final String LIBERTY_GRADLE_START_CMD = " libertyDev ";
+    public static final String LIBERTY_GRADLE_START_CONTAINER_CMD = " libertyDevc ";
+    public static final String LIBERTY_DEV_START = LocalizedResourceUtil.getMessage("start.dev");
+    public static final String LIBERTY_DEV_CUSTOM_START = LocalizedResourceUtil.getMessage("start.dev.custom.params");
+    public static final String LIBERTY_DEV_START_CONTAINER = LocalizedResourceUtil.getMessage("start.dev.container");
+    public static final String LIBERTY_DEV_STOP = LocalizedResourceUtil.getMessage("stop.dev");
+    public static final String LIBERTY_DEV_TESTS = LocalizedResourceUtil.getMessage("run.tests.dev");
 
     // Maven
-    public static final String VIEW_INTEGRATION_TEST_REPORT = "View integration test report";
-    public static final String VIEW_UNIT_TEST_REPORT = "View unit test report";
+    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.integration.test.text");
+    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.unit.test.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
+    public static final String LIBERTY_MAVEN_DEBUG_PARAM = "-DdebugPort=";
 
     // Gradle
-    public static final String VIEW_GRADLE_TEST_REPORT = "View test report";
-    public static final String TEST_REPORT_STRING = "Test Summary";
+    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.gradle.test.text");
+    public static final String TEST_REPORT_STRING = LocalizedResourceUtil.getMessage("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
+    public static final String LIBERTY_GRADLE_DEBUG_PARAM = "--libertyDebugPort=";
+
 
     public static final String LIBERTY_TREE = "LibertyTree";
+    public static final String LIBERTY_SCROLL_PANE = "LibertyScrollPane";
 
     /**
      * Constants for Data Context, passing information between the tree nodes and the Actions
      */
-    public static final String LIBERTY_BUILD_FILE = "LIBERTY_BUILD_FILE";
+    public static final DataKey<VirtualFile> LIBERTY_BUILD_FILE_DATAKEY = DataKey.create("LIBERTY_BUILD_FILE");
     public static final String LIBERTY_PROJECT_NAME = "LIBERTY_PROJECT_NAME";
     public static final String LIBERTY_PROJECT_TYPE = "LIBERTY_PROJECT_TYPE";
     public static final String LIBERTY_PROJECT_MAP = "LIBERTY_PROJECT_MAP";
@@ -47,39 +70,30 @@ public final class Constants {
     public static final String VIEW_UNIT_TEST_REPORT_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewUnitTestReport";
     public static final String VIEW_GRADLE_TEST_REPORT_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewTestReport";
     public static final String VIEW_GRADLE_CONFIG_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewGradleConfig";
-    public static final String VIEW_EFFECTIVE_POM_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewEffectivePom";
+    public static final String VIEW_POM_XML_ACTION_ID = "io.openliberty.tools.intellij.actions.ViewPomXml";
 
-    private static final HashMap<String, String> CORE_ACTIONS_MAP = new HashMap<String, String>() {
-        {
-            put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
-            put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
-            put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
-            put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
-            put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
-        }
-    };
+    // action triggered from shift-shift "Search Everywhere" IntelliJ window or "cmd/ctl + shift + A" Actions menu
+    public static final String GO_TO_ACTION_TRIGGERED = "GoToAction";
 
-    public static HashMap<String, String> getFullActionMap() {
-        HashMap<String, String> fullActionsMap = new HashMap<>();
-        fullActionsMap.putAll(CORE_ACTIONS_MAP);
-        fullActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-        fullActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-        fullActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-        return fullActionsMap;
-    }
+    public static final Map<String, String> FULL_ACTIONS_MAP = Collections.unmodifiableMap(new LinkedHashMap<String, String>() {
+                {
+                    put(LIBERTY_DEV_START, LIBERTY_DEV_START_ACTION_ID);
+                    put(LIBERTY_DEV_START_CONTAINER, LIBERTY_DEV_START_CONTAINER_ACTION_ID);
+                    put(LIBERTY_DEV_CUSTOM_START, LIBERTY_DEV_CUSTOM_START_ACTION_ID);
+                    put(LIBERTY_DEV_TESTS, LIBERTY_DEV_TESTS_ACTION_ID);
+                    put(LIBERTY_DEV_STOP, LIBERTY_DEV_STOP_ACTION_ID);
+                    put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
+                    put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+                    put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+                }
+            });
 
-    public static HashMap<String, String> getMavenMap() {
-        HashMap<String, String> mavenActionsMap = new HashMap<>();
-        mavenActionsMap.putAll(CORE_ACTIONS_MAP);
-        mavenActionsMap.put(VIEW_UNIT_TEST_REPORT, VIEW_UNIT_TEST_REPORT_ACTION_ID);
-        mavenActionsMap.put(VIEW_INTEGRATION_TEST_REPORT, VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-        return mavenActionsMap;
-    }
+    /**
+     * Constants for language servers
+     */
+    public static final String LIBERTY_XML_SERVER = "LemMinX";
+    public static final String LIBERTY_CONFIG_SERVER="Liberty Config";
+    public static final String JAKARTA_LANG_SERVER="Eclipse LSP4Jakarta";
+    public static final String MICROPROFILE_SERVER="Eclipse LSP4MP";
 
-    public static HashMap<String, String> getGradleMap() {
-        HashMap<String, String> gradleActionsMap = new HashMap<>();
-        gradleActionsMap.putAll(CORE_ACTIONS_MAP);
-        gradleActionsMap.put(VIEW_GRADLE_TEST_REPORT, VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-        return gradleActionsMap;
-    }
 }

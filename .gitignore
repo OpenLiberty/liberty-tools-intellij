@@ -1,4 +1,9 @@
 build
+target
+video
 .gradle
 .idea
+.intellijPlatform
+.vscode
 .DS_Store
+bin/

@@ -1,0 +1,93 @@
+<!--
+  ~ Copyright (c) 2022, 2026 IBM Corporation.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v. 2.0 which is available at
+  ~ http://www.eclipse.org/legal/epl-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0
+  -->
+
+<idea-plugin>
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <!-- MicroProfile LS -->
+        <server id="lsp4mp"
+                name="MicroProfile"
+                factoryClass="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/eclipse/lsp4mp">Language Server for MicroProfile</a> provides <a href="https://microprofile.io/">MicroProfile</a> support in:
+                <ul>
+                  <li><b>Java</b> files</li>
+                  <li><b>microprofile-config.properties</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
+        <languageMapping language="Properties" serverId="lsp4mp" languageId="microprofile-properties"
+                         documentMatcher="io.openliberty.tools.intellij.lsp4mp.lsp.MicroProfileMatcher"/>
+        <languageMapping language="JAVA" serverId="lsp4mp" languageId="java"/>
+
+        <!-- LemMinX LS with Liberty LemMinX ext -->
+        <!-- TODO changing the server interface to org.eclipse.lemminx.customservice.XMLLanguageClientAPI results in class cast exception -->
+        <server id="libertyXml"
+                name="Liberty LemMinX"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyXmlServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty LemMinX Language Server</a> provides support in:
+                <ul>
+                  <li>Any <b>XML</b> file that contains a <i>server</i> root element</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
+        <languageMapping language="XML" serverId="libertyXml"/>
+
+        <!-- Liberty Config LS -->
+        <server id="libertyls"
+                name="Liberty Config"
+                factoryClass="io.openliberty.tools.intellij.liberty.lsp.LibertyConfigLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/OpenLiberty/liberty-language-server"/>Liberty Config Language Server</a> provides support in:
+                <ul>
+                  <li><b>server.env</b> files</li>
+                  <li><b>bootstrap.properties</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
+        <languageMapping language="Properties" serverId="libertyls"
+                         filePattern="**/{*.properties,*.env}"/>
+
+        <!-- Jakarta LS -->
+        <server id="jakartals"
+                name="Jakarta EE"
+                factoryClass="io.openliberty.tools.intellij.lsp4jakarta.lsp.JakartaLanguageServerFactory"
+                lastDocumentDisconnectedTimeout="36000">
+            <description><![CDATA[
+                The <a href="https://github.com/eclipse/lsp4jakarta">Language Server for Jakarta EE</a> provides support in:
+                <ul>
+                  <li><b>Java</b> files</li>
+                </ul>
+                ]]>
+            </description>
+        </server>
+        <languageMapping language="JAVA" serverId="jakartals"/>
+    </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="io.openliberty.tools.intellij.lsp4mp4ij.MicroProfilePostStartupActivity"/>
+        <fileType name="server.env" language="Properties" fileNames="server.env" extensions="env"
+                  implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>
+        <!-- Suppress certain Properties language inspections on server.env files -->
+        <lang.inspectionSuppressor language="Properties"
+                                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvInspectionSuppressor"/>
+        <projectService id="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"
+                        serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.PsiMicroProfileProjectManager"/>
+        <projectService serviceImplementation="io.openliberty.tools.intellij.lsp4mp.MicroProfileDeploymentSupport"/>
+    </extensions>
+
+</idea-plugin>
