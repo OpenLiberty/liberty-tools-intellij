@@ -49,8 +49,8 @@ public class EmbeddedAnnotationTest extends BaseJakartaTest {
      * Field-level INVALID: @Embedded field whose declared type lacks @Embeddable.
      * Diagnostic must fire on the field name identifier.
      *
-     * Source file line 25: "    private AddressNotEmbeddable address;"
-     * "address" starts at col 33, ends at col 40 (0-based line 24).
+     * Source file line 16: "    private AddressNotEmbeddable address;"
+     * "address" starts at col 33, ends at col 40 (0-based line 15).
      */
     @Test
     public void testEmbeddedFieldTypeNotAnnotatedWithEmbeddable() throws Exception {
@@ -64,7 +64,7 @@ public class EmbeddedAnnotationTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic embeddedFieldNotEmbeddable = d(24, 33, 40,
+        Diagnostic embeddedFieldNotEmbeddable = d(15, 33, 40,
                 "The type 'AddressNotEmbeddable' used in the @Embedded field or property must be annotated with @Embeddable.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "EmbeddedTypeNotAnnotatedWithEmbeddable");
 
@@ -98,8 +98,8 @@ public class EmbeddedAnnotationTest extends BaseJakartaTest {
      * Method-level INVALID: @Embedded property accessor whose return type lacks @Embeddable.
      * Diagnostic must fire on the method name identifier.
      *
-     * Source file line 27: "    public AddressNotEmbeddable getAddress() {"
-     * "getAddress" starts at col 32, ends at col 42 (0-based line 26).
+     * Source file line 18: "    public AddressNotEmbeddable getAddress() {"
+     * "getAddress" starts at col 32, ends at col 42 (0-based line 17).
      */
     @Test
     public void testEmbeddedMethodReturnTypeNotAnnotatedWithEmbeddable() throws Exception {
@@ -113,7 +113,7 @@ public class EmbeddedAnnotationTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic embeddedMethodNotEmbeddable = d(26, 32, 42,
+        Diagnostic embeddedMethodNotEmbeddable = d(17, 32, 42,
                 "The type 'AddressNotEmbeddable' used in the @Embedded field or property must be annotated with @Embeddable.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "EmbeddedTypeNotAnnotatedWithEmbeddable");
 
