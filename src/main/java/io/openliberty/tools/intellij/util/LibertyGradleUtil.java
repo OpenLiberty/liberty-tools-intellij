@@ -212,7 +212,7 @@ public class LibertyGradleUtil {
     private static String getLocalGradleWrapperPath(String wrapperDir) throws LibertyException {
         String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
         File file = new File(wrapperDir, gradlew);
-        if (true){
+        if (!file.exists()){
             String translatedMessage = LibertyBundles.message("gradle.wrapper.does.not.exist");
             throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.does.not.exist"), translatedMessage);
         }
