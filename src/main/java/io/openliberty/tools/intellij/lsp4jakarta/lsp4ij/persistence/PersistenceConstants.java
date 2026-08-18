@@ -21,6 +21,8 @@ public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String EMBEDDED = "jakarta.persistence.Embedded";
+    public static final String EMBEDDABLE = "jakarta.persistence.Embeddable";
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
@@ -55,6 +57,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_DUPLICATE_VERSION = "MultipleVersionAnnotations";
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
     public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldOrPropertyType";
+    public static final String DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE = "EmbeddedTypeNotAnnotatedWithEmbeddable";
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
     public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
