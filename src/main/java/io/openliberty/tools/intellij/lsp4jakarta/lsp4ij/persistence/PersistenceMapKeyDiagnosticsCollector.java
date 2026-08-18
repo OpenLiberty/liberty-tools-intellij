@@ -140,7 +140,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         }
         if (fieldOrPropertyType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
-            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, PersistenceConstants.MAP_INTERFACE_FQDN);
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, PersistenceConstants.MAP_INTERFACE_FQN);
         }
         if (!isMapOrSubtype) {
             hasTypeDiagnostics = true;
@@ -189,7 +189,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
 
         // Check 1: must be a Map (or subtype) — rejects List, Set, String, primitives, arrays, …
         if (!(elementType instanceof PsiClassType classType)
-                || !InheritanceUtil.isInheritor(classType.resolve(), PersistenceConstants.MAP_INTERFACE_FQDN)) {
+                || !InheritanceUtil.isInheritor(classType.resolve(), PersistenceConstants.MAP_INTERFACE_FQN)) {
             diagnostics.add(createDiagnostic(fieldOrProperty, unit,
                     Messages.getMessage("MapKeyEnumeratedOnNonMapType"),
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP, null,
