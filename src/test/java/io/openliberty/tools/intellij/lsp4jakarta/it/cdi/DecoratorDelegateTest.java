@@ -19,7 +19,6 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
-import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -412,6 +411,72 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         TextEdit constructorTextEdit = te(0, 0, 117, 0, constructorFixedContent);
         CodeAction constructorInsertInjectAction = ca(uri, "Insert @Inject", constructorParamDiagnostic, constructorTextEdit);
         assertJavaCodeAction(constructorCodeActionParams, utils, constructorInsertInjectAction);
+    }
+
+    /**
+     * Test that decorators with invalid delegate type assignability trigger diagnostics.
+     *
+     * The file contains multiple test cases:
+     * - InvalidDelegateType: delegate type (Logger) doesn't implement PaymentService (field-level)
+     * - InvalidDelegateTypePrimitive: delegate type (String) doesn't implement PaymentService (field-level)
+     * - InvalidDelegateTypeOnMethod: delegate type (Logger) doesn't implement PaymentService (method-level)
+     *
+     * Expected: Errors on delegate fields and method parameter indicating type mismatch.
+     */
+    @Test
+    public void testDecoratorWithInvalidDelegateType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/DecoratorDelegateTypeAssignability.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Expected diagnostic on InvalidDelegateType class (field-level)
+        // Line 22 (0-based: 21), field name "delegate" starts at column 19, ends at column 27
+        Diagnostic invalidTypeDiagnostic1 = d(21, 19, 27,
+                "Delegate type 'Logger' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypePrimitive class (field-level)
+        // Line 88 (0-based: 87), field name "delegate" starts at column 19, ends at column 27
+        Diagnostic invalidTypeDiagnostic2 = d(87, 19, 27,
+                "Delegate type 'String' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypeOnMethod class (method-level)
+        // Line 111 (0-based: 110), parameter name "delegate" starts at column 45, ends at column 53
+        Diagnostic invalidTypeDiagnostic3 = d(110, 45, 53,
+                "Delegate type 'Logger' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypeTruePrimitive class (field-level)
+        // Line 168 (0-based: 167), field name "delegate" starts at column 16, ends at column 24
+        Diagnostic invalidTypeDiagnostic4 = d(167, 16, 24,
+                "Delegate type 'int' does not implement the decorated type ''. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on DecoratorWithDelegateButNoDecoratedTypes class (field-level)
+        // Line 192 (0-based: 191), field name "delegate" starts at column 27, ends at column 35
+        Diagnostic invalidTypeDiagnostic5 = d(191, 27, 35,
+                "Decorator has no decorated types. A decorator must implement at least one interface (other than java.io.Serializable).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorWithNoDecoratedTypes");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidTypeDiagnostic1, invalidTypeDiagnostic2,
+                invalidTypeDiagnostic3, invalidTypeDiagnostic4, invalidTypeDiagnostic5);
     }
 
 }
