@@ -265,13 +265,13 @@ public class DiagnosticsUtils {
             if (fqn == null) {
                 continue; // unresolved annotation — skip
             }
-            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.INJECT_FQ_NAME)) {
-                continue; // @Inject is not a qualifier
+            // @Inject is not a qualifier; @Any is a built-in qualifier but not a custom one — skip both
+            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.INJECT_FQ_NAME)
+                    || isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_ANY_FQ_NAME)) {
+                continue;
             }
             if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_DEFAULT_FQ_NAME)) {
                 hasExplicitDefault = true;
-            } else if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_ANY_FQ_NAME)) {
-                // @Any is not a custom qualifier; ignore
             } else {
                 // Check if this annotation is a CDI qualifier (meta-annotated with @Qualifier)
                 PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
