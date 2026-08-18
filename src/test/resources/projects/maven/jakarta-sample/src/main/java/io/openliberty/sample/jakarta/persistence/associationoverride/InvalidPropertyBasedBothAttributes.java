@@ -5,20 +5,25 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 
 /**
  * Invalid: @AssociationOverride on a property-based (getter) @Embedded accessor
- * with name="director" which does not exist in Department (only "manager" and "lead").
- * Expected: diagnostic InvalidAssociationOverrideName on the @AssociationOverride annotation.
+ * specifies both joinColumns and joinTable.
+ * Expected: diagnostic AssociationOverrideBothJoinColumnsAndJoinTable.
  */
 @Entity
-public class InvalidPropertyBasedOverride {
+public class InvalidPropertyBasedBothAttributes {
     @Id
     private Long id;
     private Department dept;
 
     @Embedded
-    @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+    @AssociationOverride(
+        name        = "manager",
+        joinColumns = @JoinColumn(name = "MGR_ID"),
+        joinTable   = @JoinTable(name = "EMP_MGR")
+    )
     public Department getDept() {
         return dept;
     }
