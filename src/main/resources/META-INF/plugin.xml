@@ -623,8 +623,7 @@
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevCustomStartAction"
-                text="Start Liberty dev mode..."
-                description="Custom Start Liberty dev mode on current build file" icon="AllIcons.General.GearPlain"/>
+                icon="AllIcons.General.GearPlain"/>
 
         <action id="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
                 class="io.openliberty.tools.intellij.actions.LibertyDevStartContainerAction"
@@ -659,8 +658,8 @@
                 icon="AllIcons.FileTypes.Config"/>
 
         <action id="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"
-                class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar" text="Refresh Liberty tool window"
-                description="Refresh Liberty tool window projects" icon="AllIcons.Actions.Refresh"/>
+                class="io.openliberty.tools.intellij.actions.RefreshLibertyToolbar"
+                icon="AllIcons.Actions.Refresh"/>
 
         <action id="io.openliberty.tools.intellij.actions.RunLibertyDevTask"
                 class="io.openliberty.tools.intellij.actions.RunLibertyDevTask"

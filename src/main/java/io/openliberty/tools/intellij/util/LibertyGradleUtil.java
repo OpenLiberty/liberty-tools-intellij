@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -182,8 +182,8 @@ public class LibertyGradleUtil {
     public static String getGradleSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(buildFile.getParent().getPath());
         if (gradleProjectSettings == null) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.settings.is.null");
-            throw new LibertyException("Could not execute action because there is an error with Gradle configuration. Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+            String translatedMessage = LibertyBundles.message("gradle.settings.is.null");
+            throw new LibertyException(LibertyLogBundles.message("gradle.settings.is.null"), translatedMessage);
         }
         else if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
@@ -193,8 +193,8 @@ public class LibertyGradleUtil {
             // local gradle to be used
             String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
             if (gradleHome == null) {
-                String translatedMessage = LocalizedResourceUtil.getMessage("gradle.invalid.build.preference");
-                throw new LibertyException("Make sure to configure a valid path for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+                String translatedMessage = LibertyBundles.message("gradle.invalid.build.preference");
+                throw new LibertyException(LibertyLogBundles.message("gradle.invalid.build.preference"), translatedMessage);
             } else {
                 return getCustomGradlePath(gradleHome);
             }
@@ -212,22 +212,20 @@ public class LibertyGradleUtil {
     private static String getLocalGradleWrapperPath(String wrapperDir) throws LibertyException {
         String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
         File file = new File(wrapperDir, gradlew);
-        if (!file.exists()){
-            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.wrapper.does.not.exist");
-            throw new LibertyException("A Gradle wrapper for the project could not be found. Make sure to configure a " +
-                    "valid Gradle wrapper or change the build preferences for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+        if (true){
+            String translatedMessage = LibertyBundles.message("gradle.wrapper.does.not.exist");
+            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.does.not.exist"), translatedMessage);
         }
         if (!file.canExecute()) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.wrapper.cannot.execute");
-            throw new LibertyException("Could not execute Gradle wrapper because the process does not have permission to " +
-                    "execute it. Consider giving executable permission for the Gradle wrapper file or changing the build " +
-                    "preferences for Gradle inside IntelliJ Gradle preferences.", translatedMessage);
+            String translatedMessage = LibertyBundles.message("gradle.wrapper.cannot.execute");
+            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.cannot.execute"), translatedMessage);
         }
         String path;
         try {
             path = file.getCanonicalPath();
         } catch (IOException e) {
-            throw new LibertyException("Could not get canonical path for gradle wrapper file");
+            String translatedMessage = LibertyBundles.message("gradle.wrapper.canonical.path.error");
+            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.canonical.path.error"), translatedMessage);
         }
         String cmd = LibertyProjectUtil.includeEscapeToString(path);
         if (SystemInfo.isWindows)
@@ -249,15 +247,12 @@ public class LibertyGradleUtil {
         String gradle = SystemInfo.isWindows ? "gradle.bat" : "gradle";
         File gradleExecutable = new File(new File(gradleHomeFile.getAbsolutePath(), "bin"), gradle);
         if (!gradleExecutable.exists()) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
-            throw new LibertyException(String.format("Could not execute the Gradle executable %s. Make sure a valid path is configured " +
-                    "inside IntelliJ Gradle preferences.", gradleExecutable.getAbsolutePath()), translatedMessage);
+            String translatedMessage = LibertyBundles.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(LibertyLogBundles.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
         if (!gradleExecutable.canExecute()) {
-            String translatedMessage = LocalizedResourceUtil.getMessage("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
-            throw new LibertyException(String.format("Could not execute Gradle from %s because the process does not " +
-                    "have permission to execute it. Consider giving executable permission for the Gradle executable or " +
-                    "configure IntelliJ to use the Gradle wrapper.", gradleExecutable.getAbsolutePath()), translatedMessage);
+            String translatedMessage = LibertyBundles.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(LibertyLogBundles.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
         String cmd = LibertyProjectUtil.includeEscapeToString(gradleExecutable.getAbsolutePath());
         if (SystemInfo.isWindows) {
