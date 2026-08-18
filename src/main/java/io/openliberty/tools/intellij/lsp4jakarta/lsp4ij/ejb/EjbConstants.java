@@ -22,6 +22,8 @@ public class EjbConstants {
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
     public static final String STATEFUL_FQ_NAME = "jakarta.ejb.Stateful";
     public static final String SINGLETON_FQ_NAME = "jakarta.ejb.Singleton";
+    public static final String INTERCEPTOR_FQ_NAME = "jakarta.interceptor.Interceptor";
+    public static final String DECORATOR_FQ_NAME = "jakarta.decorator.Decorator";
 
     /* Interfaces */
     public static final String MESSAGE_LISTENER_FQ_NAME = "jakarta.jms.MessageListener";
@@ -30,13 +32,30 @@ public class EjbConstants {
             STATEFUL_FQ_NAME,
             SINGLETON_FQ_NAME
     };
+    // Session synchronization annotations
+    public static final String AFTER_BEGIN_FQ_NAME = "jakarta.ejb.AfterBegin";
+    public static final String BEFORE_COMPLETION_FQ_NAME = "jakarta.ejb.BeforeCompletion";
+    public static final String AFTER_COMPLETION_FQ_NAME = "jakarta.ejb.AfterCompletion";
+
+    public static final String[] SESSION_SYNC_ANNOTATIONS = {
+            AFTER_BEGIN_FQ_NAME,
+            BEFORE_COMPLETION_FQ_NAME,
+            AFTER_COMPLETION_FQ_NAME
+    };
 
     /* Diagnostic codes */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-ejb";
     public static final String DIAGNOSTIC_CODE_MISSING_MESSAGELISTENER = "ImplementMessageListener";
     public static final String DIAGNOSTIC_CODE_MISSING_PUBLIC_CONSTRUCTOR = "MissingPublicNoArgConstructor";
-    public static final String DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS = "ConflictingSessionBeanAnnotations";
+    public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_FINAL = "InvalidSessionSyncMethodFinal";
+    public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_STATIC = "InvalidSessionSyncMethodStatic";
+    public static final String DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NON_VOID = "InvalidSessionSyncMethodNonVoid";
+    public static final String DIAGNOSTIC_CODE_NOT_PUBLIC_CLASS = "InvalidModifierNotPublic";
+    public static final String DIAGNOSTIC_CODE_IS_FINAL_CLASS = "InvalidModifierFinal";
+    public static final String DIAGNOSTIC_CODE_IS_ABSTRACT_CLASS = "InvalidModifierAbstract";
+    public static final String DIAGNOSTIC_CODE_NON_TOP_LEVEL_CLASS = "InvalidNonTopLevelClass";
+    public static final String DIAGNOSTIC_CODE_SESSION_BEAN_INTERCEPTOR_DECORATOR = "InvalidSessionBeanWithInterceptorOrDecorator";
     public static final String DIAGNOSTIC_CODE_FINALIZE_METHOD = "SessionBeanFinalizeMethod";
-
+    public static final String DIAGNOSTIC_CODE_CONFLICTING_ANNOTATIONS = "ConflictingSessionBeanAnnotations";
     public static final String FINALIZE_METHOD_NAME = "finalize";
 }
