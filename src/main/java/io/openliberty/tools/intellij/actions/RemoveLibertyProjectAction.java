@@ -15,7 +15,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,7 +30,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("liberty.project.remove");
+        return LocalizedResourceUtil.message("liberty.project.remove");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         String projectName = libertyModule.getName();
         final int result = Messages.showYesNoDialog(
-                LibertyBundles.message("liberty.project.remove.confirmation.dialog.message", projectName),
+                LocalizedResourceUtil.message("liberty.project.remove.confirmation.dialog.message", projectName),
                 getChooseDialogTitle(),
                 LibertyPluginIcons.libertyIcon_40);
         // Remove the project only if the user confirms it.
@@ -58,11 +58,11 @@ public class RemoveLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     public String getChooseDialogTitle() {
-        return LibertyBundles.message("liberty.project.remove.dialog.title");
+        return LocalizedResourceUtil.message("liberty.project.remove.dialog.title");
     }
 
     @Override
     public String getChooseDialogMessage() {
-        return LibertyBundles.message("liberty.project.remove.dialog.message");
+        return LocalizedResourceUtil.message("liberty.project.remove.dialog.message");
     }
 }

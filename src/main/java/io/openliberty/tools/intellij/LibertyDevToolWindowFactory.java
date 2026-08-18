@@ -15,7 +15,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 final class LibertyDevToolWindowFactory implements ToolWindowFactory {
@@ -26,7 +26,7 @@ final class LibertyDevToolWindowFactory implements ToolWindowFactory {
         LibertyExplorer explorer = new LibertyExplorer(project);
         ContentManager contentManager = toolWindow.getContentManager();
         Content content = contentManager.getFactory().createContent(explorer,
-                LibertyBundles.message("liberty.tool.window.display.name"), false);
+                LocalizedResourceUtil.message("liberty.tool.window.display.name"), false);
         contentManager.addContent(content);
 
     }

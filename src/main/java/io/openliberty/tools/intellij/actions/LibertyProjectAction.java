@@ -38,7 +38,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         String actionCmd = e.getPresentation().getText();
         if (project == null) {
             // TODO prompt user to select project
-            String msg = LibertyBundles.message("liberty.project.does.not.resolve", actionCmd);
+            String msg = LocalizedResourceUtil.message("liberty.project.does.not.resolve", actionCmd);
             notifyError(msg, project);
             LOGGER.debug(msg);
             return;
@@ -68,7 +68,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         } else {
             // Notify the user that no projects were detected that apply to this action.
             Messages.showMessageDialog(project,
-                    LibertyBundles.message("liberty.project.no.projects.detected.dialog.message"),
+                    LocalizedResourceUtil.message("liberty.project.no.projects.detected.dialog.message"),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40);
         }
@@ -89,7 +89,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             mavenBuildFiles = getMavenBuildFiles(project);
             gradleBuildFiles = getGradleBuildFiles(project);
         } catch (IOException | SAXException | ParserConfigurationException e) {
-            LOGGER.error(LibertyLogBundles.message("maven.gradle.projects.not.found"),
+            LOGGER.error(LogMessageResourceUtil.message("maven.gradle.projects.not.found"),
                     e.getMessage());
             return Collections.emptyList();
         }
@@ -101,14 +101,14 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             // resolve project name
             VirtualFile virtualFile = mavenBuildFile.getBuildFile();
             if (virtualFile == null) {
-                LOGGER.error(LibertyLogBundles.message("maven.project.resolve.error", mavenBuildFile.getBuildFile()));
+                LOGGER.error(LogMessageResourceUtil.message("maven.project.resolve.error", mavenBuildFile.getBuildFile()));
             } else {
                 try {
                     mavenBuildFile.setProjectName(LibertyMavenUtil.getProjectNameFromPom(virtualFile));
                     mavenBuildFile.setProjectType(Constants.ProjectType.LIBERTY_MAVEN_PROJECT);
                     buildFiles.add(mavenBuildFile);
                 } catch (Exception e) {
-                    LOGGER.error(LibertyLogBundles.message("maven.project.name.resolve.error", virtualFile), e.getMessage());
+                    LOGGER.error(LogMessageResourceUtil.message("maven.project.name.resolve.error", virtualFile), e.getMessage());
                 }
             }
 
@@ -116,14 +116,14 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         gradleBuildFiles.forEach(gradleBuildFile -> {
             VirtualFile virtualFile = gradleBuildFile.getBuildFile();
             if (virtualFile == null) {
-                LOGGER.error(LibertyLogBundles.message("gradle.project.resolve.error", gradleBuildFile.getBuildFile()));
+                LOGGER.error(LogMessageResourceUtil.message("gradle.project.resolve.error", gradleBuildFile.getBuildFile()));
             } else {
                 try {
                     gradleBuildFile.setProjectName(LibertyGradleUtil.getProjectName(virtualFile));
                     gradleBuildFile.setProjectType(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
                     buildFiles.add(gradleBuildFile);
                 } catch (Exception e) {
-                    LOGGER.error(LibertyLogBundles.message("gradle.project.name.resolve.error", virtualFile), e.getMessage());
+                    LOGGER.error(LogMessageResourceUtil.message("gradle.project.name.resolve.error", virtualFile), e.getMessage());
                 }
             }
 

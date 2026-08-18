@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevRunTestsAction extends LibertyGeneralAction {
@@ -24,7 +24,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("run.tests.liberty.dev");
+        return LocalizedResourceUtil.message("run.tests.liberty.dev");
     }
 
     @Override

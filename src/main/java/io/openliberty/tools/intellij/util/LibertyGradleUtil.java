@@ -51,7 +51,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                LOGGER.error(LibertyLogBundles.message("gradle.project.name.read.error", settingsPath), e);
+                LOGGER.error(LogMessageResourceUtil.message("gradle.project.name.read.error", settingsPath), e);
             }
         }
         return parentFolder.getName();
@@ -182,8 +182,8 @@ public class LibertyGradleUtil {
     public static String getGradleSettingsCmd(Project project, VirtualFile buildFile) throws LibertyException {
         GradleProjectSettings gradleProjectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(buildFile.getParent().getPath());
         if (gradleProjectSettings == null) {
-            String translatedMessage = LibertyBundles.message("gradle.settings.is.null");
-            throw new LibertyException(LibertyLogBundles.message("gradle.settings.is.null"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.settings.is.null");
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.settings.is.null"), translatedMessage);
         }
         else if (gradleProjectSettings.getDistributionType().isWrapped()) {
             // a wrapper will be used
@@ -193,8 +193,8 @@ public class LibertyGradleUtil {
             // local gradle to be used
             String gradleHome = gradleProjectSettings.getGradleHome(); //it is null when the path to gradle is invalid
             if (gradleHome == null) {
-                String translatedMessage = LibertyBundles.message("gradle.invalid.build.preference");
-                throw new LibertyException(LibertyLogBundles.message("gradle.invalid.build.preference"), translatedMessage);
+                String translatedMessage = LocalizedResourceUtil.message("gradle.invalid.build.preference");
+                throw new LibertyException(LogMessageResourceUtil.message("gradle.invalid.build.preference"), translatedMessage);
             } else {
                 return getCustomGradlePath(gradleHome);
             }
@@ -213,19 +213,19 @@ public class LibertyGradleUtil {
         String gradlew = SystemInfo.isWindows ? ".\\gradlew.bat" : "./gradlew";
         File file = new File(wrapperDir, gradlew);
         if (!file.exists()){
-            String translatedMessage = LibertyBundles.message("gradle.wrapper.does.not.exist");
-            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.does.not.exist"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.wrapper.does.not.exist");
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.wrapper.does.not.exist"), translatedMessage);
         }
         if (!file.canExecute()) {
-            String translatedMessage = LibertyBundles.message("gradle.wrapper.cannot.execute");
-            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.cannot.execute"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.wrapper.cannot.execute");
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.wrapper.cannot.execute"), translatedMessage);
         }
         String path;
         try {
             path = file.getCanonicalPath();
         } catch (IOException e) {
-            String translatedMessage = LibertyBundles.message("gradle.wrapper.canonical.path.error");
-            throw new LibertyException(LibertyLogBundles.message("gradle.wrapper.canonical.path.error"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.wrapper.canonical.path.error");
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.wrapper.canonical.path.error"), translatedMessage);
         }
         String cmd = LibertyProjectUtil.includeEscapeToString(path);
         if (SystemInfo.isWindows)
@@ -247,12 +247,12 @@ public class LibertyGradleUtil {
         String gradle = SystemInfo.isWindows ? "gradle.bat" : "gradle";
         File gradleExecutable = new File(new File(gradleHomeFile.getAbsolutePath(), "bin"), gradle);
         if (!gradleExecutable.exists()) {
-            String translatedMessage = LibertyBundles.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
-            throw new LibertyException(LibertyLogBundles.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath()), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.does.not.exist", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
         if (!gradleExecutable.canExecute()) {
-            String translatedMessage = LibertyBundles.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
-            throw new LibertyException(LibertyLogBundles.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath()), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath());
+            throw new LibertyException(LogMessageResourceUtil.message("gradle.cannot.execute", gradleExecutable.getAbsolutePath()), translatedMessage);
         }
         String cmd = LibertyProjectUtil.includeEscapeToString(gradleExecutable.getAbsolutePath());
         if (SystemInfo.isWindows) {

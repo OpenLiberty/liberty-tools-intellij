@@ -97,7 +97,7 @@ public class DebugModeHandler {
                 try {
                     return Integer.parseInt(userDebugPortStr);
                 } catch (NumberFormatException e) {
-                    LOGGER.warn(LibertyLogBundles.message("debug.port.parse.error", userDebugPortStr));
+                    LOGGER.warn(LogMessageResourceUtil.message("debug.port.parse.error", userDebugPortStr));
                 }
             }
         }
@@ -115,7 +115,7 @@ public class DebugModeHandler {
      * @param debugPort JVM port to connect to
      */
     public void createAndRunDebugConfiguration(LibertyModule libertyModule, int debugPort) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(libertyModule.getProject(), LibertyBundles.message("liberty.run.config.title"), true) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(libertyModule.getProject(), LocalizedResourceUtil.message("liberty.run.config.title"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 createAndRunDebugConfiguration(indicator, libertyModule, debugPort);
@@ -131,7 +131,7 @@ public class DebugModeHandler {
      * @param debugPort     JVM port to connect to
      */
     private void createAndRunDebugConfiguration(ProgressIndicator indicator, LibertyModule libertyModule, int debugPort) {
-        indicator.setText(LibertyBundles.message("attaching.debugger"));
+        indicator.setText(LocalizedResourceUtil.message("attaching.debugger"));
         try {
             String debugPortStr = waitForSocketActivation(indicator, libertyModule, DEFAULT_ATTACH_HOST, debugPort);
             if (debugPortStr == null) {
@@ -141,13 +141,13 @@ public class DebugModeHandler {
             RemoteConfiguration remoteConfiguration = (RemoteConfiguration) settings.getConfiguration();
             remoteConfiguration.PORT = debugPortStr;
             long groupId = ExecutionEnvironment.getNextUnusedExecutionId();
-            LOGGER.debug(LibertyLogBundles.message("debugger.attach.attempt", libertyModule.getName(), debugPortStr));
+            LOGGER.debug(LogMessageResourceUtil.message("debugger.attach.attempt", libertyModule.getName(), debugPortStr));
             ExecutionUtil.runConfiguration(settings, DefaultDebugExecutor.getDebugExecutorInstance(), DefaultExecutionTarget.INSTANCE, groupId);
         } catch (Exception e) {
             // do not show error if debug attachment was cancelled by user
             if (!(e instanceof ProcessCanceledException)) {
-                LOGGER.warn(LibertyBundles.message("cannot.attach.debugger"), e);
-                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(e.getMessage(), LibertyBundles.message("cannot.attach.debugger")));
+                LOGGER.warn(LocalizedResourceUtil.message("cannot.attach.debugger"), e);
+                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(e.getMessage(), LocalizedResourceUtil.message("cannot.attach.debugger")));
             }
         }
     }
@@ -211,12 +211,12 @@ public class DebugModeHandler {
                     return String.valueOf(debugPort);
                 } catch (ConnectException e) {
                     // After dev mode starts it still takes a few seconds for the runtime to start.
-                    LOGGER.trace(LibertyLogBundles.message("connect.exception.waiting.for.runtime", debugPort));
+                    LOGGER.trace(LogMessageResourceUtil.message("connect.exception.waiting.for.runtime", debugPort));
                 }
             }
             TimeUnit.SECONDS.sleep(retryInc);
         }
-        throw new Exception(LibertyBundles.message("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
+        throw new Exception(LocalizedResourceUtil.message("cannot.attach.debugger.host.port", host, String.format("%d",debugPort)));
     }
 
     /**
@@ -251,14 +251,14 @@ public class DebugModeHandler {
     private Path getServerEnvPath(LibertyModule libertyModule) {
         String serverDirectory = getServerDirectoryFromLibertyPluginConfig(libertyModule);
         if (serverDirectory == null || serverDirectory.isEmpty()) {
-            LOGGER.trace(LibertyLogBundles.message("server.directory.null.or.empty", libertyModule.getName()));
+            LOGGER.trace(LogMessageResourceUtil.message("server.directory.null.or.empty", libertyModule.getName()));
             return null;
         }
         Path serverEnvPath = Paths.get(serverDirectory, WLP_SERVER_ENV_FILE_NAME);
         if (Files.exists(serverEnvPath)) {
             return serverEnvPath;
         } else {
-            LOGGER.trace(LibertyLogBundles.message("server.env.not.found", libertyModule.getName()));
+            LOGGER.trace(LogMessageResourceUtil.message("server.env.not.found", libertyModule.getName()));
             return null;
         }
     }
@@ -294,7 +294,7 @@ public class DebugModeHandler {
                 serverDirectory = element.getTextContent();
             }
         } catch (Exception e) {
-            LOGGER.trace(LibertyLogBundles.message("server.directory.not.found"));
+            LOGGER.trace(LogMessageResourceUtil.message("server.directory.not.found"));
         }
         return serverDirectory;
     }

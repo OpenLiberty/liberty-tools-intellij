@@ -30,7 +30,7 @@ public class JavaVersionUtil {
     public static boolean isJavaHomeValid(String javaHome, String serverType) {
 
         if (javaHome == null) {
-            String errorMessage = LibertyBundles.message("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.message("javaHome.is.null", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
@@ -38,14 +38,14 @@ public class JavaVersionUtil {
 
         File javaHomeDir = new File(javaHome);
         if (!javaHomeDir.exists()) {
-            String errorMessage = LibertyBundles.message("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.message("javaHomeDir.does.not.exist", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
         }
 
         if (!checkJavaVersion(javaHome, Constants.REQUIRED_JAVA_VERSION)) {
-            String errorMessage = LibertyBundles.message("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
+            String errorMessage = LocalizedResourceUtil.message("java.version.message", serverType, Constants.REQUIRED_JAVA_VERSION);
             LOGGER.error(errorMessage);
             showErrorPopup(errorMessage);
             return false;
@@ -56,7 +56,7 @@ public class JavaVersionUtil {
     private static void notifyError(String errMsg, Project project) {
 
         Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                LibertyBundles.message("java.runtime.error.message"),
+                LocalizedResourceUtil.message("java.runtime.error.message"),
                 errMsg, NotificationType.WARNING);
         notif.setIcon(LibertyPluginIcons.libertyIcon);
         Notifications.Bus.notify(notif, project);

@@ -20,7 +20,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -36,7 +36,7 @@ public class LibertyDevCustomStartAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("start.liberty.dev.custom.params");
+        return LocalizedResourceUtil.message("start.liberty.dev.custom.params");
     }
 
     @Override

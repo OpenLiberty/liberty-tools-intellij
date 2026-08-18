@@ -15,7 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class ViewGradleConfig extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("view.gradle.config.file");
+        return LocalizedResourceUtil.message("view.gradle.config.file");
     }
 
     @Override

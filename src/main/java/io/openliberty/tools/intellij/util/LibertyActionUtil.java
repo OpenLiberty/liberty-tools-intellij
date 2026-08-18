@@ -40,14 +40,14 @@ public class LibertyActionUtil {
             try {
                 while (widget.getProcessTtyConnector() == null) {
                     if (i > 100) {
-                        LOGGER.error(LibertyLogBundles.message("timeout.waiting.execute.command", cmd1));
+                        LOGGER.error(LogMessageResourceUtil.message("timeout.waiting.execute.command", cmd1));
                         return;
                     }
-                    LOGGER.debug(LibertyLogBundles.message("waiting.for.cd.to.execute", i++));
+                    LOGGER.debug(LogMessageResourceUtil.message("waiting.for.cd.to.execute", i++));
                     Thread.sleep(100);
                 }
             } catch (InterruptedException x) {
-                LOGGER.error(LibertyLogBundles.message("interrupted.waiting.execute.command", cmd1), x);
+                LOGGER.error(LogMessageResourceUtil.message("interrupted.waiting.execute.command", cmd1), x);
             }
             executeCommand(widget, cmd2);
         });
@@ -74,7 +74,7 @@ public class LibertyActionUtil {
             result.append(cmd).append(enterCode);
             connector.write(result.toString());
         } catch (IOException e) {
-            LOGGER.error(LibertyLogBundles.message("command.execution.error", cmd), e);
+            LOGGER.error(LogMessageResourceUtil.message("command.execution.error", cmd), e);
         }
 
     }

@@ -21,8 +21,8 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyBundles;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +64,7 @@ public class RunLibertyDevTask extends AnAction {
     private void handleLibertyTreeEvent(@NotNull AnActionEvent e, Project project, boolean isUpdate) {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
         if (libertyDevToolWindow != null) {
-            Content content = libertyDevToolWindow.getContentManager().findContent(LibertyBundles.message("liberty.tool.window.display.name"));
+            Content content = libertyDevToolWindow.getContentManager().findContent(LocalizedResourceUtil.message("liberty.tool.window.display.name"));
             JComponent libertyWindow = content.getComponent();
             Component[] components = libertyWindow.getComponents();
             Tree libertyTree = null;
@@ -93,7 +93,7 @@ public class RunLibertyDevTask extends AnAction {
                 }
             }
             if (libertyTree == null) {
-                LOGGER.debug(LibertyLogBundles.message("tree.view.not.built"));
+                LOGGER.debug(LogMessageResourceUtil.message("tree.view.not.built"));
             }
         }
     }
@@ -109,7 +109,7 @@ public class RunLibertyDevTask extends AnAction {
             final String[] libertyActions = Constants.FULL_ACTIONS_MAP.keySet().toArray(new String[0]);
             LibertyProjectChooserDialog dialog = new LibertyProjectChooserDialog(
                     project,
-                    LibertyBundles.message("liberty.action.selection.dialog.message"), LibertyBundles.message("liberty.action.selection.dialog.title"),
+                    LocalizedResourceUtil.message("liberty.action.selection.dialog.message"), LocalizedResourceUtil.message("liberty.action.selection.dialog.title"),
                     LibertyPluginIcons.libertyIcon_40,
                     libertyActions,
                     null,

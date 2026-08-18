@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,7 +28,7 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("liberty.project.add");
+        return LocalizedResourceUtil.message("liberty.project.add");
     }
 
     @Override
@@ -48,11 +48,11 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     public String getChooseDialogTitle() {
-        return LibertyBundles.message("liberty.project.add.dialog.title");
+        return LocalizedResourceUtil.message("liberty.project.add.dialog.title");
     }
 
     @Override
     public String getChooseDialogMessage() {
-        return LibertyBundles.message("liberty.project.add.dialog.message");
+        return LocalizedResourceUtil.message("liberty.project.add.dialog.message");
     }
 }

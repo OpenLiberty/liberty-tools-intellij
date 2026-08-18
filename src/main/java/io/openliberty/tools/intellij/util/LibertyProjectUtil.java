@@ -172,7 +172,7 @@ public class LibertyProjectUtil {
                     setEngineMethod.invoke(optionsProviderInstance, classicEngine);
                 } catch (ClassNotFoundException | NoSuchMethodException |
                          IllegalAccessException | InvocationTargetException e) {
-                    LOGGER.debug(LibertyLogBundles.message("terminal.engine.classic.fallback"), e);
+                    LOGGER.debug(LogMessageResourceUtil.message("terminal.engine.classic.fallback"), e);
                 }
             }
 

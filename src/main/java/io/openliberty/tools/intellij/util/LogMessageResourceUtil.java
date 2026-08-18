@@ -17,14 +17,14 @@ import java.util.logging.Logger;
 /**
  * Resource bundle for log messages that are NOT intended for translation.
  * These messages are for debugging/diagnostic purposes only.
- * User-facing messages should use {@link LibertyBundles} instead.
+ * User-facing messages should use {@link LocalizedResourceUtil} instead.
  */
-public class LibertyLogBundles extends DynamicBundle {
-    private static final Logger LOGGER = Logger.getLogger(LibertyLogBundles.class.getName());
+public class LogMessageResourceUtil extends DynamicBundle {
+    private static final Logger LOGGER = Logger.getLogger(LogMessageResourceUtil.class.getName());
     static final String BUNDLE_NAME = "messages.LibertyLogMessages";
-    private static final LibertyLogBundles INSTANCE = new LibertyLogBundles();
+    private static final LogMessageResourceUtil INSTANCE = new LogMessageResourceUtil();
 
-    protected LibertyLogBundles() {
+    protected LogMessageResourceUtil() {
         super(BUNDLE_NAME);
     }
 

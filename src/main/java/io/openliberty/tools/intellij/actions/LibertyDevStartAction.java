@@ -30,7 +30,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("start.liberty.dev");
+        return LocalizedResourceUtil.message("start.liberty.dev");
     }
 
     @Override
@@ -87,7 +87,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
                     startCmd += " " + debugParam + debugPort;
                 }
             } catch (IOException e) {
-                String msg = LibertyBundles.message("liberty.debug.port.unresolved", getActionCommandName(), project.getName());
+                String msg = LocalizedResourceUtil.message("liberty.debug.port.unresolved", getActionCommandName(), project.getName());
                 notifyError(msg, project);
                 LOGGER.error(msg);
             }

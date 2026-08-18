@@ -19,8 +19,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyBundles;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("view.unit.test.report");
+        return LocalizedResourceUtil.message("view.unit.test.report");
     }
 
     @Override
@@ -66,13 +66,13 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
 
         if (surefireReportVirtualFile == null || !surefireReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                    LibertyBundles.message("unit.test.report.does.not.exist"),
-                    LibertyBundles.message("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
+                    LocalizedResourceUtil.message("unit.test.report.does.not.exist"),
+                    LocalizedResourceUtil.message("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug(LibertyLogBundles.message("unit.test.report.not.exist.at", surefireReportFile.getAbsolutePath()));
+            LOGGER.debug(LogMessageResourceUtil.message("unit.test.report.not.exist.at", surefireReportFile.getAbsolutePath()));
             return;
         }
 

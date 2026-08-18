@@ -13,7 +13,7 @@ import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +35,7 @@ public class LibertyRunConfigurationType implements ConfigurationType {
     @Nls
     @Override
     public String getConfigurationTypeDescription() {
-        return LibertyBundles.message("liberty.run.config.title");
+        return LocalizedResourceUtil.message("liberty.run.config.title");
     }
 
     @Override

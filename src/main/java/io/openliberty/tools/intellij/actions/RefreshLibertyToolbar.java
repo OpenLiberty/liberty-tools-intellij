@@ -25,8 +25,8 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyBundles;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ public class RefreshLibertyToolbar extends AnAction {
 
     public static void refreshDashboard(Project project) {
         if (project == null) {
-            LOGGER.debug(LibertyLogBundles.message("refresh.toolbar.project.unresolved"));
+            LOGGER.debug(LogMessageResourceUtil.message("refresh.toolbar.project.unresolved"));
             return;
         }
         ProjectView.getInstance(project).refresh();
@@ -59,7 +59,7 @@ public class RefreshLibertyToolbar extends AnAction {
         ToolWindow libertyDevToolWindow = ToolWindowManager.getInstance(project).getToolWindow(Constants.LIBERTY_DEV_DASHBOARD_ID);
 
         Content content = libertyDevToolWindow.getContentManager().findContent(
-                LibertyBundles.message("liberty.tool.window.display.name"));
+                LocalizedResourceUtil.message("liberty.tool.window.display.name"));
 
         SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
 
@@ -93,7 +93,7 @@ public class RefreshLibertyToolbar extends AnAction {
                 scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
                 simpleToolWindowPanel.setContent(scrollPane);
             } else {
-                JBTextArea jbTextArea = new JBTextArea(LibertyBundles.message("no.liberty.projects.detected"));
+                JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.message("no.liberty.projects.detected"));
                 jbTextArea.setEditable(false);
                 jbTextArea.setBackground(simpleToolWindowPanel.getBackground());
                 jbTextArea.setLineWrap(true);

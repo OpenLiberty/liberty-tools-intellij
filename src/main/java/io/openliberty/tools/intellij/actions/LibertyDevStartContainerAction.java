@@ -24,7 +24,7 @@ public class LibertyDevStartContainerAction extends LibertyDevStartAction {
      */
     @Override
     protected String getActionCommandName() {
-        return LibertyBundles.message("start.liberty.dev.container");
+        return LocalizedResourceUtil.message("start.liberty.dev.container");
     }
 
     @Override

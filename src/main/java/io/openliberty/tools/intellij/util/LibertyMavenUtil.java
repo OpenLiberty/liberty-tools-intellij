@@ -232,12 +232,12 @@ public class LibertyMavenUtil {
         String mvnw = SystemInfo.isWindows ? ".\\mvnw.cmd" : "./mvnw";
         File wrapper = new File(buildFile.getParent().getPath(), mvnw);
         if (!wrapper.exists()){
-            String translatedMessage = LibertyBundles.message("maven.wrapper.does.not.exist");
-            throw new LibertyException(LibertyLogBundles.message("maven.wrapper.does.not.exist"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("maven.wrapper.does.not.exist");
+            throw new LibertyException(LogMessageResourceUtil.message("maven.wrapper.does.not.exist"), translatedMessage);
         }
         if (!wrapper.canExecute()) {
-            String translatedMessage = LibertyBundles.message("maven.wrapper.cannot.execute");
-            throw new LibertyException(LibertyLogBundles.message("maven.wrapper.cannot.execute"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("maven.wrapper.cannot.execute");
+            throw new LibertyException(LogMessageResourceUtil.message("maven.wrapper.cannot.execute"), translatedMessage);
         }
         return mvnw;
     }
@@ -256,8 +256,8 @@ public class LibertyMavenUtil {
         File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
         // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
-            String translatedMessage = LibertyBundles.message("maven.invalid.build.preference");
-            throw new LibertyException(LibertyLogBundles.message("maven.invalid.build.preference"), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("maven.invalid.build.preference");
+            throw new LibertyException(LogMessageResourceUtil.message("maven.invalid.build.preference"), translatedMessage);
         }
 
         // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
@@ -283,13 +283,13 @@ public class LibertyMavenUtil {
                             " -classpath " + LibertyProjectUtil.includeEscapeToString(classworldsPath) +
                             " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
                 } else {
-                    String translatedMessage = LibertyBundles.message("maven.cannot.execute", mavenExecutable.getAbsolutePath());
-                    throw new LibertyException(LibertyLogBundles.message("maven.cannot.execute", mavenExecutable.getAbsolutePath()), translatedMessage);
+                    String translatedMessage = LocalizedResourceUtil.message("maven.cannot.execute", mavenExecutable.getAbsolutePath());
+                    throw new LibertyException(LogMessageResourceUtil.message("maven.cannot.execute", mavenExecutable.getAbsolutePath()), translatedMessage);
                 }
             }
         } else {
-            String translatedMessage = LibertyBundles.message("maven.does.not.exist", mavenExecutable.getAbsolutePath());
-            throw new LibertyException(LibertyLogBundles.message("maven.does.not.exist", mavenExecutable.getAbsolutePath()), translatedMessage);
+            String translatedMessage = LocalizedResourceUtil.message("maven.does.not.exist", mavenExecutable.getAbsolutePath());
+            throw new LibertyException(LogMessageResourceUtil.message("maven.does.not.exist", mavenExecutable.getAbsolutePath()), translatedMessage);
         }
     }
 

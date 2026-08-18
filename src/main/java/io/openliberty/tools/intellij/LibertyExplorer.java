@@ -62,7 +62,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 }, modalityState);
             } else {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    JBTextArea jbTextArea = new JBTextArea(LibertyBundles.message("no.liberty.projects.detected"));
+                    JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.message("no.liberty.projects.detected"));
                     jbTextArea.setEditable(false);
                     jbTextArea.setBackground(getBackground());
                     jbTextArea.setLineWrap(true);
@@ -276,12 +276,12 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
-            LOGGER.debug(LibertyLogBundles.message("tree.node.selected", actionNodeName));
+            LOGGER.debug(LogMessageResourceUtil.message("tree.node.selected", actionNodeName));
 
             // calls action on double click
             String actionId = Constants.FULL_ACTIONS_MAP.get(actionNodeName);
             if (actionId == null) {
-                LOGGER.error(LibertyLogBundles.message("action.id.not.found", actionNodeName));
+                LOGGER.error(LogMessageResourceUtil.message("action.id.not.found", actionNodeName));
             }
             LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
             if (action != null) {

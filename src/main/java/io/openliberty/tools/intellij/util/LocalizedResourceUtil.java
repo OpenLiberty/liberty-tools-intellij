@@ -25,12 +25,12 @@ import java.util.logging.Logger;
  * compile-time validation of message keys in supporting IDEs.</p>
  *
  * <p>Log/debug messages not intended for translation should use
- * {@link LibertyLogBundles} instead.</p>
+ * {@link LogMessageResourceUtil} instead.</p>
  */
-public class LibertyBundles extends DynamicBundle {
-    private static final Logger LOGGER = Logger.getLogger(LibertyBundles.class.getName());
+public class LocalizedResourceUtil extends DynamicBundle {
+    private static final Logger LOGGER = Logger.getLogger(LocalizedResourceUtil.class.getName());
     static final String BUNDLE_NAME = "messages.LibertyBundles";
-    private static final LibertyBundles INSTANCE = new LibertyBundles();
+    private static final LocalizedResourceUtil INSTANCE = new LocalizedResourceUtil();
 
     /**
      * Supported languages for localized date formatting.
@@ -41,7 +41,7 @@ public class LibertyBundles extends DynamicBundle {
         Locale.JAPANESE.getLanguage()
     );
 
-    protected LibertyBundles() {
+    protected LocalizedResourceUtil() {
         super(BUNDLE_NAME);
     }
 

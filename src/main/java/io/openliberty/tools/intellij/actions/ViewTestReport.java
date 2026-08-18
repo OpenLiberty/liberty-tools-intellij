@@ -20,9 +20,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import io.openliberty.tools.intellij.util.LibertyGradleUtil;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class ViewTestReport extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LibertyBundles.message("view.gradle.test.report");
+        return LocalizedResourceUtil.message("view.gradle.test.report");
     }
 
     @Override
@@ -90,13 +90,13 @@ public class ViewTestReport extends LibertyGeneralAction {
         if (testReportVirtualFile == null || !testReportVirtualFile.exists()) {
             String displayName = parentFile.toNioPath().relativize(testReportFile.toPath()).toString();
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                    LibertyBundles.message("gradle.test.report.does.not.exist"),
-                    LibertyBundles.message("test.report.does.not.exist", displayName),
+                    LocalizedResourceUtil.message("gradle.test.report.does.not.exist"),
+                    LocalizedResourceUtil.message("test.report.does.not.exist", displayName),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug(LibertyLogBundles.message("gradle.test.report.not.exist.at", testReportFile.getAbsolutePath()));
+            LOGGER.debug(LogMessageResourceUtil.message("gradle.test.report.not.exist.at", testReportFile.getAbsolutePath()));
             return;
         }
 

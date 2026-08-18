@@ -10,7 +10,7 @@
 package io.openliberty.tools.intellij.runConfiguration;
 
 import com.intellij.execution.RunManagerListener;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -45,7 +45,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
                     libertyModule.setCustomRunConfig(null);
                 }
             } catch (Exception e) {
-                LOGGER.warn(LibertyLogBundles.message("run.config.clear.error", runConfig.getBuildFile()), e);
+                LOGGER.warn(LogMessageResourceUtil.message("run.config.clear.error", runConfig.getBuildFile()), e);
             }
 
         }

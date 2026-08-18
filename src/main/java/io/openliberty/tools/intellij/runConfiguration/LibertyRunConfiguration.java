@@ -26,7 +26,7 @@ import com.intellij.openapi.util.JDOMExternalizerUtil;
 import com.intellij.openapi.util.WriteExternalException;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import io.openliberty.tools.intellij.util.Constants;
 import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
@@ -144,7 +144,7 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
                 config.setEditBeforeRun(false);
             }
         } catch (NullPointerException e) {
-            LOGGER.error(LibertyLogBundles.message("run.config.module.unresolved", getBuildFile()));
+            LOGGER.error(LogMessageResourceUtil.message("run.config.module.unresolved", getBuildFile()));
             throw new ExecutionException(e);
         }
         // run the start dev mode action which also handles runInContainer.
