@@ -14,7 +14,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import io.openliberty.tools.intellij.util.*;
 import org.xml.sax.SAXException;
 

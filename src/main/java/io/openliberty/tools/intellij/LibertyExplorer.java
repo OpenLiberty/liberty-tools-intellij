@@ -28,7 +28,6 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
-import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
