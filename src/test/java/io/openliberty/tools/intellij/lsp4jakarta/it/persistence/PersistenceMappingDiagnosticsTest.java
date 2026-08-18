@@ -159,8 +159,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 28 (0-based 27): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
-        Diagnostic zipcodeNotInAddress = d(27, 4, 77,
+        // Line 19 (0-based 18): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
+        Diagnostic zipcodeNotInAddress = d(18, 4, 77,
                 "The name \"zipcode\" in @AttributeOverride does not match any declared field or property in \"Address\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -180,8 +180,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 21 (0-based 20): @AttributeOverride(name = "salary", column = @Column(name = "EMP_SALARY"))
-        Diagnostic salaryNotInPerson = d(20, 0, 74,
+        // Line 12 (0-based 11): @AttributeOverride(name = "salary", column = @Column(name = "EMP_SALARY"))
+        Diagnostic salaryNotInPerson = d(11, 0, 74,
                 "The name \"salary\" in @AttributeOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -201,8 +201,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 24 (0-based 23): @AttributeOverride(name = "bonus", column = @Column(name = "MGR_BONUS"))
-        Diagnostic bonusNotInPerson = d(23, 4, 76,
+        // Line 15 (0-based 14): @AttributeOverride(name = "bonus", column = @Column(name = "MGR_BONUS"))
+        Diagnostic bonusNotInPerson = d(14, 4, 76,
                 "The name \"bonus\" in @AttributeOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -222,8 +222,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "zipcode.postcode", ...)
-        Diagnostic postcodeNotInZipcode = d(28, 4, 85,
+        // Line 20 (0-based 19): @AttributeOverride(name = "zipcode.postcode", ...)
+        Diagnostic postcodeNotInZipcode = d(19, 4, 85,
                 "The name \"zipcode.postcode\" in @AttributeOverride cannot be resolved: \"postcode\" does not exist in \"Zipcode\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -243,8 +243,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "location.zip", ...)
-        Diagnostic locationNotInAddressWithZipcode = d(28, 4, 81,
+        // Line 20 (0-based 19): @AttributeOverride(name = "location.zip", ...)
+        Diagnostic locationNotInAddressWithZipcode = d(19, 4, 81,
                 "The name \"location.zip\" in @AttributeOverride cannot be resolved: \"location\" does not exist in \"AddressWithZipcode\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -264,8 +264,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "city", column = @Column(name = "PROP_CITY"))
-        Diagnostic cityMissingKeyOrValuePrefix = d(28, 4, 75,
+        // Line 20 (0-based 19): @AttributeOverride(name = "city", column = @Column(name = "PROP_CITY"))
+        Diagnostic cityMissingKeyOrValuePrefix = d(19, 4, 75,
                 "The name \"city\" in @AttributeOverride on a Map @ElementCollection must be prefixed with \"key.\" or \"value.\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -373,8 +373,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 28 (0-based 27): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
-        Diagnostic directorNotInDepartment = d(27, 4, 87,
+        // Line 19 (0-based 18): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+        Diagnostic directorNotInDepartment = d(18, 4, 87,
                 "The name \"director\" in @AssociationOverride does not match any declared field or property in \"Department\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -394,8 +394,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 21 (0-based 20): @AssociationOverride(name = "mentor", joinColumns = @JoinColumn(name = "MENTOR_ID"))
-        Diagnostic mentorNotInPerson = d(20, 0, 84,
+        // Line 12 (0-based 11): @AssociationOverride(name = "mentor", joinColumns = @JoinColumn(name = "MENTOR_ID"))
+        Diagnostic mentorNotInPerson = d(11, 0, 84,
                 "The name \"mentor\" in @AssociationOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -415,8 +415,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 24 (0-based 23): @AssociationOverride(name = "mentor", ...)
-        Diagnostic mentorNotInPerson = d(23, 4, 92,
+        // Line 15 (0-based 14): @AssociationOverride(name = "mentor", ...)
+        Diagnostic mentorNotInPerson = d(14, 4, 92,
                 "The name \"mentor\" in @AssociationOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -436,8 +436,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AssociationOverride(name = "subDept.owner", ...)
-        Diagnostic ownerNotInSubTeam = d(28, 4, 94,
+        // Line 20 (0-based 19): @AssociationOverride(name = "subDept.owner", ...)
+        Diagnostic ownerNotInSubTeam = d(19, 4, 94,
                 "The name \"subDept.owner\" in @AssociationOverride cannot be resolved: \"owner\" does not exist in \"SubTeam\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -457,8 +457,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AssociationOverride(name = "division.coordinator", ...)
-        Diagnostic divisionNotInDepartmentWithTeam = d(28, 4, 101,
+        // Line 20 (0-based 19): @AssociationOverride(name = "division.coordinator", ...)
+        Diagnostic divisionNotInDepartmentWithTeam = d(19, 4, 101,
                 "The name \"division.coordinator\" in @AssociationOverride cannot be resolved: \"division\" does not exist in \"DepartmentWithTeam\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -498,8 +498,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 30 (0-based 29): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
-        Diagnostic zipcodeNotInAddress = d(29, 4, 77,
+        // Line 21 (0-based 20): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
+        Diagnostic zipcodeNotInAddress = d(20, 4, 77,
                 "The name \"zipcode\" in @AttributeOverride does not match any declared field or property in \"Address\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -539,8 +539,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 30 (0-based 29): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
-        Diagnostic directorNotInDepartment = d(29, 4, 87,
+        // Line 21 (0-based 20): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+        Diagnostic directorNotInDepartment = d(20, 4, 87,
                 "The name \"director\" in @AssociationOverride does not match any declared field or property in \"Department\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -637,5 +637,275 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         TextEdit removeAttributeOverrides = te(0, 0, 21, 0, newText);
         CodeAction removeAttributeOverridesAction = ca(uri, "Remove @AttributeOverrides", overrideContainerOnIdField, removeAttributeOverrides);
         assertJavaCodeAction(codeActionParams, utils, removeAttributeOverridesAction);
+    }
+
+    // -----------------------------------------------------------------------
+    // @AssociationOverride — invalid target type (diagnostic + quickfixes)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void associationOverrideOnPlainClass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidAssociationOverrideOnPlainClass.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 11 (0-based 10): @AssociationOverride(name = "address", joinColumns = @JoinColumn(name = "ADDR_ID"))
+        Diagnostic overrideOnPlainClass = d(10, 0, 83,
+                "@AssociationOverride is only valid on a class annotated with @Entity, @MappedSuperclass, or @Embeddable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideOnInvalidTarget");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, overrideOnPlainClass);
+    }
+
+    @Test
+    public void associationOverridesContainerOnPlainClass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidAssociationOverridesOnPlainClass.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Lines 12-15 (0-based 11-14): @AssociationOverrides({...})
+        Diagnostic containerOverrideOnPlainClass = d(11, 0, 14, 2,
+                "@AssociationOverrides is only valid on a class annotated with @Entity, @MappedSuperclass, or @Embeddable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideOnInvalidTarget");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, containerOverrideOnPlainClass);
+    }
+
+    // -----------------------------------------------------------------------
+    // @AssociationOverride — both joinColumns and joinTable (diagnostic)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void associationOverrideBothJoinColumnsAndJoinTable_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidBothJoinColumnsAndJoinTable.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Lines 13-17 (0-based 12-16): @AssociationOverride(name=..., joinColumns=..., joinTable=...)
+        Diagnostic bothAttributesDiagnostic = d(12, 0, 16, 1,
+                "@AssociationOverride must not specify both joinColumns and joinTable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideBothJoinColumnsAndJoinTable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, bothAttributesDiagnostic);
+    }
+
+    @Test
+    public void associationOverrideJoinTableOnly_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/ValidJoinTableOnly.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
+    @Test
+    public void associationOverridesContainerOneBothAttributes_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidContainerBothAttributes.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // The second nested @AssociationOverride (lines 18-22, 0-based 17-21) has both attributes.
+        Diagnostic containerBothAttributesDiagnostic = d(17, 4, 21, 5,
+                "@AssociationOverride must not specify both joinColumns and joinTable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideBothJoinColumnsAndJoinTable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, containerBothAttributesDiagnostic);
+    }
+
+    @Test
+    public void associationOverrideEmbeddedFieldBothAttributes_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidEmbeddedFieldBothAttributes.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @AssociationOverride on field "dept" (lines 21-25, 0-based 20-24)
+        Diagnostic embeddedFieldBothAttributesDiagnostic = d(20, 4, 24, 5,
+                "@AssociationOverride must not specify both joinColumns and joinTable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideBothJoinColumnsAndJoinTable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, embeddedFieldBothAttributesDiagnostic);
+    }
+
+    @Test
+    public void associationOverridePropertyBasedBothAttributes_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidPropertyBasedBothAttributes.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @AssociationOverride on getter getDept() (lines 22-26, 0-based 21-25)
+        Diagnostic propertyBasedBothAttributesDiagnostic = d(21, 4, 25, 5,
+                "@AssociationOverride must not specify both joinColumns and joinTable.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverrideBothJoinColumnsAndJoinTable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, propertyBasedBothAttributesDiagnostic);
+    }
+
+    // -----------------------------------------------------------------------
+    // @AssociationOverrides — empty container (diagnostic)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void associationOverridesEmptyContainer_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidEmptyAssociationOverrides.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 11 (0-based 10): @AssociationOverrides({})
+        Diagnostic emptyContainerDiagnostic = d(10, 0, 25,
+                "@AssociationOverrides must contain at least one @AssociationOverride.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverridesEmptyContainer");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, emptyContainerDiagnostic);
+    }
+
+    @Test
+    public void associationOverridesNonEmptyContainer_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/ValidContainerOverride.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
+    @Test
+    public void associationOverridesEmptyContainerOnField_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidEmptyAssociationOverridesOnField.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 18 (0-based 17): @AssociationOverrides({})
+        Diagnostic emptyContainerOnFieldDiagnostic = d(17, 4, 29,
+                "@AssociationOverrides must contain at least one @AssociationOverride.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverridesEmptyContainer");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, emptyContainerOnFieldDiagnostic);
+    }
+
+    @Test
+    public void associationOverridesEmptyContainerOnMethod_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidEmptyAssociationOverridesOnMethod.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 20 (0-based 19): @AssociationOverrides({})
+        Diagnostic emptyContainerOnMethodDiagnostic = d(19, 4, 29,
+                "@AssociationOverrides must contain at least one @AssociationOverride.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverridesEmptyContainer");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, emptyContainerOnMethodDiagnostic);
+    }
+
+    // -----------------------------------------------------------------------
+    // @AssociationOverrides — duplicate names (diagnostic)
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void associationOverridesDuplicateName_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidDuplicateAssociationOverrideNames.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 16 (0-based 15): the second @AssociationOverride(name = "supervisor", ...)
+        Diagnostic duplicateNameDiagnostic = d(15, 4, 90,
+                "@AssociationOverrides contains duplicate override name \"supervisor\". Each name must be unique within the same context.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AssociationOverridesDuplicateName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, duplicateNameDiagnostic);
     }
 }
