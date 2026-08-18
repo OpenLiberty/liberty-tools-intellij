@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util;
 
 import com.intellij.psi.*;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -234,24 +235,13 @@ public class AnnotationValueExpressionUtil {
      */
     public static PsiAnnotation[] getNestedAnnotations(PsiAnnotation container) {
         PsiAnnotationMemberValue value = container.findAttributeValue("value");
-        if (value instanceof PsiArrayInitializerMemberValue) {
-            PsiAnnotationMemberValue[] initializers =
-                    ((PsiArrayInitializerMemberValue) value).getInitializers();
-            int count = 0;
-            PsiAnnotation[] buf = new PsiAnnotation[initializers.length];
-            for (PsiAnnotationMemberValue item : initializers) {
-                if (item instanceof PsiAnnotation) {
-                    buf[count++] = (PsiAnnotation) item;
-                }
-            }
-            if (count == initializers.length) {
-                return buf;
-            }
-            PsiAnnotation[] trimmed = new PsiAnnotation[count];
-            System.arraycopy(buf, 0, trimmed, 0, count);
-            return trimmed;
-        } else if (value instanceof PsiAnnotation) {
-            return new PsiAnnotation[]{(PsiAnnotation) value};
+        if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
+            return Arrays.stream(arrayValue.getInitializers())
+                    .filter(PsiAnnotation.class::isInstance)
+                    .map(PsiAnnotation.class::cast)
+                    .toArray(PsiAnnotation[]::new);
+        } else if (value instanceof PsiAnnotation annotation) {
+            return new PsiAnnotation[]{annotation};
         }
         return PsiAnnotation.EMPTY_ARRAY;
     }
@@ -269,9 +259,9 @@ public class AnnotationValueExpressionUtil {
         if (value == null) {
             return null;
         }
-        String text = value.getText();
-        if (text != null && text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
-            return text.substring(1, text.length() - 1);
+        if (value instanceof PsiLiteralExpression literal) {
+            Object literalValue = literal.getValue();
+            return literalValue instanceof String ? (String) literalValue : null;
         }
         return null;
     }
