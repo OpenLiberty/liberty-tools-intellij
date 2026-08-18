@@ -101,7 +101,7 @@ jobs:
     # Run for all test-groups when triggered via workflow_dispatch, workflow_call, or when 'run-ci' label is applied.
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event.label.name == 'run-ci'
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
+    name: Build / ${{ matrix.runtime || 'skipped' }} - ${{ matrix.test-group || 'apply run-ci label to run' }}
     strategy:
       fail-fast: false
       matrix:
@@ -222,7 +222,7 @@ jobs:
     # Runs subset of test-groups for lsp4jakarta PRs when 'run-lsp4jakarta-it' label is applied.
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta-it'
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
+    name: Build (lsp4jakarta) / ${{ matrix.runtime || 'skipped' }} - ${{ matrix.test-group || 'apply run-lsp4jakarta-it label to run' }}
     strategy:
       fail-fast: false
       matrix:
