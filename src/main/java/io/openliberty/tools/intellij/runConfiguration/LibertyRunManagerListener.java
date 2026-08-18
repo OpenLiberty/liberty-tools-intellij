@@ -10,6 +10,7 @@
 package io.openliberty.tools.intellij.runConfiguration;
 
 import com.intellij.execution.RunManagerListener;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -44,7 +45,7 @@ public class LibertyRunManagerListener implements RunManagerListener {
                     libertyModule.setCustomRunConfig(null);
                 }
             } catch (Exception e) {
-                LOGGER.warn(String.format("Unable to clear custom run configuration for Liberty module: %s. Could not resolve build file.", runConfig.getBuildFile()), e);
+                LOGGER.warn(LibertyLogBundles.message("run.config.clear.error", runConfig.getBuildFile()), e);
             }
 
         }

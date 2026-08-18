@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
+            LOGGER.debug(LibertyLogBundles.message("integration.test.report.not.exist.at", failsafeReportFile.getAbsolutePath()));
             return;
         }
 

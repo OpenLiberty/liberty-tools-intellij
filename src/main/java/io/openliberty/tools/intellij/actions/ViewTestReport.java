@@ -20,8 +20,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyGradleUtil;
 import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LibertyGradleUtil;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +96,7 @@ public class ViewTestReport extends LibertyGeneralAction {
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug("Gradle test report does not exist at : " + testReportFile.getAbsolutePath());
+            LOGGER.debug(LibertyLogBundles.message("gradle.test.report.not.exist.at", testReportFile.getAbsolutePath()));
             return;
         }
 

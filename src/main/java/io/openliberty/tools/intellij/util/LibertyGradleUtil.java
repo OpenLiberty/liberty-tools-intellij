@@ -51,7 +51,7 @@ public class LibertyGradleUtil {
                     return name.replaceAll("^[\"']+|[\"']+$", "");
                 }
             } catch (IOException e) {
-                LOGGER.error(String.format("Could not read project name from file %s", settingsPath), e);
+                LOGGER.error(LibertyLogBundles.message("gradle.project.name.read.error", settingsPath), e);
             }
         }
         return parentFolder.getName();

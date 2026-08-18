@@ -28,6 +28,7 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -276,12 +277,12 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         if (node instanceof LibertyActionNode) {
             ActionManager am = ActionManager.getInstance();
             String actionNodeName = ((LibertyActionNode) node).getName();
-            LOGGER.debug("Selected: " + actionNodeName);
+            LOGGER.debug(LibertyLogBundles.message("tree.node.selected", actionNodeName));
 
             // calls action on double click
             String actionId = Constants.FULL_ACTIONS_MAP.get(actionNodeName);
             if (actionId == null) {
-                LOGGER.error("Could not find action ID for action name: " + actionNodeName);
+                LOGGER.error(LibertyLogBundles.message("action.id.not.found", actionNodeName));
             }
             LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
             if (action != null) {

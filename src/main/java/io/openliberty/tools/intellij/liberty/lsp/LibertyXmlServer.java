@@ -15,6 +15,7 @@ import com.intellij.openapi.application.PluginPathManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class LibertyXmlServer extends OSProcessStreamConnectionProvider {
             params.add("org.eclipse.lemminx.XMLServerLauncher");
             setCommandLine(new GeneralCommandLine(params));
         } else {
-            LOGGER.warn(String.format("Unable to start the LemMinX language server. LemMinX server path: %s or Liberty LemMinX extension server path: %s does not exist"), lemminxServerPath, libertyServerPath);
+            LOGGER.warn(LibertyLogBundles.message("lemminx.server.path.not.found", lemminxServerPath, libertyServerPath));
         }
     }
 

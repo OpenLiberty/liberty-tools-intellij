@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -71,7 +72,7 @@ public class ViewUnitTestReport extends LibertyGeneralAction {
             notif.setIcon(LibertyPluginIcons.libertyIcon);
 
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug("Unit test report does not exist at : " + surefireReportFile.getAbsolutePath());
+            LOGGER.debug(LibertyLogBundles.message("unit.test.report.not.exist.at", surefireReportFile.getAbsolutePath()));
             return;
         }
 

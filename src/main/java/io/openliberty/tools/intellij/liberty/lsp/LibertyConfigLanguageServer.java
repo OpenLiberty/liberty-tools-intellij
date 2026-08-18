@@ -15,6 +15,7 @@ import com.intellij.openapi.application.PluginPathManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
 import io.openliberty.tools.intellij.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class LibertyConfigLanguageServer extends OSProcessStreamConnectionProvid
             params.add(libertyServerPath.getAbsolutePath());
             setCommandLine(new GeneralCommandLine(params));
         } else {
-            LOGGER.warn(String.format("Unable to start the Liberty language server, Liberty language server path: %s does not exist", libertyServerPath));
+            LOGGER.warn(LibertyLogBundles.message("liberty.lang.server.path.not.found", libertyServerPath));
         }
 
     }

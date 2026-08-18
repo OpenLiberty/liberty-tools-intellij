@@ -21,8 +21,9 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -92,7 +93,7 @@ public class RunLibertyDevTask extends AnAction {
                 }
             }
             if (libertyTree == null) {
-                LOGGER.debug("Tree view not built, no valid projects to run Liberty dev actions on");
+                LOGGER.debug(LibertyLogBundles.message("tree.view.not.built"));
             }
         }
     }

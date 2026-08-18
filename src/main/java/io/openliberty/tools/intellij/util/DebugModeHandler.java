@@ -97,7 +97,7 @@ public class DebugModeHandler {
                 try {
                     return Integer.parseInt(userDebugPortStr);
                 } catch (NumberFormatException e) {
-                    LOGGER.warn(String.format("Unable to parse debug port from user configured params: %s",userDebugPortStr));
+                    LOGGER.warn(LibertyLogBundles.message("debug.port.parse.error", userDebugPortStr));
                 }
             }
         }
@@ -141,7 +141,7 @@ public class DebugModeHandler {
             RemoteConfiguration remoteConfiguration = (RemoteConfiguration) settings.getConfiguration();
             remoteConfiguration.PORT = debugPortStr;
             long groupId = ExecutionEnvironment.getNextUnusedExecutionId();
-            LOGGER.debug(String.format("%s: attempting to attach debugger to port %s", libertyModule.getName(), debugPortStr));
+            LOGGER.debug(LibertyLogBundles.message("debugger.attach.attempt", libertyModule.getName(), debugPortStr));
             ExecutionUtil.runConfiguration(settings, DefaultDebugExecutor.getDebugExecutorInstance(), DefaultExecutionTarget.INSTANCE, groupId);
         } catch (Exception e) {
             // do not show error if debug attachment was cancelled by user
@@ -211,7 +211,7 @@ public class DebugModeHandler {
                     return String.valueOf(debugPort);
                 } catch (ConnectException e) {
                     // After dev mode starts it still takes a few seconds for the runtime to start.
-                    LOGGER.trace(String.format("ConnectException waiting for runtime to start on port %d", debugPort));
+                    LOGGER.trace(LibertyLogBundles.message("connect.exception.waiting.for.runtime", debugPort));
                 }
             }
             TimeUnit.SECONDS.sleep(retryInc);
@@ -251,14 +251,14 @@ public class DebugModeHandler {
     private Path getServerEnvPath(LibertyModule libertyModule) {
         String serverDirectory = getServerDirectoryFromLibertyPluginConfig(libertyModule);
         if (serverDirectory == null || serverDirectory.isEmpty()) {
-            LOGGER.trace(String.format("Server directory is null or empty for project %s", libertyModule.getName()));
+            LOGGER.trace(LibertyLogBundles.message("server.directory.null.or.empty", libertyModule.getName()));
             return null;
         }
         Path serverEnvPath = Paths.get(serverDirectory, WLP_SERVER_ENV_FILE_NAME);
         if (Files.exists(serverEnvPath)) {
             return serverEnvPath;
         } else {
-            LOGGER.trace(String.format("Unable to find the server.env file for project %s", libertyModule.getName()));
+            LOGGER.trace(LibertyLogBundles.message("server.env.not.found", libertyModule.getName()));
             return null;
         }
     }
@@ -294,7 +294,7 @@ public class DebugModeHandler {
                 serverDirectory = element.getTextContent();
             }
         } catch (Exception e) {
-            LOGGER.trace("Unable to find serverDirectory from liberty-plugin-config file");
+            LOGGER.trace(LibertyLogBundles.message("server.directory.not.found"));
         }
         return serverDirectory;
     }

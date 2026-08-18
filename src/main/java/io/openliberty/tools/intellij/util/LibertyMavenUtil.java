@@ -233,14 +233,11 @@ public class LibertyMavenUtil {
         File wrapper = new File(buildFile.getParent().getPath(), mvnw);
         if (!wrapper.exists()){
             String translatedMessage = LibertyBundles.message("maven.wrapper.does.not.exist");
-            throw new LibertyException("A Maven wrapper for the project could not be found. Make sure to configure a " +
-                    "valid Maven wrapper or change the build preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
+            throw new LibertyException(LibertyLogBundles.message("maven.wrapper.does.not.exist"), translatedMessage);
         }
         if (!wrapper.canExecute()) {
             String translatedMessage = LibertyBundles.message("maven.wrapper.cannot.execute");
-            throw new LibertyException("Could not execute Maven wrapper because the process does not have permission to " +
-                    "execute it. Consider giving executable permission for the Maven wrapper file or changing the build " +
-                    "preferences for Maven inside IntelliJ Maven preferences.", translatedMessage);
+            throw new LibertyException(LibertyLogBundles.message("maven.wrapper.cannot.execute"), translatedMessage);
         }
         return mvnw;
     }
@@ -260,7 +257,7 @@ public class LibertyMavenUtil {
         // when customMavenHome path is invalid it returns null
         if (mavenHomeFile == null) {
             String translatedMessage = LibertyBundles.message("maven.invalid.build.preference");
-            throw new LibertyException("Make sure to configure a valid path for Maven home path inside IntelliJ Maven preferences.", translatedMessage);
+            throw new LibertyException(LibertyLogBundles.message("maven.invalid.build.preference"), translatedMessage);
         }
 
         // When a custom maven is specified, IntelliJ settings force it to point to the root folder and consider the subfolders invalid,
@@ -287,15 +284,12 @@ public class LibertyMavenUtil {
                             " " + MavenExternalParameters.MAVEN_LAUNCHER_CLASS;
                 } else {
                     String translatedMessage = LibertyBundles.message("maven.cannot.execute", mavenExecutable.getAbsolutePath());
-                    throw new LibertyException(String.format("Could not execute Maven from %s because the process does not "+
-                            "have permission to execute it. Consider giving executable permission for the Maven executable or " +
-                            "configure IntelliJ to use the Maven wrapper.", mavenExecutable.getAbsolutePath()), translatedMessage);
+                    throw new LibertyException(LibertyLogBundles.message("maven.cannot.execute", mavenExecutable.getAbsolutePath()), translatedMessage);
                 }
             }
         } else {
             String translatedMessage = LibertyBundles.message("maven.does.not.exist", mavenExecutable.getAbsolutePath());
-            throw new LibertyException(String.format("Could not execute the Maven executable %s. Make sure a valid path is configured " +
-                    "inside IntelliJ Maven preferences.", mavenExecutable.getAbsolutePath()), translatedMessage);
+            throw new LibertyException(LibertyLogBundles.message("maven.does.not.exist", mavenExecutable.getAbsolutePath()), translatedMessage);
         }
     }
 

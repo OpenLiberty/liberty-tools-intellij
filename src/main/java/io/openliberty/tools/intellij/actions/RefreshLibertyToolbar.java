@@ -25,8 +25,9 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.LibertyExplorer;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LibertyBundles;
+import io.openliberty.tools.intellij.util.LibertyLogBundles;
+import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -50,7 +51,7 @@ public class RefreshLibertyToolbar extends AnAction {
 
     public static void refreshDashboard(Project project) {
         if (project == null) {
-            LOGGER.debug("Unable to refresh Liberty toolbar, could not resolve project");
+            LOGGER.debug(LibertyLogBundles.message("refresh.toolbar.project.unresolved"));
             return;
         }
         ProjectView.getInstance(project).refresh();
