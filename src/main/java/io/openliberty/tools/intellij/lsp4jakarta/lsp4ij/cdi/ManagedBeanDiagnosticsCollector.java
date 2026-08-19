@@ -64,7 +64,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
                     scopeFQNames);
             boolean isManagedBean = !managedBeanAnnotations.isEmpty();
-            boolean hasPassivatingScope = hasPassivatingScope(type);
             boolean isDependent = managedBeanAnnotations.stream().anyMatch(DEPENDENT_FQ_NAME::equals);
             boolean hasMultipleScopes = managedBeanAnnotations.size() > 1;
             // Check if the class is an interceptor or decorator
@@ -388,10 +387,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DiagnosticSeverity.Error));
                 }
 
-                // A managed bean in a passivating scope must implement Serializable.
-                validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
-            } else if (hasPassivatingScope) {
-                // For custom-scoped beans not recognized as managed beans, still validate passivating scope.
+            }
+
+            // A managed bean (or custom-scoped class) in a passivating scope must implement Serializable.
+            if (hasPassivatingScope(type)) {
                 validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
             }
 
@@ -517,7 +516,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      */
     private void validatePassivatingScopeWithoutSerializable(PsiJavaFile unit, List<Diagnostic> diagnostics,
                                                              PsiClass type) {
-        if (!hasPassivatingScope(type) || DiagnosticsUtils.inheritsFrom(type, SERIALIZABLE_FQ_NAME)) {
+        if (DiagnosticsUtils.inheritsFrom(type, SERIALIZABLE_FQ_NAME)) {
             return;
         }
         diagnostics.add(createDiagnostic(type, unit,
