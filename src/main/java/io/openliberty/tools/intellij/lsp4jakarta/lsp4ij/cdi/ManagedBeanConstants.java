@@ -31,6 +31,8 @@ public class ManagedBeanConstants {
     public static final String APPLICATION_SCOPED_FQ_NAME = "jakarta.enterprise.context.ApplicationScoped";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
     public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
+    public static final String NORMAL_SCOPE_PASSIVATING_ATTR = "passivating";
+    public static final String SERIALIZABLE_FQ_NAME = "java.io.Serializable";
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
@@ -44,6 +46,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
     public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
     public static final String DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED = "InvalidSpecializedBeanWithNamedAnnotation";
+    public static final String DIAGNOSTIC_CODE_PASSIVATING_SCOPE_WITHOUT_SERIALIZABLE = "InvalidPassivatingScopedBeanWithoutSerializable";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -85,6 +88,11 @@ public class ManagedBeanConstants {
             "jakarta.enterprise.context.ConversationScoped",
             "jakarta.enterprise.context.NormalScope",
             "jakarta.enterprise.context.RequestScoped"
+    };
+
+    public static final String[] BUILT_IN_PASSIVATING_SCOPE_FQ_NAMES = {
+            "jakarta.enterprise.context.SessionScoped",
+            "jakarta.enterprise.context.ConversationScoped"
     };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);

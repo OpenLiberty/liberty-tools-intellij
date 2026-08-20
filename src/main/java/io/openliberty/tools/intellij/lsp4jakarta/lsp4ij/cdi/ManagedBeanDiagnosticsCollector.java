@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
@@ -385,6 +386,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
                 }
+
+            }
+
+            // A managed bean (or custom-scoped class) in a passivating scope must implement Serializable.
+            if (hasPassivatingScope(type)) {
+                validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
             }
 
             /*
@@ -498,6 +505,54 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         DiagnosticSeverity.Error));
             }
         }
+    }
+
+    /**
+     * Validates that a managed bean in a passivating scope implements {@code java.io.Serializable}.
+     *
+     * @param unit the Java source file being validated
+     * @param diagnostics the list to add diagnostics to
+     * @param type the class being validated
+     */
+    private void validatePassivatingScopeWithoutSerializable(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                                             PsiClass type) {
+        if (DiagnosticsUtils.inheritsFrom(type, SERIALIZABLE_FQ_NAME)) {
+            return;
+        }
+        diagnostics.add(createDiagnostic(type, unit,
+                Messages.getMessage("ManagedBeanInPassivatingScopeWithoutSerializable"),
+                DIAGNOSTIC_CODE_PASSIVATING_SCOPE_WITHOUT_SERIALIZABLE, null, DiagnosticSeverity.Error));
+    }
+
+    /**
+     * Returns {@code true} if the given class declares a built-in passivating scope or
+     * a custom scope meta-annotated with {@code @NormalScope(passivating = true)}.
+     *
+     * @param type the class being validated
+     * @return {@code true} if the class is declared in a passivating scope
+     */
+    private boolean hasPassivatingScope(PsiClass type) {
+        return Stream.of(type.getAnnotations())
+                .anyMatch(annotation -> getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                        BUILT_IN_PASSIVATING_SCOPE_FQ_NAMES) != null || isCustomPassivatingScope(type, annotation));
+    }
+
+    /**
+     * Returns {@code true} if the given annotation represents a custom passivating scope.
+     *
+     * @param type the class being validated
+     * @param annotation the annotation declared on the class
+     * @return {@code true} if the annotation is meta-annotated with {@code @NormalScope}
+     *         and has {@code passivating=true}
+     */
+    private boolean isCustomPassivatingScope(PsiClass type, PsiAnnotation annotation) {
+        PsiAnnotation normalScopeAnnotation = io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil
+                .getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
+        if (normalScopeAnnotation == null) {
+            return false;
+        }
+        PsiAnnotationMemberValue passivatingValue = normalScopeAnnotation.findAttributeValue(NORMAL_SCOPE_PASSIVATING_ATTR);
+        return passivatingValue != null && Boolean.parseBoolean(passivatingValue.getText());
     }
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,

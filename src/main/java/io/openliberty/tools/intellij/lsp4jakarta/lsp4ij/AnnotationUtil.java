@@ -12,6 +12,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -72,6 +73,34 @@ public class AnnotationUtil {
                     );
         }
         return false;
+    }
+
+    /**
+     * Resolves and returns the meta-annotation matching {@code metaAnnotationFQN} that is
+     * declared on the type of the given annotation, if present.
+     *
+     * <p>Uses {@link #hasMetaAnnotation} as a pre-flight check, then resolves the annotation's
+     * declaring type and looks up the meta-annotation on it directly.
+     *
+     * @param annotation the annotation declared on the class
+     * @param type the class being validated (used for name resolution)
+     * @param metaAnnotationFQN the fully qualified name of the meta-annotation to resolve
+     * @return the resolved meta-annotation, or {@code null} if not present
+     */
+    public static PsiAnnotation getMetaAnnotation(PsiAnnotation annotation, PsiClass type, String metaAnnotationFQN) {
+        if (!hasMetaAnnotation(annotation, type, metaAnnotationFQN)) {
+            return null;
+        }
+        String annotationName = annotation.getQualifiedName();
+        if (annotationName == null) {
+            return null;
+        }
+        PsiClass annotationClass = JavaPsiFacade.getInstance(type.getProject())
+                .findClass(annotationName, type.getResolveScope());
+        if (annotationClass == null) {
+            return null;
+        }
+        return com.intellij.codeInsight.AnnotationUtil.findAnnotation(annotationClass, metaAnnotationFQN);
     }
 
 }
