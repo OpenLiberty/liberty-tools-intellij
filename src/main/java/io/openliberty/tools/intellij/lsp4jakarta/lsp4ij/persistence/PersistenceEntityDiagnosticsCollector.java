@@ -252,6 +252,23 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                             DiagnosticSeverity.Error));
 
                 }
+
+                /* ============ @Converter Annotation Diagnostics =========== */
+                boolean isConverterAnnotated = false;
+                for (PsiAnnotation annotation : allAnnotations) {
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.CONVERTER)) {
+                        isConverterAnnotated = true;
+                        break;
+                    }
+                }
+                if (isConverterAnnotated) {
+                    if (!doesImplementInterfaces(type, PersistenceConstants.ATTRIBUTE_CONVERTER)) {
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("ConverterMustImplementAttributeConverter"),
+                                PersistenceConstants.DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT, null,
+                                DiagnosticSeverity.Error));
+                    }
+                }
             }
         }
         // We do not do anything if the found unit is null

@@ -31,6 +31,8 @@ public class PersistenceConstants {
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
+    public static final String CONVERTER = "jakarta.persistence.Converter";
+    public static final String ATTRIBUTE_CONVERTER = "jakarta.persistence.AttributeConverter";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
 
@@ -62,6 +64,9 @@ public class PersistenceConstants {
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+
+    /* Converter Codes */
+    public static final String DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT = "ConverterMustImplementAttributeConverter";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
