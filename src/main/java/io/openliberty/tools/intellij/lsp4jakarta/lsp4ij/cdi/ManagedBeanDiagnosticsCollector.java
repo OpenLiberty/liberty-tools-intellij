@@ -19,9 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
@@ -546,7 +546,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      *         and has {@code passivating=true}
      */
     private boolean isCustomPassivatingScope(PsiClass type, PsiAnnotation annotation) {
-        PsiAnnotation normalScopeAnnotation = AnnotationUtil.getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
+        PsiAnnotation normalScopeAnnotation = io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil
+                .getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
         if (normalScopeAnnotation == null) {
             return false;
         }
@@ -781,8 +782,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DECORATOR_FQ_NAME,
                             DEPENDENT_FQ_NAME
                     })) {
-                if (AnnotationUtil.getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME) != null) {
-                    foundInvalidScopes.add(annotationName);
+                // Check if it's a custom @NormalScope annotation using AnnotationUtil
+                try {
+                    PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
+                            .findClass(annotationName, type.getResolveScope());
+                    if (annotationType != null && AnnotationUtil.isAnnotated(annotationType, NORMAL_SCOPE_FQ_NAME, 0)) {
+                        foundInvalidScopes.add(annotationName);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Exception during annotation type resolution for: " + annotationName, e);
                 }
             }
         }
