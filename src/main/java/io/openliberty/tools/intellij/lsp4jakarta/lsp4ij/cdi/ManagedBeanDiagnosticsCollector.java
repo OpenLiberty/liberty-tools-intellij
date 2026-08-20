@@ -19,9 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
@@ -546,36 +546,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      *         and has {@code passivating=true}
      */
     private boolean isCustomPassivatingScope(PsiClass type, PsiAnnotation annotation) {
-        PsiAnnotation normalScopeAnnotation = getNormalScopeMetaAnnotation(type, annotation);
+        PsiAnnotation normalScopeAnnotation = AnnotationUtil.getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
         if (normalScopeAnnotation == null) {
             return false;
         }
         PsiAnnotationMemberValue passivatingValue = normalScopeAnnotation.findAttributeValue(NORMAL_SCOPE_PASSIVATING_ATTR);
         return passivatingValue != null && Boolean.parseBoolean(passivatingValue.getText());
-    }
-
-    /**
-     * Resolves and returns the {@code @NormalScope} meta-annotation declared on the given
-     * annotation, if present.
-     *
-     * @param type the class being validated
-     * @param annotation the annotation declared on the class
-     * @return the resolved {@code @NormalScope} meta-annotation, or {@code null} if not present
-     */
-    private PsiAnnotation getNormalScopeMetaAnnotation(PsiClass type, PsiAnnotation annotation) {
-        if (!io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil.hasMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME)) {
-            return null;
-        }
-        String annotationName = annotation.getQualifiedName();
-        if (annotationName == null) {
-            return null;
-        }
-        PsiClass annotationClass = JavaPsiFacade.getInstance(type.getProject())
-                .findClass(annotationName, type.getResolveScope());
-        if (annotationClass == null) {
-            return null;
-        }
-        return AnnotationUtil.findAnnotation(annotationClass, NORMAL_SCOPE_FQ_NAME);
     }
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
@@ -805,7 +781,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DECORATOR_FQ_NAME,
                             DEPENDENT_FQ_NAME
                     })) {
-                if (getNormalScopeMetaAnnotation(type, annotation) != null) {
+                if (io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil
+                        .getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME) != null) {
                     foundInvalidScopes.add(annotationName);
                 }
             }
