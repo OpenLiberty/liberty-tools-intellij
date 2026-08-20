@@ -781,8 +781,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             DECORATOR_FQ_NAME,
                             DEPENDENT_FQ_NAME
                     })) {
-                if (io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil
-                        .getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME) != null) {
+                if (AnnotationUtil.getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME) != null) {
                     foundInvalidScopes.add(annotationName);
                 }
             }
