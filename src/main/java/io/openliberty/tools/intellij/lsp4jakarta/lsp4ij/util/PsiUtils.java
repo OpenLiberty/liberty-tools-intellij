@@ -72,5 +72,11 @@ public class PsiUtils {
         }
         return null;
     }
+
+    /** Returns {@code true} if {@code type} declares a field with the given simple name. */
+    public static boolean hasFieldInType(PsiClass type, String fieldName) {
+        return type.findFieldByName(fieldName, false) != null;
+    }
+
 }
 

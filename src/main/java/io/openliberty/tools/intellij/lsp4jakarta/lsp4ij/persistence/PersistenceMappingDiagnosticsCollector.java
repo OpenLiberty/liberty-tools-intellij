@@ -218,7 +218,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass resolvedClass = classType.resolve();
 
         if (isElementCollection
-                && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQN)) {
+                && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQDN)) {
             validateNameOnMapField(name, annotation, classType, desc, unit, diagnostics);
         } else if (resolvedClass != null) {
             validateNameAgainstType(name, name, annotation, resolvedClass, desc, unit, diagnostics);
@@ -282,7 +282,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                                          PsiJavaFile unit, List<Diagnostic> diagnostics) {
         int dot = name.indexOf('.');
         if (dot == PersistenceConstants.NOT_FOUND) {
-            if (!hasFieldInType(targetType, name)) {
+            if (!PsiUtils.hasFieldInType(targetType, name)) {
                 String message = fullName.equals(name)
                         ? Messages.getMessage(desc.msgNotFound, name, targetType.getName())
                         : Messages.getMessage(desc.msgDotInvalid, fullName, name, targetType.getName());
@@ -293,7 +293,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             // Dot-notation: resolve first segment, recurse on remainder
             String first = name.substring(0, dot);
             String rest = name.substring(dot + 1);
-            if (!hasFieldInType(targetType, first)) {
+            if (!PsiUtils.hasFieldInType(targetType, first)) {
                 diagnostics.add(createDiagnostic(annotation, unit,
                         Messages.getMessage(desc.msgDotInvalid, fullName, first, targetType.getName()),
                         desc.errorCode, null, DiagnosticSeverity.Error));
@@ -317,10 +317,10 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     private boolean fieldExistsInType(PsiClass type, String name) {
         int dot = name.indexOf('.');
         if (dot == PersistenceConstants.NOT_FOUND) {
-            return hasFieldInType(type, name);
+            return PsiUtils.hasFieldInType(type, name);
         }
         String first = name.substring(0, dot);
-        if (!hasFieldInType(type, first)) {
+        if (!PsiUtils.hasFieldInType(type, first)) {
             return false;
         }
         PsiField nestedField = type.findFieldByName(first, false);
@@ -330,15 +330,5 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass nestedClass = ((PsiClassType) nestedField.getType()).resolve();
         return nestedClass != null && fieldExistsInType(nestedClass, name.substring(dot + 1));
     }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    /** Returns {@code true} if {@code type} declares a field with the given simple name. */
-    private boolean hasFieldInType(PsiClass type, String fieldName) {
-        return type.findFieldByName(fieldName, false) != null;
-    }
-
 
 }
