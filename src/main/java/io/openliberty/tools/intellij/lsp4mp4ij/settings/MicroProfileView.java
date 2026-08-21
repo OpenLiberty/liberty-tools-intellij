@@ -14,10 +14,12 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.settings;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
 import com.redhat.devtools.lsp4ij.ui.components.InspectionHyperlink;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 
@@ -27,6 +29,7 @@ import javax.swing.*;
 public class MicroProfileView implements Disposable {
 
     private final JPanel myMainPanel;
+    private final ComboBox<ExecutionMode> executionModeCombo = new ComboBox<>(new DefaultComboBoxModel<>(ExecutionMode.values()));
 
     public MicroProfileView() {
         JPanel settingsPanel = createSettings();
@@ -37,7 +40,8 @@ public class MicroProfileView implements Disposable {
 
     private JPanel createSettings() {
         return FormBuilder.createFormBuilder()
-                .addComponent(new InspectionHyperlink(MicroProfileBundle.message("microprofile.inspection.link"), "MicroProfile"))
+                .addComponent(new InspectionHyperlink(LocalizedResourceUtil.getMessage("microprofile.inspection.link"), "MicroProfile"))
+                .addLabeledComponent(LocalizedResourceUtil.getMessage("microprofile.executionMode"), executionModeCombo)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -49,5 +53,13 @@ public class MicroProfileView implements Disposable {
     @Override
     public void dispose() {
 
+    }
+
+    public void setExecutionMode(ExecutionMode executionMode) {
+        executionModeCombo.setSelectedItem(executionMode);
+    }
+
+    public ExecutionMode getExecutionMode() {
+        return (ExecutionMode) executionModeCombo.getSelectedItem();
     }
 }

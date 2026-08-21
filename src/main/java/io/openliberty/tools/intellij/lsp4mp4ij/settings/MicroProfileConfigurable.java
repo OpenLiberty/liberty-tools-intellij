@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.NamedConfigurable;
 import com.intellij.openapi.util.NlsContexts;
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 
@@ -57,16 +58,29 @@ public class MicroProfileConfigurable extends NamedConfigurable<UserDefinedMicro
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return MicroProfileBundle.message("microprofile");
+        return LocalizedResourceUtil.getMessage("microprofile");
     }
 
 
     @Override
+    public void reset() {
+        if (myView == null) return;
+        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
+        myView.setExecutionMode(settings.getExecutionMode());
+    }
+
+    @Override
     public boolean isModified() {
-        return false;
+        if (myView == null) return false;
+        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
+        return !(myView.getExecutionMode() == settings.getExecutionMode());
     }
 
     @Override
     public void apply() throws ConfigurationException {
+        if (myView == null) return;
+        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
+        settings.setExecutionMode(myView.getExecutionMode());
+        settings.fireStateChanged();
     }
 }

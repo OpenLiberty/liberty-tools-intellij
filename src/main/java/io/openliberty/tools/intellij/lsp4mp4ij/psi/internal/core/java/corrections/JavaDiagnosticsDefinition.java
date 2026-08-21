@@ -22,11 +22,8 @@ import com.intellij.util.xmlb.annotations.Attribute;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.JavaDiagnosticsContext;
 import io.openliberty.tools.intellij.util.ExceptionUtil;
-import org.eclipse.lsp4j.Diagnostic;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,15 +72,15 @@ public final class JavaDiagnosticsDefinition extends BaseKeyedLazyInstance<IJava
     }
 
     @Override
-    public List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
-        return ExceptionUtil.executeWithExceptionHandling(
+    public void collectDiagnostics(JavaDiagnosticsContext context) {
+        ExceptionUtil.executeWithExceptionHandling(
                 () -> {
-                    List<Diagnostic> diagnostics = getInstance().collectDiagnostics(context);
-                    return diagnostics != null ? diagnostics : Collections.emptyList();
+                    getInstance().collectDiagnostics(context);
+                    return true;
                 },
                 e -> {
                     LOGGER.log(Level.WARNING, "Error while calling collectDiagnostics", e);
-                    return Collections.emptyList();
+                    return false;
                 }
         );
     }

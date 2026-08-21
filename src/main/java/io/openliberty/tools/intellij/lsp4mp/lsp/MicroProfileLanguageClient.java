@@ -278,4 +278,10 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
         // Requires porting https://github.com/eclipse/lsp4mp/issues/321 / https://github.com/eclipse/lsp4mp/pull/329
         return CompletableFuture.completedFuture(null);
     }
+
+    @Override
+    public CompletableFuture<List<InlayHint>> getJavaInlayHint(MicroProfileJavaInlayHintParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/inlayHint", javaParams.getUri());
+        return runAsBackground("Computing Java inlayHint", monitor -> PropertiesManagerForJava.getInstance().inlayHint(javaParams, PsiUtilsLSImpl.getInstance(getProject()), monitor), coalesceBy);
+    }
 }
