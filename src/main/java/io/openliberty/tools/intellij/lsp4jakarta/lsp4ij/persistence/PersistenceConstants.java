@@ -33,9 +33,6 @@ public class PersistenceConstants {
     public static final String ASSOCIATION_OVERRIDE = "jakarta.persistence.AssociationOverride";
     public static final String ASSOCIATION_OVERRIDES = "jakarta.persistence.AssociationOverrides";
 
-    /* java.util.Map interface */
-    public static final String MAP_INTERFACE_FQN = "java.util.Map";
-
     /* @ElementCollection map prefix constants */
     public static final String MAP_KEY_PREFIX = "key.";
     public static final String MAP_VALUE_PREFIX = "value.";

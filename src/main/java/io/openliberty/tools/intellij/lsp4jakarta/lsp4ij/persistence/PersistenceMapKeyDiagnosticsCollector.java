@@ -140,7 +140,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         }
         if (fieldOrPropertyType instanceof PsiClassType classType) {
             PsiClass psiClass = classType.resolve();
-            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, PersistenceConstants.MAP_INTERFACE_FQN);
+            isMapOrSubtype = InheritanceUtil.isInheritor(psiClass, PersistenceConstants.MAP_INTERFACE_FQDN);
         }
         if (!isMapOrSubtype) {
             hasTypeDiagnostics = true;
