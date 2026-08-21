@@ -19,7 +19,7 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
-import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -31,12 +31,12 @@ public class MicroProfileJavaView implements Disposable {
 
     private final JPanel myMainPanel;
 
-    private JBCheckBox urlCodeLensEnabledCheckBox = new JBCheckBox(MicroProfileBundle.message("microprofile.java.codeLens.url.enabled"));
+    private JBCheckBox urlCodeLensEnabledCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.java.codeLens.url.enabled"));
 
     public MicroProfileJavaView() {
         JComponent descriptionPanel = createDescription(null);
         JPanel settingsPanel = createSettings(descriptionPanel);
-        TitledBorder title = IdeBorderFactory.createTitledBorder(MicroProfileBundle.message("microprofile.java.title"));
+        TitledBorder title = IdeBorderFactory.createTitledBorder(LocalizedResourceUtil.getMessage("microprofile.java.title"));
         settingsPanel.setBorder(title);
         this.myMainPanel = JBUI.Panels.simplePanel(10, 10)
                 .addToLeft(JBUI.Panels.simplePanel())
