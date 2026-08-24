@@ -151,7 +151,7 @@ public class CdiTypedAnnotationDiagnosticsCollector extends AbstractDiagnosticsC
         for (PsiClass superType : PsiClassImplUtil.getAllSuperClassesRecursively(beanClass)) {
             String superFQName = superType.getQualifiedName();
             if (superFQName == null) continue;
-            if ("java.lang.Object".equals(superFQName)) continue;
+            if (OBJECT_FQ_NAME.equals(superFQName)) continue;
             String superSimpleName = superType.getName();
             if (typeName.equals(superFQName) || typeName.equals(superSimpleName)) {
                 return true;
@@ -211,12 +211,19 @@ public class CdiTypedAnnotationDiagnosticsCollector extends AbstractDiagnosticsC
 
     /**
      * Resolves a {@link PsiType} to a {@link PsiClass}, erasing generic parameters.
-     * Returns {@code null} if the type cannot be resolved to a class.
+     * Returns {@code null} if the type cannot be resolved to a concrete class (including
+     * when the type is a type variable / type parameter, which has no resolvable hierarchy).
      */
     private PsiClass resolveClassType(PsiType type) {
         PsiType erased = type instanceof PsiClassType ? ((PsiClassType) type).rawType() : type;
         if (erased instanceof PsiClassType) {
-            return ((PsiClassType) erased).resolve();
+            PsiClass resolved = ((PsiClassType) erased).resolve();
+            // Type variables (e.g. T in class Foo<T>) resolve to a PsiTypeParameter.
+            // Their hierarchy is not a real class hierarchy, so skip them entirely.
+            if (resolved instanceof PsiTypeParameter) {
+                return null;
+            }
+            return resolved;
         }
         return null;
     }

@@ -203,6 +203,20 @@ public class CdiTypedAnnotationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Test
+    public void typedAnnotationOnProducerMethodWithGenericReturnTypeIsValid() throws Exception {
+        // @Typed(Object.class) on a method returning a type variable T — the return type
+        // cannot be resolved to a concrete PSI class, so no diagnostic should be raised.
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        String uri = getFileUri(module, "TypedProducerMethodGenericReturnType.java");
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
     // ── Quickfix tests ────────────────────────────────────────────────────────
 
     @Test

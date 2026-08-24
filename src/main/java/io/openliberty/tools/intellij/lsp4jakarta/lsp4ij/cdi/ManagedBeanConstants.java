@@ -36,6 +36,8 @@ public class ManagedBeanConstants {
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
 
+    public static final String OBJECT_FQ_NAME = "java.lang.Object";
+
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
     public static final String DIAGNOSTIC_CODE_SCOPEDECL = "InvalidScopeDecl";
