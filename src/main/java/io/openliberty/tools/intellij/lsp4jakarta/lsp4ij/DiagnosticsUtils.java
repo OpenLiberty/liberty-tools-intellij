@@ -13,14 +13,20 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -234,5 +240,90 @@ public class DiagnosticsUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Extracts the simple class name from a {@link PsiType}.
+     *
+     * <p>For a plain class type ({@code Department}) returns the class's simple name.
+     * For a parameterized collection type ({@code List<Employee>}) returns the simple
+     * name of the first type argument.
+     *
+     * @param psiType the PSI type to inspect
+     * @return the simple class name, or {@code null} if it cannot be extracted
+     */
+    public static String getElementTypeSimpleName(PsiType psiType) {
+        if (psiType instanceof PsiClassType classType) {
+            PsiType[] typeArguments = classType.getParameters();
+            if (typeArguments.length > 0 && typeArguments[0] instanceof PsiClassType argType) {
+                // Collection type: return the simple name of the first type argument.
+                PsiClass argClass = argType.resolve();
+                return argClass != null ? argClass.getName() : null;
+            }
+            // Plain class type.
+            PsiClass resolved = classType.resolve();
+            return resolved != null ? resolved.getName() : null;
+        }
+        return null;
+    }
+
+    /**
+     * Builds a map from simple class name to {@link PsiClass} for every class
+     * carrying the given annotation in the module's non-test source roots.
+     *
+     * <p>Performs a direct filesystem traversal of the module's source roots
+     * (via {@link ModuleRootManager}) rather than relying on IntelliJ's
+     * annotation index, which may not yet be fully populated during tests.
+     *
+     * @param context      any {@link PsiClass} from the module (provides module and project)
+     * @param annotationFQ the fully-qualified annotation name to filter by
+     * @return a map from simple class name to {@link PsiClass}; never {@code null}
+     */
+    public static Map<String, PsiClass> findAnnotatedClassesInModule(PsiClass context,
+                                                                     String annotationFQ) {
+        Map<String, PsiClass> result = new HashMap<>();
+        Module module = ModuleUtilCore.findModuleForPsiElement(context);
+        if (module == null) {
+            return result;
+        }
+
+        PsiManager psiManager = PsiManager.getInstance(context.getProject());
+        VirtualFile[] sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots(false);
+
+        for (VirtualFile sourceRoot : sourceRoots) {
+            collectAnnotatedClasses(sourceRoot, psiManager, annotationFQ, result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Recursively visits all {@code .java} files under {@code directory} and
+     * records every class annotated with {@code annotationFQ} into {@code classMap}.
+     *
+     * @param directory    the virtual file directory to traverse
+     * @param psiManager   the PSI manager used to parse virtual files
+     * @param annotationFQ the fully-qualified annotation name to match
+     * @param classMap     the map to populate with simple-name → {@link PsiClass} entries
+     */
+    private static void collectAnnotatedClasses(VirtualFile directory, PsiManager psiManager,
+                                                String annotationFQ,
+                                                Map<String, PsiClass> classMap) {
+        for (VirtualFile child : directory.getChildren()) {
+            if (child.isDirectory()) {
+                collectAnnotatedClasses(child, psiManager, annotationFQ, classMap);
+            } else if ("java".equals(child.getExtension())) {
+                PsiFile psiFile = psiManager.findFile(child);
+                if (psiFile instanceof PsiJavaFile javaFile) {
+                    for (PsiClass psiClass : javaFile.getClasses()) {
+                        if (AbstractDiagnosticsCollector.isMatchedAnnotation(
+                                psiClass.getAnnotations(), annotationFQ)
+                                && psiClass.getName() != null) {
+                            classMap.put(psiClass.getName(), psiClass);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

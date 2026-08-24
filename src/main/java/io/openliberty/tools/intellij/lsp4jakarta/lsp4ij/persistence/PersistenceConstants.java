@@ -34,6 +34,21 @@ public class PersistenceConstants {
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
 
+    /* Bidirectional relationship annotation constants */
+    public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
+    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
+    public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
+    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
+    public static final String JOIN_TABLE = "jakarta.persistence.JoinTable";
+
+    /** All relationship annotations that support the {@code mappedBy} attribute. */
+    public static final String[] INVERSE_CAPABLE_RELATIONSHIP_ANNOTATIONS = {
+            ONE_TO_MANY, ONE_TO_ONE, MANY_TO_MANY
+    };
+
+    /** Annotation attribute name for the owning-side field reference. */
+    public static final String MAPPED_BY = "mappedBy";
+
     /* Type Constants */
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
 
@@ -62,6 +77,10 @@ public class PersistenceConstants {
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+
+    /* Bidirectional relationship diagnostic codes */
+    public static final String DIAGNOSTIC_CODE_INVERSE_MISSING_MAPPED_BY = "InverseSideMissingMappedBy";
+    public static final String DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE = "JoinTableOnInverseSide";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
