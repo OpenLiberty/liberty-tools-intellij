@@ -37,6 +37,7 @@ public class ManagedBeanConstants {
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
     public static final String USER_TRANSACTION_FQ_NAME = "jakarta.transaction.UserTransaction";
+    public static final String QUALIFIER_FQ_NAME = "jakarta.inject.Qualifier";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";

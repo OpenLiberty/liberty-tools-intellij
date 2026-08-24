@@ -13,7 +13,6 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -274,10 +273,7 @@ public class DiagnosticsUtils {
                 hasExplicitDefault = true;
             } else {
                 // Check if this annotation is a CDI qualifier (meta-annotated with @Qualifier)
-                PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
-                        .findClass(fqn, GlobalSearchScope.allScope(type.getProject()));
-                if (annotationType != null && AnnotationUtil.isAnnotated(
-                        annotationType, "jakarta.inject.Qualifier", 0)) {
+                if (AnnotationUtil.hasMetaAnnotation(annotation, type, ManagedBeanConstants.QUALIFIER_FQ_NAME)) {
                     hasCustomQualifier = true;
                 }
             }
