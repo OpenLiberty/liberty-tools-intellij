@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
+import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -40,6 +41,9 @@ import org.eclipse.lsp4j.Range;
  *
  */
 public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollector, IJavaDiagnosticsParticipant {
+
+    /** Fully qualified name of {@code java.lang.Object}. */
+    public static final String OBJECT_FQ_NAME = "java.lang.Object";
 
     /**
      * Constructor
@@ -183,6 +187,116 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if {@code typeName} (simple or fully qualified) is part of the
+     * unrestricted bean types of {@code beanClass}: the class itself, any superclass
+     * (excluding {@code Object}), or any directly or indirectly implemented interface.
+     *
+     * <p>Uses {@link InheritanceUtil#isInheritor} for transitive hierarchy checks, the same
+     * PSI utility used by {@link #doesImplementInterfaces}.</p>
+     *
+     * @param beanClass the bean class whose unrestricted bean types are checked
+     * @param typeName  the simple or fully qualified class name to look for
+     * @return {@code true} if {@code typeName} is in the unrestricted bean type set
+     */
+    protected static boolean isInUnrestrictedBeanTypes(PsiClass beanClass, String typeName) {
+        // Check the bean class itself by FQ name or simple name
+        if (typeName.equals(beanClass.getQualifiedName()) || typeName.equals(beanClass.getName())) {
+            return true;
+        }
+        // InheritanceUtil.isInheritor walks the full supertype hierarchy (classes + interfaces).
+        if (InheritanceUtil.isInheritor(beanClass, typeName)) {
+            return true;
+        }
+        // Also match by simple name against all supertypes (for cases where only the simple name is used).
+        for (PsiClass superType : PsiClassImplUtil.getAllSuperClassesRecursively(beanClass)) {
+            String superFQName = superType.getQualifiedName();
+            if (superFQName == null || OBJECT_FQ_NAME.equals(superFQName)) {
+                continue;
+            }
+            if (typeName.equals(superFQName) || typeName.equals(superType.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts the class names listed in the {@code value} member of a {@code @Typed} annotation.
+     * Handles both single-class ({@code @Typed(Foo.class)}) and array-of-classes
+     * ({@code @Typed({Foo.class, Bar.class})}) forms.
+     *
+     * @param typedAnnotation the {@code @Typed} annotation
+     * @return list of class names (simple or fully qualified) from the annotation value
+     */
+    protected static List<String> getAnnotationClassValues(PsiAnnotation typedAnnotation) {
+        List<String> values = new ArrayList<>();
+        PsiAnnotationMemberValue valueMember = typedAnnotation.findAttributeValue("value");
+        if (valueMember == null) {
+            return values;
+        }
+        if (valueMember instanceof PsiArrayInitializerMemberValue) {
+            for (PsiAnnotationMemberValue element : ((PsiArrayInitializerMemberValue) valueMember).getInitializers()) {
+                String name = extractClassName(element);
+                if (name != null) {
+                    values.add(name);
+                }
+            }
+        } else {
+            String name = extractClassName(valueMember);
+            if (name != null) {
+                values.add(name);
+            }
+        }
+        return values;
+    }
+
+    /**
+     * Resolves a {@link PsiType} to a {@link PsiClass}, erasing generic parameters.
+     * Returns {@code null} if the type cannot be resolved to a concrete class (including
+     * when the type is a type variable / type parameter, which has no resolvable hierarchy).
+     *
+     * @param type the PSI type to resolve
+     * @return the resolved {@link PsiClass}, or {@code null}
+     */
+    protected static PsiClass resolveClassType(PsiType type) {
+        PsiType erased = type instanceof PsiClassType ? ((PsiClassType) type).rawType() : type;
+        if (erased instanceof PsiClassType) {
+            PsiClass resolved = ((PsiClassType) erased).resolve();
+            // Type variables (e.g. T in class Foo<T>) resolve to a PsiTypeParameter.
+            // Their hierarchy is not a real class hierarchy, so skip them entirely.
+            if (resolved instanceof PsiTypeParameter) {
+                return null;
+            }
+            return resolved;
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the class simple name from a {@code Foo.class} annotation value expression.
+     * Returns {@code null} if extraction fails.
+     *
+     * @param element the annotation member value to extract from
+     * @return the class name, or {@code null}
+     */
+    private static String extractClassName(PsiAnnotationMemberValue element) {
+        if (element instanceof PsiClassObjectAccessExpression) {
+            PsiType type = ((PsiClassObjectAccessExpression) element).getOperand().getType();
+            if (type instanceof PsiClassType) {
+                PsiClass resolved = ((PsiClassType) type).resolve();
+                if (resolved != null) {
+                    return resolved.getName();
+                }
+            }
+            // Fallback: use the type's presentation text stripped of generics
+            String text = type.getPresentableText();
+            int idx = text.indexOf('<');
+            return idx >= 0 ? text.substring(0, idx) : text;
+        }
+        return null;
     }
 
     /**

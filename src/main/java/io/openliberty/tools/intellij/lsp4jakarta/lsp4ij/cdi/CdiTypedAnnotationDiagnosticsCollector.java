@@ -14,8 +14,6 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiClassImplUtil;
-import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
@@ -94,12 +92,12 @@ public class CdiTypedAnnotationDiagnosticsCollector extends AbstractDiagnosticsC
      * Each class name listed in the annotation's {@code value} member that is not in the supertype
      * hierarchy of {@code beanClass} produces a diagnostic.
      *
-     * @param declaringClass the class that owns the annotated element (used for diagnostic placement)
-     * @param beanClass      the class whose unrestricted bean types are checked; may be {@code null}
-     *                       if the type could not be resolved
+     * @param declaringClass  the class that owns the annotated element (used for diagnostic placement)
+     * @param beanClass       the class whose unrestricted bean types are checked; may be {@code null}
+     *                        if the type could not be resolved
      * @param typedAnnotation the {@code @Typed} annotation
-     * @param unit           the compilation unit
-     * @param diagnostics    list to add diagnostics to
+     * @param unit            the compilation unit
+     * @param diagnostics     list to add diagnostics to
      */
     private void checkTypedAnnotation(PsiClass declaringClass, PsiClass beanClass,
                                       PsiAnnotation typedAnnotation, PsiJavaFile unit,
@@ -108,7 +106,7 @@ public class CdiTypedAnnotationDiagnosticsCollector extends AbstractDiagnosticsC
             return;
         }
 
-        List<String> typedValues = getTypedAnnotationValues(typedAnnotation);
+        List<String> typedValues = getAnnotationClassValues(typedAnnotation);
         if (typedValues.isEmpty()) {
             return;
         }
@@ -121,110 +119,5 @@ public class CdiTypedAnnotationDiagnosticsCollector extends AbstractDiagnosticsC
                         DiagnosticSeverity.Error));
             }
         }
-    }
-
-    /**
-     * Returns {@code true} if {@code typeName} (simple or fully qualified) matches the bean class
-     * itself, any of its superclasses (excluding {@code Object}), or any directly or indirectly
-     * implemented interface.
-     *
-     * <p>Uses {@link InheritanceUtil#isInheritor} for transitive hierarchy checks, the same PSI
-     * utility used by {@link AbstractDiagnosticsCollector#doesImplementInterfaces}.</p>
-     */
-    private boolean isInUnrestrictedBeanTypes(PsiClass beanClass, String typeName) {
-        // Check the bean class itself by simple name or FQ name
-        String beanFQName = beanClass.getQualifiedName();
-        String beanSimpleName = beanClass.getName();
-        if (typeName.equals(beanFQName) || typeName.equals(beanSimpleName)) {
-            return true;
-        }
-
-        // Check all superclasses and interfaces (transitively) via InheritanceUtil.
-        // isInheritor handles both classes and interfaces including transitive ones.
-        // We pass checkDeep=true (default overload) to walk the full hierarchy.
-        if (InheritanceUtil.isInheritor(beanClass, typeName)) {
-            return true;
-        }
-
-        // Also check by simple name against the full supertype hierarchy.
-        // PsiClassImplUtil.getAllSuperClassesRecursively includes both superclasses and interfaces.
-        for (PsiClass superType : PsiClassImplUtil.getAllSuperClassesRecursively(beanClass)) {
-            String superFQName = superType.getQualifiedName();
-            if (superFQName == null) continue;
-            if (OBJECT_FQ_NAME.equals(superFQName)) continue;
-            String superSimpleName = superType.getName();
-            if (typeName.equals(superFQName) || typeName.equals(superSimpleName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Extracts the class names listed in the {@code value} member of a {@code @Typed} annotation.
-     * Handles both single-class ({@code @Typed(Foo.class)}) and array-of-classes
-     * ({@code @Typed({Foo.class, Bar.class})}) forms.
-     */
-    private List<String> getTypedAnnotationValues(PsiAnnotation typedAnnotation) {
-        java.util.ArrayList<String> values = new java.util.ArrayList<>();
-        PsiAnnotationMemberValue valueMember = typedAnnotation.findAttributeValue("value");
-        if (valueMember == null) {
-            return values;
-        }
-        if (valueMember instanceof PsiArrayInitializerMemberValue) {
-            for (PsiAnnotationMemberValue element : ((PsiArrayInitializerMemberValue) valueMember).getInitializers()) {
-                String name = extractClassName(element);
-                if (name != null) {
-                    values.add(name);
-                }
-            }
-        } else {
-            String name = extractClassName(valueMember);
-            if (name != null) {
-                values.add(name);
-            }
-        }
-        return values;
-    }
-
-    /**
-     * Extracts the class simple name from a {@code Foo.class} annotation value expression.
-     * Returns {@code null} if extraction fails.
-     */
-    private String extractClassName(PsiAnnotationMemberValue element) {
-        if (element instanceof PsiClassObjectAccessExpression) {
-            PsiType type = ((PsiClassObjectAccessExpression) element).getOperand().getType();
-            if (type instanceof PsiClassType) {
-                PsiClass resolved = ((PsiClassType) type).resolve();
-                if (resolved != null) {
-                    return resolved.getName();
-                }
-            }
-            // Fallback: use the type's presentation text stripped of generics
-            String text = type.getPresentableText();
-            int idx = text.indexOf('<');
-            return idx >= 0 ? text.substring(0, idx) : text;
-        }
-        return null;
-    }
-
-    /**
-     * Resolves a {@link PsiType} to a {@link PsiClass}, erasing generic parameters.
-     * Returns {@code null} if the type cannot be resolved to a concrete class (including
-     * when the type is a type variable / type parameter, which has no resolvable hierarchy).
-     */
-    private PsiClass resolveClassType(PsiType type) {
-        PsiType erased = type instanceof PsiClassType ? ((PsiClassType) type).rawType() : type;
-        if (erased instanceof PsiClassType) {
-            PsiClass resolved = ((PsiClassType) erased).resolve();
-            // Type variables (e.g. T in class Foo<T>) resolve to a PsiTypeParameter.
-            // Their hierarchy is not a real class hierarchy, so skip them entirely.
-            if (resolved instanceof PsiTypeParameter) {
-                return null;
-            }
-            return resolved;
-        }
-        return null;
     }
 }
