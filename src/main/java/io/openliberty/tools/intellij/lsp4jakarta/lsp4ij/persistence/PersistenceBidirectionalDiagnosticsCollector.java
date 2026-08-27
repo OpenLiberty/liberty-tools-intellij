@@ -27,6 +27,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ import java.util.Map;
  * </ol>
  *
  * <p>Cross-file analysis is performed via
- * {@link DiagnosticsUtils#findAnnotatedClassesInModule}, which traverses
+ * {@link DiagnosticsUtils#scanSourceClasses}, which traverses
  * the module's source roots directly and is always consistent with the
  * current workspace state.
  *
@@ -74,9 +75,15 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
                 continue;
             }
 
-            // Build a module-wide map of all @Entity types keyed by simple name.
-            Map<String, PsiClass> entityTypeMap = DiagnosticsUtils.findAnnotatedClassesInModule(
-                    type, PersistenceConstants.ENTITY);
+            // Build a module-wide map of all @Entity types keyed by simple name using
+            // the generic scanner — populated once per entity class in the file.
+            Map<String, PsiClass> entityTypeMap = new HashMap<>();
+            DiagnosticsUtils.scanSourceClasses(type, scannedClass -> {
+                if (isMatchedAnnotation(scannedClass.getAnnotations(), PersistenceConstants.ENTITY)
+                        && scannedClass.getName() != null) {
+                    entityTypeMap.put(scannedClass.getName(), scannedClass);
+                }
+            });
 
             for (PsiField field : type.getFields()) {
                 validateRelationshipMember(field, field.getType(), type, unit,

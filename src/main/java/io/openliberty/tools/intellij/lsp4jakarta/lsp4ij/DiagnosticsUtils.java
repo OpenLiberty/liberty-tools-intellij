@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -268,59 +269,57 @@ public class DiagnosticsUtils {
     }
 
     /**
-     * Builds a map from simple class name to {@link PsiClass} for every class
-     * carrying the given annotation in the module's non-test source roots.
+     * Visits every source {@link PsiClass} in the module that owns {@code context}
+     * and passes each one to {@code visitor}.
      *
-     * <p>Performs a direct filesystem traversal of the module's source roots
-     * (via {@link ModuleRootManager}) rather than relying on IntelliJ's
-     * annotation index, which may not yet be fully populated during tests.
+     * <p>Performs a direct filesystem traversal of the module's non-test source roots
+     * (via {@link ModuleRootManager}) rather than relying on IntelliJ's annotation
+     * index, so it is safe to call during tests before the index is fully built.
      *
-     * @param context      any {@link PsiClass} from the module (provides module and project)
-     * @param annotationFQ the fully-qualified annotation name to filter by
-     * @return a map from simple class name to {@link PsiClass}; never {@code null}
+     * <p>Example — count {@code @NamedEntityGraph} names module-wide:
+     * <pre>{@code
+     * Map<String, Integer> counts = new HashMap<>();
+     * DiagnosticsUtils.scanSourceClasses(anyClassInModule, psiClass -> {
+     *     PsiAnnotation ann = psiClass.getAnnotation(NAMED_ENTITY_GRAPH);
+     *     if (ann != null) {
+     *         String name = AnnotationUtils.getAnnotationMemberValue(ann, "name");
+     *         if (name != null) counts.merge(name, 1, Integer::sum);
+     *     }
+     * });
+     * }</pre>
+     *
+     * @param context any {@link PsiClass} from the module (provides module and project)
+     * @param visitor called once for every source class found
      */
-    public static Map<String, PsiClass> findAnnotatedClassesInModule(PsiClass context,
-                                                                     String annotationFQ) {
-        Map<String, PsiClass> result = new HashMap<>();
+    public static void scanSourceClasses(PsiClass context, Consumer<PsiClass> visitor) {
         Module module = ModuleUtilCore.findModuleForPsiElement(context);
         if (module == null) {
-            return result;
+            return;
         }
-
         PsiManager psiManager = PsiManager.getInstance(context.getProject());
-        VirtualFile[] sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots(false);
-
-        for (VirtualFile sourceRoot : sourceRoots) {
-            collectAnnotatedClasses(sourceRoot, psiManager, annotationFQ, result);
+        for (VirtualFile sourceRoot : ModuleRootManager.getInstance(module).getSourceRoots(false)) {
+            visitClasses(sourceRoot, psiManager, visitor);
         }
-
-        return result;
     }
 
     /**
      * Recursively visits all {@code .java} files under {@code directory} and
-     * records every class annotated with {@code annotationFQ} into {@code classMap}.
+     * passes every {@link PsiClass} found to {@code visitor}.
      *
-     * @param directory    the virtual file directory to traverse
-     * @param psiManager   the PSI manager used to parse virtual files
-     * @param annotationFQ the fully-qualified annotation name to match
-     * @param classMap     the map to populate with simple-name → {@link PsiClass} entries
+     * @param directory  the virtual file directory to traverse
+     * @param psiManager the PSI manager used to parse virtual files
+     * @param visitor    called for each class found
      */
-    private static void collectAnnotatedClasses(VirtualFile directory, PsiManager psiManager,
-                                                String annotationFQ,
-                                                Map<String, PsiClass> classMap) {
+    private static void visitClasses(VirtualFile directory, PsiManager psiManager,
+                                     Consumer<PsiClass> visitor) {
         for (VirtualFile child : directory.getChildren()) {
             if (child.isDirectory()) {
-                collectAnnotatedClasses(child, psiManager, annotationFQ, classMap);
+                visitClasses(child, psiManager, visitor);
             } else if ("java".equals(child.getExtension())) {
                 PsiFile psiFile = psiManager.findFile(child);
                 if (psiFile instanceof PsiJavaFile javaFile) {
                     for (PsiClass psiClass : javaFile.getClasses()) {
-                        if (AbstractDiagnosticsCollector.isMatchedAnnotation(
-                                psiClass.getAnnotations(), annotationFQ)
-                                && psiClass.getName() != null) {
-                            classMap.put(psiClass.getName(), psiClass);
-                        }
+                        visitor.accept(psiClass);
                     }
                 }
             }
