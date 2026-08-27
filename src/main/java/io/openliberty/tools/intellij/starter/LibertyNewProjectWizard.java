@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 IBM Corporation.
+ * Copyright (c) 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -74,11 +74,13 @@ public class LibertyNewProjectWizard implements GeneratorNewProjectWizard {
         final String[] javaOptions;
         final String[] eeOptions;
         final String[] mpOptions;
+        final JSONObject eeConstraints;
         StarterInfo(String defaultGroup, String defaultArtifact,
                     String defaultBuild, String defaultJava,
                     String defaultEe,   String defaultMp,
                     String[] buildOptions, String[] javaOptions,
-                    String[] eeOptions,   String[] mpOptions) {
+                    String[] eeOptions,   String[] mpOptions,
+                    JSONObject eeConstraints) {
             this.defaultGroup    = defaultGroup;
             this.defaultArtifact = defaultArtifact;
             this.defaultBuild    = defaultBuild;
@@ -89,6 +91,7 @@ public class LibertyNewProjectWizard implements GeneratorNewProjectWizard {
             this.javaOptions     = javaOptions;
             this.eeOptions       = eeOptions;
             this.mpOptions       = mpOptions;
+            this.eeConstraints   = eeConstraints;
         }
     }
 
@@ -144,9 +147,11 @@ public class LibertyNewProjectWizard implements GeneratorNewProjectWizard {
             String[] eeOptions    = toStringArray(root.getJSONObject("e").getJSONArray("options"));
             String[] mpOptions    = toStringArray(root.getJSONObject("m").getJSONArray("options"));
 
+            JSONObject eeConstraints = root.getJSONObject("e").optJSONObject("constraints");
+
             return new StarterInfo(defaultGroup, defaultArtifact,
                     defaultBuild, defaultJava, defaultEe, defaultMp,
-                    buildOptions, javaOptions, eeOptions, mpOptions);
+                    buildOptions, javaOptions, eeOptions, mpOptions, eeConstraints);
         } catch (Exception ex) {
             LOGGER.warn("Failed to parse Liberty Starter info JSON", ex);
             return null;
