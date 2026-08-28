@@ -108,7 +108,7 @@ dependencies {
         exclude group: 'com.google.code.gson'
     }
     implementation 'org.apache.maven:maven-artifact:3.6.3'
-    implementation 'org.json:json:20240303'
+    implementation "org.json:json:$jsonLibVersion"
 //    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 //    implementation 'org.jsoup:jsoup:1.15.3'
     //Add junit dependency back when tests are added
