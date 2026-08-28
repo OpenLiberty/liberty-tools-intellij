@@ -331,7 +331,8 @@ public class LibertyNewProjectWizard implements GeneratorNewProjectWizard {
 
         @Override
         public int getWeight() {
-            return IJ_PLUGIN_WEIGHT;
+            // 1000 is an arbitrary number given for making the liberty generator come first in the generator list
+            return JVM_WEIGHT + 1000;
         }
     }
 }

@@ -18,6 +18,8 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.AnimatedIcon;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dsl.builder.Panel;
+import java.util.ArrayList;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -164,12 +166,13 @@ public class LibertyNewProjectWizardStep extends AbstractNewProjectWizardStep im
         SwingUtilities.invokeLater(() -> resolveCreateButton(groupField));
 
         // ── Build Tool ────────────────────────────────────────────────────────
-        // Wrap in a holder panel so the toggle group can be replaced once API responds.
-        JPanel buildHolder = new JPanel(new BorderLayout());
-        buildHolder.setOpaque(false);
-        buildHolder.add(buildToggleGroup(FALLBACK_BUILD, buildProp.get(), buildProp::set), BorderLayout.WEST);
+        JPanel buildPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        buildPanel.setOpaque(false);
+        final List<JRadioButton> buildRadios = new ArrayList<>();
+        final ButtonGroup buildGroup = new ButtonGroup();
+        populateBuildRadios(buildPanel, buildRadios, buildGroup, FALLBACK_BUILD, buildProp.get());
         builder.row("Build Tool:", row -> {
-            row.cell(buildHolder);
+            row.cell(buildPanel);
             return null;
         });
 
@@ -192,7 +195,7 @@ public class LibertyNewProjectWizardStep extends AbstractNewProjectWizardStep im
 
         builder.row("Java SE Version:", row -> {
             row.cell(javaCombo);
-            row.label("Jakarta EE Version:");
+            row.label("Java EE/Jakarta EE Version:");
             row.cell(eeCombo);
             row.label("MicroProfile Version:");
             row.cell(mpCombo);
@@ -205,7 +208,7 @@ public class LibertyNewProjectWizardStep extends AbstractNewProjectWizardStep im
             applyMpConstraints(mpCombo, selectedEe, null, compatibilityMessageLabel);
         });
 
-        builder.row("", row -> {
+        builder.row((JLabel) null, row -> {
             row.cell(compatibilityMessageLabel);
             return null;
         });
@@ -239,10 +242,9 @@ public class LibertyNewProjectWizardStep extends AbstractNewProjectWizardStep im
             artifactField.setText(artifact);
 
             buildProp.set(build);
-            buildHolder.removeAll();
-            buildHolder.add(buildToggleGroup(buildOpts, build, buildProp::set), BorderLayout.WEST);
-            buildHolder.revalidate();
-            buildHolder.repaint();
+            populateBuildRadios(buildPanel, buildRadios, buildGroup, buildOpts, build);
+            buildPanel.revalidate();
+            buildPanel.repaint();
 
             javaProp.set(java);
             javaCombo.setModel(new DefaultComboBoxModel<>(javaOpts));
@@ -276,24 +278,25 @@ public class LibertyNewProjectWizardStep extends AbstractNewProjectWizardStep im
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**
-     * Builds a segmented-button-style toggle group from plain Swing components.
-     * Visually matches the IntelliJ "Build system" selector (Maven / Gradle).
+     * Clears and repopulates {@code panel} with one {@link JRadioButton} per build option.
+     * Existing buttons are removed first so this can be called again when the API response
+     * arrives with the live option list.
      */
-    private static JPanel buildToggleGroup(String[] options, String selected,
-                                           java.util.function.Consumer<String> onSelect) {
-        JPanel panel = new JPanel(new GridLayout(1, options.length, 0, 0));
-        panel.setOpaque(false);
-        ButtonGroup group = new ButtonGroup();
+    private void populateBuildRadios(JPanel panel, List<JRadioButton> radios,
+                                     ButtonGroup group, String[] options, String selected) {
+        for (JRadioButton r : radios) group.remove(r);
+        radios.clear();
+        panel.removeAll();
 
         for (final String value : options) {
-            JToggleButton btn = new JToggleButton(capitalize(value));
-            btn.setSelected(value.equalsIgnoreCase(selected));
-            btn.setFocusPainted(false);
-            btn.addActionListener(e -> onSelect.accept(value));
-            group.add(btn);
-            panel.add(btn);
+            JRadioButton radio = new JRadioButton(capitalize(value));
+            radio.setSelected(value.equalsIgnoreCase(selected));
+            radio.setOpaque(false);
+            radio.addActionListener(e -> buildProp.set(value));
+            group.add(radio);
+            panel.add(radio);
+            radios.add(radio);
         }
-        return panel;
     }
 
     private static String capitalize(String s) {
