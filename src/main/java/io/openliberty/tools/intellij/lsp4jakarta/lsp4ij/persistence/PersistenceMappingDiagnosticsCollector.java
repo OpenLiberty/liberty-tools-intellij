@@ -243,9 +243,15 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             return;
         }
 
+        // Retrieve the actual type arguments of the Map, i.e. [K, V] from Map<K, V>.
+        // getParameters() returns an empty array for a raw Map (no generics) and a
+        // single-element array if somehow only one bound is present. In either case
+        // we cannot determine which class to resolve the "key." or "value." suffix
+        // against, so we bail out silently rather than producing a false-positive
+        // diagnostic.
         PsiType[] typeArgs = mapType.getParameters();
         if (typeArgs.length < 2) {
-            return; // raw map — cannot validate further
+            return;
         }
 
         String suffix;
