@@ -15,11 +15,10 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -27,15 +26,11 @@ import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public abstract class LibertyGeneralAction extends AnAction {
     protected static final Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
@@ -169,21 +164,21 @@ public abstract class LibertyGeneralAction extends AnAction {
      * Returns the Terminal widget for the corresponding Liberty module
      *
      * @param createWidget create Terminal widget if it does not already exist
-     * @return ShellTerminalWidget
+     * @return TerminalWidget
      */
-    protected ShellTerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected TerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
         // look for existing terminal tab
-        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
+        TerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
         // look for creating new terminal tab
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
+        TerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
         // Set Focus to existing terminal widget
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
-        // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        // hasRunningCommands() must not be called from the EDT (asserted since IntelliJ 2026.1)
-        if (widget == null || (!createWidget && !computeOffEdt(widget::hasRunningCommands))) {
+        // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running.
+        // Use TerminalWidget.getTtyConnector() to check whether a command is currently active.
+        if (widget == null || (!createWidget && widget.getTtyConnector() == null)) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
@@ -210,24 +205,4 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @return The string representation of the action command being processed.
      */
     protected abstract String getActionCommandName();
-
-    /**
-     * Runs the given supplier on a pooled thread and blocks for the result.
-     * Use this to call APIs that assert they must not be called from the EDT.
-     *
-     * Method assisted by IBM Bob
-     */
-    private static <T> T computeOffEdt(Supplier<T> supplier) {
-        Future<T> future = ApplicationManager.getApplication().executeOnPooledThread(supplier::get);
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ProcessCanceledException(e);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) throw (RuntimeException) cause;
-            throw new RuntimeException(cause != null ? cause : e);
-        }
-    }
 }

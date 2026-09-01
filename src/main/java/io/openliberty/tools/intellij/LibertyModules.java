@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -229,7 +229,7 @@ public class LibertyModules {
             while (it.hasNext()) {
                 LibertyModule libertyModule = (LibertyModule) it.next();
                 // do not remove from list if the corresponding terminal widget has running commands
-                if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().hasRunningCommands())) {
+                if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().getTtyConnector() != null)) {
                     it.remove();
                 }
             }

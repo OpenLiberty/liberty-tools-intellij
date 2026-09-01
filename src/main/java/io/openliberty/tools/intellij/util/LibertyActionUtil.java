@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,34 +11,29 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.jediterm.terminal.TtyConnector;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.intellij.terminal.ui.TerminalWidget;
 
 public class LibertyActionUtil {
 
     static Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
+
     /**
-     * Send the given two commands to the given ShellTerminalWidget
-     * but ensure the first command has at least started executing
-     * before typing the second command on the terminal.
+     * Send the given two commands to the given TerminalWidget.
+     * The commands are run sequentially: cmd1 first, then cmd2 once cmd1 has started executing.
      *
      * @param widget
      * @param cmd1
      * @param cmd2
      */
-    public static void executeCommand(ShellTerminalWidget widget, String cmd1, String cmd2) {
-        // Perform these commands on the same pooled thread or else the event thread will be blocked
+    public static void executeCommand(TerminalWidget widget, String cmd1, String cmd2) {
+        // Perform these commands on the same pooled thread or else the event thread will be blocked.
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             executeCommand(widget, cmd1);
             // Do not run the second command until the execution of the first command has begun.
             // This is required because IntelliJ batches commands and runs them out of order.
             int i = 0;
             try {
-                while (widget.getProcessTtyConnector() == null) {
+                while (widget.getTtyConnector() == null) {
                     if (i > 100) {
                         LOGGER.error("Time out waiting to execute command: " + cmd1);
                         return;
@@ -54,28 +49,13 @@ public class LibertyActionUtil {
     }
 
     /**
-     * Send the given command to the given ShellTerminalWidget
+     * Send the given command to the given TerminalWidget.
      *
      * @param widget
      * @param cmd
      */
-    public static void executeCommand(ShellTerminalWidget widget, String cmd) {
-        try {
-            widget.grabFocus();
-            TtyConnector connector = widget.getTtyConnector();
-            if (connector == null) {
-                // new terminal, use built in execute command function
-                widget.executeCommand(cmd);
-                return;
-            }
-            // existing terminal, add a new line character and send command through connector
-            String enterCode = new String(widget.getTerminal().getCodeForKey(KeyEvent.VK_ENTER, 0), StandardCharsets.UTF_8);
-            StringBuilder result = new StringBuilder();
-            result.append(cmd).append(enterCode);
-            connector.write(result.toString());
-        } catch (IOException e) {
-            LOGGER.error(String.format("Failed to execute command: %s", cmd), e);
-        }
-
+    public static void executeCommand(TerminalWidget widget, String cmd) {
+        widget.requestFocus();
+        widget.sendCommandToExecute(cmd);
     }
 }
