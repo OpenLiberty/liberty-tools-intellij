@@ -25,6 +25,7 @@ import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.terminal.TerminalCommandUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
@@ -177,8 +178,9 @@ public abstract class LibertyGeneralAction extends AnAction {
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running.
-        // Use TerminalWidget.getTtyConnector() to check whether a command is currently active.
-        if (widget == null || (!createWidget && widget.getTtyConnector() == null)) {
+        // Use TerminalCommandUtil.isCommandRunning() which checks TerminalShellIntegration.getOutputStatus()
+        // first (non-blocking), then falls back to TerminalViewSessionState / getTtyConnector().
+        if (widget == null || (!createWidget && !TerminalCommandUtil.isCommandRunning(libertyModule))) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
