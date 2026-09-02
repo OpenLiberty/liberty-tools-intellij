@@ -63,24 +63,11 @@ public class MicroProfileConfigurable extends NamedConfigurable<UserDefinedMicro
 
 
     @Override
-    public void reset() {
-        if (myView == null) return;
-        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
-        myView.setExecutionMode(settings.getExecutionMode());
-    }
-
-    @Override
     public boolean isModified() {
-        if (myView == null) return false;
-        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
-        return !(myView.getExecutionMode() == settings.getExecutionMode());
+        return false;
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        if (myView == null) return;
-        UserDefinedMicroProfileSettings settings = UserDefinedMicroProfileSettings.getInstance(project);
-        settings.setExecutionMode(myView.getExecutionMode());
-        settings.fireStateChanged();
     }
 }

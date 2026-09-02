@@ -79,19 +79,6 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
         myState.myValidationEnabled = validationEnabled;
     }
 
-    public ExecutionMode getExecutionMode() {
-        try {
-            return ExecutionMode.valueOf(myState.myExecutionMode);
-        }
-        catch(Exception e) {
-            return ExecutionMode.safe;
-        }
-    }
-
-    public void setExecutionMode(ExecutionMode executionMode) {
-        myState.myExecutionMode = executionMode.name();
-    }
-
     // ---------- Properties
 
     public boolean isInlayHintEnabled() {
@@ -171,11 +158,6 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
         Map<String, Object> tools = new HashMap<>();
         microprofile.put("tools", tools);
 
-        // Execution mode
-        Map<String, Object> execution = new HashMap<>();
-        execution.put("mode", getExecutionMode().name());
-        tools.put("execution", execution);
-
         // Inlay hint
         Map<String, Object> inlayHint = new HashMap<>();
         inlayHint.put("enabled", isInlayHintEnabled());
@@ -228,9 +210,6 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
     }
 
     public static class MyState {
-
-        @Tag("executionMode")
-        public String myExecutionMode = ExecutionMode.safe.name();
 
         @Tag("validationEnabled")
         public boolean myValidationEnabled = true;
