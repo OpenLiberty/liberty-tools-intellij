@@ -11,72 +11,51 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.terminal.frontend.view.TerminalView;
-import io.openliberty.tools.intellij.LibertyModule;
+import com.intellij.terminal.ui.TerminalWidget;
 
 public class LibertyActionUtil {
 
     static Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
 
     /**
-     * Send two commands sequentially to the terminal associated with the given module.
-     * {@code cmd1} is sent first; {@code cmd2} is sent once the terminal session is active.
+     * Send the given two commands to the given TerminalWidget.
+     * The commands are run sequentially: cmd1 first, then cmd2 once cmd1 has started executing.
      *
-     * <p>Uses {@link TerminalView#createSendTextBuilder()} when a {@link TerminalView} is
-     * available (IntelliJ 2025.3+). Falls back to
-     * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
-     *
-     * @param libertyModule the module whose terminal should receive the commands
-     * @param cmd1          first command (e.g. {@code cd <project-dir>})
-     * @param cmd2          second command (e.g. the Liberty dev mode start command)
+     * @param widget
+     * @param cmd1
+     * @param cmd2
      */
-    public static void executeCommand(LibertyModule libertyModule, String cmd1, String cmd2) {
-        // Run on a pooled thread so the EDT is never blocked.
+    public static void executeCommand(TerminalWidget widget, String cmd1, String cmd2) {
+        // Perform these commands on the same pooled thread or else the event thread will be blocked.
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            executeCommand(libertyModule, cmd1);
-            // Wait until the terminal session has an active TTY before sending the second command.
+            executeCommand(widget, cmd1);
+            // Do not run the second command until the execution of the first command has begun.
+            // This is required because IntelliJ batches commands and runs them out of order.
             int i = 0;
             try {
-                while (libertyModule.getShellWidget() != null
-                        && libertyModule.getShellWidget().getTtyConnector() == null) {
+                while (widget.getTtyConnector() == null) {
                     if (i > 100) {
-                        LOGGER.error("Timed out waiting to execute command: " + cmd1);
+                        LOGGER.error("Time out waiting to execute command: " + cmd1);
                         return;
                     }
                     LOGGER.debug("Waiting for cd to execute: " + i++);
                     Thread.sleep(100);
                 }
-            } catch (InterruptedException e) {
-                LOGGER.error(String.format("Interrupted waiting to execute command: %s", cmd1), e);
-                Thread.currentThread().interrupt();
-                return;
+            } catch (InterruptedException x) {
+                LOGGER.error(String.format("Interrupted waiting to execute command: %s", cmd1), x);
             }
-            executeCommand(libertyModule, cmd2);
+            executeCommand(widget, cmd2);
         });
     }
 
     /**
-     * Send a single command to the terminal associated with the given module.
+     * Send the given command to the given TerminalWidget.
      *
-     * <p>Uses {@link TerminalView#createSendTextBuilder()} when a {@link TerminalView} is
-     * available (IntelliJ 2025.3+). Falls back to
-     * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
-     *
-     * @param libertyModule the module whose terminal should receive the command
-     * @param cmd           the command to send
+     * @param widget
+     * @param cmd
      */
-    public static void executeCommand(LibertyModule libertyModule, String cmd) {
-        TerminalView view = libertyModule.getTerminalView();
-        if (view != null) {
-            // Reworked Terminal path: use TerminalSendTextBuilder with shouldExecute()
-            // so the text is treated as a command (executed immediately, not just typed).
-            view.createSendTextBuilder().shouldExecute().send(cmd);
-            return;
-        }
-        // Classic fallback.
-        if (libertyModule.getShellWidget() != null) {
-            libertyModule.getShellWidget().requestFocus();
-            libertyModule.getShellWidget().sendCommandToExecute(cmd);
-        }
+    public static void executeCommand(TerminalWidget widget, String cmd) {
+        widget.requestFocus();
+        widget.sendCommandToExecute(cmd);
     }
 }

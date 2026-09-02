@@ -15,7 +15,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
-import com.intellij.terminal.frontend.view.TerminalView;
 import com.intellij.terminal.ui.TerminalWidget;
 
 /**
@@ -30,8 +29,6 @@ public class LibertyModule {
     private boolean validContainerVersion;
     private boolean debugMode;
     private TerminalWidget shellWidget;
-    /** Reworked Terminal view for this module's terminal tab. {@code null} if not yet started. */
-    private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
 
@@ -39,7 +36,6 @@ public class LibertyModule {
         this.project = project;
         this.debugMode = false;
         this.shellWidget = null;
-        this.terminalView  = null;
         this.customRunConfig = null;
         this.useCustom = false;
     }
@@ -144,17 +140,5 @@ public class LibertyModule {
 
     public void setShellWidget(TerminalWidget shellWidget) {
         this.shellWidget = shellWidget;
-    }
-
-    /**
-     * Returns the Reworked Terminal {@link TerminalView} for this module's terminal tab,
-     * or {@code null} if no terminal tab has been opened yet.
-     */
-    public TerminalView getTerminalView() {
-        return terminalView;
-    }
-
-    public void setTerminalView(TerminalView terminalView) {
-        this.terminalView = terminalView;
     }
 }

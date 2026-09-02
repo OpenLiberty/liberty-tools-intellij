@@ -36,7 +36,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
             return;
         }
         String runTestsCommand = " ";
-        LibertyActionUtil.executeCommand(libertyModule, runTestsCommand);
+        LibertyActionUtil.executeCommand(widget, runTestsCommand);
     }
 
 }

@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.*;
-import io.openliberty.tools.intellij.util.terminal.TerminalCommandUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -229,9 +228,8 @@ public class LibertyModules {
             Iterator it = libertyModules.values().iterator();
             while (it.hasNext()) {
                 LibertyModule libertyModule = (LibertyModule) it.next();
-                // Do not remove from list if the corresponding terminal has running commands.
-                boolean hasRunning = TerminalCommandUtil.isCommandRunning(libertyModule);
-                if (project.equals(libertyModule.getProject()) && !hasRunning) {
+                // do not remove from list if the corresponding terminal widget has running commands
+                if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().getTtyConnector() != null)) {
                     it.remove();
                 }
             }

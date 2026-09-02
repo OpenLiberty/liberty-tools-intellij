@@ -36,6 +36,6 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
             return;
         }
         String stopCmd = "q";
-        LibertyActionUtil.executeCommand(libertyModule, stopCmd);
+        LibertyActionUtil.executeCommand(widget, stopCmd);
     }
 }

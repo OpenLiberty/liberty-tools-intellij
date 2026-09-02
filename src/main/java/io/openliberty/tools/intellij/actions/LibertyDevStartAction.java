@@ -96,7 +96,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         // Do not use the custom parameters in the future unless we get here via the run configuration dialog
         libertyModule.setUseCustom(false);
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
-        LibertyActionUtil.executeCommand(libertyModule, cdToProjectCmd, startCmd);
+        LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
             debugHandler.createAndRunDebugConfiguration(libertyModule, debugPort);
