@@ -44,12 +44,19 @@
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.completion.JavaCompletionDefinition"/>
         <extensionPoint name="javaCodeLensParticipant"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.IJavaCodeLensParticipant"/>
+        <extensionPoint name="javaInlayHintsParticipant"
+                        interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.inlayhint.IJavaInlayHintsParticipant"/>
         <extensionPoint name="configSourceProvider"
                         interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project.IConfigSourceProvider"/>
         <extensionPoint name="javaASTValidator.validator"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.JavaASTValidatorExtensionPointBean"/>
         <extensionPoint name="javaASTValidator.annotationValidator"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.validators.annotations.AnnotationRuleExtensionPointBean"/>
+        <extensionPoint name="javaASTInlayHint.inlayHint"
+                        beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.inlayhint.JavaASTInlayHintExtensionPointBean">
+            <with attribute="implementation"
+                  implements="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.inlayhint.JavaASTInlayHint"/>
+        </extensionPoint>
         <extensionPoint name="javaCodeActionParticipant"
                         beanClass="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.JavaCodeActionDefinition"/>
         <extensionPoint name="jaxRsInfoProvider" interface="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.IJaxRsInfoProvider"/>
@@ -161,6 +168,8 @@
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.InterceptorDiagnosticsParticipant"/>
+        <javaInlayHintsParticipant
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.inlayhint.JavaASTInlayHintsParticipant"/>
 
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
@@ -580,6 +589,8 @@
 
         <javaASTValidator.validator
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTValidator"/>
+        <javaASTInlayHint.inlayHint
+                implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.java.MicroProfileConfigASTInlayHint" />
         <javaASTValidator.validator
                 implementation="io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator"/>
         <javaASTValidator.annotationValidator annotation="org.eclipse.microprofile.faulttolerance.CircuitBreaker"

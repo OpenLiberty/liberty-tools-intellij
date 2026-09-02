@@ -68,7 +68,7 @@ public final class DiagnosticsHandler {
         try {
             Module module = ApplicationManager.getApplication().runReadAction((ThrowableComputable<Module, IOException>) () -> utils.getModule(uri));
             // Collect all adapted diagnostic definitions
-            JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings);
+            JavaDiagnosticsContext context = new JavaDiagnosticsContext(uri, typeRoot, utils, module, documentFormat, settings, diagnostics);
             List<JavaDiagnosticsDefinition> definitions = JavaDiagnosticsDefinition.EP_NAME.getExtensionList()
                     .stream()
                     .filter(definition -> group.equals(definition.getGroup()))
@@ -78,10 +78,7 @@ public final class DiagnosticsHandler {
             // Begin, collect, end participants
             definitions.forEach(definition -> definition.beginDiagnostics(context));
             definitions.forEach(definition -> {
-                List<Diagnostic> collectedDiagnostics = definition.collectDiagnostics(context);
-                if (collectedDiagnostics != null && !collectedDiagnostics.isEmpty()) {
-                    diagnostics.addAll(collectedDiagnostics);
-                }
+                definition.collectDiagnostics(context);
             });
             definitions.forEach(definition -> definition.endDiagnostics(context));
         } catch (IOException e) {

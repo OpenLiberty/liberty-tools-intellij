@@ -20,12 +20,14 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4jakarta.commons.*;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaCodeActionParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaCompletionParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsParams;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaDiagnosticsSettings;
+import org.eclipse.lsp4mp.commons.runtime.ExecutionMode;
 
 import java.util.Collections;
 import java.util.List;
@@ -142,7 +144,7 @@ public final class PropertiesManagerForJakarta {
     private MicroProfileJavaDiagnosticsParams adapt(JakartaJavaDiagnosticsParams params) {
         JakartaJavaDiagnosticsSettings settings = params.getSettings();
         MicroProfileJavaDiagnosticsParams mpParams = new MicroProfileJavaDiagnosticsParams(params.getUris(),
-                new MicroProfileJavaDiagnosticsSettings(settings != null ? settings.getPatterns() : Collections.emptyList()));
+                new MicroProfileJavaDiagnosticsSettings(settings != null ? settings.getPatterns() : Collections.emptyList(), DiagnosticSeverity.Error, ExecutionMode.SAFE));
         DocumentFormat df = params.getDocumentFormat();
         mpParams.setDocumentFormat(df != null ? org.eclipse.lsp4mp.commons.DocumentFormat.forValue(df.getValue()) : null);
         return mpParams;

@@ -16,8 +16,8 @@ package io.openliberty.tools.intellij.lsp4mp4ij.settings;
 import com.intellij.openapi.Disposable;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
-import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
 import com.redhat.devtools.lsp4ij.ui.components.InspectionHyperlink;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 
@@ -37,7 +37,7 @@ public class MicroProfileView implements Disposable {
 
     private JPanel createSettings() {
         return FormBuilder.createFormBuilder()
-                .addComponent(new InspectionHyperlink(MicroProfileBundle.message("microprofile.inspection.link"), "MicroProfile"))
+                .addComponent(new InspectionHyperlink(LocalizedResourceUtil.getMessage("microprofile.inspection.link"), "MicroProfile"))
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -50,4 +50,5 @@ public class MicroProfileView implements Disposable {
     public void dispose() {
 
     }
+
 }

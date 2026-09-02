@@ -13,11 +13,9 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,18 +97,13 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *
      * @param context the java diagnostics context
      *
-     * @return diagnostics list and null otherwise.
-     *
      */
     @Override
-    public final List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
+    public final void collectDiagnostics(JavaDiagnosticsContext context) {
         PsiFile typeRoot = context.getTypeRoot();
         if (typeRoot instanceof PsiJavaFile) {
-            List<Diagnostic> diagnostics = new ArrayList<>();
-            collectDiagnostics((PsiJavaFile) typeRoot, diagnostics);
-            return diagnostics;
+            collectDiagnostics((PsiJavaFile) typeRoot, context.getDiagnostics());
         }
-        return Collections.emptyList();
     }
 
     /**

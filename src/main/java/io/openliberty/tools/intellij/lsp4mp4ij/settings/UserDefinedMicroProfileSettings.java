@@ -89,6 +89,38 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
         myState.myInlayHintEnabled = inlayHintEnabled;
     }
 
+    public boolean isInlayHintConvertersEnabled() {
+        return myState.myInlayHintConvertersEnabled;
+    }
+
+    public void setInlayHintConvertersEnabled(boolean inlayHintConvertersEnabled) {
+        myState.myInlayHintConvertersEnabled = inlayHintConvertersEnabled;
+    }
+
+    public boolean isInlayHintDefaultValuesEnabled() {
+        return myState.myInlayHintDefaultValuesEnabled;
+    }
+
+    public void setInlayHintDefaultValuesEnabled(boolean inlayHintDefaultValuesEnabled) {
+        myState.myInlayHintDefaultValuesEnabled = inlayHintDefaultValuesEnabled;
+    }
+
+    public boolean isInlayHintTypesEnabled() {
+        return myState.myInlayHintTypesEnabled;
+    }
+
+    public void setInlayHintTypesEnabled(boolean inlayHintTypesEnabled) {
+        myState.myInlayHintTypesEnabled = inlayHintTypesEnabled;
+    }
+
+    public boolean isInlayHintResolveExpressionsEnabled() {
+        return myState.myInlayHintResolveExpressionsEnabled;
+    }
+
+    public void setInlayHintResolveExpressionsEnabled(boolean inlayHintResolveExpressionsEnabled) {
+        myState.myInlayHintResolveExpressionsEnabled = inlayHintResolveExpressionsEnabled;
+    }
+
     // ---------- Java
 
     public boolean isUrlCodeLensEnabled() {
@@ -126,11 +158,22 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
         Map<String, Object> tools = new HashMap<>();
         microprofile.put("tools", tools);
 
-        // Properties settings
         // Inlay hint
         Map<String, Object> inlayHint = new HashMap<>();
         inlayHint.put("enabled", isInlayHintEnabled());
         tools.put("inlayHint", inlayHint);
+        Map<String, Object> inlayHintConverter = new HashMap<>();
+        inlayHintConverter.put("enabled", isInlayHintConvertersEnabled());
+        inlayHint.put("converters", inlayHintConverter);
+        Map<String, Object> inlayHintDefaultValue = new HashMap<>();
+        inlayHintDefaultValue.put("enabled", isInlayHintDefaultValuesEnabled());
+        inlayHint.put("defaultValues", inlayHintDefaultValue);
+        Map<String, Object> inlayHintType = new HashMap<>();
+        inlayHintType.put("enabled", isInlayHintTypesEnabled());
+        inlayHint.put("types", inlayHintType);
+        Map<String, Object> inlayHintResolveExpression = new HashMap<>();
+        inlayHintResolveExpression.put("enabled", isInlayHintResolveExpressionsEnabled());
+        inlayHint.put("resolveExpressions", inlayHintResolveExpression);
 
         // Java settings
         // URL code lens
@@ -173,6 +216,18 @@ public class UserDefinedMicroProfileSettings implements PersistentStateComponent
 
         @Tag("inlayHintEnabled")
         public boolean myInlayHintEnabled = true;
+
+        @Tag("inlayHintConvertersEnabled")
+        public boolean myInlayHintConvertersEnabled = false;
+
+        @Tag("inlayHintDefaultValuesEnabled")
+        public boolean myInlayHintDefaultValuesEnabled = true;
+
+        @Tag("inlayHintTypesEnabled")
+        public boolean myInlayHintTypesEnabled = false;
+
+        @Tag("inlayHintResolveExpressionsEnabled")
+        public boolean myInlayHintResolveExpressionsEnabled = true;
 
         @Tag("urlCodeLensEnabled")
         public boolean myUrlCodeLensEnabled = true;

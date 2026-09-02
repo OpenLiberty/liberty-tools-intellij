@@ -12,8 +12,10 @@ package io.openliberty.tools.intellij.lsp4mp.lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.application.PluginPathManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
+import io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
 import org.slf4j.Logger;
@@ -33,7 +35,10 @@ public class MicroProfileServer extends OSProcessStreamConnectionProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroProfileServer.class);
 
-    public MicroProfileServer() {
+    private final Project project;
+
+    public MicroProfileServer(Project project) {
+        this.project = project;
         String javaHome = System.getProperty("java.home");
         File lsp4mpServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/org.eclipse.lsp4mp.ls-uber.jar"));
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.MICROPROFILE_SERVER)){
@@ -50,17 +55,7 @@ public class MicroProfileServer extends OSProcessStreamConnectionProvider {
     @Override
     public Object getInitializationOptions(VirtualFile rootUri) {
         Map<String, Object> root = new HashMap<>();
-        Map<String, Object> settings = new HashMap<>();
-        Map<String, Object> microprofile = new HashMap<>();
-        Map<String, Object> tools = new HashMap<>();
-        Map<String, Object> trace = new HashMap<>();
-        trace.put("server", "verbose");
-        tools.put("trace", trace);
-        Map<String, Object> codeLens = new HashMap<>();
-        codeLens.put("urlCodeLensEnabled", "true");
-        tools.put("codeLens", codeLens);
-        microprofile.put("tools", tools);
-        settings.put("microprofile", microprofile);
+        Map<String, Object> settings = UserDefinedMicroProfileSettings.getInstance(project).toSettingsForMicroProfileLS();
         root.put("settings", settings);
         Map<String, Object> extendedClientCapabilities = new HashMap<>();
         Map<String, Object> commands = new HashMap<>();
