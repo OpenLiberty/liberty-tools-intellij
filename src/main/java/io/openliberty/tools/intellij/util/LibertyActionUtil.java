@@ -30,8 +30,8 @@ public class LibertyActionUtil {
      * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
      *
      * @param libertyModule the module whose terminal should receive the commands
-     * @param cmd1          first command (e.g. {@code cd <project-dir>})
-     * @param cmd2          second command (e.g. the Liberty dev mode start command)
+     * @param cmd1 first command (e.g. {@code cd <project-dir>})
+     * @param cmd2 second command (e.g. the Liberty dev mode start command)
      */
     public static void executeCommand(LibertyModule libertyModule, String cmd1, String cmd2) {
         // Run on a pooled thread so the EDT is never blocked.
@@ -67,7 +67,7 @@ public class LibertyActionUtil {
      * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
      *
      * @param libertyModule the module whose terminal should receive the command
-     * @param cmd           the command to send (a newline is appended to trigger execution)
+     * @param cmd the command to send (a newline is appended to trigger execution)
      */
     public static void executeCommand(LibertyModule libertyModule, String cmd) {
         TerminalView view = libertyModule.getTerminalView();
