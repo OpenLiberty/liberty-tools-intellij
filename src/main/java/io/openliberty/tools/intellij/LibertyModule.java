@@ -15,12 +15,16 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
+import com.intellij.terminal.frontend.view.TerminalView;
 import com.intellij.terminal.ui.TerminalWidget;
 
 /**
  * Represents a Liberty server module
  * (one entry in the Liberty tool window tree view)
  */
+// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
+// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
+@SuppressWarnings("UnstableApiUsage")
 public class LibertyModule {
     private Project project;
     private VirtualFile buildFile;
@@ -29,6 +33,7 @@ public class LibertyModule {
     private boolean validContainerVersion;
     private boolean debugMode;
     private TerminalWidget shellWidget;
+    private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
 
@@ -36,6 +41,7 @@ public class LibertyModule {
         this.project = project;
         this.debugMode = false;
         this.shellWidget = null;
+        this.terminalView = null;
         this.customRunConfig = null;
         this.useCustom = false;
     }
@@ -140,5 +146,13 @@ public class LibertyModule {
 
     public void setShellWidget(TerminalWidget shellWidget) {
         this.shellWidget = shellWidget;
+    }
+
+    public TerminalView getTerminalView() {
+        return terminalView;
+    }
+
+    public void setTerminalView(TerminalView terminalView) {
+        this.terminalView = terminalView;
     }
 }

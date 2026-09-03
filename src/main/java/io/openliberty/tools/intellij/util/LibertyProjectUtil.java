@@ -19,6 +19,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.terminal.frontend.view.TerminalView;
+import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTab;
+import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTabsManager;
 import com.intellij.terminal.ui.TerminalWidget;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
@@ -37,6 +40,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
 
+// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
+// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
+@SuppressWarnings("UnstableApiUsage")
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
@@ -144,6 +150,9 @@ public class LibertyProjectUtil {
     /**
      * Get the Terminal widget for the corresponding Liberty module, creating a new one if requested.
      *
+     * <p>A new Reworked Terminal tab is created via {@link TerminalToolWindowTabsManager}.
+     * The resulting {@link TerminalView} is stored on the module alongside the {@link TerminalWidget}.
+     *
      * @param project
      * @param libertyModule
      * @param createWidget  true if a new widget should be created
@@ -154,7 +163,28 @@ public class LibertyProjectUtil {
     public static TerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
                                                    TerminalToolWindowManager terminalToolWindowManager, TerminalWidget widget) {
         if (widget == null && createWidget) {
-            // Create a new terminal tab using the Reworked Terminal API.
+            // Create a new Reworked Terminal tab.
+            TerminalToolWindowTabsManager tabsManager = TerminalToolWindowTabsManager.getInstance(project);
+            TerminalToolWindowTab tab = tabsManager.createTabBuilder()
+                    .workingDirectory(project.getBasePath())
+                    .tabName(libertyModule.getName())
+                    .requestFocus(true)
+                    .createTab();
+            TerminalView terminalView = tab.getView();
+
+            // Retrieve the associated TerminalWidget via the tab's Content.
+            ToolWindow toolWindow = terminalToolWindowManager.getToolWindow();
+            if (toolWindow != null) {
+                Content content = findContentForView(tabsManager, terminalView);
+                TerminalWidget newWidget = content != null
+                        ? TerminalToolWindowManager.findWidgetByContent(content) : null;
+                if (newWidget != null) {
+                    libertyModule.setTerminalView(terminalView);
+                    libertyModule.setShellWidget(newWidget);
+                    return newWidget;
+                }
+            }
+            // Fallback: store the view and widget from a fresh createShellWidget call.
             TerminalWidget newTerminal = terminalToolWindowManager.createShellWidget(
                     project.getBasePath(), libertyModule.getName(), true, true);
             libertyModule.setShellWidget(newTerminal);
@@ -163,27 +193,37 @@ public class LibertyProjectUtil {
         return widget;
     }
 
+    /** Returns the {@link Content} for the tab hosting the given {@link TerminalView}, or {@code null}. */
+    private static Content findContentForView(TerminalToolWindowTabsManager tabsManager, TerminalView targetView) {
+        for (TerminalToolWindowTab tab : tabsManager.getTabs()) {
+            if (tab.getView().equals(targetView)) {
+                return tab.getContent();
+            }
+        }
+        return null;
+    }
+
     public static void setFocusToWidget(Project project, TerminalWidget widget) {
+        if (widget == null) return;
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
+        if (toolWindow == null) return;
 
-        if (toolWindow != null && widget != null) {
-            ContentManager contentManager = toolWindow.getContentManager();
-            Content[] contents = contentManager.getContents();
+        ContentManager contentManager = toolWindow.getContentManager();
+        Content[] contents = contentManager.getContents();
 
-            int index = 0;
-            for (int i = 0; i < contents.length; i++) {
-                // Use TerminalToolWindowManager.findWidgetByContent to map Content -> TerminalWidget.
-                if (widget.equals(TerminalToolWindowManager.findWidgetByContent(contents[i]))) {
-                    index = i;
-                    break;
-                }
+        int index = 0;
+        for (int i = 0; i < contents.length; i++) {
+            // Use TerminalToolWindowManager.findWidgetByContent to map Content -> TerminalWidget.
+            if (widget.equals(TerminalToolWindowManager.findWidgetByContent(contents[i]))) {
+                index = i;
+                break;
             }
-            if (contents.length > 0) {
-                Content terminalContent = contents[index];
-                contentManager.setSelectedContent(terminalContent);
-                terminalContent.getComponent().requestFocus();
-            }
+        }
+        if (contents.length > 0) {
+            Content terminalContent = contents[index];
+            contentManager.setSelectedContent(terminalContent);
+            terminalContent.getComponent().requestFocus();
         }
     }
 
@@ -252,7 +292,7 @@ public class LibertyProjectUtil {
      */
     public static TerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
         TerminalWidget widget = libertyModule.getShellWidget();
-        // check if widget exists in terminal view
+        // check if widget still exists in terminal view
         if (widget != null) {
             for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
                 if (widget.equals(terminalWidget)) {
@@ -260,7 +300,9 @@ public class LibertyProjectUtil {
                 }
             }
         }
+        // Widget is gone – clear both the TerminalWidget and the TerminalView references.
         libertyModule.setShellWidget(null);
+        libertyModule.setTerminalView(null);
         return null;
     }
 
