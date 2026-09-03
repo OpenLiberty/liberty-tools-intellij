@@ -41,8 +41,8 @@ public class LibertyActionUtil {
             // This is required because IntelliJ batches commands and runs them out of order.
             int i = 0;
             try {
-                while (libertyModule.getShellWidget() != null
-                        && libertyModule.getShellWidget().getTtyConnector() == null) {
+                while (libertyModule.getTerminalWidget() != null
+                        && libertyModule.getTerminalWidget().getTtyConnector() == null) {
                     if (i > 100) {
                         LOGGER.error("Timed out waiting to execute command: " + cmd1);
                         return;
@@ -78,9 +78,9 @@ public class LibertyActionUtil {
             return;
         }
         // Classic fallback.
-        if (libertyModule.getShellWidget() != null) {
-            libertyModule.getShellWidget().requestFocus();
-            libertyModule.getShellWidget().sendCommandToExecute(cmd);
+        if (libertyModule.getTerminalWidget() != null) {
+            libertyModule.getTerminalWidget().requestFocus();
+            libertyModule.getTerminalWidget().sendCommandToExecute(cmd);
         }
     }
 }

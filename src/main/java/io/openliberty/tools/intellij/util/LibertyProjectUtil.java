@@ -180,14 +180,14 @@ public class LibertyProjectUtil {
                         ? TerminalToolWindowManager.findWidgetByContent(content) : null;
                 if (newWidget != null) {
                     libertyModule.setTerminalView(terminalView);
-                    libertyModule.setShellWidget(newWidget);
+                    libertyModule.setTerminalWidget(newWidget);
                     return newWidget;
                 }
             }
             // Fallback: store the view and widget from a fresh createShellWidget call.
             TerminalWidget newTerminal = terminalToolWindowManager.createShellWidget(
                     project.getBasePath(), libertyModule.getName(), true, true);
-            libertyModule.setShellWidget(newTerminal);
+            libertyModule.setTerminalWidget(newTerminal);
             return newTerminal;
         }
         return widget;
@@ -291,7 +291,7 @@ public class LibertyProjectUtil {
      * @return TerminalWidget or null if it does not exist
      */
     public static TerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
-        TerminalWidget widget = libertyModule.getShellWidget();
+        TerminalWidget widget = libertyModule.getTerminalWidget();
         // check if widget still exists in terminal view
         if (widget != null) {
             for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
@@ -301,7 +301,7 @@ public class LibertyProjectUtil {
             }
         }
         // Widget is gone – clear both the TerminalWidget and the TerminalView references.
-        libertyModule.setShellWidget(null);
+        libertyModule.setTerminalWidget(null);
         libertyModule.setTerminalView(null);
         return null;
     }

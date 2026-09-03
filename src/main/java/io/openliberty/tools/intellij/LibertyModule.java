@@ -32,7 +32,7 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
     private boolean debugMode;
-    private TerminalWidget shellWidget;
+    private TerminalWidget terminalWidget;
     private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
@@ -40,7 +40,7 @@ public class LibertyModule {
     public LibertyModule(Project project) {
         this.project = project;
         this.debugMode = false;
-        this.shellWidget = null;
+        this.terminalWidget = null;
         this.terminalView = null;
         this.customRunConfig = null;
         this.useCustom = false;
@@ -140,12 +140,12 @@ public class LibertyModule {
         this.debugMode = debugMode;
     }
 
-    public TerminalWidget getShellWidget() {
-        return shellWidget;
+    public TerminalWidget getTerminalWidget() {
+        return terminalWidget;
     }
 
-    public void setShellWidget(TerminalWidget shellWidget) {
-        this.shellWidget = shellWidget;
+    public void setTerminalWidget(TerminalWidget terminalWidget) {
+        this.terminalWidget = terminalWidget;
     }
 
     public TerminalView getTerminalView() {

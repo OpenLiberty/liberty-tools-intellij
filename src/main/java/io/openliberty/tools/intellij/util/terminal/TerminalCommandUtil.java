@@ -46,7 +46,7 @@ public class TerminalCommandUtil {
             return !(sessionState instanceof TerminalViewSessionState.Running);
         }
         // Classic fallback – only reached when no TerminalView is stored.
-        return module.getShellWidget() == null
-                || module.getShellWidget().getTtyConnector() == null;
+        return module.getTerminalWidget() == null
+                || module.getTerminalWidget().getTtyConnector() == null;
     }
 }
