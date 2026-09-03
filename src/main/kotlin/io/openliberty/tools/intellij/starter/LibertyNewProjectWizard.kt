@@ -59,7 +59,7 @@ class LibertyNewProjectWizard : GeneratorNewProjectWizard {
 
     override val id:   String = "OpenLiberty"
     override val name: String = "Open Liberty"
-    override val icon: Icon = LibertyPluginIcons.libertyIcon
+    override val icon: Icon = LibertyPluginIcons.libertyIcon_16
 
     // ── Step chain ────────────────────────────────────────────────────────────
 
