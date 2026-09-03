@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -194,29 +193,48 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * unrestricted bean types of {@code beanClass}: the class itself, any superclass
      * (excluding {@code Object}), or any directly or indirectly implemented interface.
      *
-     * <p>Uses {@link InheritanceUtil#isInheritor} for transitive hierarchy checks, the same
-     * PSI utility used by {@link #doesImplementInterfaces}.</p>
+     * <p>FQ-name matching delegates to {@link DiagnosticsUtils#inheritsFrom(PsiClass, String)}.
+     * Simple-name matching walks {@link PsiClass#getSupers()} recursively to cover both
+     * superclasses and interfaces.</p>
      *
      * @param beanClass the bean class whose unrestricted bean types are checked
      * @param typeName  the simple or fully qualified class name to look for
      * @return {@code true} if {@code typeName} is in the unrestricted bean type set
      */
     protected static boolean isInUnrestrictedBeanTypes(PsiClass beanClass, String typeName) {
-        // Check the bean class itself by FQ name or simple name
+        // Check the bean class itself by FQ name or simple name.
         if (typeName.equals(beanClass.getQualifiedName()) || typeName.equals(beanClass.getName())) {
             return true;
         }
-        // InheritanceUtil.isInheritor walks the full supertype hierarchy (classes + interfaces).
-        if (InheritanceUtil.isInheritor(beanClass, typeName)) {
+        // DiagnosticsUtils.inheritsFrom walks the full supertype hierarchy (classes + interfaces)
+        // by fully qualified name.
+        if (DiagnosticsUtils.inheritsFrom(beanClass, typeName)) {
             return true;
         }
-        // Also match by simple name against all supertypes (for cases where only the simple name is used).
-        for (PsiClass superType : PsiClassImplUtil.getAllSuperClassesRecursively(beanClass)) {
-            String superFQName = superType.getQualifiedName();
-            if (superFQName == null || OBJECT_FQ_NAME.equals(superFQName)) {
-                continue;
+        // Simple-name fallback: walk all supertypes (classes and interfaces) and match by
+        // simple name only. FQ-name matching is already handled by inheritsFrom above.
+        for (PsiClass superType : beanClass.getSupers()) {
+            if (isSimpleNameInHierarchy(superType, typeName)) {
+                return true;
             }
-            if (typeName.equals(superFQName) || typeName.equals(superType.getName())) {
+        }
+        return false;
+    }
+
+    /**
+     * Recursively checks whether {@code typeName} matches the simple name of {@code type}
+     * or any of its supertypes, excluding {@code java.lang.Object}.
+     */
+    private static boolean isSimpleNameInHierarchy(PsiClass type, String typeName) {
+        String fqName = type.getQualifiedName();
+        if (fqName == null || OBJECT_FQ_NAME.equals(fqName)) {
+            return false;
+        }
+        if (typeName.equals(type.getName())) {
+            return true;
+        }
+        for (PsiClass superType : type.getSupers()) {
+            if (isSimpleNameInHierarchy(superType, typeName)) {
                 return true;
             }
         }
