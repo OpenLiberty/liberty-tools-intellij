@@ -41,6 +41,9 @@ import org.eclipse.lsp4j.Range;
  */
 public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollector, IJavaDiagnosticsParticipant {
 
+    /** Fully qualified name of {@code java.lang.Object}. */
+    public static final String OBJECT_FQ_NAME = "java.lang.Object";
+
     /**
      * Constructor
      */
@@ -183,6 +186,135 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if {@code typeName} (simple or fully qualified) is part of the
+     * unrestricted bean types of {@code beanClass}: the class itself, any superclass
+     * (excluding {@code Object}), or any directly or indirectly implemented interface.
+     *
+     * <p>FQ-name matching delegates to {@link DiagnosticsUtils#inheritsFrom(PsiClass, String)}.
+     * Simple-name matching walks {@link PsiClass#getSupers()} recursively to cover both
+     * superclasses and interfaces.</p>
+     *
+     * @param beanClass the bean class whose unrestricted bean types are checked
+     * @param typeName  the simple or fully qualified class name to look for
+     * @return {@code true} if {@code typeName} is in the unrestricted bean type set
+     */
+    protected static boolean isInUnrestrictedBeanTypes(PsiClass beanClass, String typeName) {
+        // Check the bean class itself by FQ name or simple name.
+        if (typeName.equals(beanClass.getQualifiedName()) || typeName.equals(beanClass.getName())) {
+            return true;
+        }
+        // DiagnosticsUtils.inheritsFrom walks the full supertype hierarchy (classes + interfaces)
+        // by fully qualified name.
+        if (DiagnosticsUtils.inheritsFrom(beanClass, typeName)) {
+            return true;
+        }
+        // Simple-name fallback: walk all supertypes (classes and interfaces) and match by
+        // simple name only. FQ-name matching is already handled by inheritsFrom above.
+        for (PsiClass superType : beanClass.getSupers()) {
+            if (isSimpleNameInHierarchy(superType, typeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Recursively checks whether {@code typeName} matches the simple name of {@code type}
+     * or any of its supertypes, excluding {@code java.lang.Object}.
+     */
+    private static boolean isSimpleNameInHierarchy(PsiClass type, String typeName) {
+        String fqName = type.getQualifiedName();
+        if (fqName == null || OBJECT_FQ_NAME.equals(fqName)) {
+            return false;
+        }
+        if (typeName.equals(type.getName())) {
+            return true;
+        }
+        for (PsiClass superType : type.getSupers()) {
+            if (isSimpleNameInHierarchy(superType, typeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts the class names listed in the {@code value} member of a {@code @Typed} annotation.
+     * Handles both single-class ({@code @Typed(Foo.class)}) and array-of-classes
+     * ({@code @Typed({Foo.class, Bar.class})}) forms.
+     *
+     * @param typedAnnotation the {@code @Typed} annotation
+     * @return list of class names (simple or fully qualified) from the annotation value
+     */
+    protected static List<String> getAnnotationClassValues(PsiAnnotation typedAnnotation) {
+        List<String> values = new ArrayList<>();
+        PsiAnnotationMemberValue valueMember = typedAnnotation.findAttributeValue("value");
+        if (valueMember == null) {
+            return values;
+        }
+        if (valueMember instanceof PsiArrayInitializerMemberValue) {
+            for (PsiAnnotationMemberValue element : ((PsiArrayInitializerMemberValue) valueMember).getInitializers()) {
+                String name = extractClassName(element);
+                if (name != null) {
+                    values.add(name);
+                }
+            }
+        } else {
+            String name = extractClassName(valueMember);
+            if (name != null) {
+                values.add(name);
+            }
+        }
+        return values;
+    }
+
+    /**
+     * Resolves a {@link PsiType} to a {@link PsiClass}, erasing generic parameters.
+     * Returns {@code null} if the type cannot be resolved to a concrete class (including
+     * when the type is a type variable / type parameter, which has no resolvable hierarchy).
+     *
+     * @param type the PSI type to resolve
+     * @return the resolved {@link PsiClass}, or {@code null}
+     */
+    protected static PsiClass resolveClassType(PsiType type) {
+        PsiType erased = type instanceof PsiClassType ? ((PsiClassType) type).rawType() : type;
+        if (erased instanceof PsiClassType) {
+            PsiClass resolved = ((PsiClassType) erased).resolve();
+            // Type variables (e.g. T in class Foo<T>) resolve to a PsiTypeParameter.
+            // Their hierarchy is not a real class hierarchy, so skip them entirely.
+            if (resolved instanceof PsiTypeParameter) {
+                return null;
+            }
+            return resolved;
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the class simple name from a {@code Foo.class} annotation value expression.
+     * Returns {@code null} if extraction fails.
+     *
+     * @param element the annotation member value to extract from
+     * @return the class name, or {@code null}
+     */
+    private static String extractClassName(PsiAnnotationMemberValue element) {
+        if (element instanceof PsiClassObjectAccessExpression) {
+            PsiType type = ((PsiClassObjectAccessExpression) element).getOperand().getType();
+            if (type instanceof PsiClassType) {
+                PsiClass resolved = ((PsiClassType) type).resolve();
+                if (resolved != null) {
+                    return resolved.getName();
+                }
+            }
+            // Fallback: use the type's presentation text stripped of generics
+            String text = type.getPresentableText();
+            int idx = text.indexOf('<');
+            return idx >= 0 ? text.substring(0, idx) : text;
+        }
+        return null;
     }
 
     /**
