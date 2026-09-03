@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.*;
-import io.openliberty.tools.intellij.util.terminal.TerminalCommandUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -230,7 +229,7 @@ public class LibertyModules {
             while (it.hasNext()) {
                 LibertyModule libertyModule = (LibertyModule) it.next();
                 // do not remove from list if Liberty dev mode is currently running in the terminal
-                if (project.equals(libertyModule.getProject()) && TerminalCommandUtil.isCommandNotRunning(libertyModule)) {
+                if (project.equals(libertyModule.getProject()) && LibertyActionUtil.isCommandNotRunning(libertyModule)) {
                     it.remove();
                 }
             }

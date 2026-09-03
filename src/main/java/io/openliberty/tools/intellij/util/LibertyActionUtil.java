@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.util;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.terminal.frontend.view.TerminalView;
+import com.intellij.terminal.frontend.view.TerminalViewSessionState;
 import io.openliberty.tools.intellij.LibertyModule;
 
 // TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
@@ -20,6 +21,27 @@ import io.openliberty.tools.intellij.LibertyModule;
 public class LibertyActionUtil {
 
     static Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
+
+    /**
+     * Returns {@code true} if no Liberty dev mode command is currently running in the terminal
+     * tab associated with the given module.
+     *
+     * <p>Uses {@link TerminalView#getSessionState()} when a {@link TerminalView} is available
+     * (IntelliJ 2025.3+). Falls back to {@code TerminalWidget.getTtyConnector() == null} otherwise.
+     *
+     * @param libertyModule the module to check
+     */
+    public static boolean isCommandNotRunning(LibertyModule libertyModule) {
+        TerminalView view = libertyModule.getTerminalView();
+        if (view != null) {
+            // Reworked Terminal path: Running means a process is active; Terminated / NotStarted means it is not.
+            TerminalViewSessionState sessionState = view.getSessionState().getValue();
+            return !(sessionState instanceof TerminalViewSessionState.Running);
+        }
+        // Classic fallback – only reached when no TerminalView is stored.
+        return libertyModule.getTerminalWidget() == null
+                || libertyModule.getTerminalWidget().getTtyConnector() == null;
+    }
 
     /**
      * Send two commands sequentially to the terminal associated with the given module.
