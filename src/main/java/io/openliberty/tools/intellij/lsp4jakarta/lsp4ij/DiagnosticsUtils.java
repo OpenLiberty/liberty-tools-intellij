@@ -13,21 +13,14 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -268,61 +261,4 @@ public class DiagnosticsUtils {
         return null;
     }
 
-    /**
-     * Visits every source {@link PsiClass} in the module that owns {@code context}
-     * and passes each one to {@code visitor}.
-     *
-     * <p>Performs a direct filesystem traversal of the module's non-test source roots
-     * (via {@link ModuleRootManager}) rather than relying on IntelliJ's annotation
-     * index, so it is safe to call during tests before the index is fully built.
-     *
-     * <p>Example — count {@code @NamedEntityGraph} names module-wide:
-     * <pre>{@code
-     * Map<String, Integer> counts = new HashMap<>();
-     * DiagnosticsUtils.scanSourceClasses(anyClassInModule, psiClass -> {
-     *     PsiAnnotation ann = psiClass.getAnnotation(NAMED_ENTITY_GRAPH);
-     *     if (ann != null) {
-     *         String name = AnnotationUtils.getAnnotationMemberValue(ann, "name");
-     *         if (name != null) counts.merge(name, 1, Integer::sum);
-     *     }
-     * });
-     * }</pre>
-     *
-     * @param context any {@link PsiClass} from the module (provides module and project)
-     * @param visitor called once for every source class found
-     */
-    public static void scanSourceClasses(PsiClass context, Consumer<PsiClass> visitor) {
-        Module module = ModuleUtilCore.findModuleForPsiElement(context);
-        if (module == null) {
-            return;
-        }
-        PsiManager psiManager = PsiManager.getInstance(context.getProject());
-        for (VirtualFile sourceRoot : ModuleRootManager.getInstance(module).getSourceRoots(false)) {
-            visitClasses(sourceRoot, psiManager, visitor);
-        }
-    }
-
-    /**
-     * Recursively visits all {@code .java} files under {@code directory} and
-     * passes every {@link PsiClass} found to {@code visitor}.
-     *
-     * @param directory  the virtual file directory to traverse
-     * @param psiManager the PSI manager used to parse virtual files
-     * @param visitor    called for each class found
-     */
-    private static void visitClasses(VirtualFile directory, PsiManager psiManager,
-                                     Consumer<PsiClass> visitor) {
-        for (VirtualFile child : directory.getChildren()) {
-            if (child.isDirectory()) {
-                visitClasses(child, psiManager, visitor);
-            } else if ("java".equals(child.getExtension())) {
-                PsiFile psiFile = psiManager.findFile(child);
-                if (psiFile instanceof PsiJavaFile javaFile) {
-                    for (PsiClass psiClass : javaFile.getClasses()) {
-                        visitor.accept(psiClass);
-                    }
-                }
-            }
-        }
-    }
 }

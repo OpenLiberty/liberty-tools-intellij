@@ -27,7 +27,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +43,10 @@ import java.util.Map;
  *       annotation.</li>
  * </ol>
  *
- * <p>Cross-file analysis is performed via
- * {@link DiagnosticsUtils#scanSourceClasses}, which traverses
- * the module's source roots directly and is always consistent with the
- * current workspace state.
+ * <p>Cross-file analysis is performed via {@link PersistenceUtils#findAnnotatedEntityClasses},
+ * which uses {@link io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.SourceClassScanner} to
+ * traverse the module's source roots directly and is always consistent with the current
+ * workspace state.
  *
  * <p>Specification reference:
  * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0
@@ -75,15 +74,8 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
                 continue;
             }
 
-            // Build a module-wide map of all @Entity types keyed by simple name using
-            // the generic scanner — populated once per entity class in the file.
-            Map<String, PsiClass> entityTypeMap = new HashMap<>();
-            DiagnosticsUtils.scanSourceClasses(type, scannedClass -> {
-                if (isMatchedAnnotation(scannedClass.getAnnotations(), PersistenceConstants.ENTITY)
-                        && scannedClass.getName() != null) {
-                    entityTypeMap.put(scannedClass.getName(), scannedClass);
-                }
-            });
+            // Build a module-wide map of all @Entity types keyed by simple name.
+            Map<String, PsiClass> entityTypeMap = PersistenceUtils.findAnnotatedEntityClasses(type);
 
             for (PsiField field : type.getFields()) {
                 validateRelationshipMember(field, field.getType(), type, unit,
