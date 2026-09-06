@@ -41,7 +41,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         Constants.ProjectType projectType = libertyModule.getProjectType();
-        if (!ensureTerminalForAction(true, project, buildFile, getActionCommandName())) {
+        if (terminalNotReady(true, project, buildFile, getActionCommandName())) {
             return;
         }
 

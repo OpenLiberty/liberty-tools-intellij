@@ -30,7 +30,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        if (!ensureTerminalForAction(false, project, buildFile, getActionCommandName())) {
+        if (terminalNotReady(false, project, buildFile, getActionCommandName())) {
             return;
         }
         String runTestsCommand = " ";

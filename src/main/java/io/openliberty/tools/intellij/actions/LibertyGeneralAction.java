@@ -162,17 +162,21 @@ public abstract class LibertyGeneralAction extends AnAction {
     }
 
     /**
-     * Ensures a terminal tab exists for the given Liberty module, optionally creating one,
-     * and reports an error to the user if the terminal is unavailable or dev mode is not running.
+     * Returns {@code true} if the terminal prerequisite for the given action is NOT met —
+     * i.e. no terminal exists or dev mode is not running. Shows a user-facing error in that case.
+     * Callers should abort with {@code if (terminalNotReady(...)) return;}.
+     *
+     * <p>Also opens a new Reworked Terminal tab when {@code createWidget} is {@code true}
+     * and no tab currently exists.
      *
      * @param createWidget {@code true} to open a new Reworked Terminal tab when none exists
      * @param project      the current project
      * @param buildFile    build file identifying the Liberty module
      * @param actionCmd    human-readable action name used in error messages
-     * @return {@code true} if a usable terminal is available and the action may proceed;
-     *         {@code false} if an error was shown and the action should abort
+     * @return {@code true} if the action should abort (error already shown);
+     *         {@code false} if the terminal is available and the action may proceed
      */
-    protected boolean ensureTerminalForAction(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected boolean terminalNotReady(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
         // Check for an existing Classic terminal tab associated with this module.
@@ -195,9 +199,9 @@ public abstract class LibertyGeneralAction extends AnAction {
             }
             notifyError(msg, project);
             LOGGER.warn(msg);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
