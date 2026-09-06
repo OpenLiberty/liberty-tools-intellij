@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,12 +15,16 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
+import com.intellij.terminal.ui.TerminalWidget;
 
 /**
  * Represents a Liberty server module
  * (one entry in the Liberty tool window tree view)
  */
+// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
+// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
+@SuppressWarnings("UnstableApiUsage")
 public class LibertyModule {
     private Project project;
     private VirtualFile buildFile;
@@ -28,14 +32,16 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
     private boolean debugMode;
-    private ShellTerminalWidget shellWidget;
+    private TerminalWidget terminalWidget;
+    private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
 
     public LibertyModule(Project project) {
         this.project = project;
         this.debugMode = false;
-        this.shellWidget = null;
+        this.terminalWidget = null;
+        this.terminalView = null;
         this.customRunConfig = null;
         this.useCustom = false;
     }
@@ -134,11 +140,19 @@ public class LibertyModule {
         this.debugMode = debugMode;
     }
 
-    public ShellTerminalWidget getShellWidget() {
-        return shellWidget;
+    public TerminalWidget getTerminalWidget() {
+        return terminalWidget;
     }
 
-    public void setShellWidget(ShellTerminalWidget shellWidget) {
-        this.shellWidget = shellWidget;
+    public void setTerminalWidget(TerminalWidget terminalWidget) {
+        this.terminalWidget = terminalWidget;
+    }
+
+    public TerminalView getTerminalView() {
+        return terminalView;
+    }
+
+    public void setTerminalView(TerminalView terminalView) {
+        this.terminalView = terminalView;
     }
 }

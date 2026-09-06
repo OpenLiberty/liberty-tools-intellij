@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,7 +15,6 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
 import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
 import static io.openliberty.tools.intellij.util.Constants.*;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.io.IOException;
 
@@ -42,8 +41,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         Constants.ProjectType projectType = libertyModule.getProjectType();
-        ShellTerminalWidget widget = getTerminalWidgetWithFocus(true, project, buildFile, getActionCommandName());
-        if (widget == null) {
+        if (terminalNotReady(true, project, buildFile, getActionCommandName())) {
             return;
         }
 
@@ -96,7 +94,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         // Do not use the custom parameters in the future unless we get here via the run configuration dialog
         libertyModule.setUseCustom(false);
         String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
-        LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
+        LibertyActionUtil.executeCommand(libertyModule, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
             debugHandler.createAndRunDebugConfiguration(libertyModule, debugPort);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,7 +14,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStopAction extends LibertyGeneralAction {
 
@@ -31,11 +30,10 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        ShellTerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
-        if (widget == null) {
+        if (terminalNotReady(false, project, buildFile, getActionCommandName())) {
             return;
         }
         String stopCmd = "q";
-        LibertyActionUtil.executeCommand(widget, stopCmd);
+        LibertyActionUtil.executeCommand(libertyModule, stopCmd);
     }
 }
