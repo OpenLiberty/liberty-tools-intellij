@@ -105,7 +105,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        # When triggered by a PR label (run-ci), run only on linux to limit job count.
+        # When triggered via workflow_dispatch or workflow_call (e.g. cron), run on all OS's.
+        runtime: ${{ fromJson(github.event_name == 'pull_request' && '["linux"]' || '["linux","mac","windows"]') }}
         test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
@@ -226,14 +228,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        # When triggered by the run-lsp4jakarta-it label, run only on linux to limit job count.
+        runtime: [ linux ]
         test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
-        exclude:
-          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
-          - runtime: mac
-            test-group: LSP4Jakarta-Unit
-          - runtime: windows
-            test-group: LSP4Jakarta-Unit
         include:
           - runtime: linux
             os: ubuntu-latest
