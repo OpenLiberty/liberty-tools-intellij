@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -201,15 +202,18 @@ public class LibertyModules {
 
                 for (String subprojectPath : metadata.getSubprojects()) {
                     try {
-                        File parentDir = new File(parentLocation);
-                        File childDir = new File(parentDir, subprojectPath);
-                        String resolvedPath = childDir.getCanonicalPath();
+                        Path resolved = Paths.get(parentLocation, subprojectPath).normalize().toAbsolutePath();
+                        String resolvedPath = resolved.toString();
+                        // Also try forward-slash version in case VirtualFile.getPath() uses forward slashes
                         LibertyModule childModule = byLocation.get(resolvedPath);
+                        if (childModule == null) {
+                            childModule = byLocation.get(resolvedPath.replace('\\', '/'));
+                        }
                         if (childModule != null && childModule.getParentModule() == null) {
                             childModule.setParentModule(module);
                             module.addChildLibertyModule(childModule);
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         LOGGER.warn("Failed to resolve subproject path: " + subprojectPath
                                 + " for parent: " + parentLocation, e);
                     }
