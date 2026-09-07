@@ -278,11 +278,10 @@ public class LibertyProjectUtil {
      *   <li>{@code .mvn} — Maven wrapper files.</li>
      *   <li>{@code .idea} — IntelliJ project metadata.</li>
      *   <li>{@code .intellijPlatform} — IntelliJ Platform Gradle plugin cache.</li>
-     *   <li>{@code node_modules} — npm dependencies (may contain build files in nested packages).</li>
      * </ul>
      */
     private static final Set<String> EXCLUDED_DIR_NAMES = Set.of(
-            "target", "build", ".gradle", ".mvn", ".idea", ".intellijPlatform", "node_modules"
+            "target", "build", ".gradle", ".mvn", ".idea", ".intellijPlatform"
     );
 
     /**
