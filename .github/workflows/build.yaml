@@ -105,7 +105,7 @@ jobs:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     # Run for all test-groups when triggered via workflow_dispatch, workflow_call, or when 'run-ci' label is applied.
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event.label.name == 'run-ci'
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runtime == 'linux' && 'ubuntu-latest' || matrix.runtime == 'mac' && 'macOS-14' || matrix.runtime == 'windows' && 'windows-latest' }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
@@ -120,12 +120,6 @@ jobs:
           - runtime: windows
             test-group: LSP4Jakarta-Unit
         include:
-          - runtime: linux
-            os: ubuntu-latest
-          - runtime: mac
-            os: macOS-14
-          - runtime: windows
-            os: windows-latest
           - test-group: Maven-MicroProfile
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
           - test-group: Gradle-MicroProfile
@@ -164,7 +158,7 @@ jobs:
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
       - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
+        if: matrix.runtime == 'windows'
         uses: al-cheb/configure-pagefile-action@v1.4
         with:
           minimum-size: 8GB
