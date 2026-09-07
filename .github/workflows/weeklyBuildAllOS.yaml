@@ -22,4 +22,5 @@ jobs:
       refLsp4ij: main
       lsp4ijBranch: main
       refLTITag: ${{ matrix.tag }}
+      allOS: true
     name: Weekly All-OS Build

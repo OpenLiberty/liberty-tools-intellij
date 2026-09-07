@@ -22,6 +22,11 @@ on:
         type: string
         required: true
         default: main
+      allOS:
+        description: 'Run tests on all OS (linux, mac, windows). When false, runs linux only.'
+        type: boolean
+        required: false
+        default: false
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -105,9 +110,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # When triggered by a PR label (run-ci), run only on linux to limit job count.
-        # When triggered via workflow_dispatch or workflow_call (e.g. cron), run on all OS's.
-        runtime: ${{ fromJson(github.event_name == 'pull_request' && '["linux"]' || '["linux","mac","windows"]') }}
+        # Run on all OS's when allOS input is true (e.g. weekly build), otherwise linux only (PR/push).
+        runtime: ${{ fromJson(inputs.allOS && '["linux","mac","windows"]' || '["linux"]') }}
         test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
@@ -223,7 +227,7 @@ jobs:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     # Runs subset of test-groups for lsp4jakarta PRs when 'run-lsp4jakarta-it' label is applied.
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta-it'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
@@ -232,12 +236,6 @@ jobs:
         runtime: [ linux ]
         test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
         include:
-          - runtime: linux
-            os: ubuntu-latest
-          - runtime: mac
-            os: macOS-14
-          - runtime: windows
-            os: windows-latest
           - test-group: Gradle-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
           - test-group: Gradle-MP-Language-Server
@@ -253,13 +251,6 @@ jobs:
       REF_LTI_TAG: ${{ inputs.refLTITag }}
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
-      - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
-        uses: al-cheb/configure-pagefile-action@v1.4
-        with:
-          minimum-size: 8GB
-          maximum-size: 10GB
-          disk-root: "C:"
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v4
         with:
