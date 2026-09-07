@@ -14,6 +14,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +54,7 @@ public class LibertyModuleSelectionDialog extends DialogWrapper {
         this.modules = modules;
         this.message = message;
         setTitle(title);
-        setOKButtonText("Select");
+        setOKButtonText(LocalizedResourceUtil.getMessage("liberty.multimodule.selection.dialog.ok.button"));
         init();
     }
 

@@ -16,7 +16,6 @@ import io.openliberty.tools.intellij.util.*;
 import io.openliberty.tools.intellij.util.LibertyTerminalWatcher;
 import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
 import static io.openliberty.tools.intellij.util.Constants.*;
-import static io.openliberty.tools.intellij.util.Constants.LIBERTY_GRADLE_DEBUG_PARAM;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.io.IOException;
@@ -52,24 +51,18 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String startCmd;
         int debugPort = -1;
         DebugModeHandler debugHandler = new DebugModeHandler();
+        // For child modules the wrapper (mvnw/gradlew) lives in the parent directory.
+        // Pass the parent's build file so that the settings command lookup finds it there.
+        LibertyModule parentModule = libertyModule.getParentModule();
+        VirtualFile settingsBuildFile = (parentModule != null && parentModule.getBuildFile() != null)
+                ? parentModule.getBuildFile()
+                : buildFile;
+
         String buildSettingsCmd;
         try {
             if (projectType.equals(LIBERTY_MAVEN_PROJECT)) {
-                // For child modules the wrapper (mvnw) lives in the parent/execution directory,
-                // not in the child's own directory. Pass the parent's build file so that
-                // getMavenSettingsCmd looks for mvnw in the right place.
-                VirtualFile settingsBuildFile = (libertyModule.getParentModule() != null
-                        && libertyModule.getParentModule().getBuildFile() != null)
-                        ? libertyModule.getParentModule().getBuildFile()
-                        : buildFile;
                 buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, settingsBuildFile);
             } else {
-                // For Gradle child modules, getGradleSettingsCmd needs the root project path.
-                // GradleSettings is keyed by the root project path (parent dir), not the child's.
-                VirtualFile settingsBuildFile = (libertyModule.getParentModule() != null
-                        && libertyModule.getParentModule().getBuildFile() != null)
-                        ? libertyModule.getParentModule().getBuildFile()
-                        : buildFile;
                 buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, settingsBuildFile);
             }
         } catch (LibertyException ex) {

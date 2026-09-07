@@ -58,9 +58,12 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
      * Matches the start of an {@code include} statement, capturing everything
      * after the keyword on the same line.
      * Handles: include 'a','b'  include('a','b')  include ':a'  include(":a")
+     *
+     * <p>The negative lookahead {@code (?![A-Za-z])} ensures that {@code includeBuild},
+     * {@code includeFlat}, and similar keywords are not mistakenly matched.</p>
      */
     private static final Pattern INCLUDE_START_PATTERN =
-            Pattern.compile("^\\s*include\\s*\\(?(.*)");
+            Pattern.compile("^\\s*include(?![A-Za-z])\\s*\\(?(.*)");
 
     /**
      * Matches optional projectDir remappings:
@@ -182,8 +185,11 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
                 ? Paths.get(buildFilePath).getParent()
                 : (settingsFilePath != null ? Paths.get(settingsFilePath).getParent() : null);
 
-        projectName = resolveProjectName(projectDir);
-        subprojects = resolveSubprojects(projectDir);
+        // Read the settings file once and share the lines across all callers that need it.
+        List<String> settingsLines = readSettingsLines(projectDir);
+
+        projectName = resolveProjectName(projectDir, settingsLines);
+        subprojects = resolveSubprojects(settingsLines);
         isAggregator = !subprojects.isEmpty();
         parentProjectName = resolveParentProjectName(projectDir);
 
@@ -199,26 +205,41 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
     // Project name
     // -------------------------------------------------------------------------
 
-    private String resolveProjectName(Path projectDir) {
-        if (projectDir == null) {
-            return null;
+    /**
+     * Reads the settings file in {@code dir} into a list of lines.
+     * Returns an empty list when no settings file exists or cannot be read.
+     * This is the single I/O entry-point for settings file content.
+     */
+    private List<String> readSettingsLines(Path dir) {
+        List<String> lines = new ArrayList<>();
+        if (dir == null) {
+            return lines;
         }
-        Path settingsFile = findSettingsFile(projectDir);
-        if (settingsFile != null) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(settingsFile.toFile()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Matcher m = ROOT_NAME_PATTERN.matcher(line);
-                    if (m.find()) {
-                        return m.group(1);
-                    }
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Could not read settings file for project name: " + settingsFile, e);
+        Path settingsFile = findSettingsFile(dir);
+        if (settingsFile == null) {
+            return lines;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(settingsFile.toFile()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Could not read settings file: " + settingsFile, e);
+        }
+        return lines;
+    }
+
+    private String resolveProjectName(Path projectDir, List<String> settingsLines) {
+        for (String line : settingsLines) {
+            Matcher m = ROOT_NAME_PATTERN.matcher(line);
+            if (m.find()) {
+                return m.group(1);
             }
         }
         // Fall back to directory name.
-        return projectDir.getFileName() != null ? projectDir.getFileName().toString() : null;
+        return (projectDir != null && projectDir.getFileName() != null)
+                ? projectDir.getFileName().toString() : null;
     }
 
     // -------------------------------------------------------------------------
@@ -232,69 +253,54 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
      * Custom {@code projectDir} remappings are applied so the returned names are actual
      * filesystem directory names.
      */
-    private List<String> resolveSubprojects(Path projectDir) {
+    private List<String> resolveSubprojects(List<String> settingsLines) {
         List<String> result = new ArrayList<>();
-        if (projectDir == null) {
-            return result;
-        }
-        Path settingsFile = findSettingsFile(projectDir);
-        if (settingsFile == null) {
-            return result;
-        }
-
         Map<String, String> projectDirRemappings = new HashMap<>();
+        StringBuilder currentStatement = new StringBuilder();
+        boolean collectingInclude = false;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(settingsFile.toFile()))) {
-            StringBuilder currentStatement = new StringBuilder();
-            boolean collectingInclude = false;
-            String line;
+        for (String line : settingsLines) {
+            String trimmed = line.trim();
 
-            while ((line = reader.readLine()) != null) {
-                String trimmed = line.trim();
-
-                if (trimmed.isEmpty() || trimmed.startsWith("//") || trimmed.startsWith("#")) {
-                    if (collectingInclude) {
-                        parseIncludeContent(currentStatement.toString(), result);
-                        currentStatement.setLength(0);
-                        collectingInclude = false;
-                    }
-                    continue;
-                }
-
-                // Capture projectDir remappings
-                Matcher remapMatcher = PROJECT_DIR_REMAP_PATTERN.matcher(trimmed);
-                if (remapMatcher.find()) {
-                    projectDirRemappings.put(remapMatcher.group(1), remapMatcher.group(2));
-                }
-
+            if (trimmed.isEmpty() || trimmed.startsWith("//") || trimmed.startsWith("#")) {
                 if (collectingInclude) {
-                    currentStatement.append(" ").append(trimmed);
-                    if (trimmed.contains(")") || !trimmed.endsWith(",")) {
+                    parseIncludeContent(currentStatement.toString(), result);
+                    currentStatement.setLength(0);
+                    collectingInclude = false;
+                }
+                continue;
+            }
+
+            // Capture projectDir remappings
+            Matcher remapMatcher = PROJECT_DIR_REMAP_PATTERN.matcher(trimmed);
+            if (remapMatcher.find()) {
+                projectDirRemappings.put(remapMatcher.group(1), remapMatcher.group(2));
+            }
+
+            if (collectingInclude) {
+                currentStatement.append(" ").append(trimmed);
+                if (trimmed.contains(")") || !trimmed.endsWith(",")) {
+                    parseIncludeContent(currentStatement.toString(), result);
+                    currentStatement.setLength(0);
+                    collectingInclude = false;
+                }
+            } else {
+                Matcher includeMatcher = INCLUDE_START_PATTERN.matcher(trimmed);
+                if (includeMatcher.matches()) {
+                    String rest = includeMatcher.group(1).trim();
+                    currentStatement.append(rest);
+                    if (rest.contains(")") || (!rest.isEmpty() && !rest.endsWith(","))) {
                         parseIncludeContent(currentStatement.toString(), result);
                         currentStatement.setLength(0);
-                        collectingInclude = false;
-                    }
-                } else {
-                    Matcher includeMatcher = INCLUDE_START_PATTERN.matcher(trimmed);
-                    if (includeMatcher.matches()) {
-                        String rest = includeMatcher.group(1).trim();
-                        currentStatement.append(rest);
-                        if (rest.contains(")") || (!rest.isEmpty() && !rest.endsWith(","))) {
-                            parseIncludeContent(currentStatement.toString(), result);
-                            currentStatement.setLength(0);
-                        } else {
-                            collectingInclude = true;
-                        }
+                    } else {
+                        collectingInclude = true;
                     }
                 }
             }
+        }
 
-            if (collectingInclude && currentStatement.length() > 0) {
-                parseIncludeContent(currentStatement.toString(), result);
-            }
-
-        } catch (IOException e) {
-            LOGGER.warn("Could not read settings file for subprojects: " + settingsFile, e);
+        if (collectingInclude && currentStatement.length() > 0) {
+            parseIncludeContent(currentStatement.toString(), result);
         }
 
         // Apply projectDir remappings
@@ -339,14 +345,16 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
         if (parentDir == null) {
             return null;
         }
-        if (findSettingsFile(parentDir) == null) {
+        // Read parent settings file once; reuse for both subproject check and name lookup.
+        List<String> parentSettingsLines = readSettingsLines(parentDir);
+        if (parentSettingsLines.isEmpty()) {
             return null;
         }
-        List<String> parentSubprojects = resolveSubprojects(parentDir);
+        List<String> parentSubprojects = resolveSubprojects(parentSettingsLines);
         if (!parentSubprojects.contains(currentDirName)) {
             return null;
         }
-        return resolveProjectName(parentDir);
+        return resolveProjectName(parentDir, parentSettingsLines);
     }
 
     // -------------------------------------------------------------------------
@@ -384,11 +392,13 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
         if (parentDir == null) {
             return false;
         }
-        if (findSettingsFile(parentDir) == null) {
+        // Read parent settings file once; reuse for the subproject membership check.
+        List<String> parentSettingsLines = readSettingsLines(parentDir);
+        if (parentSettingsLines.isEmpty()) {
             return false;
         }
         String currentDirName = projectDir.getFileName() != null ? projectDir.getFileName().toString() : "";
-        List<String> parentSubprojects = resolveSubprojects(parentDir);
+        List<String> parentSubprojects = resolveSubprojects(parentSettingsLines);
         if (!parentSubprojects.contains(currentDirName)) {
             return false;
         }

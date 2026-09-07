@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
@@ -60,8 +61,8 @@ public class LibertyMavenUtil {
      * @param module The Liberty module to target.
      * @return Additional Maven CLI arguments, or an empty string for standalone projects.
      */
-    public static String getMavenModuleArgs(io.openliberty.tools.intellij.LibertyModule module) {
-        io.openliberty.tools.intellij.LibertyModule parent = module.getParentModule();
+    public static String getMavenModuleArgs(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
         if (parent == null) {
             return "";
         }
@@ -80,8 +81,8 @@ public class LibertyMavenUtil {
      * @param module The Liberty module to target.
      * @return The absolute path to the directory from which Maven must be invoked.
      */
-    public static String getMavenExecutionDir(io.openliberty.tools.intellij.LibertyModule module) {
-        io.openliberty.tools.intellij.LibertyModule parent = module.getParentModule();
+    public static String getMavenExecutionDir(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
         if (parent != null && parent.getBuildFile() != null && parent.getBuildFile().getParent() != null) {
             return parent.getBuildFile().getParent().getPath();
         }

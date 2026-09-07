@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -40,13 +41,13 @@ public class LibertyGradleUtil {
      * @param taskName The Gradle task name (e.g. {@code libertyDev}).
      * @return The qualified task name to pass on the Gradle command line.
      */
-    public static String getGradleTaskForModule(io.openliberty.tools.intellij.LibertyModule module, String taskName) {
-        io.openliberty.tools.intellij.LibertyModule parent = module.getParentModule();
+    public static String getGradleTaskForModule(LibertyModule module, String taskName) {
+        LibertyModule parent = module.getParentModule();
         if (parent == null) {
             return taskName;
         }
         // Use the directory name as the Gradle subproject identifier
-        com.intellij.openapi.vfs.VirtualFile buildFile = module.getBuildFile();
+        VirtualFile buildFile = module.getBuildFile();
         if (buildFile == null || buildFile.getParent() == null) {
             return taskName;
         }
@@ -65,8 +66,8 @@ public class LibertyGradleUtil {
      * @param module The Liberty module to target.
      * @return The absolute path to the directory from which Gradle must be invoked.
      */
-    public static String getGradleExecutionDir(io.openliberty.tools.intellij.LibertyModule module) {
-        io.openliberty.tools.intellij.LibertyModule parent = module.getParentModule();
+    public static String getGradleExecutionDir(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
         if (parent != null && parent.getBuildFile() != null && parent.getBuildFile().getParent() != null) {
             return parent.getBuildFile().getParent().getPath();
         }
