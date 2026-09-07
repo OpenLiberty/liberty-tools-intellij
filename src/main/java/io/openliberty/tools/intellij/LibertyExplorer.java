@@ -374,7 +374,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
          */
         private static Icon resolveStateIcon(LibertyModuleNode moduleNode) {
             LibertyModule.AppState state = resolveEffectiveState(moduleNode.getLibertyModule());
-            if (state == null)                         return LibertyPluginIcons.incompleteIcon();
+            if (state == null) return LibertyPluginIcons.incompleteIcon();
             return switch (state) {
                 case RUNNING  -> LibertyPluginIcons.runningIcon();
                 case STARTING -> LibertyPluginIcons.startingIcon();
