@@ -13,6 +13,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.jediterm.terminal.model.TerminalModelListener;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -179,11 +180,12 @@ public final class LibertyTerminalWatcher {
     }
 
     /**
-     * Updates the module's state and requests a UI refresh on the EDT,
-     * repainting all visible top-level windows so the icon updates immediately.
+     * Updates the module's state, records it in the state cache so it survives a dashboard
+     * refresh, and requests a UI refresh on the EDT repainting all visible top-level windows.
      */
     private static void setStateAndRefresh(LibertyModule libertyModule, LibertyModule.AppState newState) {
         libertyModule.setAppState(newState);
+        LibertyModules.getInstance().cacheState(libertyModule.getName(), newState);
         ApplicationManager.getApplication().invokeLater(() -> {
             for (java.awt.Window window : java.awt.Window.getWindows()) {
                 if (window != null && window.isShowing()) {

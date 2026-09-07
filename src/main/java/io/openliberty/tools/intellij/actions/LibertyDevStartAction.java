@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.actions;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.util.*;
 import io.openliberty.tools.intellij.util.LibertyTerminalWatcher;
 import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
@@ -142,6 +143,7 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         // icon updates immediately. A background watcher will promote the state to
         // RUNNING once Liberty logs CWWKF0011I.
         libertyModule.setAppState(LibertyModule.AppState.STARTING);
+        LibertyModules.getInstance().cacheState(libertyModule.getName(), LibertyModule.AppState.STARTING);
 
         String cdToProjectCmd = "cd \"" + executionDir + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);

@@ -384,11 +384,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         }
 
         /**
-         * Returns the tooltip text for the state icon
+         * Returns the tooltip text for the state icon.
          * <ul>
          *   <li>Leaf module → simple state name ("Running", "Starting...", etc.)</li>
-         *   <li>Aggregator, all children same state → simple state name</li>
-         *   <li>Aggregator, partial → "{N}/{total} running"</li>
+         *   <li>Aggregator, all stopped → "Stopped"</li>
+         *   <li>Aggregator, any starting → "Starting..."</li>
+         *   <li>Aggregator, any stopping → "Stopping..."</li>
+         *   <li>Aggregator, some/all running → "{N}/{total} running"</li>
          * </ul>
          */
         private static String resolveStateTooltip(LibertyModule module) {
@@ -417,10 +419,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             if (stopping > 0) {
                 return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.stopping");
             }
-            if (running == total) {
-                return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.running");
-            }
-            // Mixed state: some running, some stopped.
+            // Always show "X/Y running" for aggregators — whether all or only some are running.
             return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.modules.running",
                     running, total);
         }

@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij.actions;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyTerminalWatcher;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
@@ -39,6 +40,7 @@ public class LibertyDevStopAction extends LibertyGeneralAction {
 
         // Transition to STOPPING immediately so the tree icon updates before the process exits.
         libertyModule.setAppState(LibertyModule.AppState.STOPPING);
+        LibertyModules.getInstance().cacheState(libertyModule.getName(), LibertyModule.AppState.STOPPING);
 
         String stopCmd = "q";
         LibertyActionUtil.executeCommand(widget, stopCmd);

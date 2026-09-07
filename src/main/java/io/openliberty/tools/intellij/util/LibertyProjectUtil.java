@@ -269,9 +269,26 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Returns {@code true} when the given virtual file lives inside a Maven {@code target/}
-     * or Gradle {@code build/} output directory and should therefore be excluded from
-     * Liberty project detection.
+     * Directory names whose subtrees must never be scanned for Liberty build files.
+     *
+     * <ul>
+     *   <li>{@code target} — Maven build output; contains copied {@code pom.xml} files.</li>
+     *   <li>{@code build} — Gradle build output; contains copied {@code build.gradle} files.</li>
+     *   <li>{@code .gradle} — Gradle wrapper cache and daemon files.</li>
+     *   <li>{@code .mvn} — Maven wrapper files.</li>
+     *   <li>{@code .idea} — IntelliJ project metadata.</li>
+     *   <li>{@code .intellijPlatform} — IntelliJ Platform Gradle plugin cache.</li>
+     *   <li>{@code node_modules} — npm dependencies (may contain build files in nested packages).</li>
+     * </ul>
+     */
+    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of(
+            "target", "build", ".gradle", ".mvn", ".idea", ".intellijPlatform", "node_modules"
+    );
+
+    /**
+     * Returns {@code true} when the given virtual file lives inside a directory that
+     * should be excluded from Liberty project detection (build output, IDE metadata,
+     * dependency caches, etc.).
      *
      * <p>Maven copies {@code pom.xml} files into {@code target/} during packaging (e.g.
      * {@code target/m2e-wtp/ear-resources/META-INF/maven/.../pom.xml}). If those copies
@@ -280,8 +297,7 @@ public class LibertyProjectUtil {
     private static boolean isBuildOutputFile(VirtualFile vFile) {
         VirtualFile parent = vFile.getParent();
         while (parent != null) {
-            String name = parent.getName();
-            if ("target".equals(name) || "build".equals(name)) {
+            if (EXCLUDED_DIR_NAMES.contains(parent.getName())) {
                 return true;
             }
             parent = parent.getParent();

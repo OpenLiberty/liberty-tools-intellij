@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Singleton that tracks all Liberty modules discovered in the open IntelliJ project.
@@ -37,6 +38,15 @@ public class LibertyModules {
 
     // key is build file associated with the Liberty project
     Map<VirtualFile, LibertyModule> libertyModules;
+
+    /**
+     * Cache of the last known app state for each module, keyed by module name.
+     * Entries are removed when the state is STOPPED (the default initial state),
+     * so only non-default states are stored. This allows freshly constructed
+     * LibertyModule instances to be re-stamped with the correct state after a
+     * dashboard refresh that rebuilds all modules from scratch.
+     */
+    private final Map<String, LibertyModule.AppState> stateCache = new ConcurrentHashMap<>();
 
     private LibertyModules() {
         libertyModules = Collections.synchronizedMap(new HashMap<>());
@@ -112,6 +122,10 @@ public class LibertyModules {
 
             // Attach per-module build metadata and link parent → child relationships.
             buildMultiModuleRelationships(project);
+
+            // Re-stamp app states from the cache onto the newly created module instances
+            // so that a dashboard refresh does not lose any in-progress states.
+            populateStatesFromCache(project);
         }
         return this;
     }
@@ -340,6 +354,46 @@ public class LibertyModules {
             return null;
         }
     }
+
+    // -------------------------------------------------------------------------
+    // State cache
+    // -------------------------------------------------------------------------
+
+    /**
+     * Records a module's current app state in the state cache.
+     * When the state is {@code STOPPED} the entry is removed because STOPPED is the
+     * default initial state of every newly constructed {@link LibertyModule}.
+     *
+     * @param moduleName The display name of the module whose state changed.
+     * @param state      The new app state.
+     */
+    public void cacheState(String moduleName, LibertyModule.AppState state) {
+        if (state == LibertyModule.AppState.STOPPED) {
+            stateCache.remove(moduleName);
+        } else {
+            stateCache.put(moduleName, state);
+        }
+    }
+
+    /**
+     * Re-stamps the app state of every module in the given project from the state cache.
+     * Called after the module list is rebuilt so that freshly created {@link LibertyModule}
+     * instances start with the correct state rather than the default STOPPED.
+     *
+     * @param project The project whose modules should be updated.
+     */
+    private void populateStatesFromCache(Project project) {
+        if (stateCache.isEmpty()) return;
+        for (LibertyModule module : new ArrayList<>(libertyModules.values())) {
+            if (!project.equals(module.getProject())) continue;
+            LibertyModule.AppState cached = stateCache.get(module.getName());
+            if (cached != null) {
+                module.setAppState(cached);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
 
     /**
      * Add tracked Liberty project to workspace, update project,
