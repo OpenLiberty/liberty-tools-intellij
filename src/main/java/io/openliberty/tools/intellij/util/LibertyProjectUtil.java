@@ -269,25 +269,25 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Directory names whose subtrees must never be scanned for Liberty build files.
+     * Non-hidden directory names whose subtrees must never be scanned for Liberty build files.
+     * Hidden directories starting with '.' (e.g. {@code .idea}, {@code .gradle}, {@code .mvn},
+     * {@code .intellijPlatform}, {@code .git}) are automatically excluded.
      *
      * <ul>
      *   <li>{@code target} — Maven build output; contains copied {@code pom.xml} files.</li>
      *   <li>{@code build} — Gradle build output; contains copied {@code build.gradle} files.</li>
-     *   <li>{@code .gradle} — Gradle wrapper cache and daemon files.</li>
-     *   <li>{@code .mvn} — Maven wrapper files.</li>
-     *   <li>{@code .idea} — IntelliJ project metadata.</li>
-     *   <li>{@code .intellijPlatform} — IntelliJ Platform Gradle plugin cache.</li>
+     *   <li>{@code node_modules} — npm dependencies (may contain build files in nested packages).</li>
+     *   <li>{@code bin} — general compiler output directory.</li>
      * </ul>
      */
     private static final Set<String> EXCLUDED_DIR_NAMES = Set.of(
-            "target", "build", ".gradle", ".mvn", ".idea", ".intellijPlatform"
+            "target", "build", "node_modules", "bin"
     );
 
     /**
      * Returns {@code true} when the given virtual file lives inside a directory that
      * should be excluded from Liberty project detection (build output, IDE metadata,
-     * dependency caches, etc.).
+     * dependency caches, hidden directories, etc.).
      *
      * <p>Maven copies {@code pom.xml} files into {@code target/} during packaging (e.g.
      * {@code target/m2e-wtp/ear-resources/META-INF/maven/.../pom.xml}). If those copies
@@ -296,7 +296,8 @@ public class LibertyProjectUtil {
     private static boolean isBuildOutputFile(VirtualFile vFile) {
         VirtualFile parent = vFile.getParent();
         while (parent != null) {
-            if (EXCLUDED_DIR_NAMES.contains(parent.getName())) {
+            String dirName = parent.getName();
+            if (dirName.startsWith(".") || EXCLUDED_DIR_NAMES.contains(dirName)) {
                 return true;
             }
             parent = parent.getParent();

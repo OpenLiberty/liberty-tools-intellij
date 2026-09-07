@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Disposer;
 import com.jediterm.terminal.model.TerminalModelListener;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
@@ -46,6 +47,9 @@ public final class LibertyTerminalWatcher {
     /** Maximum time to poll for STOPPED before giving up (ms). */
     private static final int STOPPED_POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
+    /** Maximum time to watch for STARTING before timing out or detecting early failure (ms). */
+    private static final int STARTING_POLL_TIMEOUT_MS = 10 * 60 * 1000;
+
     private static final Logger LOGGER = Logger.getInstance(LibertyTerminalWatcher.class);
 
     private LibertyTerminalWatcher() {}
@@ -67,7 +71,7 @@ public final class LibertyTerminalWatcher {
      * @param libertyModule The module whose {@code AppState} to update.
      */
     public static void watchForRunning(ShellTerminalWidget widget, LibertyModule libertyModule) {
-        AtomicBoolean triggered = new AtomicBoolean(false);
+        AtomicBoolean completed = new AtomicBoolean(false);
 
         // Capture the current screen text as a baseline on the EDT (getText() is a Swing call).
         // The listener will only fire when the screen text changes beyond this baseline.
@@ -84,35 +88,35 @@ public final class LibertyTerminalWatcher {
         // Hold the listener in a one-element array so the lambda can self-reference.
         TerminalModelListener[] holderRef = new TerminalModelListener[1];
         holderRef[0] = () -> {
-            if (triggered.get()) return;
+            if (completed.get()) return;
 
             // getText() must be called on the EDT.
             ApplicationManager.getApplication().invokeLater(() -> {
-                if (triggered.get()) return;
+                if (completed.get()) return;
                 try {
                     String current = safeGetText(widget);
                     if (current == null) return;
 
+                    boolean isStarted = false;
                     // Only count CWWKF0011I that appeared *after* the baseline snapshot.
                     // If the message was already present before we started watching, ignore it.
                     if (current.contains(LIBERTY_STARTED_MSG) && !baseline.contains(LIBERTY_STARTED_MSG)) {
-                        if (triggered.compareAndSet(false, true)) {
-                            widget.getTerminalTextBuffer().removeModelListener(holderRef[0]);
-                            setStateAndRefresh(libertyModule, LibertyModule.AppState.RUNNING);
-                        }
+                        isStarted = true;
                     } else if (current.contains(LIBERTY_STARTED_MSG) && !current.equals(baseline)) {
                         // The message was in the baseline too, but the screen has since scrolled /
                         // refreshed — check that the occurrence is at a different position by
                         // comparing the full texts. If new content was added AND CWWKF0011I
                         // appears somewhere after the old baseline length, treat it as a new start.
                         int baseLen = baseline.length();
-                        String newPart = current.length() > baseLen ? current.substring(baseLen) : "";
+                        String newPart = current.length() > baseLen ? current.substring(baseLen) : current;
                         if (newPart.contains(LIBERTY_STARTED_MSG)) {
-                            if (triggered.compareAndSet(false, true)) {
-                                widget.getTerminalTextBuffer().removeModelListener(holderRef[0]);
-                                setStateAndRefresh(libertyModule, LibertyModule.AppState.RUNNING);
-                            }
+                            isStarted = true;
                         }
+                    }
+
+                    if (isStarted && completed.compareAndSet(false, true)) {
+                        removeListenerSafe(widget, holderRef[0]);
+                        setStateAndRefresh(libertyModule, LibertyModule.AppState.RUNNING);
                     }
                 } catch (Exception ex) {
                     LOGGER.warn("LibertyTerminalWatcher: error reading terminal screen text", ex);
@@ -122,9 +126,46 @@ public final class LibertyTerminalWatcher {
 
         try {
             widget.getTerminalTextBuffer().addModelListener(holderRef[0]);
+
+            // Ensure listener is cleaned up if the terminal widget is closed / disposed
+            Disposer.register(widget, () -> {
+                if (completed.compareAndSet(false, true)) {
+                    removeListenerSafe(widget, holderRef[0]);
+                }
+            });
         } catch (Exception ex) {
             LOGGER.warn("LibertyTerminalWatcher: could not attach model listener to terminal buffer", ex);
         }
+
+        // Watchdog thread to handle cases where start fails, process exits prematurely, or widget closes
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            long deadline = System.currentTimeMillis() + STARTING_POLL_TIMEOUT_MS;
+            while (System.currentTimeMillis() < deadline && !completed.get()) {
+                try {
+                    Thread.sleep(STOPPED_POLL_INTERVAL_MS);
+                    if (completed.get()) return;
+
+                    // If the process stopped running before CWWKF0011I was observed, start failed
+                    if (!widget.hasRunningCommands()) {
+                        if (completed.compareAndSet(false, true)) {
+                            removeListenerSafe(widget, holderRef[0]);
+                            setStateAndRefresh(libertyModule, LibertyModule.AppState.STOPPED);
+                        }
+                        return;
+                    }
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                } catch (Exception ex) {
+                    // Widget disposed or closed
+                    if (completed.compareAndSet(false, true)) {
+                        removeListenerSafe(widget, holderRef[0]);
+                        setStateAndRefresh(libertyModule, LibertyModule.AppState.STOPPED);
+                    }
+                    return;
+                }
+            }
+        });
     }
 
     /**
@@ -168,6 +209,16 @@ public final class LibertyTerminalWatcher {
     // -------------------------------------------------------------------------
     // Internal helpers
     // -------------------------------------------------------------------------
+
+    /** Safely removes the terminal model listener without throwing exceptions. */
+    private static void removeListenerSafe(ShellTerminalWidget widget, TerminalModelListener listener) {
+        if (listener == null) return;
+        try {
+            widget.getTerminalTextBuffer().removeModelListener(listener);
+        } catch (Exception ignored) {
+            // Widget or text buffer might already be disposed
+        }
+    }
 
     /** Calls {@link ShellTerminalWidget#getText()} guarding against exceptions. */
     private static String safeGetText(ShellTerminalWidget widget) {
