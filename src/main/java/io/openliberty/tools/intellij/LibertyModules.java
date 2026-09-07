@@ -121,7 +121,7 @@ public class LibertyModules {
      * aggregator (parent) modules to their Liberty leaf child modules.
      *
      * <ol>
-     *   <li>Parse every module's build file and store {@link LibertyProjectMetadata}.</li>
+     *   <li>Parse every module's build file and store {@link AbstractProjectMetadata}.</li>
      *   <li>For each module that declares a parent, wire the relationship; for each
      *       aggregator that declares children, wire the reverse.</li>
      * </ol>
@@ -143,7 +143,7 @@ public class LibertyModules {
             VirtualFile buildFile = module.getBuildFile();
             if (buildFile == null) continue;
 
-            LibertyProjectMetadata metadata = parseBuildMetadata(module);
+            AbstractProjectMetadata metadata = parseBuildMetadata(module);
             if (metadata != null) {
                 module.setBuildMetadata(metadata);
                 // Index by the authoritative name from the build file.
@@ -163,7 +163,7 @@ public class LibertyModules {
 
         // Link parent <-> child relationships
         for (LibertyModule module : modules) {
-            LibertyProjectMetadata metadata = module.getBuildMetadata();
+            AbstractProjectMetadata metadata = module.getBuildMetadata();
             if (metadata == null) continue;
 
             // Case A: child declares its parent (Maven <parent>/<artifactId>, Gradle parent detection).
@@ -317,7 +317,7 @@ public class LibertyModules {
      * Parses build metadata for a given Liberty module.
      * Returns {@code null} when the build file cannot be parsed.
      */
-    private LibertyProjectMetadata parseBuildMetadata(LibertyModule module) {
+    private AbstractProjectMetadata parseBuildMetadata(LibertyModule module) {
         VirtualFile buildFile = module.getBuildFile();
         if (buildFile == null) return null;
 

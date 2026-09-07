@@ -15,7 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
-import io.openliberty.tools.intellij.util.LibertyProjectMetadata;
+import io.openliberty.tools.intellij.util.AbstractProjectMetadata;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class LibertyModule {
     // -- Multi-module fields --
 
     /** The metadata extracted from this module's build file, populated during workspace scan. */
-    private LibertyProjectMetadata buildMetadata;
+    private AbstractProjectMetadata buildMetadata;
 
     /** The parent aggregator module, or {@code null} for standalone / root modules. */
     private LibertyModule parentModule;
@@ -196,12 +196,12 @@ public class LibertyModule {
     // -------------------------------------------------------------------------
 
     /** Returns the metadata extracted from this module's build file. */
-    public LibertyProjectMetadata getBuildMetadata() {
+    public AbstractProjectMetadata getBuildMetadata() {
         return buildMetadata;
     }
 
     /** Stores the metadata extracted from this module's build file. */
-    public void setBuildMetadata(LibertyProjectMetadata buildMetadata) {
+    public void setBuildMetadata(AbstractProjectMetadata buildMetadata) {
         this.buildMetadata = buildMetadata;
     }
 

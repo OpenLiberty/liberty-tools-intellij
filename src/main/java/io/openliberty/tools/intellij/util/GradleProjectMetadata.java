@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  *   <li>Inter-project {@code project(':name')} dependencies declared in the build file</li>
  * </ul>
  */
-public class GradleProjectMetadata implements LibertyProjectMetadata {
+public class GradleProjectMetadata extends AbstractProjectMetadata {
 
     private static final Logger LOGGER = Logger.getInstance(GradleProjectMetadata.class);
 
@@ -93,16 +93,9 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
             Pattern.compile("^\\s*(allprojects|subprojects)\\s*\\{");
 
     // -------------------------------------------------------------------------
-    // Fields
+    // Gradle-specific field (not in base class)
     // -------------------------------------------------------------------------
 
-    private String projectName;
-    private String parentProjectName;
-    private List<String> subprojects;
-    private List<String> projectDependencies;
-    private boolean hasLibertyPlugin;
-    private boolean isAggregator;
-    private final String buildFilePath;
     private final String settingsFilePath;
 
     // -------------------------------------------------------------------------
@@ -117,54 +110,9 @@ public class GradleProjectMetadata implements LibertyProjectMetadata {
      * @throws Exception if required files cannot be read.
      */
     public GradleProjectMetadata(String buildFilePath, String settingsFilePath) throws Exception {
-        this.buildFilePath = buildFilePath;
+        super(buildFilePath);
         this.settingsFilePath = settingsFilePath;
         extract();
-    }
-
-    // -------------------------------------------------------------------------
-    // LibertyProjectMetadata
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String getProjectName() {
-        return projectName;
-    }
-
-    @Override
-    public String getParentProjectName() {
-        return parentProjectName;
-    }
-
-    @Override
-    public List<String> getSubprojects() {
-        return subprojects != null ? subprojects : new ArrayList<>();
-    }
-
-    @Override
-    public boolean isLibertyPluginConfigured() {
-        return hasLibertyPlugin;
-    }
-
-    @Override
-    public boolean isAggregator() {
-        return isAggregator;
-    }
-
-    @Override
-    public String getBuildFilePath() {
-        return buildFilePath;
-    }
-
-    @Override
-    public boolean isModuleDisabled() {
-        // The Liberty Gradle plugin has no skip mechanism equivalent to Maven's.
-        return false;
-    }
-
-    @Override
-    public List<String> getProjectDependencies() {
-        return projectDependencies != null ? projectDependencies : new ArrayList<>();
     }
 
     /**

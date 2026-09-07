@@ -40,18 +40,9 @@ import java.util.List;
  *   <li>Inter-project dependencies ({@code <dependency>} artifactIds)</li>
  * </ul>
  */
-public class MavenProjectMetadata implements LibertyProjectMetadata {
+public class MavenProjectMetadata extends AbstractProjectMetadata {
 
     private static final Logger LOGGER = Logger.getInstance(MavenProjectMetadata.class);
-
-    private String projectName;
-    private String parentProjectName;
-    private List<String> subprojects;
-    private List<String> projectDependencies;
-    private boolean hasLibertyPlugin;
-    private boolean isModuleDisabled;
-    private boolean isAggregator;
-    private final String buildFilePath;
 
     /**
      * Parses the given {@code pom.xml} and populates all metadata fields.
@@ -60,53 +51,9 @@ public class MavenProjectMetadata implements LibertyProjectMetadata {
      * @throws Exception if the file cannot be read or parsed.
      */
     public MavenProjectMetadata(String pomXmlPath) throws Exception {
-        this.buildFilePath = pomXmlPath;
+        super(pomXmlPath);
         String xmlContent = new String(Files.readAllBytes(Paths.get(pomXmlPath)));
         parsePomXml(xmlContent);
-    }
-
-    // -------------------------------------------------------------------------
-    // LibertyProjectMetadata
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String getProjectName() {
-        return projectName;
-    }
-
-    @Override
-    public String getParentProjectName() {
-        return parentProjectName;
-    }
-
-    @Override
-    public List<String> getSubprojects() {
-        return subprojects != null ? subprojects : new ArrayList<>();
-    }
-
-    @Override
-    public boolean isLibertyPluginConfigured() {
-        return hasLibertyPlugin;
-    }
-
-    @Override
-    public boolean isAggregator() {
-        return isAggregator;
-    }
-
-    @Override
-    public String getBuildFilePath() {
-        return buildFilePath;
-    }
-
-    @Override
-    public boolean isModuleDisabled() {
-        return isModuleDisabled;
-    }
-
-    @Override
-    public List<String> getProjectDependencies() {
-        return projectDependencies != null ? projectDependencies : new ArrayList<>();
     }
 
     // -------------------------------------------------------------------------
