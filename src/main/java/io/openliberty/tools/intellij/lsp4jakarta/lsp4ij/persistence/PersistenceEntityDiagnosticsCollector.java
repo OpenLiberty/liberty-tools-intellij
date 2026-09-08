@@ -55,14 +55,29 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation mappedSuperclassAnnotation = null;
+                PsiAnnotation idClassAnnotation = null;
                 PsiAnnotation inheritanceAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
                     }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.MAPPEDSUPERCLASS)) {
+                        mappedSuperclassAnnotation = annotation;
+                    }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.IDCLASS)) {
+                        idClassAnnotation = annotation;
+                    }
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
                         inheritanceAnnotation = annotation;
                     }
+                }
+
+                boolean hasEntity = EntityAnnotation != null;
+                boolean hasMappedSuperclass = mappedSuperclassAnnotation != null;
+
+                if (idClassAnnotation != null && (hasEntity || hasMappedSuperclass)) {
+                    validateIdClass(idClassAnnotation, unit, diagnostics);
                 }
 
                 if (EntityAnnotation != null) {
@@ -540,5 +555,96 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
 
+    }
+
+    /**
+     * Validates the structural requirements of the class referenced by @IdClass.
+     * Per Jakarta Persistence 3.0 spec section 2.4, the primary key class must be:
+     * <ol>
+     *   <li>public</li>
+     *   <li>have a public no-arg constructor</li>
+     *   <li>implement java.io.Serializable</li>
+     *   <li>define an equals(Object) method</li>
+     *   <li>define a hashCode() method</li>
+     * </ol>
+     *
+     * @param idClassAnnotation the @IdClass annotation
+     * @param unit              the compilation unit being analysed
+     * @param diagnostics       the list to add diagnostics to
+     */
+    private void validateIdClass(PsiAnnotation idClassAnnotation,
+                                 PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiAnnotationMemberValue value = idClassAnnotation.findAttributeValue("value");
+        if (!(value instanceof PsiClassObjectAccessExpression)) {
+            return;
+        }
+        PsiType keyType = ((PsiClassObjectAccessExpression) value).getOperand().getType();
+        if (!(keyType instanceof PsiClassType)) {
+            return;
+        }
+        PsiClass idClass = ((PsiClassType) keyType).resolve();
+        if (idClass == null) {
+            return;
+        }
+
+        // Diagnostics are placed on the @IdClass annotation in the entity file so that
+        // the range is always within the file currently being analysed.
+        if (!idClass.hasModifierProperty(PsiModifier.PUBLIC)) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassMustBePublic"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MUST_BE_PUBLIC, null,
+                    DiagnosticSeverity.Error));
+        }
+
+        boolean hasPublicNoArgConstructor = false;
+        for (PsiMethod method : idClass.getMethods()) {
+            if (method.isConstructor()
+                    && method.getParameterList().getParametersCount() == 0
+                    && method.hasModifierProperty(PsiModifier.PUBLIC)) {
+                hasPublicNoArgConstructor = true;
+                break;
+            }
+        }
+        if (!hasPublicNoArgConstructor) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassMustHavePublicNoArgConstructor"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MUST_HAVE_PUBLIC_NO_ARG_CONSTRUCTOR, null,
+                    DiagnosticSeverity.Error));
+        }
+
+        if (!doesImplementInterfaces(idClass, new String[]{PersistenceConstants.SERIALIZABLE})) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassMustBeSerializable"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MUST_BE_SERIALIZABLE, null,
+                    DiagnosticSeverity.Error));
+        }
+
+        boolean hasEquals = false;
+        boolean hasHashCode = false;
+        for (PsiMethod method : idClass.getMethods()) {
+            if (!idClass.equals(method.getContainingClass())) {
+                continue;
+            }
+            if ("equals".equals(method.getName())
+                    && method.getParameterList().getParametersCount() == 1
+                    && "java.lang.Object".equals(method.getParameterList().getParameters()[0].getType().getCanonicalText())) {
+                hasEquals = true;
+            } else if ("hashCode".equals(method.getName())
+                    && method.getParameterList().getParametersCount() == 0) {
+                hasHashCode = true;
+            }
+        }
+        if (!hasEquals) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassMustDeclareEquals"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_EQUALS, null,
+                    DiagnosticSeverity.Error));
+        }
+        if (!hasHashCode) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassMustDeclareHashCode"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_HASHCODE, null,
+                    DiagnosticSeverity.Error));
+        }
     }
 }
