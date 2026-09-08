@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -242,6 +242,11 @@ public class LibertyProjectUtil {
         }
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
+                // Skip build files inside build output directories (Maven target/, Gradle build/).
+                // These are Maven/Gradle-generated copies and must never be treated as project roots.
+                if (isBuildOutputFile(vFile)) {
+                    continue;
+                }
                 try {
                     BuildFile buildFile;
                     if (buildFileType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
@@ -261,6 +266,43 @@ public class LibertyProjectUtil {
             }
         }
         return collectedBuildFiles;
+    }
+
+    /**
+     * Non-hidden directory names whose subtrees must never be scanned for Liberty build files.
+     * Hidden directories starting with '.' (e.g. {@code .idea}, {@code .gradle}, {@code .mvn},
+     * {@code .intellijPlatform}, {@code .git}) are automatically excluded.
+     *
+     * <ul>
+     *   <li>{@code target} — Maven build output; contains copied {@code pom.xml} files.</li>
+     *   <li>{@code build} — Gradle build output; contains copied {@code build.gradle} files.</li>
+     *   <li>{@code node_modules} — npm dependencies (may contain build files in nested packages).</li>
+     *   <li>{@code bin} — general compiler output directory.</li>
+     * </ul>
+     */
+    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of(
+            "target", "build", "node_modules", "bin"
+    );
+
+    /**
+     * Returns {@code true} when the given virtual file lives inside a directory that
+     * should be excluded from Liberty project detection (build output, IDE metadata,
+     * dependency caches, hidden directories, etc.).
+     *
+     * <p>Maven copies {@code pom.xml} files into {@code target/} during packaging (e.g.
+     * {@code target/m2e-wtp/ear-resources/META-INF/maven/.../pom.xml}). If those copies
+     * are not excluded they appear as phantom top-level Liberty modules.</p>
+     */
+    private static boolean isBuildOutputFile(VirtualFile vFile) {
+        VirtualFile parent = vFile.getParent();
+        while (parent != null) {
+            String dirName = parent.getName();
+            if (dirName.startsWith(".") || EXCLUDED_DIR_NAMES.contains(dirName)) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+        return false;
     }
 
     // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue

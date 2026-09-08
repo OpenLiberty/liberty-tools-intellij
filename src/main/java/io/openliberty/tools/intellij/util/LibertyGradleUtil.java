@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -27,6 +28,51 @@ import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
 public class LibertyGradleUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyGradleUtil.class);
+
+    /**
+     * Qualifies a Gradle task name for the given module so that the task is routed
+     * to the correct subproject when run from the root project directory.
+     *
+     * <p>For child modules, the task is prefixed with {@code :<directoryName>:}, e.g.
+     * {@code libertyDev} becomes {@code :myapp:libertyDev}. For standalone (root)
+     * projects the task name is returned unchanged.</p>
+     *
+     * @param module   The Liberty module to target.
+     * @param taskName The Gradle task name (e.g. {@code libertyDev}).
+     * @return The qualified task name to pass on the Gradle command line.
+     */
+    public static String getGradleTaskForModule(LibertyModule module, String taskName) {
+        LibertyModule parent = module.getParentModule();
+        if (parent == null) {
+            return taskName;
+        }
+        // Use the directory name as the Gradle subproject identifier
+        VirtualFile buildFile = module.getBuildFile();
+        if (buildFile == null || buildFile.getParent() == null) {
+            return taskName;
+        }
+        String subprojectName = buildFile.getParent().getName();
+        return ":" + subprojectName + ":" + taskName;
+    }
+
+    /**
+     * Returns the execution directory for a Gradle command targeting the given module.
+     *
+     * <p>For child modules in a multi-module build the command must run from the
+     * <em>root</em> (parent) project directory so Gradle can locate the settings file
+     * and the full project hierarchy. For standalone projects the module's own
+     * directory is returned.</p>
+     *
+     * @param module The Liberty module to target.
+     * @return The absolute path to the directory from which Gradle must be invoked.
+     */
+    public static String getGradleExecutionDir(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
+        if (parent != null && parent.getBuildFile() != null && parent.getBuildFile().getParent() != null) {
+            return parent.getBuildFile().getParent().getPath();
+        }
+        return module.getBuildFile().getParent().getPath();
+    }
 
     /**
      * Given the gradle build file get the project name

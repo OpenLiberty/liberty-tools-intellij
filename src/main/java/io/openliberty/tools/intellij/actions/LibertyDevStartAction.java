@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,7 +12,9 @@ package io.openliberty.tools.intellij.actions;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
+import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.util.*;
+import io.openliberty.tools.intellij.util.LibertyTerminalWatcher;
 import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
 import static io.openliberty.tools.intellij.util.Constants.*;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
@@ -50,12 +52,19 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         String startCmd;
         int debugPort = -1;
         DebugModeHandler debugHandler = new DebugModeHandler();
+        // For child modules the wrapper (mvnw/gradlew) lives in the parent directory.
+        // Pass the parent's build file so that the settings command lookup finds it there.
+        LibertyModule parentModule = libertyModule.getParentModule();
+        VirtualFile settingsBuildFile = (parentModule != null && parentModule.getBuildFile() != null)
+                ? parentModule.getBuildFile()
+                : buildFile;
+
         String buildSettingsCmd;
         try {
-            if(projectType.equals(LIBERTY_MAVEN_PROJECT)) {
-                buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, buildFile);
+            if (projectType.equals(LIBERTY_MAVEN_PROJECT)) {
+                buildSettingsCmd = LibertyMavenUtil.getMavenSettingsCmd(project, settingsBuildFile);
             } else {
-                buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, buildFile);
+                buildSettingsCmd = LibertyGradleUtil.getGradleSettingsCmd(project, settingsBuildFile);
             }
         } catch (LibertyException ex) {
             // in this case, the settings specified to mvn or gradle are invalid and an error was launched by getMavenSettingsCmd or getGradleSettingsCmd.
@@ -95,8 +104,54 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
 
         // Do not use the custom parameters in the future unless we get here via the run configuration dialog
         libertyModule.setUseCustom(false);
-        String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
+
+        // For child modules in a multi-module build, run from the parent directory and
+        // append the module selector argument. The buildSettingsCmd already contains the
+        // correct wrapper/executable; we only need to adjust the working directory and
+        // append the module selector.
+        String executionDir;
+        if (projectType.equals(LIBERTY_MAVEN_PROJECT)) {
+            executionDir = LibertyMavenUtil.getMavenExecutionDir(libertyModule);
+            String moduleArgs = LibertyMavenUtil.getMavenModuleArgs(libertyModule);
+            if (!moduleArgs.isEmpty()) {
+                startCmd = startCmd + moduleArgs;
+            }
+        } else {
+            executionDir = LibertyGradleUtil.getGradleExecutionDir(libertyModule);
+            // For Gradle child modules the task is already qualified via getGradleTaskForModule
+            // inside the start command constants — re-build the start cmd with a qualified task.
+            if (libertyModule.getParentModule() != null) {
+                String baseTask = runInContainer ? "libertyDevc" : "libertyDev";
+                String qualifiedTask = LibertyGradleUtil.getGradleTaskForModule(libertyModule, baseTask);
+                String qualifiedContainerTask = LibertyGradleUtil.getGradleTaskForModule(libertyModule, "libertyDevc");
+                if (runInContainer) {
+                    startCmd = buildSettingsCmd + " " + qualifiedContainerTask;
+                } else if (libertyModule.isCustom()) {
+                    String containerTask = libertyModule.runInContainer() ? qualifiedContainerTask : qualifiedTask;
+                    startCmd = buildSettingsCmd + " " + containerTask + libertyModule.getCustomStartParams();
+                } else {
+                    startCmd = buildSettingsCmd + " " + qualifiedTask;
+                }
+                // Re-attach debug param if needed
+                if (libertyModule.isDebugMode() && debugPort != -1) {
+                    startCmd += " " + LIBERTY_GRADLE_DEBUG_PARAM + debugPort;
+                }
+            }
+        }
+
+        // Mark the module as STARTING before launching the command so the tree
+        // icon updates immediately. A background watcher will promote the state to
+        // RUNNING once Liberty logs CWWKF0011I.
+        libertyModule.setAppState(LibertyModule.AppState.STARTING);
+        LibertyModules.getInstance().cacheState(libertyModule.getName(), LibertyModule.AppState.STARTING);
+
+        String cdToProjectCmd = "cd \"" + executionDir + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
+
+        // Register the terminal watcher AFTER the command is sent so the widget's
+        // TtyConnector is in the right state. The watcher runs on a pooled thread.
+        LibertyTerminalWatcher.watchForRunning(widget, libertyModule);
+
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
             debugHandler.createAndRunDebugConfiguration(libertyModule, debugPort);

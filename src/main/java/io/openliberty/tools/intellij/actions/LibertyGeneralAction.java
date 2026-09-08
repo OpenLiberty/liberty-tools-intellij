@@ -29,6 +29,7 @@ import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
+import io.openliberty.tools.intellij.actions.LibertyModuleSelectionDialog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -124,7 +125,45 @@ public abstract class LibertyGeneralAction extends AnAction {
             return;
         }
 
+        // Multi-module: when the selected entry is an aggregator (parent of Liberty modules),
+        // resolve the target leaf child module before dispatching the action.
+        if (libertyModule.isParentOfLibertyModule()) {
+            libertyModule = resolveChildModule(libertyModule, project, actionCmd);
+            if (libertyModule == null) {
+                // User cancelled the selection dialog — nothing to do.
+                return;
+            }
+        }
+
         executeLibertyAction(libertyModule);
+    }
+
+    /**
+     * When the given module is an aggregator, resolves the single child Liberty module or
+     * asks the user to pick one via {@link LibertyModuleSelectionDialog}.
+     *
+     * @param parentModule The aggregator Liberty module.
+     * @param project      The current IntelliJ project.
+     * @param actionCmd    The action name (shown in the dialog title).
+     * @return The resolved child module, or {@code null} when the user cancelled.
+     */
+    protected LibertyModule resolveChildModule(LibertyModule parentModule, Project project, String actionCmd) {
+        List<LibertyModule> children = parentModule.getChildLibertyModules();
+        if (children.isEmpty()) {
+            // Aggregator with no known Liberty children — act on the parent itself.
+            return parentModule;
+        }
+        if (children.size() == 1) {
+            return children.get(0);
+        }
+        // Multiple children — ask the user to pick.
+        LibertyModuleSelectionDialog dialog = new LibertyModuleSelectionDialog(
+                project,
+                LocalizedResourceUtil.getMessage("liberty.multimodule.selection.dialog.title"),
+                LocalizedResourceUtil.getMessage("liberty.multimodule.selection.dialog.message", actionCmd),
+                children);
+        dialog.show();
+        return dialog.getSelectedModule();
     }
 
     /* Returns project type(s) applicable to this action. */

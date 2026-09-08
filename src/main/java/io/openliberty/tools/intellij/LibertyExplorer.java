@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -39,8 +39,10 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
@@ -112,31 +114,47 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         HashMap<String, ArrayList<Object>> projectMap = new HashMap<>();
 
         for (LibertyModule libertyModule : libertyModules.getLibertyModules(project)) {
-            LibertyModuleNode node = new LibertyModuleNode(libertyModule);
 
+            // Multi-module: child modules are rendered under their parent node, not at the
+            // top level. Skip them here; they are added when the parent is processed below.
+            if (libertyModule.getParentModule() != null) {
+                continue;
+            }
+
+            LibertyModuleNode node = new LibertyModuleNode(libertyModule);
             top.add(node);
+
             ArrayList<Object> settings = new ArrayList<Object>();
             settings.add(libertyModule.getBuildFile());
             settings.add(libertyModule.getProjectType());
             projectMap.put(libertyModule.getName(), settings);
 
-            // ordered to align with IntelliJ's right-click menu
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, libertyModule));
-            // check if Liberty Maven Plugin is 3.3-M1+ or Liberty Gradle Plugin is 3.1-M1+
-            // if version is not specified in pom, assume latest version as downloaded from maven central
-            boolean validContainerVersion = libertyModule.isValidContainerVersion();
-            if (validContainerVersion) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, libertyModule));
-            }
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
-            if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
-                node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
-                node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
+            if (libertyModule.isParentOfLibertyModule()) {
+                // Aggregator: add each child Liberty module as a child tree node with
+                // its own actions. The parent node itself does not get action children —
+                // actions are only meaningful on the concrete (leaf) modules.
+                for (LibertyModule childModule : libertyModule.getChildLibertyModules()) {
+                    LibertyModuleNode childNode = new LibertyModuleNode(childModule);
+                    node.add(childNode);
+
+                    ArrayList<Object> childSettings = new ArrayList<>();
+                    childSettings.add(childModule.getBuildFile());
+                    childSettings.add(childModule.getProjectType());
+                    projectMap.put(childModule.getName(), childSettings);
+
+                    addActionNodes(childNode, childModule);
+                }
             } else {
-                node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
+                // Standalone (non-aggregator) leaf module — add action nodes directly.
+                addActionNodes(node, libertyModule);
             }
+        }
+
+        // If the only modules in the workspace are child modules (all have parents),
+        // the loop above produced an empty tree. Return null so the "no projects" message
+        // is shown — this happens transiently during re-scan before the parent is linked.
+        if (top.getChildCount() == 0) {
+            return null;
         }
 
         Tree tree = new Tree(top);
@@ -151,13 +169,17 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         tree.addTreeSelectionListener(e -> {
             Object node = e.getPath().getLastPathComponent();
             if (node instanceof LibertyModuleNode libertyNode) {
-                // open build file
+                // open build file (works for both top-level and child module nodes)
                 FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, libertyNode.getFilePath()), true);
                 treeDataProvider.saveData(libertyNode.getFilePath(), libertyNode.getName(), libertyNode.getProjectType());
             } else if (node instanceof LibertyActionNode) {
                 DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
-                LibertyModuleNode parentNode = (LibertyModuleNode) treeNode.getParent();
-                treeDataProvider.saveData(parentNode.getFilePath(), parentNode.getName(), parentNode.getProjectType());
+                // The action node's parent is always the LibertyModuleNode it belongs to,
+                // regardless of whether that module node is top-level or nested under an aggregator.
+                javax.swing.tree.TreeNode parentTreeNode = treeNode.getParent();
+                if (parentTreeNode instanceof LibertyModuleNode parentNode) {
+                    treeDataProvider.saveData(parentNode.getFilePath(), parentNode.getName(), parentNode.getProjectType());
+                }
             }
         });
 
@@ -227,13 +249,39 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
         });
 
-        // set tree icons and colours
+        // set tree icons, colours and state-badge renderer
         LibertyTreeRenderer libertyRenderer = new LibertyTreeRenderer(backgroundColor);
         tree.setCellRenderer(libertyRenderer);
+
+        // Enable per-row tooltips — Swing reads setToolTipText() from the renderer component.
+        javax.swing.ToolTipManager.sharedInstance().registerComponent(tree);
+
         return tree;
     }
 
+    /**
+     * Appends Liberty action child nodes to the given module tree node.
+     * Extracted to avoid duplicating the action-wiring logic for parent and child nodes.
+     */
+    private static void addActionNodes(LibertyModuleNode node, LibertyModule libertyModule) {
+        node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, libertyModule));
+        boolean validContainerVersion = libertyModule.isValidContainerVersion();
+        if (validContainerVersion) {
+            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, libertyModule));
+        }
+        node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
+        node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
+        node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
+        if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+            node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
+            node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
+        } else {
+            node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
+        }
+    }
+
     static class LibertyTreeRenderer extends DefaultTreeCellRenderer {
+
         public LibertyTreeRenderer(Color backgroundColor) {
             setBackgroundNonSelectionColor(backgroundColor);
         }
@@ -246,27 +294,175 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 boolean leaf,
                 int row,
                 boolean hasFocus) {
-            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-            // assign gear icon to action nodes
-            if (leaf) {
-                setIcon(LibertyPluginIcons.IntelliJGear);
+            // LibertyModuleNode: badge icon (root only) + state icon + state tooltip
+            if (value instanceof LibertyModuleNode moduleNode) {
+                LibertyModule lm = moduleNode.getLibertyModule();
+
+                // Resolve state icon based on effective AppState
+                Icon stateIcon = resolveStateIcon(moduleNode);
+
+                // Build the node icon.
+                // Root modules: build-type badge (Maven/Gradle) + state icon side-by-side.
+                // Child (sub-project) modules: state icon only.
+                final Icon compositeIcon;
+                if (lm.getParentModule() == null) {
+                    Icon badgeIcon;
+                    if (moduleNode.isGradleProjectType()) {
+                        badgeIcon = LibertyPluginIcons.gradleIcon;
+                    } else if (moduleNode.isMavenProjectType()) {
+                        badgeIcon = LibertyPluginIcons.mavenIcon;
+                    } else {
+                        badgeIcon = LibertyPluginIcons.libertyIcon;
+                    }
+                    compositeIcon = new CompositeIcon(badgeIcon, stateIcon);
+                } else {
+                    compositeIcon = stateIcon;
+                }
+
+                setOpenIcon(compositeIcon);
+                setClosedIcon(compositeIcon);
+                setLeafIcon(compositeIcon);
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+                setIcon(compositeIcon);
+                // State tooltip
+                setToolTipText(resolveStateTooltip(lm));
                 return this;
             }
 
-            // select icon for node based on project type
-            if (value instanceof LibertyModuleNode) {
-                LibertyModuleNode moduleNode = (LibertyModuleNode) value;
-                if (moduleNode.isGradleProjectType()) {
-                    setIcon(LibertyPluginIcons.gradleIcon);
-                } else if (moduleNode.isMavenProjectType()) {
-                    setIcon(LibertyPluginIcons.mavenIcon);
-                } else {
-                    setIcon(LibertyPluginIcons.libertyIcon);
-                }
+            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+            // LibertyActionNode (leaf): gear icon
+            if (leaf) {
+                setIcon(LibertyPluginIcons.IntelliJGear);
+                setToolTipText(null);
             }
 
             return this;
+        }
+
+        /**
+         * Resolves the effective {@link LibertyModule.AppState} for display.
+         * For aggregators, derives a combined state from all children.
+         * Returns {@code null} when children are in a mixed state (incomplete).
+         */
+        private static LibertyModule.AppState resolveEffectiveState(LibertyModule module) {
+            List<LibertyModule> children = module.getChildLibertyModules();
+            if (children.isEmpty()) {
+                return module.getAppState();
+            }
+            int running = 0, starting = 0, stopping = 0;
+            int total = children.size();
+            for (LibertyModule child : children) {
+                switch (child.getAppState()) {
+                    case RUNNING  -> running++;
+                    case STARTING -> starting++;
+                    case STOPPING -> stopping++;
+                    default       -> {} // STOPPED
+                }
+            }
+            if (running + starting + stopping == 0) return LibertyModule.AppState.STOPPED;
+            if (starting > 0)                       return LibertyModule.AppState.STARTING;
+            if (stopping > 0)                       return LibertyModule.AppState.STOPPING;
+            if (running == total)                   return LibertyModule.AppState.RUNNING;
+            return null; // mixed / incomplete
+        }
+
+        /**
+         * Picks the correct state icon
+         * STARTING → starting.svg, STOPPING → stopping.svg.
+         */
+        private static Icon resolveStateIcon(LibertyModuleNode moduleNode) {
+            LibertyModule.AppState state = resolveEffectiveState(moduleNode.getLibertyModule());
+            if (state == null) return LibertyPluginIcons.incompleteIcon();
+            return switch (state) {
+                case RUNNING  -> LibertyPluginIcons.runningIcon();
+                case STARTING -> LibertyPluginIcons.startingIcon();
+                case STOPPING -> LibertyPluginIcons.stoppingIcon();
+                case STOPPED  -> LibertyPluginIcons.stoppedIcon();
+            };
+        }
+
+        /**
+         * Returns the tooltip text for the state icon.
+         * <ul>
+         *   <li>Leaf module → simple state name ("Running", "Starting...", etc.)</li>
+         *   <li>Aggregator, all stopped → "Stopped"</li>
+         *   <li>Aggregator, any starting → "Starting..."</li>
+         *   <li>Aggregator, any stopping → "Stopping..."</li>
+         *   <li>Aggregator, some/all running → "{N}/{total} running"</li>
+         * </ul>
+         */
+        private static String resolveStateTooltip(LibertyModule module) {
+            List<LibertyModule> children = module.getChildLibertyModules();
+            if (children.isEmpty()) {
+                // Leaf module — simple state label.
+                return simpleStateTooltip(module.getAppState());
+            }
+            // Aggregator — compute counts across children.
+            int running = 0, starting = 0, stopping = 0;
+            int total = children.size();
+            for (LibertyModule child : children) {
+                switch (child.getAppState()) {
+                    case RUNNING  -> running++;
+                    case STARTING -> starting++;
+                    case STOPPING -> stopping++;
+                    default       -> {}
+                }
+            }
+            if (running + starting + stopping == 0) {
+                return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.stopped");
+            }
+            if (starting > 0) {
+                return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.starting");
+            }
+            if (stopping > 0) {
+                return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.stopping");
+            }
+            // Always show "X/Y running" for aggregators — whether all or only some are running.
+            return LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.modules.running",
+                    running, total);
+        }
+
+        private static String simpleStateTooltip(LibertyModule.AppState state) {
+            if (state == null) return null;
+            return switch (state) {
+                case RUNNING  -> LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.running");
+                case STARTING -> LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.starting");
+                case STOPPING -> LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.stopping");
+                case STOPPED  -> LocalizedResourceUtil.getMessage("liberty.dashboard.tooltip.stopped");
+            };
+        }
+
+        /**
+         * A lightweight {@link Icon} that paints two icons side-by-side:
+         * the build-type badge on the left and the state indicator on the right,
+         * separated by a 2 px gap.
+         */
+        private static class CompositeIcon implements Icon {
+            private final Icon left;
+            private final Icon right;
+            private static final int GAP = 2;
+
+            CompositeIcon(Icon left, Icon right) {
+                this.left  = left;
+                this.right = right;
+            }
+
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                int leftH  = left.getIconHeight();
+                int rightH = right.getIconHeight();
+                int totalH = getIconHeight();
+                // Vertically center each icon within the composite height
+                int leftY  = y + (totalH - leftH)  / 2;
+                int rightY = y + (totalH - rightH) / 2;
+                left.paintIcon(c, g, x, leftY);
+                right.paintIcon(c, g, x + left.getIconWidth() + GAP, rightY);
+            }
+
+            @Override public int getIconWidth()  { return left.getIconWidth() + GAP + right.getIconWidth(); }
+            @Override public int getIconHeight() { return Math.max(left.getIconHeight(), right.getIconHeight()); }
         }
     }
 

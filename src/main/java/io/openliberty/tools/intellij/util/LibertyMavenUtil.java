@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
@@ -44,6 +45,49 @@ import static org.jetbrains.idea.maven.project.MavenHomeKt.staticOrBundled;
 
 public class LibertyMavenUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyMavenUtil.class);
+
+    /**
+     * Returns the Maven arguments needed to target a specific child module from the
+     * parent (aggregator) project directory.
+     *
+     * <p>When {@code module} has a parent, this appends {@code -pl :<artifactId> -am}
+     * so that Maven processes only the selected child module and its upstream dependencies.
+     * The command must be executed from the <em>parent</em> project directory; the
+     * appropriate {@code cd} path is the parent build file's parent directory.</p>
+     *
+     * <p>When {@code module} has no parent (standalone project) an empty string is
+     * returned and the command should be executed from the module's own directory.</p>
+     *
+     * @param module The Liberty module to target.
+     * @return Additional Maven CLI arguments, or an empty string for standalone projects.
+     */
+    public static String getMavenModuleArgs(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
+        if (parent == null) {
+            return "";
+        }
+        // -pl :<artifactId> selects the child module by artifact ID
+        // -am (--also-make) builds all upstream modules required by the selection
+        return " -pl :" + module.getName() + " -am";
+    }
+
+    /**
+     * Returns the execution directory for a Maven command targeting the given module.
+     *
+     * <p>For child modules in a multi-module build the command must run from the
+     * <em>parent</em> directory so the full reactor is visible. For standalone
+     * projects the module's own directory is returned.</p>
+     *
+     * @param module The Liberty module to target.
+     * @return The absolute path to the directory from which Maven must be invoked.
+     */
+    public static String getMavenExecutionDir(LibertyModule module) {
+        LibertyModule parent = module.getParentModule();
+        if (parent != null && parent.getBuildFile() != null && parent.getBuildFile().getParent() != null) {
+            return parent.getBuildFile().getParent().getPath();
+        }
+        return module.getBuildFile().getParent().getPath();
+    }
 
     /**
      * Return the project name given a pom.xml build file

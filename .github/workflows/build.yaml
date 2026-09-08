@@ -51,7 +51,7 @@ on:
   # To re-trigger after new commits, remove and re-add the label.
   pull_request:
     types: [ labeled ]
-    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
+    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*', 'multi-module-support-feature-branch' ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:

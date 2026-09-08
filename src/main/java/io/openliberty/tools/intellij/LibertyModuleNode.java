@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -49,5 +49,9 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
 
     public boolean isMavenProjectType() {
         return libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT);
+    }
+
+    public LibertyModule getLibertyModule() {
+        return libertyModule;
     }
 }
