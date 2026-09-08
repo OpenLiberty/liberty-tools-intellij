@@ -164,6 +164,48 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Extracts all property and field names from a type across its
+     * inheritance hierarchy.
+     *
+     * <p>Includes all fields and JavaBean getter/boolean is-getter property names.
+     *
+     * @param psiClass the PsiClass to inspect
+     * @return a set of available property/field names
+     */
+    public static java.util.Set<String> getPropertyNames(PsiClass psiClass) {
+        java.util.Set<String> propertyNames = new java.util.HashSet<>();
+        if (psiClass == null) {
+            return propertyNames;
+        }
+        List<PsiClass> hierarchy = new ArrayList<>();
+        hierarchy.add(psiClass);
+        hierarchy.addAll(collectSuperClasses(psiClass));
+
+        for (PsiClass clazz : hierarchy) {
+            for (PsiField field : clazz.getFields()) {
+                propertyNames.add(field.getName());
+            }
+            for (PsiMethod method : clazz.getMethods()) {
+                if (method.getParameterList().getParametersCount() != 0) {
+                    continue;
+                }
+                PsiType returnType = method.getReturnType();
+                if (returnType == null || returnType.equals(PsiTypes.voidType())) {
+                    continue;
+                }
+                String name = method.getName();
+                if (name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
+                    propertyNames.add(Introspector.decapitalize(name.substring(3)));
+                } else if (name.startsWith("is") && name.length() > 2 && Character.isUpperCase(name.charAt(2))
+                        && (returnType.equals(PsiTypes.booleanType()) || "java.lang.Boolean".equals(returnType.getCanonicalText()))) {
+                    propertyNames.add(Introspector.decapitalize(name.substring(2)));
+                }
+            }
+        }
+        return propertyNames;
+    }
+
+    /**
      * Returns {@code true} if the given {@code @Priority} annotation carries a
      * negative integer value.
      *
