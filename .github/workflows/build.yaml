@@ -110,7 +110,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Run on all OS's when allOS input is true (e.g. weekly build), otherwise linux only (PR/push).
+        # Limit PR/push CI to linux only to reduce the number of GHA jobs consumed by LTI.
+        # The full OS matrix (linux, mac, windows) runs only when allOS=true, which is set
+        # by the weekly scheduled workflow (weeklyBuildAllOS.yaml) or a manual trigger.
         runtime: ${{ fromJson(inputs.allOS && '["linux","mac","windows"]' || '["linux"]') }}
         test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
@@ -226,7 +228,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # When triggered by the run-lsp4jakarta-it label, run only on linux to limit job count.
+        # When triggered by the run-lsp4jakarta-it label, run linux only to reduce the number of GHA jobs consumed by LTI.
         runtime: [ linux ]
         test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
         include:
