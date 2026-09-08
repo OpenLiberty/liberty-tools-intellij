@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.JakartaSearchSettings;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.ProjectWideNameScanner;
@@ -151,27 +152,42 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
     }
 
     // =========================================================================
-    // Validation — flags duplicates in the current file
+    // Validation — flags duplicates and invalid attributes in the current file
     // =========================================================================
 
     /**
      * Checks all {@code @NamedEntityGraph} / {@code @NamedEntityGraphs} annotations
-     * on {@code psiClass} and adds a diagnostic for any whose name appears more than
-     * once in the project-wide count map.
+     * on {@code psiClass} and adds diagnostics for duplicate graph names or nonexistent
+     * attribute nodes.
      */
     private void validateClass(PsiClass psiClass, PsiJavaFile unit,
                                Map<String, Integer> counts, List<Diagnostic> diagnostics) {
+        java.util.Set<String> propertyNames = null;
         for (PsiAnnotation ann : psiClass.getAnnotations()) {
             String qualifiedName = ann.getQualifiedName();
             if (qualifiedName == null) {
                 continue;
             }
             if (PersistenceConstants.NAMED_ENTITY_GRAPH.equals(qualifiedName)) {
-                checkForDuplicate(ann, unit, counts, diagnostics);
+                if (propertyNames == null) {
+                    propertyNames = DiagnosticsUtils.getPropertyNames(psiClass);
+                }
+                validateEntityGraph(ann, psiClass, propertyNames, unit, counts, diagnostics);
             } else if (PersistenceConstants.NAMED_ENTITY_GRAPHS.equals(qualifiedName)) {
-                forEachNestedGraph(ann, inner -> checkForDuplicate(inner, unit, counts, diagnostics));
+                if (propertyNames == null) {
+                    propertyNames = DiagnosticsUtils.getPropertyNames(psiClass);
+                }
+                java.util.Set<String> props = propertyNames;
+                forEachNestedGraph(ann, inner -> validateEntityGraph(inner, psiClass, props, unit, counts, diagnostics));
             }
         }
+    }
+
+    private void validateEntityGraph(PsiAnnotation graphAnn, PsiClass psiClass,
+                                     java.util.Set<String> propertyNames, PsiJavaFile unit,
+                                     Map<String, Integer> counts, List<Diagnostic> diagnostics) {
+        checkForDuplicate(graphAnn, unit, counts, diagnostics);
+        validateAttributeNodes(graphAnn, psiClass, propertyNames, unit, diagnostics);
     }
 
     private void checkForDuplicate(PsiAnnotation ann, PsiJavaFile unit,
@@ -185,6 +201,35 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
                     ann, unit,
                     Messages.getMessage("DuplicateNamedEntityGraphName", graphName),
                     PersistenceConstants.DIAGNOSTIC_CODE_DUPLICATE_NAMED_ENTITY_GRAPH,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    private void validateAttributeNodes(PsiAnnotation graphAnn, PsiClass psiClass,
+                                        java.util.Set<String> propertyNames, PsiJavaFile unit,
+                                        List<Diagnostic> diagnostics) {
+        PsiAnnotationMemberValue value = graphAnn.findAttributeValue("attributeNodes");
+        if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
+            for (PsiAnnotationMemberValue item : arrayValue.getInitializers()) {
+                if (item instanceof PsiAnnotation nodeAnn) {
+                    validateSingleAttributeNode(nodeAnn, psiClass, propertyNames, unit, diagnostics);
+                }
+            }
+        } else if (value instanceof PsiAnnotation nodeAnn) {
+            validateSingleAttributeNode(nodeAnn, psiClass, propertyNames, unit, diagnostics);
+        }
+    }
+
+    private void validateSingleAttributeNode(PsiAnnotation nodeAnn, PsiClass psiClass,
+                                             java.util.Set<String> propertyNames, PsiJavaFile unit,
+                                             List<Diagnostic> diagnostics) {
+        String attrName = AnnotationUtils.getAnnotationMemberValue(nodeAnn, "value");
+        if (attrName != null && !attrName.isEmpty() && !propertyNames.contains(attrName)) {
+            diagnostics.add(createDiagnostic(
+                    nodeAnn, unit,
+                    Messages.getMessage("NamedAttributeNodeAttributeNotFound", attrName, psiClass.getName()),
+                    PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ATTRIBUTE_NODE_ATTRIBUTE_NOT_FOUND,
                     null,
                     DiagnosticSeverity.Error));
         }

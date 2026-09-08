@@ -115,5 +115,7 @@ public class PersistenceConstants {
     /* NamedEntityGraph Codes */
     public static final String NAMED_ENTITY_GRAPH = "jakarta.persistence.NamedEntityGraph";
     public static final String NAMED_ENTITY_GRAPHS = "jakarta.persistence.NamedEntityGraphs";
+    public static final String NAMED_ATTRIBUTE_NODE = "jakarta.persistence.NamedAttributeNode";
     public static final String DIAGNOSTIC_CODE_DUPLICATE_NAMED_ENTITY_GRAPH = "DuplicateNamedEntityGraphName";
+    public static final String DIAGNOSTIC_CODE_NAMED_ATTRIBUTE_NODE_ATTRIBUTE_NOT_FOUND = "NamedAttributeNodeAttributeNotFound";
 }
