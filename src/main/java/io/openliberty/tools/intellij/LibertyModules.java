@@ -284,13 +284,13 @@ public class LibertyModules {
             }
 
             // Check for Gradle aggregator (settings file in parent dir)
-            java.nio.file.Path parentSettingsFile = GradleProjectMetadata.findSettingsFile(
-                    java.nio.file.Paths.get(parentDirPath));
+            Path parentSettingsFile = GradleProjectMetadata.findSettingsFile(
+                    Paths.get(parentDirPath));
             if (parentSettingsFile != null) {
                 try {
                     GradleProjectMetadata parentMeta = new GradleProjectMetadata(
-                            GradleProjectMetadata.findBuildFile(java.nio.file.Paths.get(parentDirPath)) != null
-                                    ? GradleProjectMetadata.findBuildFile(java.nio.file.Paths.get(parentDirPath)).toString()
+                            GradleProjectMetadata.findBuildFile(Paths.get(parentDirPath)) != null
+                                    ? GradleProjectMetadata.findBuildFile(Paths.get(parentDirPath)).toString()
                                     : null,
                             parentSettingsFile.toString());
                     if (parentMeta.isAggregator() && parentMeta.getSubprojects().contains(moduleDirName)) {
@@ -302,8 +302,8 @@ public class LibertyModules {
                             String aggName = parentMeta.getProjectName() != null
                                     ? parentMeta.getProjectName()
                                     : parentDir.getName();
-                            java.nio.file.Path parentBuildFilePath = GradleProjectMetadata
-                                    .findBuildFile(java.nio.file.Paths.get(parentDirPath));
+                            Path parentBuildFilePath = GradleProjectMetadata
+                                    .findBuildFile(Paths.get(parentDirPath));
                             File parentBuildFile = parentBuildFilePath != null
                                     ? parentBuildFilePath.toFile()
                                     : new File(parentDir, "settings.gradle");
@@ -346,8 +346,8 @@ public class LibertyModules {
             } else {
                 // For Gradle, also look for the settings file in the same directory.
                 String settingsFilePath = null;
-                java.nio.file.Path settingsFile = GradleProjectMetadata.findSettingsFile(
-                        java.nio.file.Paths.get(buildFilePath).getParent());
+                Path settingsFile = GradleProjectMetadata.findSettingsFile(
+                        Paths.get(buildFilePath).getParent());
                 if (settingsFile != null) {
                     settingsFilePath = settingsFile.toString();
                 }
