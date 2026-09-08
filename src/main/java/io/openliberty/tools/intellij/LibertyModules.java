@@ -259,7 +259,7 @@ public class LibertyModules {
                             String aggName = parentMeta.getProjectName() != null
                                     ? parentMeta.getProjectName()
                                     : parentDir.getName();
-                            VirtualFile parentVFile = com.intellij.openapi.vfs.VfsUtil
+                            VirtualFile parentVFile = VfsUtil
                                     .findFileByIoFile(parentPom, true);
                             if (parentVFile != null) {
                                 aggregator = new LibertyModule(project, parentVFile, aggName,
@@ -307,7 +307,7 @@ public class LibertyModules {
                             File parentBuildFile = parentBuildFilePath != null
                                     ? parentBuildFilePath.toFile()
                                     : new File(parentDir, "settings.gradle");
-                            VirtualFile parentVFile = com.intellij.openapi.vfs.VfsUtil
+                            VirtualFile parentVFile = VfsUtil
                                     .findFileByIoFile(parentBuildFile, true);
                             if (parentVFile != null) {
                                 aggregator = new LibertyModule(project, parentVFile, aggName,
