@@ -49,6 +49,21 @@ on:
         type: string
         required: false
         default: main
+      runLinux:
+        description: 'Run tests on Linux'
+        type: boolean
+        required: false
+        default: true
+      runMac:
+        description: 'Run tests on macOS'
+        type: boolean
+        required: false
+        default: false
+      runWindows:
+        description: 'Run tests on Windows'
+        type: boolean
+        required: false
+        default: false
   push:
     # Restricted to main to avoid triggering workflows on forks.
     branches: [ main ]
@@ -111,9 +126,18 @@ jobs:
       fail-fast: false
       matrix:
         # Limit PR/push CI to linux only to reduce the number of GHA jobs consumed by LTI.
-        # The full OS matrix (linux, mac, windows) runs only when allOS=true, which is set
-        # by the weekly scheduled workflow (weeklyBuildAllOS.yaml) or a manual trigger.
-        runtime: ${{ fromJson(inputs.allOS && '["linux","mac","windows"]' || '["linux"]') }}
+        # The full OS matrix (linux, mac, windows) runs only when allOS=true (set by the weekly
+        # scheduled workflow) or when specific OS inputs are selected via workflow_dispatch.
+        runtime: >-
+          ${{ fromJson(
+            github.event_name == 'workflow_call' && inputs.allOS && '["linux","mac","windows"]' ||
+            github.event_name == 'workflow_dispatch' && format('[{0}{1}{2}]',
+              inputs.runLinux  && '"linux",'  || '',
+              inputs.runMac    && '"mac",'    || '',
+              inputs.runWindows && '"windows"' || ''
+            ) ||
+            '["linux"]'
+          ) }}
         test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
