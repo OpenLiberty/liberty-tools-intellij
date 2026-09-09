@@ -72,7 +72,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataRequestScoped = new JsonArray();
         dataRequestScoped.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic inheritedRequestScopeOnSingleton = d(8, 13, 42,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @RequestScoped present in the class ScopeInheritanceParentWithRequestScope. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataRequestScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedRequestScopeOnSingleton);
@@ -120,7 +120,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataSessionScoped = new JsonArray();
         dataSessionScoped.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic inheritedSessionScopeOnSingleton = d(8, 13, 42,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @SessionScoped present in the class ScopeInheritanceParentWithSessionScope. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataSessionScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedSessionScopeOnSingleton);
@@ -144,7 +144,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataRequestScoped = new JsonArray();
         dataRequestScoped.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic inheritedRequestScopeTransitiveOnSingleton = d(9, 13, 54,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @RequestScoped present in the class ScopeInheritanceParentWithRequestScope. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataRequestScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedRequestScopeTransitiveOnSingleton);
@@ -180,7 +180,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataRequestScoped = new JsonArray();
         dataRequestScoped.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic inheritedRequestScopeOnStateless = d(8, 13, 42,
-                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
+                "Invalid scope @RequestScoped present in the class ScopeInheritanceParentWithRequestScope. A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope", dataRequestScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedRequestScopeOnStateless);
@@ -216,7 +216,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataApplicationScoped = new JsonArray();
         dataApplicationScoped.add("jakarta.enterprise.context.ApplicationScoped");
         Diagnostic inheritedApplicationScopeOnStateless = d(8, 13, 46,
-                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
+                "Invalid scope @ApplicationScoped present in the class ScopeInheritanceParentWithApplicationScope. A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope", dataApplicationScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedApplicationScopeOnStateless);
@@ -240,7 +240,7 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
         JsonArray dataRequestScoped = new JsonArray();
         dataRequestScoped.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic inheritedRequestScopeTransitiveOnStateless = d(9, 13, 54,
-                "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
+                "Invalid scope @RequestScoped present in the class ScopeInheritanceParentWithRequestScope. A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope", dataRequestScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, inheritedRequestScopeTransitiveOnStateless);

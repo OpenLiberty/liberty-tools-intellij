@@ -362,12 +362,16 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
             if (isManagedBean) {
                 if (isSingleton) {
-                    boolean hasInvalidSingletonScope = managedBeanAnnotations.stream()
-                            .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
-                                    && !DEPENDENT_FQ_NAME.equals(annotation));
-                    if (hasInvalidSingletonScope) {
+                    List<String> invalidSingletonScopes = managedBeanAnnotations.stream()
+                            .filter(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
+                                    && !DEPENDENT_FQ_NAME.equals(annotation))
+                            .collect(Collectors.toList());
+                    if (!invalidSingletonScopes.isEmpty()) {
+                        String invalidScopeNames = toSimpleScopeNames(invalidSingletonScopes);
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("SingletonSessionBeanInvalidScope"),
+                                Messages.getMessage("SingletonSessionBeanInvalidScope",
+                                        invalidScopeNames,
+                                        type.getName()),
                                 DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
                                 new Gson().toJsonTree(managedBeanAnnotations),
                                 DiagnosticSeverity.Error));
@@ -387,8 +391,14 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                      *
                      * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
                      */
+                    List<String> invalidStatelessScopes = managedBeanAnnotations.stream()
+                            .filter(a -> !DEPENDENT_FQ_NAME.equals(a))
+                            .collect(Collectors.toList());
+                    String invalidStatelessScopeNames = toSimpleScopeNames(invalidStatelessScopes);
                     diagnostics.add(createDiagnostic(type, unit,
-                            Messages.getMessage("StatelessSessionBeanInvalidScope"),
+                            Messages.getMessage("StatelessSessionBeanInvalidScope",
+                                    invalidStatelessScopeNames,
+                                    type.getName()),
                             DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
@@ -406,12 +416,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
                     invalidScopes.remove(APPLICATION_SCOPED_FQ_NAME); // valid
                     invalidScopes.remove(DEPENDENT_FQ_NAME);          // valid
-                    String matchedScope = findSupertypeWithAnyAnnotation(type, invalidScopes);
-                    if (matchedScope != null) {
+                    String[] singletonMatch = findSupertypeWithAnyAnnotation(type, invalidScopes);
+                    if (singletonMatch != null) {
+                        String annotationFQName = singletonMatch[0];
+                        String declaringClassName = singletonMatch[1];
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("SingletonSessionBeanInvalidScope"),
+                                Messages.getMessage("SingletonSessionBeanInvalidScope",
+                                        "@" + getSimpleName(annotationFQName), declaringClassName),
                                 DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
-                                new Gson().toJsonTree(List.of(matchedScope)),
+                                new Gson().toJsonTree(List.of(annotationFQName)),
                                 DiagnosticSeverity.Error));
                     }
                 }
@@ -420,12 +433,15 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     // remove it so that the remaining set contains only the invalid scopes.
                     Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
                     invalidScopes.remove(DEPENDENT_FQ_NAME); // valid
-                    String matchedScope = findSupertypeWithAnyAnnotation(type, invalidScopes);
-                    if (matchedScope != null) {
+                    String[] statelessMatch = findSupertypeWithAnyAnnotation(type, invalidScopes);
+                    if (statelessMatch != null) {
+                        String annotationFQName = statelessMatch[0];
+                        String declaringClassName = statelessMatch[1];
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("StatelessSessionBeanInvalidScope"),
+                                Messages.getMessage("StatelessSessionBeanInvalidScope",
+                                        "@" + getSimpleName(annotationFQName), declaringClassName),
                                 DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE,
-                                new Gson().toJsonTree(List.of(matchedScope)),
+                                new Gson().toJsonTree(List.of(annotationFQName)),
                                 DiagnosticSeverity.Error));
                     }
                 }
@@ -529,13 +545,18 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * @return the matched annotation FQ name if any ancestor carries one of the invalid
      *         annotations; {@code null} if no such ancestor exists
      */
-    private String findSupertypeWithAnyAnnotation(PsiClass type, Set<String> invalidAnnotationFQNames) {
+    /**
+     * Walks the superclass chain of {@code type} and returns a two-element array
+     * {@code [annotationFQName, declaringClassName]} for the first ancestor that carries
+     * any of the given annotations, or {@code null} if none is found.
+     */
+    private String[] findSupertypeWithAnyAnnotation(PsiClass type, Set<String> invalidAnnotationFQNames) {
         PsiClass superclass = type.getSuperClass();
         while (superclass != null && !OBJECT_FQ_NAME.equals(superclass.getQualifiedName())) {
             for (PsiAnnotation annotation : superclass.getAnnotations()) {
                 String fqName = annotation.getQualifiedName();
                 if (fqName != null && invalidAnnotationFQNames.contains(fqName)) {
-                    return fqName;
+                    return new String[] { fqName, superclass.getName() };
                 }
             }
             superclass = superclass.getSuperClass();
@@ -658,6 +679,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
         }
         return false;
+    }
+
+    private static String toSimpleScopeNames(Collection<String> fqNames) {
+        return fqNames.stream()
+                .map(a -> "@" + getSimpleName(a))
+                .collect(Collectors.joining(", "));
     }
 
     private String createInvalidInjectLabel(Set<String> invalidAnnotations) {
