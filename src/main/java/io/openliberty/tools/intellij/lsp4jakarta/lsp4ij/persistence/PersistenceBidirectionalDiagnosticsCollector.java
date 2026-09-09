@@ -117,7 +117,7 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
 
             if (hasMappedBy) {
                 // Explicitly the inverse side — @JoinTable is forbidden here.
-                if (AnnotationUtils.getAnnotation(member, PersistenceConstants.JOIN_TABLE) != null) {
+                if (AnnotationUtils.hasAnnotation(member, PersistenceConstants.JOIN_TABLE)) {
                     diagnostics.add(createDiagnostic(member, unit,
                             Messages.getMessage("JoinTableOnInverseSide"),
                             PersistenceConstants.DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE, null,
@@ -167,42 +167,54 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
         String declaringSimpleName = declaringType.getName();
 
         for (PsiField field : targetType.getFields()) {
-            PsiAnnotation annotation = AnnotationUtils.getAnnotation(field, mirroredAnnotationFQ);
-            if (annotation != null) {
-                if (requiresMappedByOnTarget) {
-                    String mappedByValue = AnnotationUtils.getAnnotationMemberValue(
-                            annotation, PersistenceConstants.MAPPED_BY);
-                    if (mappedByValue == null || mappedByValue.isEmpty()) {
-                        continue;
-                    }
-                }
-                if (declaringSimpleName.equals(
-                        DiagnosticsUtils.getElementTypeSimpleName(field.getType()))) {
-                    return true;
-                }
+            if (hasMirroredBackReference(field, field.getType(), mirroredAnnotationFQ,
+                    requiresMappedByOnTarget, declaringSimpleName)) {
+                return true;
             }
         }
 
         for (PsiMethod method : targetType.getMethods()) {
-            PsiAnnotation annotation = AnnotationUtils.getAnnotation(method, mirroredAnnotationFQ);
-            if (annotation != null) {
-                if (requiresMappedByOnTarget) {
-                    String mappedByValue = AnnotationUtils.getAnnotationMemberValue(
-                            annotation, PersistenceConstants.MAPPED_BY);
-                    if (mappedByValue == null || mappedByValue.isEmpty()) {
-                        continue;
-                    }
-                }
-                PsiType returnType = method.getReturnType();
-                if (returnType != null
-                        && declaringSimpleName.equals(
-                                DiagnosticsUtils.getElementTypeSimpleName(returnType))) {
-                    return true;
-                }
+            PsiType returnType = method.getReturnType();
+            if (returnType != null && hasMirroredBackReference(method, returnType,
+                    mirroredAnnotationFQ, requiresMappedByOnTarget, declaringSimpleName)) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Returns {@code true} when {@code member} carries the given {@code mirroredAnnotationFQ}
+     * and its declared type matches {@code declaringSimpleName}.
+     *
+     * <p>When {@code requiresMappedByOnTarget} is {@code true} (self-mirroring annotations
+     * such as {@code @OneToOne} and {@code @ManyToMany}), the annotation must also have a
+     * non-empty {@code mappedBy} attribute to confirm the member is explicitly the inverse side.
+     *
+     * @param member                  the field or method to inspect
+     * @param memberType              the field type or method return type
+     * @param mirroredAnnotationFQ    the fully-qualified annotation to look for
+     * @param requiresMappedByOnTarget whether a non-empty {@code mappedBy} is required
+     * @param declaringSimpleName     the simple name of the declaring entity class
+     * @return {@code true} if this member is a matching back-reference
+     */
+    private boolean hasMirroredBackReference(PsiElement member, PsiType memberType,
+                                             String mirroredAnnotationFQ,
+                                             boolean requiresMappedByOnTarget,
+                                             String declaringSimpleName) {
+        PsiAnnotation annotation = AnnotationUtils.getAnnotation(member, mirroredAnnotationFQ);
+        if (annotation == null) {
+            return false;
+        }
+        if (requiresMappedByOnTarget) {
+            String mappedByValue = AnnotationUtils.getAnnotationMemberValue(
+                    annotation, PersistenceConstants.MAPPED_BY);
+            if (mappedByValue == null || mappedByValue.isEmpty()) {
+                return false;
+            }
+        }
+        return declaringSimpleName.equals(DiagnosticsUtils.getElementTypeSimpleName(memberType));
     }
 
     /**
