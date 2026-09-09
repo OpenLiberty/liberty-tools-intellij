@@ -401,9 +401,11 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // scope from a superclass via @Inherited CDI scope annotations. Check these cases
                 // when isManagedBean is false (no scope declared directly on the class).
                 if (isSingleton) {
+                    // Valid scopes for a @Singleton are @ApplicationScoped and @Dependent;
+                    // remove them so that the remaining set contains only the invalid scopes.
                     Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
-                    invalidScopes.remove(APPLICATION_SCOPED_FQ_NAME);
-                    invalidScopes.remove(DEPENDENT_FQ_NAME);
+                    invalidScopes.remove(APPLICATION_SCOPED_FQ_NAME); // valid
+                    invalidScopes.remove(DEPENDENT_FQ_NAME);          // valid
                     String matchedScope = findSupertypeWithAnyAnnotation(type, invalidScopes);
                     if (matchedScope != null) {
                         diagnostics.add(createDiagnostic(type, unit,
@@ -414,8 +416,10 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     }
                 }
                 if (isStateless) {
+                    // The only valid scope for a @Stateless bean is @Dependent;
+                    // remove it so that the remaining set contains only the invalid scopes.
                     Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
-                    invalidScopes.remove(DEPENDENT_FQ_NAME);
+                    invalidScopes.remove(DEPENDENT_FQ_NAME); // valid
                     String matchedScope = findSupertypeWithAnyAnnotation(type, invalidScopes);
                     if (matchedScope != null) {
                         diagnostics.add(createDiagnostic(type, unit,
