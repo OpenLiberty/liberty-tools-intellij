@@ -356,12 +356,27 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             /**
              * If a managed bean class is of generic type, it must be annotated with @Dependent
              */
+            boolean isStateless = isMatchedAnnotation(typeAnnotations, STATELESS_FQ_NAME);
+            boolean isSingleton = isMatchedAnnotation(typeAnnotations, SINGLETON_FQ_NAME);
+            boolean isClassGeneric = type.getTypeParameters().length != 0;
+
             if (isManagedBean) {
-                validateSingletonSessionBean(unit, diagnostics, type, managedBeanAnnotations);
-                boolean isStateless = !getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
-                                .map(PsiAnnotation::getQualifiedName).toArray(String[]::new),
-                        new String[]{STATELESS_FQ_NAME}).isEmpty();
-                boolean isClassGeneric = type.getTypeParameters().length != 0;
+                if (isSingleton) {
+                    List<String> invalidSingletonScopes = managedBeanAnnotations.stream()
+                            .filter(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
+                                    && !DEPENDENT_FQ_NAME.equals(annotation))
+                            .collect(Collectors.toList());
+                    if (!invalidSingletonScopes.isEmpty()) {
+                        String invalidScopeNames = toSimpleScopeNames(invalidSingletonScopes);
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("SingletonSessionBeanInvalidScope",
+                                        invalidScopeNames,
+                                        type.getName()),
+                                DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
+                                new Gson().toJsonTree(managedBeanAnnotations),
+                                DiagnosticSeverity.Error));
+                    }
+                }
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
@@ -376,14 +391,59 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                      *
                      * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#stateless_session_beans
                      */
+                    List<String> invalidStatelessScopes = managedBeanAnnotations.stream()
+                            .filter(a -> !DEPENDENT_FQ_NAME.equals(a))
+                            .collect(Collectors.toList());
+                    String invalidStatelessScopeNames = toSimpleScopeNames(invalidStatelessScopes);
                     diagnostics.add(createDiagnostic(type, unit,
-                            Messages.getMessage("StatelessSessionBeanWithIllegalScope"),
-                            DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE, null, DiagnosticSeverity.Error));
+                            Messages.getMessage("StatelessSessionBeanInvalidScope",
+                                    invalidStatelessScopeNames,
+                                    type.getName()),
+                            DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE, null, DiagnosticSeverity.Error));
                 } else if (hasMultipleScopes) {
                     diagnostics.add(createDiagnostic(type, unit,
                             Messages.getMessage("ScopeTypeAnnotationsManagedBean"),
                             DIAGNOSTIC_CODE_SCOPEDECL, new Gson().toJsonTree(managedBeanAnnotations),
                             DiagnosticSeverity.Error));
+                }
+            } else {
+                // A @Singleton or @Stateless class with no declared scope may still inherit an invalid
+                // scope from a superclass via @Inherited CDI scope annotations. Check these cases
+                // when isManagedBean is false (no scope declared directly on the class).
+                if (isSingleton) {
+                    // Valid scopes for a @Singleton are @ApplicationScoped and @Dependent;
+                    // remove them so that the remaining set contains only the invalid scopes.
+                    Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
+                    invalidScopes.remove(APPLICATION_SCOPED_FQ_NAME); // valid
+                    invalidScopes.remove(DEPENDENT_FQ_NAME);          // valid
+                    String[] singletonMatch = findSupertypeWithAnyAnnotation(type, invalidScopes);
+                    if (singletonMatch != null) {
+                        String annotationFQName = singletonMatch[0];
+                        String declaringClassName = singletonMatch[1];
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("SingletonSessionBeanInvalidScope",
+                                        "@" + getSimpleName(annotationFQName), declaringClassName),
+                                DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
+                                new Gson().toJsonTree(List.of(annotationFQName)),
+                                DiagnosticSeverity.Error));
+                    }
+                }
+                if (isStateless) {
+                    // The only valid scope for a @Stateless bean is @Dependent;
+                    // remove it so that the remaining set contains only the invalid scopes.
+                    Set<String> invalidScopes = new HashSet<>(SCOPE_FQ_NAMES);
+                    invalidScopes.remove(DEPENDENT_FQ_NAME); // valid
+                    String[] statelessMatch = findSupertypeWithAnyAnnotation(type, invalidScopes);
+                    if (statelessMatch != null) {
+                        String annotationFQName = statelessMatch[0];
+                        String declaringClassName = statelessMatch[1];
+                        diagnostics.add(createDiagnostic(type, unit,
+                                Messages.getMessage("StatelessSessionBeanInvalidScope",
+                                        "@" + getSimpleName(annotationFQName), declaringClassName),
+                                DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE,
+                                new Gson().toJsonTree(List.of(annotationFQName)),
+                                DiagnosticSeverity.Error));
+                    }
                 }
             }
 
@@ -473,31 +533,35 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     }
 
     /**
-     * validateSingletonSessionBean
-     * Singleton session bean scope validation
-     * A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.
-     * If a singleton bean declares any other scope, the container must treat it as a definition error.
+     * Walks the full superclass chain of {@code type} and returns the FQ name of the first
+     * invalid annotation found in any ancestor, or {@code null} if none is found.
      *
-     * @param unit
-     * @param diagnostics
-     * @param type
-     * @param managedBeanAnnotations
+     * <p>The type itself is skipped — only superclasses are examined. Every level of the
+     * hierarchy is checked; the walk stops early when a match is found.</p>
+     *
+     * @param type the root type whose superclass chain is searched
+     * @param invalidAnnotationFQNames the fully-qualified names of the annotations to treat
+     *            as invalid (e.g. the scopes that are not permitted for this bean type)
+     * @return the matched annotation FQ name if any ancestor carries one of the invalid
+     *         annotations; {@code null} if no such ancestor exists
      */
-    private void validateSingletonSessionBean(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, List<String> managedBeanAnnotations) {
-        boolean isSingletonSessionBean = Stream.of(type.getAnnotations())
-                .anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), SINGLETON_FQ_NAME));
-        if (isSingletonSessionBean) {
-            boolean hasInvalidSingletonScope = managedBeanAnnotations.stream()
-                    .anyMatch(annotation -> !APPLICATION_SCOPED_FQ_NAME.equals(annotation)
-                            && !DEPENDENT_FQ_NAME.equals(annotation));
-            if (hasInvalidSingletonScope) {
-                diagnostics.add(createDiagnostic(type, unit,
-                        Messages.getMessage("SingletonSessionBeanInvalidScope"),
-                        DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
-                        new Gson().toJsonTree(managedBeanAnnotations),
-                        DiagnosticSeverity.Error));
+    /**
+     * Walks the superclass chain of {@code type} and returns a two-element array
+     * {@code [annotationFQName, declaringClassName]} for the first ancestor that carries
+     * any of the given annotations, or {@code null} if none is found.
+     */
+    private String[] findSupertypeWithAnyAnnotation(PsiClass type, Set<String> invalidAnnotationFQNames) {
+        PsiClass superclass = type.getSuperClass();
+        while (superclass != null && !OBJECT_FQ_NAME.equals(superclass.getQualifiedName())) {
+            for (PsiAnnotation annotation : superclass.getAnnotations()) {
+                String fqName = annotation.getQualifiedName();
+                if (fqName != null && invalidAnnotationFQNames.contains(fqName)) {
+                    return new String[] { fqName, superclass.getName() };
+                }
             }
+            superclass = superclass.getSuperClass();
         }
+        return null;
     }
 
     private void invalidParamsCheck(PsiJavaFile unit, List<Diagnostic> diagnostics, PsiClass type, String target,
@@ -615,6 +679,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
         }
         return false;
+    }
+
+    private static String toSimpleScopeNames(Collection<String> fqNames) {
+        return fqNames.stream()
+                .map(a -> "@" + getSimpleName(a))
+                .collect(Collectors.joining(", "));
     }
 
     private String createInvalidInjectLabel(Set<String> invalidAnnotations) {

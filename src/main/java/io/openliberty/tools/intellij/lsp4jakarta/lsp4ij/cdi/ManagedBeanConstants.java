@@ -40,7 +40,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_SCOPEDECL = "InvalidScopeDecl";
     public static final String DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE = "InvalidSingletonSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCES_INJECT = "RemoveProducesOrInject";
-    public static final String DIAGNOSTIC_CODE_STATELESS_ILLEGAL_SCOPE = "InvalidStatelessSessionBeanScope";
+    public static final String DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE = "InvalidStatelessSessionBeanScope";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
     public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
     public static final String DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED = "InvalidSpecializedBeanWithNamedAnnotation";
@@ -88,4 +88,6 @@ public class ManagedBeanConstants {
     };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
+
+    public static final String OBJECT_FQ_NAME = "java.lang.Object";
 }
