@@ -235,4 +235,30 @@ public class DiagnosticsUtils {
         }
         return false;
     }
+
+    /**
+     * Extracts the simple class name from a {@link PsiType}.
+     *
+     * <p>For a plain class type ({@code Department}) returns the class's simple name.
+     * For a parameterized collection type ({@code List<Employee>}) returns the simple
+     * name of the first type argument.
+     *
+     * @param psiType the PSI type to inspect
+     * @return the simple class name, or {@code null} if it cannot be extracted
+     */
+    public static String getElementTypeSimpleName(PsiType psiType) {
+        if (psiType instanceof PsiClassType classType) {
+            PsiType[] typeArguments = classType.getParameters();
+            if (typeArguments.length > 0 && typeArguments[0] instanceof PsiClassType argType) {
+                // Collection type: return the simple name of the first type argument.
+                PsiClass argClass = argType.resolve();
+                return argClass != null ? argClass.getName() : null;
+            }
+            // Plain class type.
+            PsiClass resolved = classType.resolve();
+            return resolved != null ? resolved.getName() : null;
+        }
+        return null;
+    }
+
 }
