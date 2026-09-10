@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,7 +26,7 @@ final class LibertyDevToolWindowFactory implements ToolWindowFactory {
         LibertyExplorer explorer = new LibertyExplorer(project);
         ContentManager contentManager = toolWindow.getContentManager();
         Content content = contentManager.getFactory().createContent(explorer,
-                LocalizedResourceUtil.getMessage("liberty.tool.window.display.name"), false);
+                LocalizedResourceUtil.message("liberty.tool.window.display.name"), false);
         contentManager.addContent(content);
 
     }
