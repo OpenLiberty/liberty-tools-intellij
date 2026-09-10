@@ -16,7 +16,7 @@ jobs:
       matrix:
         # 'main' plus any feature branches currently in progress.
         # Add or remove branches here as feature work starts or completes.
-        tag: [ 'main', 'intellij-2026.2-test-automation' , 'lsp4jakarta-0.3.0-integration', 'lsp4jakarta-0.2.7-release-branch', 'lsp4mp-0.17.0-support', 'multi-module-support-feature-branch', 'open-liberty-starter-integration', ]
+        tag: [ 'main' , 'lsp4jakarta-0.3.0-integration', 'lsp4jakarta-0.2.7-release-branch', 'lsp4mp-0.17.0-support', 'multi-module-support-feature-branch', 'open-liberty-starter-integration', ]
     with:
       useLocalPlugin: false
       refLsp4ij: main
