@@ -130,11 +130,11 @@ jobs:
         # scheduled workflow) or when specific OS inputs are selected via workflow_dispatch.
         runtime: >-
           ${{ fromJson(
-            github.event_name == 'workflow_call' && inputs.allOS && '["linux","mac","windows"]' ||
-            github.event_name == 'workflow_dispatch' && format('[{0}{1}{2}]',
-              inputs.runLinux  && '"linux",'  || '',
-              inputs.runMac    && '"mac",'    || '',
-              inputs.runWindows && '"windows"' || ''
+            inputs.allOS && '["linux","mac","windows"]' ||
+            (inputs.runLinux || inputs.runMac || inputs.runWindows) && format('[{0}{1}{2}]',
+              inputs.runLinux && '"linux"' || '',
+              inputs.runMac && (inputs.runLinux && ',"mac"' || '"mac"') || '',
+              inputs.runWindows && ((inputs.runLinux || inputs.runMac) && ',"windows"' || '"windows"') || ''
             ) ||
             '["linux"]'
           ) }}
