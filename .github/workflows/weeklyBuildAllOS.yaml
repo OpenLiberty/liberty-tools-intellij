@@ -3,9 +3,9 @@ name: Weekly Build - All OS
 on:
   workflow_dispatch:
   schedule:
-    # The job runs at 9:30 AM UTC every Monday, which is 3:00 PM IST and 4:30 AM EST.
+    # The job runs at 1:30 AM UTC every Monday, which is 7:00 AM IST and 8:30 PM EST (Sunday).
     # Ref - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
-    - cron: '30 9 * * 1'
+    - cron: '30 1 * * 1'
 
 jobs:
   # Run the LTI Tests on all OS's against lsp4ij main branch for main and feature branches in progress
