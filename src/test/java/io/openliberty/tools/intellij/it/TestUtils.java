@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,17 +17,17 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
 
 /**
  * Test utilities.
  */
 public class TestUtils {
 
-    /**
-     * WLP messages.log path.
-     */
-    public static final Path WLP_MSGLOG_PATH = Paths.get("wlp", "usr", "servers", "defaultServer", "logs", "messages.log");
 
     /**
      * Liberty server stopped message:
@@ -60,7 +60,7 @@ public class TestUtils {
     public static void validateLibertyServerStopped(String testName, String wlpInstallPath, int maxAttempts, boolean failOnNoStop) {
         printTrace(TraceSevLevel.INFO, testName + ":validateLibertyServerStopped: Entry.");
 
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
         int retryIntervalSecs = 5;
         boolean foundStoppedMsg = false;
         Exception error = null;
@@ -183,7 +183,7 @@ public class TestUtils {
             // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
             String msg = testName + ":validateProjectStarted: Timed out while waiting for project with resource URI " + resourceURI + "and port " + port + " to become available.";
             printTrace(TraceSevLevel.ERROR, msg);
-            String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+            String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
             String msgHeader = "Message log for failed test: " + testName + ":validateProjectStarted";
             printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
             Assertions.fail(msg);
@@ -292,7 +292,7 @@ public class TestUtils {
         // If we are here, the expected outcome was not found. Print the Liberty server's messages.log and fail.
         String msg = testName + ":validateProjectStopped: Timed out while waiting for project under URL: " + projUrl + " to stop.";
         printTrace(TraceSevLevel.ERROR, msg);
-        String wlpMsgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString()).toString();
+        String wlpMsgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG)).toString();
         String msgHeader = "Message log for failed test: " + testName + ":validateProjectStopped";
         printLibertyMessagesLogFile(msgHeader, wlpMsgLogPath);
         Assertions.fail(msg);
@@ -534,7 +534,7 @@ public class TestUtils {
      */
     public static boolean isServerStopNeeded(String wlpInstallPath) {
         boolean stopServer = false;
-        Path msgLogPath = Paths.get(wlpInstallPath, WLP_MSGLOG_PATH.toString());
+        Path msgLogPath = Paths.get(wlpInstallPath, buildPathArray(MESSAGES_LOG_PATH, MESSAGES_LOG));
         if (fileExists(msgLogPath)) {
             try {
                 // The file maybe an old log. For now, check for the message indicating
@@ -559,7 +559,7 @@ public class TestUtils {
      */
     public static void checkDebugPort(String absoluteWLPPath, int debugPort) throws IOException {
         // Retrieve the WLP server.env file path
-        Path serverEnvPath = Paths.get(absoluteWLPPath, "wlp", "usr", "servers", "defaultServer", "server.env");
+        Path serverEnvPath = Paths.get(absoluteWLPPath, buildPathArray(DEFAULT_SERVER_PATH, SERVER_ENV));
         // Read all lines from server.env
         List<String> lines = Files.readAllLines(serverEnvPath);
         // Check if Debug Port is set to the specified port
@@ -615,5 +615,30 @@ public class TestUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * Combines the project name with a given array of paths.
+     *
+     * @param projectName the name of the project to prepend
+     * @param pathArray   an array of paths to append to the project name
+     * @return a new array with the project name as the first element followed by the original paths
+     */
+    public static String[] combinePath(String projectName, String[] pathArray) {
+        return Stream.concat(Stream.of(projectName), Arrays.stream(pathArray))
+                .toArray(String[]::new);
+    }
+
+    /**
+     * Builds a new array by appending a file name to an existing path array.
+     *
+     * @param path     An array of path segments.
+     * @param fileName The file name to append.
+     * @return A new array containing all elements of `path` followed by `fileName`.
+     */
+    public static String[] buildPathArray(String[] path, String fileName) {
+        return Stream.concat(Stream.of(path), Stream.of(fileName))
+                .toArray(String[]::new);
     }
 }
