@@ -362,12 +362,13 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the ActionButtonWithText class.
+     * Returns the ComponentFixture object associated with the run configurations combo box button
+     * on the project frame toolbar.
      *
-     * @return The ContainerFixture object associated with the ActionButtonWithText class.
+     * @return The ComponentFixture for the run configurations combo box button.
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
-        return find(ContainerFixture.class, byXpath("//div[@class='ActionButtonWithText']"), Duration.ofSeconds(5));
+        return find(ComponentFixture.class, byXpath("//div[@class='RedesignedRunConfigurationSelectorButton']"), Duration.ofSeconds(5));
     }
 
     /**
