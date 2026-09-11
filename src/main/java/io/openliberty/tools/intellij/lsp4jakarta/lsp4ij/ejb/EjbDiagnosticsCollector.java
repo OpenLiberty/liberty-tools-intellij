@@ -24,6 +24,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.EjbConstants.*;
@@ -165,6 +166,49 @@ public class EjbDiagnosticsCollector extends AbstractDiagnosticsCollector {
                     null,
                     DiagnosticSeverity.Error));
         }
+
+        // Validate @AfterBegin/@BeforeCompletion: no parameters allowed
+        boolean isSessionSyncNoParamMethod = !getMatchedJavaElementNames(type,
+                Stream.of(method.getAnnotations())
+                        .map(PsiAnnotation::getQualifiedName)
+                        .toArray(String[]::new),
+                SESSION_SYNC_NO_PARAM_ANNOTATIONS).isEmpty();
+
+        if (isSessionSyncNoParamMethod && method.getParameterList().getParametersCount() > 0) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSessionSyncMethodNoParamAnnotation", annotationNames),
+                    DIAGNOSTIC_CODE_INVALID_SESSION_SYNC_NO_PARAM,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Validate @AfterCompletion: must have exactly one boolean parameter
+        if (isMatchedAnnotation(method.getAnnotations(), AFTER_COMPLETION_FQ_NAME)
+                && !isValidAfterCompletionParams(method)) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidAfterCompletionMethodParams"),
+                    DIAGNOSTIC_CODE_INVALID_AFTER_COMPLETION_PARAMS,
+                    null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Returns true if the {@code @AfterCompletion} method has exactly one
+     * {@code boolean} or {@code Boolean} parameter, as required by the EJB spec.
+     *
+     * @param method the method to check
+     * @return true if the parameter signature is valid
+     */
+    private boolean isValidAfterCompletionParams(PsiMethod method) {
+        PsiParameter[] params = method.getParameterList().getParameters();
+        if (params.length != 1) {
+            return false;
+        }
+        PsiType paramType = params[0].getType();
+        return paramType.equals(PsiTypes.booleanType())
+                || paramType.equalsToText(BOOLEAN_CLASS_FQ_NAME)
+                || paramType.equalsToText(BOOLEAN_CLASS_NAME);
     }
 
     /**
