@@ -25,6 +25,8 @@
                     factoryClass="io.openliberty.tools.intellij.LibertyDevToolWindowFactory"/>
         <projectService serviceImplementation="io.openliberty.tools.intellij.LibertyProjectSettings"/>
         <configurationType implementation="io.openliberty.tools.intellij.runConfiguration.LibertyRunConfigurationType"/>
+        <!-- Open Liberty Starter -->
+        <moduleBuilder builderClass="io.openliberty.tools.intellij.starter.LibertyNewProjectWizard$LibertyBuilder"/>
     </extensions>
 
     <extensionPoints>
