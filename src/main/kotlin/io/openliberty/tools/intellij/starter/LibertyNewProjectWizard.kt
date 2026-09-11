@@ -57,8 +57,8 @@ import javax.swing.Icon
  */
 class LibertyNewProjectWizard : GeneratorNewProjectWizard {
 
-    override val id:   String = "OpenLiberty"
-    override val name: String = "Open Liberty"
+    override val id:   String = "Liberty"
+    override val name: String = "Liberty"
     override val icon: Icon = LibertyPluginIcons.libertyIcon_16
 
     // ── Step chain ────────────────────────────────────────────────────────────
