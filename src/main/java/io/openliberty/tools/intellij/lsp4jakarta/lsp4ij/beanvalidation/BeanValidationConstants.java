@@ -76,6 +76,15 @@ public class BeanValidationConstants {
     public static final String DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS = "ConflictingConstraints";
     public static final String DIAGNOSTIC_CODE_INVALID_VALID_ANNOTATION = "InvalidValidAnnotationOnNonCascadableType";
 
+    /* TYPE_USE (generic type argument) diagnostic codes */
+    public static final String DIAGNOSTIC_CODE_INVALID_BOOLEAN_TYPE_USE = "InvalidAnnotationOnNonBooleanTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_BIG_DECIMAL_TYPE_USE = "InvalidAnnotationOnNonBigDecimalTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_STRING_TYPE_USE = "InvalidAnnotationOnNonStringTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_DATE_TIME_TYPE_USE = "InvalidAnnotationOnNonDateTimeTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_MIN_MAX_TYPE_USE = "InvalidAnnotationOnNonMinMaxTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_POSITIVE_TYPE_USE = "InvalidAnnotationOnNonPositiveTypeUse";
+    public static final String DIAGNOSTIC_CODE_INVALID_SIZE_TYPE_USE = "InvalidAnnotationOnNonSizeTypeUse";
+
     public final static Set<String> SET_OF_ANNOTATIONS = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(ASSERT_TRUE, ASSERT_FALSE, DIGITS, DECIMAL_MAX,
                     DECIMAL_MIN, EMAIL, PAST_OR_PRESENT, FUTURE_OR_PRESENT, PAST, FUTURE, MIN, MAX, NEGATIVE_OR_ZERO,
@@ -103,4 +112,30 @@ public class BeanValidationConstants {
             "java.lang.Float",
             "java.lang.Double"
     );
+
+    /**
+     * Numeric wrappers accepted by @DecimalMax/@DecimalMin/@Digits (byte/short/int/long wrappers + CharSequence).
+     * Primitives are not included because Java prevents them from appearing as generic type arguments.
+     */
+    public final static String[] NUMERIC_AND_CHAR_WRAPPER_TYPES = {
+            "java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long"
+    };
+
+    /**
+     * Numeric wrappers accepted by @Min/@Max (byte/short/int/long wrappers only).
+     * Primitives are not included because Java prevents them from appearing as generic type arguments.
+     */
+    public final static String[] NUMERIC_WRAPPER_TYPES = {
+            "java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long"
+    };
+
+    /**
+     * Numeric wrappers accepted by @Negative/@NegativeOrZero/@Positive/@PositiveOrZero
+     * (byte/short/int/long/float/double wrappers).
+     * Primitives are not included because Java prevents them from appearing as generic type arguments.
+     */
+    public final static String[] NUMERIC_AND_DECIMAL_WRAPPER_TYPES = {
+            "java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long",
+            "java.lang.Float", "java.lang.Double"
+    };
 }

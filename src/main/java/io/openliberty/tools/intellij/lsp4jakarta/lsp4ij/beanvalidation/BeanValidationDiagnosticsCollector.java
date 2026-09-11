@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.beanvalidation;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
+import com.intellij.psi.util.TypeConversionUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
@@ -54,6 +55,8 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                 allFields = type.getFields();
                 for (PsiField field : allFields) {
                     processAnnotations(field, type, diagnostics);
+                    // Check TYPE_USE annotations on generic type arguments of this field
+                    checkTypeUseAnnotations(field, type, diagnostics);
                 }
                 allMethods = type.getMethods();
                 for (PsiMethod method : allMethods) {
@@ -282,6 +285,137 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
                     source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
         }
+    }
+
+    /**
+     * Checks TYPE_USE annotations on the generic type arguments of a field's declared type.
+     * In PSI, annotations placed on type arguments (e.g. {@code List<@Email String>}) are
+     * accessible via {@link PsiType#getAnnotations()} on each element of
+     * {@link PsiClassType#getParameters()}.
+     *
+     * @param field       the PSI field being inspected
+     * @param declaringType the declaring class (used for name resolution)
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void checkTypeUseAnnotations(PsiField field, PsiClass declaringType, List<Diagnostic> diagnostics) {
+        PsiType fieldType = field.getType();
+        if (fieldType instanceof PsiClassType classType) {
+            validateTypeArguments(field, declaringType, classType, diagnostics);
+        }
+    }
+
+    /**
+     * Recursively validates constraint annotations on the type arguments of {@code classType}.
+     * For each annotated type argument, checks whether the annotation is valid for the
+     * argument's erased type and emits a TYPE_USE diagnostic with a dedicated error code.
+     *
+     * @param field         the field element (used for diagnostic range)
+     * @param declaringType the declaring class (used for name resolution)
+     * @param classType     the PSI class type whose type arguments are inspected
+     * @param diagnostics   the list to add diagnostics to
+     */
+    private void validateTypeArguments(PsiField field, PsiClass declaringType,
+                                       PsiClassType classType, List<Diagnostic> diagnostics) {
+        PsiType[] typeArguments = classType.getParameters();
+        for (PsiType typeArg : typeArguments) {
+            // Annotations on the type argument (e.g. List<@Email String>)
+            PsiAnnotation[] typeAnnotations = typeArg.getAnnotations();
+            // Erase the type argument to its raw form (e.g. java.util.List<X> → java.util.List)
+            String erasedName = TypeConversionUtil.erasure(typeArg).getCanonicalText();
+
+            for (PsiAnnotation annotation : typeAnnotations) {
+                String annFQN = annotation.getQualifiedName();
+                if (annFQN == null) continue;
+
+                String matched = getMatchedJavaElementName(declaringType, annFQN,
+                        SET_OF_ANNOTATIONS.toArray(new String[0]));
+                if (matched == null || matched.equals(VALID)) continue;
+
+                switch (matched) {
+                    case ASSERT_FALSE, ASSERT_TRUE -> {
+                        // Valid only on Boolean — primitives cannot appear as type args
+                        if (!erasedName.equals("java.lang.Boolean")) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationBooleanTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_BOOLEAN_TYPE_USE);
+                        }
+                    }
+                    case DECIMAL_MAX, DECIMAL_MIN, DIGITS -> {
+                        // Valid on BigDecimal, BigInteger, CharSequence, or numeric wrappers
+                        // Primitive type args are impossible (Java disallows them), so only check FQ names
+                        if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
+                            && !erasedName.equals(CHAR_SEQUENCE)
+                            && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_AND_CHAR_WRAPPER_TYPES) == null) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationBigDecimalTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_BIG_DECIMAL_TYPE_USE);
+                        }
+                    }
+                    case EMAIL, NOT_BLANK, PATTERN -> {
+                        if (!erasedName.equals(STRING) && !erasedName.equals(CHAR_SEQUENCE)) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationStringTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_STRING_TYPE_USE);
+                        }
+                    }
+                    case FUTURE, FUTURE_OR_PRESENT, PAST, PAST_OR_PRESENT -> {
+                        if (getMatchedJavaElementName(declaringType, erasedName,
+                                SET_OF_DATE_TYPES.toArray(new String[0])) == null) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationDateTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_DATE_TIME_TYPE_USE);
+                        }
+                    }
+                    case MIN, MAX -> {
+                        // Valid on BigDecimal, BigInteger, or integer numeric wrappers
+                        if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
+                            && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_WRAPPER_TYPES) == null) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationMinMaxTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_MIN_MAX_TYPE_USE);
+                        }
+                    }
+                    case NEGATIVE, NEGATIVE_OR_ZERO, POSITIVE, POSITIVE_OR_ZERO -> {
+                        // Valid on BigDecimal, BigInteger, or any numeric wrapper (incl. Float, Double)
+                        if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
+                            && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_AND_DECIMAL_WRAPPER_TYPES) == null) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "AnnotationPositiveTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_POSITIVE_TYPE_USE);
+                        }
+                    }
+                    case NOT_EMPTY, SIZE -> {
+                        if (!isSizeOrNonEmptyAllowed(typeArg)) {
+                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                                    "SizeOrNonEmptyAnnotationsTypeUse",
+                                    DIAGNOSTIC_CODE_INVALID_SIZE_TYPE_USE);
+                        }
+                    }
+                    default -> LOGGER.log(Level.SEVERE, "Unexpected annotation in TYPE_USE check: " + matched);
+                }
+            }
+
+            // Recurse into nested generic type arguments (e.g. Map<String, List<@Email Integer>>)
+            if (typeArg instanceof PsiClassType nestedClassType) {
+                validateTypeArguments(field, declaringType, nestedClassType, diagnostics);
+            }
+        }
+    }
+
+    /**
+     * Emits a TYPE_USE constraint diagnostic on {@code field}.
+     *
+     * @param field           the field element (used for diagnostic range)
+     * @param diagnostics     the list to add diagnostics to
+     * @param annotationFQN   the fully-qualified annotation name (for message formatting)
+     * @param messageKey      the message key (without method/field suffix — TYPE_USE variants)
+     * @param diagnosticCode  the TYPE_USE-specific diagnostic code constant
+     */
+    private void emitTypeUseDiagnostic(PsiField field, List<Diagnostic> diagnostics,
+                                       String annotationFQN, String messageKey, String diagnosticCode) {
+        String message = Messages.getMessage(messageKey, "@" + getSimpleName(annotationFQN));
+        diagnostics.add(createDiagnostic(field, (PsiJavaFile) field.getContainingFile(),
+                message, diagnosticCode, annotationFQN, DiagnosticSeverity.Error));
     }
 
     /**
