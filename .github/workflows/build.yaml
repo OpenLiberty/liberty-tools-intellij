@@ -22,6 +22,11 @@ on:
         type: string
         required: true
         default: main
+      allOS:
+        description: 'Run tests on all OS (linux, mac, windows). When false, runs linux only.'
+        type: boolean
+        required: false
+        default: false
   workflow_dispatch:
     inputs:
       useLocalPlugin:
@@ -44,6 +49,21 @@ on:
         type: string
         required: false
         default: main
+      runLinux:
+        description: 'Run tests on Linux'
+        type: boolean
+        required: false
+        default: true
+      runMac:
+        description: 'Run tests on macOS'
+        type: boolean
+        required: false
+        default: false
+      runWindows:
+        description: 'Run tests on Windows'
+        type: boolean
+        required: false
+        default: false
   push:
     # Restricted to main to avoid triggering workflows on forks.
     branches: [ main ]
@@ -100,12 +120,24 @@ jobs:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     # Run for all test-groups when triggered via workflow_dispatch, workflow_call, or when 'run-ci' label is applied.
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event.label.name == 'run-ci'
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runtime == 'linux' && 'ubuntu-latest' || matrix.runtime == 'mac' && 'macOS-14' || matrix.runtime == 'windows' && 'windows-latest' }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        # Limit PR/push CI to linux only to reduce the number of GHA jobs consumed by LTI.
+        # The full OS matrix (linux, mac, windows) runs only when allOS=true (set by the weekly
+        # scheduled workflow) or when specific OS inputs are selected via workflow_dispatch.
+        runtime: >-
+          ${{ fromJson(
+            inputs.allOS && '["linux","mac","windows"]' ||
+            (inputs.runLinux || inputs.runMac || inputs.runWindows) && format('[{0}{1}{2}]',
+              inputs.runLinux && '"linux"' || '',
+              inputs.runMac && (inputs.runLinux && ',"mac"' || '"mac"') || '',
+              inputs.runWindows && ((inputs.runLinux || inputs.runMac) && ',"windows"' || '"windows"') || ''
+            ) ||
+            '["linux"]'
+          ) }}
         test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
@@ -114,12 +146,6 @@ jobs:
           - runtime: windows
             test-group: LSP4Jakarta-Unit
         include:
-          - runtime: linux
-            os: ubuntu-latest
-          - runtime: mac
-            os: macOS-14
-          - runtime: windows
-            os: windows-latest
           - test-group: Maven-MicroProfile
             test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
           - test-group: Gradle-MicroProfile
@@ -158,7 +184,7 @@ jobs:
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
       - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
+        if: matrix.runtime == 'windows'
         uses: al-cheb/configure-pagefile-action@v1.4
         with:
           minimum-size: 8GB
@@ -221,26 +247,15 @@ jobs:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     # Runs subset of test-groups for lsp4jakarta PRs when 'run-lsp4jakarta-it' label is applied.
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta-it'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        # When triggered by the run-lsp4jakarta-it label, run linux only to reduce the number of GHA jobs consumed by LTI.
+        runtime: [ linux ]
         test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
-        exclude:
-          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
-          - runtime: mac
-            test-group: LSP4Jakarta-Unit
-          - runtime: windows
-            test-group: LSP4Jakarta-Unit
         include:
-          - runtime: linux
-            os: ubuntu-latest
-          - runtime: mac
-            os: macOS-14
-          - runtime: windows
-            os: windows-latest
           - test-group: Gradle-Language-Server
             test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
           - test-group: Gradle-MP-Language-Server
@@ -256,13 +271,6 @@ jobs:
       REF_LTI_TAG: ${{ inputs.refLTITag }}
       TEST_CLASS: ${{ matrix.test-class }}
     steps:
-      - name: Configure pagefile
-        if: contains(matrix.os, 'windows')
-        uses: al-cheb/configure-pagefile-action@v1.4
-        with:
-          minimum-size: 8GB
-          maximum-size: 10GB
-          disk-root: "C:"
       - name: 'Checkout liberty-tools-intellij'
         uses: actions/checkout@v4
         with:
