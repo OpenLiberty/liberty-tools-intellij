@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util;
 
 import com.intellij.psi.*;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -224,5 +225,46 @@ public class AnnotationValueExpressionUtil {
         logUnableToCreateDefaultValue();
         return factory.createExpressionFromText("null", annotation);
     }
+
+    /**
+     * Returns the nested single-annotation instances from a container annotation's
+     * {@code value} attribute (e.g. the entries inside {@code @AttributeOverrides}).
+     *
+     * @param container the container annotation (e.g. {@code @AttributeOverrides})
+     * @return an array of nested annotations, or an empty array if none found
+     */
+    public static PsiAnnotation[] getNestedAnnotations(PsiAnnotation container) {
+        PsiAnnotationMemberValue value = container.findAttributeValue("value");
+        if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
+            return Arrays.stream(arrayValue.getInitializers())
+                    .filter(PsiAnnotation.class::isInstance)
+                    .map(PsiAnnotation.class::cast)
+                    .toArray(PsiAnnotation[]::new);
+        } else if (value instanceof PsiAnnotation annotation) {
+            return new PsiAnnotation[]{annotation};
+        }
+        return PsiAnnotation.EMPTY_ARRAY;
+    }
+
+    /**
+     * Extracts the string value of a named annotation attribute, stripping surrounding quotes.
+     * Returns {@code null} if the attribute is absent or not a string literal.
+     *
+     * @param annotation the annotation to extract the value from
+     * @param attributeName the name of the attribute
+     * @return the string value without quotes, or {@code null} if the attribute is absent or not a string literal
+     */
+    public static String getAnnotationStringValue(PsiAnnotation annotation, String attributeName) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof PsiLiteralExpression literal) {
+            Object literalValue = literal.getValue();
+            return literalValue instanceof String ? (String) literalValue : null;
+        }
+        return null;
+    }
 }
+
 
