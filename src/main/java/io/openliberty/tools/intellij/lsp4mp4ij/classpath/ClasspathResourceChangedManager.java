@@ -26,6 +26,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
 import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -54,7 +55,7 @@ public class ClasspathResourceChangedManager implements Disposable {
 	private final MessageBusConnection appConnection;
 	private final ClasspathResourceChangedListener listener;
 
-	public static ClasspathResourceChangedManager getInstance(Project project) {
+	public static ClasspathResourceChangedManager getInstance(@NotNull Project project) {
 		return project.getService(ClasspathResourceChangedManager.class);
 	}
 

@@ -11,9 +11,11 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.search.SearchScope;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import org.eclipse.lsp4mp.commons.DocumentFormat;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,13 +37,16 @@ public class SearchContext {
 
     private final SearchScope scope;
 
+    private final ProgressIndicator monitor;
+
     public SearchContext(Module module, SearchScope scope, IPropertiesCollector collector, IPsiUtils utils,
-                         DocumentFormat documentFormat) {
+                         DocumentFormat documentFormat, @NotNull ProgressIndicator monitor) {
         this.module = module;
         this.scope = scope;
         this.collector = collector;
         this.utils = utils;
         this.documentFormat = documentFormat;
+        this.monitor = monitor;
         cache = new HashMap<>();
     }
 
@@ -71,5 +76,10 @@ public class SearchContext {
 
     public DocumentFormat getDocumentFormat() {
         return documentFormat;
+    }
+
+    @NotNull
+    public ProgressIndicator getMonitor() {
+        return monitor;
     }
 }

@@ -99,7 +99,7 @@ public final class JakartaLanguageClient extends IndexAwareLanguageClient implem
     final var coalesceBy = new CoalesceByKey("jakarta/java/projectLabels",
             jakartaJavaProjectLabelsParams.getUri(), jakartaJavaProjectLabelsParams.getTypes());
     return runAsBackground("Computing Java projects labels",
-            monitor -> adapt(ProjectLabelManager.getInstance().getProjectLabelInfo(adapt(jakartaJavaProjectLabelsParams), utils)), coalesceBy);
+            monitor -> adapt(ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(adapt(jakartaJavaProjectLabelsParams), utils)), coalesceBy);
   }
 
   // Support the message "jakarta/java/workspaceLabels"
@@ -108,7 +108,7 @@ public final class JakartaLanguageClient extends IndexAwareLanguageClient implem
     final IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
     final var coalesceBy = new CoalesceByKey("jakarta/java/workspaceLabels");
     return runAsBackground("Computing All Java projects labels",
-            monitor -> adapt(ProjectLabelManager.getInstance().getProjectLabelInfo(utils)), coalesceBy);
+            monitor -> adapt(ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(utils)), coalesceBy);
   }
 
   // Support the message "jakarta/java/fileInfo"

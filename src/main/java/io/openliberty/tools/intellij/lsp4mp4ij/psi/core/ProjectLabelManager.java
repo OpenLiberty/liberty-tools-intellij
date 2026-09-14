@@ -14,12 +14,12 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
 import org.eclipse.lsp4mp.commons.ProjectLabelInfoEntry;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,14 +33,15 @@ import java.util.List;
  *
  */
 public class ProjectLabelManager {
-	private static final ProjectLabelManager INSTANCE = new ProjectLabelManager();
 
-	public static ProjectLabelManager getInstance() {
-		return INSTANCE;
+	private final @NotNull Project project;
+
+	public static ProjectLabelManager getInstance(@NotNull Project project) {
+		return project.getService(ProjectLabelManager.class);
 	}
 
-	private ProjectLabelManager() {
-
+	private ProjectLabelManager(@NotNull Project project) {
+		this.project = project;
 	}
 
 	/**
@@ -50,12 +51,10 @@ public class ProjectLabelManager {
 	 */
 	public List<ProjectLabelInfoEntry> getProjectLabelInfo(IPsiUtils utils) {
 		List<ProjectLabelInfoEntry> results = new ArrayList<>();
-		for(Project project : ProjectManager.getInstance().getOpenProjects()) {
-			for(Module module : ModuleManager.getInstance(project).getModules()) {
-				ProjectLabelInfoEntry info = getProjectLabelInfo(module, null, utils);
-				if (info != null) {
-					results.add(info);
-				}
+		for (Module module : ModuleManager.getInstance(project).getModules()) {
+			ProjectLabelInfoEntry info = getProjectLabelInfo(module, null, utils);
+			if (info != null) {
+				results.add(info);
 			}
 		}
 		return results;

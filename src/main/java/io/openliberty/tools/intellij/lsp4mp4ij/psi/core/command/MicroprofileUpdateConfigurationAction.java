@@ -53,7 +53,7 @@ public class MicroprofileUpdateConfigurationAction extends LSPCommandAction {
             String section = configUpdate.get("section").getAsString();
             ConfigurationUpdater updater = updaters.get(section);
             if (updater == null) {
-                throw new UnsupportedOperationException("Updating "+section+" is not supported yet!");
+                throw new UnsupportedOperationException("Updating " + section + " is not supported yet!");
             }
             JsonElement value = configUpdate.get("value");
             updater.updateConfiguration(e.getProject(), value);
@@ -69,7 +69,7 @@ public class MicroprofileUpdateConfigurationAction extends LSPCommandAction {
     }
 
     interface ConfigurationUpdater {
-        void updateConfiguration(Project project,  JsonElement value);
+        void updateConfiguration(Project project, JsonElement value);
     }
 
     private static class InspectionConfigurationUpdater implements ConfigurationUpdater {
@@ -87,7 +87,7 @@ public class MicroprofileUpdateConfigurationAction extends LSPCommandAction {
             }
         }
 
-        private void updateConfiguration(Project project,  @NotNull String value) {
+        private void updateConfiguration(Project project, @NotNull String value) {
             InspectionProfile profile = InspectionProfileManager.getInstance(project).getCurrentProfile();
             InspectionToolWrapper<?, ?> toolWrapper = profile.getInspectionTool(inspectionId, project);
             if (toolWrapper != null && toolWrapper.getTool() instanceof AbstractDelegateInspectionWithExclusions) {
