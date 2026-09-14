@@ -421,7 +421,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         String annotationFQName = singletonMatch[0];
                         String declaringClassName = singletonMatch[1];
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("SingletonSessionBeanInvalidScope",
+                                Messages.getMessage("SingletonSessionBeanInvalidInheritedScope",
                                         "@" + getSimpleName(annotationFQName), declaringClassName),
                                 DIAGNOSTIC_CODE_INVALID_SINGLETON_SCOPE,
                                 new Gson().toJsonTree(List.of(annotationFQName)),
@@ -438,7 +438,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         String annotationFQName = statelessMatch[0];
                         String declaringClassName = statelessMatch[1];
                         diagnostics.add(createDiagnostic(type, unit,
-                                Messages.getMessage("StatelessSessionBeanInvalidScope",
+                                Messages.getMessage("StatelessSessionBeanInvalidInheritedScope",
                                         "@" + getSimpleName(annotationFQName), declaringClassName),
                                 DIAGNOSTIC_CODE_INVALID_STATELESS_SCOPE,
                                 new Gson().toJsonTree(List.of(annotationFQName)),
