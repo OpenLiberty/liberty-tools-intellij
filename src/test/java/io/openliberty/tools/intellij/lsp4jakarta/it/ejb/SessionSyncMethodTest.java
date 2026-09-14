@@ -164,7 +164,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
         // Line 13 (0-based): "    public boolean afterComplete(boolean committed) {"
         // method name "afterComplete": "    public boolean " = 19 chars (4+7+8)
         Diagnostic expectedDiagnostic = d(13, 19, 32,
-                "@AfterCompletion session synchronization method must return void.",
+                "@AfterCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
 
         assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
@@ -360,14 +360,14 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 "@BeforeCompletion session synchronization method must not be declared as static.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodStatic");
         Diagnostic nonVoidOnBeforeCommit = d(21, 26, 43,
-                "@BeforeCompletion session synchronization method must return void.",
+                "@BeforeCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
 
         Diagnostic finalOnAfterComplete = d(27, 21, 39,
                 "@AfterCompletion session synchronization method must not be declared as final.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodFinal");
         Diagnostic nonVoidOnAfterComplete = d(27, 21, 39,
-                "@AfterCompletion session synchronization method must return void.",
+                "@AfterCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
 
         // Engine emits diagnostics in reverse method order (last method first)

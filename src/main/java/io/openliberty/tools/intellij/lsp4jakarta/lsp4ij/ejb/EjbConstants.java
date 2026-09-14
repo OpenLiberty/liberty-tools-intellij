@@ -50,7 +50,6 @@ public class EjbConstants {
 
     /* Primitive/wrapper types used in session sync validation */
     public static final String BOOLEAN_CLASS_FQ_NAME = "java.lang.Boolean";
-    public static final String BOOLEAN_CLASS_NAME = "Boolean";
 
     /* Diagnostic codes */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-ejb";
