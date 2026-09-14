@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.starter
 
+import com.intellij.ide.BrowserUtil
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep
 import com.intellij.ide.wizard.NewProjectWizardStep
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil
@@ -22,8 +23,6 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.Panel
 import org.json.JSONObject
 import java.awt.Container
-import java.awt.Desktop
-import java.net.URI
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import javax.swing.*
@@ -54,7 +53,7 @@ class LibertyServerUrlStep(parent: NewProjectWizardStep) : AbstractNewProjectWiz
             cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
             addMouseListener(object : java.awt.event.MouseAdapter() {
                 override fun mouseClicked(e: java.awt.event.MouseEvent) {
-                    runCatching { Desktop.getDesktop().browse(URI(STARTER_URL)) }
+                    runCatching { BrowserUtil.browse(STARTER_URL) }
                 }
             })
         }
