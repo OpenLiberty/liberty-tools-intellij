@@ -685,6 +685,9 @@
                 class="io.openliberty.tools.intellij.actions.RemoveLibertyProjectAction"
                 icon="AllIcons.FileTypes.Config"/>
 
+        <action id="microprofile.command.open.uri"
+                class="io.openliberty.tools.intellij.lsp4mp4ij.psi.core.command.MicroprofileOpenURIAction"/>
+
     </actions>
     <!-- Point to LSP xml -->
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml"
