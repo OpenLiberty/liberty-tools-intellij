@@ -85,8 +85,9 @@ public class PsiUtilsLSImpl implements IPsiUtils {
 
     @Override
     public PsiClass findClass(Module module, String className) {
-        return ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), className, null, false,
-                GlobalSearchScope.allScope(module.getProject()));
+        return ReadAction
+                .compute(() -> ClassUtil.findPsiClass(PsiManager.getInstance(module.getProject()), className, null, false,
+                        GlobalSearchScope.allScope(module.getProject())));
     }
 
     @Override
@@ -102,7 +103,16 @@ public class PsiUtilsLSImpl implements IPsiUtils {
             PsiFile file = sourceElement.getContainingFile();
             Document document = PsiDocumentManager.getInstance(psiMember.getProject()).getDocument(file);
             if (document != null) {
-                TextRange range = sourceElement.getTextRange();
+                TextRange range = null;
+                if (sourceElement instanceof PsiNameIdentifierOwner nameIdentifierOwner) {
+                    var nameIdentifier = nameIdentifierOwner.getNameIdentifier();
+                    if (nameIdentifier != null) {
+                        range = nameIdentifier.getTextRange();
+                    }
+                }
+                if (range == null) {
+                    range = sourceElement.getTextRange();
+                }
                 return toLocation(file, LSPIJUtils.toRange(range, document));
             }
         }
