@@ -64,6 +64,12 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
+
+    // ObserverMethod notify validation
+    public static final String OBSERVER_METHOD_FQ_NAME = "jakarta.enterprise.inject.spi.ObserverMethod";
+    public static final String EVENT_CONTEXT_FQ_NAME = "jakarta.enterprise.inject.spi.EventContext";
+    public static final String NOTIFY_METHOD_NAME = "notify";
+    public static final String DIAGNOSTIC_CODE_OBSERVER_METHOD_WITHOUT_NOTIFY = "InvalidObserverMethodWithoutNotify";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
