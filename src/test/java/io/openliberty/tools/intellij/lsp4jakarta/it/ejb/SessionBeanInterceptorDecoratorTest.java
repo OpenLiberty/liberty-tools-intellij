@@ -146,9 +146,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Stateless with @Decorator\n" +
                 "@Stateless\n" +
-                "class InvalidStatelessWithDecorator {\n" +
+                "class InvalidStatelessWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
@@ -163,9 +163,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Stateless with @Decorator\n" +
                 "@Decorator\n" +
-                "class InvalidStatelessWithDecorator {\n" +
+                "class InvalidStatelessWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
@@ -274,9 +274,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Stateful with @Decorator\n" +
                 "@Stateful\n" +
-                "class InvalidStatefulWithDecorator {\n" +
+                "class InvalidStatefulWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
@@ -291,9 +291,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Stateful with @Decorator\n" +
                 "@Decorator\n" +
-                "class InvalidStatefulWithDecorator {\n" +
+                "class InvalidStatefulWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
@@ -402,9 +402,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Singleton with @Decorator\n" +
                 "@Singleton\n" +
-                "class InvalidSingletonWithDecorator {\n" +
+                "class InvalidSingletonWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
@@ -419,9 +419,9 @@ public class SessionBeanInterceptorDecoratorTest extends BaseJakartaTest {
                 "import jakarta.inject.Inject;\n\n" +
                 "// Invalid: @Singleton with @Decorator\n" +
                 "@Decorator\n" +
-                "class InvalidSingletonWithDecorator {\n" +
+                "class InvalidSingletonWithDecorator implements EjbDecoratorService {\n" +
                 "    @Inject @Delegate\n" +
-                "    private Object delegate;\n\n" +
+                "    private EjbDecoratorService delegate;\n\n" +
                 "    public void businessMethod() {\n" +
                 "    }\n" +
                 "}\n";
