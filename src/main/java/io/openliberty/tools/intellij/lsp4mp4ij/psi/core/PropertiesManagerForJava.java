@@ -75,6 +75,10 @@ public final class PropertiesManagerForJava {
      * Returns the Java file information (ex : package name) from the given file URI
      * and null otherwise.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaFileInfo()}).</p>
+     *
      * @param params  the file information parameters.
      * @param utils   the utilities class
      * @return the Java file information (ex : package name) from the given file URI
@@ -94,6 +98,10 @@ public final class PropertiesManagerForJava {
 
     /**
      * Returns the codelens list according the given codelens parameters.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCodelens()}).</p>
      *
      * @param params  the codelens parameters
      * @param utils   the utilities class
@@ -144,6 +152,10 @@ public final class PropertiesManagerForJava {
     /**
      * Returns the CompletionItems given the completion item params
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCompletion()}).</p>
+     *
      * @param params  the completion item params
      * @param utils   the IJDTUtils
      * @return the CompletionItems for the given the completion item params
@@ -154,6 +166,10 @@ public final class PropertiesManagerForJava {
 
     /**
      * Returns the definition list according the given definition parameters.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaDefinition()}).</p>
      *
      * @param params  the definition parameters
      * @param utils   the utilities class
@@ -215,6 +231,10 @@ public final class PropertiesManagerForJava {
     /**
      * Returns diagnostics for the given uris list.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaDiagnostics()}).</p>
+     *
      * @param params the diagnostics parameters
      * @param utils  the utilities class
      * @return diagnostics for the given uris list.
@@ -225,6 +245,10 @@ public final class PropertiesManagerForJava {
 
     /**
      * Returns the hover information according to the given <code>params</code>
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaHover()}).</p>
      *
      * @param params  the hover parameters
      * @param utils   the utilities class
@@ -259,6 +283,10 @@ public final class PropertiesManagerForJava {
 
     /**
      * Returns the cursor context for the given file and cursor position.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCursorContext()}).</p>
      *
      * @param params  the completion params that provide the file and cursor
      *                position to get the context for
@@ -358,6 +386,10 @@ public final class PropertiesManagerForJava {
     /**
      * Returns the codeAction list according the given codeAction parameters.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCodeAction()}).</p>
+     *
      * @param params  the codeAction parameters
      * @param utils   the utilities class
      * @return the codeAction list according the given codeAction parameters.
@@ -368,6 +400,10 @@ public final class PropertiesManagerForJava {
 
     /**
      * Returns the codeAction list according the given codeAction parameters.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code resolveCodeAction()}).</p>
      *
      * @param unresolved the CodeAction to resolve
      * @param utils      the utilities class
