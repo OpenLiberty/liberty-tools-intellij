@@ -41,7 +41,7 @@ import java.util.zip.ZipInputStream
 import javax.swing.Icon
 
 /**
- * Registers "Open Liberty" in IntelliJ's new-project wizard.
+ * Registers "Liberty" in IntelliJ's new-project wizard.
  *
  * The single wizard page is built by [LibertyNewProjectWizardStep] via
  * [com.intellij.ide.wizard.NewProjectWizardChainStep], which chains the
@@ -220,7 +220,7 @@ class LibertyNewProjectWizard : GeneratorNewProjectWizard {
             }
             val status = conn.responseCode
             if (status != HttpURLConnection.HTTP_OK) {
-                throw IOException("Open Liberty Starter returned HTTP $status")
+                throw IOException("Liberty Starter returned HTTP $status")
             }
             return try {
                 conn.inputStream.use { input ->
