@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -109,7 +108,7 @@ public class PropertiesManager {
             if (query != null) {
                 try {
                     beginSearch(context, monitor);
-                    query.forEach((Consumer<? super PsiModifierListOwner>) psiMember -> collectProperties(psiMember, context, monitor));
+                    query.findAll().forEach(psiMember -> collectProperties(psiMember, context, monitor));
                 }
                 finally {
                     endSearch(context, monitor);

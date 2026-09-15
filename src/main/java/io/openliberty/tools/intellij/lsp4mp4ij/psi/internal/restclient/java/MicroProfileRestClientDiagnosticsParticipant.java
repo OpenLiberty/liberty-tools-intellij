@@ -204,7 +204,7 @@ public class MicroProfileRestClientDiagnosticsParticipant implements IJavaDiagno
 
 		final AtomicInteger nbReferences = new AtomicInteger(0);
 		Query<PsiReference> query = ReferencesSearch.search(interfaceType, createSearchScope(context.getJavaProject()));
-		query.forEach(match -> {
+		query.findAll().forEach(match -> {
 			PsiField field = PsiTreeUtil.getParentOfType(match.getElement(), PsiField.class);
 			if (field != null) {
 				boolean hasInjectAnnotation = AnnotationUtils.hasAnyAnnotation(field, INJECT_JAVAX_ANNOTATION, INJECT_JAKARTA_ANNOTATION);
