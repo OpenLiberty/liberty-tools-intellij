@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
@@ -28,7 +29,6 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Persistence diagnostic collector that validates bidirectional JPA
@@ -39,14 +39,14 @@ import java.util.Map;
  *   <li>The inverse side of a bidirectional relationship must declare the
  *       {@code mappedBy} attribute on its {@code @OneToMany}, {@code @OneToOne},
  *       or {@code @ManyToMany} annotation.</li>
- *   <li>The inverse side of a relationship must not carry a {@code @JoinTable}
- *       annotation.</li>
+ *   <li>The inverse side of a relationship must not carry {@code @JoinTable},
+ *       {@code @JoinColumn}, or {@code @JoinColumns} annotations.</li>
  * </ol>
  *
- * <p>Cross-file analysis is performed via {@link PersistenceUtils#findAnnotatedEntityClasses},
- * which uses {@link io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.SourceClassScanner} to
- * traverse the module's source roots directly and is always consistent with the current
- * workspace state.
+ * <p>The target entity type is resolved per-member by extracting the element type
+ * from the member's {@link PsiType} (resolving collection type arguments where needed)
+ * and checking that the resolved {@link PsiClass} carries {@code @Entity}. This avoids
+ * a full module-wide scan and is consistent with the current workspace state.
  *
  * <p>Specification reference:
  * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0
@@ -74,17 +74,12 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
                 continue;
             }
 
-            // Build a module-wide map of all @Entity types keyed by simple name.
-            Map<String, PsiClass> entityTypeMap = PersistenceUtils.findAnnotatedEntityClasses(type);
-
             for (PsiField field : type.getFields()) {
-                validateRelationshipMember(field, field.getType(), type, unit,
-                        entityTypeMap, diagnostics);
+                validateRelationshipMember(field, field.getType(), type, unit, diagnostics);
             }
 
             for (PsiMethod method : type.getMethods()) {
-                validateRelationshipMember(method, method.getReturnType(), type, unit,
-                        entityTypeMap, diagnostics);
+                validateRelationshipMember(method, method.getReturnType(), type, unit, diagnostics);
             }
         }
     }
@@ -96,13 +91,11 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
      * @param memberType    the field type or method return type
      * @param declaringType the entity class that owns the member
      * @param unit          the compilation unit of the declaring class
-     * @param entityTypeMap module-wide map from simple class name to {@link PsiClass}
      * @param diagnostics   the list to append new diagnostics to
      */
     private void validateRelationshipMember(PsiElement member, PsiType memberType,
                                             PsiClass declaringType,
                                             PsiJavaFile unit,
-                                            Map<String, PsiClass> entityTypeMap,
                                             List<Diagnostic> diagnostics) {
         for (String relAnnotationFQ : PersistenceConstants.INVERSE_CAPABLE_RELATIONSHIP_ANNOTATIONS) {
             PsiAnnotation relAnnotation = AnnotationUtils.getAnnotation(member, relAnnotationFQ);
@@ -116,19 +109,24 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
             boolean hasMappedBy = mappedByValue != null && !mappedByValue.isEmpty();
 
             if (hasMappedBy) {
-                // Explicitly the inverse side — @JoinTable is forbidden here.
-                if (AnnotationUtils.hasAnnotation(member, PersistenceConstants.JOIN_TABLE)) {
-                    diagnostics.add(createDiagnostic(member, unit,
-                            Messages.getMessage("JoinTableOnInverseSide"),
-                            PersistenceConstants.DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE, null,
-                            DiagnosticSeverity.Error));
+                // Explicitly the inverse side — owner-only annotations are forbidden here.
+                for (String ownerOnlyAnnotation : PersistenceConstants.OWNER_ONLY_ANNOTATIONS) {
+                    if (AnnotationUtils.hasAnnotation(member, ownerOnlyAnnotation)) {
+                        String messageKey = PersistenceConstants.JOIN_TABLE.equals(ownerOnlyAnnotation)
+                                ? "JoinTableOnInverseSide" : "JoinColumnOnInverseSide";
+                        String diagnosticCode = PersistenceConstants.JOIN_TABLE.equals(ownerOnlyAnnotation)
+                                ? PersistenceConstants.DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE
+                                : PersistenceConstants.DIAGNOSTIC_CODE_JOIN_COLUMN_ON_INVERSE;
+                        diagnostics.add(createDiagnostic(member, unit,
+                                Messages.getMessage(messageKey),
+                                diagnosticCode, null,
+                                DiagnosticSeverity.Error));
+                    }
                 }
             } else {
                 // No mappedBy — flag only when the target entity back-references this class,
                 // proving the relationship is bidirectional.
-                String targetSimpleName = DiagnosticsUtils.getElementTypeSimpleName(memberType);
-                PsiClass targetType = targetSimpleName != null
-                        ? entityTypeMap.get(targetSimpleName) : null;
+                PsiClass targetType = resolveTargetEntityType(memberType);
                 if (targetType != null && isInverseSideOf(targetType, declaringType, relAnnotationFQ)) {
                     diagnostics.add(createDiagnostic(member, unit,
                             Messages.getMessage("InverseSideMissingMappedBy", relSimpleName),
@@ -139,6 +137,36 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
             // Only one relationship annotation per member expected — stop after first match.
             break;
         }
+    }
+
+    /**
+     * Resolves the target entity {@link PsiClass} for a given member type.
+     *
+     * <p>For collection-typed members ({@code List<Employee>}, {@code Set<Order>}),
+     * the first type argument is resolved. For single-valued members the declared
+     * type is resolved directly. Only {@code @Entity}-annotated classes are returned.
+     *
+     * @param memberType the field type or method return type
+     * @return the target entity {@link PsiClass}, or {@code null} if not resolvable
+     */
+    private PsiClass resolveTargetEntityType(PsiType memberType) {
+        if (!(memberType instanceof PsiClassType classType)) {
+            return null;
+        }
+        // For collection types (List<Employee>), resolve the first type argument.
+        PsiType[] typeArgs = classType.getParameters();
+        PsiClass resolved;
+        if (typeArgs.length > 0 && typeArgs[0] instanceof PsiClassType argType) {
+            resolved = argType.resolve();
+        } else {
+            resolved = classType.resolve();
+        }
+        if (resolved == null) {
+            return null;
+        }
+        // Only return @Entity-annotated types to avoid false positives.
+        return AnnotationUtils.getAnnotation(resolved, PersistenceConstants.ENTITY) != null
+                ? resolved : null;
     }
 
     /**
