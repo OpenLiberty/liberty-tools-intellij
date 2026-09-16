@@ -30,6 +30,8 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String IDCLASS = "jakarta.persistence.IdClass";
+    public static final String SERIALIZABLE = "java.io.Serializable";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
@@ -62,6 +64,13 @@ public class PersistenceConstants {
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+
+    /* IdClass Codes */
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_PUBLIC = "IdClassMustBePublic";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_HAVE_PUBLIC_NO_ARG_CONSTRUCTOR = "IdClassMustHavePublicNoArgConstructor";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_SERIALIZABLE = "IdClassMustBeSerializable";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_EQUALS = "IdClassMustDeclareEquals";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_HASHCODE = "IdClassMustDeclareHashCode";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
