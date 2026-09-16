@@ -20,6 +20,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -31,12 +32,16 @@ public class MicroProfilePropertiesView implements Disposable {
 
     private final JPanel myMainPanel;
 
-    private final JBCheckBox inlayHintCheckBox = new JBCheckBox(MicroProfileBundle.message("microprofile.properties.inlayHint.enabled"));
+    private final JBCheckBox inlayHintCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.properties.inlayHint.enabled"));
+    private final JBCheckBox inlayHintConverterCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.properties.inlayHint.converters.enabled"));
+    private final JBCheckBox inlayHintDefaultValueCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.properties.inlayHint.defaultValues.enabled"));
+    private final JBCheckBox inlayHintTypeCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.properties.inlayHint.types.enabled"));
+    private final JBCheckBox inlayHintResolveExpressionCheckBox = new JBCheckBox(LocalizedResourceUtil.getMessage("microprofile.properties.inlayHint.resolveExpressions.enabled"));
 
     public MicroProfilePropertiesView() {
         JComponent descriptionPanel = createDescription(null);
         JPanel settingsPanel = createSettings(descriptionPanel);
-        TitledBorder title = IdeBorderFactory.createTitledBorder(MicroProfileBundle.message("microprofile.properties.title"));
+        TitledBorder title = IdeBorderFactory.createTitledBorder(LocalizedResourceUtil.getMessage("microprofile.properties.title"));
         settingsPanel.setBorder(title);
         this.myMainPanel = JBUI.Panels.simplePanel(10, 10)
                 .addToLeft(JBUI.Panels.simplePanel())
@@ -47,6 +52,10 @@ public class MicroProfilePropertiesView implements Disposable {
         return FormBuilder.createFormBuilder()
                 .addComponent(description, 0)
                 .addComponent(inlayHintCheckBox, 5)
+                .addComponent(inlayHintConverterCheckBox, 5)
+                .addComponent(inlayHintDefaultValueCheckBox, 5)
+                .addComponent(inlayHintTypeCheckBox, 5)
+                .addComponent(inlayHintResolveExpressionCheckBox, 5)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -81,6 +90,38 @@ public class MicroProfilePropertiesView implements Disposable {
 
     public void setInlayHintEnabled(boolean inlayHint) {
         inlayHintCheckBox.setSelected(inlayHint);
+    }
+
+    public boolean isInlayHintConvertersEnabled() {
+        return inlayHintConverterCheckBox.isSelected();
+    }
+
+    public void setInlayHintConvertersEnabled(boolean inlayHint) {
+        inlayHintConverterCheckBox.setSelected(inlayHint);
+    }
+
+    public boolean isInlayHintDefaultValuesEnabled() {
+        return inlayHintDefaultValueCheckBox.isSelected();
+    }
+
+    public void setInlayHintDefaultValuesEnabled(boolean inlayHint) {
+        inlayHintDefaultValueCheckBox.setSelected(inlayHint);
+    }
+
+    public boolean isInlayHintTypesEnabled() {
+        return inlayHintTypeCheckBox.isSelected();
+    }
+
+    public void setInlayHintTypesEnabled(boolean inlayHint) {
+        inlayHintTypeCheckBox.setSelected(inlayHint);
+    }
+
+    public boolean isInlayHintResolveExpressionsEnabled() {
+        return inlayHintResolveExpressionCheckBox.isSelected();
+    }
+
+    public void setInlayHintResolveExpressionsEnabled(boolean inlayHint) {
+        inlayHintResolveExpressionCheckBox.setSelected(inlayHint);
     }
 
     @Override

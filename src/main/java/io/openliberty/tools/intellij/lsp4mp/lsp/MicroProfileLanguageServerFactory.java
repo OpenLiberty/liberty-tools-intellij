@@ -19,7 +19,7 @@ import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider;
 public class MicroProfileLanguageServerFactory implements LanguageServerFactory {
     @Override
     public StreamConnectionProvider createConnectionProvider(Project project) {
-        return new MicroProfileServer();
+        return new MicroProfileServer(project);
     }
 
     @Override

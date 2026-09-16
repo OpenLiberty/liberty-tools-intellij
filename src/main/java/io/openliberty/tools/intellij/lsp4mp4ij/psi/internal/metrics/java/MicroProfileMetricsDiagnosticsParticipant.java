@@ -58,48 +58,45 @@ public class MicroProfileMetricsDiagnosticsParticipant implements IJavaDiagnosti
 	}
 
 	@Override
-	public List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context) {
+	public void collectDiagnostics(JavaDiagnosticsContext context) {
 		PsiFile typeRoot = context.getTypeRoot();
 		PsiElement[] elements = typeRoot.getChildren();
-		List<Diagnostic> diagnostics = new ArrayList<>();
-		collectDiagnostics(elements, diagnostics, context);
-		return diagnostics;
+		collectDiagnostics(elements, context);
 	}
 
-	private static void collectDiagnostics(PsiElement[] elements, List<Diagnostic> diagnostics,
-			JavaDiagnosticsContext context) {
+	private static void collectDiagnostics(PsiElement[] elements,
+	                                       JavaDiagnosticsContext context) {
 		for (PsiElement element : elements) {
 			if (element instanceof PsiClass) {
 				PsiClass type = (PsiClass) element;
 				if (!type.isInterface()) {
-					validateClassType(type, diagnostics, context);
+					validateClassType(type, context);
 				}
 				continue;
 			}
 		}
 	}
 
-	private static void validateClassType(PsiClass classType, List<Diagnostic> diagnostics, JavaDiagnosticsContext context) {
+	private static void validateClassType(PsiClass classType, JavaDiagnosticsContext context) {
 		String uri = context.getUri();
 		IPsiUtils utils = context.getUtils();
 		DocumentFormat documentFormat = context.getDocumentFormat();
 		boolean hasInvalidScopeAnnotation = AnnotationUtils.hasAnyAnnotation(classType, REQUEST_SCOPED_JAVAX_ANNOTATION, SESSION_SCOPED_JAVAX_ANNOTATION, DEPENDENT_JAVAX_ANNOTATION,
-																						REQUEST_SCOPED_JAKARTA_ANNOTATION, SESSION_SCOPED_JAKARTA_ANNOTATION, DEPENDENT_JAKARTA_ANNOTATION);
+				REQUEST_SCOPED_JAKARTA_ANNOTATION, SESSION_SCOPED_JAKARTA_ANNOTATION, DEPENDENT_JAKARTA_ANNOTATION);
 		// check for Gauge annotation for Diagnostic 1 only if the class has an invalid
 		// scope annotation
 		if (hasInvalidScopeAnnotation) {
 			for (PsiElement element : classType.getChildren()) {
 				if (element instanceof PsiMethod) {
 					PsiMethod method = (PsiMethod) element;
-					validateMethod(classType, method, diagnostics, context);
+					validateMethod(classType, method,  context);
 				}
 			}
 		}
 	}
 
-	private static void validateMethod(PsiClass classType, PsiMethod method, List<Diagnostic> diagnostics,
-									   JavaDiagnosticsContext context) {
-		String uri = context.getUri();
+	private static void validateMethod(PsiClass classType, PsiMethod method,
+	                                   JavaDiagnosticsContext context) {
 		DocumentFormat documentFormat = context.getDocumentFormat();
 		boolean hasGaugeAnnotation = AnnotationUtils.hasAnnotation(method, GAUGE_ANNOTATION);
 
@@ -109,9 +106,8 @@ public class MicroProfileMetricsDiagnosticsParticipant implements IJavaDiagnosti
 		// Suggest that @AnnotationScoped is used instead.</li>
 		if (hasGaugeAnnotation) {
 			Range cdiBeanRange = PositionUtils.toNameRange(classType, context.getUtils());
-			Diagnostic d = context.createDiagnostic(uri, createDiagnostic1Message(classType, documentFormat),
+			context.addDiagnostic(createDiagnostic1Message(classType, documentFormat),
 					cdiBeanRange, DIAGNOSTIC_SOURCE, MicroProfileMetricsErrorCode.ApplicationScopedAnnotationMissing);
-			diagnostics.add(d);
 		}
 	}
 
