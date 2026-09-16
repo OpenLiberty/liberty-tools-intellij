@@ -108,9 +108,12 @@ public class PropertiesManager {
             if (query != null) {
                 try {
                     beginSearch(context, monitor);
-                    query.findAll().forEach(psiMember -> collectProperties(psiMember, context, monitor));
-                }
-                finally {
+                    query.findAll().forEach(psiMember -> {
+                        // Check if the operation has been cancelled
+                        monitor.checkCanceled();
+                        collectProperties(psiMember, context, monitor);
+                    });
+                } finally {
                     endSearch(context, monitor);
                 }
             }
