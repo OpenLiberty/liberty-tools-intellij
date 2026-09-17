@@ -21,6 +21,7 @@ public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String ENTITY_LISTENERS = "jakarta.persistence.EntityListeners";
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
@@ -62,6 +63,10 @@ public class PersistenceConstants {
 
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+
+    /* EntityListeners Codes */
+    public static final String DIAGNOSTIC_CODE_INVALID_CONSTRUCTOR_IN_ENTITY_LISTENER = "InvalidConstructorInEntityListener";
+    public static final String DIAGNOSTIC_CODE_INVALID_ENTITY_LISTENER_TYPE = "InvalidEntityListenerType";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
