@@ -57,8 +57,18 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
         Diagnostic d1 = d(19, 19, 31, "A method with the @PostConstruct annotation must be void.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PostConstructReturnType");
 
+        // Non-void @PostConstruct also violates lifecycle callback signature rule
+        Diagnostic nonVoidReturnSignature = d(19, 19, 31,
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must have the signature void <METHOD>().",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
+
         Diagnostic d2 = d(24, 16, 28, "A method with the @PostConstruct annotation must not have any parameters.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PostConstructParams");
+
+        // @PostConstruct with params also violates lifecycle callback signature rule
+        Diagnostic hasParamsSignature = d(24, 16, 28,
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must have the signature void <METHOD>().",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
 
         Diagnostic d3 = d(28, 16, 28, "A method with the @PostConstruct annotation must not throw checked exceptions.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PostConstructException");
@@ -72,7 +82,7 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-annotations", "PostConstructException");
         d5.setData(new Gson().toJsonTree(Arrays.asList("io.openliberty.sample.jakarta.annotations.CustomCheckedException","java.io.IOException")));
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3, d4, d5);
+        assertJavaDiagnostics(diagnosticsParams, utils, d1, nonVoidReturnSignature, d2, hasParamsSignature, d3, d4, d5);
 
         // Starting codeAction tests.
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PostConstruct;\n" +
