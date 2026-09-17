@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,7 +11,6 @@ package io.openliberty.tools.intellij.util;
 
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
-import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -20,7 +19,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.terminal.JBTerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
+import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTab;
+import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTabsManager;
 import com.intellij.terminal.ui.TerminalWidget;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
@@ -28,20 +29,20 @@ import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
 
+// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
+// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
+@SuppressWarnings("UnstableApiUsage")
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
@@ -147,87 +148,82 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Get the Terminal widget for corresponding Liberty module
+     * Get the Terminal widget for the corresponding Liberty module, creating a new one if requested.
+     *
+     * <p>A new Reworked Terminal tab is created via {@link TerminalToolWindowTabsManager}.
+     * The resulting {@link TerminalView} is stored on the module alongside the {@link TerminalWidget}.
      *
      * @param project
      * @param libertyModule
      * @param createWidget  true if a new widget should be created
-     * @return ShellTerminalWidget or null if it does not exist
+     * @param terminalToolWindowManager
+     * @param widget        existing widget, or {@code null} if none is known
+     * @return TerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
-                                                        TerminalToolWindowManager terminalToolWindowManager, ShellTerminalWidget widget) {
-        // Set Terminal engine to CLASSIC
+    public static TerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
+                                                   TerminalToolWindowManager terminalToolWindowManager, TerminalWidget widget) {
         if (widget == null && createWidget) {
-            if (shouldForceClassicTerminal()) {
-                try {
-                    Class<?> optionsProviderClass = Class.forName("org.jetbrains.plugins.terminal.TerminalOptionsProvider");
-                    Object optionsProviderInstance = optionsProviderClass
-                            .getMethod("getInstance")
-                            .invoke(null);
+            // Create a new Reworked Terminal tab.
+            TerminalToolWindowTabsManager tabsManager = TerminalToolWindowTabsManager.getInstance(project);
+            TerminalToolWindowTab tab = tabsManager.createTabBuilder()
+                    .workingDirectory(project.getBasePath())
+                    .tabName(libertyModule.getName())
+                    .requestFocus(true)
+                    .createTab();
+            TerminalView terminalView = tab.getView();
 
-                    Class<?> terminalEngineClass = Class.forName("org.jetbrains.plugins.terminal.TerminalEngine");
-                    Object classicEngine = Enum.valueOf((Class<Enum>) terminalEngineClass, "CLASSIC");
-                    Method setEngineMethod = optionsProviderClass
-                            .getMethod("setTerminalEngine", terminalEngineClass);
-                    setEngineMethod.invoke(optionsProviderInstance, classicEngine);
-                } catch (ClassNotFoundException | NoSuchMethodException |
-                         IllegalAccessException | InvocationTargetException e) {
-                    LOGGER.debug("Falling back to default terminal engine.", e);
+            // Retrieve the associated TerminalWidget via the tab's Content.
+            ToolWindow toolWindow = terminalToolWindowManager.getToolWindow();
+            if (toolWindow != null) {
+                Content content = findContentForView(tabsManager, terminalView);
+                TerminalWidget newWidget = content != null
+                        ? TerminalToolWindowManager.findWidgetByContent(content) : null;
+                if (newWidget != null) {
+                    libertyModule.setTerminalView(terminalView);
+                    libertyModule.setTerminalWidget(newWidget);
+                    return newWidget;
                 }
             }
-
-            // create a new terminal tab
-            ShellTerminalWidget newTerminal = ShellTerminalWidget.toShellJediTermWidgetOrThrow(
-                    terminalToolWindowManager.createShellWidget(project.getBasePath(), libertyModule.getName(),
-                            true, true));
-            libertyModule.setShellWidget(newTerminal);
+            // Fallback: store the view and widget from a fresh createShellWidget call.
+            TerminalWidget newTerminal = terminalToolWindowManager.createShellWidget(
+                    project.getBasePath(), libertyModule.getName(), true, true);
+            libertyModule.setTerminalWidget(newTerminal);
             return newTerminal;
         }
         return widget;
     }
 
-    /**
-     * Determines whether the IntelliJ terminal engine should be forced to "CLASSIC"
-     * Return {@code true} for all IntelliJ versions starting with 2025.1.x,
-     *          except for the explicitly excluded versions: 2025.1, 2025.1.1, 2025.1.1.1
-     * Return {@code false} for all other versions (e.g., 2024.x and 2025.2+)
-     *
-     * @return {@code true} if the IDE version requires forcing the "CLASSIC"
-     *          terminal engine; {@code false} otherwise.
-     */
-    private static boolean shouldForceClassicTerminal() {
-        ApplicationInfo appInfo = ApplicationInfo.getInstance();
-        String fullVersion = appInfo.getFullVersion();
-
-        if (!fullVersion.startsWith("2025.1")) {
-            return false;
+    /** Returns the {@link Content} for the tab hosting the given {@link TerminalView}, or {@code null}. */
+    private static Content findContentForView(TerminalToolWindowTabsManager tabsManager, TerminalView targetView) {
+        for (TerminalToolWindowTab tab : tabsManager.getTabs()) {
+            if (tab.getView().equals(targetView)) {
+                return tab.getContent();
+            }
         }
-
-        // Explicitly exclude safe builds
-        Set<String> excluded = Set.of("2025.1", "2025.1.1", "2025.1.1.1");
-        return !excluded.contains(fullVersion);
+        return null;
     }
 
-    public static void setFocusToWidget(Project project, ShellTerminalWidget widget) {
+    public static void setFocusToWidget(Project project, TerminalWidget widget) {
+        if (widget == null) return;
         TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow();
+        if (toolWindow == null) return;
 
-        if (toolWindow != null && widget != null) {
-            ContentManager contentManager = toolWindow.getContentManager();
-            Content[] contents = contentManager.getContents();
+        ContentManager contentManager = toolWindow.getContentManager();
+        Content[] contents = contentManager.getContents();
 
-            int index = 0;
-            for (int i = 0; i < contents.length; i++) {
-                if (contents[i].getPreferredFocusableComponent().equals(widget)) {
-                    index = i;
-                    break;
-                }
+        int index = 0;
+        for (int i = 0; i < contents.length; i++) {
+            // Use TerminalToolWindowManager.findWidgetByContent to map Content -> TerminalWidget.
+            if (widget.equals(TerminalToolWindowManager.findWidgetByContent(contents[i]))) {
+                index = i;
+                break;
             }
-            if (contents.length > 0) {
-                Content terminalContent = contents[index];
-                contentManager.setSelectedContent(terminalContent);
-                terminalContent.getComponent().requestFocus();
-            }
+        }
+        if (contents.length > 0) {
+            Content terminalContent = contents[index];
+            contentManager.setSelectedContent(terminalContent);
+            terminalContent.getComponent().requestFocus();
         }
     }
 
@@ -292,20 +288,21 @@ public class LibertyProjectUtil {
      *
      * @param libertyModule
      * @param terminalToolWindowManager
-     * @return ShellTerminalWidget or null if it does not exist
+     * @return TerminalWidget or null if it does not exist
      */
-    public static ShellTerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
-        ShellTerminalWidget widget = libertyModule.getShellWidget();
-        // check if widget exists in terminal view
+    public static TerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
+        TerminalWidget widget = libertyModule.getTerminalWidget();
+        // check if widget still exists in terminal view
         if (widget != null) {
             for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
-                JBTerminalWidget jbTerminalWidget = JBTerminalWidget.asJediTermWidget(terminalWidget);
-                if (widget.equals(jbTerminalWidget)) {
+                if (widget.equals(terminalWidget)) {
                     return widget;
                 }
             }
         }
-        libertyModule.setShellWidget(null);
+        // Widget is gone – clear both the TerminalWidget and the TerminalView references.
+        libertyModule.setTerminalWidget(null);
+        libertyModule.setTerminalView(null);
         return null;
     }
 
