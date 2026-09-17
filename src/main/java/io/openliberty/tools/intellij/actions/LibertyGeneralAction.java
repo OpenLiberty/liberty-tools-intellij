@@ -15,27 +15,23 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
+import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public abstract class LibertyGeneralAction extends AnAction {
     protected static final Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
@@ -166,24 +162,35 @@ public abstract class LibertyGeneralAction extends AnAction {
     }
 
     /**
-     * Returns the Terminal widget for the corresponding Liberty module
+     * Returns {@code true} if the terminal prerequisite for the given action is NOT met —
+     * i.e. no terminal exists or dev mode is not running. Shows a user-facing error in that case.
+     * Callers should abort with {@code if (terminalNotReady(...)) return;}.
      *
-     * @param createWidget create Terminal widget if it does not already exist
-     * @return ShellTerminalWidget
+     * <p>Also opens a new Reworked Terminal tab when {@code createWidget} is {@code true}
+     * and no tab currently exists.
+     *
+     * @param createWidget {@code true} to open a new Reworked Terminal tab when none exists
+     * @param project      the current project
+     * @param buildFile    build file identifying the Liberty module
+     * @param actionCmd    human-readable action name used in error messages
+     * @return {@code true} if the action should abort (error already shown);
+     *         {@code false} if the terminal is available and the action may proceed
      */
-    protected ShellTerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    protected boolean terminalNotReady(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
-        // look for existing terminal tab
-        ShellTerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
-        // look for creating new terminal tab
-        ShellTerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
-        // Set Focus to existing terminal widget
-        LibertyProjectUtil.setFocusToWidget(project, existingWidget);
+        // Check for an existing Classic terminal tab associated with this module.
+        TerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
+        // Ensure a terminal tab exists — creates a Reworked Terminal tab if needed.
+        // Returns true when a usable terminal is available (existing widget, existing TerminalView,
+        // or a freshly created Reworked tab). Returns false only when createWidget=false and no tab exists.
+        boolean terminalAvailable = LibertyProjectUtil.ensureTerminalTab(project, libertyModule, createWidget, existingWidget);
+        // Bring the correct module's terminal tab into focus (works for both Reworked and Classic tabs).
+        LibertyProjectUtil.setFocusToModule(project, libertyModule, existingWidget);
 
-        // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        // hasRunningCommands() must not be called from the EDT (asserted since IntelliJ 2026.1)
-        if (widget == null || (!createWidget && !computeOffEdt(widget::hasRunningCommands))) {
+        // Shows error for actions where terminal widget does not exist or action requires a terminal
+        // to already exist with Liberty dev mode actively running.
+        if (!terminalAvailable || (!createWidget && LibertyActionUtil.isCommandNotRunning(libertyModule))) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
@@ -192,9 +199,9 @@ public abstract class LibertyGeneralAction extends AnAction {
             }
             notifyError(msg, project);
             LOGGER.warn(msg);
-            return null;
+            return true;
         }
-        return widget;
+        return false;
     }
 
     /**
@@ -210,24 +217,4 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @return The string representation of the action command being processed.
      */
     protected abstract String getActionCommandName();
-
-    /**
-     * Runs the given supplier on a pooled thread and blocks for the result.
-     * Use this to call APIs that assert they must not be called from the EDT.
-     *
-     * Method assisted by IBM Bob
-     */
-    private static <T> T computeOffEdt(Supplier<T> supplier) {
-        Future<T> future = ApplicationManager.getApplication().executeOnPooledThread(supplier::get);
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ProcessCanceledException(e);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) throw (RuntimeException) cause;
-            throw new RuntimeException(cause != null ? cause : e);
-        }
-    }
 }
