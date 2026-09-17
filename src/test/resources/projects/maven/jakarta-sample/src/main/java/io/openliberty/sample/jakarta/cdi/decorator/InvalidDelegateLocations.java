@@ -115,3 +115,38 @@ class ValidDelegateOnMethodParam implements PaymentService {
         delegate.processPayment(amount);
     }
 }
+
+/**
+ * Invalid: @Delegate on parameter of an @Inject non-void method (non-initializer).
+ * A non-void @Inject method is not an initializer method per CDI spec.
+ */
+@Decorator
+@Dependent
+class DelegateOnNonVoidInjectMethod implements PaymentService {
+
+    @Inject
+    public PaymentService buildDelegate(@Delegate PaymentService delegate) {
+        return delegate;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+    }
+}
+
+/**
+ * Invalid: @Delegate on parameter of a static @Inject void method (non-initializer).
+ * Static methods cannot be initializer methods per CDI spec.
+ */
+@Decorator
+@Dependent
+class DelegateOnStaticInjectMethod implements PaymentService {
+
+    @Inject
+    public static void setDelegate(@Delegate PaymentService delegate) {
+    }
+
+    @Override
+    public void processPayment(double amount) {
+    }
+}
