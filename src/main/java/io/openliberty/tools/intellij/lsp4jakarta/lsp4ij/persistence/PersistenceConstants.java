@@ -24,6 +24,8 @@ public class PersistenceConstants {
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
+    public static final String EMBEDDABLE = "jakarta.persistence.Embeddable";
+    public static final String IDCLASS = "jakarta.persistence.IdClass";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
     public static final String MAPKEY = "jakarta.persistence.MapKey";
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
@@ -60,6 +62,8 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
 
 
+    public static final String DIAGNOSTIC_CODE_EMBEDDED_ID_TYPE_NOT_EMBEDDABLE = "EmbeddedIdTypeNotAnnotatedWithEmbeddable";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_TYPE_NOT_EMBEDDABLE = "IdClassTypeNotAnnotatedWithEmbeddable";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
 
