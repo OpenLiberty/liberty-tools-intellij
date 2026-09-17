@@ -15,14 +15,6 @@ import java.util.List;
 /**
  * Common base class for build-tool metadata extracted from a project's build file.
  *
- * <p>Concrete subclasses are responsible for parsing the relevant build file and
- * populating the fields declared here.  Two subclasses are expected:</p>
- * <ul>
- *   <li>{@code MavenProjectMetadata} – parses a {@code pom.xml}</li>
- *   <li>{@code GradleProjectMetadata} – parses {@code build.gradle} /
- *       {@code settings.gradle} (Groovy and Kotlin DSL)</li>
- * </ul>
- *
  * <p>This class is intentionally kept free of any build-tool specifics so that
  * the multi-module relationship model in
  * {@link io.openliberty.tools.intellij.LibertyModules} can treat Maven and
@@ -34,16 +26,13 @@ public abstract class AbstractProjectMetadata {
     protected final String buildFilePath;
 
     /**
-     * The name that identifies this project (Maven {@code artifactId} or
-     * Gradle {@code rootProject.name}).  May be {@code null} when it cannot be
-     * determined from the build file.
+     * The name that identifies this project.
      */
     protected String projectName;
 
     /**
      * The name of the parent/aggregator project, as declared in this module's
-     * own build file (Maven {@code <parent>/<artifactId>}, Gradle parent-directory
-     * detection).  {@code null} for standalone or root projects.
+     * own build file.
      */
     protected String parentProjectName;
 
