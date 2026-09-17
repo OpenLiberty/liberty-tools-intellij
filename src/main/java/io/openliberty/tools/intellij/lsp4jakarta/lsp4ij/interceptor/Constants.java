@@ -60,4 +60,13 @@ public class Constants {
 
     public static final String PRIORITY_FQ_NAME = "jakarta.annotation.Priority";
 
+    /* Diagnostic code for invalid lifecycle callback interceptor method signature */
+    public static final String DIAGNOSTIC_CODE_INVALID_LIFECYCLE_CALLBACK_SIGNATURE = "InvalidLifecycleCallbackInterceptorMethodSignature";
+
+    /* Fully qualified name of java.lang.Object */
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
+
+    /* Fully qualified name of void (as used by PsiType) */
+    public static final String VOID_TYPE = "void";
+
 }
