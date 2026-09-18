@@ -96,7 +96,7 @@ public abstract class AbstractProjectMetadata {
      * by this project.  Never {@code null}; returns an empty list for leaf projects.
      */
     public List<String> getSubprojects() {
-        return subprojects != null ? subprojects : new ArrayList<>();
+        return subprojects;
     }
 
     /**
