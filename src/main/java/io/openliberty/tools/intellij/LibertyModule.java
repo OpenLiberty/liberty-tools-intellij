@@ -18,8 +18,6 @@ import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
 import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -236,7 +234,7 @@ public class LibertyModule {
      * registered under this aggregator.
      */
     public List<LibertyModule> getChildLibertyModules() {
-        return Collections.unmodifiableList(new ArrayList<>(childModules));
+        return List.copyOf(childModules);
     }
 
     /** Returns the current dev-mode lifecycle state of this module. */
