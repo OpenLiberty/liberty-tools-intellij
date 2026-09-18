@@ -104,7 +104,7 @@ public abstract class AbstractProjectMetadata {
      * declared in this module's build file.  Never {@code null}.
      */
     public List<String> getProjectDependencies() {
-        return projectDependencies != null ? projectDependencies : new ArrayList<>();
+        return projectDependencies;
     }
 
     /** Returns {@code true} when the Liberty Maven/Gradle plugin is configured. */
