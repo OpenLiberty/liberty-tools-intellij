@@ -88,9 +88,6 @@ public class AnnotationUtil {
      * @return the resolved meta-annotation, or {@code null} if not present
      */
     public static PsiAnnotation getMetaAnnotation(PsiAnnotation annotation, PsiClass type, String metaAnnotationFQN) {
-        if (!hasMetaAnnotation(annotation, type, metaAnnotationFQN)) {
-            return null;
-        }
         String annotationName = annotation.getQualifiedName();
         if (annotationName == null) {
             return null;
