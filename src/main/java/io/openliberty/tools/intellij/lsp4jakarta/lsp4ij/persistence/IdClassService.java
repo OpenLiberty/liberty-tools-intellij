@@ -29,16 +29,12 @@ import java.util.Map;
  *
  * <p>Implements the rules from Jakarta Persistence 3.0 spec §2.4 and §2.4.1.1:
  * <ul>
- *   <li>Every member of the id class must correspond by name to an {@code @Id}
- *       field or property in the entity ({@code IdClassMemberMissingInEntity}).</li>
  *   <li>Every {@code @Id} field or property in the entity must have a corresponding
  *       member in the id class ({@code IdClassMemberMissingInKeyClass}).</li>
  *   <li>Corresponding members must have matching types. For relationship
  *       {@code @Id} attributes ({@code @ManyToOne} / {@code @OneToOne}), the
  *       expected key-class type is the parent entity's PK type, not the
  *       relationship type itself (spec §2.4.1.1, third bullet).</li>
- *   <li>When property-based access is used, each getter in the id class must be
- *       {@code public} or {@code protected} ({@code IdClassPropertyNotPublicOrProtected}).</li>
  * </ul>
  * </p>
  */
@@ -50,7 +46,6 @@ class IdClassService {
      * match per Jakarta Persistence spec §2.4 and §2.4.1.1.
      *
      * @param entityType        the {@code @Entity} class under inspection
-     * @param unit              the PSI file containing the entity
      * @param idClassAnnotation the {@code @IdClass} annotation on the entity
      * @param idMembers         the members of the entity annotated with {@code @Id}
      * @param diagnostics       the list to add diagnostics to
@@ -64,58 +59,49 @@ class IdClassService {
             return;
         }
 
-        // Infer access type from where @Id annotations are placed on the entity.
-        // If any @Id is on a field → field-based access; if all are on methods → property-based access.
-        boolean entityUsesFieldAccess = idMembers.stream().anyMatch(m -> m instanceof PsiField);
+        // Infer access type: if any @Id is on a field → field-based; otherwise → property-based.
+        boolean fieldAccess = idMembers.stream().anyMatch(m -> m instanceof PsiField);
 
-        // Build a name→type map for the entity's @Id members.
-        // For relationship @Id members (@ManyToOne / @OneToOne), the type stored in the
-        // key class must be the parent entity's PK type, not the relationship type itself
-        // (Jakarta Persistence 3.0 spec §2.4.1.1, third bullet).
+        // Build name→expectedType map for entity @Id members.
+        // For @ManyToOne / @OneToOne @Id members the expected type is the parent entity's
+        // PK type, not the relationship type (spec §2.4.1.1, third bullet).
         Map<String, String> entityIdMap = new HashMap<>();
         for (PsiJvmModifiersOwner member : idMembers) {
-            String name = entityUsesFieldAccess
+            String name = fieldAccess
                     ? ((PsiNamedElement) member).getName()
                     : propertyNameFromGetter(((PsiNamedElement) member).getName());
-            if (name == null) {
-                continue;
+            if (name != null) {
+                entityIdMap.put(name, resolveExpectedKeyClassType(member));
             }
-            String typeFqn = resolveExpectedKeyClassType(member);
-            entityIdMap.put(name, typeFqn);
         }
 
-        // Build a name→type map for the key class, using the same access mode.
+        // Build name→type map for key class members using the same access mode.
         Map<String, String> keyClassMap = new HashMap<>();
-        if (entityUsesFieldAccess) {
+        if (fieldAccess) {
             for (PsiField field : keyClass.getFields()) {
-                if (field.hasModifierProperty(PsiModifier.STATIC)
-                        || field.hasModifierProperty(PsiModifier.TRANSIENT)) {
-                    continue;
+                if (!field.hasModifierProperty(PsiModifier.STATIC)
+                        && !field.hasModifierProperty(PsiModifier.TRANSIENT)) {
+                    keyClassMap.put(field.getName(), field.getType().getCanonicalText());
                 }
-                keyClassMap.put(field.getName(), field.getType().getCanonicalText());
             }
         } else {
-            // Property-based access: inspect getter methods.
             for (PsiMethod method : keyClass.getMethods()) {
                 String propName = propertyNameFromGetter(method.getName());
-                if (propName == null || method.getParameterList().getParametersCount() != 0) {
-                    continue;
+                if (propName != null && method.getParameterList().getParametersCount() == 0) {
+                    PsiType returnType = method.getReturnType();
+                    keyClassMap.put(propName, returnType != null ? returnType.getCanonicalText() : null);
                 }
-                PsiType returnType = method.getReturnType();
-                keyClassMap.put(propName, returnType != null ? returnType.getCanonicalText() : null);
             }
         }
 
-        // Every entity @Id member must have a matching member in the key class,
-        // and when both exist their types must be the same.
+        // Check every entity @Id member against the key class map.
         for (PsiJvmModifiersOwner idMember : idMembers) {
-            String memberName = entityUsesFieldAccess
+            String memberName = fieldAccess
                     ? ((PsiNamedElement) idMember).getName()
                     : propertyNameFromGetter(((PsiNamedElement) idMember).getName());
             if (memberName == null) {
                 continue;
             }
-
             if (!keyClassMap.containsKey(memberName)) {
                 diagnostics.add(diagnostic((PsiElement) idMember,
                         Messages.getMessage("IdClassMemberMissingInKeyClass", memberName),
@@ -137,15 +123,10 @@ class IdClassService {
      * given entity {@code @Id} member, following Jakarta Persistence spec §2.4.1.1.
      *
      * <ul>
-     *   <li>For a <em>basic</em> {@code @Id} field or property, this is simply the
-     *       declared type of that member.</li>
-     *   <li>For a <em>relationship</em> {@code @Id} (annotated with {@code @ManyToOne}
-     *       or {@code @OneToOne}), the key-class must hold the parent entity's PK type:
-     *       <ul>
-     *         <li>Simple parent PK → type of the parent's {@code @Id} field/property.</li>
-     *         <li>Composite parent PK ({@code @IdClass}) → the {@code @IdClass} type.</li>
-     *       </ul>
-     *   </li>
+     *   <li>For a basic {@code @Id} field or property this is the declared type.</li>
+     *   <li>For a relationship {@code @Id} ({@code @ManyToOne} / {@code @OneToOne}),
+     *       the key-class must hold the parent entity's PK type (simple PK) or
+     *       {@code @IdClass} type (composite PK).</li>
      * </ul>
      *
      * @param member the entity {@code @Id} field or method
@@ -154,24 +135,18 @@ class IdClassService {
     private String resolveExpectedKeyClassType(PsiJvmModifiersOwner member) {
         String rawType = resolvedTypeName(member);
 
-        // Detect whether this @Id member is also a relationship (@ManyToOne / @OneToOne).
-        boolean isRelationship = false;
-        for (PsiAnnotation ann : member.getAnnotations()) {
-            String qualName = ann.getQualifiedName();
-            if (PersistenceConstants.MANYTOONE.equals(qualName)
-                    || PersistenceConstants.ONETOONE.equals(qualName)) {
-                isRelationship = true;
-                break;
-            }
-        }
-
+        // Only relationship @Id fields need special handling.
+        boolean isRelationship = member.hasAnnotation(PersistenceConstants.MANYTOONE)
+                || member.hasAnnotation(PersistenceConstants.ONETOONE);
         if (!isRelationship || rawType == null) {
             return rawType;
         }
 
-        // Resolve the parent entity PsiClass.
-        PsiType memberPsiType = memberPsiType(member);
-        if (!(memberPsiType instanceof PsiClassType parentClassType)) {
+        // Resolve the parent entity PsiClass from the field/method type.
+        PsiType memberType = member instanceof PsiField
+                ? ((PsiField) member).getType()
+                : ((PsiMethod) member).getReturnType();
+        if (!(memberType instanceof PsiClassType parentClassType)) {
             return rawType;
         }
         PsiClass parentClass = parentClassType.resolve();
@@ -179,23 +154,21 @@ class IdClassService {
             return rawType;
         }
 
-        // Check whether the parent has @IdClass (composite PK).
+        // If the parent has @IdClass (composite PK), return that class's type.
         PsiAnnotation idClassAnn = parentClass.getAnnotation(PersistenceConstants.IDCLASS);
         if (idClassAnn != null) {
             PsiAnnotationMemberValue value = idClassAnn.findAttributeValue("value");
             if (value instanceof PsiClassObjectAccessExpression classExpr) {
-                PsiType idClassType = classExpr.getOperand().getType();
-                return idClassType.getCanonicalText();
+                return classExpr.getOperand().getType().getCanonicalText();
             }
         }
 
-        // Simple parent PK: find the single @Id field in the parent and return its type.
+        // Simple parent PK: return the type of the parent's @Id field or getter.
         for (PsiField field : parentClass.getFields()) {
             if (field.getAnnotation(PersistenceConstants.ID) != null) {
                 return field.getType().getCanonicalText();
             }
         }
-        // Property-based parent PK: find the @Id getter.
         for (PsiMethod method : parentClass.getMethods()) {
             if (method.getAnnotation(PersistenceConstants.ID) != null) {
                 PsiType rt = method.getReturnType();
@@ -224,7 +197,7 @@ class IdClassService {
     }
 
     /**
-     * Returns the canonical type name of a {@link PsiJvmModifiersOwner}.
+     * Returns the canonical type name of a field or getter method.
      *
      * @param member the field or method to inspect
      * @return canonical type name, or {@code null}
@@ -241,38 +214,22 @@ class IdClassService {
     }
 
     /**
-     * Returns the {@link PsiType} of a field or method return type.
-     *
-     * @param member the field or method to inspect
-     * @return the {@link PsiType}, or {@code null}
-     */
-    private PsiType memberPsiType(PsiJvmModifiersOwner member) {
-        if (member instanceof PsiField field) {
-            return field.getType();
-        }
-        if (member instanceof PsiMethod method) {
-            return method.getReturnType();
-        }
-        return null;
-    }
-
-    /**
      * Derives a Java bean property name from a getter method name.
+     * Returns {@code null} if the method name does not follow getter conventions.
      *
-     * @param methodName the method name to inspect
-     * @return the derived property name, or {@code null}
+     * @param methodName the getter method name (e.g. {@code "getName"}, {@code "isActive"})
+     * @return the property name (e.g. {@code "name"}, {@code "active"}), or {@code null}
      */
     private String propertyNameFromGetter(String methodName) {
         if (methodName == null) {
             return null;
         }
-        String suffix = null;
+        String suffix;
         if (methodName.startsWith("get") && methodName.length() > 3) {
             suffix = methodName.substring(3);
         } else if (methodName.startsWith("is") && methodName.length() > 2) {
             suffix = methodName.substring(2);
-        }
-        if (suffix == null || suffix.isEmpty()) {
+        } else {
             return null;
         }
         return Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
