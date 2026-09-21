@@ -41,13 +41,13 @@ public abstract class AbstractProjectMetadata {
      * project (Maven {@code <modules>}, Gradle {@code include(...)}).
      * Empty list for leaf/standalone projects.
      */
-    protected List<String> subprojects = new ArrayList<>();
+    protected final List<String> subprojects = new ArrayList<>();
 
     /**
      * Artifact IDs / project-path segments of inter-project dependencies
      * declared in this module's build file.
      */
-    protected List<String> projectDependencies = new ArrayList<>();
+    protected final List<String> projectDependencies = new ArrayList<>();
 
     /** {@code true} when the Liberty Maven/Gradle plugin is configured for this project. */
     protected boolean hasLibertyPlugin;
