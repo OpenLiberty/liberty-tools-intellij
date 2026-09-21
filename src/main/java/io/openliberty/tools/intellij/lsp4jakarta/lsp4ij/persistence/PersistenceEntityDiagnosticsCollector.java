@@ -23,8 +23,8 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,10 +55,14 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                 /* ============ Entity Annotation Diagnostics =========== */
                 PsiAnnotation EntityAnnotation = null;
+                PsiAnnotation idClassAnnotation = null;
                 PsiAnnotation inheritanceAnnotation = null;
                 for (PsiAnnotation annotation : allAnnotations) {
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
+                    }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.IDCLASS)) {
+                        idClassAnnotation = annotation;
                     }
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.INHERITANCE)) {
                         inheritanceAnnotation = annotation;
@@ -202,6 +206,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     // Validate @Version annotation usage
                     if(!versionAnnotatedElements.isEmpty()){
                         validateVersionAnnotation(versionAnnotatedElements,type, unit, diagnostics);
+                    }
+
+                    // Validate @IdClass member alignment when the entity uses composite keys
+                    // Specification: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a132
+                    if (idClassAnnotation != null && idMembers.size() > 1) {
+                        validateIdClassMemberAlignment(type, unit, idClassAnnotation, idMembers, diagnostics);
                     }
 
                     if (!hasPrimaryKey) {
@@ -490,6 +500,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         return false;
     }
 
+    private void validateIdClassMemberAlignment(PsiClass entityType, PsiJavaFile unit,
+                                                PsiAnnotation idClassAnnotation,
+                                                List<PsiJvmModifiersOwner> idMembers,
+                                                List<Diagnostic> diagnostics) {
+        new IdClassService().validate(entityType, unit, idClassAnnotation, idMembers, diagnostics);
+    }
 
     /**
      * Validates that a field or method annotated with @Id/@Version has a supported type.
@@ -517,21 +533,30 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         // Get canonical type name for validation
         String typeName = elementType.getCanonicalText();
 
-        boolean isValidType = false;
-        if(PersistenceConstants.ID.equals(candidate)){
-            // Check if type is an array (arrays are not valid @Id types)
-            boolean isArrayType = elementType instanceof PsiArrayType;
-            // Check if type is in the list of valid @Id types
-            isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
-            // Create diagnostic if type is invalid
-            if (!isValidType) {
-                diagnostics.add(createDiagnostic(element, unit,
-                        Messages.getMessage("InvalidIdType"),
-                        PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
-                        DiagnosticSeverity.Error));
+        if (PersistenceConstants.ID.equals(candidate)) {
+            // Relationship @Id fields (@ManyToOne / @OneToOne) hold an entity type, not a
+            // basic type — skip the primitive/wrapper type check for them.
+            boolean isRelationshipId = false;
+            for (PsiAnnotation ann : element.getAnnotations()) {
+                String qualName = ann.getQualifiedName();
+                if (PersistenceConstants.MANYTOONE.equals(qualName)
+                        || PersistenceConstants.ONETOONE.equals(qualName)) {
+                    isRelationshipId = true;
+                    break;
+                }
             }
-        }else if(PersistenceConstants.VERSION.equals(candidate)){
-            isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
+            if (!isRelationshipId) {
+                boolean isArrayType = elementType instanceof PsiArrayType;
+                boolean isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
+                if (!isValidType) {
+                    diagnostics.add(createDiagnostic(element, unit,
+                            Messages.getMessage("InvalidIdType"),
+                            PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
+                            DiagnosticSeverity.Error));
+                }
+            }
+        } else if (PersistenceConstants.VERSION.equals(candidate)) {
+            boolean isValidType = PersistenceConstants.SET_OF_VALID_VERSION_TYPES.contains(typeName);
             if (!isValidType) {
                 diagnostics.add(createDiagnostic(element, unit,
                         Messages.getMessage("InvalidVersionFieldOrPropertyType"),
