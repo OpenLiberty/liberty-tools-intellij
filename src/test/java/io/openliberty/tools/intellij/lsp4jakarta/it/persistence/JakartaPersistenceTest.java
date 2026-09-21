@@ -1168,4 +1168,99 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         // Valid: @Entity + @Inheritance extending @MappedSuperclass — no @Entity ancestor
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    @Test
+    public void testIdClassMemberAlignmentValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberAlignmentValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id fields perfectly match key class members by name and type — no diagnostics expected.
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testIdClassMemberNameMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberNameMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id field "firstName" has no match in key class — single diagnostic on the @Id field.
+        Diagnostic firstNameMissingInKeyClassDiagnostic = d(28, 19, 28,
+                "The entity @Id field or property 'firstName' does not have a corresponding member in the @IdClass key class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberMissingInKeyClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, firstNameMissingInKeyClassDiagnostic);
+    }
+
+    @Test
+    public void testIdClassMemberTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id field "firstName" is String but key class field is int.
+        Diagnostic typeMismatchDiagnostic = d(28, 19, 28,
+                "The type of @Id field or property 'firstName' in the entity ('java.lang.String') does not match the type of the corresponding member in the @IdClass key class ('int').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, typeMismatchDiagnostic);
+    }
+
+    @Test
+    public void testIdClassManyToOneValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "dept" resolves to Department's PK type (int),
+        // and the key class holds int — types match, no diagnostics expected.
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testIdClassManyToOneTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "dept" resolves to Department's PK type (int),
+        // but the key class holds String — type mismatch expected.
+        Diagnostic deptTypeMismatchDiagnostic = d(35, 23, 27,
+                "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
+    }
+
 }
