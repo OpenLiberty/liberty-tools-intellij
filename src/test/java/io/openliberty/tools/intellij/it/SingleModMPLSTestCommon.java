@@ -250,15 +250,17 @@ public abstract class SingleModMPLSTestCommon {
 
     /**
      * Tests MicroProfile Language Server diagnostic support for microprofile config entries
-     * in the microprofile-config.properties file
+     * in the microprofile-config.properties file. Uses a custom Java enum @ConfigProperty
+     * (app.mode / AppMode) so that supplying an invalid value triggers a diagnostic from
+     * LSP4MP for an unrecognised enum constant.
      */
     @Test
     @Video
     public void testDiagnosticInMicroProfileConfigProperties() {
-        String MPCfgSnippet = "mp.health.disable";
-        String MPCfgNameChooserSnippet = "procedures";
-        String incorrectValue = "none";
-        String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
+        String configKey = "app.mode";
+        String incorrectValue = "invalid";
+        // LSP4MP diagnostic message for an unrecognised enum value (SRCFG00049)
+        String expectedHoverData = "SRCFG00049: Cannot convert invalid to enum class";
 
         // get focus on file tab prior to copy
         UIBotTestUtils.clickOnFileTab(remoteRobot, "microprofile-config.properties");
@@ -267,7 +269,8 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            // Type the full "app.mode=invalid" line directly — no LS autocomplete needed
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFileDirect(remoteRobot, "microprofile-config.properties", configKey, incorrectValue);
 
             //move cursor to hover point
             UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, incorrectValue, "microprofile-config.properties", UIBotTestUtils.PopupType.DIAGNOSTIC);
@@ -287,12 +290,10 @@ public abstract class SingleModMPLSTestCommon {
     @Test
     @Video
     public void testQuickFixInMicroProfileConfigProperties() {
-        String MPCfgSnippet = "mp.health.disable";
-        String MPCfgNameChooserSnippet = "procedures";
-        String incorrectValue = "none";
-        String quickfixChooserString = "Replace with 'true'?";
-        String correctedValue = "mp.health.disable-default-procedures=true";
-        String expectedHoverData = "Type mismatch: boolean expected. By default, this value will be interpreted as 'false'";
+        String configKey = "app.mode";
+        String incorrectValue = "invalid";
+        String quickfixChooserString = "Replace with 'DEVELOPMENT'?";
+        String correctedValue = "app.mode=DEVELOPMENT";
 
         Path pathToMpCfgProperties = Paths.get(projectsPath, projectName,"src", "main", "resources", "META-INF", "microprofile-config.properties");
 
@@ -303,7 +304,7 @@ public abstract class SingleModMPLSTestCommon {
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFile(remoteRobot, "microprofile-config.properties", MPCfgSnippet, MPCfgNameChooserSnippet, incorrectValue, false);
+            UIBotTestUtils.insertConfigIntoMPConfigPropertiesFileDirect(remoteRobot, "microprofile-config.properties", configKey, incorrectValue);
 
             //move cursor to hover point
             UIBotTestUtils.hoverForQuickFixInAppFile(remoteRobot, incorrectValue, "microprofile-config.properties", quickfixChooserString);

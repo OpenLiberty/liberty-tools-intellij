@@ -56,6 +56,9 @@ public class MicroProfileServer extends OSProcessStreamConnectionProvider {
     public Object getInitializationOptions(VirtualFile rootUri) {
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> settings = UserDefinedMicroProfileSettings.getInstance(project).toSettingsForMicroProfileLS();
+        // Do not send validation at startup — it overwrites the LS built-in defaults
+        // and causes getDiagnosticSeverity() to return null, breaking Java diagnostics.
+        ((Map<String, Object>) ((Map<String, Object>) settings.get("microprofile")).get("tools")).remove("validation");
         root.put("settings", settings);
         Map<String, Object> extendedClientCapabilities = new HashMap<>();
         Map<String, Object> commands = new HashMap<>();
