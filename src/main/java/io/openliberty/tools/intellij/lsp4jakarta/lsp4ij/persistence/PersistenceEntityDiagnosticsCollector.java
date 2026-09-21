@@ -85,12 +85,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(method);
                             // Validate @Version method return type
-                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.VERSION);
+                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.VERSION, false);
                         }
                         // find @Id annotation usage on methods
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.ID)) {
                             // Validate @Id method return type
-                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.ID);
+                            validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.ID, idClassAnnotation != null);
                         }
 
                         if (isConstructorMethod(method)) {
@@ -138,12 +138,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(field);
                             // Validate @Version field type
-                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.VERSION);
+                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.VERSION, false);
                         }
-                        // find @Id annotation usage on methods
+                        // find @Id annotation usage on fields
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.ID)) {
-                            // Validate @Id field return type
-                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.ID);
+                            // Validate @Id field type
+                            validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.ID, idClassAnnotation != null);
                         }
 
                         // If a field is static, we do not care about it, we care about all other field
@@ -515,7 +515,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @param diagnostics list to add diagnostics to
      * @param candidate Check @Id/@Version
      */
-    private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics, String candidate) {
+    private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                           String candidate, boolean entityHasIdClass) {
         PsiType elementType = null;
 
         // Get the type based on whether it's a field or method
@@ -534,21 +535,12 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         String typeName = elementType.getCanonicalText();
 
         if (PersistenceConstants.ID.equals(candidate)) {
-            // Relationship @Id fields (@ManyToOne / @OneToOne) hold an entity type, not a
-            // basic type — skip the primitive/wrapper type check for them.
-            boolean isRelationshipId = false;
-            for (PsiAnnotation ann : element.getAnnotations()) {
-                String qualName = ann.getQualifiedName();
-                if (PersistenceConstants.MANYTOONE.equals(qualName)
-                        || PersistenceConstants.ONETOONE.equals(qualName)) {
-                    isRelationshipId = true;
-                    break;
-                }
-            }
-            if (!isRelationshipId) {
+            // When @IdClass is present the entity uses composite FK-based PKs (spec §2.4.1.1);
+            // @Id fields may hold entity types — InvalidIdType is not applicable.
+            // IdClassService validates correctness separately.
+            if (!entityHasIdClass) {
                 boolean isArrayType = elementType instanceof PsiArrayType;
-                boolean isValidType = !isArrayType && PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName);
-                if (!isValidType) {
+                if (isArrayType || !PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName)) {
                     diagnostics.add(createDiagnostic(element, unit,
                             Messages.getMessage("InvalidIdType"),
                             PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ID_TYPE, null,
