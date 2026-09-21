@@ -12,6 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.beans.Introspector;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
@@ -69,7 +70,7 @@ class IdClassService {
         for (PsiJvmModifiersOwner member : idMembers) {
             String name = fieldAccess
                     ? ((PsiNamedElement) member).getName()
-                    : propertyNameFromGetter(((PsiNamedElement) member).getName());
+                    : getterPropertyName(((PsiNamedElement) member).getName());
             if (name != null) {
                 entityIdMap.put(name, resolveExpectedKeyClassType(member));
             }
@@ -86,7 +87,7 @@ class IdClassService {
             }
         } else {
             for (PsiMethod method : keyClass.getMethods()) {
-                String propName = propertyNameFromGetter(method.getName());
+                String propName = getterPropertyName(method.getName());
                 if (propName != null && method.getParameterList().getParametersCount() == 0) {
                     PsiType returnType = method.getReturnType();
                     keyClassMap.put(propName, returnType != null ? returnType.getCanonicalText() : null);
@@ -98,7 +99,7 @@ class IdClassService {
         for (PsiJvmModifiersOwner idMember : idMembers) {
             String memberName = fieldAccess
                     ? ((PsiNamedElement) idMember).getName()
-                    : propertyNameFromGetter(((PsiNamedElement) idMember).getName());
+                    : getterPropertyName(((PsiNamedElement) idMember).getName());
             if (memberName == null) {
                 continue;
             }
@@ -157,9 +158,9 @@ class IdClassService {
         // If the parent has @IdClass (composite PK), return that class's type.
         PsiAnnotation idClassAnn = parentClass.getAnnotation(PersistenceConstants.IDCLASS);
         if (idClassAnn != null) {
-            PsiAnnotationMemberValue value = idClassAnn.findAttributeValue("value");
-            if (value instanceof PsiClassObjectAccessExpression classExpr) {
-                return classExpr.getOperand().getType().getCanonicalText();
+            PsiClass pkClass = resolveIdClass(idClassAnn);
+            if (pkClass != null) {
+                return pkClass.getQualifiedName();
             }
         }
 
@@ -180,18 +181,17 @@ class IdClassService {
     }
 
     /**
-     * Resolves the {@link PsiClass} referenced by an {@code @IdClass} annotation.
+     * Resolves the {@link PsiClass} referenced by an {@code @IdClass} annotation's
+     * {@code value} attribute (a class literal such as {@code EmployeePK.class}).
      *
      * @param idClassAnnotation the {@code @IdClass} annotation
      * @return the resolved key-class {@link PsiClass}, or {@code null} if it cannot be resolved
      */
     private PsiClass resolveIdClass(PsiAnnotation idClassAnnotation) {
         PsiAnnotationMemberValue value = idClassAnnotation.findAttributeValue("value");
-        if (value instanceof PsiClassObjectAccessExpression classExpr) {
-            PsiType type = classExpr.getOperand().getType();
-            if (type instanceof PsiClassType classType) {
-                return classType.resolve();
-            }
+        if (value instanceof PsiClassObjectAccessExpression classExpr
+                && classExpr.getOperand().getType() instanceof PsiClassType classType) {
+            return classType.resolve();
         }
         return null;
     }
@@ -214,25 +214,25 @@ class IdClassService {
     }
 
     /**
-     * Derives a Java bean property name from a getter method name.
+     * Derives a Java bean property name from a getter method name using
+     * {@link Introspector#decapitalize}, consistent with the approach in
+     * {@link PersistenceMapKeyDiagnosticsCollector}.
      * Returns {@code null} if the method name does not follow getter conventions.
      *
      * @param methodName the getter method name (e.g. {@code "getName"}, {@code "isActive"})
      * @return the property name (e.g. {@code "name"}, {@code "active"}), or {@code null}
      */
-    private String propertyNameFromGetter(String methodName) {
+    private String getterPropertyName(String methodName) {
         if (methodName == null) {
             return null;
         }
-        String suffix;
         if (methodName.startsWith("get") && methodName.length() > 3) {
-            suffix = methodName.substring(3);
-        } else if (methodName.startsWith("is") && methodName.length() > 2) {
-            suffix = methodName.substring(2);
-        } else {
-            return null;
+            return Introspector.decapitalize(methodName.substring(3));
         }
-        return Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
+        if (methodName.startsWith("is") && methodName.length() > 2) {
+            return Introspector.decapitalize(methodName.substring(2));
+        }
+        return null;
     }
 
     /**
