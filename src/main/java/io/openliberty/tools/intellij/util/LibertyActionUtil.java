@@ -13,6 +13,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.terminal.frontend.view.TerminalView;
 import com.intellij.terminal.frontend.view.TerminalViewSessionState;
+import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 
 // TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
@@ -100,9 +101,10 @@ public class LibertyActionUtil {
             return;
         }
         // Classic fallback.
-        if (libertyModule.getTerminalWidget() != null) {
-            libertyModule.getTerminalWidget().requestFocus();
-            libertyModule.getTerminalWidget().sendCommandToExecute(cmd);
+        TerminalWidget terminalWidget = libertyModule.getTerminalWidget();
+        if (terminalWidget != null) {
+            terminalWidget.requestFocus();
+            terminalWidget.sendCommandToExecute(cmd);
         }
     }
 }
