@@ -395,35 +395,25 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      */
     private void validatePKDateTemporal(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
 
-        PsiAnnotation[] annotations = null;
+        PsiAnnotation[] annotations = fieldOrProperty.getAnnotations();
         PsiAnnotation id = null, temporal = null;
         String typeFQ = null;
 
-        if (fieldOrProperty instanceof PsiMethod method) {
-            annotations = method.getAnnotations();
-            if (method.getReturnType() instanceof PsiClassType classType) {
-                PsiClass psiClass = classType.resolve();
-                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
-            }
-        } else if (fieldOrProperty instanceof PsiField field) {
-            annotations = field.getAnnotations();
-            if (field.getType() instanceof PsiClassType classType) {
-                PsiClass psiClass = classType.resolve();
-                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
-            }
+        PsiType memberType = DiagnosticsUtils.getMemberType(fieldOrProperty);
+        if (memberType instanceof PsiClassType classType) {
+            PsiClass psiClass = classType.resolve();
+            typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
         }
 
-        if (annotations != null) {
-            for (PsiAnnotation annotation : annotations) {
-                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                        PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+        for (PsiAnnotation annotation : annotations) {
+            String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
 
-                if (matchedAnnotation != null) {
-                    if (matchedAnnotation.equals(PersistenceConstants.ID)) {
-                        id = annotation;
-                    } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
-                        temporal = annotation;
-                    }
+            if (matchedAnnotation != null) {
+                if (matchedAnnotation.equals(PersistenceConstants.ID)) {
+                    id = annotation;
+                } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
+                    temporal = annotation;
                 }
             }
         }
@@ -512,14 +502,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @param candidate Check @Id/@Version
      */
     private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics, String candidate) {
-        PsiType elementType = null;
-
-        // Get the type based on whether it's a field or method
-        if (element instanceof PsiField) {
-            elementType = ((PsiField) element).getType();
-        } else if (element instanceof PsiMethod) {
-            elementType = ((PsiMethod) element).getReturnType();
-        }
+        PsiType elementType = DiagnosticsUtils.getMemberType(element);
 
         // If we couldn't determine the type, skip validation
         if (elementType == null) {
@@ -565,12 +548,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      */
     private void validateEmbeddableReferenceType(PsiJvmModifiersOwner member,
                                                  PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        PsiType memberType = null;
-        if (member instanceof PsiField field) {
-            memberType = field.getType();
-        } else if (member instanceof PsiMethod method) {
-            memberType = method.getReturnType();
-        }
+        PsiType memberType = DiagnosticsUtils.getMemberType(member);
 
         if (!(memberType instanceof PsiClassType classType)) {
             return;
@@ -622,9 +600,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
         boolean hasEmbeddable = isMatchedAnnotation(keyClass.getAnnotations(), PersistenceConstants.EMBEDDABLE);
         if (!hasEmbeddable) {
-            String simpleName = keyClass.getName();
             diagnostics.add(createDiagnostic(idClassAnnotation, unit,
-                    Messages.getMessage("IdClassTypeNotAnnotatedWithEmbeddable", simpleName),
+                    Messages.getMessage("IdClassTypeNotAnnotatedWithEmbeddable", keyClass.getName()),
                     PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_TYPE_NOT_EMBEDDABLE, null,
                     DiagnosticSeverity.Error));
         }
