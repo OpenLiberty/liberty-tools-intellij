@@ -4,8 +4,8 @@ import jakarta.interceptor.Interceptor;
 
 /**
  * Valid: @Interceptor subclass of SeparateFileSuperclassWithAroundConstruct,
- * defined in a separate source file. Drives the project-wide scan to record
- * the ancestor's FQN, suppressing the diagnostic on the superclass file.
+ * defined in a separate source file. Its presence is discovered by
+ * ClassInheritorsSearch, suppressing the diagnostic on the superclass file.
  */
 @Monitored
 @Interceptor

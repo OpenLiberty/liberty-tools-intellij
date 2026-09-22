@@ -7,7 +7,8 @@ import jakarta.interceptor.InvocationContext;
  * Valid: @AroundConstruct declared in a non-interceptor superclass whose
  * @Interceptor-annotated subclass is defined in a SEPARATE source file
  * (SeparateFileInterceptorSubclass.java).
- * The project-wide scan must suppress the diagnostic here.
+ * ClassInheritorsSearch finds the @Interceptor subclass and suppresses
+ * the diagnostic here.
  */
 public class SeparateFileSuperclassWithAroundConstruct {
 

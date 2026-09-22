@@ -21,12 +21,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.List;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.JakartaSearchSettings;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.ProjectWideNameScanner;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
@@ -63,18 +59,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		if (unit == null)
 			return;
 
-		// Guard: skip the expensive project-wide scan unless the file has a
-		// non-interceptor type with @AroundConstruct. Feature gate: disabled globally → no scan.
-		Set<String> interceptorAncestorFqns = Collections.emptySet();
-		if (fileHasNonInterceptorAroundConstruct(unit) && JakartaSearchSettings.SEARCH_ENGINE_DIAGNOSTICS_ENABLED) {
-			// Phase 1: collect FQNs of all non-interceptor types that are superclasses
-			// of an @Interceptor class in a different source file, project-wide.
-			Map<String, Integer> ancestorMap = ProjectWideNameScanner.scan(
-					unit.getProject(),
-					(psiClass, nameCount) -> extractInterceptorAncestors(psiClass, nameCount));
-			interceptorAncestorFqns = ancestorMap.keySet();
-		}
-		// Phase 2: validate all types in the current file.
+		// Validate all types in the current file.
 		PsiClass[] alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
 			if (isInterceptorTypeReferenced(type)) {
@@ -134,7 +119,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			// A class with @AroundInvoke or @AroundTimeout but no @Interceptor is still a target class
 			// for this check — only @Interceptor annotation exempts @AroundConstruct usage.
 			if (!isInterceptorType(type)) {
-				checkAroundConstructInTargetClass(type, unit, diagnostics, interceptorAncestorFqns);
+				checkAroundConstructInTargetClass(type, unit, diagnostics);
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
@@ -371,87 +356,59 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		}
 	}
 	
-	/**
-	 * Returns {@code true} if the file contains at least one non-{@code @Interceptor}
-	 * type that has a method annotated with {@code @AroundConstruct}.
-	 * Used as a cheap guard before the expensive project-wide scan.
-	 *
-	 * @param unit the PSI Java file to inspect
-	 * @return {@code true} if a scan is worth running
-	 */
-	private boolean fileHasNonInterceptorAroundConstruct(PsiJavaFile unit) {
-		for (PsiClass type : unit.getClasses()) {
-			if (isInterceptorType(type)) {
-				continue;
-			}
-			boolean hasAroundConstruct = Arrays.stream(type.getMethods())
-				.flatMap(method -> Arrays.stream(method.getModifierList().getAnnotations()))
-				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME));
-			if (hasAroundConstruct) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * For a given scanned class, if it is annotated with {@code @Interceptor},
-	 * walks up its superclass chain and records the FQN of every ancestor that
-	 * lives in a different source file than the interceptor class itself.
-	 *
-	 * <p>These ancestors are the non-interceptor superclasses that are permitted
-	 * to declare {@code @AroundConstruct} (Jakarta Interceptors spec 2.0).
-	 *
-	 * @param scannedClass the class currently visited by {@link ProjectWideNameScanner}
-	 * @param nameCount    accumulator map; key = FQN, value = occurrence count
-	 */
-	private void extractInterceptorAncestors(PsiClass scannedClass, Map<String, Integer> nameCount) {
-		if (!isInterceptorType(scannedClass)) {
-			return;
-		}
-		// Walk the superclass chain and record ancestors in a different file.
-		PsiFile interceptorFile = scannedClass.getContainingFile();
-		Set<PsiClass> visited = new HashSet<>();
-		PsiClass superClass = scannedClass.getSuperClass();
-		while (superClass != null && visited.add(superClass)) {
-			PsiFile superFile = superClass.getContainingFile();
-			if (superFile != null && !superFile.equals(interceptorFile)) {
-				nameCount.merge(superClass.getQualifiedName(), 1, Integer::sum);
-			}
-			superClass = superClass.getSuperClass();
-		}
-	}
+	// =========================================================================
+	// Validation — @AroundConstruct in target classes
+	// =========================================================================
 
 	/**
 	 * Checks if a non-interceptor class declares a method annotated with
 	 * {@code @AroundConstruct}, which is forbidden by the Jakarta Interceptors 2.0
-	 * specification. The diagnostic is suppressed when the class is a superclass of
-	 * an {@code @Interceptor}-annotated class declared in a different source file
+	 * specification. The diagnostic is suppressed when the class has at least one
+	 * {@code @Interceptor}-annotated subclass declared in a different source file
 	 * (spec permits {@code @AroundConstruct} in interceptor superclasses).
 	 *
-	 * @param type                    the non-interceptor type to check
-	 * @param unit                    the PSI Java file
-	 * @param diagnostics             the list to add diagnostics to
-	 * @param interceptorAncestorFqns FQNs of non-interceptor types that are superclasses
-	 *                                of an {@code @Interceptor} class in another file
+	 * @param type        the non-interceptor type to check
+	 * @param unit        the PSI Java file
+	 * @param diagnostics the list to add diagnostics to
 	 */
 	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
-												   List<Diagnostic> diagnostics,
-												   Set<String> interceptorAncestorFqns) {
-		// Suppress entirely when this class is already known to be an interceptor superclass.
-		if (interceptorAncestorFqns.contains(type.getQualifiedName())) {
-			return;
-		}
+												   List<Diagnostic> diagnostics) {
 		Arrays.stream(type.getMethods())
 			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
 				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
 			.findFirst()
 			.ifPresent(method -> {
+				// Suppress when an @Interceptor subclass exists in a different source file —
+				// spec allows @AroundConstruct in interceptor superclasses.
+				if (hasInterceptorSubclassInOtherFile(type, unit)) {
+					return;
+				}
 				Range range = PositionUtils.toNameRange(method);
 				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
 				Diagnostic diagnostic = new Diagnostic(range, msg);
 				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
 				diagnostics.add(diagnostic);
 			});
+	}
+
+	/**
+	 * Returns {@code true} if {@code type} has at least one subclass (in any source
+	 * file other than the one containing {@code type}) that is annotated with
+	 * {@code @Interceptor}.
+	 *
+	 * <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
+	 * project scan.
+	 *
+	 * @param type the type whose subtype hierarchy is to be searched
+	 * @param unit the PSI Java file that contains {@code type}
+	 * @return {@code true} if an {@code @Interceptor} subclass exists in another file
+	 */
+	private boolean hasInterceptorSubclassInOtherFile(PsiClass type, PsiJavaFile unit) {
+		GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
+		return ClassInheritorsSearch.search(type, scope, true)
+				.anyMatch(subtype -> {
+					PsiFile subFile = subtype.getContainingFile();
+					return subFile != null && !subFile.equals(unit) && isInterceptorType(subtype);
+				});
 	}
 }

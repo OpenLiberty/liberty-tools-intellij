@@ -1665,8 +1665,8 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Valid: @AroundConstruct declared in a non-interceptor superclass whose
         // @Interceptor-annotated subclass (SeparateFileInterceptorSubclass.java) lives
-        // in a separate source file. The project-wide scan must recognise this class
-        // as an interceptor superclass and suppress the diagnostic.
+        // in a separate source file. The ClassInheritorsSearch finds the @Interceptor
+        // subclass and suppresses the diagnostic.
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
@@ -1684,8 +1684,8 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Invalid: @AroundConstruct declared in a non-interceptor superclass whose only
         // subclass (InvalidSeparateFileTargetSubclass.java) is also non-interceptor.
-        // No @Interceptor class extends this — the project-wide scan must NOT suppress
-        // the diagnostic.
+        // No @Interceptor class extends this — the ClassInheritorsSearch finds no
+        // @Interceptor subclass, so the diagnostic must fire.
         Diagnostic aroundConstructInSeparateSuperclass = JakartaForJavaAssert.d(13, 16, 25,
                 "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
@@ -1729,8 +1729,8 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
 
         // Valid: @AroundConstruct declared in a common ancestor of two subclasses —
         // one @Interceptor (InterceptorSubclassOfShared) and one non-interceptor
-        // (NonInterceptorSubclassOfShared) in separate files. The interceptor subclass
-        // drives the scan — diagnostic must be suppressed.
+        // (NonInterceptorSubclassOfShared) in separate files. The ClassInheritorsSearch
+        // finds the @Interceptor subclass — diagnostic must be suppressed.
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 }
