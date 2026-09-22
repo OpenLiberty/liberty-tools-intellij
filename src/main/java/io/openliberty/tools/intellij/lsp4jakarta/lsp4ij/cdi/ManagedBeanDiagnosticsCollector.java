@@ -410,6 +410,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 // A @Singleton or @Stateless class with no declared scope may still inherit an invalid
                 // scope from a superclass via @Inherited CDI scope annotations. Check these cases
                 // when isManagedBean is false (no scope declared directly on the class).
+                // Note: @Stateful session beans have no CDI-mandated scope restriction
+                // (CDI 3.0 §3.2.4), so no inherited-scope check is needed for them.
                 if (isSingleton) {
                     // Valid scopes for a @Singleton are @ApplicationScoped and @Dependent;
                     // remove them so that the remaining set contains only the invalid scopes.
