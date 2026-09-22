@@ -324,18 +324,18 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
             String erasedName = TypeConversionUtil.erasure(typeArg).getCanonicalText();
 
             for (PsiAnnotation annotation : typeAnnotations) {
-                String annFQN = annotation.getQualifiedName();
-                if (annFQN == null) continue;
+                String annotationFQN = annotation.getQualifiedName();
+                if (annotationFQN == null) continue;
 
-                String matched = getMatchedJavaElementName(declaringType, annFQN,
+                String matched = getMatchedJavaElementName(declaringType, annotationFQN,
                         SET_OF_ANNOTATIONS.toArray(new String[0]));
                 if (matched == null || matched.equals(VALID)) continue;
 
                 switch (matched) {
                     case ASSERT_FALSE, ASSERT_TRUE -> {
                         // Valid only on Boolean — primitives cannot appear as type args
-                        if (!erasedName.equals("java.lang.Boolean")) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                        if (!erasedName.equals(BOOLEAN_FQ)) {
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationBooleanTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_BOOLEAN_TYPE_USE);
                         }
@@ -346,14 +346,14 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
                             && !erasedName.equals(CHAR_SEQUENCE)
                             && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_AND_CHAR_WRAPPER_TYPES) == null) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationBigDecimalTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_BIG_DECIMAL_TYPE_USE);
                         }
                     }
                     case EMAIL, NOT_BLANK, PATTERN -> {
                         if (!erasedName.equals(STRING) && !erasedName.equals(CHAR_SEQUENCE)) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationStringTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_STRING_TYPE_USE);
                         }
@@ -361,7 +361,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                     case FUTURE, FUTURE_OR_PRESENT, PAST, PAST_OR_PRESENT -> {
                         if (getMatchedJavaElementName(declaringType, erasedName,
                                 SET_OF_DATE_TYPES.toArray(new String[0])) == null) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationDateTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_DATE_TIME_TYPE_USE);
                         }
@@ -370,7 +370,7 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         // Valid on BigDecimal, BigInteger, or integer numeric wrappers
                         if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
                             && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_WRAPPER_TYPES) == null) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationMinMaxTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_MIN_MAX_TYPE_USE);
                         }
@@ -379,14 +379,14 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                         // Valid on BigDecimal, BigInteger, or any numeric wrapper (incl. Float, Double)
                         if (!erasedName.equals(BIG_DECIMAL) && !erasedName.equals(BIG_INTEGER)
                             && getMatchedJavaElementName(declaringType, erasedName, NUMERIC_AND_DECIMAL_WRAPPER_TYPES) == null) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "AnnotationPositiveTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_POSITIVE_TYPE_USE);
                         }
                     }
                     case NOT_EMPTY, SIZE -> {
                         if (!isSizeOrNonEmptyAllowed(typeArg)) {
-                            emitTypeUseDiagnostic(field, diagnostics, annFQN,
+                            emitTypeUseDiagnostic(field, diagnostics, annotationFQN,
                                     "SizeOrNonEmptyAnnotationsTypeUse",
                                     DIAGNOSTIC_CODE_INVALID_SIZE_TYPE_USE);
                         }

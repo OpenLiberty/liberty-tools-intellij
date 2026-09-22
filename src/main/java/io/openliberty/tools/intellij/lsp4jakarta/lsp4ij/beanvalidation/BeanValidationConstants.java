@@ -60,6 +60,7 @@ public class BeanValidationConstants {
     public static final String INSTANT = "java.time.Instant";
     public static final String CALENDAR = "java.util.Calendar";
     public static final String DATE = "java.util.Date";
+    public static final String BOOLEAN_FQ = "java.lang.Boolean";
     public static final String CHAR_SEQUENCE = "java.lang.CharSequence";
     public static final String STRING = "java.lang.String";
     public static final String BIG_INTEGER = "java.math.BigInteger";
