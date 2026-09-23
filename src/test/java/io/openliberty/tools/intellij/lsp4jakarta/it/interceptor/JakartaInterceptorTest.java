@@ -1692,4 +1692,63 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         // All lifecycle callback methods in InterceptorSuperClassValidBase have valid signatures
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    @Test
+    public void testSeparateFileSuperclassWithInvalidLifecycleCallbackSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // Open the superclass file — its @Interceptor subclass lives in a separate file
+        // (SeparateFileInterceptorSubclassForLifecycle.java). The ClassInheritorsSearch
+        // must detect the @Interceptor subclass in the other file and trigger lifecycle
+        // callback signature validation on the superclass methods.
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SeparateFileSuperclassWithInvalidLifecycle.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        String signatureMsg = "Lifecycle callback interceptor methods declared in an interceptor class or its superclass must have one of the signatures: void <METHOD>(InvocationContext) or Object <METHOD>(InvocationContext).";
+
+        // @PreDestroy with wrong param type (line 19, method name "preDestroyWrongParam")
+        Diagnostic preDestroyWrongParam = JakartaForJavaAssert.d(19, 16, 36, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+
+        Diagnostic missingProceed = JakartaForJavaAssert.d(19, 16, 36,
+                "Interceptor methods must always call the InvocationContext.proceed method.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
+
+        // @PostConstruct with String return type (line 23, method name "postConstructInvalidReturn")
+        Diagnostic postConstructInvalidReturn = JakartaForJavaAssert.d(23, 18, 44, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+
+        // @AroundConstruct with String return type (line 29, method name "aroundConstructInvalidReturn")
+        Diagnostic aroundConstructInvalidReturn = JakartaForJavaAssert.d(29, 18, 46, signatureMsg,
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                preDestroyWrongParam, missingProceed, postConstructInvalidReturn, aroundConstructInvalidReturn);
+    }
+
+    @Test
+    public void testSeparateFileSuperclassWithValidLifecycleCallbackSignatures() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        // Open the superclass file — its @Interceptor subclass lives in a separate file
+        // (SeparateFileInterceptorSubclassValidLifecycle.java). All lifecycle callback
+        // signatures are valid — no diagnostic must fire.
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SeparateFileSuperclassWithValidLifecycle.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid signatures — no InvalidLifecycleCallbackInterceptorMethodSignature diagnostic
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+
 }

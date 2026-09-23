@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.List;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
@@ -111,6 +113,15 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
+				}
+			}
+
+			// When a non-interceptor type is a superclass of an @Interceptor class in a
+			// different file, its lifecycle callback methods must still satisfy the spec
+			// signature constraint (Jakarta Interceptors 2.0).
+			if (!isInterceptorTypeReferenced(type) && hasInterceptorSubclassInOtherFile(type, unit)) {
+				for (PsiMethod method : type.getMethods()) {
+					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}
 			}
 		}
@@ -389,5 +400,26 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INVALID_LIFECYCLE_CALLBACK_SIGNATURE, DiagnosticSeverity.Error);
 			diagnostics.add(diagnostic);
 		}
+	}
+	
+	/**
+		* Returns {@code true} if {@code type} has at least one subclass (in any source
+		* file other than the one containing {@code type}) that is annotated with
+		* {@code @Interceptor}.
+		*
+		* <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
+		* project scan.
+		*
+		* @param type the type whose subtype hierarchy is to be searched
+		* @param unit the PSI Java file that contains {@code type}
+		* @return {@code true} if an {@code @Interceptor} subclass exists in another file
+		*/
+	private boolean hasInterceptorSubclassInOtherFile(PsiClass type, PsiJavaFile unit) {
+		GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
+		return ClassInheritorsSearch.search(type, scope, true)
+				.anyMatch(subtype -> {
+					PsiFile subFile = subtype.getContainingFile();
+					return subFile != null && !subFile.equals(unit) && isInterceptorType(subtype);
+				});
 	}
 }
