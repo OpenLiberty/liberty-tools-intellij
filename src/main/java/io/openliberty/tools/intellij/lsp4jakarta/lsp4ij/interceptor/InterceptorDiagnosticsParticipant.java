@@ -120,7 +120,26 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-    }
+		List<PsiMethod> proceedNotInTryCatch = allMethodDeclarations.stream().filter(m -> isInterceptorMethodWithUnwrappedProceed(m)).collect(Collectors.toList());
+		for (PsiMethod m : proceedNotInTryCatch) {
+			Range range = PositionUtils.toNameRange(m);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorProceedNotInTryCatch"));
+			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_PROCEED_NOT_IN_TRY_CATCH, DiagnosticSeverity.Warning);
+			diagnostics.add(diagnostic);
+		}
+			 }
+
+	/**
+		* Checks whether a method declaration is an interceptor method that calls proceed()
+		* but does NOT wrap that call in a try/catch/finally block.
+		*
+		* @param method the method to check
+		* @return true if the method has proceed() called outside of a try statement, false otherwise
+		*/
+	private boolean isInterceptorMethodWithUnwrappedProceed(PsiMethod method) {
+		return ASTUtils.containsMethodInvocation(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT)
+				&& !ASTUtils.isProceedWrappedInTryCatch(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
+	}
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
