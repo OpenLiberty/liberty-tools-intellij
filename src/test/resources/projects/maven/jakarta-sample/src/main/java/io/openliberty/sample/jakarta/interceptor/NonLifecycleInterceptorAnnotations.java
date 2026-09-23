@@ -2,7 +2,6 @@ package io.openliberty.sample.jakarta.interceptor;
 
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.AroundTimeout;
-import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 /**
@@ -10,8 +9,6 @@ import jakarta.interceptor.InvocationContext;
  * must NOT trigger InvalidLifecycleCallbackInterceptorMethodSignature — they are not
  * lifecycle callbacks.
  */
-@Monitored
-@Interceptor
 public class NonLifecycleInterceptorAnnotations {
 
     // @AroundInvoke with String return — NOT a lifecycle callback, no signature diagnostic
