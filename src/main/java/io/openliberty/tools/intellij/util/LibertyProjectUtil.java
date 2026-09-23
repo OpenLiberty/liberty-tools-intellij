@@ -40,9 +40,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
 
-// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
-// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
-@SuppressWarnings("UnstableApiUsage")
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
@@ -160,6 +157,8 @@ public class LibertyProjectUtil {
      * @param widget        existing widget, or {@code null} if none is known
      * @return TerminalWidget or null if it does not exist
      */
+    // TerminalToolWindowTabsManager, TerminalToolWindowTab, TerminalView are @Experimental, but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public static TerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
                                                    TerminalToolWindowManager terminalToolWindowManager, TerminalWidget widget) {
         if (widget == null && createWidget) {
@@ -194,6 +193,8 @@ public class LibertyProjectUtil {
     }
 
     /** Returns the {@link Content} for the tab hosting the given {@link TerminalView}, or {@code null}. */
+    // TerminalToolWindowTabsManager, TerminalToolWindowTab, TerminalView are @Experimental, but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     private static Content findContentForView(TerminalToolWindowTabsManager tabsManager, TerminalView targetView) {
         for (TerminalToolWindowTab tab : tabsManager.getTabs()) {
             if (tab.getView().equals(targetView)) {

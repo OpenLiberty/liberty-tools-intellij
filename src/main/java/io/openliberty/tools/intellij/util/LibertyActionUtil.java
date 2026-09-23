@@ -16,9 +16,6 @@ import com.intellij.terminal.frontend.view.TerminalViewSessionState;
 import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 
-// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
-// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
-@SuppressWarnings("UnstableApiUsage")
 public class LibertyActionUtil {
 
     static Logger LOGGER = Logger.getInstance(LibertyActionUtil.class);
@@ -32,6 +29,9 @@ public class LibertyActionUtil {
      *
      * @param libertyModule the module to check
      */
+    // TerminalView, TerminalViewSessionState are @Experimental,
+    // but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public static boolean isCommandNotRunning(LibertyModule libertyModule) {
         TerminalView view = libertyModule.getTerminalView();
         if (view != null) {
@@ -92,6 +92,9 @@ public class LibertyActionUtil {
      * @param libertyModule the module whose terminal should receive the command
      * @param cmd the command to send (a newline is appended to trigger execution)
      */
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public static void executeCommand(LibertyModule libertyModule, String cmd) {
         TerminalView view = libertyModule.getTerminalView();
         if (view != null) {

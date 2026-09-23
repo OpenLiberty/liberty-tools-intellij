@@ -22,9 +22,6 @@ import com.intellij.terminal.ui.TerminalWidget;
  * Represents a Liberty server module
  * (one entry in the Liberty tool window tree view)
  */
-// TerminalView and related Reworked Terminal APIs are marked @Experimental by JetBrains, but their
-// use is explicitly recommended over the Classic Terminal APIs (see https://youtrack.jetbrains.com/issue/IJPL-252504).
-@SuppressWarnings("UnstableApiUsage")
 public class LibertyModule {
     private Project project;
     private VirtualFile buildFile;
@@ -33,6 +30,9 @@ public class LibertyModule {
     private boolean validContainerVersion;
     private boolean debugMode;
     private TerminalWidget terminalWidget;
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
@@ -148,10 +148,16 @@ public class LibertyModule {
         this.terminalWidget = terminalWidget;
     }
 
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public TerminalView getTerminalView() {
         return terminalView;
     }
 
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public void setTerminalView(TerminalView terminalView) {
         this.terminalView = terminalView;
     }
