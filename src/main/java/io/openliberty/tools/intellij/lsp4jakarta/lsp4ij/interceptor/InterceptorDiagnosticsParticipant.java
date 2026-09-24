@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.List;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
@@ -60,7 +62,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		PsiClass[] alltypes;
 		alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
-			if (isInterceptorTypeReferenced(type)) {
+			boolean isInterceptorType = isInterceptorTypeReferenced(type);
+			if (isInterceptorType) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
@@ -100,6 +103,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 						addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
 								messageKey, DIAGNOSTIC_CODE_INTERCEPTOR_STATIC, severity);
 					}
+					// Validate lifecycle callback method signatures
+					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
@@ -109,6 +114,15 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
+				}
+			}
+
+			// When a non-interceptor type is a superclass of an @Interceptor class in a
+			// different file, its lifecycle callback methods must still satisfy the spec
+			// signature constraint (Jakarta Interceptors 2.0).
+			if (!isInterceptorType && hasInterceptorSubclassInOtherFile(type, unit)) {
+				for (PsiMethod method : type.getMethods()) {
+					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}
 			}
 		}
@@ -344,5 +358,69 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Warning);
 			diagnostics.add(diagnostic);
 		}
+	}
+
+	/**
+	 * Validates that a lifecycle callback interceptor method has the required signature.
+	 * According to Jakarta Interceptors specification, lifecycle callback interceptor methods
+	 * declared in an interceptor class or superclass must have one of the signatures:
+	 * <ul>
+	 * <li>{@code void <METHOD>(InvocationContext)}</li>
+	 * <li>{@code Object <METHOD>(InvocationContext)}</li>
+	 * </ul>
+	 *
+	 * @param type        the declaring class
+	 * @param method      the method to validate
+	 * @param unit        the compilation unit
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void validateLifecycleCallbackMethodSignature(PsiClass type, PsiMethod method,
+														   PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		// Only validate lifecycle callback annotations (@PreDestroy, @PostConstruct, @AroundConstruct)
+		List<String> lifecycleAnnotations = containsAnyMatchingAnnotations(type, method, LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS);
+		if (lifecycleAnnotations.isEmpty()) {
+			return;
+		}
+
+		boolean validSignature = false;
+		PsiParameter[] params = method.getParameterList().getParameters();
+		if (params.length == 1) {
+			String paramType = params[0].getType().getCanonicalText();
+			if (JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT.equals(paramType)) {
+				PsiType returnType = method.getReturnType();
+				if (returnType != null) {
+					String returnTypeName = returnType.getCanonicalText();
+					validSignature = VOID_TYPE.equals(returnTypeName) || JAVA_LANG_OBJECT.equals(returnTypeName);
+				}
+			}
+		}
+
+		if (!validSignature) {
+			Range range = PositionUtils.toNameRange(method);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidLifecycleCallbackInterceptorMethodSignature"));
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INVALID_LIFECYCLE_CALLBACK_SIGNATURE, DiagnosticSeverity.Error);
+			diagnostics.add(diagnostic);
+		}
+	}
+	
+	/**
+		* Returns {@code true} if {@code type} has at least one subclass (in any source
+		* file other than the one containing {@code type}) that is annotated with
+		* {@code @Interceptor}.
+		*
+		* <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
+		* project scan.
+		*
+		* @param type the type whose subtype hierarchy is to be searched
+		* @param unit the PSI Java file that contains {@code type}
+		* @return {@code true} if an {@code @Interceptor} subclass exists in another file
+		*/
+	private boolean hasInterceptorSubclassInOtherFile(PsiClass type, PsiJavaFile unit) {
+		GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
+		return ClassInheritorsSearch.search(type, scope, true)
+				.anyMatch(subtype -> {
+					PsiFile subFile = subtype.getContainingFile();
+					return subFile != null && !subFile.equals(unit) && isInterceptorType(subtype);
+				});
 	}
 }
