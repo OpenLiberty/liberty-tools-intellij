@@ -7,6 +7,8 @@ on:
 
 jobs:
   fetch_all_pull_requests_and_notify_using_condition_and_cron:
+    # Skip this job when running on forked repositories
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij'
     runs-on: ubuntu-latest
 
     env:
