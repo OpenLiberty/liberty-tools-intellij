@@ -18,8 +18,7 @@ import java.util.stream.Collectors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
-import com.intellij.codeInsight.AnnotationUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
@@ -546,8 +545,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      *         and has {@code passivating=true}
      */
     private boolean isCustomPassivatingScope(PsiClass type, PsiAnnotation annotation) {
-        PsiAnnotation normalScopeAnnotation = io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil
-                .getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
+        PsiAnnotation normalScopeAnnotation = AnnotationUtil.getMetaAnnotation(annotation, type, NORMAL_SCOPE_FQ_NAME);
         if (normalScopeAnnotation == null) {
             return false;
         }

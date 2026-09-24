@@ -18,7 +18,6 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaCodeReferenceElement;
 import io.openliberty.tools.intellij.util.ExceptionUtil;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -31,12 +30,12 @@ import java.util.Collections;
  * Returns the list of recognised defining annotations applied to a
  * class.
  *
- * @param type the type representing the class
- * @param scopes list of defining annotations
  * @return list of recognised defining annotations applied to a class
  */
-public class AnnotationUtil {
+public class AnnotationUtil extends com.intellij.codeInsight.AnnotationUtil{
+
     private static final Logger LOGGER = Logger.getLogger(AnnotationUtil.class.getName());
+
     public static List<String> getScopeAnnotations(PsiClass type, Set<String> scopes) {
         return ExceptionUtil.executeWithExceptionHandling(
                 // Construct a stream of only the annotations applied to the type that are also
@@ -97,7 +96,7 @@ public class AnnotationUtil {
         if (annotationClass == null) {
             return null;
         }
-        return com.intellij.codeInsight.AnnotationUtil.findAnnotation(annotationClass, metaAnnotationFQN);
+        return findAnnotation(annotationClass, metaAnnotationFQN);
     }
 
 }
