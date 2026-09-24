@@ -62,7 +62,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		PsiClass[] alltypes;
 		alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
-			if (isInterceptorTypeReferenced(type)) {
+			boolean isInterceptorType = isInterceptorTypeReferenced(type);
+			if (isInterceptorType) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
@@ -119,7 +120,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			// When a non-interceptor type is a superclass of an @Interceptor class in a
 			// different file, its lifecycle callback methods must still satisfy the spec
 			// signature constraint (Jakarta Interceptors 2.0).
-			if (!isInterceptorTypeReferenced(type) && hasInterceptorSubclassInOtherFile(type, unit)) {
+			if (!isInterceptorType && hasInterceptorSubclassInOtherFile(type, unit)) {
 				for (PsiMethod method : type.getMethods()) {
 					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}
