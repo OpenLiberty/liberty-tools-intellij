@@ -23,25 +23,13 @@ import java.util.Map;
  * Builds a <em>name → occurrence-count</em> map by visiting every source type
  * in the project using {@link AllClassesSearch}.
  *
- * <p>Only called when {@link JakartaSearchSettings#SEARCH_ENGINE_DIAGNOSTICS_ENABLED}
- * is {@code true}; callers must check that flag before invoking this class.
+ * <p>Only called when {@link JakartaSearchSettings#isSearchEngineDiagnosticsEnabled()}
+ * returns {@code true}; callers must check that before invoking this class.
  *
  * <p><b>Performance note:</b> every diagnostic call pays the full scan cost,
  * regardless of how many types actually carry the elements of interest.
  * With a large source set this cost grows linearly with project size.
  *
- * <h3>Usage</h3>
- * <pre>{@code
- * Map<String, Integer> counts = ProjectWideNameScanner.scan(
- *     unit.getProject(),
- *     (psiClass, nameCount) -> {
- *         PsiAnnotation ann = psiClass.getAnnotation(NAMED_ENTITY_GRAPH);
- *         if (ann != null) {
- *             String name = getNameAttr(ann);
- *             if (name != null) nameCount.merge(name, 1, Integer::sum);
- *         }
- *     });
- * }</pre>
  */
 public final class ProjectWideNameScanner {
 
@@ -49,7 +37,7 @@ public final class ProjectWideNameScanner {
      * Scans every source type in {@code project} and returns a name → count map.
      *
      * <p>Only call this method after confirming
-     * {@link JakartaSearchSettings#SEARCH_ENGINE_DIAGNOSTICS_ENABLED} is {@code true}.
+     * {@link JakartaSearchSettings#isSearchEngineDiagnosticsEnabled()} returns {@code true}.
      *
      * @param project   the IntelliJ project
      * @param extractor caller-supplied logic — decides what to collect from each class

@@ -67,9 +67,9 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
         }
 
         // Feature gate: all search-engine-based diagnostics are disabled when
-        // JakartaSearchSettings.SEARCH_ENGINE_DIAGNOSTICS_ENABLED is false.
+        // JakartaSearchSettings.isSearchEngineDiagnosticsEnabled() returns false.
         // This single flag disables every diagnostic that calls ProjectWideNameScanner.
-        if (!JakartaSearchSettings.SEARCH_ENGINE_DIAGNOSTICS_ENABLED) {
+        if (!JakartaSearchSettings.isSearchEngineDiagnosticsEnabled()) {
             return;
         }
 
