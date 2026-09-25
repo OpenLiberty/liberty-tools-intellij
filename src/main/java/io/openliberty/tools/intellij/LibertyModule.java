@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,7 +15,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
+import com.intellij.terminal.ui.TerminalWidget;
 
 /**
  * Represents a Liberty server module
@@ -28,14 +29,19 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
     private boolean debugMode;
-    private ShellTerminalWidget shellWidget;
+    private TerminalWidget terminalWidget;
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
+    private TerminalView terminalView;
     private LibertyRunConfiguration customRunConfig;
     private boolean useCustom;
 
     public LibertyModule(Project project) {
         this.project = project;
         this.debugMode = false;
-        this.shellWidget = null;
+        this.terminalWidget = null;
+        this.terminalView = null;
         this.customRunConfig = null;
         this.useCustom = false;
     }
@@ -134,11 +140,25 @@ public class LibertyModule {
         this.debugMode = debugMode;
     }
 
-    public ShellTerminalWidget getShellWidget() {
-        return shellWidget;
+    public TerminalWidget getTerminalWidget() {
+        return terminalWidget;
     }
 
-    public void setShellWidget(ShellTerminalWidget shellWidget) {
-        this.shellWidget = shellWidget;
+    public void setTerminalWidget(TerminalWidget terminalWidget) {
+        this.terminalWidget = terminalWidget;
+    }
+
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
+    public TerminalView getTerminalView() {
+        return terminalView;
+    }
+
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
+    public void setTerminalView(TerminalView terminalView) {
+        this.terminalView = terminalView;
     }
 }

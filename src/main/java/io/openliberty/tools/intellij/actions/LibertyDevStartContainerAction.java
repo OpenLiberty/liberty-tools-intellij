@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,11 +9,8 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 
 public class LibertyDevStartContainerAction extends LibertyDevStartAction {
 
