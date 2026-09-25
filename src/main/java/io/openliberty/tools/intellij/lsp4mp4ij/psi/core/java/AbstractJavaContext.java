@@ -209,9 +209,11 @@ public abstract class AbstractJavaContext {
 		// Reverse to get Outer -> Inner -> Deep
 		Collections.reverse(classNames);
 
-		// Extract the package prefix (everything before the first class name)
-		int lastDot = qualifiedName.indexOf(classNames.get(0));
-		String packagePrefix = lastDot > 0 ? qualifiedName.substring(0, lastDot) : "";
+		// Extract the package prefix (everything before the outermost class name)
+		// Use lastIndexOf to avoid a false match if the class name also appears as a
+		// substring somewhere in the package path (e.g. com.foo.Bar.Bar).
+		int lastDot = qualifiedName.lastIndexOf("." + classNames.get(0));
+		String packagePrefix = lastDot >= 0 ? qualifiedName.substring(0, lastDot + 1) : "";
 
 		// Combine package and nested class names using '$'
 		return packagePrefix + String.join("$", classNames);
