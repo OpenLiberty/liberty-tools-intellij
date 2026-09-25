@@ -45,7 +45,7 @@ public class PsiMicroProfileProject {
 
     private transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
     private transient PropertyValueExpander propertyValueExpander = null;
-    private MicroProfileProjectRuntime projectRuntime;
+    private volatile MicroProfileProjectRuntime projectRuntime;
 
     public PsiMicroProfileProject(Module javaProject) {
         this.javaProject = javaProject;
@@ -311,11 +311,15 @@ public class PsiMicroProfileProject {
 
     public MicroProfileProjectRuntime getProjectRuntime() {
         if (projectRuntime == null) {
-            try {
-                Set<String> classpath = resolveClasspathJars(javaProject);
-                projectRuntime = new MicroProfileProjectRuntime(classpath);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error while loading project runtime", e);
+            synchronized (this) {
+                if (projectRuntime == null) {
+                    try {
+                        Set<String> classpath = resolveClasspathJars(javaProject);
+                        projectRuntime = new MicroProfileProjectRuntime(classpath);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error while loading project runtime", e);
+                    }
+                }
             }
         }
         return projectRuntime;
