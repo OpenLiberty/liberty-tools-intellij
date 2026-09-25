@@ -237,6 +237,27 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Resolves the element {@link PsiClass} from a {@link PsiType}.
+     *
+     * <p>For a parameterized collection type ({@code List<Employee>}) the first type
+     * argument is resolved. For a plain class type ({@code Department}) the type itself
+     * is resolved directly.
+     *
+     * @param psiType the PSI type to inspect
+     * @return the resolved {@link PsiClass}, or {@code null} if it cannot be resolved
+     */
+    public static PsiClass resolveElementType(PsiType psiType) {
+        if (!(psiType instanceof PsiClassType classType)) {
+            return null;
+        }
+        PsiType[] typeArguments = classType.getParameters();
+        if (typeArguments.length > 0 && typeArguments[0] instanceof PsiClassType argType) {
+            return argType.resolve();
+        }
+        return classType.resolve();
+    }
+
+    /**
      * Extracts the simple class name from a {@link PsiType}.
      *
      * <p>For a plain class type ({@code Department}) returns the class's simple name.
@@ -247,18 +268,8 @@ public class DiagnosticsUtils {
      * @return the simple class name, or {@code null} if it cannot be extracted
      */
     public static String getElementTypeSimpleName(PsiType psiType) {
-        if (psiType instanceof PsiClassType classType) {
-            PsiType[] typeArguments = classType.getParameters();
-            if (typeArguments.length > 0 && typeArguments[0] instanceof PsiClassType argType) {
-                // Collection type: return the simple name of the first type argument.
-                PsiClass argClass = argType.resolve();
-                return argClass != null ? argClass.getName() : null;
-            }
-            // Plain class type.
-            PsiClass resolved = classType.resolve();
-            return resolved != null ? resolved.getName() : null;
-        }
-        return null;
+        PsiClass resolved = resolveElementType(psiType);
+        return resolved != null ? resolved.getName() : null;
     }
 
 }

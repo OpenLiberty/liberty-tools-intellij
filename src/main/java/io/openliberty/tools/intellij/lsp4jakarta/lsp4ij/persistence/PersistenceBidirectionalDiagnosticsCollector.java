@@ -14,7 +14,6 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
@@ -150,17 +149,7 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
      * @return the target entity {@link PsiClass}, or {@code null} if not resolvable
      */
     private PsiClass resolveTargetEntityType(PsiType memberType) {
-        if (!(memberType instanceof PsiClassType classType)) {
-            return null;
-        }
-        // For collection types (List<Employee>), resolve the first type argument.
-        PsiType[] typeArgs = classType.getParameters();
-        PsiClass resolved;
-        if (typeArgs.length > 0 && typeArgs[0] instanceof PsiClassType argType) {
-            resolved = argType.resolve();
-        } else {
-            resolved = classType.resolve();
-        }
+        PsiClass resolved = DiagnosticsUtils.resolveElementType(memberType);
         if (resolved == null) {
             return null;
         }
@@ -256,10 +245,7 @@ public class PersistenceBidirectionalDiagnosticsCollector extends AbstractDiagno
         if (PersistenceConstants.ONE_TO_MANY.equals(relAnnotationFQ)) {
             return PersistenceConstants.MANY_TO_ONE;
         }
-        if (PersistenceConstants.MANY_TO_MANY.equals(relAnnotationFQ)) {
-            return PersistenceConstants.MANY_TO_MANY;
-        }
-        // ONE_TO_ONE is self-mirroring.
+        // MANY_TO_MANY and ONE_TO_ONE are self-mirroring.
         return relAnnotationFQ;
     }
 }
