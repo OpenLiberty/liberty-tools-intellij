@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 Red Hat Inc. and others.
+* Copyright (c) 2023, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -31,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,7 +80,9 @@ public class DefaultJaxRsInfoProvider implements IJaxRsInfoProvider {
 			}
 
 			Set<PsiClass> jaxRsClasses = new HashSet<>();
-			query.forEach((Consumer<? super PsiModifierListOwner>) item -> {
+			query.findAll().forEach(item -> {
+				// Check if the operation has been cancelled
+				monitor.checkCanceled();
 				if (item instanceof PsiMember) {
 					PsiClass cl = ((PsiMember) item).getContainingClass();
 					if (cl != null) {

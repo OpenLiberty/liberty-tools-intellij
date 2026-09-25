@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2025 Red Hat, Inc.
+ * Copyright (c) 2019, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -109,9 +108,12 @@ public class PropertiesManager {
             if (query != null) {
                 try {
                     beginSearch(context, monitor);
-                    query.forEach((Consumer<? super PsiModifierListOwner>) psiMember -> collectProperties(psiMember, context, monitor));
-                }
-                finally {
+                    query.findAll().forEach(psiMember -> {
+                        // Check if the operation has been cancelled
+                        monitor.checkCanceled();
+                        collectProperties(psiMember, context, monitor);
+                    });
+                } finally {
                     endSearch(context, monitor);
                 }
             }
