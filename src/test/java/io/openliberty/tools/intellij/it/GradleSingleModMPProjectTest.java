@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 /**
  * Tests Liberty Tools actions using a single module MicroProfile Gradle project.
  */
@@ -20,12 +22,12 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
     /**
      * Single module Microprofile project name.
      */
-    private static final String SM_MP_PROJECT_NAME = "singleModGradleMP";
+    private static final String SM_MP_PROJECT_NAME = GRADLE_MP_PROJECT;
 
     /**
      * The path to the folder containing the test projects.
      */
-    private static final String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    private static final String PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR).toAbsolutePath().toString();
 
     /**
      * Prepares the environment for test execution.
@@ -43,8 +45,8 @@ public class GradleSingleModMPProjectTest extends SingleModMPProjectTestCommon {
         setSmMpProjResURI("api/resource");
         setSmMPProjOutput("Hello! Welcome to Open Liberty");
         setWLPInstallPath("build");
-        setTestReportPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), "build", "reports", "tests", "test", "index.html"));
-        setBuildFileName("build.gradle");
+        setTestReportPath(Paths.get(getProjectsDirPath(), getSmMPProjectName(), INDEX_HTML_PATH));
+        setBuildFileName(GRADLE_BUILD_FILE);
         setBuildFileOpenCommand("Liberty: View Gradle config");
         setStartParams("--hotTests");
         setStartParamsDebugPort("--libertyDebugPort=9876");

@@ -21,6 +21,8 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitForIgnoringError;
 import static org.junit.jupiter.api.Assertions.fail;
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+import static io.openliberty.tools.intellij.it.TestUtils.*;
 
 /**
  * Holds common tests that use a single module non Liberty Tools compliant REST project.
@@ -85,7 +87,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
     @AfterAll
     public static void cleanup() {
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, COMPACT_MODE, 3);
         }
         UIBotTestUtils.closeLibertyToolWindow(remoteRobot);
         UIBotTestUtils.closeProjectView(remoteRobot);
@@ -194,8 +196,8 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.waitForLTWNoProjectDetectedMsg(remoteRobot, 10);
 
         // Copy a valid server.xml file to this project's src/main/liberty/config directory.
-        Path validServerXml = Paths.get(getHelperFilesDirPath(), "server.xml");
-        Path destination = Paths.get(getProjectsDirPath(), getSmNLTRestProjectName(), "src", "main", "liberty", "config", "server.xml");
+        Path validServerXml = Paths.get(getHelperFilesDirPath(), SERVER_XML);
+        Path destination = Paths.get(getProjectsDirPath(), combinePath(getSmNLTRestProjectName(), buildPathArray(CONFIG_DIR_PATH, SERVER_XML)));
 
         try {
             Files.copy(validServerXml, destination, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
@@ -302,7 +304,7 @@ public abstract class SingleModNLTRestProjectTestCommon {
         UIBotTestUtils.importProject(remoteRobot, projectPath, projectName);
         UIBotTestUtils.openProjectView(remoteRobot);
         if (!remoteRobot.isMac()) {
-            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, "Compact Mode", 3);
+            UIBotTestUtils.runActionFromSearchEverywherePanel(remoteRobot, COMPACT_MODE, 3);
         }
         // IntelliJ does not start building and indexing until the Project View is open
         UIBotTestUtils.waitForIndexing(remoteRobot);
