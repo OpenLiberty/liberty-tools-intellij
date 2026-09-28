@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 IBM Corporation.
+ * Copyright (c) 2023, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -173,11 +173,9 @@ public class ProjectFrameFixture extends CommonContainerFixture {
      */
     public JTreeFixture getProjectViewJTree(RemoteRobot remoteRobot, String... xpathVars) {
         String visibleText = xpathVars[0];
-        String intellijVersion = remoteRobot.callJs("com.intellij.openapi.application.ApplicationInfo.getInstance().getFullVersion();");
-        String className = intellijVersion.startsWith("2025") ? "MyProjectViewTree" : "ProjectViewTree";
 
         return find(JTreeFixture.class,
-                byXpath("//div[@class='" + className + "' and contains(@visible_text, '" + visibleText + "')]"),
+                byXpath("//div[@class='MyProjectViewTree' and contains(@visible_text, '" + visibleText + "')]"),
                 Duration.ofMinutes(1));
     }
 
@@ -364,12 +362,13 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the ActionButtonWithText class.
+     * Returns the ComponentFixture object associated with the run configurations combo box button
+     * on the project frame toolbar.
      *
-     * @return The ContainerFixture object associated with the ActionButtonWithText class.
+     * @return The ComponentFixture for the run configurations combo box button.
      */
     public ComponentFixture getRunConfigurationsComboBoxButton() {
-        return find(ContainerFixture.class, byXpath("//div[@class='ActionButtonWithText']"), Duration.ofSeconds(5));
+        return find(ComponentFixture.class, byXpath("//div[@class='RedesignedRunConfigurationSelectorButton']"), Duration.ofSeconds(5));
     }
 
     /**

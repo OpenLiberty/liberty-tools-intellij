@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2022, 2025 IBM Corporation and others.
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the 
  * terms of the Eclipse Public License v. 2.0 which is available at 
@@ -18,6 +18,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.websocket;
 import java.util.*;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -68,6 +69,10 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
 
                 // ServerEndpoint annotation diagnostics
                 serverEndpointErrorCheck(type, diagnostics, unit);
+
+                publicNoArgsConstructorCheck(type, diagnostics, unit);
+
+                duplicateLifeCycleAnnotationCheck(type, diagnostics, unit);
             }
         }
     }
@@ -312,6 +317,57 @@ public class WebSocketDiagnosticsCollector extends AbstractDiagnosticsCollector 
         }
         return endpointPathVars;
     }
+
+    private void publicNoArgsConstructorCheck(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit){
+        boolean hasUserDefinedConstructor = false, hasPublicNoArgConstructor = false;
+        for (PsiMethod method : type.getMethods()) {
+            if (isConstructorMethod(method)){
+                hasUserDefinedConstructor = true;
+                PsiParameterList params = method.getParameterList();
+                boolean isPublic = method.hasModifierProperty(PsiModifier.PUBLIC);
+                if(params.getParametersCount()==0 && isPublic){
+                    hasPublicNoArgConstructor = true;
+                }
+            }
+        }
+
+        if (hasUserDefinedConstructor && !hasPublicNoArgConstructor) {
+            diagnostics.add(createDiagnostic(type, unit,
+                    Messages.getMessage("publicNoArgConstructorMissing", type.getName()),
+                    WebSocketConstants.DIAGNOSTICS_MISSING_NOARG_CONSTRUCTOR, null, DiagnosticSeverity.Error));
+        }
+    }
+
+    private void duplicateLifeCycleAnnotationCheck(PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
+
+        Set<String> visitedAnnotations = new HashSet<>();
+
+        for (PsiMethod method : type.getMethods()) {
+            for (PsiAnnotation annotation : method.getAnnotations()) {
+                String annotationName = annotation.getQualifiedName();
+
+                if (isLifecycleAnnotation(type, annotationName)) {
+                    if (visitedAnnotations.contains(annotationName)) {
+                        JsonArray diagnosticsData = new JsonArray();
+                        diagnosticsData.add(annotationName);
+
+                        diagnostics.add(createDiagnostic(annotation, unit,
+                                Messages.getMessage("DuplicateLifeCycleAnnotation", annotationName),
+                                WebSocketConstants.DIAGNOSTICS_DUPLICATE_ANNOTATION, diagnosticsData, DiagnosticSeverity.Error));
+                    } else {
+                        visitedAnnotations.add(annotationName);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isLifecycleAnnotation(PsiClass type, String annotationName) {
+        return isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_OPEN)
+                || isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_CLOSE)
+                || isMatchedJavaElement(type, annotationName, WebSocketConstants.ON_ERROR);
+    }
+
     /**
      * Check if valueClass is a wrapper object for a primitive value Based on
      * https://github.com/eclipse/lsp4mp/blob/9789a1a996811fade43029605c014c7825e8f1da/microprofile.jdt/org.eclipse.lsp4mp.jdt.core/src/main/java/org/eclipse/lsp4mp/jdt/core/utils/JDTTypeUtils.java#L294-L298
