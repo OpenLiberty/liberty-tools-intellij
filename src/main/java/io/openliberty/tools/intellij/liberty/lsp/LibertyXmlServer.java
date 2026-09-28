@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat, Inc.
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,9 +11,7 @@
 package io.openliberty.tools.intellij.liberty.lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.application.PluginPathManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import io.openliberty.tools.intellij.util.JavaVersionUtil;
@@ -25,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Start LemMinX language server with Liberty LemMinX ext
@@ -35,9 +34,8 @@ public class LibertyXmlServer extends OSProcessStreamConnectionProvider {
 
     public LibertyXmlServer() {
         String javaHome = System.getProperty("java.home");
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(PluginId.getId("open-liberty.intellij"));
-        File lemminxServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/org.eclipse.lemminx-uber.jar");
-        File libertyServerPath = new File(descriptor.getPluginPath().toFile(), "lib/server/liberty-langserver-lemminx-jar-with-dependencies.jar");
+        File lemminxServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/org.eclipse.lemminx-uber.jar"));
+        File libertyServerPath = Objects.requireNonNull(PluginPathManager.getPluginResource(getClass(), "lib/server/liberty-langserver-lemminx-jar-with-dependencies.jar"));
         if(!JavaVersionUtil.isJavaHomeValid(javaHome, Constants.LIBERTY_XML_SERVER)){
             return;
         }

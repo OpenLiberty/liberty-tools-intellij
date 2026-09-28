@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,7 +15,9 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.LibertyModule;
@@ -30,7 +32,10 @@ import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class LibertyGeneralAction extends AnAction {
     protected static final Logger LOGGER = Logger.getInstance(LibertyGeneralAction.class);
@@ -177,7 +182,8 @@ public abstract class LibertyGeneralAction extends AnAction {
         LibertyProjectUtil.setFocusToWidget(project, existingWidget);
 
         // Shows error for actions where terminal widget does not exist or action requires a terminal to already exist and expects "Start" to be running
-        if (widget == null || (!createWidget && !widget.hasRunningCommands())) {
+        // hasRunningCommands() must not be called from the EDT (asserted since IntelliJ 2026.1)
+        if (widget == null || (!createWidget && !computeOffEdt(widget::hasRunningCommands))) {
             String msg;
             if (createWidget) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
@@ -204,4 +210,24 @@ public abstract class LibertyGeneralAction extends AnAction {
      * @return The string representation of the action command being processed.
      */
     protected abstract String getActionCommandName();
+
+    /**
+     * Runs the given supplier on a pooled thread and blocks for the result.
+     * Use this to call APIs that assert they must not be called from the EDT.
+     *
+     * Method assisted by IBM Bob
+     */
+    private static <T> T computeOffEdt(Supplier<T> supplier) {
+        Future<T> future = ApplicationManager.getApplication().executeOnPooledThread(supplier::get);
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ProcessCanceledException(e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) throw (RuntimeException) cause;
+            throw new RuntimeException(cause != null ? cause : e);
+        }
+    }
 }
