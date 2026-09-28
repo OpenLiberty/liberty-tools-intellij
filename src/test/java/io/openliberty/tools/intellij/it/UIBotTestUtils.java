@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 IBM Corporation.
+ * Copyright (c) 2023, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -1682,9 +1682,19 @@ public class UIBotTestUtils {
                     searchFixture.click();
                 }
 
-                // Click on the Actions tab
-                ComponentFixture actionsTabFixture = projectFrame.getSETabLabel("Actions");
-                actionsTabFixture.click();
+                // Click on the Actions tab. Poll until the click succeeds.
+                RepeatUtilsKt.waitFor(Duration.ofSeconds(30),
+                        Duration.ofSeconds(1),
+                        "Waiting for the Actions tab to become visible in the Search Everywhere dialog",
+                        "The Actions tab did not become visible in the Search Everywhere dialog",
+                        () -> {
+                            try {
+                                projectFrame.getSETabLabel("Actions").click();
+                                return true;
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        });
 
                 // Type the search string in the search dialog box.
                 JTextFieldFixture searchField = projectFrame.textField(JTextFieldFixture.Companion.byType(), Duration.ofSeconds(10));
@@ -2047,17 +2057,14 @@ public class UIBotTestUtils {
      */
     public static void createLibertyConfiguration(RemoteRobot remoteRobot, String cfgName, boolean isMultiple, String buildFilePath) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        String editConfigurationAction= null;
         if (remoteRobot.isMac()) {
-            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
-            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", editConfigurationAction);
+            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", "Edit Configurations…");
         }
         else {
             clickOnMainMenu(remoteRobot);
             ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
             runMenu.moveMouse();
-            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
-            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem(editConfigurationAction);
+            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations…");
             editCfgsMenuEntry.click();
         }
 
@@ -2317,17 +2324,43 @@ public class UIBotTestUtils {
         while (!configFound && retryCount < maxRetries) {
             cfgSelectBox.click();
 
-            ComponentFixture cfgSelectPaneList = projectFrame.getMyList();
-            List<RemoteText> configs = cfgSelectPaneList.getData().getAll();
+            try {
+                ContainerFixture cfgSelectPaneList = projectFrame.getMyList();
 
-            if (configs != null && !configs.isEmpty()) {
-                for (RemoteText cfg : configs) {
-                    if (cfg.getText().equals(cfgName)) {
-                        cfg.click();
-                        configFound = true;
+                // Read the full (untruncated) item names from the JList model server-side.
+                // The popup renders long names with an ellipsis, so getText() on a RemoteText
+                // entry cannot be used for a reliable exact match. callJs executes in the IDE
+                // process where the model always holds the full string, independent of how the
+                // component paints it on screen.
+                String modelNames = cfgSelectPaneList.callJs(
+                        "var model = component.getModel();" +
+                        "var names = [];" +
+                        "for (var i = 0; i < model.getSize(); i++) {" +
+                        "    var item = model.getElementAt(i);" +
+                        "    names.push(item != null ? item.toString() : '');" +
+                        "}" +
+                        "names.join('\\n');",
+                        true);
+
+                String[] modelNameArray = modelNames.split("\n", -1);
+                int matchIndex = -1;
+                for (int i = 0; i < modelNameArray.length; i++) {
+                    if (cfgName.equals(modelNameArray[i])) {
+                        matchIndex = i;
                         break;
                     }
                 }
+
+                if (matchIndex >= 0) {
+                    // Click the rendered entry at the matched model index.
+                    List<RemoteText> entries = cfgSelectPaneList.findAllText();
+                    if (matchIndex < entries.size()) {
+                        entries.get(matchIndex).click();
+                        configFound = true;
+                    }
+                }
+            } catch (WaitForConditionTimeoutException e) {
+                // popup did not appear — retry
             }
             if (!configFound) {
                 retryCount++;
@@ -2358,8 +2391,7 @@ public class UIBotTestUtils {
         if (remoteRobot.isMac()) {
             for (int attempt = 0; attempt < 5; attempt++) { // Retry up to 5 times
                 try {
-                    debugOrRunAction = handleMenuBasedOnVersion(remoteRobot,  execMode == ExecMode.DEBUG ? "Debug..." : "Run...", execMode == ExecMode.DEBUG ? "Debug…" : "Run…");
-                    projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", debugOrRunAction);
+                    projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", execMode == ExecMode.DEBUG ? "Debug…" : "Run…");
                     // Exit loop if successful
                     break;
                 } catch (WaitForConditionTimeoutException e) {
@@ -2377,11 +2409,9 @@ public class UIBotTestUtils {
             clickOnMainMenu(remoteRobot);
             ComponentFixture menuOption = projectFrame.getActionMenu("Run", "10");
             menuOption.moveMouse();
-            debugOrRunAction= handleMenuBasedOnVersion(remoteRobot, "Run...", "Run…");
-            ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem(debugOrRunAction);
+            ComponentFixture menuCfgExecOption = projectFrame.getActionMenuItem("Run…");
             if (execMode == ExecMode.DEBUG) {
-                debugOrRunAction = handleMenuBasedOnVersion(remoteRobot, "Debug...", "Debug…");
-                menuCfgExecOption = projectFrame.getActionMenuItem(debugOrRunAction);
+                menuCfgExecOption = projectFrame.getActionMenuItem("Debug…");
             }
 
             menuCfgExecOption.click();
@@ -2431,17 +2461,14 @@ public class UIBotTestUtils {
      */
     public static void deleteLibertyRunConfigurations(RemoteRobot remoteRobot) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-        String editConfigurationAction = null;
         if (remoteRobot.isMac()) {
-            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
-            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", editConfigurationAction);
+            projectFrame.clickOnMainMenuWithActions(remoteRobot, "Run", "Edit Configurations…");
         }
         else {
             clickOnMainMenu(remoteRobot);
             ComponentFixture runMenu = projectFrame.getActionMenu("Run", "10");
             runMenu.moveMouse();
-            editConfigurationAction = handleMenuBasedOnVersion(remoteRobot, "Edit Configurations...", "Edit Configurations…");
-            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem(editConfigurationAction);
+            ComponentFixture editCfgsMenuEntry = projectFrame.getActionMenuItem("Edit Configurations…");
             editCfgsMenuEntry.click();
         }
 
@@ -2906,31 +2933,6 @@ public class UIBotTestUtils {
         int intellijWindowWidth = mainWindow.getRemoteComponent().getWidth();
 
         return intellijWindowWidth >= screenSize.width || intellijWindowHeight >= screenSize.height;
-    }
-
-    /**
-     * Handles version-specific menu actions based on the IntelliJ IDEA version.
-     *
-     * @param remoteRobot        Instance of the RemoteRobot to interact with the IntelliJ UI.
-     * @param menuAction2024_2   The submenu option for IntelliJ version 2024.2.
-     * @param menuAction2024_3   The submenu option for IntelliJ version 2024.3.
-     * @throws UnsupportedOperationException if the IntelliJ version is not supported.
-     */
-    public static String handleMenuBasedOnVersion(RemoteRobot remoteRobot, String menuAction2024_2, String menuAction2024_3) {
-        // Using Remote robot's javascript API Retrieve the IntelliJ version
-        String intellijVersion = remoteRobot.callJs("com.intellij.openapi.application.ApplicationInfo.getInstance().getFullVersion();");
-
-        String menuAction2;
-        if (intellijVersion.startsWith("2024.2")) {
-            menuAction2 = menuAction2024_2;
-        } else if (intellijVersion.startsWith("2024.3") || intellijVersion.startsWith("2025")) {
-            menuAction2 = menuAction2024_3;
-        } else {
-            // If the version is unsupported, throw an exception to indicate the issue.
-            throw new UnsupportedOperationException("Unsupported IntelliJ version: " + intellijVersion);
-        }
-
-        return menuAction2;
     }
 
     /**

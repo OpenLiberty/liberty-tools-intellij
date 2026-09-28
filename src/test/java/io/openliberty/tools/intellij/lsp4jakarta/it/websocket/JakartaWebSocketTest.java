@@ -1,18 +1,19 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2025 IBM Corporation and others.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v. 2.0 which is available at
-* http://www.eclipse.org/legal/epl-2.0.
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*     IBM Corporation - initial API and implementation
-*******************************************************************************/
+ * Copyright (c) 2022, 2026 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 
 package io.openliberty.tools.intellij.lsp4jakarta.it.websocket;
 
+import com.google.gson.JsonArray;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -104,7 +105,7 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
 
         // OnOpen Invalid Param Types
         Diagnostic d1 = JakartaForJavaAssert.d(19, 47, 59,
-        "Invalid parameter type. When using @jakarta.websocket.OnOpen, parameter must be of type: \n- jakarta.websocket.EndpointConfig\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof.",
+                "Invalid parameter type. When using @jakarta.websocket.OnOpen, parameter must be of type: \n- jakarta.websocket.EndpointConfig\n- jakarta.websocket.Session\n- annotated with @PathParams and of type String or any Java primitive type or boxed version thereof.",
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnOpenChangeInvalidParam");
 
         // OnClose Invalid Param Type
@@ -233,5 +234,157 @@ public class JakartaWebSocketTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-websocket", "OnMessageDuplicateMethod");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2);
+    }
+
+    @Test
+    public void testNoArgConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/MissingPublicNoArgConstructor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic d = JakartaForJavaAssert.d(5, 13, 42,
+                "WebSocket endpoint class MissingPublicNoArgConstructor must declare a public no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-websocket", "missingPublicNoArgConstructor");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "@ServerEndpoint(\"/path\")\npublic class MissingPublicNoArgConstructor {\n\n" +
+                "    String status;\n\n" +
+                "    public MissingPublicNoArgConstructor() {\n    }\n\n" +
+                "    public MissingPublicNoArgConstructor(String status) {\n" +
+                "        super();\n        this.status = status;\n    }\n\n}\n";
+
+        TextEdit te = te(0, 0, 15, 0, newText);
+        CodeAction ca = ca(uri, "Add a no-arg public constructor to this class", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+    }
+
+
+    @Test
+    public void testDefaultConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/DefaultConstructorTest.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testUserDefinedNoArgConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/UserDefinedNoArgConstrctor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testDuplicateLifeCycleAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/websocket/DuplicateAnnotationTest.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray diagnosticsData = new JsonArray();
+        diagnosticsData.add("jakarta.websocket.OnOpen");
+        Diagnostic d1 = JakartaForJavaAssert.d(35, 1, 8,
+                "Life cycle annotation jakarta.websocket.OnOpen already registered with another method.",
+                DiagnosticSeverity.Error, "jakarta-websocket", "DuplicateLifeCycleAnnotation", diagnosticsData);
+
+        diagnosticsData = new JsonArray();
+        diagnosticsData.add("jakarta.websocket.OnClose");
+        Diagnostic d2 = JakartaForJavaAssert.d(40, 1, 9,
+                "Life cycle annotation jakarta.websocket.OnClose already registered with another method.",
+                DiagnosticSeverity.Error, "jakarta-websocket", "DuplicateLifeCycleAnnotation", diagnosticsData);
+
+        diagnosticsData = new JsonArray();
+        diagnosticsData.add("jakarta.websocket.OnError");
+        Diagnostic d3 = JakartaForJavaAssert.d(45, 1, 9,
+                "Life cycle annotation jakarta.websocket.OnError already registered with another method.",
+                DiagnosticSeverity.Error, "jakarta-websocket", "DuplicateLifeCycleAnnotation", diagnosticsData);
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d1, d2, d3);
+
+        // Expected code actions
+        JakartaJavaCodeActionParams codeActionsParams = createCodeActionParams(uri, d1);
+        String newText = "package io.openliberty.sample.jakarta.websocket;\n\n" +
+                "import jakarta.websocket.OnClose;\nimport jakarta.websocket.OnError;\nimport jakarta.websocket.OnMessage;\n" +
+                "import jakarta.websocket.OnOpen;\nimport jakarta.websocket.Session;\n\n" +
+                "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "@ServerEndpoint(\"/path\")\n" +
+                "public class DuplicateAnnotationTest {\n\n	" +
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnClose\n	public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
+        TextEdit te = te(0, 0, 50, 0, newText);
+        CodeAction ca = ca(uri, "Remove @OnOpen", d1, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+
+        // Expected code actions
+        codeActionsParams = createCodeActionParams(uri, d2);
+        newText = "package io.openliberty.sample.jakarta.websocket;\n\n" +
+                "import jakarta.websocket.OnClose;\nimport jakarta.websocket.OnError;\nimport jakarta.websocket.OnMessage;\n" +
+                "import jakarta.websocket.OnOpen;\nimport jakarta.websocket.Session;\n\n" +
+                "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "@ServerEndpoint(\"/path\")\n" +
+                "public class DuplicateAnnotationTest {\n\n	" +
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnError\n	public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
+        te = te(0, 0, 50, 0, newText);
+        ca = ca(uri, "Remove @OnClose", d2, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
+
+        // Expected code actions
+        codeActionsParams = createCodeActionParams(uri, d3);
+        newText = "package io.openliberty.sample.jakarta.websocket;\n\n" +
+                "import jakarta.websocket.OnClose;\nimport jakarta.websocket.OnError;\nimport jakarta.websocket.OnMessage;\n" +
+                "import jakarta.websocket.OnOpen;\nimport jakarta.websocket.Session;\n\n" +
+                "import java.io.IOException;\n\nimport jakarta.websocket.server.ServerEndpoint;\n\n" +
+                "@ServerEndpoint(\"/path\")\n" +
+                "public class DuplicateAnnotationTest {\n\n	" +
+                "@OnOpen\n	public void onOpen(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnMessage\n	public void onMessage(Session session, String message) throws IOException {\n\n	}\n\n	" +
+                "@OnClose\n	public void onClose(Session session) throws IOException {\n\n	}\n\n	" +
+                "@OnError\n	public void onError(Session session, Throwable throwable) {\n\n	}\n	\n	" +
+                "@OnOpen\n	public void onOpen2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "@OnClose\n	public void onClose2(Session session) throws IOException {\n\n	}\n	\n	" +
+                "public void onError2(Session session, Throwable throwable) {\n\n	}\n}\n";
+        te = te(0, 0, 50, 0, newText);
+        ca = ca(uri, "Remove @OnError", d3, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionsParams, utils, ca);
     }
 }

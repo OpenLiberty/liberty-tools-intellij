@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.psi.*;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.Change;
 
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
             for (String newAttr : this.attributesToAdd) {
                 // don't add duplicate attributes to an annotation
                 if (Arrays.stream(values).noneMatch(v -> v.getName().equals(newAttr))) {
-                    annotation.setDeclaredAttributeValue(newAttr, newDefaultExpression(annotation, newAttr));
+                    annotation.setDeclaredAttributeValue(newAttr, AnnotationValueExpressionUtil.createAnnotationAttributeDefault(annotation, newAttr));
                 }
             }
             // remove attributes
@@ -98,28 +99,5 @@ public class ModifyAnnotationProposal extends NewAnnotationProposal {
 
         final Document changed = fInvocationNode.getViewProvider().getDocument();
         return  new Change(sourceCU.getViewProvider().getDocument(), changed);
-    }
-
-    /**
-     * newDefaultExpression
-     * Add new attributes of type String or Class.
-     * For initial values, we use empty strings for String types and Object.class for Class types,
-     * since the user's intended values are unknown at this stage,
-     * These placeholders (e.g., name = "", type = Object.class) must be updated by the user as needed.
-     * when an annotation in Jakarta EE declares an attribute named type, it’s always of the form of Class<?>
-     *
-     * @param annotation
-     * @param attributeName
-     * @return
-     */
-    private PsiAnnotationMemberValue newDefaultExpression(PsiAnnotation annotation, String attributeName) {
-        if ("type".equals(attributeName)) {
-            return PsiElementFactory.getInstance(annotation.getProject())
-                    .createExpressionFromText("Object.class", annotation);
-        } else {
-            return PsiElementFactory.getInstance(annotation.getProject()).
-                    createExpressionFromText("\"\"", annotation);
-        }
-
     }
 }
