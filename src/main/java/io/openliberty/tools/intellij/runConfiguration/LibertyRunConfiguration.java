@@ -15,6 +15,8 @@ import com.intellij.execution.configurations.*;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
@@ -152,18 +154,13 @@ public class LibertyRunConfiguration extends ModuleBasedConfiguration<RunConfigu
         }
 
         // Required configuration event data.
-        DataContext dataCtx = dataId -> {
-            if (CommonDataKeys.PROJECT.is(dataId)) {
-                return libertyModule.getProject();
-            }
-            if (Constants.LIBERTY_BUILD_FILE_DATAKEY.getName().equals(dataId)) {
-                return libertyModule.getBuildFile();
-            }
-            return null;
-        };
+        DataContext dataCtx = SimpleDataContext.builder()
+                .add(CommonDataKeys.PROJECT, libertyModule.getProject())
+                .add(Constants.LIBERTY_BUILD_FILE_DATAKEY, libertyModule.getBuildFile())
+                .build();
 
-        AnActionEvent event = new AnActionEvent(null, dataCtx, ActionPlaces.UNKNOWN, new Presentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
+        AnActionEvent event = new AnActionEvent(dataCtx, new Presentation(), ActionPlaces.UNKNOWN, ActionUiKind.NONE, null, 0, ActionManager.getInstance());
+        ActionUtil.performActionDumbAwareWithCallbacks(action, event);
 
         // return null because we are not plugging into "Run" tool window in IntelliJ, just terminal and Debug
         return null;

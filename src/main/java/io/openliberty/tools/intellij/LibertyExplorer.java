@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,6 +11,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -95,7 +96,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     }
 
     /**
-     * Builds the Open Liberty Tools Dashboard tree
+     * Builds the Liberty Tools Dashboard tree
      *
      * @param project         current project
      * @param backgroundColor
@@ -141,9 +142,9 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         Tree tree = new Tree(top);
         tree.setName(Constants.LIBERTY_TREE);
         tree.setRootVisible(false);
-        TreeDataProvider newDataProvider = new TreeDataProvider();
-        DataManager.registerDataProvider(tree, newDataProvider);
-        TreeDataProvider treeDataProvider = (TreeDataProvider) DataManager.getDataProvider(tree);
+        TreeDataProvider treeDataProvider = new TreeDataProvider();
+        UiDataProvider.wrapComponent(tree, treeDataProvider);
+        tree.putClientProperty(Constants.LIBERTY_TREE_DATA_PROVIDER_KEY, treeDataProvider);
 
         treeDataProvider.setProjectMap(projectMap);
 
@@ -284,11 +285,31 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             }
             LibertyGeneralAction action = (LibertyGeneralAction) am.getAction(actionId);
             if (action != null) {
-                action.actionPerformed(new AnActionEvent(null,
-                        DataManager.getInstance().getDataContext(tree),
-                        ActionPlaces.UNKNOWN, new Presentation(),
-                        am, 0));
+                DataContext dataContext = buildDataContext(tree);
+                AnActionEvent event = new AnActionEvent(dataContext,
+                        new Presentation(), ActionPlaces.UNKNOWN, ActionUiKind.NONE, null,
+                        0, am);
+                ActionUtil.performActionDumbAwareWithCallbacks(action, event);
             }
         }
+    }
+
+    /**
+     * Builds a DataContext for the given tree that includes data from the TreeDataProvider
+     * stored as a client property. This is necessary because UiDataProvider.wrapComponent
+     * is not resolved by DataManager.getDataContext(component).
+     */
+    public static DataContext buildDataContext(Tree tree) {
+        TreeDataProvider provider = (TreeDataProvider) tree.getClientProperty(Constants.LIBERTY_TREE_DATA_PROVIDER_KEY);
+        if (provider == null) {
+            return DataManager.getInstance().getDataContext(tree);
+        }
+        return SimpleDataContext.builder()
+                .setParent(DataManager.getInstance().getDataContext(tree))
+                .add(Constants.LIBERTY_BUILD_FILE_DATAKEY, provider.currentFile)
+                .add(Constants.LIBERTY_PROJECT_NAME, provider.projectName)
+                .add(Constants.LIBERTY_PROJECT_TYPE, provider.projectType)
+                .add(Constants.LIBERTY_PROJECT_MAP, provider.map)
+                .build();
     }
 }

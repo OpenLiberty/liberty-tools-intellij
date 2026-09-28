@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -90,7 +90,7 @@ public class JakartaServletTest extends BaseJakartaTest {
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.ServletException;\n" +
                 "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n" +
                 "import jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\n" +
-                "import java.io.IOException;\n\n@WebServlet(urlPatterns=\"\")\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
+                "import java.io.IOException;\n\n@WebServlet(urlPatterns={})\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
                 "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, " +
                 "IOException {\n\t\tres.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + " +
                 "Open Liberty!\");\n\t}\n}";
@@ -100,10 +100,9 @@ public class JakartaServletTest extends BaseJakartaTest {
         String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.ServletException;\n" +
                 "import jakarta.servlet.annotation.WebServlet;\nimport jakarta.servlet.http.HttpServlet;\n" +
                 "import jakarta.servlet.http.HttpServletRequest;\nimport jakarta.servlet.http.HttpServletResponse;\n" +
-                "import java.io.IOException;\n\n@WebServlet(\"\")\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
-                "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, " +
-                "IOException {\n\t\tres.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + " +
-                "Open Liberty!\");\n\t}\n}";
+                "import java.io.IOException;\n\n@WebServlet({})\npublic class InvalidWebServlet extends HttpServlet {\n\t" +
+                "@Override\n\tprotected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {\n\t\t" +
+                "res.setContentType(\"text/html;charset=UTF-8\");\n\t\tres.getWriter().println(\"Hello Jakarta EE 9 + Open Liberty!\");\n\t}\n}";
         TextEdit te2 = JakartaForJavaAssert.te(0, 0, 16, 1, newText1);
         CodeAction ca2 = JakartaForJavaAssert.ca(uri, "Add the `value` attribute to @WebServlet", d, te2);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2);
@@ -160,13 +159,13 @@ public class JakartaServletTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
         String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(servletNames=\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(servletNames={})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
         String newText1 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(urlPatterns=\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(urlPatterns={})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
         String newText2 = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.servlet.Filter;\n" +
-                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter(\"\")\npublic abstract class InvalidWebFilter " +
+                "import jakarta.servlet.annotation.WebFilter;\n\n@WebFilter({})\npublic abstract class InvalidWebFilter " +
                 "implements Filter {\n\n}\n\n\n";
 
         JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
@@ -308,5 +307,33 @@ public class JakartaServletTest extends BaseJakartaTest {
         CodeAction ca7 = JakartaForJavaAssert.ca(uri, "Let 'DontImplementListener' implement 'ServletRequestListener'", d, te7);
 
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca1, ca2, ca3, ca4, ca5, ca6, ca7);
+    }
+    @Test
+    public void ExtendWebServletForDeclareRoles() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/servlet/DeclareRolesWithoutServlet.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // expected
+        Diagnostic d = JakartaForJavaAssert.d(6, 13, 39, "Annotated classes with @DeclareRoles must implement the Servlet interface or its subclasses.",
+                DiagnosticSeverity.Error, "jakarta-servlet", "ExtendHttpServlet");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, d);
+
+        // test associated quick-fix code action
+        JakartaJavaCodeActionParams codeActionParams = JakartaForJavaAssert.createCodeActionParams(uri, d);
+        String newText = "package io.openliberty.sample.jakarta.servlet;\n\nimport jakarta.annotation.security.DeclareRoles;\n" +
+                "import jakarta.servlet.http.HttpServlet;\n\n@DeclareRoles(\"Administrator\")\n" +
+                "public class DeclareRolesWithoutServlet extends HttpServlet {\n\n}\n";
+
+        TextEdit te = JakartaForJavaAssert.te(0, 0, 9, 0, newText);
+        CodeAction ca = JakartaForJavaAssert.ca(uri, "Let 'DeclareRolesWithoutServlet' extend 'HttpServlet'", d, te);
+        JakartaForJavaAssert.assertJavaCodeAction(codeActionParams, utils, ca);
     }
 }
