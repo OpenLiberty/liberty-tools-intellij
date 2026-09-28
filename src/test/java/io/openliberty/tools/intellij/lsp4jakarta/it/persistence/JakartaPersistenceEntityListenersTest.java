@@ -149,7 +149,7 @@ public class JakartaPersistenceEntityListenersTest extends BaseJakartaTest {
 
         // Line 8 (0-based), col 0–142: the full @EntityListeners annotation
         Diagnostic nonInstantiableDiagnostic = d(8, 0, 142,
-                "The entity listener class(es) NonStaticInnerImplicitListener, NonStaticInnerExplicitListener must not be abstract, an interface, or a non-static inner class.",
+                "The entity listener class(es) NonStaticInnerImplicitListener, NonStaticInnerExplicitListener must not be abstract, an interface, a non-static inner class, an anonymous class, or a local class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidEntityListenerType");
 
         assertJavaDiagnostics(diagnosticsParams, utils, nonInstantiableDiagnostic);
@@ -178,7 +178,7 @@ public class JakartaPersistenceEntityListenersTest extends BaseJakartaTest {
 
         // Line 8 (0-based), col 0–85: the full @EntityListeners annotation
         Diagnostic nonInstantiableDiagnostic = d(8, 0, 85,
-                "The entity listener class(es) AbstractListener must not be abstract, an interface, or a non-static inner class.",
+                "The entity listener class(es) AbstractListener must not be abstract, an interface, a non-static inner class, an anonymous class, or a local class.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidEntityListenerType");
         Diagnostic invalidConstructorDiagnostic = d(8, 0, 85,
                 "The entity listener class(es) PackagePrivateConstructorListener must declare a public no-argument constructor.",
