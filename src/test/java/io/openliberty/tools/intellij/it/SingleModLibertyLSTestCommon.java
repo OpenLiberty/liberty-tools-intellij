@@ -210,14 +210,14 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedServerEnvString = "WLP_LOGGING_CONSOLE_FORMAT=SIMPLE";
 
         // get focus on server.env tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, SERVER_ENV);
 
         // Save the current server.env content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippetLowerCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
-            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, SERVER_ENV, envCfgSnippetLowerCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
+            Path pathToServerEnv = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_ENV)));
             TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
             // Replace server.xml content with the original content
@@ -238,14 +238,14 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedServerEnvString = "WLP_LOGGING_CONSOLE_FORMAT=SIMPLE";
 
         // get focus on server.env tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "server.env");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, SERVER_ENV);
 
         // Save the current server.env content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "server.env", envCfgSnippetMixCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
-            Path pathToServerEnv = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "server.env");
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, SERVER_ENV, envCfgSnippetMixCase, envCfgNameChooserSnippet, envCfgValueSnippet, true);
+            Path pathToServerEnv = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, SERVER_ENV)));
             TestUtils.validateStringInFile(pathToServerEnv.toString(), expectedServerEnvString);
         } finally {
             // Replace server.xml content with the original content
@@ -295,14 +295,14 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, BOOTSTRAP_PROPERTIES);
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippetUpperCase, configNameChooserSnippet, configValueSnippet, true);
-            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, BOOTSTRAP_PROPERTIES, configNameSnippetUpperCase, configNameChooserSnippet, configValueSnippet, true);
+            Path pathToBootstrapProps = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, BOOTSTRAP_PROPERTIES)));
             TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
             // Replace server.xml content with the original content
@@ -323,14 +323,14 @@ public abstract class SingleModLibertyLSTestCommon {
         String expectedBootstrapPropsString = "com.ibm.ws.logging.console.format=TBASIC";
 
         // get focus on bootstrap.properties tab prior to copy
-        UIBotTestUtils.clickOnFileTab(remoteRobot, "bootstrap.properties");
+        UIBotTestUtils.clickOnFileTab(remoteRobot, BOOTSTRAP_PROPERTIES);
 
         // Save the current bootstrap.properties content.
         UIBotTestUtils.copyWindowContent(remoteRobot);
 
         try {
-            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, "bootstrap.properties", configNameSnippetMixCase, configNameChooserSnippet, configValueSnippet, true);
-            Path pathToBootstrapProps = Paths.get(projectsPath, projectName, "src", "main", "liberty", "config", "bootstrap.properties");
+            UIBotTestUtils.insertConfigIntoConfigFile(remoteRobot, BOOTSTRAP_PROPERTIES, configNameSnippetMixCase, configNameChooserSnippet, configValueSnippet, true);
+            Path pathToBootstrapProps = Paths.get(projectsPath, combinePath(projectName, buildPathArray(CONFIG_DIR_PATH, BOOTSTRAP_PROPERTIES)));
             TestUtils.validateStringInFile(pathToBootstrapProps.toString(), expectedBootstrapPropsString);
         } finally {
             // Replace server.xml content with the original content
@@ -345,7 +345,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testCompletionValuesInServerEnv() {
-        runCompletionTest("server.env", "WLP_LOGGING_CONSOLE_FORMAT=", new String[]{"DEV", "JSON", "SIMPLE", "TBASIC"}, 4);
+        runCompletionTest(SERVER_ENV, "WLP_LOGGING_CONSOLE_FORMAT=", new String[]{"DEV", "JSON", "SIMPLE", "TBASIC"}, 4);
     }
 
     /**
@@ -355,7 +355,7 @@ public abstract class SingleModLibertyLSTestCommon {
     @Test
     @Video
     public void testCompletionValuesInBootstrapProperties() {
-        runCompletionTest("bootstrap.properties", "com.ibm.ws.logging.console.log.level=", new String[]{"AUDIT", "ERROR", "INFO", "OFF", "WARNING"}, 5);
+        runCompletionTest(BOOTSTRAP_PROPERTIES, "com.ibm.ws.logging.console.log.level=", new String[]{"AUDIT", "ERROR", "INFO", "OFF", "WARNING"}, 5);
     }
 
     /**

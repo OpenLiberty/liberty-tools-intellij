@@ -1061,10 +1061,10 @@ public class UIBotTestUtils {
         Exception error = null;
 
         String configNameSnippet = "";
-        if (fileName.equals("server.env")) {
+        if (fileName.equals(SERVER_ENV)) {
             configNameSnippet = configNameSnippetCaseSpecific.toUpperCase(java.util.Locale.ROOT);
         }
-        else if (fileName.equals("bootstrap.properties")) {
+        else if (fileName.equals(BOOTSTRAP_PROPERTIES)) {
             configNameSnippet = configNameSnippetCaseSpecific.toLowerCase(java.util.Locale.ROOT);
         }
         else {

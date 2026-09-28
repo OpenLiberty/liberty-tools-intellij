@@ -132,7 +132,7 @@ public abstract class SingleModJakartaLSTestCommon {
             for (int i = 0; i<5; i++){
                 if (foundHoverData.contains("method 'getProperties()' is never used")) {
                     TestUtils.sleepAndIgnoreException(2);
-                    UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, "SystemResource2.java", UIBotTestUtils.PopupType.DIAGNOSTIC);
+                    UIBotTestUtils.hoverInAppServerCfgFile(remoteRobot, flaggedString, SYSTEM_RESOURCE_2_JAVA, UIBotTestUtils.PopupType.DIAGNOSTIC);
                     foundHoverData = UIBotTestUtils.getHoverStringData(remoteRobot, UIBotTestUtils.PopupType.DIAGNOSTIC);
                 }
                 else {
