@@ -111,4 +111,9 @@ public class PersistenceConstants {
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
 
     public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
+
+    /* NamedEntityGraph Codes */
+    public static final String NAMED_ENTITY_GRAPH = "jakarta.persistence.NamedEntityGraph";
+    public static final String NAMED_ENTITY_GRAPHS = "jakarta.persistence.NamedEntityGraphs";
+    public static final String DIAGNOSTIC_CODE_DUPLICATE_NAMED_ENTITY_GRAPH = "DuplicateNamedEntityGraphName";
 }
