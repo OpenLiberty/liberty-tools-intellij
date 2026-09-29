@@ -50,7 +50,7 @@ public class LibertyProjectUtil {
      * for Liberty build files.  A build file found anywhere under a directory
      * with one of these names is considered a generated copy, not a source file.
      */
-    static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "build");
+    static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target");
 
     enum BuildFileFilter {
         ADDABLE {
@@ -288,8 +288,8 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Returns {@code true} when the given build file resides inside a build-output
-     * directory (e.g. {@code target/} for Maven, {@code build/} for Gradle).
+     * Returns {@code true} when the given build file resides inside a Maven build-output
+     * directory (i.e. {@code target/}).
      *
      * <p>Such files are generated copies of the original and must not be treated as
      * independent Liberty projects.</p>

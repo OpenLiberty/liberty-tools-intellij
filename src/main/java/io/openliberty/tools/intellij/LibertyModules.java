@@ -19,7 +19,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -128,20 +127,14 @@ public class LibertyModules {
      */
     private void parseBuildMetadata(Project project) {
         for (LibertyModule module : getLibertyModules(project)) {
+            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                continue;
+            }
             VirtualFile buildFile = module.getBuildFile();
             if (buildFile == null) continue;
             String buildFilePath = buildFile.toNioPath().toString();
             try {
-                AbstractProjectMetadata metadata;
-                if (module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
-                    metadata = new MavenProjectMetadata(buildFilePath);
-                } else {
-                    Path projectDir = Paths.get(buildFilePath).getParent();
-                    Path settingsFile = GradleProjectMetadata.findSettingsFile(projectDir);
-                    String settingsFilePath = settingsFile != null ? settingsFile.toString() : null;
-                    metadata = new GradleProjectMetadata(buildFilePath, settingsFilePath);
-                }
-                module.setBuildMetadata(metadata);
+                module.setBuildMetadata(new MavenProjectMetadata(buildFilePath));
             } catch (Exception e) {
                 LOGGER.warn(String.format("Could not parse build metadata for: %s", buildFilePath), e);
             }
