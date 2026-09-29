@@ -17,8 +17,11 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiJavaFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -75,6 +78,54 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
                     }
                 }
             }
+
+            // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#specialize_producer_method
+            // A producer method annotated with @Specializes must:
+            //   1. Be non-static
+            //   2. Directly override another producer method in the superclass
+            // Note: @Specializes on a method is independent of @Specializes on the class.
+            for (PsiMethod method : type.getMethods()) {
+                if (AnnotationUtils.hasAnnotation(method, SPECIALIZES_FQ_NAME)
+                        && AnnotationUtils.hasAnnotation(method, PRODUCES_FQ_NAME)) {
+                    validateSpecializesProducerMethod(method, type, unit, diagnostics);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates a producer method annotated with {@code @Specializes}.
+     *
+     * <p>Per CDI spec §specialize_producer_method, the method must:</p>
+     * <ol>
+     *   <li>Be non-static</li>
+     *   <li>Directly override another producer method (annotated with {@code @Produces})
+     *       in the direct superclass</li>
+     * </ol>
+     *
+     * <p>Both violations are reported independently.</p>
+     *
+     * @param method      the producer method to validate
+     * @param type        the declaring class
+     * @param unit        the containing file
+     * @param diagnostics the list to add diagnostics to
+     */
+    private void validateSpecializesProducerMethod(PsiMethod method, PsiClass type,
+                                                   PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        // Rule 1: must not be static
+        if (method.hasModifierProperty(PsiModifier.STATIC)) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSpecializesStaticProducerMethod"),
+                    DIAGNOSTIC_CODE_SPECIALIZES_STATIC_PRODUCER, null,
+                    DiagnosticSeverity.Error));
+        }
+
+        // Rule 2: must directly override a @Produces method in the superclass
+        if (!DiagnosticsUtils.directSuperclassHasMatchingAnnotatedMethod(type, method, PRODUCES_FQ_NAME)) {
+            diagnostics.add(createDiagnostic(method, unit,
+                    Messages.getMessage("InvalidSpecializesProducerMethodNotOverriding"),
+                    DIAGNOSTIC_CODE_SPECIALIZES_PRODUCER_NOT_OVERRIDING, null,
+                    DiagnosticSeverity.Error));
         }
     }
 
