@@ -172,6 +172,15 @@ public class ManagedBeanTest extends BaseJakartaTest {
                 "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
                 "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
                 "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
+        String newText6 = "package io.openliberty.sample.jakarta.cdi;\n\nimport jakarta.enterprise.context.*;\n\n" +
+                "@Dependent\npublic class ManagedBeanWithDependent<T> {\n    public int a;\n\n    " +
+                "public ManagedBeanWithDependent() {\n        this.a = 10;\n    }\n}\n\n@Dependent\n@RequestScoped\n" +
+                "@SessionScoped\nclass NonGenericManagedBean {\n    public int a;\n\n    " +
+                "public NonGenericManagedBean() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "@SessionScoped\nclass ManagedBeanWithoutDependent<T> {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithoutDependent() {\n        this.a = 10;\n    }\n}\n\n@RequestScoped\n" +
+                "@SessionScoped\nclass ManagedBeanWithMultipleScopes2 {\n    public static int a;\n\n    " +
+                "public ManagedBeanWithMultipleScopes2() {\n        this.a = 10;\n    }\n}";
 
         // Assert for the diagnostic d1
         JakartaJavaCodeActionParams codeActionParams1 = createCodeActionParams(uri, d1);
@@ -180,7 +189,6 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit removeSessionScopedTextEdit = te(0, 0, 43, 1, newText2);
         CodeAction removeSessionScopedCodeAction = ca(uri, "Remove @SessionScoped", d1, removeSessionScopedTextEdit);
         assertJavaCodeAction(codeActionParams1, utils, removeRequestScopedCodeAction, removeSessionScopedCodeAction);
-
 
         // Assert for the diagnostic d3
         JakartaJavaCodeActionParams codeActionParams3 = createCodeActionParams(uri, d3);
@@ -199,6 +207,18 @@ public class ManagedBeanTest extends BaseJakartaTest {
         TextEdit te5 = te(0, 0, 43, 1, newText5);
         CodeAction ca5 = ca(uri, "Replace current scope with @Dependent", d5, te5);
         assertJavaCodeAction(codeActionParams5, utils, ca5);
+
+        // Assert for the diagnostic d7
+        JakartaJavaCodeActionParams codeActionParams7 = createCodeActionParams(uri, d7);
+        TextEdit te7 = te(0, 0, 43, 1, newText6);
+        CodeAction ca7 = ca(uri, "Replace current scope with @Dependent", d7, te7);
+        assertJavaCodeAction(codeActionParams7, utils, ca7);
+
+        // Assert for the diagnostic d8
+        JakartaJavaCodeActionParams codeActionParams8 = createCodeActionParams(uri, d8);
+        TextEdit te8 = te(0, 0, 43, 1, newText6);
+        CodeAction ca8 = ca(uri, "Replace current scope with @Dependent", d8, te8);
+        assertJavaCodeAction(codeActionParams8, utils, ca8);
 
     }
 

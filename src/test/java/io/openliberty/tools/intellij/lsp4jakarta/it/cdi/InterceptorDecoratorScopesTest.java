@@ -63,17 +63,11 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
         Diagnostic interceptorSessionScoped = d(60, 6, 34, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.SessionScoped"));
-        Diagnostic interceptorSessionScopedMissingSerializable = d(60, 6, 34,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
         // Line 68: Invalid interceptor with multiple scopes - InvalidScopeDecl
         Diagnostic interceptorMultiScopeDecl = d(68, 6, 42, "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl",
                 createJsonArray("jakarta.enterprise.context.SessionScoped", "jakarta.enterprise.context.ApplicationScoped"));
-        Diagnostic interceptorMultiScopeMissingSerializable = d(68, 6, 42,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
         // Line 68: Invalid interceptor with multiple scopes - InvalidInterceptorOrDecorator
         Diagnostic interceptorMultiScope = d(68, 6, 42, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
@@ -89,17 +83,11 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
         Diagnostic decoratorSessionScoped = d(85, 6, 32, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.SessionScoped"));
-        Diagnostic decoratorSessionScopedMissingSerializable = d(85, 6, 32,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
         // Line 95: Invalid decorator with multiple scopes - InvalidScopeDecl
         Diagnostic decoratorMultiScopeDecl = d(95, 6, 40, "Scope type annotations must be specified by a managed bean class at most once.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidScopeDecl",
                 createJsonArray("jakarta.enterprise.context.ConversationScoped", "jakarta.enterprise.context.RequestScoped"));
-        Diagnostic decoratorMultiScopeMissingSerializable = d(95, 6, 40,
-                "A managed bean in a passivating scope must implement java.io.Serializable.",
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
 
         // Line 95: Invalid decorator with multiple scopes - InvalidInterceptorOrDecorator
         Diagnostic decoratorMultiScope = d(95, 6, 40, "Interceptors and decorators must be annotated with the @Dependent scope. Any other scope is invalid.",
@@ -128,10 +116,8 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, decoratorMixedScopes, interceptorMixedScopes,
                 decoratorCustomScope, interceptorCustomScope, decoratorMultiScopeDecl,
-                decoratorMultiScopeMissingSerializable, decoratorMultiScope,
-                decoratorSessionScopedMissingSerializable, decoratorSessionScoped, decoratorAppScoped,
-                interceptorMultiScopeDecl, interceptorMultiScopeMissingSerializable,
-                interceptorMultiScope, interceptorSessionScopedMissingSerializable,
+                decoratorMultiScope, decoratorSessionScoped, decoratorAppScoped,
+                interceptorMultiScopeDecl, interceptorMultiScope,
                 interceptorSessionScoped, interceptorAppScoped);
 
         // Test quickfix for interceptor with @ApplicationScoped (line 41)

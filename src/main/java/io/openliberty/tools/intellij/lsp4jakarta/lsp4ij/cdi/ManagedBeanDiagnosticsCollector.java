@@ -389,7 +389,8 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
             }
 
             // A managed bean (or custom-scoped class) in a passivating scope must implement Serializable.
-            if (hasPassivatingScope(type)) {
+            // Interceptors and decorators are excluded as per CDI 3.0 §6.6.4 / §6.2.
+            if (!interceptorOrDecorator && hasPassivatingScope(type)) {
                 validatePassivatingScopeWithoutSerializable(unit, diagnostics, type);
             }
 
