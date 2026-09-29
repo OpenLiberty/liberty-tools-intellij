@@ -118,7 +118,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			// When a non-interceptor type is a superclass of an @Interceptor class in a
 			// different file, its lifecycle callback methods must still satisfy the spec
 			// signature constraint (Jakarta Interceptors 2.0).
-			if (!isInterceptorType && hasInterceptorSubclassInOtherFile(type, unit)) {
+			if (!isInterceptorType && hasInterceptorSubclass(type, unit)) {
 				for (PsiMethod method : type.getMethods()) {
 					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}

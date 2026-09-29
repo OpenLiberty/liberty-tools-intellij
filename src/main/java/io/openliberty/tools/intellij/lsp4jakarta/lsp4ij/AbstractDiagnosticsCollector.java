@@ -358,7 +358,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @param unit the PSI Java file that contains {@code type}
      * @return {@code true} if an {@code @Interceptor} subclass exists in another file
      */
-    public static boolean hasInterceptorSubclassInOtherFile(PsiClass type, PsiJavaFile unit) {
+    public static boolean hasInterceptorSubclass(PsiClass type, PsiJavaFile unit) {
         GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
         return ClassInheritorsSearch.search(type, scope, true)
                 .anyMatch(subtype -> {
