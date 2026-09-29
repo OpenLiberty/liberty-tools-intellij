@@ -378,7 +378,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			.ifPresent(method -> {
 				// Suppress when an @Interceptor subclass exists in a different source file —
 				// spec allows @AroundConstruct in interceptor superclasses.
-				if (hasInterceptorSubclassInOtherFile(type, unit)) {
+				if (hasInterceptorSubclass(type, unit)) {
 					return;
 				}
 				Range range = PositionUtils.toNameRange(method);
