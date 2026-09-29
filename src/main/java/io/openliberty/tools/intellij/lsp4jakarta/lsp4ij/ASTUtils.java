@@ -60,7 +60,7 @@ public class ASTUtils {
      * @param parentFQN the fully qualified name of the declaring class (e.g. "jakarta.interceptor.InvocationContext")
      * @return true if the matching method invocation exists AND is inside a try statement; false otherwise
      */
-    public static boolean isProceedWrappedInTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
+    public static boolean isMethodWrappedInTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
         PsiMethodCallExpression match = findMethodInvocation(psiMethod, targetMethod, parentFQN);
         if (match == null) {
             return false;
