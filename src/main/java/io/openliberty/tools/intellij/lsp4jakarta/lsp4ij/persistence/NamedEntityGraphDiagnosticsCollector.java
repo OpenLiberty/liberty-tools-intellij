@@ -60,9 +60,9 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
         }
 
         // Guard: skip the expensive project-wide scan entirely unless the current
-        // file contains at least one @Entity class that also carries @NamedEntityGraph
+        // file contains at least one class that carries @NamedEntityGraph
         // or @NamedEntityGraphs. This is an O(annotations-in-file) check.
-        if (!fileHasEntityWithGraphAnnotation(unit)) {
+        if (!fileHasGraphAnnotation(unit)) {
             return;
         }
 
@@ -91,30 +91,21 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
     // =========================================================================
 
     /**
-     * Returns {@code true} if the file contains at least one class annotated with
-     * {@code @Entity} that also carries {@code @NamedEntityGraph} or
-     * {@code @NamedEntityGraphs}.
+     * Returns {@code true} if the file contains at least one class that carries
+     * {@code @NamedEntityGraph} or {@code @NamedEntityGraphs}.
      *
      * <p>This is a cheap O(annotations-in-file) check used to skip the expensive
      * project-wide scan for files that cannot possibly produce this diagnostic.
      */
-    private boolean fileHasEntityWithGraphAnnotation(PsiJavaFile unit) {
+    private boolean fileHasGraphAnnotation(PsiJavaFile unit) {
         for (PsiClass psiClass : unit.getClasses()) {
-            boolean hasEntity = false;
-            boolean hasGraph = false;
             for (PsiAnnotation annotation : psiClass.getAnnotations()) {
                 String qualifiedName = annotation.getQualifiedName();
                 if (qualifiedName == null) {
                     continue;
                 }
-                if (PersistenceConstants.ENTITY.equals(qualifiedName)) {
-                    hasEntity = true;
-                }
                 if (PersistenceConstants.NAMED_ENTITY_GRAPH.equals(qualifiedName)
                         || PersistenceConstants.NAMED_ENTITY_GRAPHS.equals(qualifiedName)) {
-                    hasGraph = true;
-                }
-                if (hasEntity && hasGraph) {
                     return true;
                 }
             }
