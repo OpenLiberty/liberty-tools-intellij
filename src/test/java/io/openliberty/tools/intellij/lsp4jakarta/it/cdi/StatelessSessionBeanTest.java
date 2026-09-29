@@ -100,7 +100,11 @@ public class StatelessSessionBeanTest extends BaseJakartaTest {
                 "A stateless session bean belongs to the @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidStatelessSessionBeanScope");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, illegalSessionScope);
+        Diagnostic missingSerializable = d(8, 13, 39,
+                "A managed bean in a passivating scope must implement java.io.Serializable.",
+                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidPassivatingScopedBeanWithoutSerializable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, illegalSessionScope, missingSerializable);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, illegalSessionScope);
 
