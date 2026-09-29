@@ -138,7 +138,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		*/
 	private boolean isInterceptorMethodWithUnwrappedProceed(PsiMethod method) {
 		return ASTUtils.containsMethodInvocation(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT)
-				&& !ASTUtils.isProceedWrappedInTryCatch(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
+				&& !ASTUtils.isMethodWrappedInTryCatch(method, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT);
 	}
 
 	/**
