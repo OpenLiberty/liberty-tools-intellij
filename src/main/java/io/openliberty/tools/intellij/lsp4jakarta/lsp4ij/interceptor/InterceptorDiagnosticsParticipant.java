@@ -21,8 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.List;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
@@ -391,24 +389,4 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			});
 	}
 
-	/**
-	 * Returns {@code true} if {@code type} has at least one subclass (in any source
-	 * file other than the one containing {@code type}) that is annotated with
-	 * {@code @Interceptor}.
-	 *
-	 * <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
-	 * project scan.
-	 *
-	 * @param type the type whose subtype hierarchy is to be searched
-	 * @param unit the PSI Java file that contains {@code type}
-	 * @return {@code true} if an {@code @Interceptor} subclass exists in another file
-	 */
-	private boolean hasInterceptorSubclassInOtherFile(PsiClass type, PsiJavaFile unit) {
-		GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
-		return ClassInheritorsSearch.search(type, scope, true)
-				.anyMatch(subtype -> {
-					PsiFile subFile = subtype.getContainingFile();
-					return subFile != null && !subFile.equals(unit) && isInterceptorType(subtype);
-				});
-	}
 }
