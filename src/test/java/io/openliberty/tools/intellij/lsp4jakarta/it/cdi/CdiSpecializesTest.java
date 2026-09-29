@@ -427,4 +427,212 @@ public class CdiSpecializesTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils, nonNormalScopeDiagnostic);
     }
+
+    // ── Producer method @Specializes tests (Issue #670 / LTI #691) ───────────
+
+    /**
+     * Tests that a producer method annotated with @Specializes that is static
+     * triggers two diagnostics:
+     * 1. InvalidSpecializesStaticProducerMethod — must not be static
+     * 2. InvalidSpecializesProducerMethodNotOverriding — no superclass producer to override
+     *
+     * Line 18 (1-based) = line 17 (0-based):
+     * "    public static String produce() {"
+     * "produce" starts at col 25, ends at col 32
+     */
+    @Test
+    public void testSpecializesStaticProducerMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesStaticProducerMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic staticDiagnostic = d(17, 25, 32,
+                "A producer method annotated with @Specializes must not be static.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesStaticProducerMethod");
+
+        Diagnostic notOverridingDiagnostic = d(17, 25, 32,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, staticDiagnostic, notOverridingDiagnostic);
+    }
+
+    /**
+     * Tests that a non-static producer method annotated with @Specializes that has
+     * no superclass producer method to override triggers one diagnostic:
+     * InvalidSpecializesProducerMethodNotOverriding.
+     *
+     * Line 18 (1-based) = line 17 (0-based):
+     * "    public String produce() {"
+     * "produce" starts at col 18, ends at col 25
+     */
+    @Test
+    public void testSpecializesProducerMethodNoOverride() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesProducerMethodNoOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic notOverridingDiagnostic = d(17, 18, 25,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, notOverridingDiagnostic);
+    }
+
+    /**
+     * Tests that a valid producer method annotated with @Specializes — non-static
+     * and overriding a @Produces method in the direct superclass — does NOT
+     * trigger any diagnostic.
+     */
+    @Test
+    public void testSpecializesValidProducerMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesValidProducerMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — non-static and directly overrides BaseProducer.produce()
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Tests that a valid producer method annotated with @Specializes that omits
+     * the @Override annotation does NOT trigger any diagnostic.
+     *
+     * @Override is optional in Java — its absence does not affect whether a method
+     * actually overrides its superclass counterpart. The CDI spec requires the
+     * override at the language level, not the annotation level.
+     */
+    @Test
+    public void testSpecializesValidProducerMethodWithoutOverrideAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesValidProducerMethodNoOverrideAnnotation.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — @Override annotation is optional; the method
+        // still overrides BaseProducer.produce() at the Java language level
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Tests three flavours of @Specializes producer methods that do NOT properly
+     * override a superclass producer method, all in one class extending BaseProducer:
+     *
+     * Scenario A — same name as BaseProducer.produce() but with a parameter
+     * (overload, not override): line 32 (0-based), "produce" col 18..25
+     *
+     * Scenario B — completely different name, no params:
+     * line 38 (0-based), "createValue" col 18..29
+     *
+     * Scenario C — completely different name and param:
+     * line 45 (0-based), "build" col 18..23
+     *
+     * All three must trigger InvalidSpecializesProducerMethodNotOverriding.
+     */
+    @Test
+    public void testSpecializesProducerMethodNotOverridingFlavours() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesProducerMethodNotOverriding.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Scenario A: produce(String qualifier) — overload, not override
+        // line 32 (1-based) = 31 (0-based): "    public String produce(String qualifier) {"
+        // "produce" after "    public String " = col 18, len 7 → 18..25
+        Diagnostic scenarioA = d(31, 18, 25,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        // Scenario B: createValue() — different name entirely
+        // line 39 (1-based) = 38 (0-based): "    public String createValue() {"
+        // "createValue" after "    public String " = col 18, len 11 → 18..29
+        Diagnostic scenarioB = d(38, 18, 29,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        // Scenario C: build(int count) — different name and param
+        // line 46 (1-based) = 45 (0-based): "    public String build(int count) {"
+        // "build" after "    public String " = col 18, len 5 → 18..23
+        Diagnostic scenarioC = d(45, 18, 23,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, scenarioA, scenarioB, scenarioC);
+    }
+
+    /**
+     * Tests the grandparent chain case:
+     *
+     * GrandparentProducer — @Produces grandParentProduce()
+     * ParentProducerNoProduces — inherits grandParentProduce(), no @Produces
+     * SpecializesProducerMethodGrandparentChain — @Produces @Specializes grandParentProduce()
+     *
+     * The method overrides ParentProducerNoProduces.grandParentProduce() — but
+     * that method has no @Produces. The @Produces on GrandparentProducer is
+     * irrelevant because only the direct superclass is checked.
+     */
+    @Test
+    public void testSpecializesProducerMethodGrandparentChain() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/SpecializesProducerMethodGrandparentChain.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // ParentProducerNoProduces.grandParentProduce() has no @Produces,
+        // so @Specializes here is invalid even though the grandparent has @Produces.
+        // line 25 (1-based) = 24 (0-based): "    public String grandParentProduce() {"
+        // "grandParentProduce" after "    public String " = col 18, len 18 → 18..36
+        Diagnostic chainDiagnostic = d(24, 18, 36,
+                "A producer method annotated with @Specializes must directly override another producer method in a superclass.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidSpecializesProducerMethodNotOverriding");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, chainDiagnostic);
+    }
 }
