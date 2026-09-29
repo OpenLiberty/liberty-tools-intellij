@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
@@ -175,19 +176,11 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         false otherwise.
      */
     protected static boolean doesImplementInterfaces(PsiClass type, String[] interfaceFQNames) {
-        PsiClass[] interfaces = type.getInterfaces();
-
-        // should check import statements first for the performance?
-
-        // check super hierarchy
-        if (interfaces.length > 0) { // the type implements interface(s)
-            //ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
-            //IType[] interfaces = typeHierarchy.getAllInterfaces();
-            for (PsiClass interfase : interfaces) {
-                String fqName = interfase.getQualifiedName();
-                for (String iName : interfaceFQNames) {
-                    if (fqName.equals(iName)) return true;
-                }
+        // Use InheritanceUtil.isInheritor so that interfaces implemented by a
+        // superclass (inherited implementation) are also considered.
+        for (String interfaceFQName : interfaceFQNames) {
+            if (InheritanceUtil.isInheritor(type, interfaceFQName)) {
+                return true;
             }
         }
         return false;

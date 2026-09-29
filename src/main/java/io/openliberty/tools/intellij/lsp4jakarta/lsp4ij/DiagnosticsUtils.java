@@ -21,6 +21,7 @@ import com.intellij.psi.tree.IElementType;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for common IntelliJ PSI-based diagnostic logic.
@@ -197,6 +198,21 @@ public class DiagnosticsUtils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    /**
+     * Converts a list of fully-qualified annotation names into a comma-separated
+     * string of simple names with the given prefix, removing duplicates.
+     *
+     * @param fqAnnotationNames list of fully-qualified annotation names
+     * @param prefix            prefix to prepend to each simple name (e.g. {@code "@"})
+     * @return comma-separated display string, e.g. {@code "@AfterBegin, @BeforeCompletion"}
+     */
+    public static String getSimpleAnnotationNames(List<String> fqAnnotationNames, String prefix) {
+        return fqAnnotationNames.stream()
+                .map(fq -> prefix + JDTUtils.getSimpleName(fq))
+                .distinct()
+                .collect(Collectors.joining(", "));
     }
 
     /**
