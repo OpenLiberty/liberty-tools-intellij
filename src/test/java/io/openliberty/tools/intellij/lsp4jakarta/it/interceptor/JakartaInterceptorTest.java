@@ -1682,4 +1682,21 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         // All interceptor methods use proceed() inside try/catch/finally — no warnings expected
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    @Test
+    public void testValidInterceptorProceedInTryCatchAllFormsTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/ValidInterceptorProceedInTryCatchAllForms.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Covers all three try-statement forms: try/catch, try/finally, try/catch/finally.
+        // All three map to TryStatement in PSI — no warnings expected for any form.
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
