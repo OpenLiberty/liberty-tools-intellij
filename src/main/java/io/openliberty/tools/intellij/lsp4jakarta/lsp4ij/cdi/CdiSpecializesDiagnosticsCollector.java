@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
@@ -87,7 +88,7 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
      * Scans all project source types and returns a map from ultimate base FQ name to the
      * list of {@code @Specializes} types (direct or transitive) that specialize that base.
      */
-    private Map<String, List<PsiClass>> collectProjectSpecializersByUltimateBase(com.intellij.openapi.project.Project project) {
+    private Map<String, List<PsiClass>> collectProjectSpecializersByUltimateBase(Project project) {
         Map<String, List<PsiClass>> result = new HashMap<>();
         GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
 
@@ -115,7 +116,7 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
             return null;
         }
         String fqName = superClass.getQualifiedName();
-        if (fqName == null || "java.lang.Object".equals(fqName)) {
+        if (fqName == null || JAVA_LANG_OBJECT.equals(fqName)) {
             return null;
         }
         // If the superclass also has @Specializes, keep walking up the chain.
