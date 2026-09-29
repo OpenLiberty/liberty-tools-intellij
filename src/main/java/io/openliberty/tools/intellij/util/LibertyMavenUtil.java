@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
@@ -199,6 +200,52 @@ public class LibertyMavenUtil {
         } catch (NullPointerException | ClassCastException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns the Maven {@code -pl :artifactId -am} arguments needed to target a specific
+     * submodule in a multi-module build.
+     *
+     * <p>When the given {@code libertyModule} is a submodule (i.e. its build metadata declares
+     * a parent project name) this method returns {@code " -pl :artifactId -am"} so the caller
+     * can append it directly to the Maven command.  For standalone or root modules an empty
+     * string is returned and the command is left unchanged.</p>
+     *
+     * @param libertyModule the Liberty module for which the command is being built
+     * @return the module-selector arguments, or {@code ""} when not needed
+     */
+    public static String getMavenModuleArgs(LibertyModule libertyModule) {
+        if (libertyModule == null) return "";
+        AbstractProjectMetadata meta = libertyModule.getBuildMetadata();
+        if (meta == null || meta.getParentProjectName() == null) return "";
+        String artifactId = meta.getProjectName();
+        if (artifactId == null || artifactId.isEmpty()) return "";
+        return " -pl :" + artifactId + " -am";
+    }
+
+    /**
+     * Returns the directory from which the Maven command should be executed for the given module.
+     *
+     * <p>For a submodule that has a parent Liberty module registered in the same workspace, the
+     * command must be run from the <em>aggregator's</em> directory so that Maven can resolve the
+     * full project graph.  For standalone or root modules the command is run from the module's
+     * own directory (i.e. the parent of its {@code pom.xml}).</p>
+     *
+     * @param libertyModule the Liberty module for which the execution directory is needed
+     * @return absolute path of the directory to {@code cd} into before running Maven
+     */
+    public static String getMavenExecutionDir(LibertyModule libertyModule) {
+        if (libertyModule != null) {
+            LibertyModule parent = libertyModule.getParentModule();
+            if (parent != null && parent.getBuildFile() != null) {
+                return parent.getBuildFile().getParent().getPath();
+            }
+        }
+        // Standalone or root module — run from its own directory
+        if (libertyModule != null && libertyModule.getBuildFile() != null) {
+            return libertyModule.getBuildFile().getParent().getPath();
+        }
+        return "";
     }
 
     /**

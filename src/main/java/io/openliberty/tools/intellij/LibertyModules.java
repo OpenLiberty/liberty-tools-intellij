@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,6 +21,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Singleton to save the Liberty modules in the open project
@@ -32,6 +33,13 @@ public class LibertyModules {
 
     // key is build file associated with the Liberty project
     Map<VirtualFile, LibertyModule> libertyModules;
+
+    /**
+     * Cache of the last-known {@link LibertyModule.AppState} for each build-file path.
+     * Used to restore state across re-scans when the Liberty process is still running.
+     * Key: absolute NIO path string of the build file.
+     */
+    private final Map<String, LibertyModule.AppState> stateCache = new ConcurrentHashMap<>();
 
     private LibertyModules() {
         libertyModules = Collections.synchronizedMap(new HashMap<>());
@@ -101,8 +109,108 @@ public class LibertyModules {
                 boolean validContainerVersion = buildFile.isValidContainerVersion();
                 addLibertyModule(new LibertyModule(project, virtualFile, projectName, buildFile.getProjectType(), validContainerVersion));
             }
+
+            // After all modules are registered, parse metadata and wire relationships.
+            parseBuildMetadata(project);
+            buildMultiModuleRelationships(project);
+            populateStatesFromCache(project);
         }
         return this;
+    }
+
+    /**
+     * Parses the build file of each Liberty module for the given project and stores
+     * the result in {@link LibertyModule#setBuildMetadata(AbstractProjectMetadata)}.
+     * Errors are logged but do not abort processing of remaining modules.
+     *
+     * @param project the IntelliJ project whose modules should be parsed
+     */
+    private void parseBuildMetadata(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                continue;
+            }
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null) continue;
+            String buildFilePath = buildFile.toNioPath().toString();
+            try {
+                module.setBuildMetadata(new MavenProjectMetadata(buildFilePath));
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Could not parse build metadata for: %s", buildFilePath), e);
+            }
+        }
+    }
+
+    /**
+     * Wires parent/child relationships between Liberty modules for the given project
+     * based on the {@link AbstractProjectMetadata#getParentProjectName()} declared in
+     * each module's build metadata.
+     *
+     * <p>For each module whose metadata reports a parent project name, the method
+     * searches for a module in the same project whose {@code projectName} matches.
+     * When a match is found:
+     * <ul>
+     *   <li>the child's {@link LibertyModule#setParentModule(LibertyModule)} is set, and</li>
+     *   <li>the parent's {@link LibertyModule#addChildLibertyModule(LibertyModule)} is called.</li>
+     * </ul>
+     *
+     * @param project the IntelliJ project whose modules should be linked
+     */
+    private void buildMultiModuleRelationships(Project project) {
+        List<LibertyModule> modules = getLibertyModules(project);
+
+        // Build a lookup: projectName → LibertyModule (skip null names)
+        Map<String, LibertyModule> byName = new HashMap<>();
+        for (LibertyModule module : modules) {
+            AbstractProjectMetadata meta = module.getBuildMetadata();
+            if (meta != null && meta.getProjectName() != null) {
+                byName.put(meta.getProjectName(), module);
+            }
+        }
+
+        // Wire relationships
+        for (LibertyModule child : modules) {
+            AbstractProjectMetadata meta = child.getBuildMetadata();
+            if (meta == null || meta.getParentProjectName() == null) continue;
+            LibertyModule parent = byName.get(meta.getParentProjectName());
+            if (parent == null || parent == child) continue;
+            child.setParentModule(parent);
+            parent.addChildLibertyModule(child);
+        }
+    }
+
+    /**
+     * Saves the current {@link LibertyModule.AppState} of every module in the
+     * given project to the in-memory state cache.
+     *
+     * @param project the IntelliJ project whose module states should be cached
+     */
+    public void cacheState(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile != null) {
+                stateCache.put(buildFile.toNioPath().toString(), module.getAppState());
+            }
+        }
+    }
+
+    /**
+     * Restores the {@link LibertyModule.AppState} of each module in the given
+     * project from the in-memory state cache (populated by {@link #cacheState(Project)}).
+     * Only states that differ from the default {@link LibertyModule.AppState#STOPPED} are
+     * restored so that newly added modules start with the correct default.
+     *
+     * @param project the IntelliJ project whose module states should be restored
+     */
+    private void populateStatesFromCache(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null) continue;
+            LibertyModule.AppState cached = stateCache.get(buildFile.toNioPath().toString());
+            if (cached != null && cached != LibertyModule.AppState.STOPPED) {
+                module.setAppState(cached);
+            }
+        }
     }
 
     /**
@@ -114,14 +222,16 @@ public class LibertyModules {
     public LibertyModule addLibertyModule(LibertyModule module) {
         synchronized (libertyModules) {
             if (libertyModules.containsKey(module.getBuildFile())) {
-                // Update existing Liberty project, projectType module, name and validContainerVersion
+                // Update existing Liberty project, projectType module, name and validContainerVersion.
                 // Do not update the build file (key), debugMode, shellWidget or customStartParams since
                 // they may modify saved run configs.
+                // Clear multi-module relationships so buildMultiModuleRelationships() re-wires them cleanly.
                 LibertyModule existing = libertyModules.get(module.getBuildFile());
                 existing.setProject(module.getProject());
                 existing.setProjectType(module.getProjectType());
                 existing.setName(module.getName());
                 existing.setValidContainerVersion(module.isValidContainerVersion());
+                existing.clearMultiModuleRelationships();
             } else {
                 libertyModules.put(module.getBuildFile(), module);
             }

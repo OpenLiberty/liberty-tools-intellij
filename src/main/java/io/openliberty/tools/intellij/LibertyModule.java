@@ -230,6 +230,15 @@ public class LibertyModule {
     }
 
     /**
+     * Clears all child modules and the parent module reference.
+     * Called before each re-scan so that stale relationships are not retained.
+     */
+    public void clearMultiModuleRelationships() {
+        childModules.clear();
+        parentModule = null;
+    }
+
+    /**
      * Returns an unmodifiable snapshot of the direct child Liberty modules
      * registered under this aggregator.
      */

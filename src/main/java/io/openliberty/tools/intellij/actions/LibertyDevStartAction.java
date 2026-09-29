@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -65,10 +65,15 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
             return;
         }
 
+        // For Maven multi-module projects, append the module selector (-pl :artifactId -am) and
+        // run from the aggregator directory. For all other cases, behaviour is unchanged.
+        String mavenModuleArgs = projectType.equals(LIBERTY_MAVEN_PROJECT)
+                ? LibertyMavenUtil.getMavenModuleArgs(libertyModule) : "";
+
         // Handle Liberty Explorer (dashboard) Start action
         // Also handle Start... action when LibertyRunConfiguration calls this
-        String start = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CMD : LIBERTY_GRADLE_START_CMD);
-        String startInContainer = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CONTAINER_CMD : LIBERTY_GRADLE_START_CONTAINER_CMD);
+        String start = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CMD : LIBERTY_GRADLE_START_CMD) + mavenModuleArgs;
+        String startInContainer = buildSettingsCmd + (projectType.equals(LIBERTY_MAVEN_PROJECT) ? LIBERTY_MAVEN_START_CONTAINER_CMD : LIBERTY_GRADLE_START_CONTAINER_CMD) + mavenModuleArgs;
         if (runInContainer) {
             startCmd = startInContainer;
         } else if (libertyModule.isCustom()) {
@@ -95,7 +100,11 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
 
         // Do not use the custom parameters in the future unless we get here via the run configuration dialog
         libertyModule.setUseCustom(false);
-        String cdToProjectCmd = "cd \"" + buildFile.getParent().getPath() + "\"";
+        // For Maven submodules, cd to the aggregator directory; for all others use the module's own directory.
+        String executionDir = projectType.equals(LIBERTY_MAVEN_PROJECT)
+                ? LibertyMavenUtil.getMavenExecutionDir(libertyModule)
+                : buildFile.getParent().getPath();
+        String cdToProjectCmd = "cd \"" + executionDir + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
             // Create remote configuration to attach debugger
