@@ -222,14 +222,16 @@ public class LibertyModules {
     public LibertyModule addLibertyModule(LibertyModule module) {
         synchronized (libertyModules) {
             if (libertyModules.containsKey(module.getBuildFile())) {
-                // Update existing Liberty project, projectType module, name and validContainerVersion
+                // Update existing Liberty project, projectType module, name and validContainerVersion.
                 // Do not update the build file (key), debugMode, shellWidget or customStartParams since
                 // they may modify saved run configs.
+                // Clear multi-module relationships so buildMultiModuleRelationships() re-wires them cleanly.
                 LibertyModule existing = libertyModules.get(module.getBuildFile());
                 existing.setProject(module.getProject());
                 existing.setProjectType(module.getProjectType());
                 existing.setName(module.getName());
                 existing.setValidContainerVersion(module.isValidContainerVersion());
+                existing.clearMultiModuleRelationships();
             } else {
                 libertyModules.put(module.getBuildFile(), module);
             }
