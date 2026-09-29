@@ -20,9 +20,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.JakartaSearchSettings;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,6 +43,11 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
  */
 @RunWith(JUnit4.class)
 public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
+
+    @After
+    public void tearDown() throws Exception {
+        JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
+    }
 
     /**
      * An entity whose {@code @NamedEntityGraph} name {@code "User.graph"} is also
@@ -266,5 +273,32 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-persistence", "DuplicateNamedEntityGraphName");
 
         assertJavaDiagnostics(diagnosticsParams, utils, firstSelfDuplicateDiag, secondSelfDuplicateDiag);
+    }
+
+    /**
+     * When {@link JakartaSearchSettings#setSearchEngineDiagnosticsEnabled(boolean)} is {@code false},
+     * the project-wide scan is disabled and no diagnostics must be produced, even for a file
+     * with known duplicate entity graph names.
+     */
+    @Test
+    public void searchEngineDiagnosticsDisabledProducesNoDiagnostics() throws Exception {
+        try {
+            JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(false);
+
+            Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+            IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+            VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                    + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphDuplicate1.java");
+            String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+            JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+            diagnosticsParams.setUris(Arrays.asList(uri));
+
+            // With search engine diagnostics disabled, zero diagnostics should be emitted.
+            assertJavaDiagnostics(diagnosticsParams, utils);
+        } finally {
+            JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
+        }
     }
 }

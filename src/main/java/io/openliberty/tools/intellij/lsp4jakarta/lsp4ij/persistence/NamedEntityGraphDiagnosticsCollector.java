@@ -78,7 +78,7 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
         // project. Any name with a count > 1 is a duplicate.
         Map<String, Integer> graphNameOccurrences = ProjectWideNameScanner.scan(
                 unit.getProject(),
-                (psiClass, nameCount) -> extractNamesFromClass(psiClass, nameCount));
+                this::extractNamesFromClass);
 
         // Phase 2: validate classes in the current file against the collected counts.
         for (PsiClass psiClass : unit.getClasses()) {

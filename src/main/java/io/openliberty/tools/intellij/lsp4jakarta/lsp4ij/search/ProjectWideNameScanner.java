@@ -45,7 +45,7 @@ public final class ProjectWideNameScanner {
      */
     public static Map<String, Integer> scan(Project project, NameExtractorStrategy extractor) {
         Map<String, Integer> nameCount = new HashMap<>();
-        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
 
         AllClassesSearch.search(scope, project).forEach(psiClass -> {
             extractor.extract(psiClass, nameCount);
