@@ -45,6 +45,13 @@ import java.util.concurrent.ExecutionException;
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
 
+    /**
+     * Directory names that are build-output folders and should never be scanned
+     * for Liberty build files.  A build file found anywhere under a directory
+     * with one of these names is considered a generated copy, not a source file.
+     */
+    static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "build");
+
     enum BuildFileFilter {
         ADDABLE {
             public boolean matches(Project project, BuildFile buildFile, VirtualFile virtualFile) {
@@ -242,6 +249,10 @@ public class LibertyProjectUtil {
         }
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
+                // Skip build files that live inside build-output directories (e.g. target/, build/)
+                if (isBuildOutputFile(vFile)) {
+                    continue;
+                }
                 try {
                     BuildFile buildFile;
                     if (buildFileType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
@@ -274,6 +285,28 @@ public class LibertyProjectUtil {
         } catch (ExecutionException | InterruptedException e) {
             return null;
         }
+    }
+
+    /**
+     * Returns {@code true} when the given build file resides inside a build-output
+     * directory (e.g. {@code target/} for Maven, {@code build/} for Gradle).
+     *
+     * <p>Such files are generated copies of the original and must not be treated as
+     * independent Liberty projects.</p>
+     *
+     * @param buildFile the virtual file to test
+     * @return {@code true} if any ancestor directory of {@code buildFile} has a name
+     *         listed in {@link #EXCLUDED_DIR_NAMES}
+     */
+    static boolean isBuildOutputFile(VirtualFile buildFile) {
+        VirtualFile parent = buildFile.getParent();
+        while (parent != null) {
+            if (EXCLUDED_DIR_NAMES.contains(parent.getName())) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+        return false;
     }
 
     /**
