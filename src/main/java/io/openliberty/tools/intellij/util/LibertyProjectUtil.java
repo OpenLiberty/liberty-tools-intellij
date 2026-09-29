@@ -332,7 +332,7 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * 
+     *
      * @param buildFile maven or gradle build file in the form of PsiFile
      * @return <code>true</code> if the project contains src/main/liberty/config/server.xml relative to the build file; <code>false</code> otherwise
      */
