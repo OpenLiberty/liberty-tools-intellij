@@ -627,7 +627,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
             if ("equals".equals(method.getName())
                     && method.getParameterList().getParametersCount() == 1
-                    && "java.lang.Object".equals(method.getParameterList().getParameters()[0].getType().getCanonicalText())) {
+                    && PersistenceConstants.OBJECT.equals(method.getParameterList().getParameters()[0].getType().getCanonicalText())) {
                 hasEquals = true;
             } else if ("hashCode".equals(method.getName())
                     && method.getParameterList().getParametersCount() == 0) {
