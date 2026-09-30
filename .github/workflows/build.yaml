@@ -138,33 +138,53 @@ jobs:
             ) ||
             '["linux"]'
           ) }}
-        test-group: [ Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
-        include: >-
+        test-group: >-
           ${{ fromJson(
-            format('[{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}]',
-              '{"test-group": "Maven-MicroProfile", "test-class": "io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest"},',
-              '{"test-group": "Gradle-MicroProfile", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest"},',
-              '{"test-group": "Maven-Custom-Liberty-Install", "test-class": "io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest"},',
-              '{"test-group": "Gradle-Custom-Liberty-Install", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest"},',
-              '{"test-group": "Maven-MP-Config", "test-class": "io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest"},',
-              '{"test-group": "Gradle-MP-Config", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest"},',
-              '{"test-group": "Maven-MP-SID", "test-class": "io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest"},',
-              '{"test-group": "Gradle-MP-SID", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest"},',
-              '{"test-group": "Maven-NLT-REST", "test-class": "io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest"},',
-              '{"test-group": "Gradle-NLT-REST", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest"},',
-              '{"test-group": "Gradle-Language-Server", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModLSTest"},',
-              '{"test-group": "Gradle-MP-Language-Server", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModMPLSTest"},',
-              '{"test-group": "Gradle-Jakarta-Language-Server", "test-class": "io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest"},',
-              '{"test-group": "Maven-Multi-Module-MP", "test-class": "io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest"}',
-              (inputs.allOS || inputs.runLinux || (!inputs.runLinux && !inputs.runMac && !inputs.runWindows)) && ',{"runtime": "linux", "test-group": "LSP4Jakarta-Unit", "test-class": "io.openliberty.tools.intellij.lsp4jakarta.it.*"}' || ''
-            )
+            (inputs.allOS || inputs.runLinux || (!inputs.runLinux && !inputs.runMac && !inputs.runWindows)) &&
+            '["LSP4Jakarta-Unit", "Maven-MicroProfile", "Gradle-MicroProfile", "Maven-Custom-Liberty-Install", "Gradle-Custom-Liberty-Install", "Maven-MP-Config", "Gradle-MP-Config", "Maven-MP-SID", "Gradle-MP-SID", "Maven-NLT-REST", "Gradle-NLT-REST", "Gradle-Language-Server", "Gradle-MP-Language-Server", "Gradle-Jakarta-Language-Server", "Maven-Multi-Module-MP"]' ||
+            '["Maven-MicroProfile", "Gradle-MicroProfile", "Maven-Custom-Liberty-Install", "Gradle-Custom-Liberty-Install", "Maven-MP-Config", "Gradle-MP-Config", "Maven-MP-SID", "Gradle-MP-SID", "Maven-NLT-REST", "Gradle-NLT-REST", "Gradle-Language-Server", "Gradle-MP-Language-Server", "Gradle-Jakarta-Language-Server", "Maven-Multi-Module-MP"]'
           ) }}
+        exclude:
+          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
+          - runtime: mac
+            test-group: LSP4Jakarta-Unit
+          - runtime: windows
+            test-group: LSP4Jakarta-Unit
+        include:
+          - test-group: Maven-MicroProfile
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPProjectTest
+          - test-group: Gradle-MicroProfile
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPProjectTest
+          - test-group: Maven-Custom-Liberty-Install
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModCustomWLPInstallProjectTest
+          - test-group: Gradle-Custom-Liberty-Install
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModCustomWLPInstallProjectTest
+          - test-group: Maven-MP-Config
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPCfgProjectTest
+          - test-group: Gradle-MP-Config
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPCfgProjectTest
+          - test-group: Maven-MP-SID
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModMPSIDProjectTest
+          - test-group: Gradle-MP-SID
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPSIDProjectTest
+          - test-group: Maven-NLT-REST
+            test-class: io.openliberty.tools.intellij.it.MavenSingleModNLTRestProjectTest
+          - test-group: Gradle-NLT-REST
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModNLTRestProjectTest
+          - test-group: Gradle-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
+          - test-group: Gradle-MP-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
+          - test-group: Gradle-Jakarta-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
+          - test-group: Maven-Multi-Module-MP
+            test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
     env:
       USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
       REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
       LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
       REF_LTI_TAG: ${{ inputs.refLTITag }}
-      TEST_CLASS: ${{ matrix.test-class }}
+      TEST_CLASS: ${{ matrix.test-group == 'LSP4Jakarta-Unit' && 'io.openliberty.tools.intellij.lsp4jakarta.it.*' || matrix.test-class }}
     steps:
       - name: Configure pagefile
         if: matrix.runtime == 'windows'
