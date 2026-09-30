@@ -138,7 +138,12 @@ jobs:
             ) ||
             '["linux"]'
           ) }}
-        test-group: [ LSP4Jakarta-Unit, Maven-MicroProfile, Gradle-MicroProfile, Maven-Custom-Liberty-Install, Gradle-Custom-Liberty-Install, Maven-MP-Config, Gradle-MP-Config, Maven-MP-SID, Gradle-MP-SID, Maven-NLT-REST, Gradle-NLT-REST, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server, Maven-Multi-Module-MP ]
+        test-group: >-
+          ${{ fromJson(
+            (inputs.allOS || inputs.runLinux || (!inputs.runLinux && !inputs.runMac && !inputs.runWindows)) &&
+            '["LSP4Jakarta-Unit", "Maven-MicroProfile", "Gradle-MicroProfile", "Maven-Custom-Liberty-Install", "Gradle-Custom-Liberty-Install", "Maven-MP-Config", "Gradle-MP-Config", "Maven-MP-SID", "Gradle-MP-SID", "Maven-NLT-REST", "Gradle-NLT-REST", "Gradle-Language-Server", "Gradle-MP-Language-Server", "Gradle-Jakarta-Language-Server", "Maven-Multi-Module-MP"]' ||
+            '["Maven-MicroProfile", "Gradle-MicroProfile", "Maven-Custom-Liberty-Install", "Gradle-Custom-Liberty-Install", "Maven-MP-Config", "Gradle-MP-Config", "Maven-MP-SID", "Gradle-MP-SID", "Maven-NLT-REST", "Gradle-NLT-REST", "Gradle-Language-Server", "Gradle-MP-Language-Server", "Gradle-Jakarta-Language-Server", "Maven-Multi-Module-MP"]'
+          ) }}
         exclude:
           # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
           - runtime: mac
