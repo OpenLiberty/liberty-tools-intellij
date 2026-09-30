@@ -10,6 +10,7 @@ on:
 jobs:
   # Run the LTI Tests on all OS's against lsp4ij main branch for main and feature branches in progress
   call-build-workflow-all-os:
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij'
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
