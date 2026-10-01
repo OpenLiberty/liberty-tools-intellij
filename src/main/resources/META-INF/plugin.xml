@@ -733,6 +733,10 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveFinalizeMethodQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
+                                   targetDiagnostic="jakarta-ejb#InvalidAfterCompletionMethodParams"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.FixAfterCompletionMethodParamsQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
                                    targetDiagnostic="jakarta-ejb#ConflictingSessionBeanAnnotations"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ejb.RemoveConflictingSessionBeanAnnotationsQuickFix"/>
 
