@@ -160,6 +160,9 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
+        // Line 12 (0-based): "    @AfterCompletion"
+        // Line 13 (0-based): "    public boolean afterComplete(boolean committed) {"
+        // method name "afterComplete": "    public boolean " = 19 chars (4+7+8)
         Diagnostic expectedDiagnostic = d(13, 19, 32,
                 "@AfterCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
@@ -191,6 +194,284 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
     }
 
     // -----------------------------------------------------------------------
+    // Diagnostic + QuickFix: @AfterBegin method must not declare any parameters
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testAfterBeginWithParamsDiagnosticAndQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidNoParamAfterBegin.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 13 (0-based): "    public void afterBegin(String info) {"
+        // "    public void " = 16 chars -> method name "afterBegin" starts at col 16, ends at col 26
+        Diagnostic expectedDiagnostic = d(13, 16, 26,
+                "@AfterBegin session synchronization method must not declare any parameters.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNoParamAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: Remove all parameters
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterBegin;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterBegin method must not declare any parameters.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidNoParamAfterBegin {\n"
+                + "\n"
+                + "    // Error: @AfterBegin method must not have parameters\n"
+                + "    @AfterBegin\n"
+                + "    public void afterBegin() {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 16, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Remove all parameters", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    // -----------------------------------------------------------------------
+    // Diagnostic + QuickFix: @BeforeCompletion method must not declare any parameters
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testBeforeCompletionWithParamsDiagnosticAndQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidNoParamBeforeCompletion.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 13 (0-based): "    public void beforeCompletion(int status) {"
+        // "    public void " = 16 chars -> method name "beforeCompletion" starts at col 16, ends at col 32
+        Diagnostic expectedDiagnostic = d(13, 16, 32,
+                "@BeforeCompletion session synchronization method must not declare any parameters.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNoParamAnnotation");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: Remove all parameters
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.BeforeCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @BeforeCompletion method must not declare any parameters.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidNoParamBeforeCompletion {\n"
+                + "\n"
+                + "    // Error: @BeforeCompletion method must not have parameters\n"
+                + "    @BeforeCompletion\n"
+                + "    public void beforeCompletion() {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 16, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Remove all parameters", expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    // -----------------------------------------------------------------------
+    // Diagnostic + QuickFix: @AfterCompletion method must have exactly one boolean parameter
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testAfterCompletionMissingParamDiagnosticAndQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionNoParam.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based): "    public void afterCompletion() {"
+        // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
+        Diagnostic expectedDiagnostic = d(14, 16, 31,
+                "@AfterCompletion session synchronization method must declare exactly one boolean parameter.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidAfterCompletionMethodParams");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: insert "boolean committed" as the single parameter
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.\n"
+                + " * This class has no parameters (missing the required boolean).\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidAfterCompletionNoParam {\n"
+                + "\n"
+                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
+                + "    @AfterCompletion\n"
+                + "    public void afterCompletion(boolean committed) {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+                expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    @Test
+    public void testAfterCompletionWrongParamTypeDiagnosticAndQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionWrongParam.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based): "    public void afterCompletion(String status) {"
+        // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
+        Diagnostic expectedDiagnostic = d(14, 16, 31,
+                "@AfterCompletion session synchronization method must declare exactly one boolean parameter.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidAfterCompletionMethodParams");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: change type of "String status" to "boolean status"
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.\n"
+                + " * This class has a parameter of the wrong type (String instead of boolean).\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidAfterCompletionWrongParam {\n"
+                + "\n"
+                + "    // Error: @AfterCompletion method parameter must be boolean\n"
+                + "    @AfterCompletion\n"
+                + "    public void afterCompletion(boolean status) {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+                expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    @Test
+    public void testAfterCompletionMultiParamWithBooleanQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamWithBoolean.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based): "    public void afterCompletion(String status, boolean committed, int extra) {"
+        // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
+        Diagnostic expectedDiagnostic = d(14, 16, 31,
+                "@AfterCompletion session synchronization method must declare exactly one boolean parameter.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidAfterCompletionMethodParams");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: remove "String status" and "int extra", keep "boolean committed"
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterCompletion method has multiple params, one of which is boolean.\n"
+                + " * QuickFix should remove all non-boolean params and keep the boolean one.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidAfterCompletionMultiParamWithBoolean {\n"
+                + "\n"
+                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
+                + "    @AfterCompletion\n"
+                + "    public void afterCompletion(boolean committed) {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+                expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    @Test
+    public void testAfterCompletionMultiParamNoBooleanQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamNoBoolean.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based): "    public void afterCompletion(String status, int extra) {"
+        // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
+        Diagnostic expectedDiagnostic = d(14, 16, 31,
+                "@AfterCompletion session synchronization method must declare exactly one boolean parameter.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidAfterCompletionMethodParams");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: keep first param but change "String status" -> "boolean status", remove "int extra"
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterCompletion method has multiple params, none of which is boolean.\n"
+                + " * QuickFix should keep the first param but change its type to boolean, and remove the rest.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidAfterCompletionMultiParamNoBoolean {\n"
+                + "\n"
+                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
+                + "    @AfterCompletion\n"
+                + "    public void afterCompletion(boolean status) {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+                expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
+    // -----------------------------------------------------------------------
     // Diagnostic + QuickFix: mixed illegal modifiers on session synchronization methods
     // -----------------------------------------------------------------------
 
@@ -205,6 +486,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
+
         Diagnostic finalOnBeginSync = d(16, 29, 43,
                 "@AfterBegin session synchronization method must not be declared as final.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodFinal");
@@ -218,7 +500,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
         Diagnostic nonVoidOnBeforeCommit = d(21, 26, 43,
                 "@BeforeCompletion session synchronization method must be of type void.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodNonVoid");
-        
+
         Diagnostic finalOnAfterComplete = d(27, 21, 39,
                 "@AfterCompletion session synchronization method must not be declared as final.",
                 DiagnosticSeverity.Error, "jakarta-ejb", "InvalidSessionSyncMethodFinal");

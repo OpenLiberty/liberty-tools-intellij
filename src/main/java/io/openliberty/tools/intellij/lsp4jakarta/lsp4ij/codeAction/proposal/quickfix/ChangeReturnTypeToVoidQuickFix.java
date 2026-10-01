@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 /**
  * Generic quick fix that changes the return type of a method to void.
+ * Uses ModifyReturnTypeProposal.
  */
 public class ChangeReturnTypeToVoidQuickFix implements IJavaCodeActionParticipant {
 
