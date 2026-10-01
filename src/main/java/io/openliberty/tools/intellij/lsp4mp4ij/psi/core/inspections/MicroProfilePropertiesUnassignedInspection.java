@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat Inc. and others.
+ * Copyright (c) 2023, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.inspections;
 
 import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
 import com.redhat.devtools.lsp4ij.inspections.AbstractDelegateInspectionWithExclusions;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 /**
  * Dummy inspection for unknown properties in Microprofile properties files
@@ -23,6 +24,6 @@ public class MicroProfilePropertiesUnassignedInspection extends AbstractDelegate
     public static final String ID = getShortName(MicroProfilePropertiesUnassignedInspection.class.getSimpleName());
 
     public MicroProfilePropertiesUnassignedInspection() {
-        super(MicroProfileBundle.message("microprofile.properties.validation.excluded.properties"));
+        super(LocalizedResourceUtil.getMessage("microprofile.properties.validation.excluded.properties"));
     }
 }

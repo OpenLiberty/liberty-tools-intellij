@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat Inc. and others.
+ * Copyright (c) 2023, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,8 +17,8 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.NamedConfigurable;
 import com.intellij.openapi.util.NlsContexts;
-import io.openliberty.tools.intellij.lsp4mp4ij.MicroProfileBundle;
 import io.openliberty.tools.intellij.lsp4mp4ij.settings.UserDefinedMicroProfileSettings;
+import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 
 import javax.swing.*;
 
@@ -58,7 +58,7 @@ public class MicroProfileJavaConfigurable extends NamedConfigurable<UserDefinedM
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return MicroProfileBundle.message("microprofile.java");
+        return LocalizedResourceUtil.getMessage("microprofile.java");
     }
 
     @Override

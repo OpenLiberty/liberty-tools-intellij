@@ -77,6 +77,24 @@
         <languageMapping language="JAVA" serverId="jakartals"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
+
+        <!-- MicroProfile settings -->
+        <projectConfigurable groupId="language"
+                             id="MicroProfile"
+                             bundle="messages.LibertyBundles"
+                             key="microprofile"
+                             instance="io.openliberty.tools.intellij.lsp4mp4ij.settings.MicroProfileConfigurable"/>
+        <projectConfigurable parentId="MicroProfile"
+                             id="MicroProfileProperties"
+                             bundle="messages.LibertyBundles"
+                             key="microprofile.properties"
+                             instance="io.openliberty.tools.intellij.lsp4mp4ij.settings.properties.MicroProfilePropertiesConfigurable"/>
+        <projectConfigurable parentId="MicroProfile"
+                             bundle="messages.LibertyBundles"
+                             key="microprofile.java"
+                             id="MicroProfileJava"
+                             instance="io.openliberty.tools.intellij.lsp4mp4ij.settings.java.MicroProfileJavaConfigurable"/>
+
         <postStartupActivity implementation="io.openliberty.tools.intellij.lsp4mp4ij.MicroProfilePostStartupActivity"/>
         <fileType name="server.env" language="Properties" fileNames="server.env" extensions="env"
                   implementationClass="io.openliberty.tools.intellij.liberty.lsp.ServerEnvFileType"/>

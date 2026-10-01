@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -12,16 +12,22 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.project;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.compiler.CompilerPaths;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.project.ConfigSourcePropertiesProvider;
 import com.redhat.devtools.lsp4ij.LSPIJUtils;
+import org.eclipse.lsp4mp.commons.runtime.MicroProfileProjectRuntime;
 import org.eclipse.lsp4mp.commons.utils.ConfigSourcePropertiesProviderUtils;
 import org.eclipse.lsp4mp.commons.utils.IConfigSourcePropertiesProvider;
 import org.eclipse.lsp4mp.commons.utils.PropertyValueExpander;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -32,12 +38,14 @@ import java.util.stream.Collectors;
  */
 public class PsiMicroProfileProject {
 
-    private final Module javaProject;
+    private static final Logger LOGGER = Logger.getLogger(PsiMicroProfileProject.class.getName());
 
+    private final Module javaProject;
     private List<IConfigSource> configSources;
 
     private transient IConfigSourcePropertiesProvider aggregatedPropertiesProvider = null;
     private transient PropertyValueExpander propertyValueExpander = null;
+    private volatile MicroProfileProjectRuntime projectRuntime;
 
     public PsiMicroProfileProject(Module javaProject) {
         this.javaProject = javaProject;
@@ -299,6 +307,39 @@ public class PsiMicroProfileProject {
                     .layer(new ConfigSourcePropertiesProvider(configSources.get(i)), provider);
         }
         return provider;
+    }
+
+    public MicroProfileProjectRuntime getProjectRuntime() {
+        if (projectRuntime == null) {
+            synchronized (this) {
+                if (projectRuntime == null) {
+                    try {
+                        Set<String> classpath = resolveClasspathJars(javaProject);
+                        projectRuntime = new MicroProfileProjectRuntime(classpath);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error while loading project runtime", e);
+                    }
+                }
+            }
+        }
+        return projectRuntime;
+    }
+
+    private static Set<String> resolveClasspathJars(@NotNull Module javaProject) {
+        Set<String> jars = new LinkedHashSet<>();
+
+        // Recursively enumerate all order entries for the module
+        VirtualFile[] roots = OrderEnumerator.orderEntries(javaProject)
+                .librariesOnly()
+                .recursively()
+                .getClassesRoots();
+
+        for (VirtualFile vf : roots) {
+            if (vf.getName().endsWith(".jar")) {
+                jars.add(new File(vf.getPath()).getAbsolutePath().replace("!", ""));
+            }
+        }
+        return jars;
     }
 
 }
