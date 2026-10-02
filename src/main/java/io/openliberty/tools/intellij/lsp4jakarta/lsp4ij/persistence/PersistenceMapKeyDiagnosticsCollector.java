@@ -69,6 +69,10 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         boolean hasMapKeyTemporalAnnotation = false;
         boolean hasTypeDiagnostics = false;
         PsiAnnotation[] allAnnotations = fieldOrProperty.getAnnotations();
+
+        // Collect @Convert annotations for later validation
+        List<PsiAnnotation> convertAnnotations = new ArrayList<PsiAnnotation>();
+
         for (PsiAnnotation annotation : allAnnotations) {
             String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
                     PersistenceConstants.SET_OF_PERSISTENCE_ANNOTATIONS);
@@ -85,6 +89,12 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             // Check for @MapKeyTemporal annotation
             if (PersistenceConstants.MAPKEYTEMPORAL.equals(annotation.getQualifiedName())) {
                 hasMapKeyTemporalAnnotation = true;
+            }
+            // Collect @Convert annotations
+            String convertMatch = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    new String[]{PersistenceConstants.CONVERT});
+            if (convertMatch != null) {
+                convertAnnotations.add(annotation);
             }
         }
         if (hasMapKeyAnnotation) {
@@ -118,6 +128,64 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
         // element collection or relationship, and the map key type must be an enum.
         if (hasMapKeyEnumeratedAnnotation) {
             validateMapKeyEnumerated(fieldOrProperty, unit, diagnostics);
+        }
+        // Validate @Convert annotation rules
+        if (!convertAnnotations.isEmpty()) {
+            collectConvertDiagnostics(fieldOrProperty, type, convertAnnotations, allAnnotations, unit, diagnostics);
+        }
+    }
+
+    /**
+     * Validates {@code @Convert} annotation rules on a single field or method
+     */
+    private void collectConvertDiagnostics(PsiJvmModifiersOwner fieldOrProperty, PsiClass type,
+                                           List<PsiAnnotation> convertAnnotations,
+                                           PsiAnnotation[] allAnnotations,
+                                           PsiJavaFile unit, List<Diagnostic> diagnostics) {
+
+        // Rule: Multiple @Convert on the same attribute
+        if (convertAnnotations.size() > 1) {
+            diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                    Messages.getMessage("ConvertAnnotationMultipleOnSameAttribute"),
+                    PersistenceConstants.DIAGNOSTIC_CODE_CONVERT_MULTIPLE_ON_SAME_ATTRIBUTE,
+                    null, DiagnosticSeverity.Error));
+        }
+
+        // Determine restricted co-annotation name (e.g. "@Id"), if present
+        String restrictedAnnotationName = null;
+        for (PsiAnnotation otherAnnotation : allAnnotations) {
+            String matched = getMatchedJavaElementName(type, otherAnnotation.getQualifiedName(),
+                    PersistenceConstants.CONVERT_RESTRICTED_ANNOTATIONS);
+            if (matched != null) {
+                restrictedAnnotationName = "@" + matched.substring(matched.lastIndexOf('.') + 1);
+                break;
+            }
+        }
+
+        for (PsiAnnotation convertAnnotation : convertAnnotations) {
+            PsiNameValuePair[] attributes = convertAnnotation.getParameterList().getAttributes();
+
+            boolean hasConverter = Arrays.stream(attributes)
+                    .anyMatch(a -> PersistenceConstants.CONVERTER.equals(a.getName()));
+            boolean hasDisableConversion = Arrays.stream(attributes)
+                    .anyMatch(a -> PersistenceConstants.DISABLE_CONVERSION.equals(a.getName())
+                            && "true".equals(a.getLiteralValue()));
+
+            // Rule: Neither converter nor disableConversion=true specified
+            if (!hasConverter && !hasDisableConversion) {
+                diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                        Messages.getMessage("ConvertAnnotationMissingConverterOrDisable"),
+                        PersistenceConstants.DIAGNOSTIC_CODE_CONVERT_MISSING_CONVERTER_OR_DISABLE,
+                        null, DiagnosticSeverity.Error));
+            }
+
+            // Rule: @Convert on a restricted target
+            if (restrictedAnnotationName != null) {
+                diagnostics.add(createDiagnostic(fieldOrProperty, unit,
+                        Messages.getMessage("ConvertAnnotationOnRestrictedTarget", restrictedAnnotationName),
+                        PersistenceConstants.DIAGNOSTIC_CODE_CONVERT_ON_RESTRICTED_TARGET,
+                        null, DiagnosticSeverity.Error));
+            }
         }
     }
 
