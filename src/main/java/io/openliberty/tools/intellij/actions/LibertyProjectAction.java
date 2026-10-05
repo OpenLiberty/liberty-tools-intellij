@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -38,7 +38,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         String actionCmd = e.getPresentation().getText();
         if (project == null) {
             // TODO prompt user to select project
-            String msg = LocalizedResourceUtil.getMessage("liberty.project.does.not.resolve", actionCmd);
+            String msg = LocalizedResourceUtil.message("liberty.project.does.not.resolve", actionCmd);
             notifyError(msg, project);
             LOGGER.debug(msg);
             return;
@@ -68,7 +68,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         } else {
             // Notify the user that no projects were detected that apply to this action.
             Messages.showMessageDialog(project,
-                    LocalizedResourceUtil.getMessage("liberty.project.no.projects.detected.dialog.message"),
+                    LocalizedResourceUtil.message("liberty.project.no.projects.detected.dialog.message"),
                     getChooseDialogTitle(),
                     LibertyPluginIcons.libertyIcon_40);
         }
@@ -89,7 +89,7 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             mavenBuildFiles = getMavenBuildFiles(project);
             gradleBuildFiles = getGradleBuildFiles(project);
         } catch (IOException | SAXException | ParserConfigurationException e) {
-            LOGGER.error("Could not find Maven or Gradle projects in workspace",
+            LOGGER.error(LogMessageResourceUtil.message("maven.gradle.projects.not.found"),
                     e.getMessage());
             return Collections.emptyList();
         }
@@ -101,14 +101,14 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
             // resolve project name
             VirtualFile virtualFile = mavenBuildFile.getBuildFile();
             if (virtualFile == null) {
-                LOGGER.error(String.format("Could not resolve Maven project for build file: %s", mavenBuildFile.getBuildFile()));
+                LOGGER.error(LogMessageResourceUtil.message("maven.project.resolve.error", mavenBuildFile.getBuildFile()));
             } else {
                 try {
                     mavenBuildFile.setProjectName(LibertyMavenUtil.getProjectNameFromPom(virtualFile));
                     mavenBuildFile.setProjectType(Constants.ProjectType.LIBERTY_MAVEN_PROJECT);
                     buildFiles.add(mavenBuildFile);
                 } catch (Exception e) {
-                    LOGGER.error(String.format("Could not resolve project name from pom.xml: %s", virtualFile), e.getMessage());
+                    LOGGER.error(LogMessageResourceUtil.message("maven.project.name.resolve.error", virtualFile), e.getMessage());
                 }
             }
 
@@ -116,14 +116,14 @@ public abstract class LibertyProjectAction extends LibertyGeneralAction {
         gradleBuildFiles.forEach(gradleBuildFile -> {
             VirtualFile virtualFile = gradleBuildFile.getBuildFile();
             if (virtualFile == null) {
-                LOGGER.error(String.format("Could not resolve Gradle project for build file: %s", gradleBuildFile.getBuildFile()));
+                LOGGER.error(LogMessageResourceUtil.message("gradle.project.resolve.error", gradleBuildFile.getBuildFile()));
             } else {
                 try {
                     gradleBuildFile.setProjectName(LibertyGradleUtil.getProjectName(virtualFile));
                     gradleBuildFile.setProjectType(Constants.ProjectType.LIBERTY_GRADLE_PROJECT);
                     buildFiles.add(gradleBuildFile);
                 } catch (Exception e) {
-                    LOGGER.error(String.format("Could not resolve project name from settings.gradle: %s", virtualFile), e.getMessage());
+                    LOGGER.error(LogMessageResourceUtil.message("gradle.project.name.resolve.error", virtualFile), e.getMessage());
                 }
             }
 

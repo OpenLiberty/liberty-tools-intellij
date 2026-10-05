@@ -26,21 +26,21 @@ public final class Constants {
     public static final String LIBERTY_MAVEN_START_CONTAINER_CMD = " io.openliberty.tools:liberty-maven-plugin:devc ";
     public static final String LIBERTY_GRADLE_START_CMD = " libertyDev ";
     public static final String LIBERTY_GRADLE_START_CONTAINER_CMD = " libertyDevc ";
-    public static final String LIBERTY_DEV_START = LocalizedResourceUtil.getMessage("start.dev");
-    public static final String LIBERTY_DEV_CUSTOM_START = LocalizedResourceUtil.getMessage("start.dev.custom.params");
-    public static final String LIBERTY_DEV_START_CONTAINER = LocalizedResourceUtil.getMessage("start.dev.container");
-    public static final String LIBERTY_DEV_STOP = LocalizedResourceUtil.getMessage("stop.dev");
-    public static final String LIBERTY_DEV_TESTS = LocalizedResourceUtil.getMessage("run.tests.dev");
+    public static final String LIBERTY_DEV_START = LocalizedResourceUtil.message("start.dev");
+    public static final String LIBERTY_DEV_CUSTOM_START = LocalizedResourceUtil.message("start.dev.custom.params");
+    public static final String LIBERTY_DEV_START_CONTAINER = LocalizedResourceUtil.message("start.dev.container");
+    public static final String LIBERTY_DEV_STOP = LocalizedResourceUtil.message("stop.dev");
+    public static final String LIBERTY_DEV_TESTS = LocalizedResourceUtil.message("run.tests.dev");
 
     // Maven
-    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.integration.test.text");
-    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.maven.unit.test.text");
+    public static final String VIEW_INTEGRATION_TEST_REPORT = LocalizedResourceUtil.message("tool.window.maven.integration.test.text");
+    public static final String VIEW_UNIT_TEST_REPORT = LocalizedResourceUtil.message("tool.window.maven.unit.test.text");
     public static final String LIBERTY_MAVEN_PLUGIN_CONTAINER_VERSION = "3.3-M1";
     public static final String LIBERTY_MAVEN_DEBUG_PARAM = "-DdebugPort=";
 
     // Gradle
-    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.getMessage("tool.window.gradle.test.text");
-    public static final String TEST_REPORT_STRING = LocalizedResourceUtil.getMessage("test.summary");
+    public static final String VIEW_GRADLE_TEST_REPORT = LocalizedResourceUtil.message("tool.window.gradle.test.text");
+    public static final String TEST_REPORT_STRING = LocalizedResourceUtil.message("test.summary");
     public static final String LIBERTY_GRADLE_PLUGIN_CONTAINER_VERSION = "3.1-M1";
     public static final String LIBERTY_GRADLE_DEBUG_PARAM = "--libertyDebugPort=";
 

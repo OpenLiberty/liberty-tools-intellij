@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,6 +20,7 @@ import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 import io.openliberty.tools.intellij.util.Constants;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
+import io.openliberty.tools.intellij.util.LogMessageResourceUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("view.integration.test.report");
+        return LocalizedResourceUtil.message("view.integration.test.report");
     }
 
     @Override
@@ -65,12 +66,12 @@ public class ViewIntegrationTestReport extends LibertyGeneralAction {
 
         if (failsafeReportVirtualFile == null || !failsafeReportVirtualFile.exists()) {
             Notification notif = new Notification(Constants.LIBERTY_DEV_DASHBOARD_ID,
-                    LocalizedResourceUtil.getMessage("integration.test.report.does.not.exist.notification.title"),
-                    LocalizedResourceUtil.getMessage("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
+                    LocalizedResourceUtil.message("integration.test.report.does.not.exist.notification.title"),
+                    LocalizedResourceUtil.message("test.report.does.not.exist.multiple.locations", reportNameNo1, reportNameNo2),
                     NotificationType.ERROR);
             notif.setIcon(LibertyPluginIcons.libertyIcon);
             Notifications.Bus.notify(notif, project);
-            LOGGER.debug("Integration test report does not exist at : " + failsafeReportFile.getAbsolutePath());
+            LOGGER.debug(LogMessageResourceUtil.message("integration.test.report.not.exist.at", failsafeReportFile.getAbsolutePath()));
             return;
         }
 

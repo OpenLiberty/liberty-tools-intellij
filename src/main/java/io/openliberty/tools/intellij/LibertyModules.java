@@ -65,12 +65,12 @@ public class LibertyModules {
             try {
                 buildFiles.addAll(LibertyProjectUtil.getMavenBuildFiles(project));
             } catch (IOException | SAXException | ParserConfigurationException e) {
-                LOGGER.error("I/O error or error parsing Liberty Maven projects in workspace", e);
+                LOGGER.error(LogMessageResourceUtil.message("io.error.parsing.maven.projects"), e);
             }
             try { // search for Gradle files even if Maven files experience error
                 buildFiles.addAll(LibertyProjectUtil.getGradleBuildFiles(project));
             } catch (IOException | SAXException | ParserConfigurationException e) {
-                LOGGER.error("I/O error or error parsing Liberty Gradle projects in workspace", e);
+                LOGGER.error(LogMessageResourceUtil.message("io.error.parsing.gradle.projects"), e);
             }
 
             for (BuildFile buildFile : buildFiles) {
@@ -78,7 +78,7 @@ public class LibertyModules {
                 VirtualFile virtualFile = buildFile.getBuildFile();
                 String projectName = null;
                 if (virtualFile == null) {
-                    LOGGER.error(String.format("Could not resolve current project %s", virtualFile));
+                    LOGGER.error(LogMessageResourceUtil.message("project.resolve.error", virtualFile));
                     break;
                 }
                 try {
@@ -88,7 +88,7 @@ public class LibertyModules {
                         projectName = LibertyGradleUtil.getProjectName(virtualFile);
                     }
                 } catch (Exception e) {
-                    LOGGER.warn(String.format("Could not resolve project name from build file: %s", virtualFile), e);
+                    LOGGER.warn(LogMessageResourceUtil.message("project.name.resolve.error", virtualFile), e);
                 }
                 if (projectName == null) {
                     if (virtualFile.getParent() != null) {

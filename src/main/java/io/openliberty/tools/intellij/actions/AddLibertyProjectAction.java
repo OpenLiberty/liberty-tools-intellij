@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -28,7 +28,7 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add");
+        return LocalizedResourceUtil.message("liberty.project.add");
     }
 
     @Override
@@ -48,11 +48,11 @@ public class AddLibertyProjectAction extends LibertyProjectAction {
 
     @Override
     public String getChooseDialogTitle() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add.dialog.title");
+        return LocalizedResourceUtil.message("liberty.project.add.dialog.title");
     }
 
     @Override
     public String getChooseDialogMessage() {
-        return LocalizedResourceUtil.getMessage("liberty.project.add.dialog.message");
+        return LocalizedResourceUtil.message("liberty.project.add.dialog.message");
     }
 }
