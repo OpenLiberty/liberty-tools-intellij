@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation.
+ * Copyright (c) 2023, 2025 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,17 +13,19 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.nio.file.Paths;
 
+import static io.openliberty.tools.intellij.it.Utils.ItConstants.*;
+
 public class GradleSingleModJakartaLSTest extends SingleModJakartaLSTestCommon {
 
     /**
      * Application Name
      */
-    public static String PROJECT_NAME = "sampleGradleMPLSApp";
+    public static String PROJECT_NAME = GRADLE_MPLS_PROJECT;
 
     /**
      * The path to the folder containing the test projects.
      */
-    public static String PROJECTS_PATH = Paths.get("src", "test", "resources", "projects", "gradle").toAbsolutePath().toString();
+    public static String PROJECTS_PATH = Paths.get(GRADLE_PROJECT_PATH_STR).toAbsolutePath().toString();
 
     /**
      * Application resoruce URL.
