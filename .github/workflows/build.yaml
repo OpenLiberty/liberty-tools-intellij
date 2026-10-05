@@ -120,7 +120,7 @@ jobs:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
     # Run for all test-groups when triggered via workflow_dispatch, workflow_call, schedule, or when 'run-ci' label is applied.
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event_name == 'schedule' || github.event.label.name == 'run-ci'
-    runs-on: ${{ matrix.runtime == 'linux' && 'ubuntu-latest' || matrix.runtime == 'mac' && 'macOS-14' || matrix.runtime == 'windows' && 'windows-latest' }}
+    runs-on: ${{ matrix.runtime == 'linux' && 'ubuntu-latest' || matrix.runtime == 'mac' && 'macOS-latest' || matrix.runtime == 'windows' && 'windows-latest' }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
       fail-fast: false
