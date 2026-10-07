@@ -68,7 +68,7 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
      */
     private void collectEntityListenersDiagnostics(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
         for (PsiAnnotation annotation : type.getAnnotations()) {
-            if (isMatchedAnnotation(annotation,PersistenceConstants.ENTITY_LISTENERS)) {
+            if (isMatchedAnnotation(annotation, PersistenceConstants.ENTITY_LISTENERS)) {
                 validateEntityListenersAnnotation(annotation, unit, diagnostics);
             }
         }
