@@ -167,7 +167,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 if (isMatchedAnnotation(annotation, AnnotationConstants.POST_CONSTRUCT_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if(!isInterceptorTypeReferenced(method.getContainingClass())) {
+                        if(!isInterceptorContextType(method.getContainingClass(), unit)) {
                             if (!checkedExceptions.isEmpty()) {
                                 String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                         "@PostConstruct");
@@ -196,7 +196,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 } else if (isMatchedAnnotation(annotation, AnnotationConstants.PRE_DESTROY_FQ_NAME)) {
                     if (element instanceof PsiMethod method) {
                         List<String> checkedExceptions = getCheckedExceptionPresent(method);
-                        if(!isInterceptorTypeReferenced(method.getContainingClass())) {
+                        if(!isInterceptorContextType(method.getContainingClass(), unit)) {
                             if (!checkedExceptions.isEmpty()) {
                                 String diagnosticMessage = Messages.getMessage("MethodMustNotThrow",
                                         "@PreDestroy");
@@ -225,6 +225,29 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
                 }
             }
         }
+    }
+
+    /**
+     * Returns {@code true} if the given type should be treated as being in an interceptor
+     * context for the purposes of {@code @PostConstruct} and {@code @PreDestroy} validation.
+     *
+     * <p>A type is in an interceptor context when:
+     * <ul>
+     *   <li>it is itself an interceptor-referenced type (has {@code @Interceptor}, or uses
+     *       {@code @AroundInvoke} / {@code @AroundConstruct} / {@code @AroundTimeout}), or</li>
+     *   <li>it is a superclass of a type that is annotated with {@code @Interceptor}.</li>
+     * </ul>
+     *
+     * <p>When either condition holds, the Annotation diagnostics collector must suppress
+     * its parameter / return-type / exception checks because the Interceptor diagnostics
+     * participant owns those validations in that context.
+     *
+     * @param type the declaring type of the {@code @PostConstruct} or {@code @PreDestroy} method
+     * @param unit the PSI Java file containing {@code type}
+     * @return {@code true} if annotation parameter/return-type checks must be suppressed
+     */
+    private boolean isInterceptorContextType(PsiClass type, PsiJavaFile unit) {
+        return isInterceptorTypeReferenced(type) || hasInterceptorSubclass(type, unit);
     }
 
     /**

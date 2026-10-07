@@ -1750,5 +1750,31 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    /**
+     * Validates that opening a standalone superclass file whose sole lifecycle
+     * callback method is {@code @PostConstruct void postConstruct(InvocationContext)}
+     * produces zero diagnostics — neither a signature diagnostic from the Interceptor
+     * participant nor a parameter/return-type/exception diagnostic from the Annotation
+     * collector — when an {@code @Interceptor} subclass extends that superclass in a
+     * separate file (InterceptorSubclassOfPostConstructSuperclass.java).
+     */
+    @Test
+    public void testSuperclassWithValidPostConstructInInterceptorContext() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
+        // Open the standalone superclass file — its @Interceptor subclass is in a separate file.
+        // The @PostConstruct method uses the interceptor-valid void(InvocationContext) signature.
+        // Neither the Interceptor diagnostics participant nor the Annotation diagnostics
+        // collector should fire any diagnostic for this file.
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InterceptorSuperClassWithPostConstruct.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // 0 diagnostics expected
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
