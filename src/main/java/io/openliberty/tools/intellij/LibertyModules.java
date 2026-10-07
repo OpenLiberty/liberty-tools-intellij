@@ -340,6 +340,11 @@ public class LibertyModules {
                 LibertyModule libertyModule = (LibertyModule) it.next();
                 // do not remove from list if the corresponding terminal widget has running commands
                 if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().hasRunningCommands())) {
+                    // Evict the state cache entry so it does not leak
+                    VirtualFile buildFile = libertyModule.getBuildFile();
+                    if (buildFile != null) {
+                        stateCache.remove(buildFile.toNioPath().toString());
+                    }
                     it.remove();
                 }
             }
