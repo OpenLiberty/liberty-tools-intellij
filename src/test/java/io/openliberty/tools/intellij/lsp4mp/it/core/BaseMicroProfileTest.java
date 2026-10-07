@@ -43,14 +43,36 @@ public abstract class BaseMicroProfileTest extends MavenImportingTestCase {
     protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
 
     @Override
-    protected void setUpFixtures() throws Exception {
-        myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
-        final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
-        myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
-        IdeaProjectTestFixture fixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
-        setTestFixture(fixture);
-        fixture.setUp();
-        LanguageLevelProjectExtension.getInstance(fixture.getProject()).setLanguageLevel(LanguageLevel.JDK_11);
+    protected void setUpFixtures() {
+        try {
+            myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
+            final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
+            myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
+            IdeaProjectTestFixture fixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
+            setTestFixture(fixture);
+            fixture.setUp();
+            LanguageLevelProjectExtension.getInstance(fixture.getProject()).setLanguageLevel(LanguageLevel.JDK_11);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void setUp() {
+        try {
+            super.setUp();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void tearDown() {
+        try {
+            super.tearDown();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Module createMavenModule(File projectDir) throws Exception {
