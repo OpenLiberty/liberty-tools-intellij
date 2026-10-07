@@ -9,7 +9,6 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
-import com.intellij.openapi.diagnostic.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -41,8 +40,6 @@ import java.util.List;
  * </ul>
  */
 public class MavenProjectMetadata extends AbstractProjectMetadata {
-
-    private static final Logger LOGGER = Logger.getInstance(MavenProjectMetadata.class);
 
     /**
      * Parses the given {@code pom.xml} and populates all metadata fields.
