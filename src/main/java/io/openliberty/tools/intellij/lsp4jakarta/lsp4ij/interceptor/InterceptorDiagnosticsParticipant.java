@@ -371,16 +371,16 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 */
 	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
 												   List<Diagnostic> diagnostics) {
+		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
+		// result is constant across all methods of the same type.
+		if (hasInterceptorSubclass(type, unit)) {
+			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
+			return;
+		}
 		Arrays.stream(type.getMethods())
 			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
 				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
-			.findFirst()
-			.ifPresent(method -> {
-				// Suppress when an @Interceptor subclass exists in a different source file —
-				// spec allows @AroundConstruct in interceptor superclasses.
-				if (hasInterceptorSubclass(type, unit)) {
-					return;
-				}
+			.forEach(method -> {
 				Range range = PositionUtils.toNameRange(method);
 				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
 				Diagnostic diagnostic = new Diagnostic(range, msg);
