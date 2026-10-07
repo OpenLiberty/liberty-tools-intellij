@@ -203,6 +203,45 @@ public class LibertyMavenUtil {
     }
 
     /**
+     * Returns the path to the Maven executable for the given project, or {@code null}
+     * if it cannot be determined. Unlike {@link #getMavenSettingsCmd(Project, VirtualFile)}
+     * this method does not throw and is suitable for use in background metadata parsing.
+     *
+     * @param project the IntelliJ project
+     * @return Maven executable path string, or {@code null}
+     */
+    public static String getMavenExecutable(Project project) {
+        // Try the project's own build file — any pom.xml will do for resolving the executable
+        try {
+            MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
+            @NotNull MavenHomeType mavenHomeType = mavenSettings.getMavenHomeType();
+            if (wrappedMaven.equals(mavenHomeType.getTitle())) {
+                // Use the project base path to look for a wrapper
+                String basePath = project.getBasePath();
+                if (basePath != null) {
+                    String mvnw = SystemInfo.isWindows ? "mvnw.cmd" : "mvnw";
+                    File wrapper = new File(basePath, mvnw);
+                    if (wrapper.exists() && wrapper.canExecute()) {
+                        return wrapper.getAbsolutePath();
+                    }
+                }
+                return null;
+            }
+            StaticResolvedMavenHomeType resolvedMavenHomeType = staticOrBundled(mavenHomeType);
+            File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
+            if (mavenHomeFile == null) return null;
+            String maven = SystemInfo.isWindows ? "mvn.cmd" : "mvn";
+            File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), maven);
+            if (mavenExecutable.exists() && mavenExecutable.canExecute()) {
+                return mavenExecutable.getAbsolutePath();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Could not resolve Maven executable for project: " + project.getName(), e);
+        }
+        return null;
+    }
+
+    /**
      * Returns the Maven {@code -pl :artifactId -am} arguments needed to target a specific
      * submodule in a multi-module build.
      *

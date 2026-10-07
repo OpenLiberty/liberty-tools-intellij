@@ -18,6 +18,7 @@ import io.openliberty.tools.intellij.util.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -131,13 +132,9 @@ public class LibertyModules {
                 continue;
             }
             VirtualFile buildFile = module.getBuildFile();
-            if (buildFile == null) continue;
-            String buildFilePath = buildFile.toNioPath().toString();
-            try {
-                module.setBuildMetadata(new MavenProjectMetadata(buildFilePath));
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Could not parse build metadata for: %s", buildFilePath), e);
-            }
+            if (buildFile == null || buildFile.getParent() == null) continue;
+            File pomDir = new File(buildFile.getParent().getPath());
+            module.setBuildMetadata(new MavenProjectMetadata(pomDir, project));
         }
     }
 

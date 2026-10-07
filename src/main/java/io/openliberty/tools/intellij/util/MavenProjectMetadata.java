@@ -9,17 +9,21 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.util;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,192 +32,198 @@ import java.util.List;
  *
  * Extracts Liberty multi-module metadata from a Maven {@code pom.xml} file.
  *
+ * <p>Uses a two-pass hybrid approach</p>
+ * <ol>
+ *   <li>Parse the raw {@code pom.xml} directly (fast path). If all {@code <module>}
+ *       values are literal strings (no {@code ${...}} variables), use them directly.</li>
+ *   <li>If any {@code <module>} value contains a Maven variable, fall back to running
+ *       {@code mvn help:evaluate -Dexpression=project.modules} to obtain fully resolved
+ *       values from the effective POM.</li>
+ * </ol>
+ *
  * <p>Specifically this class determines:</p>
  * <ul>
  *   <li>The project name ({@code artifactId})</li>
  *   <li>The parent project name (from {@code <parent>/<artifactId>})</li>
- *   <li>The list of declared child modules (from {@code <modules>})</li>
+ *   <li>The list of resolved child module names</li>
  *   <li>Whether the Liberty Maven plugin is configured</li>
- *   <li>Whether Liberty dev mode is explicitly skipped</li>
+ *   <li>Whether Liberty dev mode is explicitly skipped ({@code <skip>true</skip>})</li>
  *   <li>Whether this POM is an aggregator ({@code packaging=pom} + has modules)</li>
- *   <li>Inter-project dependencies ({@code <dependency>} artifactIds)</li>
  * </ul>
  */
 public class MavenProjectMetadata extends AbstractProjectMetadata {
 
+    private static final Logger LOGGER = Logger.getInstance(MavenProjectMetadata.class);
+
+    private static final String POM_FILE_NAME = "pom.xml";
+    private static final String MODULES_TAG  = "modules";
+    private static final String MODULE_TAG   = "module";
+    private static final String STRINGS_TAG  = "strings";
+    private static final String STRING_TAG   = "string";
+
     /**
-     * Parses the given {@code pom.xml} and populates all metadata fields.
+     * Parses the {@code pom.xml} in the given directory and populates all metadata fields.
      *
-     * @param pomXmlPath Absolute path to the {@code pom.xml} file.
-     * @throws Exception if the file cannot be read or parsed.
+     * @param pomDir  directory containing the {@code pom.xml} file
+     * @param project the IntelliJ project (used to resolve the Maven executable when needed)
      */
-    public MavenProjectMetadata(String pomXmlPath) throws Exception {
-        super(pomXmlPath);
-        String xmlContent = new String(Files.readAllBytes(Paths.get(pomXmlPath)));
-        parsePomXml(xmlContent);
+    public MavenProjectMetadata(File pomDir, Project project) {
+        super(new File(pomDir, POM_FILE_NAME).getAbsolutePath());
+        try {
+            parsePom(pomDir, project);
+        } catch (Exception e) {
+            LOGGER.warn("Could not parse Maven metadata from: " + pomDir, e);
+        }
     }
 
     // -------------------------------------------------------------------------
     // Parsing
     // -------------------------------------------------------------------------
 
-    private void parsePomXml(String xmlContent) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(false);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(new InputSource(new StringReader(xmlContent)));
-        doc.getDocumentElement().normalize();
-
+    private void parsePom(File pomDir, Project project) throws Exception {
+        DocumentBuilder db = newDocumentBuilder();
+        File pomFile = new File(pomDir, POM_FILE_NAME);
+        Document doc = db.parse(pomFile);
         Element root = doc.getDocumentElement();
 
-        // -- Project name (first <artifactId> that is a direct child of <project>) --
-        NodeList artifactIdNodes = root.getElementsByTagName("artifactId");
-        for (int i = 0; i < artifactIdNodes.getLength(); i++) {
-            Node node = artifactIdNodes.item(i);
-            if ("project".equals(node.getParentNode().getNodeName())) {
-                projectName = node.getTextContent().trim();
-                break;
-            }
-        }
+        // -- Project name (artifactId direct child of <project>) --
+        projectName = getDirectChildText(root, "artifactId");
 
         // -- Parent project name --
         NodeList parentNodes = root.getElementsByTagName("parent");
         if (parentNodes.getLength() > 0) {
-            Element parentElement = (Element) parentNodes.item(0);
-            NodeList parentArtifactIds = parentElement.getElementsByTagName("artifactId");
-            if (parentArtifactIds.getLength() > 0) {
-                parentProjectName = parentArtifactIds.item(0).getTextContent().trim();
+            Element parentEl = (Element) parentNodes.item(0);
+            String parentArtifactId = getDirectChildText(parentEl, "artifactId");
+            if (!parentArtifactId.isEmpty()) {
+                parentProjectName = parentArtifactId;
             }
         }
 
-        // -- packaging=pom check --
-        boolean pomPackaging = false;
-        NodeList packagingNodes = root.getElementsByTagName("packaging");
-        if (packagingNodes.getLength() > 0) {
-            pomPackaging = "pom".equals(packagingNodes.item(0).getTextContent().trim());
-        }
+        // -- packaging=pom --
+        boolean pomPackaging = "pom".equals(getDirectChildText(root, "packaging"));
 
         // -- Child modules --
-        // An aggregator must have both packaging=pom AND at least one <module>.
-        NodeList modulesNodes = root.getElementsByTagName("modules");
-        if (modulesNodes.getLength() > 0) {
-            subprojects.addAll(extractModuleNames((Element) modulesNodes.item(0)));
-            if (!subprojects.isEmpty() && pomPackaging) {
-                isAggregator = true;
+        if (root.getElementsByTagName(MODULES_TAG).getLength() > 0) {
+            List<String> moduleNames = getModulesIfResolved(doc);
+            if (moduleNames == null) {
+                // One or more <module> values contain ${...} variables — use help:evaluate
+                moduleNames = resolveModulesViaHelpEvaluate(pomDir, project, db);
+            }
+            if (moduleNames != null && !moduleNames.isEmpty()) {
+                subprojects.addAll(moduleNames);
+                if (pomPackaging) {
+                    isAggregator = true;
+                }
             }
         }
-
-        // -- Inter-project dependencies --
-        projectDependencies.addAll(extractProjectDependencies(root));
 
         // -- Liberty Maven plugin presence and skip flag --
         hasLibertyPlugin = detectLibertyPlugin(doc);
     }
 
     /**
-     * Returns the bare module names listed inside a {@code <modules>} element.
+     * Returns the list of module names if all {@code <module>} values are plain
+     * strings (no {@code ${...}} Maven variables), or {@code null} if any variable
+     * is present (indicating that {@code help:evaluate} is needed).
      */
-    private List<String> extractModuleNames(Element modulesElement) {
+    private static List<String> getModulesIfResolved(Document doc) {
         List<String> modules = new ArrayList<>();
-        NodeList moduleNodes = modulesElement.getElementsByTagName("module");
+        Element root = doc.getDocumentElement();
+        NodeList modulesNodes = root.getElementsByTagName(MODULES_TAG);
+        if (modulesNodes.getLength() == 0) {
+            return modules; // no modules element
+        }
+        Element modulesEl = (Element) modulesNodes.item(0);
+        NodeList moduleNodes = modulesEl.getElementsByTagName(MODULE_TAG);
         for (int i = 0; i < moduleNodes.getLength(); i++) {
-            String name = moduleNodes.item(i).getTextContent().trim();
-            if (!name.isEmpty()) {
-                modules.add(name);
+            String value = moduleNodes.item(i).getTextContent().trim();
+            if (value.contains("${")) {
+                return null; // unresolved variable — trigger fallback
+            }
+            if (!value.isEmpty()) {
+                modules.add(value);
             }
         }
         return modules;
     }
 
     /**
-     * Returns all {@code artifactId} values found inside {@code <dependencies>} and
-     * {@code <dependencyManagement>} sections.
+     * Runs {@code mvn help:evaluate -Dexpression=project.modules -q -DforceStdout}
+     * in the given directory and parses the XML output to obtain resolved module names.
+     * Returns an empty list if the command fails or produces no output.
      */
-    private List<String> extractProjectDependencies(Element root) {
-        List<String> deps = new ArrayList<>();
-
-        // Regular <dependencies>
-        NodeList depSections = root.getElementsByTagName("dependencies");
-        for (int i = 0; i < depSections.getLength(); i++) {
-            collectArtifactIds((Element) depSections.item(i), deps);
-        }
-
-        // <dependencyManagement>
-        NodeList depMgmtSections = root.getElementsByTagName("dependencyManagement");
-        for (int i = 0; i < depMgmtSections.getLength(); i++) {
-            Element depMgmt = (Element) depMgmtSections.item(i);
-            NodeList inner = depMgmt.getElementsByTagName("dependencies");
-            for (int j = 0; j < inner.getLength(); j++) {
-                collectArtifactIds((Element) inner.item(j), deps);
+    private static List<String> resolveModulesViaHelpEvaluate(File pomDir, Project project,
+                                                               DocumentBuilder db) {
+        List<String> modules = new ArrayList<>();
+        try {
+            String mavenCmd = LibertyMavenUtil.getMavenExecutable(project);
+            if (mavenCmd == null) {
+                LOGGER.warn("Could not resolve Maven executable — skipping help:evaluate for: " + pomDir);
+                return modules;
             }
+            String[] command = {mavenCmd, "help:evaluate",
+                    "-Dexpression=project.modules", "-q", "-DforceStdout"};
+            Process process = Runtime.getRuntime().exec(command, null, pomDir);
+            Document resultDoc = db.parse(process.getInputStream());
+            Element root = resultDoc.getDocumentElement();
+            if (STRINGS_TAG.equals(root.getTagName())) {
+                NodeList children = root.getChildNodes();
+                for (int i = 0; i < children.getLength(); i++) {
+                    Node node = children.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE
+                            && STRING_TAG.equals(((Element) node).getTagName())) {
+                        String value = node.getTextContent().trim();
+                        if (!value.isEmpty()) {
+                            modules.add(value);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("help:evaluate failed for: " + pomDir, e);
         }
-
-        return deps;
+        return modules;
     }
 
-    private void collectArtifactIds(Element dependenciesElement, List<String> target) {
-        NodeList depNodes = dependenciesElement.getElementsByTagName("dependency");
-        for (int i = 0; i < depNodes.getLength(); i++) {
-            String artifactId = getChildText((Element) depNodes.item(i), "artifactId");
-            if (!artifactId.isEmpty() && !target.contains(artifactId)) {
-                target.add(artifactId);
-            }
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Liberty plugin detection
+    // -------------------------------------------------------------------------
 
     /**
-     * Scans build, profiles, and pluginManagement sections for the Liberty Maven plugin.
-     * Also sets {@link #isModuleDisabled} when {@code <skip>true</skip>} is found.
+     * Scans {@code <build>}, {@code <profiles>}, and {@code <pluginManagement>}
+     * sections for the Liberty Maven plugin. Also sets {@link #isModuleDisabled}
+     * when {@code <skip>true</skip>} is found.
      */
     private boolean detectLibertyPlugin(Document doc) {
         Element root = doc.getDocumentElement();
-
-        // <build>
-        if (findLibertyPluginInElement(root, "build")) {
-            return true;
-        }
-
-        // <profiles>/<profile>/<build>
+        if (findLibertyPluginInElement(root, "build")) return true;
         NodeList profileNodes = doc.getElementsByTagName("profile");
         for (int i = 0; i < profileNodes.getLength(); i++) {
-            if (findLibertyPluginInElement((Element) profileNodes.item(i), "build")) {
-                return true;
-            }
+            if (findLibertyPluginInElement((Element) profileNodes.item(i), "build")) return true;
         }
-
-        // <pluginManagement>
         NodeList pluginMgmtNodes = doc.getElementsByTagName("pluginManagement");
         for (int i = 0; i < pluginMgmtNodes.getLength(); i++) {
-            if (findLibertyPluginInElement((Element) pluginMgmtNodes.item(i), "plugins")) {
-                return true;
-            }
+            if (findLibertyPluginInElement((Element) pluginMgmtNodes.item(i), "plugins")) return true;
         }
-
         return false;
     }
 
-    /**
-     * Searches {@code containerElement} for the Liberty Maven plugin under {@code sectionTag}.
-     * Also sets {@link #isModuleDisabled} when {@code <skip>true</skip>} is present.
-     */
-    private boolean findLibertyPluginInElement(Element containerElement, String sectionTag) {
-        NodeList sectionNodes = containerElement.getElementsByTagName(sectionTag);
-        for (int i = 0; i < sectionNodes.getLength(); i++) {
-            Element section = (Element) sectionNodes.item(i);
-            NodeList pluginsNodes = section.getElementsByTagName("plugins");
+    private boolean findLibertyPluginInElement(Element container, String sectionTag) {
+        NodeList sections = container.getElementsByTagName(sectionTag);
+        for (int i = 0; i < sections.getLength(); i++) {
+            NodeList pluginsNodes = ((Element) sections.item(i)).getElementsByTagName("plugins");
             for (int j = 0; j < pluginsNodes.getLength(); j++) {
-                Element pluginsElement = (Element) pluginsNodes.item(j);
-                NodeList pluginNodes = pluginsElement.getElementsByTagName("plugin");
+                NodeList pluginNodes = ((Element) pluginsNodes.item(j)).getElementsByTagName("plugin");
                 for (int k = 0; k < pluginNodes.getLength(); k++) {
                     Element plugin = (Element) pluginNodes.item(k);
-                    String groupId = getChildText(plugin, "groupId");
-                    String artifactId = getChildText(plugin, "artifactId");
-                    if ("io.openliberty.tools".equals(groupId) && "liberty-maven-plugin".equals(artifactId)) {
-                        // Check for <skip>true</skip> in any <configuration> element
+                    String groupId   = getDirectChildText(plugin, "groupId");
+                    String artifactId = getDirectChildText(plugin, "artifactId");
+                    if ("io.openliberty.tools".equals(groupId)
+                            && "liberty-maven-plugin".equals(artifactId)) {
                         NodeList configNodes = plugin.getElementsByTagName("configuration");
                         for (int m = 0; m < configNodes.getLength(); m++) {
-                            String skip = getChildText((Element) configNodes.item(m), "skip");
-                            if ("true".equalsIgnoreCase(skip)) {
+                            if ("true".equalsIgnoreCase(
+                                    getDirectChildText((Element) configNodes.item(m), "skip"))) {
                                 isModuleDisabled = true;
                                 break;
                             }
@@ -227,15 +237,35 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
     }
 
     /**
-     * Returns the trimmed text content of the first child element with the given tag,
-     * or an empty string if not found.
+     * Returns the text content of the first direct child element with the given
+     * tag name, or an empty string when not found.
      */
-    private String getChildText(Element parent, String tagName) {
-        NodeList nodes = parent.getElementsByTagName(tagName);
-        if (nodes.getLength() > 0) {
-            return nodes.item(0).getTextContent().trim();
+    private static String getDirectChildText(Element parent, String tagName) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node n = children.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE && tagName.equals(n.getNodeName())) {
+                return n.getTextContent().trim();
+            }
         }
         return "";
+    }
+
+    /**
+     * Creates a securely configured {@link DocumentBuilder}.
+     * Silences Apache Xerces System.err output via a no-op {@link ErrorHandler}.
+     */
+    private static DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new ErrorHandler() {
+            @Override public void warning(SAXParseException e) throws SAXException {}
+            @Override public void error(SAXParseException e) throws SAXException {}
+            @Override public void fatalError(SAXParseException e) throws SAXException {}
+        });
+        return db;
     }
 
     @Override
@@ -246,7 +276,6 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
                 + ", aggregator=" + isAggregator
                 + ", libertyPlugin=" + hasLibertyPlugin
                 + ", disabled=" + isModuleDisabled
-                + ", dependencies=" + projectDependencies
                 + ", buildFile=" + buildFilePath + "}";
     }
 }
