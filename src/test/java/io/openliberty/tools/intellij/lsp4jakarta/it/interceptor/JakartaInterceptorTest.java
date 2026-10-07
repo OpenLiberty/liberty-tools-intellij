@@ -38,7 +38,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class JakartaInterceptorTest extends BaseJakartaTest {
 
-    private static final String PROCEED_NOT_IN_TRY_CATCH_MSG = "Exceptions and initialization and/or cleanup operations should typically be handled in try/catch/finally blocks around the proceed method.";
+    private static final String PROCEED_NOT_IN_TRY_CATCH_MSG = "Exceptions, initialization and/or cleanup operations should typically be handled in try/catch/finally blocks around the proceed method.";
 
     @Test
     public void invalidInterceptorTest() throws Exception {
@@ -1601,7 +1601,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorMissingInterceptorBinding");
 
         Diagnostic proceedNotInTryCatch = JakartaForJavaAssert.d(14, 18, 27,
-                "Exceptions and initialization and/or cleanup operations should typically be handled in try/catch/finally blocks around the proceed method.",
+                PROCEED_NOT_IN_TRY_CATCH_MSG,
                 DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorProceedNotInTryCatch");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, missingBindingDiagnostic, proceedNotInTryCatch);
