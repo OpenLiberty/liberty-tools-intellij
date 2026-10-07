@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.InheritanceUtil;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
@@ -335,6 +336,32 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                 .anyMatch(annotation -> {
                     String annotationName = annotation.getQualifiedName();
                     return getMatchedJavaElementName(type, annotationName, interceptorReferences) != null;
+                });
+    }
+
+    /**
+     * Returns {@code true} if {@code type} has at least one subclass (anywhere in the
+     * project, including within the same source file) that is annotated with
+     * {@code @Interceptor}.
+     *
+     * <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
+     * project scan.
+     *
+     * <p>The filter excludes {@code type} itself (to avoid a class being considered its
+     * own subtype) but intentionally includes same-file subtypes, so that a package-private
+     * base class declared in the same {@code .java} file as its {@code @Interceptor} subclass
+     * is also validated correctly.
+     *
+     * @param type the type whose subtype hierarchy is to be searched
+     * @param unit the PSI Java file that contains {@code type}
+     * @return {@code true} if an {@code @Interceptor} subclass exists anywhere in the project
+     */
+    public static boolean hasInterceptorSubclass(PsiClass type, PsiJavaFile unit) {
+        GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
+        return ClassInheritorsSearch.search(type, scope, true)
+                .anyMatch(subtype -> {
+                    PsiFile subFile = subtype.getContainingFile();
+                    return subFile != null && !subtype.equals(type) && isInterceptorType(subtype);
                 });
     }
 
