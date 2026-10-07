@@ -139,17 +139,22 @@ public class LibertyModules {
     }
 
     /**
-     * Wires parent/child relationships between Liberty modules for the given project
-     * based on the {@link AbstractProjectMetadata#getParentProjectName()} declared in
-     * each module's build metadata.
+     * Wires parent/child relationships between Liberty modules for the given project.
      *
-     * <p>For each module whose metadata reports a parent project name, the method
-     * searches for a module in the same project whose {@code projectName} matches.
-     * When a match is found:
-     * <ul>
-     *   <li>the child's {@link LibertyModule#setParentModule(LibertyModule)} is set, and</li>
-     *   <li>the parent's {@link LibertyModule#addChildLibertyModule(LibertyModule)} is called.</li>
-     * </ul>
+     * <p>Two complementary strategies are used:</p>
+     * <ol>
+     *   <li><b>Name-based (Strategy 1):</b> the child's build metadata declares a
+     *       {@code <parent><artifactId>} (Maven) or equivalent. The parent is located
+     *       by matching that name against the {@code projectName} of every known module.</li>
+     *   <li><b>Path-based (Strategy 2):</b> the parent is an aggregator whose
+     *       {@code <modules>} list is known but whose children do not declare a
+     *       {@code <parent>} element. Each subproject path declared by the aggregator
+     *       is resolved relative to the aggregator's directory and matched by canonical
+     *       filesystem path against the directory that contains each child's build file.</li>
+     * </ol>
+     *
+     * <p>Strategy 1 runs first. Strategy 2 only links modules that are still unlinked
+     * after Strategy 1, so the two strategies never conflict.</p>
      *
      * @param project the IntelliJ project whose modules should be linked
      */
@@ -165,7 +170,7 @@ public class LibertyModules {
             }
         }
 
-        // Wire relationships
+        // Name-based strategy - child declares <parent><artifactId>
         for (LibertyModule child : modules) {
             AbstractProjectMetadata meta = child.getBuildMetadata();
             if (meta == null || meta.getParentProjectName() == null) continue;
@@ -173,6 +178,45 @@ public class LibertyModules {
             if (parent == null || parent == child) continue;
             child.setParentModule(parent);
             parent.addChildLibertyModule(child);
+        }
+
+        // Path-based strategy - aggregator declares <modules> but children have no <parent>
+        // Build a lookup: canonical directory path -> LibertyModule
+        Map<String, LibertyModule> byDir = new HashMap<>();
+        for (LibertyModule module : modules) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile != null && buildFile.getParent() != null) {
+                try {
+                    String canonical = new File(buildFile.getParent().getPath()).getCanonicalPath();
+                    byDir.put(canonical, module);
+                } catch (IOException e) {
+                    byDir.put(buildFile.getParent().getPath(), module);
+                }
+            }
+        }
+
+        for (LibertyModule aggregator : modules) {
+            AbstractProjectMetadata meta = aggregator.getBuildMetadata();
+            if (meta == null || !meta.isAggregator()) continue;
+            VirtualFile aggregatorBuildFile = aggregator.getBuildFile();
+            if (aggregatorBuildFile == null || aggregatorBuildFile.getParent() == null) continue;
+            File aggregatorDir = new File(aggregatorBuildFile.getParent().getPath());
+
+            for (String subprojectPath : meta.getSubprojects()) {
+                File childDir = new File(aggregatorDir, subprojectPath);
+                String childCanonical;
+                try {
+                    childCanonical = childDir.getCanonicalPath();
+                } catch (IOException e) {
+                    childCanonical = childDir.getAbsolutePath();
+                }
+                LibertyModule child = byDir.get(childCanonical);
+                // Only link if not already wired by Strategy 1
+                if (child != null && child != aggregator && child.getParentModule() == null) {
+                    child.setParentModule(aggregator);
+                    aggregator.addChildLibertyModule(child);
+                }
+            }
         }
     }
 

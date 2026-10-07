@@ -89,13 +89,28 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         // -- Project name (artifactId direct child of <project>) --
         projectName = getDirectChildText(root, "artifactId");
 
-        // -- Parent project name --
+        // -- Parent project name + relative path --
+        File parentPomFile = null;
         NodeList parentNodes = root.getElementsByTagName("parent");
         if (parentNodes.getLength() > 0) {
             Element parentEl = (Element) parentNodes.item(0);
             String parentArtifactId = getDirectChildText(parentEl, "artifactId");
             if (!parentArtifactId.isEmpty()) {
                 parentProjectName = parentArtifactId;
+            }
+            // Resolve the parent pom.xml path.
+            // <relativePath> defaults to "../pom.xml" when absent or empty.
+            String relativePath = getDirectChildText(parentEl, "relativePath");
+            if (relativePath.isEmpty()) {
+                relativePath = "../pom.xml";
+            }
+            File candidate = new File(pomDir, relativePath);
+            // <relativePath> may point to the parent directory rather than the file itself
+            if (candidate.isDirectory()) {
+                candidate = new File(candidate, POM_FILE_NAME);
+            }
+            if (candidate.isFile()) {
+                parentPomFile = candidate;
             }
         }
 
@@ -118,7 +133,18 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         }
 
         // -- Liberty Maven plugin presence and skip flag --
+        // Check the current POM first. If not found and a parent POM exists on disk,
+        // check there too — the Liberty plugin is commonly declared only in the parent's
+        // <pluginManagement> and inherited by child modules without repeating it.
         hasLibertyPlugin = detectLibertyPlugin(doc);
+        if (!hasLibertyPlugin && parentPomFile != null) {
+            try {
+                Document parentDoc = db.parse(parentPomFile);
+                hasLibertyPlugin = detectLibertyPlugin(parentDoc);
+            } catch (Exception e) {
+                LOGGER.warn("Could not parse parent POM for Liberty plugin detection: " + parentPomFile, e);
+            }
+        }
     }
 
     /**
