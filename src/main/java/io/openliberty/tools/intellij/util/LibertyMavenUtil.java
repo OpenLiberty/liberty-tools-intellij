@@ -270,8 +270,13 @@ public class LibertyMavenUtil {
      * full project graph.  For standalone or root modules the command is run from the module's
      * own directory (i.e. the parent of its {@code pom.xml}).</p>
      *
+     * <p>If neither the parent nor the module itself has a build file, falls back to the
+     * IntelliJ project base path. Returns {@code null} if no directory can be determined,
+     * in which case the caller should skip command execution and log an error.</p>
+     *
      * @param libertyModule the Liberty module for which the execution directory is needed
-     * @return absolute path of the directory to {@code cd} into before running Maven
+     * @return absolute path of the directory to {@code cd} into before running Maven,
+     *         or {@code null} if it cannot be determined
      */
     public static String getMavenExecutionDir(LibertyModule libertyModule) {
         if (libertyModule != null) {
@@ -279,12 +284,19 @@ public class LibertyMavenUtil {
             if (parent != null && parent.getBuildFile() != null) {
                 return parent.getBuildFile().getParent().getPath();
             }
+            if (libertyModule.getBuildFile() != null) {
+                return libertyModule.getBuildFile().getParent().getPath();
+            }
+            // Fall back to the IntelliJ project base path
+            if (libertyModule.getProject() != null
+                    && libertyModule.getProject().getBasePath() != null) {
+                LOGGER.warn(String.format(
+                        "No build file found for module '%s' - falling back to project base path",
+                        libertyModule.getName()));
+                return libertyModule.getProject().getBasePath();
+            }
         }
-        // Standalone or root module — run from its own directory
-        if (libertyModule != null && libertyModule.getBuildFile() != null) {
-            return libertyModule.getBuildFile().getParent().getPath();
-        }
-        return "";
+        return null;
     }
 
     /**

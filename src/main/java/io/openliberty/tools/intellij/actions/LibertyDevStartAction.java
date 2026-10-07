@@ -101,9 +101,19 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         // Do not use the custom parameters in the future unless we get here via the run configuration dialog
         libertyModule.setUseCustom(false);
         // For Maven submodules, cd to the aggregator directory; for all others use the module's own directory.
-        String executionDir = projectType.equals(LIBERTY_MAVEN_PROJECT)
-                ? LibertyMavenUtil.getMavenExecutionDir(libertyModule)
-                : buildFile.getParent().getPath();
+        String executionDir;
+        if (projectType.equals(LIBERTY_MAVEN_PROJECT)) {
+            executionDir = LibertyMavenUtil.getMavenExecutionDir(libertyModule);
+            if (executionDir == null) {
+                String msg = String.format("Unable to %s: could not determine the execution directory for %s.",
+                        getActionCommandName(), libertyModule.getName());
+                notifyError(msg, project);
+                LOGGER.error(msg);
+                return;
+            }
+        } else {
+            executionDir = buildFile.getParent().getPath();
+        }
         String cdToProjectCmd = "cd \"" + executionDir + "\"";
         LibertyActionUtil.executeCommand(widget, cdToProjectCmd, startCmd);
         if (libertyModule.isDebugMode() && debugPort != -1) {
