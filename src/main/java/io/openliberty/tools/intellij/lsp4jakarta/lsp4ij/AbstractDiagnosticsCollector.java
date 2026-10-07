@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
@@ -291,10 +292,13 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Checks if type is of Interceptor type or uses interceptor-related features.
      * Returns true if:
      * - The type has @Interceptor annotation
-     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundConstruct, AroundTimeout)
+     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundTimeout)
      * - The type or its methods use @Interceptors annotation
      *
      * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
+     * Note: AroundConstruct is intentionally excluded — per spec it may only appear in interceptor
+     * classes and their superclasses, so the check for its misuse in target classes is handled
+     * independently in InterceptorDiagnosticsParticipant.
      *
      * @param type     the type to check
      * @return true if the type is an interceptor type or uses interceptor-related features
@@ -321,7 +325,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     /**
      * Checks if the type has any methods annotated with interceptor-specific annotations.
-     * Checks for: @AroundInvoke, @AroundConstruct, @AroundTimeout
+     * Checks for: @AroundInvoke, @AroundTimeout
      *
      * @param type    the type to check
      * @param methods the methods array (pre-fetched to avoid redundant calls)
@@ -335,6 +339,27 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
                 .anyMatch(annotation -> {
                     String annotationName = annotation.getQualifiedName();
                     return getMatchedJavaElementName(type, annotationName, interceptorReferences) != null;
+                });
+    }
+
+    /**
+     * Returns {@code true} if {@code type} has at least one subclass (in any source
+     * file other than the one containing {@code type}) that is annotated with
+     * {@code @Interceptor}.
+     *
+     * <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
+     * project scan.
+     *
+     * @param type the type whose subtype hierarchy is to be searched
+     * @param unit the PSI Java file that contains {@code type}
+     * @return {@code true} if an {@code @Interceptor} subclass exists in another file
+     */
+    public static boolean hasInterceptorSubclass(PsiClass type, PsiJavaFile unit) {
+        GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
+        return ClassInheritorsSearch.search(type, scope, true)
+                .anyMatch(subtype -> {
+                    PsiFile subFile = subtype.getContainingFile();
+                    return subFile != null && !subFile.equals(unit) && isInterceptorType(subtype);
                 });
     }
 

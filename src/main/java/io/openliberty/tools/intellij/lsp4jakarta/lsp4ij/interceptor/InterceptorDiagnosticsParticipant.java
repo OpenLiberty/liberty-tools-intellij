@@ -57,8 +57,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		if (unit == null)
 			return;
 
-		PsiClass[] alltypes;
-		alltypes = unit.getClasses();
+		// Validate all types in the current file.
+		PsiClass[] alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
@@ -103,24 +103,32 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
-				
+	
 				// Process inner classes for duplicate interceptor method annotations
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
 				}
+	
+			}
+	
+			// @AroundConstruct is only valid in classes declared with @Interceptor (and their superclasses).
+			// A class with @AroundInvoke or @AroundTimeout but no @Interceptor is still a target class
+			// for this check — only @Interceptor annotation exempts @AroundConstruct usage.
+			if (!isInterceptorType(type)) {
+				checkAroundConstructInTargetClass(type, unit, diagnostics);
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
-		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
+		for (PsiMethod invokeMethod : methodsMissingProceedInvocation) {
 			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-    }
+	}
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
@@ -345,4 +353,40 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			diagnostics.add(diagnostic);
 		}
 	}
+	
+	// =========================================================================
+	// Validation — @AroundConstruct in target classes
+	// =========================================================================
+
+	/**
+	 * Checks if a non-interceptor class declares a method annotated with
+	 * {@code @AroundConstruct}, which is forbidden by the Jakarta Interceptors 2.0
+	 * specification. The diagnostic is suppressed when the class has at least one
+	 * {@code @Interceptor}-annotated subclass declared in a different source file
+	 * (spec permits {@code @AroundConstruct} in interceptor superclasses).
+	 *
+	 * @param type        the non-interceptor type to check
+	 * @param unit        the PSI Java file
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
+												   List<Diagnostic> diagnostics) {
+		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
+		// result is constant across all methods of the same type.
+		if (hasInterceptorSubclass(type, unit)) {
+			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
+			return;
+		}
+		Arrays.stream(type.getMethods())
+			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
+				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
+			.forEach(method -> {
+				Range range = PositionUtils.toNameRange(method);
+				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
+				Diagnostic diagnostic = new Diagnostic(range, msg);
+				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
+				diagnostics.add(diagnostic);
+			});
+	}
+
 }
