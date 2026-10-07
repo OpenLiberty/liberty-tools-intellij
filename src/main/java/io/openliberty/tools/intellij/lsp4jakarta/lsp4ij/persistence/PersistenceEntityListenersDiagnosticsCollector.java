@@ -153,7 +153,7 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
 
     /**
      * Returns {@code true} if the given class is non-instantiable as an entity listener:
-     * abstract, an interface, or a non-static inner class.
+     * abstract, an interface, a non-static inner class, an anonymous class, or a local class.
      *
      * @param listenerClass the class to check
      * @return {@code true} if non-instantiable
@@ -165,9 +165,19 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
         if (listenerClass.hasModifierProperty(PsiModifier.ABSTRACT)) {
             return true;
         }
+
         // Non-static inner class: has a containing class but is not declared static.
         PsiClass containingClass = listenerClass.getContainingClass();
         if (containingClass != null && !listenerClass.hasModifierProperty(PsiModifier.STATIC)) {
+            return true;
+        }
+
+        // Anonymous class (e.g. new Foo() { ... }).
+        if (listenerClass instanceof PsiAnonymousClass) {
+            return true;
+        }
+        // Local class: declared inside a method/initializer block.
+        if (listenerClass.getParent() instanceof PsiCodeBlock) {
             return true;
         }
         return false;
