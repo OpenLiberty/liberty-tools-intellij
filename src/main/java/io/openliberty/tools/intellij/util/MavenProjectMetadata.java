@@ -23,22 +23,29 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import org.xml.sax.InputSource;
 
 /**
  * Assisted by IBM Bob
  *
  * Extracts Liberty multi-module metadata from a Maven {@code pom.xml} file.
  *
- * <p>Uses a two-pass hybrid approach</p>
+ * <p>Uses a two-pass hybrid approach:</p>
  * <ol>
- *   <li>Parse the raw {@code pom.xml} directly (fast path). If all {@code <module>}
- *       values are literal strings (no {@code ${...}} variables), use them directly.</li>
- *   <li>If any {@code <module>} value contains a Maven variable, fall back to running
- *       {@code mvn help:evaluate -Dexpression=project.modules} to obtain fully resolved
- *       values from the effective POM.</li>
+ *   <li><b>Fast path</b> — parse the raw {@code pom.xml} directly. If the file
+ *       contains no {@code ${...}} variable references, the raw values are used
+ *       as-is. This covers the vast majority of real-world projects.</li>
+ *   <li><b>Effective-POM fallback</b> — if any {@code ${...}} variable is found
+ *       anywhere in the raw POM, run {@code mvn help:effective-pom -q} to obtain
+ *       the fully resolved document and extract all fields from that instead.
+ *       This guarantees correctness when variables affect any field we read
+ *       (artifact IDs, plugin coordinates, skip flags, module names, etc.).</li>
  * </ol>
  *
  * <p>Specifically this class determines:</p>
@@ -58,8 +65,6 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
     private static final String POM_FILE_NAME = "pom.xml";
     private static final String MODULES_TAG  = "modules";
     private static final String MODULE_TAG   = "module";
-    private static final String STRINGS_TAG  = "strings";
-    private static final String STRING_TAG   = "string";
 
     /**
      * Parses the {@code pom.xml} in the given directory and populates all metadata fields.
@@ -81,16 +86,41 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
     // -------------------------------------------------------------------------
 
     private void parsePom(File pomDir, Project project) throws Exception {
-        DocumentBuilder db = newDocumentBuilder();
         File pomFile = new File(pomDir, POM_FILE_NAME);
-        Document doc = db.parse(pomFile);
+        String rawContent = new String(Files.readAllBytes(pomFile.toPath()), StandardCharsets.UTF_8);
+
+        DocumentBuilder db = newDocumentBuilder();
+        Document doc;
+
+        if (rawContent.contains("${")) {
+            // The POM contains variable references somewhere — variables can affect any
+            // field we read (artifactId, plugin coordinates, skip flag, module names).
+            // Use the effective POM so that all values are fully resolved.
+            LOGGER.debug("POM contains variables, using effective POM for: " + pomFile);
+            doc = resolveEffectivePom(pomDir, project, db);
+            if (doc == null) {
+                // Effective POM failed — fall back to raw XML as best-effort
+                LOGGER.warn("Falling back to raw XML for: " + pomFile);
+                doc = db.parse(new InputSource(new StringReader(rawContent)));
+            }
+        } else {
+            // No variables in the raw POM — safe to use directly (fast path)
+            doc = db.parse(new InputSource(new StringReader(rawContent)));
+        }
+
+        extractFromDoc(doc, pomDir);
+    }
+
+    /**
+     * Extracts all metadata fields from the given (raw or effective) POM document.
+     */
+    private void extractFromDoc(Document doc, File pomDir) {
         Element root = doc.getDocumentElement();
 
         // -- Project name (artifactId direct child of <project>) --
         projectName = getDirectChildText(root, "artifactId");
 
-        // -- Parent project name + relative path --
-        File parentPomFile = null;
+        // -- Parent project name --
         NodeList parentNodes = root.getElementsByTagName("parent");
         if (parentNodes.getLength() > 0) {
             Element parentEl = (Element) parentNodes.item(0);
@@ -98,117 +128,68 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
             if (!parentArtifactId.isEmpty()) {
                 parentProjectName = parentArtifactId;
             }
-            // Resolve the parent pom.xml path.
-            // <relativePath> defaults to "../pom.xml" when absent or empty.
-            String relativePath = getDirectChildText(parentEl, "relativePath");
-            if (relativePath.isEmpty()) {
-                relativePath = "../pom.xml";
-            }
-            File candidate = new File(pomDir, relativePath);
-            // <relativePath> may point to the parent directory rather than the file itself
-            if (candidate.isDirectory()) {
-                candidate = new File(candidate, POM_FILE_NAME);
-            }
-            if (candidate.isFile()) {
-                parentPomFile = candidate;
-            }
         }
 
         // -- packaging=pom --
         boolean pomPackaging = "pom".equals(getDirectChildText(root, "packaging"));
 
         // -- Child modules --
-        if (root.getElementsByTagName(MODULES_TAG).getLength() > 0) {
-            List<String> moduleNames = getModulesIfResolved(doc);
-            if (moduleNames == null) {
-                // One or more <module> values contain ${...} variables — use help:evaluate
-                moduleNames = resolveModulesViaHelpEvaluate(pomDir, project, db);
-            }
-            if (moduleNames != null && !moduleNames.isEmpty()) {
-                subprojects.addAll(moduleNames);
-                if (pomPackaging) {
-                    isAggregator = true;
+        NodeList modulesNodes = root.getElementsByTagName(MODULES_TAG);
+        if (modulesNodes.getLength() > 0) {
+            Element modulesEl = (Element) modulesNodes.item(0);
+            NodeList moduleNodes = modulesEl.getElementsByTagName(MODULE_TAG);
+            for (int i = 0; i < moduleNodes.getLength(); i++) {
+                String value = moduleNodes.item(i).getTextContent().trim();
+                if (!value.isEmpty()) {
+                    subprojects.add(value);
                 }
+            }
+            if (!subprojects.isEmpty() && pomPackaging) {
+                isAggregator = true;
             }
         }
 
         // -- Liberty Maven plugin presence and skip flag --
-        // Check the current POM first. If not found and a parent POM exists on disk,
-        // check there too — the Liberty plugin is commonly declared only in the parent's
-        // <pluginManagement> and inherited by child modules without repeating it.
+        // When working from the effective POM, inherited <pluginManagement> entries
+        // are already merged in, so no parent POM walk is needed.
         hasLibertyPlugin = detectLibertyPlugin(doc);
-        if (!hasLibertyPlugin && parentPomFile != null) {
-            try {
-                Document parentDoc = db.parse(parentPomFile);
-                hasLibertyPlugin = detectLibertyPlugin(parentDoc);
-            } catch (Exception e) {
-                LOGGER.warn("Could not parse parent POM for Liberty plugin detection: " + parentPomFile, e);
-            }
-        }
     }
 
     /**
-     * Returns the list of module names if all {@code <module>} values are plain
-     * strings (no {@code ${...}} Maven variables), or {@code null} if any variable
-     * is present (indicating that {@code help:evaluate} is needed).
+     * Runs {@code mvn help:effective-pom -q} in the given directory and returns
+     * the parsed effective POM document, or {@code null} if the command fails.
      */
-    private static List<String> getModulesIfResolved(Document doc) {
-        List<String> modules = new ArrayList<>();
-        Element root = doc.getDocumentElement();
-        NodeList modulesNodes = root.getElementsByTagName(MODULES_TAG);
-        if (modulesNodes.getLength() == 0) {
-            return modules; // no modules element
-        }
-        Element modulesEl = (Element) modulesNodes.item(0);
-        NodeList moduleNodes = modulesEl.getElementsByTagName(MODULE_TAG);
-        for (int i = 0; i < moduleNodes.getLength(); i++) {
-            String value = moduleNodes.item(i).getTextContent().trim();
-            if (value.contains("${")) {
-                return null; // unresolved variable — trigger fallback
-            }
-            if (!value.isEmpty()) {
-                modules.add(value);
-            }
-        }
-        return modules;
-    }
-
-    /**
-     * Runs {@code mvn help:evaluate -Dexpression=project.modules -q -DforceStdout}
-     * in the given directory and parses the XML output to obtain resolved module names.
-     * Returns an empty list if the command fails or produces no output.
-     */
-    private static List<String> resolveModulesViaHelpEvaluate(File pomDir, Project project,
-                                                               DocumentBuilder db) {
-        List<String> modules = new ArrayList<>();
+    private static Document resolveEffectivePom(File pomDir, Project project, DocumentBuilder db) {
         try {
             String mavenCmd = LibertyMavenUtil.getMavenExecutable(project);
             if (mavenCmd == null) {
-                LOGGER.warn("Could not resolve Maven executable — skipping help:evaluate for: " + pomDir);
-                return modules;
+                LOGGER.warn("Could not resolve Maven executable — cannot compute effective POM for: " + pomDir);
+                return null;
             }
-            String[] command = {mavenCmd, "help:evaluate",
-                    "-Dexpression=project.modules", "-q", "-DforceStdout"};
+            String[] command = {mavenCmd, "help:effective-pom", "-q"};
             Process process = Runtime.getRuntime().exec(command, null, pomDir);
-            Document resultDoc = db.parse(process.getInputStream());
-            Element root = resultDoc.getDocumentElement();
-            if (STRINGS_TAG.equals(root.getTagName())) {
-                NodeList children = root.getChildNodes();
-                for (int i = 0; i < children.getLength(); i++) {
-                    Node node = children.item(i);
-                    if (node.getNodeType() == Node.ELEMENT_NODE
-                            && STRING_TAG.equals(((Element) node).getTagName())) {
-                        String value = node.getTextContent().trim();
-                        if (!value.isEmpty()) {
-                            modules.add(value);
-                        }
-                    }
+
+            // Capture stdout
+            StringBuilder sb = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
                 }
             }
+            process.waitFor();
+
+            String output = sb.toString().trim();
+            if (output.isEmpty()) {
+                LOGGER.warn("help:effective-pom produced no output for: " + pomDir);
+                return null;
+            }
+            return db.parse(new InputSource(new StringReader(output)));
         } catch (Exception e) {
-            LOGGER.warn("help:evaluate failed for: " + pomDir, e);
+            LOGGER.warn("help:effective-pom failed for: " + pomDir, e);
+            return null;
         }
-        return modules;
     }
 
     // -------------------------------------------------------------------------
