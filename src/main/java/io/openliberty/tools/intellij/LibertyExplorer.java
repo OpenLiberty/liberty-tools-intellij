@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
@@ -24,10 +25,10 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.treeStructure.Tree;
 import io.openliberty.tools.intellij.actions.LibertyGeneralAction;
 import io.openliberty.tools.intellij.actions.LibertyToolbarActionGroup;
+import io.openliberty.tools.intellij.starter.LibertyNewProjectWizard;
 import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,6 +48,24 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
     public LibertyExplorer(@NotNull Project project) {
         super(true, true);
+        buildContent(project);
+    }
+
+    /**
+     * Refreshes the Liberty tool window content by rebuilding the tree and toolbar.
+     * Safe to call from any thread; UI work is dispatched onto the EDT.
+     *
+     * @param project current project
+     */
+    public void refresh(@NotNull Project project) {
+        buildContent(project);
+    }
+
+    /**
+     * Builds (or rebuilds) the tree and toolbar asynchronously.
+     * Read-actions run on a pooled thread; UI updates run on the EDT.
+     */
+    private void buildContent(@NotNull Project project) {
         //NOTE: To address the "Slow operations are prohibited on EDT" Exception (https://github.com/OpenLiberty/liberty-tools-intellij/issues/674), we have implemented the workaround outlined in the document (https://plugins.jetbrains.com/docs/intellij/general-threading-rules.html).
         // We have now moved the method "buildTree(project, getBackground())" to a background thread. To pass control from a background thread to the Event Dispatch Thread (EDT), UI operations are now included within the method "ApplicationManager.getApplication().invokeLater()".
         ModalityState modalityState = getModalityState();
@@ -62,20 +81,108 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 }, modalityState);
             } else {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    JBTextArea jbTextArea = new JBTextArea(LocalizedResourceUtil.getMessage("no.liberty.projects.detected"));
-                    jbTextArea.setEditable(false);
-                    jbTextArea.setBackground(getBackground());
-                    jbTextArea.setLineWrap(true);
-
-                    this.setContent(jbTextArea);
+                    this.setContent(buildEmptyStatePanel(project, getBackground()));
                 }, modalityState);
             }
 
             ApplicationManager.getApplication().invokeLater(() -> {
                 ActionToolbar actionToolbar = buildActionToolbar(tree);
                 this.setToolbar(actionToolbar.getComponent());
+                this.revalidate();
+                this.repaint();
             }, modalityState);
         });
+    }
+
+    private static JPanel buildEmptyStatePanel(Project project, Color background) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(background);
+
+        JEditorPane introText = new JEditorPane(
+                "text/html", LocalizedResourceUtil.getMessage("no.liberty.projects.detected.intro"));
+        introText.setEditable(false);
+        introText.setOpaque(false);
+        introText.setAlignmentX(Component.LEFT_ALIGNMENT);
+        introText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        // Cap the height once the component is shown and its preferred size is known.
+        adjustHeightForEditorPane(panel, introText);
+
+        JButton openButton = new JButton(LocalizedResourceUtil.getMessage("no.liberty.open.button"));
+        openButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        openButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, openButton.getPreferredSize().height));
+        openButton.addActionListener(e -> {
+            AnAction openAction = ActionManager.getInstance().getAction("OpenFile");
+            if (openAction != null) {
+                AnActionEvent event = AnActionEvent.createEvent(
+                        openAction,
+                        DataManager.getInstance().getDataContext(openButton),
+                        null, ActionPlaces.UNKNOWN, ActionUiKind.NONE, null);
+                ActionUtil.performAction(openAction, event);
+            }
+        });
+        panel.add(openButton);
+
+        panel.add(Box.createRigidArea(new Dimension(0, 8)));
+
+        JButton createButton = new JButton(LocalizedResourceUtil.getMessage("no.liberty.create.button"));
+        createButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        createButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, createButton.getPreferredSize().height));
+        createButton.addActionListener(e -> LibertyNewProjectWizard.show(project));
+        panel.add(createButton);
+
+        panel.add(Box.createRigidArea(new Dimension(0, 8)));
+
+        JEditorPane restText = new JEditorPane(
+                "text/html", LocalizedResourceUtil.getMessage("no.liberty.projects.detected.rest"));
+        restText.setEditable(false);
+        restText.setOpaque(false);
+        restText.setAlignmentX(Component.LEFT_ALIGNMENT);
+        restText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        restText.addHyperlinkListener(e -> {
+            if (e.getEventType() == javax.swing.event.HyperlinkEvent.EventType.ACTIVATED) {
+                BrowserUtil.browse(e.getURL().toString());
+            }
+        });
+        adjustHeightForEditorPane(panel, restText);
+
+        JButton addProjectButton = new JButton(LocalizedResourceUtil.getMessage("no.liberty.add.project.button"));
+        addProjectButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        addProjectButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, addProjectButton.getPreferredSize().height));
+        addProjectButton.addActionListener(e -> {
+            AnAction addAction = ActionManager.getInstance().getAction(
+                    "io.openliberty.tools.intellij.actions.AddLibertyProjectAction");
+            if (addAction != null) {
+                AnActionEvent event = AnActionEvent.createEvent(
+                        addAction,
+                        DataManager.getInstance().getDataContext(addProjectButton),
+                        null, ActionPlaces.UNKNOWN, ActionUiKind.NONE, null);
+                ActionUtil.performAction(addAction, event);
+            }
+        });
+        panel.add(addProjectButton);
+
+        return panel;
+    }
+
+    private static void adjustHeightForEditorPane(JPanel panel, JEditorPane pane) {
+        // Override getMaximumSize() so BoxLayout always uses the actual preferred
+        // height after the component has been given its real width by the layout pass.
+        JEditorPane sized = new JEditorPane(pane.getContentType(), pane.getText()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        sized.setEditable(false);
+        sized.setOpaque(false);
+        sized.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sized.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        for (javax.swing.event.HyperlinkListener l : pane.getHyperlinkListeners()) {
+            sized.addHyperlinkListener(l);
+        }
+        panel.add(sized);
+        panel.add(Box.createRigidArea(new Dimension(0, 8)));
     }
 
     private ModalityState getModalityState() {
