@@ -33,6 +33,7 @@ import io.openliberty.tools.intellij.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -69,9 +70,11 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         //NOTE: To address the "Slow operations are prohibited on EDT" Exception (https://github.com/OpenLiberty/liberty-tools-intellij/issues/674), we have implemented the workaround outlined in the document (https://plugins.jetbrains.com/docs/intellij/general-threading-rules.html).
         // We have now moved the method "buildTree(project, getBackground())" to a background thread. To pass control from a background thread to the Event Dispatch Thread (EDT), UI operations are now included within the method "ApplicationManager.getApplication().invokeLater()".
         ModalityState modalityState = getModalityState();
+        // Capture background colour on the EDT before handing off to the pooled thread.
+        Color backgroundColor = getBackground();
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             // build tree (Read operations need to be wrapped in a read action)
-            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, getBackground()));
+            Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, backgroundColor));
 
             if (tree != null) {
                 ApplicationManager.getApplication().invokeLater(() -> {
@@ -94,18 +97,22 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         });
     }
 
+    /** URL for the Liberty Maven plugin CI configuration docs. */
+    private static final String MAVEN_PLUGIN_URL = "https://github.com/OpenLiberty/ci.maven/#configuration";
+
+    /** URL for the Liberty Gradle plugin docs. */
+    private static final String GRADLE_PLUGIN_URL = "https://github.com/OpenLiberty/ci.gradle#adding-the-plugin-to-the-build-script";
+
+    /** URL for the Liberty server.xml configuration overview. */
+    private static final String SERVER_XML_URL = "https://openliberty.io/docs/latest/reference/config/server-configuration-overview.html#server-xml";
+
     private static JPanel buildEmptyStatePanel(Project project, Color background) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(background);
 
-        JEditorPane introText = new JEditorPane(
-                "text/html", LocalizedResourceUtil.getMessage("no.liberty.projects.detected.intro"));
-        introText.setEditable(false);
-        introText.setOpaque(false);
-        introText.setAlignmentX(Component.LEFT_ALIGNMENT);
-        introText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-        // Cap the height once the component is shown and its preferred size is known.
+        JEditorPane introText = createLinkLabel(
+                LocalizedResourceUtil.getMessage("no.liberty.projects.detected.intro"));
         adjustHeightForEditorPane(panel, introText);
 
         JButton openButton = new JButton(LocalizedResourceUtil.getMessage("no.liberty.open.button"));
@@ -133,17 +140,9 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         panel.add(Box.createRigidArea(new Dimension(0, 8)));
 
-        JEditorPane restText = new JEditorPane(
-                "text/html", LocalizedResourceUtil.getMessage("no.liberty.projects.detected.rest"));
-        restText.setEditable(false);
-        restText.setOpaque(false);
-        restText.setAlignmentX(Component.LEFT_ALIGNMENT);
-        restText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-        restText.addHyperlinkListener(e -> {
-            if (e.getEventType() == javax.swing.event.HyperlinkEvent.EventType.ACTIVATED) {
-                BrowserUtil.browse(e.getURL().toString());
-            }
-        });
+        JEditorPane restText = createLinkLabel(
+                LocalizedResourceUtil.getMessage("no.liberty.projects.detected.rest",
+                        MAVEN_PLUGIN_URL, GRADLE_PLUGIN_URL, SERVER_XML_URL));
         adjustHeightForEditorPane(panel, restText);
 
         JButton addProjectButton = new JButton(LocalizedResourceUtil.getMessage("no.liberty.add.project.button"));
@@ -163,6 +162,28 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         panel.add(addProjectButton);
 
         return panel;
+    }
+
+    /**
+     * Creates a non-editable HTML editor pane with a hyperlink listener that opens
+     * links in the system browser. Mirrors the pattern used in AccessKeyConfigurable.
+     *
+     * @param htmlText the HTML content (without outer {@code <html>} wrapper)
+     * @return a configured {@link JEditorPane}
+     */
+    private static JEditorPane createLinkLabel(String htmlText) {
+        String html = "<html><body>" + htmlText + "</body></html>";
+        JEditorPane editorPane = new JEditorPane("text/html", html);
+        editorPane.setEditable(false);
+        editorPane.setOpaque(false);
+        editorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        editorPane.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                BrowserUtil.browse(e.getURL().toString());
+            }
+        });
+        return editorPane;
     }
 
     private static void adjustHeightForEditorPane(JPanel panel, JEditorPane pane) {
