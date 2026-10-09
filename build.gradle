@@ -171,6 +171,16 @@ dependencies {
         testFramework TestFrameworkType.Plugin.Maven.INSTANCE
     }
 }
+
+// The setupDependencies task is a deprecated stub from the IntelliJ Platform Gradle Plugin v1 that
+// IntelliJ IDEA may still invoke via its "After Sync" trigger. Disabling it suppresses the warning.
+// This block can be removed once all developers and CI have cleared the setupDependencies entry from
+// their IDE's Task Activation settings (Gradle tool window → right-click module → Tasks Activation),
+// or from .idea/workspace.xml directly. It must also be removed if the project upgrades to
+// IntelliJ Platform Gradle Plugin 2.19.0+, where the task no longer exists and this stub would fail.
+// See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html#setupdependencies
+tasks.named('setupDependencies').configure { enabled = false }
+
 task copyDeps(type: Copy) {
     from configurations.lsp
     into new File(buildDir, 'server/server')
