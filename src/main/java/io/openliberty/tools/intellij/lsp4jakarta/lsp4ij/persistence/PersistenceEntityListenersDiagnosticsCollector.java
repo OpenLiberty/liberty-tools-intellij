@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
@@ -89,6 +90,13 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
 
         PsiAnnotationParameterList paramList = annotation.getParameterList();
         for (PsiNameValuePair pair : paramList.getAttributes()) {
+            // Only process the "value" attribute. For the shorthand form
+            // @EntityListeners(Foo.class), getName() returns null; for the
+            // explicit form @EntityListeners(value = {…}), it returns "value".
+            String attrName = pair.getName();
+            if (attrName != null && !attrName.equals(PersistenceConstants.VALUE)) {
+                continue;
+            }
             PsiAnnotationMemberValue value = pair.getValue();
             if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
                 for (PsiAnnotationMemberValue element : arrayValue.getInitializers()) {
@@ -165,19 +173,12 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
         if (listenerClass.hasModifierProperty(PsiModifier.ABSTRACT)) {
             return true;
         }
-
         // Non-static inner class: has a containing class but is not declared static.
-        PsiClass containingClass = listenerClass.getContainingClass();
-        if (containingClass != null && !listenerClass.hasModifierProperty(PsiModifier.STATIC)) {
+        if (PsiUtil.isInnerClass(listenerClass)) {
             return true;
         }
-
-        // Anonymous class (e.g. new Foo() { ... }).
-        if (listenerClass instanceof PsiAnonymousClass) {
-            return true;
-        }
-        // Local class: declared inside a method/initializer block.
-        if (listenerClass.getParent() instanceof PsiCodeBlock) {
+        // Anonymous or local class (declared inside a method/initializer block).
+        if (PsiUtil.isLocalOrAnonymousClass(listenerClass)) {
             return true;
         }
         return false;

@@ -39,6 +39,7 @@ public class PersistenceConstants {
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
 
     /* Annotation Fields */
+    public static final String VALUE = "value";
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
 
