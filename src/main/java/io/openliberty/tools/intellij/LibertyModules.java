@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,9 +18,11 @@ import io.openliberty.tools.intellij.util.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Singleton to save the Liberty modules in the open project
@@ -32,6 +34,13 @@ public class LibertyModules {
 
     // key is build file associated with the Liberty project
     Map<VirtualFile, LibertyModule> libertyModules;
+
+    /**
+     * Cache of the last-known {@link LibertyModule.AppState} for each build-file path.
+     * Used to restore state across re-scans when the Liberty process is still running.
+     * Key: absolute NIO path string of the build file.
+     */
+    private final Map<String, LibertyModule.AppState> stateCache = new ConcurrentHashMap<>();
 
     private LibertyModules() {
         libertyModules = Collections.synchronizedMap(new HashMap<>());
@@ -101,8 +110,291 @@ public class LibertyModules {
                 boolean validContainerVersion = buildFile.isValidContainerVersion();
                 addLibertyModule(new LibertyModule(project, virtualFile, projectName, buildFile.getProjectType(), validContainerVersion));
             }
+
+            // After all modules are registered, parse metadata and wire relationships.
+            parseBuildMetadata(project);
+            buildMultiModuleRelationships(project);
+            populateStatesFromCache(project);
         }
         return this;
+    }
+
+    /**
+     * Parses the build file of each Liberty module for the given project and stores
+     * the result in {@link LibertyModule#setBuildMetadata(AbstractProjectMetadata)}.
+     * Errors are logged but do not abort processing of remaining modules.
+     *
+     * @param project the IntelliJ project whose modules should be parsed
+     */
+    private void parseBuildMetadata(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                continue;
+            }
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null || buildFile.getParent() == null) continue;
+            File pomDir = new File(buildFile.getParent().getPath());
+            module.setBuildMetadata(new MavenProjectMetadata(pomDir, project));
+        }
+        // After parsing known Liberty modules, register any aggregator POMs on disk
+        // that were not picked up by the initial scan (because they have no Liberty plugin).
+        // Without them, Strategy 2 path-based wiring has nothing to iterate over.
+        registerAggregatorModules(project);
+    }
+
+    /**
+     * Walks up the directory tree from each known Maven Liberty module looking for
+     * {@code pom.xml} files that declare child modules (aggregators) but were excluded
+     * from the initial scan because they do not directly configure the Liberty plugin.
+     *
+     * <p>When such a POM is found and is not already registered, it is added as a
+     * {@link LibertyModule} so that {@link #buildMultiModuleRelationships} can use it
+     * as the anchor for Strategy 2 (path-based) wiring.</p>
+     *
+     * @param project the IntelliJ project
+     */
+    private void registerAggregatorModules(Project project) {
+        // Snapshot to avoid concurrent modification while we may add new modules
+        List<LibertyModule> snapshot = getLibertyModules(project);
+        // Track canonical paths already registered to avoid duplicates
+        Set<String> registeredDirs = new java.util.HashSet<>();
+        for (LibertyModule module : snapshot) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null || buildFile.getParent() == null) continue;
+            try {
+                registeredDirs.add(new File(buildFile.getParent().getPath()).getCanonicalPath());
+            } catch (IOException e) {
+                registeredDirs.add(buildFile.getParent().getPath());
+            }
+        }
+
+        for (LibertyModule module : snapshot) {
+            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) continue;
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null || buildFile.getParent() == null) continue;
+
+            // Walk up from the module's directory looking for aggregator POMs
+            File dir = new File(buildFile.getParent().getPath()).getParentFile();
+            while (dir != null) {
+                File candidatePom = new File(dir, "pom.xml");
+                if (!candidatePom.isFile()) break;
+
+                String canonicalDir;
+                try {
+                    canonicalDir = dir.getCanonicalPath();
+                } catch (IOException e) {
+                    canonicalDir = dir.getAbsolutePath();
+                }
+
+                if (registeredDirs.contains(canonicalDir)) break; // already registered
+
+                // Parse the candidate POM to check if it is an aggregator
+                MavenProjectMetadata meta = new MavenProjectMetadata(dir, module.getProject());
+                if (!meta.isAggregator()) break; // not an aggregator — stop walking up
+
+                // Register as a LibertyModule (aggregator, no Liberty plugin)
+                String pomPath = candidatePom.getAbsolutePath();
+                VirtualFile pomVFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance()
+                        .findFileByPath(pomPath);
+                if (pomVFile == null) break;
+
+                String aggregatorName = meta.getProjectName() != null
+                        ? meta.getProjectName() : dir.getName();
+                LibertyModule aggregator = new LibertyModule(
+                        project, pomVFile, aggregatorName,
+                        Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
+                aggregator.setBuildMetadata(meta);
+                addLibertyModule(aggregator);
+                registeredDirs.add(canonicalDir);
+                LOGGER.debug("Registered aggregator module: " + aggregatorName + " at " + canonicalDir);
+
+                dir = dir.getParentFile();
+            }
+        }
+
+        registerNonAncestorAggregators(project, registeredDirs);
+    }
+
+    /**
+     * Registers aggregator POMs that are not in an ancestor directory of the modules they
+     * aggregate, e.g. an aggregator in a sibling {@code pom/} folder that lists
+     * {@code <module>../ear</module>}. The directory walk in
+     * {@link #registerAggregatorModules} cannot find these.
+     *
+     * <p>Only POMs that declare {@code <modules>} are parsed, and an aggregator is registered
+     * only if one of its modules resolves to an already registered directory.</p>
+     *
+     * @param project        the IntelliJ project
+     * @param registeredDirs canonical directories of the modules registered so far; updated
+     *                       with each aggregator that is added
+     */
+    private void registerNonAncestorAggregators(Project project, Set<String> registeredDirs) {
+        for (VirtualFile pomVFile : LibertyProjectUtil.getAllPomFiles(project)) {
+            VirtualFile pomDirVFile = pomVFile.getParent();
+            if (pomDirVFile == null) continue;
+            File dir = new File(pomDirVFile.getPath());
+            String canonicalDir;
+            try {
+                canonicalDir = dir.getCanonicalPath();
+            } catch (IOException e) {
+                canonicalDir = dir.getAbsolutePath();
+            }
+            if (registeredDirs.contains(canonicalDir)) continue;
+
+            try {
+                if (!new String(java.nio.file.Files.readAllBytes(new File(pomVFile.getPath()).toPath()),
+                        java.nio.charset.StandardCharsets.UTF_8).contains("<modules>")) {
+                    continue;
+                }
+            } catch (IOException e) {
+                continue;
+            }
+
+            MavenProjectMetadata meta = new MavenProjectMetadata(dir, project);
+            if (!meta.isAggregator()) continue;
+
+            boolean aggregatesRegisteredModule = false;
+            for (String subprojectPath : meta.getSubprojects()) {
+                File childDir = new File(dir, subprojectPath);
+                String childCanonical;
+                try {
+                    childCanonical = childDir.getCanonicalPath();
+                } catch (IOException e) {
+                    childCanonical = childDir.getAbsolutePath();
+                }
+                if (registeredDirs.contains(childCanonical)) {
+                    aggregatesRegisteredModule = true;
+                    break;
+                }
+            }
+            if (!aggregatesRegisteredModule) continue;
+
+            String aggregatorName = meta.getProjectName() != null && !meta.getProjectName().isEmpty()
+                    ? meta.getProjectName() : dir.getName();
+            LibertyModule aggregator = new LibertyModule(
+                    project, pomVFile, aggregatorName,
+                    Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
+            aggregator.setBuildMetadata(meta);
+            addLibertyModule(aggregator);
+            registeredDirs.add(canonicalDir);
+            LOGGER.debug("Registered non-ancestor aggregator module: " + aggregatorName + " at " + canonicalDir);
+        }
+    }
+
+    /**
+     * Wires parent/child relationships between Liberty modules for the given project.
+     *
+     * <p>Two complementary strategies are used:</p>
+     * <ol>
+     *   <li><b>Name-based (Strategy 1):</b> the child's build metadata declares a
+     *       {@code <parent><artifactId>} (Maven) or equivalent. The parent is located
+     *       by matching that name against the {@code projectName} of every known module.</li>
+     *   <li><b>Path-based (Strategy 2):</b> the parent is an aggregator whose
+     *       {@code <modules>} list is known but whose children do not declare a
+     *       {@code <parent>} element. Each subproject path declared by the aggregator
+     *       is resolved relative to the aggregator's directory and matched by canonical
+     *       filesystem path against the directory that contains each child's build file.</li>
+     * </ol>
+     *
+     * <p>Strategy 1 runs first. Strategy 2 only links modules that are still unlinked
+     * after Strategy 1, so the two strategies never conflict.</p>
+     *
+     * @param project the IntelliJ project whose modules should be linked
+     */
+    private void buildMultiModuleRelationships(Project project) {
+        List<LibertyModule> modules = getLibertyModules(project);
+
+        // Build a lookup: projectName → LibertyModule (skip null names)
+        Map<String, LibertyModule> byName = new HashMap<>();
+        for (LibertyModule module : modules) {
+            AbstractProjectMetadata meta = module.getBuildMetadata();
+            if (meta != null && meta.getProjectName() != null) {
+                byName.put(meta.getProjectName(), module);
+            }
+        }
+
+        // Name-based strategy - child declares <parent><artifactId>
+        for (LibertyModule child : modules) {
+            AbstractProjectMetadata meta = child.getBuildMetadata();
+            if (meta == null || meta.getParentProjectName() == null) continue;
+            LibertyModule parent = byName.get(meta.getParentProjectName());
+            if (parent == null || parent == child) continue;
+            child.setParentModule(parent);
+            parent.addChildLibertyModule(child);
+        }
+
+        // Path-based strategy - aggregator declares <modules> but children have no <parent>
+        // Build a lookup: canonical directory path -> LibertyModule
+        Map<String, LibertyModule> byDir = new HashMap<>();
+        for (LibertyModule module : modules) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile != null && buildFile.getParent() != null) {
+                try {
+                    String canonical = new File(buildFile.getParent().getPath()).getCanonicalPath();
+                    byDir.put(canonical, module);
+                } catch (IOException e) {
+                    byDir.put(buildFile.getParent().getPath(), module);
+                }
+            }
+        }
+
+        for (LibertyModule aggregator : modules) {
+            AbstractProjectMetadata meta = aggregator.getBuildMetadata();
+            if (meta == null || !meta.isAggregator()) continue;
+            VirtualFile aggregatorBuildFile = aggregator.getBuildFile();
+            if (aggregatorBuildFile == null || aggregatorBuildFile.getParent() == null) continue;
+            File aggregatorDir = new File(aggregatorBuildFile.getParent().getPath());
+
+            for (String subprojectPath : meta.getSubprojects()) {
+                File childDir = new File(aggregatorDir, subprojectPath);
+                String childCanonical;
+                try {
+                    childCanonical = childDir.getCanonicalPath();
+                } catch (IOException e) {
+                    childCanonical = childDir.getAbsolutePath();
+                }
+                LibertyModule child = byDir.get(childCanonical);
+                // Only link if not already wired by Strategy 1
+                if (child != null && child != aggregator && child.getParentModule() == null) {
+                    child.setParentModule(aggregator);
+                    aggregator.addChildLibertyModule(child);
+                }
+            }
+        }
+    }
+
+    /**
+     * Saves the current {@link LibertyModule.AppState} of every module in the
+     * given project to the in-memory state cache.
+     *
+     * @param project the IntelliJ project whose module states should be cached
+     */
+    public void cacheState(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile != null) {
+                stateCache.put(buildFile.toNioPath().toString(), module.getAppState());
+            }
+        }
+    }
+
+    /**
+     * Restores the {@link LibertyModule.AppState} of each module in the given
+     * project from the in-memory state cache (populated by {@link #cacheState(Project)}).
+     * Only states that differ from the default {@link LibertyModule.AppState#STOPPED} are
+     * restored so that newly added modules start with the correct default.
+     *
+     * @param project the IntelliJ project whose module states should be restored
+     */
+    private void populateStatesFromCache(Project project) {
+        for (LibertyModule module : getLibertyModules(project)) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null) continue;
+            LibertyModule.AppState cached = stateCache.get(buildFile.toNioPath().toString());
+            if (cached != null && cached != LibertyModule.AppState.STOPPED) {
+                module.setAppState(cached);
+            }
+        }
     }
 
     /**
@@ -114,14 +406,16 @@ public class LibertyModules {
     public LibertyModule addLibertyModule(LibertyModule module) {
         synchronized (libertyModules) {
             if (libertyModules.containsKey(module.getBuildFile())) {
-                // Update existing Liberty project, projectType module, name and validContainerVersion
+                // Update existing Liberty project, projectType module, name and validContainerVersion.
                 // Do not update the build file (key), debugMode, shellWidget or customStartParams since
                 // they may modify saved run configs.
+                // Clear multi-module relationships so buildMultiModuleRelationships() re-wires them cleanly.
                 LibertyModule existing = libertyModules.get(module.getBuildFile());
                 existing.setProject(module.getProject());
                 existing.setProjectType(module.getProjectType());
                 existing.setName(module.getName());
                 existing.setValidContainerVersion(module.isValidContainerVersion());
+                existing.clearMultiModuleRelationships();
             } else {
                 libertyModules.put(module.getBuildFile(), module);
             }
@@ -230,6 +524,11 @@ public class LibertyModules {
                 LibertyModule libertyModule = (LibertyModule) it.next();
                 // do not remove from list if the corresponding terminal widget has running commands
                 if (project.equals(libertyModule.getProject()) && !(libertyModule.getShellWidget() != null && libertyModule.getShellWidget().hasRunningCommands())) {
+                    // Evict the state cache entry so it does not leak
+                    VirtualFile buildFile = libertyModule.getBuildFile();
+                    if (buildFile != null) {
+                        stateCache.remove(buildFile.toNioPath().toString());
+                    }
                     it.remove();
                 }
             }
