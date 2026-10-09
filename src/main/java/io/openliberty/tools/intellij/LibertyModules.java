@@ -136,6 +136,81 @@ public class LibertyModules {
             File pomDir = new File(buildFile.getParent().getPath());
             module.setBuildMetadata(new MavenProjectMetadata(pomDir, project));
         }
+        // After parsing known Liberty modules, register any aggregator POMs on disk
+        // that were not picked up by the initial scan (because they have no Liberty plugin).
+        // Without them, Strategy 2 path-based wiring has nothing to iterate over.
+        registerAggregatorModules(project);
+    }
+
+    /**
+     * Walks up the directory tree from each known Maven Liberty module looking for
+     * {@code pom.xml} files that declare child modules (aggregators) but were excluded
+     * from the initial scan because they do not directly configure the Liberty plugin.
+     *
+     * <p>When such a POM is found and is not already registered, it is added as a
+     * {@link LibertyModule} so that {@link #buildMultiModuleRelationships} can use it
+     * as the anchor for Strategy 2 (path-based) wiring.</p>
+     *
+     * @param project the IntelliJ project
+     */
+    private void registerAggregatorModules(Project project) {
+        // Snapshot to avoid concurrent modification while we may add new modules
+        List<LibertyModule> snapshot = getLibertyModules(project);
+        // Track canonical paths already registered to avoid duplicates
+        Set<String> registeredDirs = new java.util.HashSet<>();
+        for (LibertyModule module : snapshot) {
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null || buildFile.getParent() == null) continue;
+            try {
+                registeredDirs.add(new File(buildFile.getParent().getPath()).getCanonicalPath());
+            } catch (IOException e) {
+                registeredDirs.add(buildFile.getParent().getPath());
+            }
+        }
+
+        for (LibertyModule module : snapshot) {
+            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) continue;
+            VirtualFile buildFile = module.getBuildFile();
+            if (buildFile == null || buildFile.getParent() == null) continue;
+
+            // Walk up from the module's directory looking for aggregator POMs
+            File dir = new File(buildFile.getParent().getPath()).getParentFile();
+            while (dir != null) {
+                File candidatePom = new File(dir, "pom.xml");
+                if (!candidatePom.isFile()) break;
+
+                String canonicalDir;
+                try {
+                    canonicalDir = dir.getCanonicalPath();
+                } catch (IOException e) {
+                    canonicalDir = dir.getAbsolutePath();
+                }
+
+                if (registeredDirs.contains(canonicalDir)) break; // already registered
+
+                // Parse the candidate POM to check if it is an aggregator
+                MavenProjectMetadata meta = new MavenProjectMetadata(dir, module.getProject());
+                if (!meta.isAggregator()) break; // not an aggregator — stop walking up
+
+                // Register as a LibertyModule (aggregator, no Liberty plugin)
+                String pomPath = candidatePom.getAbsolutePath();
+                VirtualFile pomVFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance()
+                        .findFileByPath(pomPath);
+                if (pomVFile == null) break;
+
+                String aggregatorName = meta.getProjectName() != null
+                        ? meta.getProjectName() : dir.getName();
+                LibertyModule aggregator = new LibertyModule(
+                        project, pomVFile, aggregatorName,
+                        Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
+                aggregator.setBuildMetadata(meta);
+                addLibertyModule(aggregator);
+                registeredDirs.add(canonicalDir);
+                LOGGER.debug("Registered aggregator module: " + aggregatorName + " at " + canonicalDir);
+
+                dir = dir.getParentFile();
+            }
+        }
     }
 
     /**
