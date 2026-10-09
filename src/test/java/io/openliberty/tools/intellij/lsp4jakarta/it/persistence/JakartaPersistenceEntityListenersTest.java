@@ -156,6 +156,105 @@ public class JakartaPersistenceEntityListenersTest extends BaseJakartaTest {
     }
 
     /**
+     * A class nested directly inside an interface is implicitly static (JLS 9.5).
+     * It must NOT be flagged as a non-static inner class — no diagnostic expected.
+     */
+    @Test
+    public void entityListenersInterfaceNestedListener() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersInterfaceNestedListener.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Single-class form {@code @EntityListeners(L.class)} with a valid listener.
+     * No diagnostic expected.
+     */
+    @Test
+    public void entityListenersSingleValidListener() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersSingleValidListener.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Single-class form {@code @EntityListeners(L.class)} with a listener that has only a
+     * protected no-arg constructor. Must produce an {@code InvalidConstructorInEntityListener} diagnostic.
+     * <p>
+     * Annotation text {@code @EntityListeners(ProtectedConstructorListener.class)} is 52 characters
+     * long on line 8 (0-based).
+     */
+    @Test
+    public void entityListenersSingleInvalidListener() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersSingleInvalidListener.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic invalidConstructorDiagnostic = d(8, 0, 52,
+                "The entity listener class(es) ProtectedConstructorListener must declare a public no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidConstructorInEntityListener");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidConstructorDiagnostic);
+    }
+
+    /**
+     * A package-private class with no declared constructors gets a synthetic package-private
+     * default constructor (JLS 8.8.9) — not public. Must produce an
+     * {@code InvalidConstructorInEntityListener} diagnostic.
+     * <p>
+     * Annotation text {@code @EntityListeners(PackagePrivateImplicitConstructorListener.class)}
+     * is 65 characters long on line 8 (0-based).
+     */
+    @Test
+    public void entityListenersPackagePrivateImplicitConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersPackagePrivateImplicitConstructor.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic invalidConstructorDiagnostic = d(8, 0, 65,
+                "The entity listener class(es) PackagePrivateImplicitConstructorListener must declare a public no-argument constructor.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidConstructorInEntityListener");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidConstructorDiagnostic);
+    }
+
+    /**
      * One listener is abstract (non-instantiable) and one has a package-private no-arg
      * constructor (invalid). Two diagnostics — one for each violation — should be reported.
      * <p>
