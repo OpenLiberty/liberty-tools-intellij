@@ -211,6 +211,74 @@ public class LibertyModules {
                 dir = dir.getParentFile();
             }
         }
+
+        registerNonAncestorAggregators(project, registeredDirs);
+    }
+
+    /**
+     * Registers aggregator POMs that are not in an ancestor directory of the modules they
+     * aggregate, e.g. an aggregator in a sibling {@code pom/} folder that lists
+     * {@code <module>../ear</module>}. The directory walk in
+     * {@link #registerAggregatorModules} cannot find these.
+     *
+     * <p>Only POMs that declare {@code <modules>} are parsed, and an aggregator is registered
+     * only if one of its modules resolves to an already registered directory.</p>
+     *
+     * @param project        the IntelliJ project
+     * @param registeredDirs canonical directories of the modules registered so far; updated
+     *                       with each aggregator that is added
+     */
+    private void registerNonAncestorAggregators(Project project, Set<String> registeredDirs) {
+        for (VirtualFile pomVFile : LibertyProjectUtil.getAllPomFiles(project)) {
+            VirtualFile pomDirVFile = pomVFile.getParent();
+            if (pomDirVFile == null) continue;
+            File dir = new File(pomDirVFile.getPath());
+            String canonicalDir;
+            try {
+                canonicalDir = dir.getCanonicalPath();
+            } catch (IOException e) {
+                canonicalDir = dir.getAbsolutePath();
+            }
+            if (registeredDirs.contains(canonicalDir)) continue;
+
+            try {
+                if (!new String(java.nio.file.Files.readAllBytes(new File(pomVFile.getPath()).toPath()),
+                        java.nio.charset.StandardCharsets.UTF_8).contains("<modules>")) {
+                    continue;
+                }
+            } catch (IOException e) {
+                continue;
+            }
+
+            MavenProjectMetadata meta = new MavenProjectMetadata(dir, project);
+            if (!meta.isAggregator()) continue;
+
+            boolean aggregatesRegisteredModule = false;
+            for (String subprojectPath : meta.getSubprojects()) {
+                File childDir = new File(dir, subprojectPath);
+                String childCanonical;
+                try {
+                    childCanonical = childDir.getCanonicalPath();
+                } catch (IOException e) {
+                    childCanonical = childDir.getAbsolutePath();
+                }
+                if (registeredDirs.contains(childCanonical)) {
+                    aggregatesRegisteredModule = true;
+                    break;
+                }
+            }
+            if (!aggregatesRegisteredModule) continue;
+
+            String aggregatorName = meta.getProjectName() != null && !meta.getProjectName().isEmpty()
+                    ? meta.getProjectName() : dir.getName();
+            LibertyModule aggregator = new LibertyModule(
+                    project, pomVFile, aggregatorName,
+                    Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
+            aggregator.setBuildMetadata(meta);
+            addLibertyModule(aggregator);
+            registeredDirs.add(canonicalDir);
+            LOGGER.debug("Registered non-ancestor aggregator module: " + aggregatorName + " at " + canonicalDir);
+        }
     }
 
     /**

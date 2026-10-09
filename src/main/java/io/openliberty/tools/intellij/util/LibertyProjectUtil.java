@@ -274,6 +274,27 @@ public class LibertyProjectUtil {
         return collectedBuildFiles;
     }
 
+    /**
+     * Returns every {@code pom.xml} in the project, excluding those inside build-output directories.
+     * Unlike {@link #getMavenBuildFiles(Project)}, this is not limited to Liberty projects, so it can
+     * be used to find aggregator POMs that do not configure the Liberty plugin.
+     *
+     * @param project the IntelliJ project
+     * @return the matching POM files, or an empty list if the index could not be read
+     */
+    public static List<VirtualFile> getAllPomFiles(Project project) {
+        List<VirtualFile> poms = new ArrayList<>();
+        Collection<VirtualFile> indexedVFiles = readIndex(project, "pom.xml");
+        if (indexedVFiles != null) {
+            for (VirtualFile vFile : indexedVFiles) {
+                if (!isBuildOutputFile(vFile)) {
+                    poms.add(vFile);
+                }
+            }
+        }
+        return poms;
+    }
+
     // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue
     // and in a runReadAction() to handle the read action required problem.
     private static Collection<VirtualFile> readIndex(Project project, String name) {
