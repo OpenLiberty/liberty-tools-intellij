@@ -176,6 +176,94 @@ public class JakartaPersistenceEntityListenersTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    // -----------------------------------------------------------------------
+    // Implicitly-static member type cases — PSI synthetic STATIC modifier
+    // -----------------------------------------------------------------------
+
+    /**
+     * A class nested inside an interface member of another class is implicitly
+     * static per JLS 9.5. Must NOT be flagged — no diagnostic expected.
+     */
+    @Test
+    public void entityListenersNestedInInterface() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersNestedInInterface.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * A class nested inside an enum member of another class is implicitly
+     * static per JLS 8.9. Must NOT be flagged — no diagnostic expected.
+     */
+    @Test
+    public void entityListenersNestedInEnum() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersNestedInEnum.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * A class nested inside a record member of another class is implicitly
+     * static per JLS 8.10. Must NOT be flagged — no diagnostic expected.
+     */
+    @Test
+    public void entityListenersNestedInRecord() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersNestedInRecord.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * A class nested inside an annotation type member of another class is
+     * implicitly static per JLS 9.6. Must NOT be flagged — no diagnostic expected.
+     */
+    @Test
+    public void entityListenersNestedInAnnotation() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitylisteners/EntityListenersNestedInAnnotation.java");
+        assertNotNull("Test resource file not found", javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
     /**
      * Single-class form {@code @EntityListeners(L.class)} with a valid listener.
      * No diagnostic expected.
