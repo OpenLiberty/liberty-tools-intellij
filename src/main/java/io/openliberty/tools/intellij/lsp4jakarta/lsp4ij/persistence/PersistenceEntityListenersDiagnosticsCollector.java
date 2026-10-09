@@ -184,11 +184,11 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
     }
 
     /**
-     * Returns {@code true} if the entity listener class declares constructors but none
-     * of them is a public no-argument constructor.
+     * Returns {@code true} if the entity listener class is missing a public no-argument constructor.
      *
-     * <p>If the class declares no constructors at all the compiler provides a default
-     * public no-argument constructor, so this method returns {@code false} in that case.
+     * <p>When no constructors are declared the compiler synthesises a default no-arg constructor
+     * whose access matches the class visibility (JLS 8.8.9). The listener is therefore only valid
+     * when the class itself is public.
      *
      * @param listenerClass the class to check
      * @return {@code true} if the class is missing a public no-arg constructor
@@ -196,8 +196,9 @@ public class PersistenceEntityListenersDiagnosticsCollector extends AbstractDiag
     private boolean isMissingPublicNoArgsConstructor(PsiClass listenerClass) {
         PsiMethod[] constructors = listenerClass.getConstructors();
         if (constructors.length == 0) {
-            // Implicit default public constructor provided by the compiler.
-            return false;
+            // No declared constructors: compiler synthesises a default constructor with the same
+            // access as the class (JLS 8.8.9). Only valid when the class is public.
+            return !listenerClass.hasModifierProperty(PsiModifier.PUBLIC);
         }
         for (PsiMethod constructor : constructors) {
             if (constructor.getParameterList().getParametersCount() == 0
