@@ -16,8 +16,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 
-import java.util.Arrays;
-
 /**
  * Stateless PSI model-query helpers used by {@link DerivedIdentityDiagnosticsCollector}
  * to resolve composite-key metadata and parent-entity primary key types.
@@ -54,20 +52,24 @@ final class CompositeKeyResolver {
      * composite key is declared and to resolve the {@code @EmbeddedId} class.
      */
     static KeyStrategy resolveKeyStrategy(PsiClass entityType) {
+        PsiClass embeddedIdType = null;
+
         // Check @EmbeddedId on fields
-        PsiClass embeddedIdType = Arrays.stream(entityType.getFields())
-                .filter(field -> AnnotationUtils.hasAnnotation(field, PersistenceConstants.EMBEDDEDID))
-                .findFirst()
-                .map(field -> PsiUtil.resolveClassInClassTypeOnly(field.getType()))
-                .orElse(null);
+        for (PsiField field : entityType.getFields()) {
+            if (AnnotationUtils.hasAnnotation(field, PersistenceConstants.EMBEDDEDID)) {
+                embeddedIdType = PsiUtil.resolveClassInClassTypeOnly(field.getType());
+                break;
+            }
+        }
 
         // Check @EmbeddedId on property getters (if not found on fields)
         if (embeddedIdType == null) {
-            embeddedIdType = Arrays.stream(entityType.getMethods())
-                    .filter(method -> AnnotationUtils.hasAnnotation(method, PersistenceConstants.EMBEDDEDID))
-                    .findFirst()
-                    .map(method -> PsiUtil.resolveClassInClassTypeOnly(method.getReturnType()))
-                    .orElse(null);
+            for (PsiMethod method : entityType.getMethods()) {
+                if (AnnotationUtils.hasAnnotation(method, PersistenceConstants.EMBEDDEDID)) {
+                    embeddedIdType = PsiUtil.resolveClassInClassTypeOnly(method.getReturnType());
+                    break;
+                }
+            }
         }
 
         // Check for @IdClass at the type level
@@ -121,16 +123,18 @@ final class CompositeKeyResolver {
             }
         }
         // Check @Id and @EmbeddedId on fields, then on methods
-        return Arrays.stream(entityType.getFields())
-                .filter(field -> AnnotationUtils.hasAnyAnnotation(field, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID))
-                .findFirst()
-                .map(field -> field.getType().getCanonicalText())
-                .or(() -> Arrays.stream(entityType.getMethods())
-                        .filter(method -> AnnotationUtils.hasAnyAnnotation(method, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID))
-                        .findFirst()
-                        .map(PsiMethod::getReturnType)
-                        .map(PsiType::getCanonicalText))
-                .orElse(null);
+        for (PsiField field : entityType.getFields()) {
+            if (AnnotationUtils.hasAnyAnnotation(field, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID)) {
+                return field.getType().getCanonicalText();
+            }
+        }
+        for (PsiMethod method : entityType.getMethods()) {
+            if (AnnotationUtils.hasAnyAnnotation(method, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID)) {
+                PsiType returnType = method.getReturnType();
+                return returnType != null ? returnType.getCanonicalText() : null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -146,13 +150,13 @@ final class CompositeKeyResolver {
         }
         // Fall back to property getter: getXxx()
         String getterName = "get" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
-        return Arrays.stream(embeddableType.getMethods())
-                .filter(method -> getterName.equals(method.getName())
-                        && method.getParameterList().getParametersCount() == 0)
-                .findFirst()
-                .map(PsiMethod::getReturnType)
-                .map(PsiType::getCanonicalText)
-                .orElse(null);
+        for (PsiMethod method : embeddableType.getMethods()) {
+            if (getterName.equals(method.getName()) && method.getParameterList().getParametersCount() == 0) {
+                PsiType returnType = method.getReturnType();
+                return returnType != null ? returnType.getCanonicalText() : null;
+            }
+        }
+        return null;
     }
 
     /**
