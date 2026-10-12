@@ -76,19 +76,14 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
             // build tree (Read operations need to be wrapped in a read action)
             Tree tree = ApplicationManager.getApplication().runReadAction((Computable<Tree>) () -> buildTree(project, backgroundColor));
 
-            if (tree != null) {
-                ApplicationManager.getApplication().invokeLater(() -> {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                if (tree != null) {
                     JBScrollPane scrollPane = new JBScrollPane(tree);
                     scrollPane.setName(Constants.LIBERTY_SCROLL_PANE);
                     this.setContent(scrollPane);
-                }, modalityState);
-            } else {
-                ApplicationManager.getApplication().invokeLater(() -> {
+                } else {
                     this.setContent(buildEmptyStatePanel(project, getBackground()));
-                }, modalityState);
-            }
-
-            ApplicationManager.getApplication().invokeLater(() -> {
+                }
                 ActionToolbar actionToolbar = buildActionToolbar(tree);
                 this.setToolbar(actionToolbar.getComponent());
                 this.revalidate();
