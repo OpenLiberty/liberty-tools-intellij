@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,7 +88,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
 
     /* primitive → wrapper FQ name mapping for derived-identity type checks (spec §2.4) */
-    public static final java.util.Map<String, String> PRIMITIVE_TO_WRAPPER = java.util.Map.of(
+    public static final Map<String, String> PRIMITIVE_TO_WRAPPER = Map.of(
             "int",     "java.lang.Integer",
             "long",    "java.lang.Long",
             "short",   "java.lang.Short",

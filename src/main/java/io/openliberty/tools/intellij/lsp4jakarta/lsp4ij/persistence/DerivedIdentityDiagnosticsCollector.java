@@ -17,6 +17,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsColle
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.KeyStrategy;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.ParentPk;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -91,13 +92,13 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
             if (field.hasModifierProperty(PsiModifier.STATIC)) {
                 continue;
             }
-            PsiAnnotation mapsIdAnn = CompositeKeyResolver.findAnnotation(field.getAnnotations(), PersistenceConstants.MAPSID);
+            PsiAnnotation mapsIdAnn = AnnotationUtils.getAnnotation(field, PersistenceConstants.MAPSID);
             if (mapsIdAnn != null) {
                 validateMapsIdMember(field, field.getAnnotations(), mapsIdAnn, keyStrategy, unit, diagnostics);
             }
         }
         for (PsiMethod method : type.getMethods()) {
-            PsiAnnotation mapsIdAnn = CompositeKeyResolver.findAnnotation(method.getAnnotations(), PersistenceConstants.MAPSID);
+            PsiAnnotation mapsIdAnn = AnnotationUtils.getAnnotation(method, PersistenceConstants.MAPSID);
             if (mapsIdAnn != null) {
                 validateMapsIdMember(method, method.getAnnotations(), mapsIdAnn, keyStrategy, unit, diagnostics);
             }
@@ -111,7 +112,7 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
     private void validateMapsIdMember(PsiJvmModifiersOwner member, PsiAnnotation[] memberAnnotations,
                                       PsiAnnotation mapsIdAnn, KeyStrategy keyStrategy,
                                       PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String mapsIdValue = CompositeKeyResolver.getMapsIdValue(mapsIdAnn);
+        String mapsIdValue = AnnotationUtils.getAnnotationMemberValue(mapsIdAnn, "value");
         boolean hasValue = mapsIdValue != null && !mapsIdValue.isEmpty();
 
         boolean fatal = validateMapsIdStructure(member, memberAnnotations, keyStrategy, hasValue, unit, diagnostics);
@@ -120,7 +121,11 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
         }
         if (hasValue) {
             validateMapsIdAttributeBinding(member, memberAnnotations, keyStrategy, mapsIdValue, unit, diagnostics);
-        } else if (!keyStrategy.hasIdClass
+        }
+        // Value-less @MapsId: skipped for @IdClass entities, since @IdClass member
+        // alignment is validated by a separate collector, and when the relationship
+        // itself is the @Id (its type is the parent entity, not a key type).
+        else if (!keyStrategy.hasIdClass
                 && !isMatchedAnnotation(memberAnnotations, PersistenceConstants.ID)) {
             validateValuelessMapsId(member, unit, diagnostics);
         }

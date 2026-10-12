@@ -13,6 +13,10 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiUtil;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
+
+import java.util.Arrays;
 
 /**
  * Stateless PSI model-query helpers used by {@link DerivedIdentityDiagnosticsCollector}
@@ -50,28 +54,24 @@ final class CompositeKeyResolver {
      * composite key is declared and to resolve the {@code @EmbeddedId} class.
      */
     static KeyStrategy resolveKeyStrategy(PsiClass entityType) {
-        PsiClass embeddedIdType = null;
-
         // Check @EmbeddedId on fields
-        for (PsiField field : entityType.getFields()) {
-            if (hasAnnotation(field.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
-                embeddedIdType = resolveFieldClass(field);
-                break;
-            }
-        }
+        PsiClass embeddedIdType = Arrays.stream(entityType.getFields())
+                .filter(field -> AnnotationUtils.hasAnnotation(field, PersistenceConstants.EMBEDDEDID))
+                .findFirst()
+                .map(field -> PsiUtil.resolveClassInClassTypeOnly(field.getType()))
+                .orElse(null);
 
         // Check @EmbeddedId on property getters (if not found on fields)
         if (embeddedIdType == null) {
-            for (PsiMethod method : entityType.getMethods()) {
-                if (hasAnnotation(method.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
-                    embeddedIdType = resolveMethodReturnClass(method);
-                    break;
-                }
-            }
+            embeddedIdType = Arrays.stream(entityType.getMethods())
+                    .filter(method -> AnnotationUtils.hasAnnotation(method, PersistenceConstants.EMBEDDEDID))
+                    .findFirst()
+                    .map(method -> PsiUtil.resolveClassInClassTypeOnly(method.getReturnType()))
+                    .orElse(null);
         }
 
         // Check for @IdClass at the type level
-        boolean hasIdClass = hasAnnotation(entityType.getAnnotations(), PersistenceConstants.IDCLASS);
+        boolean hasIdClass = AnnotationUtils.hasAnnotation(entityType, PersistenceConstants.IDCLASS);
 
         return new KeyStrategy(embeddedIdType, hasIdClass);
     }
@@ -93,12 +93,7 @@ final class CompositeKeyResolver {
      * cannot be resolved (library type, unresolvable FQN, or no primary key).
      */
     static ParentPk resolveParentPk(PsiJvmModifiersOwner member) {
-        PsiClass parentEntity = null;
-        if (member instanceof PsiField field) {
-            parentEntity = resolveFieldClass(field);
-        } else if (member instanceof PsiMethod method) {
-            parentEntity = resolveMethodReturnClass(method);
-        }
+        PsiClass parentEntity = PsiUtil.resolveClassInClassTypeOnly(PsiUtil.getTypeByPsiElement(member));
         if (parentEntity == null) {
             return null;
         }
@@ -117,45 +112,25 @@ final class CompositeKeyResolver {
      */
     static String resolvePkType(PsiClass entityType) {
         // Check @IdClass on the type
-        PsiAnnotation idClassAnn = findAnnotation(entityType.getAnnotations(), PersistenceConstants.IDCLASS);
+        PsiAnnotation idClassAnn = AnnotationUtils.getAnnotation(entityType, PersistenceConstants.IDCLASS);
         if (idClassAnn != null) {
-            PsiAnnotationMemberValue value = idClassAnn.findAttributeValue("value");
+            PsiAnnotationMemberValue value = AnnotationUtils.getAnnotationMemberValueExpression(idClassAnn, "value");
             if (value instanceof PsiClassObjectAccessExpression classObj) {
                 PsiType type = classObj.getOperand().getType();
                 return type.getCanonicalText();
             }
         }
-        // Check @Id and @EmbeddedId on fields
-        for (PsiField field : entityType.getFields()) {
-            if (isIdOrEmbeddedId(field.getAnnotations())) {
-                return field.getType().getCanonicalText();
-            }
-        }
-        // Check @Id and @EmbeddedId on methods
-        for (PsiMethod method : entityType.getMethods()) {
-            if (isIdOrEmbeddedId(method.getAnnotations())) {
-                PsiType rt = method.getReturnType();
-                return rt != null ? rt.getCanonicalText() : null;
-            }
-        }
-        return null;
-    }
-
-    private static boolean isIdOrEmbeddedId(PsiAnnotation[] annotations) {
-        return hasAnnotation(annotations, PersistenceConstants.ID)
-                || hasAnnotation(annotations, PersistenceConstants.EMBEDDEDID);
-    }
-
-    /**
-     * Returns {@code true} if any annotation in {@code annotations} has the given fully-qualified name.
-     */
-    static boolean hasAnnotation(PsiAnnotation[] annotations, String fqName) {
-        for (PsiAnnotation ann : annotations) {
-            if (fqName.equals(ann.getQualifiedName())) {
-                return true;
-            }
-        }
-        return false;
+        // Check @Id and @EmbeddedId on fields, then on methods
+        return Arrays.stream(entityType.getFields())
+                .filter(field -> AnnotationUtils.hasAnyAnnotation(field, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID))
+                .findFirst()
+                .map(field -> field.getType().getCanonicalText())
+                .or(() -> Arrays.stream(entityType.getMethods())
+                        .filter(method -> AnnotationUtils.hasAnyAnnotation(method, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID))
+                        .findFirst()
+                        .map(PsiMethod::getReturnType)
+                        .map(PsiType::getCanonicalText))
+                .orElse(null);
     }
 
     /**
@@ -171,30 +146,13 @@ final class CompositeKeyResolver {
         }
         // Fall back to property getter: getXxx()
         String getterName = "get" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
-        for (PsiMethod method : embeddableType.getMethods()) {
-            if (getterName.equals(method.getName()) && method.getParameterList().getParametersCount() == 0) {
-                PsiType rt = method.getReturnType();
-                return rt != null ? rt.getCanonicalText() : null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the annotation value string from a {@code @MapsId} annotation.
-     * Returns {@code null} or empty string if not specified.
-     */
-    static String getMapsIdValue(PsiAnnotation mapsIdAnn) {
-        PsiAnnotationMemberValue val = mapsIdAnn.findAttributeValue("value");
-        if (val == null) {
-            return null;
-        }
-        String text = val.getText();
-        // Strip surrounding quotes from string literals
-        if (text.startsWith("\"") && text.endsWith("\"") && text.length() > 1) {
-            return text.substring(1, text.length() - 1);
-        }
-        return text.isEmpty() ? null : text;
+        return Arrays.stream(embeddableType.getMethods())
+                .filter(method -> getterName.equals(method.getName())
+                        && method.getParameterList().getParametersCount() == 0)
+                .findFirst()
+                .map(PsiMethod::getReturnType)
+                .map(PsiType::getCanonicalText)
+                .orElse(null);
     }
 
     /**
@@ -209,35 +167,5 @@ final class CompositeKeyResolver {
         return typeA.equals(typeB)
                 || typeB.equals(PersistenceConstants.PRIMITIVE_TO_WRAPPER.get(typeA))
                 || typeA.equals(PersistenceConstants.PRIMITIVE_TO_WRAPPER.get(typeB));
-    }
-
-    // ---- private PSI resolution helpers ----------------------------------------
-
-    /** Resolves the class that a field's type refers to, or {@code null}. */
-    private static PsiClass resolveFieldClass(PsiField field) {
-        PsiType type = field.getType();
-        if (type instanceof PsiClassType classType) {
-            return classType.resolve();
-        }
-        return null;
-    }
-
-    /** Resolves the class that a method's return type refers to, or {@code null}. */
-    private static PsiClass resolveMethodReturnClass(PsiMethod method) {
-        PsiType rt = method.getReturnType();
-        if (rt instanceof PsiClassType classType) {
-            return classType.resolve();
-        }
-        return null;
-    }
-
-    /** Finds the first annotation matching {@code fqName} in the array, or {@code null}. */
-    static PsiAnnotation findAnnotation(PsiAnnotation[] annotations, String fqName) {
-        for (PsiAnnotation ann : annotations) {
-            if (fqName.equals(ann.getQualifiedName())) {
-                return ann;
-            }
-        }
-        return null;
     }
 }

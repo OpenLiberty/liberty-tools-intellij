@@ -92,6 +92,22 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
+    /** {@code @MapsId("empId")} on an entity with an {@code @IdClass} composite key is valid. */
+    @Test
+    public void testMapsIdWithValueAndIdClassIsValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidMapsIdWithIdClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
     /** Spec §2.4.1.1 Example 4b: value-less {@code @MapsId} with a simple {@code @Id} is valid. */
     @Test
     public void testValuelessMapsIdWithSimpleKeyIsValid() throws Exception {
