@@ -2658,7 +2658,7 @@ public class UIBotTestUtils {
         ComponentFixture libertyTWBar = projectFrame.getBaseLabel("Liberty", "10");
         libertyTWBar.click();
 
-        String xPath = "//div[@class='LibertyExplorer']//div[@accessiblename.key='action.io.openliberty.tools.intellij.actions.RefreshLibertyToolbar.text']";
+        String xPath = "(//div[@class='LibertyExplorer']//div[@accessiblename.key='action.io.openliberty.tools.intellij.actions.RefreshLibertyToolbar.text'])[1]";
         ComponentFixture actionButton = projectFrame.getActionButton(xPath, "10");
         actionButton.click();
     }
