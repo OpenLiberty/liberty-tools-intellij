@@ -16,7 +16,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.XMLConstants;
@@ -87,7 +86,7 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
 
     private void parsePom(File pomDir, Project project) throws Exception {
         File pomFile = new File(pomDir, POM_FILE_NAME);
-        String rawContent = new String(Files.readAllBytes(pomFile.toPath()), StandardCharsets.UTF_8);
+        String rawContent = Files.readString(pomFile.toPath());
 
         DocumentBuilder db = newDocumentBuilder();
         Document doc;
@@ -108,13 +107,13 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
             doc = db.parse(new InputSource(new StringReader(rawContent)));
         }
 
-        extractFromDoc(doc, pomDir);
+        extractFromDoc(doc);
     }
 
     /**
      * Extracts all metadata fields from the given (raw or effective) POM document.
      */
-    private void extractFromDoc(Document doc, File pomDir) {
+    private void extractFromDoc(Document doc) {
         Element root = doc.getDocumentElement();
 
         // -- Project name (artifactId direct child of <project>) --
@@ -268,9 +267,9 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         DocumentBuilder db = dbf.newDocumentBuilder();
         db.setErrorHandler(new ErrorHandler() {
-            @Override public void warning(SAXParseException e) throws SAXException {}
-            @Override public void error(SAXParseException e) throws SAXException {}
-            @Override public void fatalError(SAXParseException e) throws SAXException {}
+            @Override public void warning(SAXParseException e) {}
+            @Override public void error(SAXParseException e) {}
+            @Override public void fatalError(SAXParseException e) {}
         });
         return db;
     }
