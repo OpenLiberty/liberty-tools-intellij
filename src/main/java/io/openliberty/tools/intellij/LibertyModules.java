@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -242,8 +243,7 @@ public class LibertyModules {
             if (registeredDirs.contains(canonicalDir)) continue;
 
             try {
-                if (!new String(java.nio.file.Files.readAllBytes(new File(pomVFile.getPath()).toPath()),
-                        java.nio.charset.StandardCharsets.UTF_8).contains("<modules>")) {
+                if (!Files.readString(new File(pomVFile.getPath()).toPath()).contains("<modules>")) {
                     continue;
                 }
             } catch (IOException e) {
