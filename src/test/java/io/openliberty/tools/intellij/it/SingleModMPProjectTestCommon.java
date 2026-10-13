@@ -37,7 +37,7 @@ import static io.openliberty.tools.intellij.util.Constants.LIBERTY_MAVEN_START_C
 /**
  * Holds common tests that use a single module MicroProfile project.
  */
-public abstract class SingleModMPProjectTestCommon {
+public abstract class SingleModMPProjectTestCommon extends BaseOSUtilities {
 
     /**
      * URL to display the UI Component hierarchy. This is used to obtain xPath related
