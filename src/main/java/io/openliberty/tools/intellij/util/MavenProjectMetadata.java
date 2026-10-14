@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import org.xml.sax.InputSource;
 
 /**
@@ -86,28 +85,46 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
 
     private void parsePom(File pomDir, Project project) throws Exception {
         File pomFile = new File(pomDir, POM_FILE_NAME);
-        String rawContent = Files.readString(pomFile.toPath());
 
         DocumentBuilder db = newDocumentBuilder();
-        Document doc;
+        // Parse the file bytes directly so the XML parser determines the encoding.
+        Document doc = db.parse(pomFile);
 
-        if (rawContent.contains("${")) {
+        // getTextContent() covers element text and CDATA but not comments, so a "${"
+        // inside a comment does not trigger the effective POM.
+        if (doc.getDocumentElement().getTextContent().contains("${")) {
             // The POM contains variable references somewhere — variables can affect any
             // field we read (artifactId, plugin coordinates, skip flag, module names).
             // Use the effective POM so that all values are fully resolved.
             LOGGER.debug("POM contains variables, using effective POM for: " + pomFile);
-            doc = resolveEffectivePom(pomDir, project, db);
-            if (doc == null) {
-                // Effective POM failed — fall back to raw XML as best-effort
+            Document effectiveDoc = resolveEffectivePom(pomDir, project, db);
+            if (effectiveDoc != null) {
+                doc = effectiveDoc;
+            } else {
+                // Effective POM failed — keep the raw document as best-effort
                 LOGGER.warn("Falling back to raw XML for: " + pomFile);
-                doc = db.parse(new InputSource(new StringReader(rawContent)));
             }
-        } else {
-            // No variables in the raw POM — safe to use directly (fast path)
-            doc = db.parse(new InputSource(new StringReader(rawContent)));
         }
 
         extractFromDoc(doc);
+    }
+
+    /**
+     * Returns {@code true} if the given {@code pom.xml} contains a {@code <modules>} element.
+     * The file is read with an XML parser, so comments, CDATA and whitespace inside tags are
+     * handled correctly. Returns {@code false} if the file cannot be read or parsed.
+     *
+     * @param pomFile the {@code pom.xml} file to inspect
+     * @return whether the POM declares a {@code <modules>} element
+     */
+    public static boolean hasModulesElement(File pomFile) {
+        try {
+            Document doc = newDocumentBuilder().parse(pomFile);
+            return doc.getElementsByTagName(MODULES_TAG).getLength() > 0;
+        } catch (Exception e) {
+            LOGGER.debug("Could not parse POM for modules check: " + pomFile, e);
+            return false;
+        }
     }
 
     /**

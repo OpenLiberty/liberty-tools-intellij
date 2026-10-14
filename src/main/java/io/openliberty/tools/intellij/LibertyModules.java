@@ -12,6 +12,7 @@ package io.openliberty.tools.intellij;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.util.*;
@@ -20,7 +21,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -195,7 +195,7 @@ public class LibertyModules {
 
                 // Register as a LibertyModule (aggregator, no Liberty plugin)
                 String pomPath = candidatePom.getAbsolutePath();
-                VirtualFile pomVFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance()
+                VirtualFile pomVFile = LocalFileSystem.getInstance()
                         .findFileByPath(pomPath);
                 if (pomVFile == null) break;
 
@@ -242,11 +242,7 @@ public class LibertyModules {
             }
             if (registeredDirs.contains(canonicalDir)) continue;
 
-            try {
-                if (!Files.readString(new File(pomVFile.getPath()).toPath()).contains("<modules>")) {
-                    continue;
-                }
-            } catch (IOException e) {
+            if (!MavenProjectMetadata.hasModulesElement(new File(pomVFile.getPath()))) {
                 continue;
             }
 
