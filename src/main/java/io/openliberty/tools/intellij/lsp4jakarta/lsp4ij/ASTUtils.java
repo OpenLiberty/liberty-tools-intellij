@@ -53,14 +53,15 @@ public class ASTUtils {
 
     /**
      * Checks whether the given method contains a call to the specified method on the specified parent type,
-     * and that call is enclosed within a try statement (i.e., inside a try/catch or try/finally block).
+     * and that call is NOT enclosed within a try statement (i.e., not inside a try/catch or try/finally block).
      *
      * @param psiMethod the method to inspect
      * @param targetMethod the method name to look for (e.g. "proceed")
      * @param parentFQN the fully qualified name of the declaring class (e.g. "jakarta.interceptor.InvocationContext")
-     * @return true if the matching method invocation exists AND is inside a try statement; false otherwise
+     * @return true if the matching method invocation exists AND is not inside a try statement;
+     *         false if there is no matching invocation or it is inside a try statement
      */
-    public static boolean isMethodWrappedInTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
+    public static boolean isMethodInvocationOutsideTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
         PsiMethodCallExpression match = findMethodInvocation(psiMethod, targetMethod, parentFQN);
         if (match == null) {
             return false;
@@ -68,11 +69,11 @@ public class ASTUtils {
         PsiElement parent = match.getParent();
         while (parent != null && parent != psiMethod) {
             if (parent instanceof PsiTryStatement) {
-                return true;
+                return false;
             }
             parent = parent.getParent();
         }
-        return false;
+        return true;
     }
 
     /**
