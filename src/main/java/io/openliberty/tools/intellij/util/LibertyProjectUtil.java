@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -44,6 +44,13 @@ import java.util.concurrent.ExecutionException;
 
 public class LibertyProjectUtil {
     private static Logger LOGGER = Logger.getInstance(LibertyProjectUtil.class);
+
+    /**
+     * Directory names that are build-output folders and should never be scanned
+     * for Liberty build files.  A build file found anywhere under a directory
+     * with one of these names is considered a generated copy, not a source file.
+     */
+    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "bin", "classes", "build");
 
     enum BuildFileFilter {
         ADDABLE {
@@ -242,6 +249,10 @@ public class LibertyProjectUtil {
         }
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
+                // Skip build files that live inside build-output directories (e.g. target/, build/)
+                if (isBuildOutputFile(vFile)) {
+                    continue;
+                }
                 try {
                     BuildFile buildFile;
                     if (buildFileType.equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
@@ -263,6 +274,27 @@ public class LibertyProjectUtil {
         return collectedBuildFiles;
     }
 
+    /**
+     * Returns every {@code pom.xml} in the project, excluding those inside build-output directories.
+     * Unlike {@link #getMavenBuildFiles(Project)}, this is not limited to Liberty projects, so it can
+     * be used to find aggregator POMs that do not configure the Liberty plugin.
+     *
+     * @param project the IntelliJ project
+     * @return the matching POM files, or an empty list if the index could not be read
+     */
+    public static List<VirtualFile> getAllPomFiles(Project project) {
+        List<VirtualFile> poms = new ArrayList<>();
+        Collection<VirtualFile> indexedVFiles = readIndex(project, "pom.xml");
+        if (indexedVFiles != null) {
+            for (VirtualFile vFile : indexedVFiles) {
+                if (!isBuildOutputFile(vFile)) {
+                    poms.add(vFile);
+                }
+            }
+        }
+        return poms;
+    }
+
     // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue
     // and in a runReadAction() to handle the read action required problem.
     private static Collection<VirtualFile> readIndex(Project project, String name) {
@@ -274,6 +306,29 @@ public class LibertyProjectUtil {
         } catch (ExecutionException | InterruptedException e) {
             return null;
         }
+    }
+
+    /**
+     * Returns {@code true} when the given build file resides inside a well-known
+     * build-output or generated-sources directory ({@code target/}, {@code bin/},
+     * {@code classes/}, {@code build/}).
+     *
+     * <p>Such files are generated copies of the original and must not be treated as
+     * independent Liberty projects.</p>
+     *
+     * @param buildFile the virtual file to test
+     * @return {@code true} if any ancestor directory of {@code buildFile} has a name
+     *         listed in {@link #EXCLUDED_DIR_NAMES}
+     */
+    static boolean isBuildOutputFile(VirtualFile buildFile) {
+        VirtualFile parent = buildFile.getParent();
+        while (parent != null) {
+            if (EXCLUDED_DIR_NAMES.contains(parent.getName())) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+        return false;
     }
 
     /**
