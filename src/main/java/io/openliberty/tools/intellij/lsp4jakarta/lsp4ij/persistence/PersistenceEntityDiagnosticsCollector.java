@@ -596,7 +596,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     DiagnosticSeverity.Error));
         }
 
-        boolean hasPublicNoArgConstructor = false;
+        // A class with no explicit constructors has an implicit default constructor,
+        // which satisfies the requirement.
+        boolean hasPublicNoArgConstructor = idClass.getConstructors().length == 0;
         for (PsiMethod method : idClass.getMethods()) {
             if (method.isConstructor()
                     && method.getParameterList().getParametersCount() == 0

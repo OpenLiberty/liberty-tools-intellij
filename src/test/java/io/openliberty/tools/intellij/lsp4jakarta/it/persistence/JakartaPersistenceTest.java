@@ -1260,4 +1260,41 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         // ValidIdClass is properly structured — no diagnostics expected
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+
+    @Test
+    public void testValidIdClassWithImplicitConstructor() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/ValidIdClassImplicitConstructor.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Key class has no explicit constructor (implicit public default) — no diagnostics expected
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testPartiallyInvalidIdClassStructure() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/PartialInvalidIdClassStructure.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @IdClass(PartialInvalidIdClass.class) at line 8 (0-based), col 0-37.
+        // Serializable is inherited from a superclass (valid); only equals(Object) is missing.
+        Diagnostic idClassNoEqualsError = d(8, 0, 37,
+                "A class referenced by @IdClass must declare an equals method.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMustDeclareEquals");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, idClassNoEqualsError);
+    }
 }
