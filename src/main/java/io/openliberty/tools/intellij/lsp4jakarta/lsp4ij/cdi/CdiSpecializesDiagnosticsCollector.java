@@ -121,7 +121,7 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
         }
 
         // Rule 2: must directly override a @Produces method in the superclass
-        if (!DiagnosticsUtils.directSuperclassHasMatchingAnnotatedMethod(type, method, PRODUCES_FQ_NAME)) {
+        if (!DiagnosticsUtils.isDirectlyOverridingAnnotatedMethodInSuperclass(type, method, PRODUCES_FQ_NAME)) {
             diagnostics.add(createDiagnostic(method, unit,
                     Messages.getMessage("InvalidSpecializesProducerMethodNotOverriding"),
                     DIAGNOSTIC_CODE_SPECIALIZES_PRODUCER_NOT_OVERRIDING, null,
