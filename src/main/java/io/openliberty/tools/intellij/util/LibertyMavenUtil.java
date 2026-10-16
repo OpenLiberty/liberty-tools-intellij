@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.openliberty.tools.intellij.LibertyModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenExternalParameters;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
@@ -199,6 +200,108 @@ public class LibertyMavenUtil {
         } catch (NullPointerException | ClassCastException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns the path to the Maven executable for the given project, or {@code null}
+     * if it cannot be determined. Unlike {@link #getMavenSettingsCmd(Project, VirtualFile)}
+     * this method does not throw and is suitable for use in background metadata parsing.
+     *
+     * @param project the IntelliJ project
+     * @return Maven executable path string, or {@code null}
+     */
+    public static String getMavenExecutable(Project project) {
+        // Try the project's own build file — any pom.xml will do for resolving the executable
+        try {
+            MavenGeneralSettings mavenSettings = MavenWorkspaceSettingsComponent.getInstance(project).getSettings().getGeneralSettings();
+            @NotNull MavenHomeType mavenHomeType = mavenSettings.getMavenHomeType();
+            if (wrappedMaven.equals(mavenHomeType.getTitle())) {
+                // Use the project base path to look for a wrapper
+                String basePath = project.getBasePath();
+                if (basePath != null) {
+                    String mvnw = SystemInfo.isWindows ? "mvnw.cmd" : "mvnw";
+                    File wrapper = new File(basePath, mvnw);
+                    if (wrapper.exists() && wrapper.canExecute()) {
+                        return wrapper.getAbsolutePath();
+                    }
+                }
+                return null;
+            }
+            StaticResolvedMavenHomeType resolvedMavenHomeType = staticOrBundled(mavenHomeType);
+            File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
+            if (mavenHomeFile == null) return null;
+            String maven = SystemInfo.isWindows ? "mvn.cmd" : "mvn";
+            File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), maven);
+            if (mavenExecutable.exists() && mavenExecutable.canExecute()) {
+                return mavenExecutable.getAbsolutePath();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Could not resolve Maven executable for project: " + project.getName(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the Maven {@code -pl :artifactId -am} arguments needed to target a specific
+     * submodule in a multi-module build.
+     *
+     * <p>When the given {@code libertyModule} is a submodule (i.e. its build metadata declares
+     * a parent project name) this method returns {@code " -pl :artifactId -am"} so the caller
+     * can append it directly to the Maven command.  For standalone or root modules an empty
+     * string is returned and the command is left unchanged.</p>
+     *
+     * @param libertyModule the Liberty module for which the command is being built
+     * @return the module-selector arguments, or {@code ""} when not needed
+     */
+    public static String getMavenModuleArgs(LibertyModule libertyModule) {
+        if (libertyModule == null) return "";
+        // Use the wired parentModule relationship (set by both Strategy 1 and Strategy 2).
+        // Do NOT rely on meta.getParentProjectName() — that field is only populated when
+        // the child explicitly declares <parent> in its pom.xml (Strategy 1 case).
+        // Strategy 2 (path-based) wires the relationship without touching that field.
+        if (libertyModule.getParentModule() == null) return "";
+        AbstractProjectMetadata meta = libertyModule.getBuildMetadata();
+        if (meta == null) return "";
+        String artifactId = meta.getProjectName();
+        if (artifactId == null || artifactId.isEmpty()) return "";
+        return " -pl :" + artifactId + " -am";
+    }
+
+    /**
+     * Returns the directory from which the Maven command should be executed for the given module.
+     *
+     * <p>For a submodule that has a parent Liberty module registered in the same workspace, the
+     * command must be run from the <em>aggregator's</em> directory so that Maven can resolve the
+     * full project graph.  For standalone or root modules the command is run from the module's
+     * own directory (i.e. the parent of its {@code pom.xml}).</p>
+     *
+     * <p>If neither the parent nor the module itself has a build file, falls back to the
+     * IntelliJ project base path. Returns {@code null} if no directory can be determined,
+     * in which case the caller should skip command execution and log an error.</p>
+     *
+     * @param libertyModule the Liberty module for which the execution directory is needed
+     * @return absolute path of the directory to {@code cd} into before running Maven,
+     *         or {@code null} if it cannot be determined
+     */
+    public static String getMavenExecutionDir(LibertyModule libertyModule) {
+        if (libertyModule != null) {
+            LibertyModule parent = libertyModule.getParentModule();
+            if (parent != null && parent.getBuildFile() != null) {
+                return parent.getBuildFile().getParent().getPath();
+            }
+            if (libertyModule.getBuildFile() != null) {
+                return libertyModule.getBuildFile().getParent().getPath();
+            }
+            // Fall back to the IntelliJ project base path
+            if (libertyModule.getProject() != null
+                    && libertyModule.getProject().getBasePath() != null) {
+                LOGGER.warn(String.format(
+                        "No build file found for module '%s' - falling back to project base path",
+                        libertyModule.getName()));
+                return libertyModule.getProject().getBasePath();
+            }
+        }
+        return null;
     }
 
     /**
