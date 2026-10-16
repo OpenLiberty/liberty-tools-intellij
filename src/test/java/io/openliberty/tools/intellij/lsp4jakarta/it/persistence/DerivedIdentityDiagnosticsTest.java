@@ -40,8 +40,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
 
-    private static final String PKG = "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/";
-
     // ---- Rule 1: @MapsId must be on @OneToOne / @ManyToOne ------------------------------------
 
     /**
@@ -53,18 +51,18 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdOnNonRelationshipField.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdOnNonRelationshipField.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(15, 17, 19,
+        Diagnostic mapsIdOnInvalidRelationship = d(15, 17, 19,
                 "@MapsId must only be applied to a field or property also annotated with @OneToOne or @ManyToOne.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdOnInvalidRelationship");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdOnInvalidRelationship);
     }
 
     // ---- Rule 2: @MapsId("value") requires a composite key ------------------------------------
@@ -78,18 +76,18 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdWithSimpleKey.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdWithSimpleKey.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(19, 21, 29,
+        Diagnostic mapsIdRequiresCompositeKey = d(19, 21, 29,
                 "@MapsId that specifies a value can only be used on an entity that declares a composite primary key via @EmbeddedId or @IdClass.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdRequiresCompositeKey");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdRequiresCompositeKey);
     }
 
     /** {@code @MapsId("empId")} on an entity with an {@code @IdClass} composite key is valid. */
@@ -98,8 +96,8 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidMapsIdWithIdClass.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidMapsIdWithIdClass.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -114,8 +112,8 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidMapsIdSimpleKey.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidMapsIdSimpleKey.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -136,8 +134,8 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdWithGeneratedValue.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdWithGeneratedValue.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -153,6 +151,39 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, invalidIdType, generatedValueOnDerived);
     }
 
+    /**
+     * {@code @MapsId("empId") @ManyToOne @Id @GeneratedValue} with {@code @EmbeddedId}:
+     * {@code MixedIdentifierAnnotations} on both fields, and {@code InvalidIdType} plus
+     * {@code GeneratedValueOnDerivedIdField} on field "employee".
+     */
+    @Test
+    public void testGeneratedValueOnMapsIdWithValueField() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdWithValueAndGeneratedValue.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic mixedEmbeddedId = d(18, 22, 24,
+                "@EmbeddedId cannot be combined with @Id in the same entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MixedIdentifierAnnotations");
+        Diagnostic invalidIdType = d(24, 21, 29,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+        Diagnostic mixedId = d(24, 21, 29,
+                "@Id cannot be combined with @EmbeddedId in the same entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MixedIdentifierAnnotations");
+        Diagnostic generatedValueOnDerived = d(24, 21, 29,
+                "@GeneratedValue cannot be applied to a primary key field that forms part of a derived identity via @MapsId.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "GeneratedValueOnDerivedIdField");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, mixedEmbeddedId, invalidIdType, mixedId, generatedValueOnDerived);
+    }
+
     // ---- Rule 4: @MapsId value must name an attribute of the @EmbeddedId class ----------------
 
     /**
@@ -164,18 +195,18 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdValueNotInEmbeddedId.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdValueNotInEmbeddedId.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(19, 21, 29,
+        Diagnostic mapsIdValueNotInEmbeddedIdClass = d(19, 21, 29,
                 "The value 'nonExistent' specified in @MapsId does not match any attribute in the @EmbeddedId class 'ProjectId'.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdValueNotInEmbeddedIdClass");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdValueNotInEmbeddedIdClass);
     }
 
     // ---- Rule 5: attribute type must match the parent PK type ---------------------------------
@@ -189,18 +220,18 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdValueTypeMismatch.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdValueTypeMismatch.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(19, 23, 33,
+        Diagnostic mapsIdValueTypeMismatch = d(19, 23, 33,
                 "The type of attribute 'empId' in the @EmbeddedId class 'ProjectId' ('long') is not compatible with the primary key type of the parent entity 'Department' ('java.lang.String').",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdValueTypeMismatch");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdValueTypeMismatch);
     }
 
     /**
@@ -212,18 +243,38 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdCompositeParentTypeMismatch.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdCompositeParentTypeMismatch.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(20, 33, 39,
+        Diagnostic mapsIdValueTypeMismatch = d(20, 33, 39,
                 "The type of attribute 'wrongKey' in the @EmbeddedId class 'ChildKey' ('java.lang.String') is not compatible with the primary key type of the parent entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId').",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdValueTypeMismatch");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdValueTypeMismatch);
+    }
+
+    /** Property-access style: GetterAccessKey.isActive() is boolean but Department's @Id is String: "department" at line 20, cols 23-33. */
+    @Test
+    public void testMapsIdValueTypeMismatchIsPropertyAccess() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdIsPropertyAccessTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic mapsIdValueTypeMismatch = d(20, 23, 33,
+                "The type of attribute 'active' in the @EmbeddedId class 'GetterAccessKey' ('boolean') is not compatible with the primary key type of the parent entity 'Department' ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdValueTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdValueTypeMismatch);
     }
 
     // ---- Value-less @MapsId with @EmbeddedId (spec Examples 5b / 6b) --------------------------
@@ -237,18 +288,18 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "MapsIdValuelessPkTypeMismatch.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdValuelessPkTypeMismatch.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic d = d(19, 33, 39,
+        Diagnostic mapsIdPrimaryKeyTypeMismatch = d(19, 33, 39,
                 "The primary key type of this entity ('io.openliberty.sample.jakarta.persistence.derivedidentity.ChildKey') must be the same as the primary key type of the parent entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId') when @MapsId is specified without a value.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdPrimaryKeyTypeMismatch");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdPrimaryKeyTypeMismatch);
     }
 
     /** Spec Examples 5b/6b: embedded id type ProjectId matches parent's PK type — valid. */
@@ -257,8 +308,8 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidMapsIdValuelessEmbeddedId.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidMapsIdValuelessEmbeddedId.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -275,8 +326,8 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidDerivedIdentityEmbeddedId.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidDerivedIdentityEmbeddedId.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -291,8 +342,24 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
-                ModuleUtilCore.getModuleDirPath(module) + PKG + "ValidMapsIdCompositeParent.java");
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidMapsIdCompositeParent.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /** Property-access style with getEmpId() resolving long matching Employee's @Id (long). */
+    @Test
+    public void testValidMapsIdPropertyAccess() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/ValidMapsIdPropertyAccess.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();

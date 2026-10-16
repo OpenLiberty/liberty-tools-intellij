@@ -143,15 +143,22 @@ final class CompositeKeyResolver {
      * Returns {@code null} if not found.
      */
     static String resolveAttributeType(PsiClass embeddableType, String attrName) {
+        if (attrName == null || attrName.isEmpty()) {
+            return null;
+        }
         // Check fields directly
         PsiField field = embeddableType.findFieldByName(attrName, false);
         if (field != null) {
             return field.getType().getCanonicalText();
         }
-        // Fall back to property getter: getXxx()
-        String getterName = "get" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
+        // Fall back to property getter: getXxx() or isXxx()
+        String capitalized = Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
+        String getterName = "get" + capitalized;
+        String isGetterName = "is" + capitalized;
         for (PsiMethod method : embeddableType.getMethods()) {
-            if (getterName.equals(method.getName()) && method.getParameterList().getParametersCount() == 0) {
+            String methodName = method.getName();
+            if ((getterName.equals(methodName) || isGetterName.equals(methodName))
+                    && method.getParameterList().getParametersCount() == 0) {
                 PsiType returnType = method.getReturnType();
                 return returnType != null ? returnType.getCanonicalText() : null;
             }
