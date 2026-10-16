@@ -59,7 +59,7 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
 
         // Non-void @PostConstruct also violates lifecycle callback signature rule
         Diagnostic nonVoidReturnSignature = d(19, 19, 31,
-                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must have the signature void <METHOD>().",
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
 
         Diagnostic d2 = d(24, 16, 28, "A method with the @PostConstruct annotation must not have any parameters.",
@@ -67,7 +67,7 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
 
         // @PostConstruct with params also violates lifecycle callback signature rule
         Diagnostic hasParamsSignature = d(24, 16, 28,
-                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must have the signature void <METHOD>().",
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
 
         Diagnostic d3 = d(28, 16, 28, "A method with the @PostConstruct annotation must not throw checked exceptions.",
@@ -82,6 +82,10 @@ public class PostConstructAnnotationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-annotations", "PostConstructException");
         d5.setData(new Gson().toJsonTree(Arrays.asList("io.openliberty.sample.jakarta.annotations.CustomCheckedException","java.io.IOException")));
 
+        // Expected diagnostics are ordered in top-down source line order:
+        // - Line 19: getStudentId() violates both @PostConstruct return type (d1) and interceptor lifecycle signature (nonVoidReturnSignature)
+        // - Line 24: getHappiness() violates both @PostConstruct parameter rule (d2) and interceptor lifecycle signature (hasParamsSignature)
+        // - Lines 28, 43, 48: methods throwing checked exceptions (d3, d4, d5)
         assertJavaDiagnostics(diagnosticsParams, utils, d1, nonVoidReturnSignature, d2, hasParamsSignature, d3, d4, d5);
 
         // Starting codeAction tests.
