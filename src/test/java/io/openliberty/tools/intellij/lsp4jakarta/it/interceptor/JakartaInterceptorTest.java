@@ -1684,6 +1684,28 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
     }
 
     @Test
+    public void testInterceptorTwoProceedCallsOnlyOneInTryCatchTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidInterceptorTwoProceedCalls.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // The method has two proceed() calls: the first is inside a try/catch (protected)
+        // and the second is outside in an if-block (unprotected). The diagnostic must fire
+        // because at least one call is unprotected, even though another call is protected.
+        Diagnostic twoProceedWarning = JakartaForJavaAssert.d(13, 18, 30,
+                PROCEED_NOT_IN_TRY_CATCH_MSG,
+                DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorProceedNotInTryCatch");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, twoProceedWarning);
+    }
+
+    @Test
     public void testValidInterceptorProceedInTryCatchAllFormsTest() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
