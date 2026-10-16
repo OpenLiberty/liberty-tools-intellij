@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +34,10 @@ public class PersistenceConstants {
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
+    public static final String MAPSID = "jakarta.persistence.MapsId";
+    public static final String ONETOONE = "jakarta.persistence.OneToOne";
+    public static final String MANYTOONE = "jakarta.persistence.ManyToOne";
+    public static final String IDCLASS = "jakarta.persistence.IdClass";
 
     /* Type Constants */
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
@@ -80,6 +85,24 @@ public class PersistenceConstants {
     public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
     public static final String DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT = "PersistenceContextNotInManagedComponent";
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
+
+    /* primitive → wrapper FQ name mapping for derived-identity type checks (spec §2.4) */
+    public static final Map<String, String> PRIMITIVE_TO_WRAPPER = Map.of(
+            "int",     "java.lang.Integer",
+            "long",    "java.lang.Long",
+            "short",   "java.lang.Short",
+            "byte",    "java.lang.Byte",
+            "char",    "java.lang.Character",
+            "boolean", "java.lang.Boolean",
+            "float",   "java.lang.Float",
+            "double",  "java.lang.Double");
+
+    /* Derived Identity error codes */
+    public static final String DIAGNOSTIC_CODE_MAPSID_ON_INVALID_RELATIONSHIP = "MapsIdOnInvalidRelationship";
+    public static final String DIAGNOSTIC_CODE_MAPSID_REQUIRES_COMPOSITE_KEY   = "MapsIdRequiresCompositeKey";
+    public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_NOT_IN_EMBEDDEDID  = "MapsIdValueNotInEmbeddedIdClass";
+    public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_TYPE_MISMATCH      = "MapsIdValueTypeMismatch";
+    public static final String DIAGNOSTIC_CODE_MAPSID_PK_TYPE_MISMATCH         = "MapsIdPrimaryKeyTypeMismatch";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
