@@ -37,7 +37,6 @@ public class PersistenceConstants {
     public static final String MAPSID = "jakarta.persistence.MapsId";
     public static final String ONETOONE = "jakarta.persistence.OneToOne";
     public static final String MANYTOONE = "jakarta.persistence.ManyToOne";
-    public static final String GENERATEDVALUE = "jakarta.persistence.GeneratedValue";
     public static final String IDCLASS = "jakarta.persistence.IdClass";
 
     /* Type Constants */
@@ -104,7 +103,6 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_NOT_IN_EMBEDDEDID  = "MapsIdValueNotInEmbeddedIdClass";
     public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_TYPE_MISMATCH      = "MapsIdValueTypeMismatch";
     public static final String DIAGNOSTIC_CODE_MAPSID_PK_TYPE_MISMATCH         = "MapsIdPrimaryKeyTypeMismatch";
-    public static final String DIAGNOSTIC_CODE_GENERATED_VALUE_ON_DERIVED_ID   = "GeneratedValueOnDerivedIdField";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };

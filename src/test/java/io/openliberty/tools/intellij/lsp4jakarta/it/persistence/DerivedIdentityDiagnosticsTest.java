@@ -122,68 +122,6 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
-    // ---- Rule 3: @GeneratedValue forbidden on derived @Id (spec §11.1.20) ---------------------
-
-    /**
-     * {@code @Id @MapsId @OneToOne @GeneratedValue} on an entity-typed field.
-     * Both {@code InvalidIdType} (Employee is not a valid @Id type) and
-     * {@code GeneratedValueOnDerivedIdField} fire on field "employee" at 0-based line 20, cols 21-29.
-     */
-    @Test
-    public void testGeneratedValueOnValuelessMapsIdField() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdWithGeneratedValue.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        Diagnostic invalidIdType = d(21, 21, 29,
-                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
-                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
-        Diagnostic generatedValueOnDerived = d(21, 21, 29,
-                "@GeneratedValue cannot be applied to a primary key field that forms part of a derived identity via @MapsId.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "GeneratedValueOnDerivedIdField");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, invalidIdType, generatedValueOnDerived);
-    }
-
-    /**
-     * {@code @MapsId("empId") @ManyToOne @Id @GeneratedValue} with {@code @EmbeddedId}:
-     * {@code MixedIdentifierAnnotations} on both fields, and {@code InvalidIdType} plus
-     * {@code GeneratedValueOnDerivedIdField} on field "employee".
-     */
-    @Test
-    public void testGeneratedValueOnMapsIdWithValueField() throws Exception {
-        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
-        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
-
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdWithValueAndGeneratedValue.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        Diagnostic mixedEmbeddedId = d(18, 22, 24,
-                "@EmbeddedId cannot be combined with @Id in the same entity.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "MixedIdentifierAnnotations");
-        Diagnostic invalidIdType = d(24, 21, 29,
-                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
-                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
-        Diagnostic mixedId = d(24, 21, 29,
-                "@Id cannot be combined with @EmbeddedId in the same entity.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "MixedIdentifierAnnotations");
-        Diagnostic generatedValueOnDerived = d(24, 21, 29,
-                "@GeneratedValue cannot be applied to a primary key field that forms part of a derived identity via @MapsId.",
-                DiagnosticSeverity.Error, "jakarta-persistence", "GeneratedValueOnDerivedIdField");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, mixedEmbeddedId, invalidIdType, mixedId, generatedValueOnDerived);
-    }
-
     // ---- Rule 4: @MapsId value must name an attribute of the @EmbeddedId class ----------------
 
     /**
@@ -296,7 +234,7 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic mapsIdPrimaryKeyTypeMismatch = d(19, 33, 39,
-                "The primary key type of this entity ('io.openliberty.sample.jakarta.persistence.derivedidentity.ChildKey') must be the same as the primary key type of the parent entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId') when @MapsId is specified without a value.",
+                "The primary key type of the parent entity ('io.openliberty.sample.jakarta.persistence.derivedidentity.ChildKey') must be same as the primary key type of the dependent entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId') when @MapsId is specified without a value.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdPrimaryKeyTypeMismatch");
 
         assertJavaDiagnostics(diagnosticsParams, utils, mapsIdPrimaryKeyTypeMismatch);

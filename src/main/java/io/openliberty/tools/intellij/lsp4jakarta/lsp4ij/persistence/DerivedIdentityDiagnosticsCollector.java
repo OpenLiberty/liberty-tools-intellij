@@ -17,15 +17,17 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsColle
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.KeyStrategy;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.ParentPk;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Diagnostic collector for Jakarta Persistence 3.0 derived-identity rules
- * (specification sections 2.4.1 and 11.1.20).
+ * (specification section 2.4.1).
  *
  * <h3>Checks performed</h3>
  * <ol>
@@ -34,8 +36,6 @@ import java.util.List;
  * <li>{@code @MapsId} that specifies a {@code value} can only be used on an
  *     entity that declares a composite primary key via {@code @EmbeddedId} or
  *     {@code @IdClass}.</li>
- * <li>{@code @GeneratedValue} is forbidden on a primary key field that is also
- *     annotated with {@code @MapsId} and {@code @Id} (spec §11.1.20).</li>
  * <li>When {@code @MapsId} specifies a value, that value must name an attribute
  *     in the {@code @EmbeddedId} class.</li>
  * <li>The type of that attribute must be compatible with the parent entity's
@@ -64,20 +64,13 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
         if (unit == null) {
             return;
         }
-        for (PsiClass type : unit.getClasses()) {
-            collectDiagnosticsForClass(type, unit, diagnostics);
-        }
-    }
-
-    private void collectDiagnosticsForClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        // Only process @Entity-annotated classes
-        if (!isMatchedAnnotation(type.getAnnotations(), PersistenceConstants.ENTITY)) {
-            return;
-        }
-        validateEntityType(type, unit, diagnostics);
-        // Recurse into nested classes
-        for (PsiClass inner : type.getInnerClasses()) {
-            collectDiagnosticsForClass(inner, unit, diagnostics);
+        // Visit nested classes too, so an @Entity nested in a non-entity holder is validated.
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
+        for (PsiClass type : allClasses) {
+            if (isMatchedAnnotation(type.getAnnotations(), PersistenceConstants.ENTITY)) {
+                validateEntityType(type, unit, diagnostics);
+            }
         }
     }
 
@@ -132,7 +125,7 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
     }
 
     /**
-     * Validates structural constraints (Rules 1–3).
+     * Validates structural constraints (Rules 1–2).
      *
      * @return {@code true} if a fatal violation was found and attribute-binding checks must not run.
      */
@@ -157,16 +150,6 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPSID_REQUIRES_COMPOSITE_KEY,
                     null, DiagnosticSeverity.Error));
             return true;
-        }
-
-        // Rule 3: @GeneratedValue forbidden on a derived-identity @Id field (spec §11.1.20).
-        boolean hasId = isMatchedAnnotation(memberAnnotations, PersistenceConstants.ID);
-        boolean hasGeneratedValue = isMatchedAnnotation(memberAnnotations, PersistenceConstants.GENERATEDVALUE);
-        if (hasId && hasGeneratedValue) {
-            diagnostics.add(createDiagnostic(member, unit,
-                    Messages.getMessage("GeneratedValueOnDerivedIdField"),
-                    PersistenceConstants.DIAGNOSTIC_CODE_GENERATED_VALUE_ON_DERIVED_ID,
-                    null, DiagnosticSeverity.Error));
         }
 
         return false;
