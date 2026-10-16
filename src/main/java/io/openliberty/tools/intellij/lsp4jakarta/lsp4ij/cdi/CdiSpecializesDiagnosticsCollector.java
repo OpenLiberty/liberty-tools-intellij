@@ -13,25 +13,24 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.searches.AllClassesSearch;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 /**
- * Detects inconsistent specialization: two or more beans annotated with {@code @Specializes}
- * sharing the same ultimate base bean (resolved transitively).
+ * Detects inconsistent specialization: more than one bean annotated with {@code @Specializes}
+ * directly extends the same superclass bean, per CDI spec §5.1.3.
+ *
+ * <p>A valid transitive chain (B {@code @Specializes} A, A {@code @Specializes} Base) is permitted
+ * because at each step only one direct subclass carries {@code @Specializes}.
  */
 public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
@@ -50,34 +49,25 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
             return;
         }
 
-        // Collect @Specializes types in the current file
-        List<PsiClass> specializersInUnit = new ArrayList<>();
         for (PsiClass type : unit.getClasses()) {
-            if (isMatchedAnnotation(type.getAnnotations(), SPECIALIZES_FQ_NAME)) {
-                specializersInUnit.add(type);
-            }
-        }
-
-        if (specializersInUnit.isEmpty()) {
-            return;
-        }
-
-        // Build a map of ultimate base FQ name → all @Specializes types in the project.
-        Map<String, List<PsiClass>> specializersByUltimateBase = collectProjectSpecializersByUltimateBase(
-                specializersInUnit.get(0).getProject());
-
-        // Report inconsistent specialization on each conflicting type in this file
-        for (PsiClass type : specializersInUnit) {
-            String ultimateBaseFqName = resolveUltimateBaseFqName(type);
-            if (ultimateBaseFqName == null) {
+            if (!isMatchedAnnotation(type.getAnnotations(), SPECIALIZES_FQ_NAME)) {
                 continue;
             }
-            List<PsiClass> allSpecializersOfBase = specializersByUltimateBase.get(ultimateBaseFqName);
-            // Inconsistent specialization: more than one bean ultimately specializes the same base.
-            if (allSpecializersOfBase != null && allSpecializersOfBase.size() > 1) {
+
+            // Rule 3: inconsistent specialization — more than one direct subclass of the
+            // immediate superclass carries @Specializes (CDI spec §5.1.3).
+            PsiClass directSuperClass = type.getSuperClass();
+            if (directSuperClass == null) {
+                continue;
+            }
+            String superFqName = directSuperClass.getQualifiedName();
+            if (superFqName == null || JAVA_LANG_OBJECT.equals(superFqName)) {
+                continue;
+            }
+            if (hasInconsistentSpecialization(directSuperClass, type)) {
                 diagnostics.add(createDiagnostic(type, unit,
                         Messages.getMessage("InconsistentSpecialization",
-                                type.getName(), ultimateBaseFqName),
+                                type.getName(), superFqName),
                         DIAGNOSTIC_CODE_INCONSISTENT_SPECIALIZATION, null,
                         DiagnosticSeverity.Error));
             }
@@ -85,44 +75,27 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
     }
 
     /**
-     * Scans all project source types and returns a map from ultimate base FQ name to the
-     * list of {@code @Specializes} types (direct or transitive) that specialize that base.
+     * Returns {@code true} if more than one direct subclass of {@code superClass}
+     * carries {@code @Specializes}, indicating inconsistent specialization.
+     *
+     * <p>Uses {@link ClassInheritorsSearch} with {@code deep=false} to restrict the
+     * search to immediate subclasses only, so valid linear transitive chains are not flagged.
+     *
+     * @param superClass   the direct superclass to inspect
+     * @param currentType  the type being validated (used to resolve the project scope)
+     * @return {@code true} if the specialization is inconsistent
      */
-    private Map<String, List<PsiClass>> collectProjectSpecializersByUltimateBase(Project project) {
-        Map<String, List<PsiClass>> result = new HashMap<>();
-        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
-
-        AllClassesSearch.search(scope, project).forEach(type -> {
-            if (!isMatchedAnnotation(type.getAnnotations(), SPECIALIZES_FQ_NAME)) {
-                return true; // continue iteration
+    private boolean hasInconsistentSpecialization(PsiClass superClass, PsiClass currentType) {
+        GlobalSearchScope scope = GlobalSearchScope.projectScope(currentType.getProject());
+        int specializerCount = 0;
+        for (PsiClass subclass : ClassInheritorsSearch.search(superClass, scope, false)) {
+            if (isMatchedAnnotation(subclass.getAnnotations(), SPECIALIZES_FQ_NAME)) {
+                specializerCount++;
+                if (specializerCount > 1) {
+                    return true;
+                }
             }
-            String ultimateBaseFqName = resolveUltimateBaseFqName(type);
-            if (ultimateBaseFqName != null) {
-                result.computeIfAbsent(ultimateBaseFqName, k -> new ArrayList<>()).add(type);
-            }
-            return true; // continue iteration
-        });
-
-        return result;
-    }
-
-    /**
-     * Walks the {@code @Specializes} chain transitively and returns the FQ name of the
-     * ultimate base bean (the first ancestor that does not itself carry {@code @Specializes}).
-     */
-    private String resolveUltimateBaseFqName(PsiClass type) {
-        PsiClass superClass = type.getSuperClass();
-        if (superClass == null) {
-            return null;
         }
-        String fqName = superClass.getQualifiedName();
-        if (fqName == null || JAVA_LANG_OBJECT.equals(fqName)) {
-            return null;
-        }
-        // If the superclass also has @Specializes, keep walking up the chain.
-        if (isMatchedAnnotation(superClass.getAnnotations(), SPECIALIZES_FQ_NAME)) {
-            return resolveUltimateBaseFqName(superClass);
-        }
-        return fqName;
+        return false;
     }
 }

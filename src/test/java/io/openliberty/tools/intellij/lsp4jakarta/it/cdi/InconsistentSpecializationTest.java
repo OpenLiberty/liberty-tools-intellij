@@ -21,7 +21,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
-import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
 import org.junit.Test;
@@ -121,25 +120,30 @@ public class InconsistentSpecializationTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, d);
     }
 
-    /** Diagnostic expected on TransitiveSpecializerB when it transitively specializes the same base as TransitiveSpecializerA. */
+    /**
+     * No diagnostic expected for a valid linear transitive chain:
+     * TransitiveSpecializerB -&gt; TransitiveSpecializerA -&gt; TransitiveBaseBean.
+     * At each level only one direct subclass carries {@code @Specializes}, so this is valid.
+     */
     @Test
-    public void inconsistentSpecializationOnTransitiveBean() throws Exception {
+    public void noDiagnosticOnValidTransitiveSpecializationChain() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
-        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+        VirtualFile fileA = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                        + "/src/main/java/io/openliberty/sample/jakarta/cdi/specializes/TransitiveSpecializerA.java");
+        String uriA = VfsUtilCore.virtualToIoFile(fileA).toURI().toString();
+        JakartaJavaDiagnosticsParams paramsA = new JakartaJavaDiagnosticsParams();
+        paramsA.setUris(Arrays.asList(uriA));
+        assertJavaDiagnostics(paramsA, utils);
+
+        VirtualFile fileB = LocalFileSystem.getInstance().refreshAndFindFileByPath(
                 ModuleUtilCore.getModuleDirPath(module)
                         + "/src/main/java/io/openliberty/sample/jakarta/cdi/specializes/TransitiveSpecializerB.java");
-        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
-
-        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
-
-        Diagnostic d = d(8, 13, 35,
-                msg("TransitiveSpecializerB",
-                        "io.openliberty.sample.jakarta.cdi.specializes.TransitiveBaseBean"),
-                DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInconsistentSpecialization");
-
-        assertJavaDiagnostics(diagnosticsParams, utils, d);
+        String uriB = VfsUtilCore.virtualToIoFile(fileB).toURI().toString();
+        JakartaJavaDiagnosticsParams paramsB = new JakartaJavaDiagnosticsParams();
+        paramsB.setUris(Arrays.asList(uriB));
+        assertJavaDiagnostics(paramsB, utils);
     }
 }
