@@ -34,6 +34,7 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY = "InterceptorNegativePriority";
     public static final String DIAGNOSTIC_CODE_DUPLICATE_INTERCEPTOR_METHOD = "InvalidMultipleInterceptorMethodsOfSameType";
     public static final String DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING = "InvalidInterceptorMissingInterceptorBinding";
+    public static final String DIAGNOSTIC_CODE_INTERCEPTOR_PROCEED_NOT_IN_TRY_CATCH = "InvalidInterceptorProceedNotInTryCatch";
 
     private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
