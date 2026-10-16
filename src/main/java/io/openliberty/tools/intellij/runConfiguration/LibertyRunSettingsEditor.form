@@ -26,7 +26,7 @@
         <properties>
           <enabled value="true"/>
           <selected value="false"/>
-          <text value="Run in container"/>
+          <text resource-bundle="messages/LibertyBundles" key="run.in.container"/>
           <verticalAlignment value="3"/>
         </properties>
       </component>

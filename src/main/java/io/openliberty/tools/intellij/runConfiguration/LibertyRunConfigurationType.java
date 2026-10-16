@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,7 +35,7 @@ public class LibertyRunConfigurationType implements ConfigurationType {
     @Nls
     @Override
     public String getConfigurationTypeDescription() {
-        return LocalizedResourceUtil.getMessage("liberty.run.config.title");
+        return LocalizedResourceUtil.message("liberty.run.config.title");
     }
 
     @Override

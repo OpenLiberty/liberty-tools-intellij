@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,7 +24,7 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
      * @return The name of the action command being processed.
      */
     protected String getActionCommandName() {
-        return LocalizedResourceUtil.getMessage("run.tests.liberty.dev");
+        return LocalizedResourceUtil.message("run.tests.liberty.dev");
     }
 
     @Override
