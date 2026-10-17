@@ -1264,6 +1264,27 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
     }
 
     @Test
+    public void testIdClassSingleIdManyToOneTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassSingleIdManyToOne.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Derived identity: the entity has a single @Id (@ManyToOne "dept") alongside @IdClass.
+        // Alignment must still be validated: Department's PK type is int, key class holds String.
+        Diagnostic deptTypeMismatchDiagnostic = d(31, 23, 27,
+                "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
+    }
+
+    @Test
     public void testIdClassOneToOneValid() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());

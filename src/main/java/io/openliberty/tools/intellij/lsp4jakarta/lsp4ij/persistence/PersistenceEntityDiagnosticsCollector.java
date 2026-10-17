@@ -208,9 +208,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         validateVersionAnnotation(versionAnnotatedElements,type, unit, diagnostics);
                     }
 
-                    // Validate @IdClass member alignment when the entity uses composite keys
+                    // Validate @IdClass member alignment. A single @Id (e.g. derived identity with
+                    // @Id @ManyToOne) can still be paired with an @IdClass.
                     // Specification: https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0#a132
-                    if (idClassAnnotation != null && idMembers.size() > 1) {
+                    if (idClassAnnotation != null && !idMembers.isEmpty()) {
                         validateIdClassMemberAlignment(type, unit, idClassAnnotation, idMembers, diagnostics);
                     }
 

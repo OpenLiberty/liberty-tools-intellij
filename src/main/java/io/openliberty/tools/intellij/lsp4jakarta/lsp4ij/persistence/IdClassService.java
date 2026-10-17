@@ -12,10 +12,11 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
-import java.beans.Introspector;
 import com.intellij.psi.*;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
@@ -70,7 +71,7 @@ class IdClassService {
         for (PsiJvmModifiersOwner member : idMembers) {
             String name = fieldAccess
                     ? ((PsiNamedElement) member).getName()
-                    : getterPropertyName(((PsiNamedElement) member).getName());
+                    : DiagnosticsUtils.getterPropertyName(((PsiNamedElement) member).getName());
             if (name != null) {
                 entityIdMap.put(name, resolveExpectedKeyClassType(member));
             }
@@ -87,8 +88,11 @@ class IdClassService {
             }
         } else {
             for (PsiMethod method : keyClass.getMethods()) {
-                String propName = getterPropertyName(method.getName());
-                if (propName != null && method.getParameterList().getParametersCount() == 0) {
+                String propName = DiagnosticsUtils.getterPropertyName(method.getName());
+                // A property getter is an instance method with no parameters and a non-void return type.
+                if (propName != null && method.getParameterList().getParametersCount() == 0
+                        && !method.hasModifierProperty(PsiModifier.STATIC)
+                        && !PsiTypeUtils.isVoidReturnType(method)) {
                     PsiType returnType = method.getReturnType();
                     keyClassMap.put(propName, returnType != null ? returnType.getCanonicalText() : null);
                 }
@@ -99,7 +103,7 @@ class IdClassService {
         for (PsiJvmModifiersOwner idMember : idMembers) {
             String memberName = fieldAccess
                     ? ((PsiNamedElement) idMember).getName()
-                    : getterPropertyName(((PsiNamedElement) idMember).getName());
+                    : DiagnosticsUtils.getterPropertyName(((PsiNamedElement) idMember).getName());
             if (memberName == null) {
                 continue;
             }
@@ -209,28 +213,6 @@ class IdClassService {
         if (member instanceof PsiMethod method) {
             PsiType rt = method.getReturnType();
             return rt != null ? rt.getCanonicalText() : null;
-        }
-        return null;
-    }
-
-    /**
-     * Derives a Java bean property name from a getter method name using
-     * {@link Introspector#decapitalize}, consistent with the approach in
-     * {@link PersistenceMapKeyDiagnosticsCollector}.
-     * Returns {@code null} if the method name does not follow getter conventions.
-     *
-     * @param methodName the getter method name (e.g. {@code "getName"}, {@code "isActive"})
-     * @return the property name (e.g. {@code "name"}, {@code "active"}), or {@code null}
-     */
-    private String getterPropertyName(String methodName) {
-        if (methodName == null) {
-            return null;
-        }
-        if (methodName.startsWith("get") && methodName.length() > 3) {
-            return Introspector.decapitalize(methodName.substring(3));
-        }
-        if (methodName.startsWith("is") && methodName.length() > 2) {
-            return Introspector.decapitalize(methodName.substring(2));
         }
         return null;
     }
