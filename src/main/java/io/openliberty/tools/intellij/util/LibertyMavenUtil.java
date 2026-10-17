@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
@@ -228,10 +229,10 @@ public class LibertyMavenUtil {
                 return null;
             }
             StaticResolvedMavenHomeType resolvedMavenHomeType = staticOrBundled(mavenHomeType);
-            File mavenHomeFile = MavenUtil.getMavenHomeFile(resolvedMavenHomeType);
-            if (mavenHomeFile == null) return null;
+            Path mavenHomePath = MavenUtil.getMavenHomePath(resolvedMavenHomeType);
+            if (mavenHomePath == null) return null;
             String maven = SystemInfo.isWindows ? "mvn.cmd" : "mvn";
-            File mavenExecutable = new File(new File(mavenHomeFile.getAbsolutePath(), "bin"), maven);
+            File mavenExecutable = mavenHomePath.resolve("bin").resolve(maven).toFile();
             if (mavenExecutable.exists() && mavenExecutable.canExecute()) {
                 return mavenExecutable.getAbsolutePath();
             }
