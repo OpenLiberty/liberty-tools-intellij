@@ -47,10 +47,18 @@ public class LibertyProjectUtil {
 
     /**
      * Directory names that are build-output folders and should never be scanned
-     * for Liberty build files.  A build file found anywhere under a directory
-     * with one of these names is considered a generated copy, not a source file.
+     * for Liberty build files.  A build file found anywhere under one of these
+     * directories (relative to the project root) is considered a generated copy,
+     * not a source file.
+     *
+     * <p>Note: "build" is intentionally omitted here. Although Gradle's output
+     * directory is also named "build", that name is too generic — it appears in
+     * many legitimate parent paths (e.g. the IntelliJ sandbox lives under
+     * {@code liberty-tools-intellij/build/idea-sandbox/...}). Build-output
+     * filtering for Gradle projects is handled by {@link #isBuildOutputFile}
+     * via the project-root boundary check instead.</p>
      */
-    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "bin", "classes", "build");
+    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "bin", "classes");
 
     enum BuildFileFilter {
         ADDABLE {
@@ -249,7 +257,7 @@ public class LibertyProjectUtil {
         }
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
-                // Skip build files that live inside build-output directories (e.g. target/, build/)
+                // Skip build files that live inside build-output directories (e.g. target/, bin/, classes/)
                 if (isBuildOutputFile(vFile)) {
                     continue;
                 }
@@ -316,10 +324,19 @@ public class LibertyProjectUtil {
     /**
      * Returns {@code true} when the given build file resides inside a well-known
      * build-output or generated-sources directory ({@code target/}, {@code bin/},
-     * {@code classes/}, {@code build/}).
+     * {@code classes/}).
      *
-     * <p>Such files are generated copies of the original and must not be treated as
-     * independent Liberty projects.</p>
+     * <p>The walk stops as soon as a directory in {@link #EXCLUDED_DIR_NAMES} is
+     * found, or when the filesystem root is reached. It does <em>not</em> use the
+     * IntelliJ {@code Project} base path as a stopping point, so it correctly
+     * handles files outside the project root too (e.g. manually added projects).</p>
+     *
+     * <p>"build" is <em>not</em> in {@link #EXCLUDED_DIR_NAMES} because the name is
+     * too common — it appears in CI checkout paths and in the IntelliJ sandbox path
+     * ({@code build/idea-sandbox/...}) and would incorrectly filter out real source
+     * files. Gradle build-output files ({@code build/...}) are instead excluded by
+     * the Liberty plugin detection logic which checks for
+     * {@code src/main/liberty/config/server.xml} relative to the build file.</p>
      *
      * @param buildFile the virtual file to test
      * @return {@code true} if any ancestor directory of {@code buildFile} has a name
