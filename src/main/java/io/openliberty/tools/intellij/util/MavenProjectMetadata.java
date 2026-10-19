@@ -53,7 +53,7 @@ import org.xml.sax.InputSource;
  *   <li>The list of resolved child module names</li>
  *   <li>Whether the Liberty Maven plugin is configured</li>
  *   <li>Whether Liberty dev mode is explicitly skipped ({@code <skip>true</skip>})</li>
- *   <li>Whether this POM is an aggregator (declares at least one {@code <module>})</li>
+ *   <li>Whether this POM is an aggregator ({@code packaging=pom} + has modules)</li>
  * </ul>
  */
 public class MavenProjectMetadata extends AbstractProjectMetadata {
@@ -63,6 +63,12 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
     private static final String POM_FILE_NAME = "pom.xml";
     private static final String MODULES_TAG  = "modules";
     private static final String MODULE_TAG   = "module";
+
+    /** {@code groupId:artifactId} of this project, or {@code null} when the artifactId is unknown. */
+    private String coordinates;
+
+    /** {@code groupId:artifactId} of the declared {@code <parent>}, or {@code null} when none. */
+    private String parentCoordinates;
 
     /**
      * Parses the {@code pom.xml} in the given directory and populates all metadata fields.
@@ -109,6 +115,16 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         extractFromDoc(doc);
     }
 
+    /** Returns {@code groupId:artifactId} of this project, or {@code null} when it could not be determined. */
+    public String getCoordinates() {
+        return coordinates;
+    }
+
+    /** Returns {@code groupId:artifactId} of the declared {@code <parent>}, or {@code null} when none. */
+    public String getParentCoordinates() {
+        return parentCoordinates;
+    }
+
     /**
      * Returns {@code true} if the given {@code pom.xml} contains a {@code <modules>} element.
      * The file is read with an XML parser, so comments, CDATA and whitespace inside tags are
@@ -135,6 +151,7 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
 
         // -- Project name (artifactId direct child of <project>) --
         projectName = getDirectChildText(root, "artifactId");
+        String groupId = getDirectChildText(root, "groupId");
 
         // -- Parent project name --
         NodeList parentNodes = root.getElementsByTagName("parent");
@@ -143,8 +160,19 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
             String parentArtifactId = getDirectChildText(parentEl, "artifactId");
             if (!parentArtifactId.isEmpty()) {
                 parentProjectName = parentArtifactId;
+                parentCoordinates = getDirectChildText(parentEl, "groupId") + ":" + parentArtifactId;
+            }
+            // groupId is inherited from the parent when the project does not declare it
+            if (groupId.isEmpty()) {
+                groupId = getDirectChildText(parentEl, "groupId");
             }
         }
+        if (!projectName.isEmpty()) {
+            coordinates = groupId + ":" + projectName;
+        }
+
+        // -- packaging=pom --
+        boolean pomPackaging = "pom".equals(getDirectChildText(root, "packaging"));
 
         // -- Child modules --
         // Only the top-level <modules> of <project> lists child modules. Plugin configuration
@@ -158,8 +186,9 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
                     subprojects.add(value);
                 }
             }
-            // A POM that lists modules is an aggregator, whatever its packaging
-            isAggregator = !subprojects.isEmpty();
+            if (!subprojects.isEmpty() && pomPackaging) {
+                isAggregator = true;
+            }
         }
 
         // -- Liberty Maven plugin presence and skip flag --

@@ -61,7 +61,7 @@ public abstract class AbstractProjectMetadata {
 
     /**
      * {@code true} when this project is an aggregator that declares child modules
-     * (Maven: at least one {@code <module>};
+     * (Maven: {@code packaging=pom} + at least one {@code <module>};
      * Gradle: at least one {@code include(...)}).
      */
     protected boolean isAggregator;

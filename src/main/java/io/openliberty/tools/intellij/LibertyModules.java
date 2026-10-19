@@ -151,8 +151,9 @@ public class LibertyModules {
      *       and parse each aggregator once.</li>
      *   <li>Register every aggregator that reaches a Liberty module, directly or through other
      *       aggregators, so that it does not matter in which order the POMs are visited.</li>
-     *   <li>Link each aggregator to the modules in its {@code <modules>} list, resolved by
-     *       canonical directory.</li>
+     *   <li>Link each child to the module named in its {@code <parent>} (by {@code groupId:artifactId}),
+     *       then link each aggregator to the modules in its {@code <modules>} list, resolved by
+     *       canonical directory, for children that are still unlinked.</li>
      * </ol>
      * What counts as an aggregator is defined in one place, {@link MavenProjectMetadata}.
      *
@@ -222,7 +223,26 @@ public class LibertyModules {
             LOGGER.debug("Registered aggregator module: " + name + " at " + entry.getKey());
         }
 
-        // 4. Link each aggregator to its modules
+        // 4a. Link each child to the module named in its <parent>. Coordinates are groupId:artifactId,
+        // so two modules with the same artifactId and a different groupId cannot overwrite each other.
+        Map<String, LibertyModule> byCoordinates = new HashMap<>();
+        for (LibertyModule module : byDir.values()) {
+            if (module.getBuildMetadata() instanceof MavenProjectMetadata) {
+                String coordinates = ((MavenProjectMetadata) module.getBuildMetadata()).getCoordinates();
+                if (coordinates != null) byCoordinates.putIfAbsent(coordinates, module);
+            }
+        }
+        for (LibertyModule child : byDir.values()) {
+            if (!(child.getBuildMetadata() instanceof MavenProjectMetadata)) continue;
+            String parentCoordinates = ((MavenProjectMetadata) child.getBuildMetadata()).getParentCoordinates();
+            LibertyModule parent = parentCoordinates == null ? null : byCoordinates.get(parentCoordinates);
+            if (parent != null && parent != child && !isAncestorOrSelf(child, parent)) {
+                child.setParentModule(parent);
+                parent.addChildLibertyModule(child);
+            }
+        }
+
+        // 4b. Link each aggregator to its modules, unless already linked by <parent>
         for (Map.Entry<String, PomNode> entry : nodes.entrySet()) {
             LibertyModule aggregator = byDir.get(entry.getKey());
             for (String childDir : entry.getValue().childDirs) {
