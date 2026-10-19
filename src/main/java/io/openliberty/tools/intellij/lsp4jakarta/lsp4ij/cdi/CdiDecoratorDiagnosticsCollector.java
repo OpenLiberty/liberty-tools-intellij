@@ -17,11 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -155,8 +157,19 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     /**
      * Validates that the delegate type implements or extends all decorated types of the
      * decorator (CDI 3.0 spec §8.1.3).
+     *
+     * Per CDI 3.0 specification section 8.1.3:
+     * "The delegate type of a decorator must implement or extend every decorated type
+     * (with exactly the same type parameters). If the delegate type does not implement
+     * or extend a decorated type of the decorator (or specifies different type parameters),
+     * the container automatically detects the problem and treats it as a definition error."
+     *
+     * @param decoratorClass   the decorator class
+     * @param delegateElement the delegate injection point (field or parameter)
+     * @param unit            the compilation unit
+     * @param diagnostics     the list to add diagnostics to
      */
-    private void validateDelegateTypeAssignability(PsiClass decoratorType, PsiElement delegateElement,
+    private void validateDelegateTypeAssignability(PsiClass decoratorClass, PsiElement delegateElement,
                                                    PsiJavaFile unit, List<Diagnostic> diagnostics) {
         try {
             PsiType delegateType = null;
@@ -168,7 +181,15 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
             if (delegateType == null) {
                 return;
             }
-
+            // Primitives are never valid bean types — report immediately without further resolution.
+            if (delegateType instanceof PsiPrimitiveType) {
+                reportDecoratorDiagnostic(delegateElement, unit, ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
+                        delegateType.getPresentableText(), "",
+                        ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
+                        diagnostics);
+                return;
+            }
+            // Resolve the delegate type to a PsiClass
             PsiClass delegateClass = null;
             if (delegateType instanceof PsiClassType) {
                 delegateClass = ((PsiClassType) delegateType).resolve();
@@ -176,24 +197,24 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
             if (delegateClass == null) {
                 return;
             }
-
-            List<String> decoratedTypes = getDecoratedTypes(decoratorType);
+            // Get all decorated types (interfaces and superclasses of the decorator)
+            List<String> decoratedTypes = getDecoratedTypes(decoratorClass);
             if (decoratedTypes.isEmpty()) {
+                // Decorator has no decorated types — definition error per CDI 3.0 §8.1.3
+                reportDecoratorDiagnostic(delegateElement, unit, ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES,
+                        null, null, ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES,
+                        diagnostics);
                 return;
             }
-
-            List<String> missingTypes = new ArrayList<>();
+            // Check if delegate type implements/extends all decorated types
             for (String decoratedTypeFQN : decoratedTypes) {
                 if (!InheritanceUtil.isInheritor(delegateClass, decoratedTypeFQN)) {
-                    missingTypes.add(decoratedTypeFQN);
+                    reportDecoratorDiagnostic(delegateElement, unit, ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
+                            delegateClass.getName(), getSimpleName(decoratedTypeFQN),
+                            ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
+                            diagnostics);
+                    return;
                 }
-            }
-
-            if (!missingTypes.isEmpty()) {
-                diagnostics.add(createDiagnostic(delegateElement, unit,
-                        Messages.getMessage("InvalidDecoratorDelegateTypeAssignability", delegateClass.getName()),
-                        ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY,
-                        null, DiagnosticSeverity.Error));
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Exception during delegate type assignability validation", e);
@@ -201,30 +222,41 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     }
 
     /**
-     * Returns all decorated types of a decorator (interfaces it implements and superclasses,
-     * excluding {@code java.lang.Object}).
+     * Reports a decorator validation diagnostic on the given delegate element.
+     *
+     * @param delegateElement  the delegate injection point (field or parameter)
+     * @param unit             the compilation unit
+     * @param messageKey       the message key (e.g., "InvalidDecoratorDelegateTypeAssignability")
+     * @param delegateTypeName the simple name of the delegate type (may be null)
+     * @param decoratedTypeName the simple name of the decorated type (may be null or empty)
+     * @param diagnostics      the list to add the diagnostic to
      */
-    private List<String> getDecoratedTypes(PsiClass decoratorType) {
-        List<String> decoratedTypes = new ArrayList<>();
+    private void reportDecoratorDiagnostic(PsiElement delegateElement, PsiJavaFile unit,
+                                           String messageKey, String delegateTypeName, String decoratedTypeName,
+                                           String errorCode, List<Diagnostic> diagnostics) {
+        String message = Messages.getMessage(messageKey, delegateTypeName, decoratedTypeName);
+        diagnostics.add(createDiagnostic(delegateElement, unit, message, errorCode,
+                null, DiagnosticSeverity.Error));
+    }
 
-        for (PsiClass iface : decoratorType.getInterfaces()) {
-            if (iface != null) {
-                String fqName = iface.getQualifiedName();
-                if (fqName != null) {
-                    decoratedTypes.add(fqName);
-                }
-            }
-        }
-
-        PsiClass superClass = decoratorType.getSuperClass();
-        if (superClass != null) {
-            String fqName = superClass.getQualifiedName();
-            if (fqName != null && !fqName.equals("java.lang.Object")) {
-                decoratedTypes.add(fqName);
-            }
-        }
-
-        return decoratedTypes;
+    /**
+     * Gets all decorated types of the decorator (Java interfaces only, excluding java.io.Serializable).
+     *
+     * Per CDI 3.0 specification section 8.1.3:
+     * "The set of decorated types of a decorator includes all bean types of the managed bean
+     * which are Java interfaces, except for java.io.Serializable. The decorator bean class and
+     * its superclasses are not decorated types of the decorator."
+     *
+     * @param decoratorClass the decorator class
+     * @return list of decorated type fully qualified names (interfaces only)
+     */
+    private List<String> getDecoratedTypes(PsiClass decoratorClass) {
+        return InheritanceUtil.getSuperClasses(decoratorClass).stream()
+                .filter(PsiClass::isInterface)
+                .map(PsiClass::getQualifiedName)
+                .filter(fqn -> fqn != null && !ManagedBeanConstants.SERIALIZABLE_FQ_NAME.equals(fqn))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**

@@ -53,7 +53,7 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
 
         // Test expected diagnostic for interceptor with disposer method
         // Diagnostic for method with @Disposes parameter
-        Diagnostic disposesDiagnostic = d(9, 16, 30,
+        Diagnostic disposesDiagnostic = d(11, 16, 30,
                 "Interceptors and Decorators cannot have methods with parameter(s) 'resource' annotated with @Disposes.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecoratorWithDisposerMethod");
 
@@ -61,10 +61,12 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
 
         // Test code actions
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, disposesDiagnostic);
-        
+
         String newText = "package io.openliberty.sample.jakarta.cdi;\n\n" +
                 "import jakarta.interceptor.Interceptor;\n" +
+                "import io.openliberty.sample.jakarta.interceptor.Monitored;\n" +
                 "import jakarta.enterprise.inject.Disposes;\n\n" +
+                "@Monitored\n" +
                 "@Interceptor\n" +
                 "public class InterceptorWithDisposerMethod {\n\n" +
                 "    // This method should trigger a diagnostic - interceptor with @Disposes\n" +
@@ -73,8 +75,8 @@ public class InterceptorDecoratorDisposerTest extends BaseJakartaTest {
                 "    // This method should not trigger a diagnostic - no disposer annotation\n" +
                 "    public void normalMethod(String param) {\n\n" +
                 "    }\n}\n";
-        
-        TextEdit editRemoveDisposes = te(0, 0, 18, 0, newText);
+
+        TextEdit editRemoveDisposes = te(0, 0, 20, 0, newText);
         CodeAction actionRemoveDisposes = ca(uri, "Remove the @Disposes modifier from parameter resource", disposesDiagnostic, editRemoveDisposes);
         
         assertJavaCodeAction(codeActionParams, utils, actionRemoveDisposes);

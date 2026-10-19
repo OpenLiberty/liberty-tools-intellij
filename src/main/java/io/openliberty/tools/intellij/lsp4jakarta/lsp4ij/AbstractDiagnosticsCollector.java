@@ -193,6 +193,18 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
+     * Returns the fully qualified names of all annotations present on the given class.
+     *
+     * @param type the class whose annotation names to extract
+     * @return array of fully qualified annotation names
+     */
+    protected static String[] getAnnotationNames(PsiClass type) {
+        return Stream.of(type.getAnnotations())
+                .map(PsiAnnotation::getQualifiedName)
+                .toArray(String[]::new);
+    }
+
+    /**
      * Returns matched Java element fully qualified name.
      *
      * @param type               Java class.
