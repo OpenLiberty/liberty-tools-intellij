@@ -1256,11 +1256,16 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // @ManyToOne @Id field "dept" resolves to Department's PK type (int),
         // but the key class holds String — type mismatch expected.
-        Diagnostic deptTypeMismatchDiagnostic = d(35, 23, 27,
+        Diagnostic deptTypeMismatchDiagnostic = d(37, 23, 27,
                 "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
                 DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
+        // Entity @Id field "active" is boolean but key class field is String.
+        Diagnostic activeTypeMismatchDiagnostic = d(40, 20, 26,
+                "The type of @Id field or property 'active' in the entity ('boolean') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic, activeTypeMismatchDiagnostic);
     }
 
     @Test

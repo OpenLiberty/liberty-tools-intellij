@@ -141,8 +141,8 @@ class IdClassService {
         String rawType = resolvedTypeName(member);
 
         // Only relationship @Id fields need special handling.
-        boolean isRelationship = member.hasAnnotation(PersistenceConstants.MANYTOONE)
-                || member.hasAnnotation(PersistenceConstants.ONETOONE);
+        boolean isRelationship = member.hasAnnotation(PersistenceConstants.MANY_TO_ONE)
+                || member.hasAnnotation(PersistenceConstants.ONE_TO_ONE);
         if (!isRelationship || rawType == null) {
             return rawType;
         }

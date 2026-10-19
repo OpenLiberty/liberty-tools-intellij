@@ -24,8 +24,8 @@ public class PersistenceConstants {
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String IDCLASS = "jakarta.persistence.IdClass";
-    public static final String MANYTOONE = "jakarta.persistence.ManyToOne";
-    public static final String ONETOONE = "jakarta.persistence.OneToOne";
+    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
+    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
     public static final String MAPKEY = "jakarta.persistence.MapKey";
