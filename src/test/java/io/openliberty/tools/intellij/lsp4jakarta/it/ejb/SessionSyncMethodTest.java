@@ -471,6 +471,51 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
 
+    @Test
+    public void testAfterCompletionMultiParamAllBooleanQuickFix() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamAllBoolean.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based): "    public void afterCompletion(boolean committed, boolean extra1, boolean extra2) {"
+        // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
+        Diagnostic expectedDiagnostic = d(14, 16, 31,
+                "@AfterCompletion session synchronization method must declare exactly one boolean parameter.",
+                DiagnosticSeverity.Error, "jakarta-ejb", "InvalidAfterCompletionMethodParams");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // QuickFix: all three params are boolean — keep the first (boolean committed), remove the rest
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
+                + "\n"
+                + "import jakarta.ejb.Stateful;\n"
+                + "import jakarta.ejb.AfterCompletion;\n"
+                + "\n"
+                + "/**\n"
+                + " * Invalid session bean - @AfterCompletion method has multiple params, all of which are boolean.\n"
+                + " * QuickFix should keep the first boolean param and remove the remaining ones.\n"
+                + " */\n"
+                + "@Stateful\n"
+                + "public class InvalidAfterCompletionMultiParamAllBoolean {\n"
+                + "\n"
+                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
+                + "    @AfterCompletion\n"
+                + "    public void afterCompletion(boolean committed) {\n"
+                + "    }\n"
+                + "}\n";
+        TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
+        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+                expectedDiagnostic, expectedTextEdit);
+        assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
+    }
+
     // -----------------------------------------------------------------------
     // Diagnostic + QuickFix: mixed illegal modifiers on session synchronization methods
     // -----------------------------------------------------------------------
