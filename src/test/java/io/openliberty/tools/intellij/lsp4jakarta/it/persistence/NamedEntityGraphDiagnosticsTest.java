@@ -24,7 +24,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.search.JakartaSearchSett
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,9 +43,13 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
 
-    @After
+    @Override
     public void tearDown() throws Exception {
-        JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
+        try {
+            JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
