@@ -113,249 +113,165 @@ public class LibertyModules {
             }
 
             // After all modules are registered, parse metadata and wire relationships.
-            parseBuildMetadata(project);
-            buildMultiModuleRelationships(project);
+            buildMultiModuleModel(project);
             populateStatesFromCache(project);
         }
         return this;
     }
 
     /**
-     * Parses the build file of each Liberty module for the given project and stores
-     * the result in {@link LibertyModule#setBuildMetadata(AbstractProjectMetadata)}.
-     * Errors are logged but do not abort processing of remaining modules.
-     *
-     * @param project the IntelliJ project whose modules should be parsed
+     * A {@code pom.xml} taking part in the multi-module graph: either a registered Liberty
+     * module or an aggregator candidate that does not configure the Liberty plugin.
      */
-    private void parseBuildMetadata(Project project) {
-        for (LibertyModule module : getLibertyModules(project)) {
-            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
-                continue;
+    private static class PomNode {
+        final File dir;
+        final VirtualFile pomFile;
+        final MavenProjectMetadata meta;
+        /** Canonical directories of the modules listed in {@code <modules>}. */
+        final List<String> childDirs = new ArrayList<>();
+
+        PomNode(File dir, VirtualFile pomFile, MavenProjectMetadata meta) {
+            this.dir = dir;
+            this.pomFile = pomFile;
+            this.meta = meta;
+            for (String subproject : meta.getSubprojects()) {
+                File child = new File(dir, subproject);
+                // <module> may point at a pom file rather than a directory
+                childDirs.add(canonicalPath(child.isFile() ? child.getParentFile() : child));
             }
-            VirtualFile buildFile = module.getBuildFile();
-            if (buildFile == null || buildFile.getParent() == null) continue;
-            File pomDir = new File(buildFile.getParent().getPath());
-            module.setBuildMetadata(new MavenProjectMetadata(pomDir, project));
         }
-        // After parsing known Liberty modules, register any aggregator POMs on disk
-        // that were not picked up by the initial scan (because they have no Liberty plugin).
-        // Without them, Strategy 2 path-based wiring has nothing to iterate over.
-        registerAggregatorModules(project);
     }
 
     /**
-     * Walks up the directory tree from each known Maven Liberty module looking for
-     * {@code pom.xml} files that declare child modules (aggregators) but were excluded
-     * from the initial scan because they do not directly configure the Liberty plugin.
-     *
-     * <p>When such a POM is found and is not already registered, it is added as a
-     * {@link LibertyModule} so that {@link #buildMultiModuleRelationships} can use it
-     * as the anchor for Strategy 2 (path-based) wiring.</p>
+     * Builds the multi-module model in a single pass:
+     * <ol>
+     *   <li>Parse the metadata of every registered Maven Liberty module.</li>
+     *   <li>Collect every other {@code pom.xml} (project POMs plus the POMs found in the
+     *       ancestor directories of each Liberty module, which may lie outside the project)
+     *       and parse each aggregator once.</li>
+     *   <li>Register every aggregator that reaches a Liberty module, directly or through other
+     *       aggregators, so that it does not matter in which order the POMs are visited.</li>
+     *   <li>Link each aggregator to the modules in its {@code <modules>} list, resolved by
+     *       canonical directory.</li>
+     * </ol>
+     * What counts as an aggregator is defined in one place, {@link MavenProjectMetadata}.
      *
      * @param project the IntelliJ project
      */
-    private void registerAggregatorModules(Project project) {
-        // Snapshot to avoid concurrent modification while we may add new modules
-        List<LibertyModule> snapshot = getLibertyModules(project);
-        // Track canonical paths already registered to avoid duplicates
-        Set<String> registeredDirs = new java.util.HashSet<>();
-        for (LibertyModule module : snapshot) {
+    private void buildMultiModuleModel(Project project) {
+        // 1. Registered modules, keyed by canonical directory
+        Map<String, LibertyModule> byDir = new HashMap<>();
+        Map<String, PomNode> nodes = new TreeMap<>(); // sorted so that linking is deterministic
+        for (LibertyModule module : getLibertyModules(project)) {
             VirtualFile buildFile = module.getBuildFile();
             if (buildFile == null || buildFile.getParent() == null) continue;
-            try {
-                registeredDirs.add(new File(buildFile.getParent().getPath()).getCanonicalPath());
-            } catch (IOException e) {
-                registeredDirs.add(buildFile.getParent().getPath());
+            File dir = new File(buildFile.getParent().getPath());
+            String key = canonicalPath(dir);
+            byDir.put(key, module);
+            if (module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                MavenProjectMetadata meta = new MavenProjectMetadata(dir, project);
+                module.setBuildMetadata(meta);
+                if (meta.isAggregator()) {
+                    nodes.put(key, new PomNode(dir, buildFile, meta));
+                }
             }
         }
 
-        for (LibertyModule module : snapshot) {
+        // 2. Every other POM that is an aggregator
+        Map<String, VirtualFile> otherPoms = new TreeMap<>();
+        for (VirtualFile pom : LibertyProjectUtil.getAllPomFiles(project)) {
+            if (pom.getParent() != null) {
+                otherPoms.put(canonicalPath(new File(pom.getParent().getPath())), pom);
+            }
+        }
+        for (LibertyModule module : new ArrayList<>(byDir.values())) {
             if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) continue;
             VirtualFile buildFile = module.getBuildFile();
-            if (buildFile == null || buildFile.getParent() == null) continue;
-
-            // Walk up from the module's directory looking for aggregator POMs
-            File dir = new File(buildFile.getParent().getPath()).getParentFile();
-            while (dir != null) {
-                File candidatePom = new File(dir, "pom.xml");
-                if (!candidatePom.isFile()) break;
-
-                String canonicalDir;
-                try {
-                    canonicalDir = dir.getCanonicalPath();
-                } catch (IOException e) {
-                    canonicalDir = dir.getAbsolutePath();
+            for (File dir = new File(buildFile.getParent().getPath()).getParentFile(); dir != null; dir = dir.getParentFile()) {
+                File pom = new File(dir, "pom.xml");
+                String key = canonicalPath(dir);
+                if (pom.isFile() && !otherPoms.containsKey(key)) {
+                    VirtualFile pomVFile = LocalFileSystem.getInstance().findFileByPath(pom.getAbsolutePath());
+                    if (pomVFile != null) otherPoms.put(key, pomVFile);
                 }
-
-                if (registeredDirs.contains(canonicalDir)) break; // already registered
-
-                // Parse the candidate POM to check if it is an aggregator
-                MavenProjectMetadata meta = new MavenProjectMetadata(dir, module.getProject());
-                if (!meta.isAggregator()) break; // not an aggregator — stop walking up
-
-                // Register as a LibertyModule (aggregator, no Liberty plugin)
-                String pomPath = candidatePom.getAbsolutePath();
-                VirtualFile pomVFile = LocalFileSystem.getInstance()
-                        .findFileByPath(pomPath);
-                if (pomVFile == null) break;
-
-                String aggregatorName = meta.getProjectName() != null
-                        ? meta.getProjectName() : dir.getName();
-                LibertyModule aggregator = new LibertyModule(
-                        project, pomVFile, aggregatorName,
-                        Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
-                aggregator.setBuildMetadata(meta);
-                addLibertyModule(aggregator);
-                registeredDirs.add(canonicalDir);
-                LOGGER.debug("Registered aggregator module: " + aggregatorName + " at " + canonicalDir);
-
-                dir = dir.getParentFile();
+            }
+        }
+        Map<String, PomNode> candidates = new TreeMap<>();
+        for (Map.Entry<String, VirtualFile> entry : otherPoms.entrySet()) {
+            if (byDir.containsKey(entry.getKey())) continue;
+            File pomFile = new File(entry.getValue().getPath());
+            if (!MavenProjectMetadata.hasModulesElement(pomFile)) continue;
+            MavenProjectMetadata meta = new MavenProjectMetadata(pomFile.getParentFile(), project);
+            if (meta.isAggregator()) {
+                candidates.put(entry.getKey(), new PomNode(pomFile.getParentFile(), entry.getValue(), meta));
             }
         }
 
-        registerNonAncestorAggregators(project, registeredDirs);
-    }
-
-    /**
-     * Registers aggregator POMs that are not in an ancestor directory of the modules they
-     * aggregate, e.g. an aggregator in a sibling {@code pom/} folder that lists
-     * {@code <module>../ear</module>}. The directory walk in
-     * {@link #registerAggregatorModules} cannot find these.
-     *
-     * <p>Only POMs that declare {@code <modules>} are parsed, and an aggregator is registered
-     * only if one of its modules resolves to an already registered directory.</p>
-     *
-     * @param project        the IntelliJ project
-     * @param registeredDirs canonical directories of the modules registered so far; updated
-     *                       with each aggregator that is added
-     */
-    private void registerNonAncestorAggregators(Project project, Set<String> registeredDirs) {
-        for (VirtualFile pomVFile : LibertyProjectUtil.getAllPomFiles(project)) {
-            VirtualFile pomDirVFile = pomVFile.getParent();
-            if (pomDirVFile == null) continue;
-            File dir = new File(pomDirVFile.getPath());
-            String canonicalDir;
-            try {
-                canonicalDir = dir.getCanonicalPath();
-            } catch (IOException e) {
-                canonicalDir = dir.getAbsolutePath();
-            }
-            if (registeredDirs.contains(canonicalDir)) continue;
-
-            if (!MavenProjectMetadata.hasModulesElement(new File(pomVFile.getPath()))) {
-                continue;
-            }
-
-            MavenProjectMetadata meta = new MavenProjectMetadata(dir, project);
-            if (!meta.isAggregator()) continue;
-
-            boolean aggregatesRegisteredModule = false;
-            for (String subprojectPath : meta.getSubprojects()) {
-                File childDir = new File(dir, subprojectPath);
-                String childCanonical;
-                try {
-                    childCanonical = childDir.getCanonicalPath();
-                } catch (IOException e) {
-                    childCanonical = childDir.getAbsolutePath();
-                }
-                if (registeredDirs.contains(childCanonical)) {
-                    aggregatesRegisteredModule = true;
-                    break;
-                }
-            }
-            if (!aggregatesRegisteredModule) continue;
-
-            String aggregatorName = meta.getProjectName() != null && !meta.getProjectName().isEmpty()
-                    ? meta.getProjectName() : dir.getName();
+        // 3. Register the aggregators that reach a Liberty module
+        Map<String, Boolean> reaches = new HashMap<>();
+        for (Map.Entry<String, PomNode> entry : candidates.entrySet()) {
+            if (!reachesLibertyModule(entry.getKey(), byDir.keySet(), candidates, reaches, new HashSet<>())) continue;
+            PomNode node = entry.getValue();
+            String name = node.meta.getProjectName() != null && !node.meta.getProjectName().isEmpty()
+                    ? node.meta.getProjectName() : node.dir.getName();
             LibertyModule aggregator = new LibertyModule(
-                    project, pomVFile, aggregatorName,
-                    Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
-            aggregator.setBuildMetadata(meta);
-            addLibertyModule(aggregator);
-            registeredDirs.add(canonicalDir);
-            LOGGER.debug("Registered non-ancestor aggregator module: " + aggregatorName + " at " + canonicalDir);
-        }
-    }
-
-    /**
-     * Wires parent/child relationships between Liberty modules for the given project.
-     *
-     * <p>Two complementary strategies are used:</p>
-     * <ol>
-     *   <li><b>Name-based (Strategy 1):</b> the child's build metadata declares a
-     *       {@code <parent><artifactId>} (Maven) or equivalent. The parent is located
-     *       by matching that name against the {@code projectName} of every known module.</li>
-     *   <li><b>Path-based (Strategy 2):</b> the parent is an aggregator whose
-     *       {@code <modules>} list is known but whose children do not declare a
-     *       {@code <parent>} element. Each subproject path declared by the aggregator
-     *       is resolved relative to the aggregator's directory and matched by canonical
-     *       filesystem path against the directory that contains each child's build file.</li>
-     * </ol>
-     *
-     * <p>Strategy 1 runs first. Strategy 2 only links modules that are still unlinked
-     * after Strategy 1, so the two strategies never conflict.</p>
-     *
-     * @param project the IntelliJ project whose modules should be linked
-     */
-    private void buildMultiModuleRelationships(Project project) {
-        List<LibertyModule> modules = getLibertyModules(project);
-
-        // Build a lookup: projectName → LibertyModule (skip null names)
-        Map<String, LibertyModule> byName = new HashMap<>();
-        for (LibertyModule module : modules) {
-            AbstractProjectMetadata meta = module.getBuildMetadata();
-            if (meta != null && meta.getProjectName() != null) {
-                byName.put(meta.getProjectName(), module);
-            }
+                    project, node.pomFile, name, Constants.ProjectType.LIBERTY_MAVEN_PROJECT, false);
+            aggregator.setBuildMetadata(node.meta);
+            byDir.put(entry.getKey(), addLibertyModule(aggregator));
+            nodes.put(entry.getKey(), node);
+            LOGGER.debug("Registered aggregator module: " + name + " at " + entry.getKey());
         }
 
-        // Name-based strategy - child declares <parent><artifactId>
-        for (LibertyModule child : modules) {
-            AbstractProjectMetadata meta = child.getBuildMetadata();
-            if (meta == null || meta.getParentProjectName() == null) continue;
-            LibertyModule parent = byName.get(meta.getParentProjectName());
-            if (parent == null || parent == child) continue;
-            child.setParentModule(parent);
-            parent.addChildLibertyModule(child);
-        }
-
-        // Path-based strategy - aggregator declares <modules> but children have no <parent>
-        // Build a lookup: canonical directory path -> LibertyModule
-        Map<String, LibertyModule> byDir = new HashMap<>();
-        for (LibertyModule module : modules) {
-            VirtualFile buildFile = module.getBuildFile();
-            if (buildFile != null && buildFile.getParent() != null) {
-                try {
-                    String canonical = new File(buildFile.getParent().getPath()).getCanonicalPath();
-                    byDir.put(canonical, module);
-                } catch (IOException e) {
-                    byDir.put(buildFile.getParent().getPath(), module);
-                }
-            }
-        }
-
-        for (LibertyModule aggregator : modules) {
-            AbstractProjectMetadata meta = aggregator.getBuildMetadata();
-            if (meta == null || !meta.isAggregator()) continue;
-            VirtualFile aggregatorBuildFile = aggregator.getBuildFile();
-            if (aggregatorBuildFile == null || aggregatorBuildFile.getParent() == null) continue;
-            File aggregatorDir = new File(aggregatorBuildFile.getParent().getPath());
-
-            for (String subprojectPath : meta.getSubprojects()) {
-                File childDir = new File(aggregatorDir, subprojectPath);
-                String childCanonical;
-                try {
-                    childCanonical = childDir.getCanonicalPath();
-                } catch (IOException e) {
-                    childCanonical = childDir.getAbsolutePath();
-                }
-                LibertyModule child = byDir.get(childCanonical);
-                // Only link if not already wired by Strategy 1
-                if (child != null && child != aggregator && child.getParentModule() == null) {
+        // 4. Link each aggregator to its modules
+        for (Map.Entry<String, PomNode> entry : nodes.entrySet()) {
+            LibertyModule aggregator = byDir.get(entry.getKey());
+            for (String childDir : entry.getValue().childDirs) {
+                LibertyModule child = byDir.get(childDir);
+                if (child != null && child != aggregator && child.getParentModule() == null
+                        && !isAncestorOrSelf(child, aggregator)) {
                     child.setParentModule(aggregator);
                     aggregator.addChildLibertyModule(child);
                 }
             }
+        }
+    }
+
+    /**
+     * Returns whether the aggregator in {@code dir} lists, directly or through other aggregator
+     * candidates, a directory that is a registered Liberty module. Cycles are tolerated.
+     */
+    private static boolean reachesLibertyModule(String dir, Set<String> libertyDirs, Map<String, PomNode> candidates,
+                                                Map<String, Boolean> memo, Set<String> visiting) {
+        if (libertyDirs.contains(dir)) return true;
+        Boolean known = memo.get(dir);
+        if (known != null) return known;
+        PomNode node = candidates.get(dir);
+        if (node == null || !visiting.add(dir)) return false;
+        boolean result = false;
+        for (String childDir : node.childDirs) {
+            if (reachesLibertyModule(childDir, libertyDirs, candidates, memo, visiting)) {
+                result = true;
+                break;
+            }
+        }
+        visiting.remove(dir);
+        memo.put(dir, result);
+        return result;
+    }
+
+    /** Returns whether {@code candidate} is {@code module} or one of its ancestors. */
+    private static boolean isAncestorOrSelf(LibertyModule candidate, LibertyModule module) {
+        for (LibertyModule m = module; m != null; m = m.getParentModule()) {
+            if (m == candidate) return true;
+        }
+        return false;
+    }
+
+    private static String canonicalPath(File file) {
+        try {
+            return file.getCanonicalPath();
+        } catch (IOException e) {
+            return file.getAbsolutePath();
         }
     }
 
@@ -405,7 +321,7 @@ public class LibertyModules {
                 // Update existing Liberty project, projectType module, name and validContainerVersion.
                 // Do not update the build file (key), debugMode, shellWidget or customStartParams since
                 // they may modify saved run configs.
-                // Clear multi-module relationships so buildMultiModuleRelationships() re-wires them cleanly.
+                // Clear multi-module relationships so buildMultiModuleModel() re-wires them cleanly.
                 LibertyModule existing = libertyModules.get(module.getBuildFile());
                 existing.setProject(module.getProject());
                 existing.setProjectType(module.getProjectType());

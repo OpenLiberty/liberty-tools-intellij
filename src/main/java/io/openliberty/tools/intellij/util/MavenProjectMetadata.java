@@ -53,7 +53,7 @@ import org.xml.sax.InputSource;
  *   <li>The list of resolved child module names</li>
  *   <li>Whether the Liberty Maven plugin is configured</li>
  *   <li>Whether Liberty dev mode is explicitly skipped ({@code <skip>true</skip>})</li>
- *   <li>Whether this POM is an aggregator ({@code packaging=pom} + has modules)</li>
+ *   <li>Whether this POM is an aggregator (declares at least one {@code <module>})</li>
  * </ul>
  */
 public class MavenProjectMetadata extends AbstractProjectMetadata {
@@ -120,7 +120,7 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
     public static boolean hasModulesElement(File pomFile) {
         try {
             Document doc = newDocumentBuilder().parse(pomFile);
-            return doc.getElementsByTagName(MODULES_TAG).getLength() > 0;
+            return getDirectChild(doc.getDocumentElement(), MODULES_TAG) != null;
         } catch (Exception e) {
             LOGGER.debug("Could not parse POM for modules check: " + pomFile, e);
             return false;
@@ -146,13 +146,11 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
             }
         }
 
-        // -- packaging=pom --
-        boolean pomPackaging = "pom".equals(getDirectChildText(root, "packaging"));
-
         // -- Child modules --
-        NodeList modulesNodes = root.getElementsByTagName(MODULES_TAG);
-        if (modulesNodes.getLength() > 0) {
-            Element modulesEl = (Element) modulesNodes.item(0);
+        // Only the top-level <modules> of <project> lists child modules. Plugin configuration
+        // and profiles may contain their own <modules> elements.
+        Element modulesEl = getDirectChild(root, MODULES_TAG);
+        if (modulesEl != null) {
             NodeList moduleNodes = modulesEl.getElementsByTagName(MODULE_TAG);
             for (int i = 0; i < moduleNodes.getLength(); i++) {
                 String value = moduleNodes.item(i).getTextContent().trim();
@@ -160,9 +158,8 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
                     subprojects.add(value);
                 }
             }
-            if (!subprojects.isEmpty() && pomPackaging) {
-                isAggregator = true;
-            }
+            // A POM that lists modules is an aggregator, whatever its packaging
+            isAggregator = !subprojects.isEmpty();
         }
 
         // -- Liberty Maven plugin presence and skip flag --
@@ -257,6 +254,18 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
             }
         }
         return false;
+    }
+
+    /** Returns the first direct child element with the given tag name, or {@code null}. */
+    private static Element getDirectChild(Element parent, String tagName) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node n = children.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE && tagName.equals(n.getNodeName())) {
+                return (Element) n;
+            }
+        }
+        return null;
     }
 
     /**

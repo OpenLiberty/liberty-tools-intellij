@@ -256,10 +256,9 @@ public class LibertyMavenUtil {
      */
     public static String getMavenModuleArgs(LibertyModule libertyModule) {
         if (libertyModule == null) return "";
-        // Use the wired parentModule relationship (set by both Strategy 1 and Strategy 2).
+        // Use the wired parentModule relationship, which is built from the aggregators' <modules>.
         // Do NOT rely on meta.getParentProjectName() — that field is only populated when
-        // the child explicitly declares <parent> in its pom.xml (Strategy 1 case).
-        // Strategy 2 (path-based) wires the relationship without touching that field.
+        // the child explicitly declares <parent> in its pom.xml.
         if (libertyModule.getParentModule() == null) return "";
         AbstractProjectMetadata meta = libertyModule.getBuildMetadata();
         if (meta == null) return "";
