@@ -344,8 +344,10 @@ public class UIBotTestUtils {
         }
 
         // Wait for the project to appear in the Liberty tool window. This line is sensitive to indexing and depends on the code that waits for indexing before continuing.
-        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "10");
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(10),
+        // Use a 60s timeout — on a freshly imported project the Liberty module scan runs after
+        // indexing completes, and on a memory-pressured CI runner this can take well over 10s.
+        ComponentFixture treeFixture = projectFrame.getTree("LibertyTree", treeItem, "60");
+        RepeatUtilsKt.waitFor(Duration.ofSeconds(60),
                 Duration.ofSeconds(2),
                 "Waiting for tree item" + treeItem + " to show in the Liberty tool window.",
                 "Tree item " + treeItem + " did not show in Liberty tool window.",
