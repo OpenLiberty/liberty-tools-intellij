@@ -45,12 +45,18 @@ on:
         required: false
         default: main
   push:
-    branches: '**'
+    # Restricted to main to avoid triggering workflows on forks.
+    branches: [ main ]
+  # Runs only when the 'run-ci' label is applied to the PR, preventing CI from triggering on every push.
+  # To re-trigger after new commits, remove and re-add the label.
   pull_request:
-    branches: [ main, lsp4jakarta-0.2.7-release-branch ]
+    types: [ labeled ]
+    branches: [ main, 'lsp4jakarta-*-integration*', 'lsp4jakarta-*-release*' ]
 
 jobs:
   fetch_merge_commit_sha_from_lsp4ij_PR:
+    # Only run when the 'run-ci' or 'run-lsp4jakarta-it' label is applied to the PR; ignored for push and workflow_call/workflow_dispatch triggers.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci' || github.event.label.name == 'run-lsp4jakarta-it'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
@@ -92,6 +98,8 @@ jobs:
 
   build:
     needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # Run for all test-groups when 'run-ci' label is applied.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-ci'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
     strategy:
@@ -140,6 +148,105 @@ jobs:
             test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
           - test-group: Maven-Multi-Module-MP
             test-class: io.openliberty.tools.intellij.it.MavenMPMultipleProjectTest
+          - test-group: LSP4Jakarta-Unit
+            test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
+    env:
+      USE_LOCAL_PLUGIN: ${{ inputs.useLocalPlugin || false }}
+      REF_LSP4IJ: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.pr_details }}
+      LSP4IJ_BRANCH: ${{ needs.fetch_merge_commit_sha_from_lsp4ij_PR.outputs.checkout_name }}
+      REF_LTI_TAG: ${{ inputs.refLTITag }}
+      TEST_CLASS: ${{ matrix.test-class }}
+    steps:
+      - name: Configure pagefile
+        if: contains(matrix.os, 'windows')
+        uses: al-cheb/configure-pagefile-action@v1.4
+        with:
+          minimum-size: 8GB
+          maximum-size: 10GB
+          disk-root: "C:"
+      - name: 'Checkout liberty-tools-intellij'
+        uses: actions/checkout@v4
+        with:
+          path: liberty-tools-intellij
+          ref: ${{ env.REF_LTI_TAG }}
+      - name: 'Install required integration test software'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/setup.sh
+
+      # Checkout and build lsp4ij only if USE_LOCAL_PLUGIN is true
+      - name: 'Checkout lsp4ij'
+        if: ${{ inputs.useLocalPlugin == true }}
+        uses: actions/checkout@v4
+        with:
+          repository: redhat-developer/lsp4ij
+          path: lsp4ij
+          ref: ${{ env.REF_LSP4IJ }}
+      - name: 'Build Lsp4ij'
+        if: ${{ inputs.useLocalPlugin == true }}
+        working-directory: ./lsp4ij
+        run: bash ./gradlew buildPlugin
+      # This step is retained to support the 24.0.9 tag running in the cron job, as it requires an unzipped LSP4IJ.
+      - name: 'Unzip lsp4ij file'
+        if: ${{ inputs.useLocalPlugin == true }}
+        working-directory: ./lsp4ij/build/distributions
+        run: |
+          unzip -o '*.zip' -d .
+
+      - name: 'Build Liberty-Tools-Intellij'
+        working-directory: ./liberty-tools-intellij
+        run: bash ./gradlew buildPlugin -PuseLocal=${{ env.USE_LOCAL_PLUGIN }}
+      - name: 'Archive artifacts'
+        if: ${{ runner.os == 'Linux' && matrix.test-group == 'LSP4Jakarta-Unit' && !failure() }}
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: liberty-tools-intellij-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          path: |
+            ./**/*liberty-tools-intellij*.zip
+            ./**/libs/*liberty-tools-intellij*.jar
+          if-no-files-found: warn
+          retention-days: 7
+      - name: 'Run tests'
+        id: run_tests
+        working-directory: ./liberty-tools-intellij
+        run: bash ./src/test/resources/ci/scripts/run.sh
+      - name: 'Archive Test logs and reports'
+        if: ${{ failure() && steps.run_tests.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: ${{ matrix.runtime }}-${{ matrix.test-group }}-test-report-LTI-${{ env.REF_LTI_TAG || 'default' }}-LSP4IJ-${{ env.LSP4IJ_BRANCH || 'default' }}
+          path: |
+            liberty-tools-intellij/build/reports/
+
+  build_lsp4jakarta:
+    needs: fetch_merge_commit_sha_from_lsp4ij_PR
+    # Runs subset of test-groups for lsp4jakarta PRs when 'run-lsp4jakarta-it' label is applied.
+    if: github.event_name == 'pull_request' && github.event.label.name == 'run-lsp4jakarta-it'
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.runtime }} - ${{ matrix.test-group }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [ linux, mac, windows ]
+        test-group: [ LSP4Jakarta-Unit, Gradle-Language-Server, Gradle-MP-Language-Server, Gradle-Jakarta-Language-Server ]
+        exclude:
+          # Exclude LSP4Jakarta-Unit from mac and windows - only run on linux
+          - runtime: mac
+            test-group: LSP4Jakarta-Unit
+          - runtime: windows
+            test-group: LSP4Jakarta-Unit
+        include:
+          - runtime: linux
+            os: ubuntu-latest
+          - runtime: mac
+            os: macOS-14
+          - runtime: windows
+            os: windows-latest
+          - test-group: Gradle-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModLSTest
+          - test-group: Gradle-MP-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModMPLSTest
+          - test-group: Gradle-Jakarta-Language-Server
+            test-class: io.openliberty.tools.intellij.it.GradleSingleModJakartaLSTest
           - test-group: LSP4Jakarta-Unit
             test-class: "io.openliberty.tools.intellij.lsp4jakarta.it.*"
     env:

@@ -65,7 +65,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     PsiType fieldType = field.getType();
                     if (containsWildcard(fieldType)) {
                         diagnostics.add(createDiagnostic(field, unit,
-                                Messages.getMessage("InvalidWildcardTypeInInjectField"),
+                                Messages.getMessage(DIAGNOSTIC_CODE_WILDCARD_INJECT),
                                 DIAGNOSTIC_CODE_WILDCARD_INJECT, null, DiagnosticSeverity.Error));
                     } else if (isGeneric && isBareTypeVariable(fieldType)) {
                         // Rule: a bare type variable (T or T[]) is not a legal bean type
@@ -80,10 +80,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             annotationNames, isGeneric, scopeFQNames,
                             new String[]{ DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD,
                                           DIAGNOSTIC_CODE_PRODUCER_FIELD_BARE_TYPE_VAR,
-                                          DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT },
-                            new String[]{ "InvalidWildcardTypeInProducerField",
-                                          "InvalidProducerFieldWithBareTypeVariableType",
-                                          "InvalidProducerFieldWithTypeVariableAndNonDependentScope" });
+                                          DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT });
                 }
             }
 
@@ -113,10 +110,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             annotationNames, isGeneric, scopeFQNames,
                             new String[]{ DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD,
                                           DIAGNOSTIC_CODE_PRODUCER_METHOD_BARE_TYPE_VAR,
-                                          DIAGNOSTIC_CODE_PRODUCER_METHOD_TYPE_VAR_NON_DEPENDENT },
-                            new String[]{ "InvalidWildcardTypeInProducerMethod",
-                                          "InvalidProducerMethodWithBareTypeVariableReturnType",
-                                          "InvalidProducerMethodWithTypeVariableAndNonDependentScope" });
+                                          DIAGNOSTIC_CODE_PRODUCER_METHOD_TYPE_VAR_NON_DEPENDENT });
                 }
             }
         }
@@ -125,18 +119,18 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
     /**
      * Applies the three CDI type-variable rules for a single {@code @Produces} member.
      *
-     * <p>{@code codes[0]} / {@code msgKeys[0]} — wildcard in type (always invalid)<br>
-     * {@code codes[1]} / {@code msgKeys[1]} — bare type variable or array of one (always invalid)<br>
-     * {@code codes[2]} / {@code msgKeys[2]} — parameterized type with type variable and
-     * non-{@code @Dependent} scope
+     * <p>{@code codes[0]} — wildcard in type (always invalid)<br>
+     * {@code codes[1]} — bare type variable or array of one (always invalid)<br>
+     * {@code codes[2]} — parameterized type with type variable and non-{@code @Dependent} scope;
+     * the message key for each is the code value itself (matches messages.properties keys)
      */
     private void checkProducerMember(PsiClass type, PsiElement element, PsiType psiType,
                                      PsiJavaFile unit, List<Diagnostic> diagnostics,
                                      String[] annotationNames, boolean isGeneric,
-                                     String[] scopeFQNames, String[] codes, String[] msgKeys) {
+                                     String[] scopeFQNames, String[] codes) {
         // Rule 0: wildcard in type — always a definition error
         if (containsWildcard(psiType)) {
-            diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(msgKeys[0]),
+            diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(codes[0]),
                     codes[0], null, DiagnosticSeverity.Error));
         }
 
@@ -146,7 +140,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
 
         // Rule 1: bare type variable (T or T[]) — always a definition error
         if (isBareTypeVariable(psiType)) {
-            diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(msgKeys[1]),
+            diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(codes[1]),
                     codes[1], null, DiagnosticSeverity.Error));
         }
         // Rule 2: parameterized type with type variable — requires @Dependent scope
@@ -154,7 +148,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
             boolean hasNonDependentScope = getMatchedJavaElementNames(type, annotationNames, scopeFQNames)
                     .stream().anyMatch(s -> !DEPENDENT_FQ_NAME.equals(s));
             if (hasNonDependentScope) {
-                diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(msgKeys[2]),
+                diagnostics.add(createDiagnostic(element, unit, Messages.getMessage(codes[2]),
                         codes[2], null, DiagnosticSeverity.Error));
             }
         }
@@ -166,6 +160,14 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
      *
      * <p>PSI resolves type arguments fully, so a bare type parameter always resolves to a
      * {@link PsiTypeParameter} — no name comparison needed.
+     *
+     * <p>Examples (assuming the enclosing class declares {@code <T>}):
+     * <ul>
+     * <li>{@code T} (bare type variable) — returns {@code true}</li>
+     * <li>{@code T[]} (array of type variable) — returns {@code true}</li>
+     * <li>{@code List<T>} (parameterized, not bare) — returns {@code false}</li>
+     * <li>{@code String} (concrete type) — returns {@code false}</li>
+     * </ul>
      */
     private boolean isBareTypeVariable(PsiType psiType) {
         if (psiType instanceof PsiClassType) {
@@ -180,6 +182,15 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
     /**
      * Returns {@code true} if {@code psiType} is a parameterized type that contains at
      * least one type variable in its type arguments (recursively).
+     *
+     * <p>Examples (assuming the enclosing class declares {@code <T>}):
+     * <ul>
+     * <li>{@code List<T>} — returns {@code true}</li>
+     * <li>{@code Map<String, T>} — returns {@code true}</li>
+     * <li>{@code List<Set<T>>} (nested) — returns {@code true}</li>
+     * <li>{@code T} (bare type variable, not parameterized) — returns {@code false}</li>
+     * <li>{@code List<String>} (concrete type argument) — returns {@code false}</li>
+     * </ul>
      */
     private boolean containsTypeVariable(PsiType psiType) {
         if (psiType instanceof PsiClassType) {
@@ -195,6 +206,16 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
     /**
      * Returns {@code true} if {@code type} contains a wildcard ({@code ?},
      * {@code ? extends}, or {@code ? super}) anywhere in the type tree.
+     *
+     * <p>Examples:
+     * <ul>
+     * <li>{@code List<?>} — returns {@code true}</li>
+     * <li>{@code List<? extends Number>} — returns {@code true}</li>
+     * <li>{@code List<? super Number>} — returns {@code true}</li>
+     * <li>{@code Map<String, ? extends Number>} — returns {@code true}</li>
+     * <li>{@code List<?>[] } (array of {@code List<?>}) — returns {@code true}</li>
+     * <li>{@code List<String>} — returns {@code false}</li>
+     * </ul>
      */
     private boolean containsWildcard(PsiType type) {
         if (type instanceof PsiWildcardType) {
