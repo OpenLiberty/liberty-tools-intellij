@@ -372,9 +372,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * @param methodTargetClass the fully qualified name of the parent type to match
      * @return true if the method call matches both the method name and parent type, false otherwise
      */
-    private boolean isMatchingMethodInvocation(PsiMethodCallExpression call,
-                                              String methodInvoked,
-                                              String methodTargetClass) {
+    protected static boolean isMatchingMethodInvocation(PsiMethodCallExpression call,
+                                                        String methodInvoked,
+                                                        String methodTargetClass) {
         PsiReferenceExpression methodExpr = call.getMethodExpression();
         String methodName = methodExpr.getReferenceName();
         

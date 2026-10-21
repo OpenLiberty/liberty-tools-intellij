@@ -120,7 +120,14 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-    }
+		List<PsiMethod> proceedNotInTryCatch = allMethodDeclarations.stream().filter(m -> ASTUtils.isMethodInvocationOutsideTryCatch(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT)).collect(Collectors.toList());
+		for (PsiMethod m : proceedNotInTryCatch) {
+			Range range = PositionUtils.toNameRange(m);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorProceedNotInTryCatch"));
+			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_PROCEED_NOT_IN_TRY_CATCH, DiagnosticSeverity.Warning);
+			diagnostics.add(diagnostic);
+		}
+			 }
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
