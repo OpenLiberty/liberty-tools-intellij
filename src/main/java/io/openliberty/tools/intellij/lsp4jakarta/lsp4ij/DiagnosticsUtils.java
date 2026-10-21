@@ -17,6 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -237,12 +238,30 @@ public class DiagnosticsUtils {
     }
 
     /**
-     * Derives a Java bean property name from a getter method name using
+     * Returns the JavaBeans property name for the given method if it qualifies as
+     * a property getter: a non-static, no-argument method whose name follows
+     * {@code get<Name>} or {@code is<Name>} conventions and whose return type is
+     * not {@code void}. Returns {@code null} if any condition is not met.
+     *
+     * @param method the method to inspect
+     * @return the property name (e.g. {@code "name"}), or {@code null} if not a getter
+     */
+    public static String getterPropertyName(PsiMethod method) {
+        if (method.getParameterList().getParametersCount() != 0
+                || method.hasModifierProperty(PsiModifier.STATIC)
+                || PsiTypeUtils.isVoidReturnType(method)) {
+            return null;
+        }
+        return getterPropertyName(method.getName());
+    }
+
+    /**
+     * Derives a Java bean property name from a method name using
      * {@link Introspector#decapitalize}.
-     * Returns {@code null} if the method name does not follow getter conventions
+     * Returns {@code null} if the name does not follow getter conventions
      * ({@code get<Name>} or {@code is<Name>}).
      *
-     * @param methodName the getter method name (e.g. {@code "getName"}, {@code "isActive"})
+     * @param methodName the method name (e.g. {@code "getName"}, {@code "isActive"})
      * @return the property name (e.g. {@code "name"}, {@code "active"}), or {@code null}
      */
     public static String getterPropertyName(String methodName) {

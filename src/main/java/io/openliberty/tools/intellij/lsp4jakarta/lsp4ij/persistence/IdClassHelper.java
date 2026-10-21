@@ -16,7 +16,6 @@ import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
@@ -64,15 +63,17 @@ class IdClassHelper {
         // Infer access type: if any @Id is on a field → field-based; otherwise → property-based.
         boolean fieldAccess = idMembers.stream().anyMatch(m -> m instanceof PsiField);
 
-        // Build name→expectedType map for entity @Id members.
-        // For @ManyToOne / @OneToOne @Id members the expected type is the parent entity's
+        // Build name→member and name→expectedType maps for entity @Id members in one pass.
+        // For @ManyToOne / @OneToOne @Id members the expected type is the related entity's
         // PK type, not the relationship type (spec §2.4.1.1, third bullet).
+        Map<String, PsiJvmModifiersOwner> entityIdMembers = new HashMap<>();
         Map<String, String> entityIdMap = new HashMap<>();
         for (PsiJvmModifiersOwner member : idMembers) {
             String memberName = fieldAccess
                     ? ((PsiNamedElement) member).getName()
                     : DiagnosticsUtils.getterPropertyName(((PsiNamedElement) member).getName());
             if (memberName != null) {
+                entityIdMembers.put(memberName, member);
                 entityIdMap.put(memberName, resolveExpectedKeyClassType(member));
             }
         }
@@ -88,34 +89,27 @@ class IdClassHelper {
             }
         } else {
             for (PsiMethod method : keyClass.getMethods()) {
-                String propertyName = DiagnosticsUtils.getterPropertyName(method.getName());
-                // A property getter is an instance method with no parameters and a non-void return type.
-                if (propertyName != null && method.getParameterList().getParametersCount() == 0
-                        && !method.hasModifierProperty(PsiModifier.STATIC)
-                        && !PsiTypeUtils.isVoidReturnType(method)) {
+                String propertyName = DiagnosticsUtils.getterPropertyName(method);
+                if (propertyName != null) {
                     PsiType returnType = method.getReturnType();
                     keyClassMap.put(propertyName, returnType != null ? returnType.getCanonicalText() : null);
                 }
             }
         }
 
-        // Check every entity @Id member against the key class map.
-        for (PsiJvmModifiersOwner idMember : idMembers) {
-            String memberName = fieldAccess
-                    ? ((PsiNamedElement) idMember).getName()
-                    : DiagnosticsUtils.getterPropertyName(((PsiNamedElement) idMember).getName());
-            if (memberName == null) {
-                continue;
-            }
+        // Iterate entityIdMap directly — no need to re-derive memberName from idMembers again.
+        for (Map.Entry<String, String> entry : entityIdMap.entrySet()) {
+            String memberName = entry.getKey();
+            PsiElement idMember = (PsiElement) entityIdMembers.get(memberName);
             if (!keyClassMap.containsKey(memberName)) {
-                diagnostics.add(diagnostic((PsiElement) idMember,
+                diagnostics.add(diagnostic(idMember,
                         Messages.getMessage("IdClassMemberMissingInKeyClass", memberName),
                         PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MEMBER_MISSING_IN_KEY_CLASS));
             } else {
-                String entityTypeName = entityIdMap.get(memberName);
+                String entityTypeName = entry.getValue();
                 String keyTypeName = keyClassMap.get(memberName);
                 if (entityTypeName != null && keyTypeName != null && !entityTypeName.equals(keyTypeName)) {
-                    diagnostics.add(diagnostic((PsiElement) idMember,
+                    diagnostics.add(diagnostic(idMember,
                             Messages.getMessage("IdClassMemberTypeMismatch", memberName, entityTypeName, keyTypeName),
                             PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MEMBER_TYPE_MISMATCH));
                 }
