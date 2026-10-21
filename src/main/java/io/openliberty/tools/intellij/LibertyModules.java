@@ -190,8 +190,9 @@ public class LibertyModules {
             VirtualFile buildFile = module.getBuildFile();
             for (File dir = new File(buildFile.getParent().getPath()).getParentFile(); dir != null; dir = dir.getParentFile()) {
                 File pom = new File(dir, "pom.xml");
+                if (!pom.isFile()) break;
                 String key = canonicalPath(dir);
-                if (pom.isFile() && !otherPoms.containsKey(key)) {
+                if (!otherPoms.containsKey(key)) {
                     VirtualFile pomVFile = LocalFileSystem.getInstance().findFileByPath(pom.getAbsolutePath());
                     if (pomVFile != null) otherPoms.put(key, pomVFile);
                 }
