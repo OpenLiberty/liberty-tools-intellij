@@ -78,6 +78,21 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     }
 
     /**
+     * Collects all {@code @Delegate}-annotated fields and method parameters from a class.
+     *
+     * @param type the class to scan
+     * @return list of all matching elements
+     */
+    private List<PsiModifierListOwner> collectAllDelegates(PsiClass type) {
+        List<PsiModifierListOwner> delegateElements = new ArrayList<>();
+        collectDelegates(type.getFields(), delegateElements);
+        for (PsiMethod method : type.getMethods()) {
+            collectDelegates(method.getParameterList().getParameters(), delegateElements);
+        }
+        return delegateElements;
+    }
+
+    /**
      * Validates a class annotated with {@code @Decorator}:
      * <ul>
      *   <li>Must declare exactly one {@code @Delegate} injection point.</li>
@@ -86,12 +101,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * </ul>
      */
     private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        List<PsiModifierListOwner> delegateElements = new ArrayList<>();
-
-        collectDelegates(type.getFields(), delegateElements);
-        for (PsiMethod method : type.getMethods()) {
-            collectDelegates(method.getParameterList().getParameters(), delegateElements);
-        }
+        List<PsiModifierListOwner> delegateElements = collectAllDelegates(type);
 
         reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
 
@@ -264,17 +274,10 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * {@code @Delegate}, per CDI 3.0 spec §8.1.3.
      */
     private void validateDelegateNotInDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        List<PsiModifierListOwner> delegateElements = new ArrayList<>();
-
-        collectDelegates(type.getFields(), delegateElements);
-        for (PsiMethod method : type.getMethods()) {
-            collectDelegates(method.getParameterList().getParameters(), delegateElements);
-        }
-
-        for (PsiModifierListOwner element : delegateElements) {
+        for (PsiModifierListOwner element : collectAllDelegates(type)) {
             diagnostics.add(createDiagnostic(element, unit,
-                    Messages.getMessage("DelegateMustBeInDecorator"),
-                    ManagedBeanConstants.DIAGNOSTIC_CODE_DELEGATE_MUST_BE_IN_DECORATOR, null,
+                    Messages.getMessage("InvalidDelegateOutsideDecorator"),
+                    ManagedBeanConstants.DIAGNOSTIC_CODE_DELEGATE_OUTSIDE_DECORATOR, null,
                     DiagnosticSeverity.Error));
         }
     }

@@ -503,10 +503,10 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
         // Line 13 (0-based), field name "service" starts at col 27, ends at col 34
         Diagnostic delegateOutsideDecoratorError = d(13, 27, 34,
-                "An injection point annotated with @Delegate must be inside a class annotated with @Decorator.",
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
-                "DelegateMustBeInDecorator");
+                "InvalidDelegateOutsideDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, delegateOutsideDecoratorError);
 
@@ -549,17 +549,17 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
         // Line 13 (0-based), parameter name "service" starts at col 46, ends at col 53
         Diagnostic methodParamDelegateError = d(13, 46, 53,
-                "An injection point annotated with @Delegate must be inside a class annotated with @Decorator.",
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
-                "DelegateMustBeInDecorator");
+                "InvalidDelegateOutsideDecorator");
 
         // Line 18 (0-based), parameter name "ps" starts at col 68, ends at col 70
         Diagnostic constructorParamDelegateError = d(18, 68, 70,
-                "An injection point annotated with @Delegate must be inside a class annotated with @Decorator.",
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
                 DiagnosticSeverity.Error,
                 "jakarta-cdi",
-                "DelegateMustBeInDecorator");
+                "InvalidDelegateOutsideDecorator");
 
         assertJavaDiagnostics(diagnosticsParams, utils, methodParamDelegateError, constructorParamDelegateError);
 
@@ -612,9 +612,9 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
     /**
      * Test that a valid @Decorator class with a single @Inject @Delegate field does NOT trigger
-     * any DelegateMustBeInDecorator diagnostic.
+     * any InvalidDelegateOutsideDecorator diagnostic.
      *
-     * Expected: No DelegateMustBeInDecorator diagnostics.
+     * Expected: No InvalidDelegateOutsideDecorator diagnostics.
      */
     @Test
     public void testValidDecoratorWithDelegateNoOutsideDecoratorDiagnostic() throws Exception {
@@ -634,7 +634,7 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
     /**
      * Test that a non-decorator class with @Inject fields but NO @Delegate annotation does NOT
-     * trigger any DelegateMustBeInDecorator diagnostic.
+     * trigger any InvalidDelegateOutsideDecorator diagnostic.
      *
      * Expected: No diagnostics.
      */
