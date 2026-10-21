@@ -57,8 +57,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		if (unit == null)
 			return;
 
-		PsiClass[] alltypes;
-		alltypes = unit.getClasses();
+		// Validate all types in the current file.
+		PsiClass[] alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
@@ -362,31 +362,40 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			diagnostics.add(diagnostic);
 		}
 	}
+	
+	// =========================================================================
+	// Validation — @AroundConstruct in target classes
+	// =========================================================================
 
 	/**
-	* Checks if a non-interceptor class (target class) or one of its superclasses
-	* declares a method annotated with {@code @AroundConstruct}.
-	* According to the Jakarta Interceptors 2.0 specification, around-construct
-	* interceptor methods may only be declared in interceptor classes and/or their
-	* superclasses. Declaring them in a target class or its superclasses is invalid.
-	*
-	* @param type        the type to check
-	* @param unit        the compilation unit
-	* @param diagnostics the list to add diagnostics to
-	*/
-	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-		for (PsiMethod method : type.getMethods()) {
-			for (PsiAnnotation annotation : method.getModifierList().getAnnotations()) {
-				if (isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)) {
-					Range range = PositionUtils.toNameRange(method);
-					String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
-					Diagnostic diagnostic = new Diagnostic(range, msg);
-					completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
-					diagnostics.add(diagnostic);
-					break;
-				}
-			}
+	 * Checks if a non-interceptor class declares a method annotated with
+	 * {@code @AroundConstruct}, which is forbidden by the Jakarta Interceptors 2.0
+	 * specification. The diagnostic is suppressed when the class has at least one
+	 * {@code @Interceptor}-annotated subclass declared in a different source file
+	 * (spec permits {@code @AroundConstruct} in interceptor superclasses).
+	 *
+	 * @param type        the non-interceptor type to check
+	 * @param unit        the PSI Java file
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
+												   List<Diagnostic> diagnostics) {
+		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
+		// result is constant across all methods of the same type.
+		if (hasInterceptorSubclass(type, unit)) {
+			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
+			return;
 		}
+		Arrays.stream(type.getMethods())
+			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
+				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
+			.forEach(method -> {
+				Range range = PositionUtils.toNameRange(method);
+				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
+				Diagnostic diagnostic = new Diagnostic(range, msg);
+				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
+				diagnostics.add(diagnostic);
+			});
 	}
 
 	/**

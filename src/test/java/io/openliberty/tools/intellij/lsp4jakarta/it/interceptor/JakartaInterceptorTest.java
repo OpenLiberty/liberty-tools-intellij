@@ -117,7 +117,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
 
         Diagnostic aroundConstructInTargetClassProceed = JakartaForJavaAssert.d(23, 18, 41,
-                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
 
         // @PostConstruct/PreDestroy/AroundConstruct methods with InvocationContext param also violate
@@ -1617,7 +1617,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         // Triggers two diagnostics: @AroundConstruct not allowed in target class,
         // AND wrong lifecycle callback signature (non-void return + has params).
         Diagnostic aroundConstructInTargetClass = JakartaForJavaAssert.d(14, 18, 27,
-                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
         Diagnostic invalidSignature = JakartaForJavaAssert.d(14, 18, 27,
                 "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
@@ -1642,7 +1642,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         // Triggers two diagnostics: @AroundConstruct not allowed in superclass of target class,
         // AND wrong lifecycle callback signature (non-void return + has params).
         Diagnostic aroundConstructInSuperclass = JakartaForJavaAssert.d(14, 18, 27,
-                "@AroundConstruct methods must not be declared in the target class or its superclasses. Only interceptor classes and/or its superclasses may declare @AroundConstruct methods.",
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
         Diagnostic invalidSignature = JakartaForJavaAssert.d(14, 18, 27,
                 "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
@@ -1686,6 +1686,112 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
+    @Test
+    public void testAroundConstructInSuperclassWithSeparateInterceptorSubclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SeparateFileSuperclassWithAroundConstruct.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @AroundConstruct declared in a non-interceptor superclass whose
+        // @Interceptor-annotated subclass (SeparateFileInterceptorSubclass.java) lives
+        // in a separate source file. The ClassInheritorsSearch finds the @Interceptor
+        // subclass and suppresses the diagnostic.
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testAroundConstructInSeparateFileSuperclassOfNonInterceptorIsInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidSeparateFileSuperclassWithAroundConstruct.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Invalid: @AroundConstruct declared in a non-interceptor superclass whose only
+        // subclass (InvalidSeparateFileTargetSubclass.java) is also non-interceptor.
+        // No @Interceptor class extends this — the ClassInheritorsSearch finds no
+        // @Interceptor subclass, so the diagnostic must fire.
+        Diagnostic aroundConstructInSeparateSuperclass = JakartaForJavaAssert.d(13, 16, 25,
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInSeparateSuperclass);
+    }
+
+    @Test
+    public void testAroundConstructSharedAncestorTwoNonInterceptorSubclasses() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SharedAncestorWithAroundConstruct.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Invalid: @AroundConstruct declared in a common ancestor of two non-interceptor
+        // subclasses (NonInterceptorSubclassA, NonInterceptorSubclassB) in separate files.
+        // Neither subclass is @Interceptor — diagnostic must still fire.
+        Diagnostic aroundConstructInSharedAncestor = JakartaForJavaAssert.d(13, 16, 25,
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInSharedAncestor);
+    }
+
+    @Test
+    public void testAroundConstructSharedAncestorOneInterceptorOneNonInterceptorSubclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SharedAncestorInterceptorAndTarget.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @AroundConstruct declared in a common ancestor of two subclasses —
+        // one @Interceptor (InterceptorSubclassOfShared) and one non-interceptor
+        // (NonInterceptorSubclassOfShared) in separate files. The ClassInheritorsSearch
+        // finds the @Interceptor subclass — diagnostic must be suppressed.
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testAroundConstructSuperclassWithInterceptorSubclassInSameFile() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/SameFileInterceptorSubclassWithAroundConstruct.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Invalid: @AroundConstruct declared in a non-interceptor superclass whose
+        // @Interceptor-annotated subclass is in the SAME compilation unit.
+        // hasInterceptorSubclass() filters out same-file subtypes (PsiFile equality check),
+        // so the @Interceptor subclass is not discovered and the diagnostic must still fire.
+        Diagnostic aroundConstructInSameFileSuperclass = JakartaForJavaAssert.d(17, 16, 25,
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInSameFileSuperclass);
+    }
+  
     @Test
     public void testInvalidLifecycleCallbackSignatureInTargetClass() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
