@@ -9,8 +9,8 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * Valid: exercises all three try-statement forms that should suppress the
- * "proceed not in try/catch" warning.  All three map to the same JDT
- * TryStatement AST node type, so the single instanceof check in ASTUtils
+ * "proceed not in try/catch" warning.  All three map to the same
+ * PsiTryStatement node type, so the single instanceof check in ASTUtils
  * accepts all of them.
  *
  *   try/catch           — aroundTimeout, preDestroy
