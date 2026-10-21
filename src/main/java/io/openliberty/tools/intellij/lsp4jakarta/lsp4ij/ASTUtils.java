@@ -12,13 +12,11 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiTryStatement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -97,19 +95,12 @@ public class ASTUtils {
         Collection<PsiMethodCallExpression> allCalls = PsiTreeUtil.findChildrenOfType(body, PsiMethodCallExpression.class);
         List<PsiMethodCallExpression> results = new ArrayList<>();
         for (PsiMethodCallExpression call : allCalls) {
-            PsiReferenceExpression methodExpr = call.getMethodExpression();
-            String methodName = methodExpr.getReferenceName();
-            if (targetMethod.equals(methodName)) {
-                PsiMethod resolved = call.resolveMethod();
-                if (resolved != null) {
-                    PsiClass declaringClass = resolved.getContainingClass();
-                    if (declaringClass != null && parentFQN.equals(declaringClass.getQualifiedName())) {
-                        results.add(call);
-                        if (stopAfterFirst) {
-                            return results;
-                        }
-                    }
-                }
+            if (!AbstractDiagnosticsCollector.isMatchingMethodInvocation(call, targetMethod, parentFQN)) {
+                continue;
+            }
+            results.add(call);
+            if (stopAfterFirst) {
+                return results;
             }
         }
         return results;
