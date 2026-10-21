@@ -505,7 +505,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                                 PsiAnnotation idClassAnnotation,
                                                 List<PsiJvmModifiersOwner> idMembers,
                                                 List<Diagnostic> diagnostics) {
-        new IdClassService().validate(entityType, unit, idClassAnnotation, idMembers, diagnostics);
+        new IdClassHelper().validate(entityType, unit, idClassAnnotation, idMembers, diagnostics);
     }
 
     /**
@@ -538,7 +538,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         if (PersistenceConstants.ID.equals(candidate)) {
             // When @IdClass is present the entity uses composite FK-based PKs (spec §2.4.1.1);
             // @Id fields may hold entity types — InvalidIdType is not applicable.
-            // IdClassService validates correctness separately.
+            // IdClassHelper validates correctness separately.
             if (!entityHasIdClass) {
                 boolean isArrayType = elementType instanceof PsiArrayType;
                 if (isArrayType || !PersistenceConstants.SET_OF_VALID_ID_TYPES.contains(typeName)) {

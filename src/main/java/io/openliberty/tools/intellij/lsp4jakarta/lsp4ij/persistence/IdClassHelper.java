@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Service class that encapsulates all {@code @IdClass} validation logic for
+ * Helper class that encapsulates all {@code @IdClass} validation logic for
  * Jakarta Persistence entity diagnostics.
  *
  * <p>Implements the rules from Jakarta Persistence 3.0 spec §2.4 and §2.4.1.1:
@@ -40,7 +40,7 @@ import java.util.Map;
  * </ul>
  * </p>
  */
-class IdClassService {
+class IdClassHelper {
 
     /**
      * Validates that the members of an {@code @IdClass} key class correspond to the
@@ -69,11 +69,11 @@ class IdClassService {
         // PK type, not the relationship type (spec §2.4.1.1, third bullet).
         Map<String, String> entityIdMap = new HashMap<>();
         for (PsiJvmModifiersOwner member : idMembers) {
-            String name = fieldAccess
+            String memberName = fieldAccess
                     ? ((PsiNamedElement) member).getName()
                     : DiagnosticsUtils.getterPropertyName(((PsiNamedElement) member).getName());
-            if (name != null) {
-                entityIdMap.put(name, resolveExpectedKeyClassType(member));
+            if (memberName != null) {
+                entityIdMap.put(memberName, resolveExpectedKeyClassType(member));
             }
         }
 
@@ -88,13 +88,13 @@ class IdClassService {
             }
         } else {
             for (PsiMethod method : keyClass.getMethods()) {
-                String propName = DiagnosticsUtils.getterPropertyName(method.getName());
+                String propertyName = DiagnosticsUtils.getterPropertyName(method.getName());
                 // A property getter is an instance method with no parameters and a non-void return type.
-                if (propName != null && method.getParameterList().getParametersCount() == 0
+                if (propertyName != null && method.getParameterList().getParametersCount() == 0
                         && !method.hasModifierProperty(PsiModifier.STATIC)
                         && !PsiTypeUtils.isVoidReturnType(method)) {
                     PsiType returnType = method.getReturnType();
-                    keyClassMap.put(propName, returnType != null ? returnType.getCanonicalText() : null);
+                    keyClassMap.put(propertyName, returnType != null ? returnType.getCanonicalText() : null);
                 }
             }
         }
@@ -130,58 +130,66 @@ class IdClassService {
      * <ul>
      *   <li>For a basic {@code @Id} field or property this is the declared type.</li>
      *   <li>For a relationship {@code @Id} ({@code @ManyToOne} / {@code @OneToOne}),
-     *       the key-class must hold the parent entity's PK type (simple PK) or
-     *       {@code @IdClass} type (composite PK).</li>
+     *       spec §2.4.1.1 (third bullet) requires the key-class to hold the <em>related</em>
+     *       entity's PK type — not the entity type itself:
+     *     <ul>
+     *       <li>If the related entity has a simple PK, the key-class member type is that
+     *           {@code @Id} field/property type.</li>
+     *       <li>If the related entity itself has a composite PK ({@code @IdClass}), the
+     *           key-class member type is that {@code @IdClass} type.</li>
+     *     </ul>
+     *   </li>
      * </ul>
      *
      * @param member the entity {@code @Id} field or method
-     * @return the expected key-class type name, or the raw member type if unresolvable
+     * @return the expected key-class type name, or the {@code @Id} field type if unresolvable
      */
     private String resolveExpectedKeyClassType(PsiJvmModifiersOwner member) {
-        String rawType = resolvedTypeName(member);
+        String idFieldType = resolvedTypeName(member);
 
         // Only relationship @Id fields need special handling.
         boolean isRelationship = member.hasAnnotation(PersistenceConstants.MANY_TO_ONE)
                 || member.hasAnnotation(PersistenceConstants.ONE_TO_ONE);
-        if (!isRelationship || rawType == null) {
-            return rawType;
+        if (!isRelationship || idFieldType == null) {
+            return idFieldType;
         }
 
-        // Resolve the parent entity PsiClass from the field/method type.
+        // Resolve the related entity PsiClass from the field/method type.
         PsiType memberType = member instanceof PsiField
                 ? ((PsiField) member).getType()
                 : ((PsiMethod) member).getReturnType();
-        if (!(memberType instanceof PsiClassType parentClassType)) {
-            return rawType;
+        if (!(memberType instanceof PsiClassType idClassType)) {
+            return idFieldType;
         }
-        PsiClass parentClass = parentClassType.resolve();
-        if (parentClass == null) {
-            return rawType;
+        PsiClass idType = idClassType.resolve();
+        if (idType == null) {
+            return idFieldType;
         }
 
-        // If the parent has @IdClass (composite PK), return that class's type.
-        PsiAnnotation idClassAnn = parentClass.getAnnotation(PersistenceConstants.IDCLASS);
-        if (idClassAnn != null) {
-            PsiClass pkClass = resolveIdClass(idClassAnn);
+        // Spec §2.4.1.1 third bullet: if the *related* entity itself has a composite PK
+        // (@IdClass), the key-class member must use that @IdClass type, not the entity type.
+        PsiAnnotation idClassAnnotation = idType.getAnnotation(PersistenceConstants.IDCLASS);
+        if (idClassAnnotation != null) {
+            PsiClass pkClass = resolveIdClass(idClassAnnotation);
             if (pkClass != null) {
                 return pkClass.getQualifiedName();
             }
         }
 
-        // Simple parent PK: return the type of the parent's @Id field or getter.
-        for (PsiField field : parentClass.getFields()) {
+        // Simple PK on the related entity: return its @Id field/getter type directly.
+        for (PsiField field : idType.getFields()) {
             if (field.getAnnotation(PersistenceConstants.ID) != null) {
                 return field.getType().getCanonicalText();
             }
         }
-        for (PsiMethod method : parentClass.getMethods()) {
+        for (PsiMethod method : idType.getMethods()) {
             if (method.getAnnotation(PersistenceConstants.ID) != null) {
                 PsiType rt = method.getReturnType();
-                return rt != null ? rt.getCanonicalText() : rawType;
+                return rt != null ? rt.getCanonicalText() : idFieldType;
             }
         }
 
-        return rawType;
+        return idFieldType;
     }
 
     /**
