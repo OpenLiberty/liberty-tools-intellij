@@ -18,9 +18,11 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
@@ -49,7 +51,11 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
             return;
         }
 
-        for (PsiClass type : unit.getClasses()) {
+        // Get all classes including nested classes
+        List<PsiClass> allTypes = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
+
+        for (PsiClass type : allTypes) {
             if (!isMatchedAnnotation(type.getAnnotations(), SPECIALIZES_FQ_NAME)) {
                 continue;
             }
