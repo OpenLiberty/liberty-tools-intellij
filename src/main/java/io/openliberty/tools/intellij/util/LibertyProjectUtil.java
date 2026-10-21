@@ -48,17 +48,15 @@ public class LibertyProjectUtil {
     /**
      * Directory names that are build-output folders and should never be scanned
      * for Liberty build files.  A build file found anywhere under one of these
-     * directories (relative to the project root) is considered a generated copy,
-     * not a source file.
+     * directories, <em>within the project root</em>, is considered a generated
+     * copy, not a source file.
      *
-     * <p>Note: "build" is intentionally omitted here. Although Gradle's output
-     * directory is also named "build", that name is too generic — it appears in
-     * many legitimate parent paths (e.g. the IntelliJ sandbox lives under
-     * {@code liberty-tools-intellij/build/idea-sandbox/...}). Build-output
-     * filtering for Gradle projects is handled by {@link #isBuildOutputFile}
-     * via the project-root boundary check instead.</p>
+     * <p>The walk performed by {@link #isBuildOutputFile(VirtualFile, String)} stops
+     * at the project base path, so directories with these names that appear
+     * <em>above</em> the project root (e.g. the IntelliJ sandbox living under
+     * {@code liberty-tools-intellij/build/idea-sandbox/...}) are never matched.</p>
      */
-    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "bin", "classes");
+    private static final Set<String> EXCLUDED_DIR_NAMES = Set.of("target", "bin", "classes", "build");
 
     enum BuildFileFilter {
         ADDABLE {
@@ -257,8 +255,8 @@ public class LibertyProjectUtil {
         }
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
-                // Skip build files that live inside build-output directories (e.g. target/, bin/, classes/)
-                if (isBuildOutputFile(vFile)) {
+                // Skip build files that live inside build-output directories (e.g. target/, build/)
+                if (isBuildOutputFile(vFile, project.getBasePath())) {
                     continue;
                 }
                 try {
@@ -295,7 +293,7 @@ public class LibertyProjectUtil {
         Collection<VirtualFile> indexedVFiles = readIndex(project, "pom.xml");
         if (indexedVFiles != null) {
             for (VirtualFile vFile : indexedVFiles) {
-                if (!isBuildOutputFile(vFile)) {
+                if (!isBuildOutputFile(vFile, project.getBasePath())) {
                     poms.add(vFile);
                 }
             }
@@ -324,27 +322,29 @@ public class LibertyProjectUtil {
     /**
      * Returns {@code true} when the given build file resides inside a well-known
      * build-output or generated-sources directory ({@code target/}, {@code bin/},
-     * {@code classes/}).
+     * {@code classes/}, {@code build/}) that is a descendant of the project root.
      *
      * <p>The walk stops as soon as a directory in {@link #EXCLUDED_DIR_NAMES} is
-     * found, or when the filesystem root is reached. It does <em>not</em> use the
-     * IntelliJ {@code Project} base path as a stopping point, so it correctly
-     * handles files outside the project root too (e.g. manually added projects).</p>
+     * found, or when the project base path is reached (whichever comes first).
+     * Stopping at the project root prevents false positives when the project itself
+     * sits inside a path that contains one of these directory names — for example,
+     * the IntelliJ sandbox at {@code liberty-tools-intellij/build/idea-sandbox/...}
+     * will not cause files inside the imported test project to be filtered out.</p>
      *
-     * <p>"build" is <em>not</em> in {@link #EXCLUDED_DIR_NAMES} because the name is
-     * too common — it appears in CI checkout paths and in the IntelliJ sandbox path
-     * ({@code build/idea-sandbox/...}) and would incorrectly filter out real source
-     * files. Gradle build-output files ({@code build/...}) are instead excluded by
-     * the Liberty plugin detection logic which checks for
-     * {@code src/main/liberty/config/server.xml} relative to the build file.</p>
-     *
-     * @param buildFile the virtual file to test
-     * @return {@code true} if any ancestor directory of {@code buildFile} has a name
-     *         listed in {@link #EXCLUDED_DIR_NAMES}
+     * @param buildFile   the virtual file to test
+     * @param projectBase the project's base path (from {@code Project.getBasePath()});
+     *                    if {@code null} the walk continues to the filesystem root
+     * @return {@code true} if any ancestor directory of {@code buildFile}, up to
+     *         (but not including) the project root, has a name listed in
+     *         {@link #EXCLUDED_DIR_NAMES}
      */
-    static boolean isBuildOutputFile(VirtualFile buildFile) {
+    static boolean isBuildOutputFile(VirtualFile buildFile, @Nullable String projectBase) {
         VirtualFile parent = buildFile.getParent();
         while (parent != null) {
+            // Stop walking once we've reached (or passed) the project root.
+            if (projectBase != null && projectBase.equals(parent.getPath())) {
+                break;
+            }
             if (EXCLUDED_DIR_NAMES.contains(parent.getName())) {
                 return true;
             }
