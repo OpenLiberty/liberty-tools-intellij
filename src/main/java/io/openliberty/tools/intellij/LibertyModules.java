@@ -177,6 +177,8 @@ public class LibertyModules {
                 }
             }
         }
+        // Clear stale relationships from any previous scan before re-wiring.
+        byDir.values().forEach(LibertyModule::clearMultiModuleRelationships);
 
         // 2. Every other POM that is an aggregator
         Map<String, VirtualFile> otherPoms = new TreeMap<>();
