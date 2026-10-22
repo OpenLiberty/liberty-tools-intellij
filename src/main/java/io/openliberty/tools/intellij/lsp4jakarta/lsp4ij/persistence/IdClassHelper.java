@@ -16,11 +16,8 @@ import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.Range;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +38,14 @@ import java.util.Map;
  * </p>
  */
 class IdClassHelper {
+    
+    /**
+     * A finding produced by {@link #validate} — carries the PSI element to highlight,
+     * the human-readable message, and the diagnostic code. Diagnostic creation is
+     * intentionally left to the caller so that it can use its own
+     * {@code AbstractDiagnosticsCollector.createDiagnostic} infrastructure.
+     */
+    record Finding(PsiElement element, String message, String code) {}
 
     /**
      * Validates that the members of an {@code @IdClass} key class correspond to the
@@ -50,15 +55,15 @@ class IdClassHelper {
      * @param entityType        the {@code @Entity} class under inspection
      * @param idClassAnnotation the {@code @IdClass} annotation on the entity
      * @param idMembers         the members of the entity annotated with {@code @Id}
-     * @param diagnostics       the list to add diagnostics to
+     * @return list of findings; empty when validation passes
      */
-    void validate(PsiClass entityType, PsiJavaFile unit,
-                  PsiAnnotation idClassAnnotation,
-                  List<PsiJvmModifiersOwner> idMembers,
-                  List<Diagnostic> diagnostics) {
+    List<Finding> validate(PsiClass entityType,
+                           PsiAnnotation idClassAnnotation,
+                           List<PsiJvmModifiersOwner> idMembers) {
+        List<Finding> findings = new ArrayList<>();
         PsiClass keyClass = resolveIdClass(idClassAnnotation);
         if (keyClass == null || idMembers.isEmpty()) {
-            return;
+            return findings;
         }
 
         // Infer access type: if any @Id is on a field → field-based; otherwise → property-based.
@@ -103,19 +108,20 @@ class IdClassHelper {
             String memberName = entry.getKey();
             PsiElement idMember = (PsiElement) entityIdMembers.get(memberName);
             if (!keyClassMap.containsKey(memberName)) {
-                diagnostics.add(diagnostic(idMember,
+                findings.add(new Finding(idMember,
                         Messages.getMessage("IdClassMemberMissingInKeyClass", memberName),
                         PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MEMBER_MISSING_IN_KEY_CLASS));
             } else {
                 String entityTypeName = entry.getValue();
                 String keyTypeName = keyClassMap.get(memberName);
                 if (entityTypeName != null && keyTypeName != null && !entityTypeName.equals(keyTypeName)) {
-                    diagnostics.add(diagnostic(idMember,
+                    findings.add(new Finding(idMember,
                             Messages.getMessage("IdClassMemberTypeMismatch", memberName, entityTypeName, keyTypeName),
                             PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_MEMBER_TYPE_MISMATCH));
                 }
             }
         }
+        return findings;
     }
 
     /**
@@ -201,22 +207,5 @@ class IdClassHelper {
             return classType.resolve();
         }
         return null;
-    }
-
-    /**
-     * Builds an Error-severity diagnostic with the persistence source tag.
-     *
-     * @param element the PSI element to compute the range from
-     * @param message the diagnostic message
-     * @param code    the diagnostic code string
-     * @return the constructed {@link Diagnostic}
-     */
-    private Diagnostic diagnostic(PsiElement element, String message, String code) {
-        Range range = PositionUtils.toNameRange(element);
-        Diagnostic d = new Diagnostic(range, message);
-        d.setSource(PersistenceConstants.DIAGNOSTIC_SOURCE);
-        d.setCode(code);
-        d.setSeverity(DiagnosticSeverity.Error);
-        return d;
     }
 }

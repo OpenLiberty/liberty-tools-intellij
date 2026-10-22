@@ -505,7 +505,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                                                 PsiAnnotation idClassAnnotation,
                                                 List<PsiJvmModifiersOwner> idMembers,
                                                 List<Diagnostic> diagnostics) {
-        new IdClassHelper().validate(entityType, unit, idClassAnnotation, idMembers, diagnostics);
+        for (IdClassHelper.Finding f : new IdClassHelper().validate(entityType, idClassAnnotation, idMembers)) {
+            diagnostics.add(createDiagnostic(f.element(), unit, f.message(), f.code(), null, DiagnosticSeverity.Error));
+        }
     }
 
     /**
