@@ -17,20 +17,6 @@ import java.util.List;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
-/**
- * Test resource for CDI §2.2.1 legal bean type diagnostics:
- * a bare type variable (T or T[]) is not a legal bean type at injection points.
- *
- * Expected diagnostics:
- * - Line 33: @Inject field of type T          → InvalidBareTypeVariableInInjectField
- * - Line 37: @Inject field of type T[]        → InvalidBareTypeVariableInInjectField
- * - Line 43: @Inject method param of type T   → InvalidBareTypeVariableInInjectMethodParam
- * - Line 47: @Inject method param of type T[] → InvalidBareTypeVariableInInjectMethodParam
- *
- * No diagnostic expected on:
- * - Line 54: @Inject field of type List<T>    (parameterized type with type variable — different rule, @Dependent OK)
- * - Line 58: plain String @Inject field       (concrete type — legal)
- */
 @Dependent
 public class BareTypeVariableInjectBean<T> {
 

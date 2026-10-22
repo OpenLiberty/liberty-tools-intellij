@@ -91,7 +91,7 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
                         if (containsWildcard(paramType)) {
                             diagnostics.add(createDiagnostic(param, unit,
                                     Messages.getMessage("InvalidWildcardTypeInInjectMethod"),
-                                    DIAGNOSTIC_CODE_WILDCARD_INJECT, null, DiagnosticSeverity.Error));
+                                    DIAGNOSTIC_CODE_WILDCARD_INJECT_METHOD, null, DiagnosticSeverity.Error));
                         } else if (isGeneric && isBareTypeVariable(paramType)) {
                             // Rule: a bare type variable (T or T[]) is not a legal bean type.
                             // Diagnostic is placed on the method so the RemoveAnnotationQuickFix

@@ -71,20 +71,6 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
             + "import jakarta.enterprise.context.Dependent;\n"
             + "import jakarta.inject.Inject;\n"
             + "\n"
-            + "/**\n"
-            + " * Test resource for CDI \u00a72.2.1 legal bean type diagnostics:\n"
-            + " * a bare type variable (T or T[]) is not a legal bean type at injection points.\n"
-            + " *\n"
-            + " * Expected diagnostics:\n"
-            + " * - Line 33: @Inject field of type T          \u2192 InvalidBareTypeVariableInInjectField\n"
-            + " * - Line 37: @Inject field of type T[]        \u2192 InvalidBareTypeVariableInInjectField\n"
-            + " * - Line 43: @Inject method param of type T   \u2192 InvalidBareTypeVariableInInjectMethodParam\n"
-            + " * - Line 47: @Inject method param of type T[] \u2192 InvalidBareTypeVariableInInjectMethodParam\n"
-            + " *\n"
-            + " * No diagnostic expected on:\n"
-            + " * - Line 54: @Inject field of type List<T>    (parameterized type with type variable \u2014 different rule, @Dependent OK)\n"
-            + " * - Line 58: plain String @Inject field       (concrete type \u2014 legal)\n"
-            + " */\n"
             + "@Dependent\n"
             + "public class BareTypeVariableInjectBean<T> {\n"
             + "\n";
@@ -163,23 +149,23 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 39 (0-based 38): T bareTypeField — field name "bareTypeField" at col 6..19
-        Diagnostic injectBareTypeField = d(38, 6, 19,
+        // Line 25 (0-based 24): T bareTypeField — field name "bareTypeField" at col 6..19
+        Diagnostic injectBareTypeField = d(24, 6, 19,
                 "A type variable is not a legal bean type. Injection point fields must not use a bare type variable (T or T[]).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidBareTypeVariableInInjectField");
 
-        // Line 43 (0-based 42): T[] bareTypeArrayField — field name "bareTypeArrayField" at col 8..26
-        Diagnostic injectBareTypeArrayField = d(42, 8, 26,
+        // Line 29 (0-based 28): T[] bareTypeArrayField — field name "bareTypeArrayField" at col 8..26
+        Diagnostic injectBareTypeArrayField = d(28, 8, 26,
                 "A type variable is not a legal bean type. Injection point fields must not use a bare type variable (T or T[]).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidBareTypeVariableInInjectField");
 
-        // Line 47 (0-based 46): setBareType — method name at col 16..27 (diagnostic on method)
-        Diagnostic injectBareTypeMethodParam = d(46, 16, 27,
+        // Line 33 (0-based 32): setBareType — method name at col 16..27 (diagnostic on method)
+        Diagnostic injectBareTypeMethodParam = d(32, 16, 27,
                 "A type variable is not a legal bean type. Parameter 'value' must not use a bare type variable (T or T[]).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidBareTypeVariableInInjectMethodParam");
 
-        // Line 52 (0-based 51): setBareTypeArray — method name at col 16..32 (diagnostic on method)
-        Diagnostic injectBareTypeArrayMethodParam = d(51, 16, 32,
+        // Line 38 (0-based 37): setBareTypeArray — method name at col 16..32 (diagnostic on method)
+        Diagnostic injectBareTypeArrayMethodParam = d(37, 16, 32,
                 "A type variable is not a legal bean type. Parameter 'values' must not use a bare type variable (T or T[]).",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidBareTypeVariableInInjectMethodParam");
 
@@ -198,7 +184,7 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
                 + INVALID_BARE_ARRAY_METHOD
                 + VALID_TAIL;
         JakartaJavaCodeActionParams codeActionBareTypeField = createCodeActionParams(uri, injectBareTypeField);
-        TextEdit removeBareTypeFieldInject = te(0, 0, 62, 0, afterRemoveBareTypeFieldInject);
+        TextEdit removeBareTypeFieldInject = te(0, 0, 48, 0, afterRemoveBareTypeFieldInject);
         CodeAction removeBareTypeFieldInjectAction = ca(uri, "Remove @Inject", injectBareTypeField,
                 removeBareTypeFieldInject);
         assertJavaCodeAction(codeActionBareTypeField, utils, removeBareTypeFieldInjectAction);
@@ -211,7 +197,7 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
                 + INVALID_BARE_ARRAY_METHOD
                 + VALID_TAIL;
         JakartaJavaCodeActionParams codeActionBareTypeArrayField = createCodeActionParams(uri, injectBareTypeArrayField);
-        TextEdit removeBareTypeArrayFieldInject = te(0, 0, 62, 0, afterRemoveBareTypeArrayFieldInject);
+        TextEdit removeBareTypeArrayFieldInject = te(0, 0, 48, 0, afterRemoveBareTypeArrayFieldInject);
         CodeAction removeBareTypeArrayFieldInjectAction = ca(uri, "Remove @Inject", injectBareTypeArrayField,
                 removeBareTypeArrayFieldInject);
         assertJavaCodeAction(codeActionBareTypeArrayField, utils, removeBareTypeArrayFieldInjectAction);
@@ -224,7 +210,7 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
                 + INVALID_BARE_ARRAY_METHOD
                 + VALID_TAIL;
         JakartaJavaCodeActionParams codeActionBareTypeMethodParam = createCodeActionParams(uri, injectBareTypeMethodParam);
-        TextEdit removeBareTypeMethodInject = te(0, 0, 62, 0, afterRemoveBareTypeMethodInject);
+        TextEdit removeBareTypeMethodInject = te(0, 0, 48, 0, afterRemoveBareTypeMethodInject);
         CodeAction removeBareTypeMethodInjectAction = ca(uri, "Remove @Inject", injectBareTypeMethodParam,
                 removeBareTypeMethodInject);
         assertJavaCodeAction(codeActionBareTypeMethodParam, utils, removeBareTypeMethodInjectAction);
@@ -238,7 +224,7 @@ public class CdiBareTypeVariableInjectTest extends BaseJakartaTest {
                 + VALID_TAIL;
         JakartaJavaCodeActionParams codeActionBareTypeArrayMethodParam = createCodeActionParams(uri,
                 injectBareTypeArrayMethodParam);
-        TextEdit removeBareTypeArrayMethodInject = te(0, 0, 62, 0, afterRemoveBareTypeArrayMethodInject);
+        TextEdit removeBareTypeArrayMethodInject = te(0, 0, 48, 0, afterRemoveBareTypeArrayMethodInject);
         CodeAction removeBareTypeArrayMethodInjectAction = ca(uri, "Remove @Inject", injectBareTypeArrayMethodParam,
                 removeBareTypeArrayMethodInject);
         assertJavaCodeAction(codeActionBareTypeArrayMethodParam, utils, removeBareTypeArrayMethodInjectAction);
