@@ -34,6 +34,7 @@ public class ManagedBeanConstants {
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -64,6 +65,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
+    public static final String DIAGNOSTIC_CODE_INCONSISTENT_SPECIALIZATION = "InvalidInconsistentSpecialization";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
