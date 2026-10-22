@@ -115,7 +115,7 @@ public class LibertyModules {
         synchronized (libertyModules) {
             if (libertyModules.containsKey(module.getBuildFile())) {
                 // Update existing Liberty project, projectType module, name and validContainerVersion
-                // Do not update the build file (key), debugMode, terminalWidget or customStartParams since
+                // Do not update the build file (key), debugMode, terminalView or customStartParams since
                 // they may modify saved run configs.
                 LibertyModule existing = libertyModules.get(module.getBuildFile());
                 existing.setProject(module.getProject());
