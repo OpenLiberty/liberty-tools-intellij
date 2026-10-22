@@ -17,6 +17,8 @@ import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
@@ -110,13 +112,13 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         for (PsiAnnotation annotation : type.getAnnotations()) {
             String fqn = annotation.getQualifiedName();
             if (isMatchedJavaElement(type, fqn, desc.singleFqn)) {
-                String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
+                String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnSuperclassChain(name, annotation, type, desc, unit, diagnostics);
                 }
             } else if (isMatchedJavaElement(type, fqn, desc.containerFqn)) {
-                for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
-                    String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
+                for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
+                    String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
                         validateNameOnSuperclassChain(name, nested, type, desc, unit, diagnostics);
                     }
@@ -133,8 +135,9 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     private void validateNameOnSuperclassChain(String name, PsiAnnotation annotation,
                                                PsiClass type, OverrideDescriptor desc,
                                                PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        if (!existsInSuperclassChain(type, name)) {
-            String targetName = getFirstMappedSuperclassName(type);
+        PsiClass mappedSuperClass = findMappedSuperclassWithField(type, name);
+        if (mappedSuperClass==null) {
+            String targetName = resolveSuperclassChainName(type);
             diagnostics.add(createDiagnostic(annotation, unit,
                     Messages.getMessage(desc.msgNotFound, name, targetName),
                     desc.errorCode, null, DiagnosticSeverity.Error));
@@ -145,36 +148,27 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      * Returns {@code true} if a field named {@code name} (supporting dot-notation)
      * exists anywhere in the {@code @MappedSuperclass} supertype chain of {@code type}.
      */
-    private boolean existsInSuperclassChain(PsiClass type, String name) {
+    private PsiClass findMappedSuperclassWithField(PsiClass type, String name) {
         PsiClass current = type.getSuperClass();
         while (current != null
                 && !PersistenceConstants.OBJECT.equals(current.getQualifiedName())) {
             if (isMatchedAnnotation(current.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS)) {
                 if (fieldExistsInType(current, name)) {
-                    return true;
+                    return current;
                 }
             }
             current = current.getSuperClass();
         }
-        return false;
+        return null;
     }
 
     /**
-     * Returns the simple name of the first {@code @MappedSuperclass} in the supertype
-     * chain, falling back to the immediate superclass name.
+     * Returns a human-readable name for the first {@code @MappedSuperclass} in the
+     * supertype chain, falling back to the immediate superclass name.
      */
-    private String getFirstMappedSuperclassName(PsiClass type) {
-        PsiClass current = type.getSuperClass();
-        while (current != null
-                && !PersistenceConstants.OBJECT.equals(current.getQualifiedName())) {
-            if (isMatchedAnnotation(current.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS)) {
-                return current.getName() != null ? current.getName() : "superclass";
-            }
-            current = current.getSuperClass();
-        }
-        PsiClass superClass = type.getSuperClass();
-        return (superClass != null && superClass.getName() != null)
-                ? superClass.getName() : "superclass";
+    private String resolveSuperclassChainName(PsiClass type) {
+        String superclassName = type.getSuperClass()!=null?type.getSuperClass().getName():null;
+        return superclassName != null ? superclassName : type.getQualifiedName();
     }
 
     // -----------------------------------------------------------------------
@@ -183,8 +177,6 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
 
     /**
      * Validates override annotations on a field or getter method (property-based access).
-     * The type is resolved via {@link #getMemberType(PsiJvmModifiersOwner)} — {@code field.getType()}
-     * for fields, {@code method.getReturnType()} for methods — keeping the rest of the logic identical.
      *
      * <p>For {@code @AttributeOverride} / {@code @AttributeOverrides}: if the member
      * lacks {@code @Embedded}, {@code @EmbeddedId}, or {@code @ElementCollection},
@@ -248,7 +240,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                                       PsiJvmModifiersOwner member, boolean isElementCollection,
                                       OverrideDescriptor desc, PsiJavaFile unit,
                                       List<Diagnostic> diagnostics) {
-        PsiType memberType = getMemberType(member);
+        PsiType memberType = PsiUtils.getMemberType(member);
         if (!(memberType instanceof PsiClassType)) {
             return;
         }
@@ -256,25 +248,14 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass resolvedClass = classType.resolve();
 
         if (isElementCollection
-                && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQN)) {
+                && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQDN)) {
             validateNameOnMapField(name, annotation, classType, desc, unit, diagnostics);
         } else if (resolvedClass != null) {
             validateNameAgainstType(name, name, annotation, resolvedClass, desc, unit, diagnostics);
         }
     }
 
-    /**
-     * Returns the declared type of a field or the return type of a method.
-     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
-     */
-    private PsiType getMemberType(PsiJvmModifiersOwner member) {
-        if (member instanceof PsiField) {
-            return ((PsiField) member).getType();
-        } else if (member instanceof PsiMethod) {
-            return ((PsiMethod) member).getReturnType();
-        }
-        return null;
-    }
+
 
     /**
      * Handles {@code @ElementCollection} map fields: requires {@code "key."} or
@@ -292,9 +273,15 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             return;
         }
 
+        // Retrieve the actual type arguments of the Map, i.e. [K, V] from Map<K, V>.
+        // getParameters() returns an empty array for a raw Map (no generics) and a
+        // single-element array if somehow only one bound is present. In either case
+        // we cannot determine which class to resolve the "key." or "value." suffix
+        // against, so we bail out silently rather than producing a false-positive
+        // diagnostic.
         PsiType[] typeArgs = mapType.getParameters();
         if (typeArgs.length < 2) {
-            return; // raw map — cannot validate further
+            return;
         }
 
         String suffix;
@@ -330,8 +317,8 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                                          PsiClass targetType, OverrideDescriptor desc,
                                          PsiJavaFile unit, List<Diagnostic> diagnostics) {
         int dot = name.indexOf('.');
-        if (dot == -1) {
-            if (!hasFieldInType(targetType, name)) {
+        if (dot == PersistenceConstants.NOT_FOUND) {
+            if (!PsiUtils.hasFieldInType(targetType, name)) {
                 String message = fullName.equals(name)
                         ? Messages.getMessage(desc.msgNotFound, name, targetType.getName())
                         : Messages.getMessage(desc.msgDotInvalid, fullName, name, targetType.getName());
@@ -342,7 +329,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             // Dot-notation: resolve first segment, recurse on remainder
             String first = name.substring(0, dot);
             String rest = name.substring(dot + 1);
-            if (!hasFieldInType(targetType, first)) {
+            if (!PsiUtils.hasFieldInType(targetType, first)) {
                 diagnostics.add(createDiagnostic(annotation, unit,
                         Messages.getMessage(desc.msgDotInvalid, fullName, first, targetType.getName()),
                         desc.errorCode, null, DiagnosticSeverity.Error));
@@ -365,11 +352,11 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      */
     private boolean fieldExistsInType(PsiClass type, String name) {
         int dot = name.indexOf('.');
-        if (dot == -1) {
-            return hasFieldInType(type, name);
+        if (dot == PersistenceConstants.NOT_FOUND) {
+            return PsiUtils.hasFieldInType(type, name);
         }
         String first = name.substring(0, dot);
-        if (!hasFieldInType(type, first)) {
+        if (!PsiUtils.hasFieldInType(type, first)) {
             return false;
         }
         PsiField nestedField = type.findFieldByName(first, false);
@@ -378,15 +365,6 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         }
         PsiClass nestedClass = ((PsiClassType) nestedField.getType()).resolve();
         return nestedClass != null && fieldExistsInType(nestedClass, name.substring(dot + 1));
-    }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    /** Returns {@code true} if {@code type} declares a field with the given simple name. */
-    private boolean hasFieldInType(PsiClass type, String fieldName) {
-        return type.findFieldByName(fieldName, false) != null;
     }
 
     /**
@@ -432,4 +410,5 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         }
         return PsiAnnotation.EMPTY_ARRAY;
     }
+
 }
