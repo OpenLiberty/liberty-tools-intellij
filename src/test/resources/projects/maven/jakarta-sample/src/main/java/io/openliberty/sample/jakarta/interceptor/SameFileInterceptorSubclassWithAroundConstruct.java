@@ -5,12 +5,11 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 /**
- * Invalid: @AroundConstruct declared in a non-interceptor superclass whose
+ * Valid: @AroundConstruct declared in a non-interceptor superclass whose
  * @Interceptor-annotated subclass lives in the SAME compilation unit.
  *
- * The hasInterceptorSubclass scan explicitly excludes subtypes that share the
- * same PsiFile, so the @Interceptor subclass below is not discovered.
- * The diagnostic must still fire on the superclass.
+ * hasInterceptorSubclass() includes same-file subtypes, so the @Interceptor
+ * subclass below IS discovered and both diagnostics are suppressed.
  */
 class SameFileSuperclassWithAroundConstruct {
 
@@ -22,8 +21,8 @@ class SameFileSuperclassWithAroundConstruct {
 
 /**
  * The @Interceptor subclass is in the same file as the superclass above.
- * Because the subtype search filters out same-file types, the superclass
- * does NOT benefit from the interceptor-superclass suppression rule.
+ * hasInterceptorSubclass() discovers it, so the superclass is treated as
+ * an interceptor superclass and no diagnostic fires.
  */
 @Monitored
 @Interceptor

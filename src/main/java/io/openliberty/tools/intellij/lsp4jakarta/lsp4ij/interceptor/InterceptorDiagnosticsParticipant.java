@@ -382,7 +382,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 												   List<Diagnostic> diagnostics) {
 		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
 		// result is constant across all methods of the same type.
-		if (hasInterceptorSubclass(type, unit)) {
+		if (hasInterceptorSubclass(type)) {
 			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
 			return;
 		}
@@ -413,6 +413,10 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 	 * @param diagnostics the list to add diagnostics to
 	 */
 	private void checkLifecycleCallbackMethodSignatureInTargetClass(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		// Suppress target class signature check if an @Interceptor subclass exists
+		if (hasInterceptorSubclass(type)) {
+			return;
+		}
 		for (PsiMethod method : type.getMethods()) {
 			List<String> lifecycleAnnotations = containsAnyMatchingAnnotations(type, method, LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS);
 			if (lifecycleAnnotations.isEmpty()) {
