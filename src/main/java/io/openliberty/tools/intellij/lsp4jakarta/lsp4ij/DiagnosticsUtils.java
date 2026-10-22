@@ -204,6 +204,37 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Returns the values of an array-valued annotation member, normalizing PSI's
+     * two representations into a single list.
+     *
+     * <p>PSI represents the member as a {@link PsiArrayInitializerMemberValue} when
+     * array notation is used (e.g. {@code {@A, @B}}), but as the bare element when a
+     * single value is given without braces (e.g. {@code @A}). Both forms are handled.</p>
+     *
+     * @param annotation  the annotation to inspect
+     * @param memberName  the member/attribute name
+     * @param elementType the expected type of each element; elements of other types are skipped
+     * @return the matching elements, or an empty list if the member is absent
+     */
+    public static <T extends PsiAnnotationMemberValue> List<T> getAnnotationMemberValues(
+            PsiAnnotation annotation, String memberName, Class<T> elementType) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(memberName);
+        if (value == null) {
+            return List.of();
+        }
+        PsiAnnotationMemberValue[] items = (value instanceof PsiArrayInitializerMemberValue arrayValue)
+                ? arrayValue.getInitializers()
+                : new PsiAnnotationMemberValue[] { value };
+        List<T> result = new ArrayList<>();
+        for (PsiAnnotationMemberValue item : items) {
+            if (elementType.isInstance(item)) {
+                result.add(elementType.cast(item));
+            }
+        }
+        return result;
+    }
+
+    /**
      * Returns {@code true} if the given {@code @Priority} annotation carries a
      * negative integer value.
      *

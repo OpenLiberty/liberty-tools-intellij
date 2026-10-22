@@ -164,24 +164,24 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
         }
     }
 
-    private void validateEntityGraph(PsiAnnotation graphAnn, PsiClass psiClass,
+    private void validateEntityGraph(PsiAnnotation graphAnnotation, PsiClass psiClass,
                                      boolean fieldBased, PsiJavaFile unit,
                                      Map<String, Integer> graphNameOccurrences, List<Diagnostic> diagnostics) {
-        checkForDuplicate(graphAnn, unit, graphNameOccurrences, diagnostics);
+        checkForDuplicate(graphAnnotation, unit, graphNameOccurrences, diagnostics);
         if (fieldBased) {
-            validateAttributeNodes(graphAnn, psiClass, unit, diagnostics);
+            validateAttributeNodes(graphAnnotation, psiClass, unit, diagnostics);
         }
     }
 
-    private void checkForDuplicate(PsiAnnotation annotation, PsiJavaFile unit,
+    private void checkForDuplicate(PsiAnnotation graphAnnotation, PsiJavaFile unit,
                                    Map<String, Integer> graphNameOccurrences, List<Diagnostic> diagnostics) {
-        String graphName = AnnotationUtils.getAnnotationMemberValue(annotation, "name");
+        String graphName = AnnotationUtils.getAnnotationMemberValue(graphAnnotation, "name");
         if (graphName == null) {
             return;
         }
         if (graphNameOccurrences.getOrDefault(graphName, 0) > 1) {
             diagnostics.add(createDiagnostic(
-                    annotation, unit,
+                    graphAnnotation, unit,
                     Messages.getMessage("DuplicateNamedEntityGraphName", graphName),
                     PersistenceConstants.DIAGNOSTIC_CODE_DUPLICATE_NAMED_ENTITY_GRAPH,
                     null,
@@ -189,27 +189,20 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
         }
     }
 
-    private void validateAttributeNodes(PsiAnnotation graphAnn, PsiClass psiClass,
+    private void validateAttributeNodes(PsiAnnotation graphAnnotation, PsiClass psiClass,
                                         PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        PsiAnnotationMemberValue value = graphAnn.findAttributeValue("attributeNodes");
-        if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
-            for (PsiAnnotationMemberValue item : arrayValue.getInitializers()) {
-                if (item instanceof PsiAnnotation nodeAnn) {
-                    validateSingleAttributeNode(nodeAnn, psiClass, unit, diagnostics);
-                }
-            }
-        } else if (value instanceof PsiAnnotation nodeAnn) {
-            validateSingleAttributeNode(nodeAnn, psiClass, unit, diagnostics);
+        for (PsiAnnotation attributeNode : DiagnosticsUtils.getAnnotationMemberValues(graphAnnotation, "attributeNodes", PsiAnnotation.class)) {
+            validateSingleAttributeNode(attributeNode, psiClass, unit, diagnostics);
         }
     }
 
-    private void validateSingleAttributeNode(PsiAnnotation nodeAnn, PsiClass psiClass,
+    private void validateSingleAttributeNode(PsiAnnotation attributeNodeAnnotation, PsiClass psiClass,
                                              PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        String attrName = AnnotationUtils.getAnnotationMemberValue(nodeAnn, "value");
+        String attrName = AnnotationUtils.getAnnotationMemberValue(attributeNodeAnnotation, "value");
         if (attrName != null && !attrName.isEmpty()
                 && !DiagnosticsUtils.hasFieldInHierarchy(psiClass, attrName)) {
             diagnostics.add(createDiagnostic(
-                    nodeAnn, unit,
+                    attributeNodeAnnotation, unit,
                     Messages.getMessage("NamedAttributeNodeAttributeNotFound", attrName, psiClass.getName()),
                     PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ATTRIBUTE_NODE_ATTRIBUTE_NOT_FOUND,
                     null,
@@ -243,15 +236,8 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
      * and single-element form ({@code @NamedEntityGraphs(a)}).
      */
     private void forEachNestedGraph(PsiAnnotation container, Consumer<PsiAnnotation> consumer) {
-        PsiAnnotationMemberValue value = container.findAttributeValue("value");
-        if (value instanceof PsiArrayInitializerMemberValue) {
-            for (PsiAnnotationMemberValue item : ((PsiArrayInitializerMemberValue) value).getInitializers()) {
-                if (item instanceof PsiAnnotation) {
-                    consumer.accept((PsiAnnotation) item);
-                }
-            }
-        } else if (value instanceof PsiAnnotation) {
-            consumer.accept((PsiAnnotation) value);
+        for (PsiAnnotation graph : DiagnosticsUtils.getAnnotationMemberValues(container, "value", PsiAnnotation.class)) {
+            consumer.accept(graph);
         }
     }
 
