@@ -629,6 +629,9 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     && method.getParameterList().getParametersCount() == 0) {
                 hasHashCode = true;
             }
+            if (hasEquals && hasHashCode) {
+                break;
+            }
         }
         if (!hasEquals) {
             diagnostics.add(createDiagnostic(idClassAnnotation, unit,
