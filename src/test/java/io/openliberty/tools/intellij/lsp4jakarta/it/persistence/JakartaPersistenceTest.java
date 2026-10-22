@@ -1327,4 +1327,22 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
     }
 
+    @Test
+    public void testIdClassManyToOneEmbeddedIdValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneEmbeddedIdValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "order" points to OrderWithEmbeddedId, which uses @EmbeddedId
+        // of type OrderEmbeddedId. The key class holds OrderEmbeddedId for that field — types
+        // match, so no type-mismatch diagnostic is expected (spec §2.4.1.1, third bullet).
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
