@@ -141,30 +141,36 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
      * Checks all {@code @NamedEntityGraph} / {@code @NamedEntityGraphs} annotations
      * on {@code psiClass} and adds diagnostics for duplicate graph names or nonexistent
      * attribute nodes.
+     *
+     * <p>Attribute-node existence is only validated when the entity uses field-based
+     * access (i.e. {@code @Id} or {@code @EmbeddedId} is placed on a field).
+     * Property-based access (getter-level {@code @Id}) is skipped.
      */
     private void validateClass(PsiClass psiClass, PsiJavaFile unit,
                                Map<String, Integer> graphNameOccurrences, List<Diagnostic> diagnostics) {
-        java.util.Set<String> propertyNames = null;
+        // JPA access type is determined by where @Id is placed.
+        // Only validate attribute node existence for field-based access entities.
+        boolean fieldBased = DiagnosticsUtils.isFieldBasedAccess(psiClass,
+                PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID);
+
         for (PsiAnnotation annotation : psiClass.getAnnotations()) {
             String qualifiedName = annotation.getQualifiedName();
             if (!PersistenceConstants.NAMED_ENTITY_GRAPH.equals(qualifiedName)
                     && !PersistenceConstants.NAMED_ENTITY_GRAPHS.equals(qualifiedName)) {
                 continue;
             }
-            if (propertyNames == null) {
-                propertyNames = DiagnosticsUtils.getPropertyNames(psiClass);
-            }
-            java.util.Set<String> props = propertyNames;
-            forEachGraph(annotation, inner -> validateEntityGraph(inner, psiClass, props, unit,
+            forEachGraph(annotation, inner -> validateEntityGraph(inner, psiClass, fieldBased, unit,
                     graphNameOccurrences, diagnostics));
         }
     }
 
     private void validateEntityGraph(PsiAnnotation graphAnn, PsiClass psiClass,
-                                     java.util.Set<String> propertyNames, PsiJavaFile unit,
+                                     boolean fieldBased, PsiJavaFile unit,
                                      Map<String, Integer> graphNameOccurrences, List<Diagnostic> diagnostics) {
         checkForDuplicate(graphAnn, unit, graphNameOccurrences, diagnostics);
-        validateAttributeNodes(graphAnn, psiClass, propertyNames, unit, diagnostics);
+        if (fieldBased) {
+            validateAttributeNodes(graphAnn, psiClass, unit, diagnostics);
+        }
     }
 
     private void checkForDuplicate(PsiAnnotation annotation, PsiJavaFile unit,
@@ -184,25 +190,24 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
     }
 
     private void validateAttributeNodes(PsiAnnotation graphAnn, PsiClass psiClass,
-                                        java.util.Set<String> propertyNames, PsiJavaFile unit,
-                                        List<Diagnostic> diagnostics) {
+                                        PsiJavaFile unit, List<Diagnostic> diagnostics) {
         PsiAnnotationMemberValue value = graphAnn.findAttributeValue("attributeNodes");
         if (value instanceof PsiArrayInitializerMemberValue arrayValue) {
             for (PsiAnnotationMemberValue item : arrayValue.getInitializers()) {
                 if (item instanceof PsiAnnotation nodeAnn) {
-                    validateSingleAttributeNode(nodeAnn, psiClass, propertyNames, unit, diagnostics);
+                    validateSingleAttributeNode(nodeAnn, psiClass, unit, diagnostics);
                 }
             }
         } else if (value instanceof PsiAnnotation nodeAnn) {
-            validateSingleAttributeNode(nodeAnn, psiClass, propertyNames, unit, diagnostics);
+            validateSingleAttributeNode(nodeAnn, psiClass, unit, diagnostics);
         }
     }
 
     private void validateSingleAttributeNode(PsiAnnotation nodeAnn, PsiClass psiClass,
-                                             java.util.Set<String> propertyNames, PsiJavaFile unit,
-                                             List<Diagnostic> diagnostics) {
+                                             PsiJavaFile unit, List<Diagnostic> diagnostics) {
         String attrName = AnnotationUtils.getAnnotationMemberValue(nodeAnn, "value");
-        if (attrName != null && !attrName.isEmpty() && !propertyNames.contains(attrName)) {
+        if (attrName != null && !attrName.isEmpty()
+                && !DiagnosticsUtils.hasFieldInHierarchy(psiClass, attrName)) {
             diagnostics.add(createDiagnostic(
                     nodeAnn, unit,
                     Messages.getMessage("NamedAttributeNodeAttributeNotFound", attrName, psiClass.getName()),

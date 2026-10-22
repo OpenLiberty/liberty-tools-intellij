@@ -164,45 +164,43 @@ public class DiagnosticsUtils {
     }
 
     /**
-     * Extracts all property and field names from a type across its
-     * inheritance hierarchy.
+     * Returns {@code true} if the entity type uses field-based access, i.e. at
+     * least one field on {@code psiClass} directly carries {@code @Id} or
+     * {@code @EmbeddedId}.
      *
-     * <p>Includes all fields and JavaBean getter/boolean is-getter property names.
+     * <p>JPA access type is determined by the placement of {@code @Id} on the
+     * declaring entity — no superclass walk is needed here.
      *
-     * @param psiClass the PsiClass to inspect
-     * @return a set of available property/field names
+     * @param psiClass     the entity class to inspect
+     * @param idFQ         the fully-qualified name of {@code @Id}
+     * @param embeddedIdFQ the fully-qualified name of {@code @EmbeddedId}
+     * @return {@code true} if any field on {@code psiClass} is annotated with
+     *         {@code @Id} or {@code @EmbeddedId}
      */
-    public static java.util.Set<String> getPropertyNames(PsiClass psiClass) {
-        java.util.Set<String> propertyNames = new java.util.HashSet<>();
-        if (psiClass == null) {
-            return propertyNames;
+    public static boolean isFieldBasedAccess(PsiClass psiClass, String idFQ, String embeddedIdFQ) {
+        for (PsiField field : psiClass.getFields()) {
+            for (PsiAnnotation annotation : field.getAnnotations()) {
+                String qn = annotation.getQualifiedName();
+                if (idFQ.equals(qn) || embeddedIdFQ.equals(qn)) {
+                    return true;
+                }
+            }
         }
-        List<PsiClass> hierarchy = new ArrayList<>();
-        hierarchy.add(psiClass);
-        hierarchy.addAll(collectSuperClasses(psiClass));
+        return false;
+    }
 
-        for (PsiClass clazz : hierarchy) {
-            for (PsiField field : clazz.getFields()) {
-                propertyNames.add(field.getName());
-            }
-            for (PsiMethod method : clazz.getMethods()) {
-                if (method.getParameterList().getParametersCount() != 0) {
-                    continue;
-                }
-                PsiType returnType = method.getReturnType();
-                if (returnType == null || returnType.equals(PsiTypes.voidType())) {
-                    continue;
-                }
-                String name = method.getName();
-                if (name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
-                    propertyNames.add(Introspector.decapitalize(name.substring(3)));
-                } else if (name.startsWith("is") && name.length() > 2 && Character.isUpperCase(name.charAt(2))
-                        && (returnType.equals(PsiTypes.booleanType()) || "java.lang.Boolean".equals(returnType.getCanonicalText()))) {
-                    propertyNames.add(Introspector.decapitalize(name.substring(2)));
-                }
-            }
-        }
-        return propertyNames;
+    /**
+     * Returns {@code true} if {@code psiClass} or any superclass in its hierarchy
+     * declares a field with the given {@code fieldName}, using PSI's
+     * {@link PsiClass#findFieldByName(String, boolean)} with hierarchy search enabled.
+     *
+     * @param psiClass  the class to start the search from
+     * @param fieldName the simple field name to look for
+     * @return {@code true} if a matching field is found in the class hierarchy
+     */
+    public static boolean hasFieldInHierarchy(PsiClass psiClass, String fieldName) {
+        // findFieldByName(name, true) searches the class and all superclasses.
+        return psiClass.findFieldByName(fieldName, true) != null;
     }
 
     /**

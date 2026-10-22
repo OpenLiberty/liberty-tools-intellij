@@ -335,8 +335,8 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
     }
 
     /**
-     * An entity referencing superclass fields/getters and local getter methods
-     * must produce no diagnostics.
+     * An entity referencing fields from the entity itself and from a superclass
+     * must produce no diagnostics (field-based access only).
      *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
@@ -357,8 +357,9 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
     }
 
     /**
-     * An entity referencing non-existent superclass fields and invalid non-getter methods
-     * in attributeNodes must produce diagnostics.
+     * An entity referencing non-existent field names (including names that happen to
+     * match getter methods but have no backing field) must produce
+     * {@code NamedAttributeNodeAttributeNotFound} diagnostics.
      *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
