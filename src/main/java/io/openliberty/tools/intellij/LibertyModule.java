@@ -16,7 +16,6 @@ import io.openliberty.tools.intellij.runConfiguration.LibertyRunConfiguration;
 import io.openliberty.tools.intellij.util.BuildFile;
 import io.openliberty.tools.intellij.util.Constants;
 import com.intellij.terminal.frontend.view.TerminalView;
-import com.intellij.terminal.ui.TerminalWidget;
 
 /**
  * Represents a Liberty server module
@@ -29,7 +28,6 @@ public class LibertyModule {
     private String name;
     private boolean validContainerVersion;
     private boolean debugMode;
-    private TerminalWidget terminalWidget;
     // TerminalView is @Experimental, but its usage is explicitly recommended by
     // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
     @SuppressWarnings("UnstableApiUsage")
@@ -40,7 +38,6 @@ public class LibertyModule {
     public LibertyModule(Project project) {
         this.project = project;
         this.debugMode = false;
-        this.terminalWidget = null;
         this.terminalView = null;
         this.customRunConfig = null;
         this.useCustom = false;
@@ -138,14 +135,6 @@ public class LibertyModule {
 
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
-    }
-
-    public TerminalWidget getTerminalWidget() {
-        return terminalWidget;
-    }
-
-    public void setTerminalWidget(TerminalWidget terminalWidget) {
-        this.terminalWidget = terminalWidget;
     }
 
     // TerminalView is @Experimental, but its usage is explicitly recommended by

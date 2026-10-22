@@ -18,7 +18,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.terminal.ui.TerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyPluginIcons;
@@ -27,7 +27,6 @@ import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LibertyProjectUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -162,26 +161,30 @@ public abstract class LibertyGeneralAction extends AnAction {
     }
 
     /**
-     * Returns the Terminal widget for the corresponding Liberty module
+     * Returns the Terminal view for the corresponding Liberty module
      *
-     * @param createWidget create Terminal widget if it does not already exist
-     * @return TerminalWidget
+     * @param createView create Terminal view if it does not already exist
+     * @return TerminalView
      */
-    protected TerminalWidget getTerminalWidgetWithFocus(boolean createWidget, Project project, VirtualFile buildFile, String actionCmd) {
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
+    protected TerminalView getTerminalViewWithFocus(boolean createView, Project project, VirtualFile buildFile, String actionCmd) {
         LibertyModule libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
-        TerminalToolWindowManager terminalToolWindowManager = TerminalToolWindowManager.getInstance(project);
         // look for existing terminal tab
-        TerminalWidget existingWidget = LibertyProjectUtil.getTerminalWidget(libertyModule, terminalToolWindowManager);
+        TerminalView existingView = LibertyProjectUtil.getTerminalView(libertyModule, project);
         // look for creating new terminal tab
-        TerminalWidget widget = LibertyProjectUtil.getTerminalWidget(project, libertyModule, createWidget, terminalToolWindowManager, existingWidget);
-        // Set Focus to existing terminal widget
-        LibertyProjectUtil.setFocusToWidget(project, existingWidget);
+        TerminalView view = LibertyProjectUtil.getTerminalView(project, libertyModule, createView, existingView);
+        // Set Focus to existing terminal view
+        if (existingView != null) {
+            LibertyProjectUtil.setFocusToView(project, existingView);
+        }
 
-        // Shows error for actions where terminal widget does not exist or action requires a terminal
+        // Shows error for actions where terminal view does not exist or action requires a terminal
         // to already exist with Liberty dev mode actively running.
-        if (widget == null || (!createWidget && LibertyActionUtil.isCommandNotRunning(libertyModule))) {
+        if (view == null || (!createView && LibertyActionUtil.isCommandNotRunning(libertyModule))) {
             String msg;
-            if (createWidget) {
+            if (createView) {
                 msg = LocalizedResourceUtil.getMessage("liberty.terminal.cannot.resolve", actionCmd, project.getName());
             } else {
                 msg = LocalizedResourceUtil.getMessage("liberty.dev.not.started.notification.content", actionCmd, project.getName(), System.lineSeparator());
@@ -190,7 +193,7 @@ public abstract class LibertyGeneralAction extends AnAction {
             LOGGER.warn(msg);
             return null;
         }
-        return widget;
+        return view;
     }
 
     /**

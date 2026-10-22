@@ -11,7 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.terminal.ui.TerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.*;
 import static io.openliberty.tools.intellij.util.Constants.ProjectType.*;
@@ -38,12 +38,15 @@ public class LibertyDevStartAction extends LibertyGeneralAction {
         runInTerminal(libertyModule, false);
     }
 
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     protected void runInTerminal(LibertyModule libertyModule, boolean runInContainer) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
         Constants.ProjectType projectType = libertyModule.getProjectType();
-        TerminalWidget widget = getTerminalWidgetWithFocus(true, project, buildFile, getActionCommandName());
-        if (widget == null) {
+        TerminalView view = getTerminalViewWithFocus(true, project, buildFile, getActionCommandName());
+        if (view == null) {
             return;
         }
 
