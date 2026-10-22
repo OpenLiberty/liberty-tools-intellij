@@ -574,15 +574,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      */
     private void validateIdClass(PsiAnnotation idClassAnnotation,
                                  PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        PsiAnnotationMemberValue value = idClassAnnotation.findAttributeValue("value");
-        if (!(value instanceof PsiClassObjectAccessExpression)) {
-            return;
-        }
-        PsiType keyType = ((PsiClassObjectAccessExpression) value).getOperand().getType();
-        if (!(keyType instanceof PsiClassType)) {
-            return;
-        }
-        PsiClass idClass = ((PsiClassType) keyType).resolve();
+        PsiClass idClass = DiagnosticsUtils.resolveClassFromAnnotationAttribute(idClassAnnotation, "value");
         if (idClass == null) {
             return;
         }
