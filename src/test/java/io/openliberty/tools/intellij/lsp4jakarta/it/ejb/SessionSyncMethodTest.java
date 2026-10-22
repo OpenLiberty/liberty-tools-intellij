@@ -331,7 +331,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 + "    }\n"
                 + "}\n";
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
-        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+        CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
@@ -376,7 +376,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 + "    }\n"
                 + "}\n";
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
-        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+        CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
@@ -421,7 +421,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 + "    }\n"
                 + "}\n";
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
-        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+        CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
@@ -466,7 +466,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 + "    }\n"
                 + "}\n";
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
-        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+        CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
@@ -511,7 +511,7 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
                 + "    }\n"
                 + "}\n";
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
-        CodeAction expectedCodeAction = ca(uri, "Fix @AfterCompletion method parameter to boolean",
+        CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
         assertJavaCodeAction(codeActionParams, utils, expectedCodeAction);
     }
