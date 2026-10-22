@@ -59,5 +59,22 @@ public class PsiUtils {
             collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
+
+    /**
+     * Returns the canonical type name of a field or getter method.
+     *
+     * @param member the field or method to inspect
+     * @return canonical type name, or {@code null}
+     */
+    public static String resolvedTypeName(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField field) {
+            return field.getType().getCanonicalText();
+        }
+        if (member instanceof PsiMethod method) {
+            PsiType rt = method.getReturnType();
+            return rt != null ? rt.getCanonicalText() : null;
+        }
+        return null;
+    }
 }
 

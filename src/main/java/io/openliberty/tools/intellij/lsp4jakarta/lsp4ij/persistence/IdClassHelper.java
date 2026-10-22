@@ -14,6 +14,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -139,7 +140,7 @@ class IdClassHelper {
      * @return the expected key-class type name, or the {@code @Id} field type if unresolvable
      */
     private String resolveExpectedKeyClassType(PsiJvmModifiersOwner member) {
-        String idFieldType = resolvedTypeName(member);
+        String idFieldType = PsiUtils.resolvedTypeName(member);
 
         // Only relationship @Id fields need special handling.
         boolean isRelationship = member.hasAnnotation(PersistenceConstants.MANY_TO_ONE)
@@ -198,23 +199,6 @@ class IdClassHelper {
         if (value instanceof PsiClassObjectAccessExpression classExpr
                 && classExpr.getOperand().getType() instanceof PsiClassType classType) {
             return classType.resolve();
-        }
-        return null;
-    }
-
-    /**
-     * Returns the canonical type name of a field or getter method.
-     *
-     * @param member the field or method to inspect
-     * @return canonical type name, or {@code null}
-     */
-    private String resolvedTypeName(PsiJvmModifiersOwner member) {
-        if (member instanceof PsiField field) {
-            return field.getType().getCanonicalText();
-        }
-        if (member instanceof PsiMethod method) {
-            PsiType rt = method.getReturnType();
-            return rt != null ? rt.getCanonicalText() : null;
         }
         return null;
     }
