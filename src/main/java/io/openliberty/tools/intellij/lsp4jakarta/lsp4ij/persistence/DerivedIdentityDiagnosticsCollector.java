@@ -16,7 +16,7 @@ import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.KeyStrategy;
-import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.ParentPk;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.CompositeKeyResolver.RelationalEntityPk;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
@@ -108,8 +108,8 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
         String mapsIdValue = AnnotationUtils.getAnnotationMemberValue(mapsIdAnn, "value");
         boolean hasValue = mapsIdValue != null && !mapsIdValue.isEmpty();
 
-        boolean fatal = validateMapsIdStructure(member, memberAnnotations, keyStrategy, hasValue, unit, diagnostics);
-        if (fatal) {
+        boolean isValidStructure = isValidMapsIdStructure(member, memberAnnotations, keyStrategy, hasValue, unit, diagnostics);
+        if (!isValidStructure) {
             return;
         }
         if (hasValue) {
@@ -127,11 +127,13 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
     /**
      * Validates structural constraints (Rules 1–2).
      *
-     * @return {@code true} if a fatal violation was found and attribute-binding checks must not run.
+     * @return {@code true} if structural constraints pass and attribute-binding checks can proceed,
+     *         {@code false} if a structural violation was found (and reported as a diagnostic),
+     *         in which case further checks should be skipped.
      */
-    private boolean validateMapsIdStructure(PsiJvmModifiersOwner member, PsiAnnotation[] memberAnnotations,
-                                            KeyStrategy keyStrategy, boolean mapsIdHasValue,
-                                            PsiJavaFile unit, List<Diagnostic> diagnostics) {
+    private boolean isValidMapsIdStructure(PsiJvmModifiersOwner member, PsiAnnotation[] memberAnnotations,
+                                           KeyStrategy keyStrategy, boolean mapsIdHasValue,
+                                           PsiJavaFile unit, List<Diagnostic> diagnostics) {
         // Rule 1: @MapsId must be on @OneToOne or @ManyToOne.
         boolean hasToOne = isMatchedAnnotation(memberAnnotations, PersistenceConstants.ONETOONE)
                 || isMatchedAnnotation(memberAnnotations, PersistenceConstants.MANYTOONE);
@@ -140,7 +142,7 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
                     Messages.getMessage("MapsIdOnInvalidRelationship"),
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPSID_ON_INVALID_RELATIONSHIP,
                     null, DiagnosticSeverity.Error));
-            return true;
+            return false;
         }
 
         // Rule 2: @MapsId("value") requires a composite key.
@@ -149,15 +151,15 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
                     Messages.getMessage("MapsIdRequiresCompositeKey"),
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPSID_REQUIRES_COMPOSITE_KEY,
                     null, DiagnosticSeverity.Error));
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     /**
      * Validates that the {@code @MapsId} value names an existing attribute in the
-     * {@code @EmbeddedId} class and that its type is compatible with the parent entity's
+     * {@code @EmbeddedId} class and that its type is compatible with the relational entity's
      * primary key type (Rules 4–5, spec §2.4.1).
      * Only runs when the entity uses {@code @EmbeddedId}.
      */
@@ -169,8 +171,8 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
             return; // @IdClass path — attribute-name checks handled by separate collector
         }
 
-        ParentPk parentPk = CompositeKeyResolver.resolveParentPk(member);
-        if (parentPk == null) {
+        RelationalEntityPk relationalEntityPk = CompositeKeyResolver.resolveRelationalEntityPk(member);
+        if (relationalEntityPk == null) {
             return;
         }
 
@@ -185,12 +187,12 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
             return;
         }
 
-        // Rule 5: the attribute's type must be compatible with the parent entity's PK type.
-        if (!CompositeKeyResolver.typesCompatible(embeddedAttrFqType, parentPk.pkFqType)) {
+        // Rule 5: the attribute's type must be compatible with the relational entity's PK type.
+        if (!CompositeKeyResolver.typesCompatible(embeddedAttrFqType, relationalEntityPk.pkFqType)) {
             diagnostics.add(createDiagnostic(member, unit,
                     Messages.getMessage("MapsIdValueTypeMismatch",
                             mapsIdValue, embeddedIdClass.getName(),
-                            embeddedAttrFqType, parentPk.entity.getName(), parentPk.pkFqType),
+                            embeddedAttrFqType, relationalEntityPk.entity.getName(), relationalEntityPk.pkFqType),
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPSID_VALUE_TYPE_MISMATCH,
                     null, DiagnosticSeverity.Error));
         }
@@ -198,14 +200,14 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
 
     /**
      * Validates a value-less {@code @MapsId} with {@code @EmbeddedId}
-     * (spec §2.4.1.1, Examples 5b/6b): the embedded id type must match the parent PK type.
+     * (spec §2.4.1.1, Examples 5b/6b): the embedded id type must match the relational entity's PK type.
      * Skipped when the relationship is also annotated {@code @Id}, or when the entity uses
      * {@code @IdClass}.
      */
     private void validateValuelessMapsId(PsiJvmModifiersOwner member, PsiJavaFile unit,
                                          List<Diagnostic> diagnostics) {
-        ParentPk parentPk = CompositeKeyResolver.resolveParentPk(member);
-        if (parentPk == null) {
+        RelationalEntityPk relationalEntityPk = CompositeKeyResolver.resolveRelationalEntityPk(member);
+        if (relationalEntityPk == null) {
             return;
         }
         PsiClass declaringType = null;
@@ -218,10 +220,10 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
             return;
         }
         String ownPkType = CompositeKeyResolver.resolvePkType(declaringType);
-        if (ownPkType != null && !CompositeKeyResolver.typesCompatible(ownPkType, parentPk.pkFqType)) {
+        if (ownPkType != null && !CompositeKeyResolver.typesCompatible(ownPkType, relationalEntityPk.pkFqType)) {
             diagnostics.add(createDiagnostic(member, unit,
                     Messages.getMessage("MapsIdPrimaryKeyTypeMismatch",
-                            ownPkType, parentPk.entity.getName(), parentPk.pkFqType),
+                            ownPkType, relationalEntityPk.entity.getName(), relationalEntityPk.pkFqType),
                     PersistenceConstants.DIAGNOSTIC_CODE_MAPSID_PK_TYPE_MISMATCH,
                     null, DiagnosticSeverity.Error));
         }

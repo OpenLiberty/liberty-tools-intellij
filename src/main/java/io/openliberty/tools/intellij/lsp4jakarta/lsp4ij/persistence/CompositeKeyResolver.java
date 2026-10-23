@@ -16,9 +16,11 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 
+import java.beans.Introspector;
+
 /**
  * Stateless PSI model-query helpers used by {@link DerivedIdentityDiagnosticsCollector}
- * to resolve composite-key metadata and parent-entity primary key types.
+ * to resolve composite-key metadata and relational-entity primary key types.
  *
  * <p>All methods are {@code static}; this class is not instantiated.</p>
  */
@@ -78,32 +80,32 @@ final class CompositeKeyResolver {
         return new KeyStrategy(embeddedIdType, hasIdClass);
     }
 
-    /** Holds the resolved parent entity and the FQ type name of its primary key. */
-    static final class ParentPk {
+    /** Holds the resolved relational entity and the FQ type name of its primary key. */
+    static final class RelationalEntityPk {
         final PsiClass entity;
         final String pkFqType;
 
-        ParentPk(PsiClass entity, String pkFqType) {
+        RelationalEntityPk(PsiClass entity, String pkFqType) {
             this.entity = entity;
             this.pkFqType = pkFqType;
         }
     }
 
     /**
-     * Resolves the parent entity referenced by the relationship {@code member}
-     * and the FQ type of its primary key. Returns {@code null} if the parent
+     * Resolves the relational entity referenced by the relationship {@code member}
+     * and the FQ type of its primary key. Returns {@code null} if the entity
      * cannot be resolved (library type, unresolvable FQN, or no primary key).
      */
-    static ParentPk resolveParentPk(PsiJvmModifiersOwner member) {
-        PsiClass parentEntity = PsiUtil.resolveClassInClassTypeOnly(PsiUtil.getTypeByPsiElement(member));
-        if (parentEntity == null) {
+    static RelationalEntityPk resolveRelationalEntityPk(PsiJvmModifiersOwner member) {
+        PsiClass relationalEntity = PsiUtil.resolveClassInClassTypeOnly(PsiUtil.getTypeByPsiElement(member));
+        if (relationalEntity == null) {
             return null;
         }
-        String pkFqType = resolvePkType(parentEntity);
+        String pkFqType = resolvePkType(relationalEntity);
         if (pkFqType == null) {
             return null;
         }
-        return new ParentPk(parentEntity, pkFqType);
+        return new RelationalEntityPk(relationalEntity, pkFqType);
     }
 
     /**
@@ -152,13 +154,18 @@ final class CompositeKeyResolver {
             return field.getType().getCanonicalText();
         }
         // Fall back to property getter: getXxx() or isXxx()
-        String capitalized = Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
-        String getterName = "get" + capitalized;
-        String isGetterName = "is" + capitalized;
         for (PsiMethod method : embeddableType.getMethods()) {
+            if (method.getParameterList().getParametersCount() != 0) {
+                continue;
+            }
             String methodName = method.getName();
-            if ((getterName.equals(methodName) || isGetterName.equals(methodName))
-                    && method.getParameterList().getParametersCount() == 0) {
+            String propertyName = null;
+            if (methodName.startsWith("get") && methodName.length() > 3) {
+                propertyName = Introspector.decapitalize(methodName.substring(3));
+            } else if (methodName.startsWith("is") && methodName.length() > 2) {
+                propertyName = Introspector.decapitalize(methodName.substring(2));
+            }
+            if (attrName.equals(propertyName)) {
                 PsiType returnType = method.getReturnType();
                 return returnType != null ? returnType.getCanonicalText() : null;
             }
