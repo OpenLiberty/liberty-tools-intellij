@@ -20,6 +20,7 @@ import com.intellij.psi.tree.IElementType;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,15 +179,8 @@ public class DiagnosticsUtils {
      *         {@code @Id} or {@code @EmbeddedId}
      */
     public static boolean isFieldBasedAccess(PsiClass psiClass, String idFQ, String embeddedIdFQ) {
-        for (PsiField field : psiClass.getFields()) {
-            for (PsiAnnotation annotation : field.getAnnotations()) {
-                String qn = annotation.getQualifiedName();
-                if (idFQ.equals(qn) || embeddedIdFQ.equals(qn)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return Arrays.stream(psiClass.getFields())
+                .anyMatch(f -> f.hasAnnotation(idFQ) || f.hasAnnotation(embeddedIdFQ));
     }
 
     /**
@@ -225,13 +219,10 @@ public class DiagnosticsUtils {
         PsiAnnotationMemberValue[] items = (value instanceof PsiArrayInitializerMemberValue arrayValue)
                 ? arrayValue.getInitializers()
                 : new PsiAnnotationMemberValue[] { value };
-        List<T> result = new ArrayList<>();
-        for (PsiAnnotationMemberValue item : items) {
-            if (elementType.isInstance(item)) {
-                result.add(elementType.cast(item));
-            }
-        }
-        return result;
+        return Arrays.stream(items)
+                .filter(elementType::isInstance)
+                .map(elementType::cast)
+                .toList();
     }
 
     /**
