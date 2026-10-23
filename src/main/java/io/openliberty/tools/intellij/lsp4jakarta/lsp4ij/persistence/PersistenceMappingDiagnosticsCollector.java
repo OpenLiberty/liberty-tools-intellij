@@ -164,11 +164,16 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
 
     /**
      * Returns a human-readable name for the first {@code @MappedSuperclass} in the
-     * supertype chain, falling back to the immediate superclass name.
+     * supertype chain, falling back to the immediate superclass name. When the class
+     * has no explicit superclass (i.e. it implicitly extends {@code java.lang.Object}),
+     * the class's own name is returned.
      */
     private String resolveSuperclassChainName(PsiClass type) {
-        String superclassName = type.getSuperClass()!=null?type.getSuperClass().getName():null;
-        return superclassName != null ? superclassName : type.getQualifiedName();
+        PsiClass superClass = type.getSuperClass();
+        if (superClass == null || PersistenceConstants.OBJECT.equals(superClass.getQualifiedName())) {
+            return type.getName();
+        }
+        return superClass.getName();
     }
 
     // -----------------------------------------------------------------------
