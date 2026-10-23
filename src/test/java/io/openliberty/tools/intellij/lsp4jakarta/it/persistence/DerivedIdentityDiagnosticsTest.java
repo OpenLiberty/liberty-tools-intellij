@@ -234,7 +234,27 @@ public class DerivedIdentityDiagnosticsTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         Diagnostic mapsIdPrimaryKeyTypeMismatch = d(19, 33, 39,
-                "The primary key type of the parent entity ('io.openliberty.sample.jakarta.persistence.derivedidentity.ChildKey') must be same as the primary key type of the dependent entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId') when @MapsId is specified without a value.",
+                "The primary key type of the Entity ('io.openliberty.sample.jakarta.persistence.derivedidentity.ChildKey') must be same as the primary key type of the Relational Entity 'ParentWithEmbeddedId' ('io.openliberty.sample.jakarta.persistence.derivedidentity.ProjectId') when @MapsId is specified without a value.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdPrimaryKeyTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, mapsIdPrimaryKeyTypeMismatch);
+    }
+
+    /** Simple @Id (String) differs from parent's simple PK (Employee.id: long). */
+    @Test
+    public void testValuelessMapsIdSimpleKeyTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/derivedidentity/MapsIdSimpleKeyTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic mapsIdPrimaryKeyTypeMismatch = d(20, 21, 29,
+                "The primary key type of the Entity ('java.lang.String') must be same as the primary key type of the Relational Entity 'Employee' ('long') when @MapsId is specified without a value.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "MapsIdPrimaryKeyTypeMismatch");
 
         assertJavaDiagnostics(diagnosticsParams, utils, mapsIdPrimaryKeyTypeMismatch);
