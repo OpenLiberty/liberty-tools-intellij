@@ -221,13 +221,13 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             }
 
             if (isSingle) {
-                String name = getAnnotationStringValue(annotation, PersistenceConstants.NAME);
+                String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
                 }
             } else {
-                for (PsiAnnotation nested : getNestedAnnotations(annotation)) {
-                    String name = getAnnotationStringValue(nested, PersistenceConstants.NAME);
+                for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
+                    String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
                         validateNameOnMember(name, nested, member, hasElementCollection, desc, unit, diagnostics);
                     }
@@ -366,49 +366,4 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass nestedClass = ((PsiClassType) nestedField.getType()).resolve();
         return nestedClass != null && fieldExistsInType(nestedClass, name.substring(dot + 1));
     }
-
-    /**
-     * Extracts the string value of a named annotation attribute, stripping surrounding quotes.
-     * Returns {@code null} if the attribute is absent or not a string literal.
-     */
-    private String getAnnotationStringValue(PsiAnnotation annotation, String attributeName) {
-        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
-        if (value == null) {
-            return null;
-        }
-        String text = value.getText();
-        if (text != null && text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
-            return text.substring(1, text.length() - 1);
-        }
-        return null;
-    }
-
-    /**
-     * Returns the nested single-annotation instances from a container annotation's
-     * {@code value} attribute (e.g. the entries inside {@code @AttributeOverrides}).
-     */
-    private PsiAnnotation[] getNestedAnnotations(PsiAnnotation container) {
-        PsiAnnotationMemberValue value = container.findAttributeValue("value");
-        if (value instanceof PsiArrayInitializerMemberValue) {
-            PsiAnnotationMemberValue[] initializers =
-                    ((PsiArrayInitializerMemberValue) value).getInitializers();
-            int count = 0;
-            PsiAnnotation[] buf = new PsiAnnotation[initializers.length];
-            for (PsiAnnotationMemberValue item : initializers) {
-                if (item instanceof PsiAnnotation) {
-                    buf[count++] = (PsiAnnotation) item;
-                }
-            }
-            if (count == initializers.length) {
-                return buf;
-            }
-            PsiAnnotation[] trimmed = new PsiAnnotation[count];
-            System.arraycopy(buf, 0, trimmed, 0, count);
-            return trimmed;
-        } else if (value instanceof PsiAnnotation) {
-            return new PsiAnnotation[]{(PsiAnnotation) value};
-        }
-        return PsiAnnotation.EMPTY_ARRAY;
-    }
-
 }
