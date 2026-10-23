@@ -23,10 +23,12 @@ import com.intellij.psi.PsiJavaFile;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +63,9 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
         if (unit == null) {
             return;
         }
-        for (PsiClass type : unit.getClasses()) {
+        List<PsiClass> allClasses = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allClasses);
+        for (PsiClass type : allClasses) {
             if (AnnotationUtils.hasAnnotation(type, SPECIALIZES_FQ_NAME)) {
                 validateSpecializes(type, unit, diagnostics);
                 // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#direct_and_indirect_specialization
