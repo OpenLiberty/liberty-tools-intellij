@@ -20,6 +20,7 @@ import com.intellij.psi.tree.IElementType;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -161,6 +162,67 @@ public class DiagnosticsUtils {
             current = current.getSuperClass();
         }
         return superClasses;
+    }
+
+    /**
+     * Returns {@code true} if the entity type uses field-based access, i.e. at
+     * least one field on {@code psiClass} directly carries {@code @Id} or
+     * {@code @EmbeddedId}.
+     *
+     * <p>JPA access type is determined by the placement of {@code @Id} on the
+     * declaring entity — no superclass walk is needed here.
+     *
+     * @param psiClass     the entity class to inspect
+     * @param idFQ         the fully-qualified name of {@code @Id}
+     * @param embeddedIdFQ the fully-qualified name of {@code @EmbeddedId}
+     * @return {@code true} if any field on {@code psiClass} is annotated with
+     *         {@code @Id} or {@code @EmbeddedId}
+     */
+    public static boolean isFieldBasedAccess(PsiClass psiClass, String idFQ, String embeddedIdFQ) {
+        return Arrays.stream(psiClass.getFields())
+                .anyMatch(f -> f.hasAnnotation(idFQ) || f.hasAnnotation(embeddedIdFQ));
+    }
+
+    /**
+     * Returns {@code true} if {@code psiClass} or any superclass in its hierarchy
+     * declares a field with the given {@code fieldName}, using PSI's
+     * {@link PsiClass#findFieldByName(String, boolean)} with hierarchy search enabled.
+     *
+     * @param psiClass  the class to start the search from
+     * @param fieldName the simple field name to look for
+     * @return {@code true} if a matching field is found in the class hierarchy
+     */
+    public static boolean hasFieldInHierarchy(PsiClass psiClass, String fieldName) {
+        // findFieldByName(name, true) searches the class and all superclasses.
+        return psiClass.findFieldByName(fieldName, true) != null;
+    }
+
+    /**
+     * Returns the values of an array-valued annotation member, normalizing PSI's
+     * two representations into a single list.
+     *
+     * <p>PSI represents the member as a {@link PsiArrayInitializerMemberValue} when
+     * array notation is used (e.g. {@code {@A, @B}}), but as the bare element when a
+     * single value is given without braces (e.g. {@code @A}). Both forms are handled.</p>
+     *
+     * @param annotation  the annotation to inspect
+     * @param memberName  the member/attribute name
+     * @param elementType the expected type of each element; elements of other types are skipped
+     * @return the matching elements, or an empty list if the member is absent
+     */
+    public static <T extends PsiAnnotationMemberValue> List<T> getAnnotationMemberValues(
+            PsiAnnotation annotation, String memberName, Class<T> elementType) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(memberName);
+        if (value == null) {
+            return List.of();
+        }
+        PsiAnnotationMemberValue[] items = (value instanceof PsiArrayInitializerMemberValue arrayValue)
+                ? arrayValue.getInitializers()
+                : new PsiAnnotationMemberValue[] { value };
+        return Arrays.stream(items)
+                .filter(elementType::isInstance)
+                .map(elementType::cast)
+                .toList();
     }
 
     /**
