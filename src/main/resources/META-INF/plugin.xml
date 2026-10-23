@@ -630,7 +630,7 @@
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertInjectAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
-                                   targetDiagnostic="jakarta-cdi#DelegateMustBeInDecorator"
+                                   targetDiagnostic="jakarta-cdi#InvalidDelegateOutsideDecorator"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveDelegateAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
