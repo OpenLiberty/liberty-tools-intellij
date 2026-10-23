@@ -313,14 +313,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the JBTextArea class.
+     * Returns the ContainerFixture object associated with the JEditorPane class used
+     * in the Liberty tool window empty-state panel.
      *
      * @param xpathVars The Locator custom variables: waitTime(seconds)
-     * @return The ContainerFixture object associated with the JBTextArea class.
+     * @return The ContainerFixture object associated with the JEditorPane class.
      */
     public ContainerFixture getTextArea(String... xpathVars) {
         String waitTime = xpathVars[0];
-        return find(ContainerFixture.class, byXpath("//div[@class='JBTextArea']"), Duration.ofSeconds(Integer.parseInt(waitTime)));
+        return find(ContainerFixture.class, byXpath("(//div[@class='JEditorPane'])[1]"), Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**
