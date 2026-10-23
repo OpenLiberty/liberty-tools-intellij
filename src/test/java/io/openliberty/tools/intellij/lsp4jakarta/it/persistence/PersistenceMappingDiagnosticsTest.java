@@ -63,6 +63,22 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
     }
 
     @Test
+    public void validEmbeddedIdOverride_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/ValidEmbeddedIdOverride.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
+    @Test
     public void validSuperclassOverride_nodiagnostic() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
@@ -637,5 +653,67 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         TextEdit removeAttributeOverrides = te(0, 0, 21, 0, newText);
         CodeAction removeAttributeOverridesAction = ca(uri, "Remove @AttributeOverrides", overrideContainerOnIdField, removeAttributeOverrides);
         assertJavaCodeAction(codeActionParams, utils, removeAttributeOverridesAction);
+    }
+
+    // -----------------------------------------------------------------------
+    // Class-level @AttributeOverride — attribute must be inherited from a @MappedSuperclass
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void classLevelOverrideNoSuperclass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/InvalidOverrideNoSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 23 (0-based 22): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
+        Diagnostic cityNotInheritedFromMappedSuperclass = d(22, 0, 70,
+                "The name \"city\" in @AttributeOverride does not match any declared field or property in \"InvalidOverrideNoSuperclass\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, cityNotInheritedFromMappedSuperclass);
+    }
+
+    @Test
+    public void classLevelOverrideNonMappedSuperclass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/InvalidOverrideNonMappedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 23 (0-based 22): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
+        Diagnostic cityInNonMappedSuperclass = d(22, 0, 70,
+                "The name \"city\" in @AttributeOverride does not match any declared field or property in \"PlainBase\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, cityInNonMappedSuperclass);
+    }
+
+    @Test
+    public void classLevelOverrideThroughNonMappedIntermediate_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/ValidOverrideThroughNonMappedIntermediate.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
     }
 }
