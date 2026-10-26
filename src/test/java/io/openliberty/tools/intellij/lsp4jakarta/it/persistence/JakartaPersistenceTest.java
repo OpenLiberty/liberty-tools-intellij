@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.it.persistence;
 
+import com.google.gson.JsonArray;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.vfs.LocalFileSystem;
