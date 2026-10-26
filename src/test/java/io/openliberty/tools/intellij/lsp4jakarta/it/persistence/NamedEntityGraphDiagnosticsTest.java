@@ -287,7 +287,7 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
      * a diagnostic.
      *
      * <p>The attribute node {@code @NamedAttributeNode("nonExistentField")} is at
-     * 0-based line 13, cols 8–47 in the test resource file.
+     * 0-based line 12, cols 8–47 in the test resource file.
      *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
