@@ -19,7 +19,6 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
-import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -412,6 +411,247 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
         TextEdit constructorTextEdit = te(0, 0, 117, 0, constructorFixedContent);
         CodeAction constructorInsertInjectAction = ca(uri, "Insert @Inject", constructorParamDiagnostic, constructorTextEdit);
         assertJavaCodeAction(constructorCodeActionParams, utils, constructorInsertInjectAction);
+    }
+
+    /**
+     * Test that decorators with invalid delegate type assignability trigger diagnostics.
+     *
+     * The file contains multiple test cases:
+     * - InvalidDelegateType: delegate type (Logger) doesn't implement PaymentService (field-level)
+     * - InvalidDelegateTypePrimitive: delegate type (String) doesn't implement PaymentService (field-level)
+     * - InvalidDelegateTypeOnMethod: delegate type (Logger) doesn't implement PaymentService (method-level)
+     *
+     * Expected: Errors on delegate fields and method parameter indicating type mismatch.
+     */
+    @Test
+    public void testDecoratorWithInvalidDelegateType() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/DecoratorDelegateTypeAssignability.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Expected diagnostic on InvalidDelegateType class (field-level)
+        // Line 22 (0-based: 21), field name "delegate" starts at column 19, ends at column 27
+        Diagnostic invalidTypeDiagnostic1 = d(21, 19, 27,
+                "Delegate type 'Logger' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypePrimitive class (field-level)
+        // Line 88 (0-based: 87), field name "delegate" starts at column 19, ends at column 27
+        Diagnostic invalidTypeDiagnostic2 = d(87, 19, 27,
+                "Delegate type 'String' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypeOnMethod class (method-level)
+        // Line 111 (0-based: 110), parameter name "delegate" starts at column 45, ends at column 53
+        Diagnostic invalidTypeDiagnostic3 = d(110, 45, 53,
+                "Delegate type 'Logger' does not implement the decorated type 'PaymentService'. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on InvalidDelegateTypeTruePrimitive class (field-level)
+        // Line 168 (0-based: 167), field name "delegate" starts at column 16, ends at column 24
+        Diagnostic invalidTypeDiagnostic4 = d(167, 16, 24,
+                "Delegate type 'int' does not implement the decorated type ''. A delegate must implement or extend the decorated type(s).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorDelegateTypeAssignability");
+
+        // Expected diagnostic on DecoratorWithDelegateButNoDecoratedTypes class (field-level)
+        // Line 192 (0-based: 191), field name "delegate" starts at column 27, ends at column 35
+        Diagnostic invalidTypeDiagnostic5 = d(191, 27, 35,
+                "Decorator has no decorated types. A decorator must implement at least one interface (other than java.io.Serializable).",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDecoratorWithNoDecoratedTypes");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, invalidTypeDiagnostic1, invalidTypeDiagnostic2,
+                invalidTypeDiagnostic3, invalidTypeDiagnostic4, invalidTypeDiagnostic5);
+    }
+
+    /**
+     * Test that @Delegate used in a class that is NOT annotated with @Decorator triggers a diagnostic
+     * and offers a "Remove @Delegate" quickfix.
+     *
+     * Per CDI 3.0 spec §8.1.3: if a bean class that is not a decorator has an injection point
+     * annotated @Delegate, the container automatically detects the problem and treats it as a
+     * definition error.
+     *
+     * Expected: Error on the field "service" in NotADecoratorWithDelegate.
+     */
+    @Test
+    public void testDelegateOutsideDecoratorClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/NotADecoratorWithDelegate.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 13 (0-based), field name "service" starts at col 27, ends at col 34
+        Diagnostic delegateOutsideDecoratorError = d(13, 27, 34,
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateOutsideDecorator");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, delegateOutsideDecoratorError);
+
+        // Test quickfix: Remove @Delegate from the field
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, delegateOutsideDecoratorError);
+        String removeDelegateFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Delegate used outside a decorator class (class is not annotated with @Decorator)\n" +
+                "@ApplicationScoped\n" +
+                "public class NotADecoratorWithDelegate {\n\n" +
+                "    // Invalid: @Delegate on a field in a non-decorator class\n" +
+                "    @Inject\n" +
+                "    private PaymentService service;\n\n" +
+                "}";
+        TextEdit removeDelegateEdit = te(0, 0, 16, 0, removeDelegateFixedContent + "\n");
+        CodeAction removeDelegateAction = ca(uri, "Remove @Delegate", delegateOutsideDecoratorError, removeDelegateEdit);
+        assertJavaCodeAction(codeActionParams, utils, removeDelegateAction);
+    }
+
+    /**
+     * Test that @Delegate used on method and constructor parameters in a non-decorator class
+     * triggers diagnostics on each parameter and offers "Remove @Delegate" quickfixes.
+     *
+     * Expected: Two errors — one on the initializer method parameter "service" and one on
+     * the constructor parameter "ps".
+     */
+    @Test
+    public void testDelegateOutsideDecoratorOnMethodAndConstructorParams() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/NotADecoratorWithMethodDelegate.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 13 (0-based), parameter name "service" starts at col 46, ends at col 53
+        Diagnostic methodParamDelegateError = d(13, 46, 53,
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateOutsideDecorator");
+
+        // Line 18 (0-based), parameter name "ps" starts at col 68, ends at col 70
+        Diagnostic constructorParamDelegateError = d(18, 68, 70,
+                "Injection points annotated with @Delegate must be inside a class annotated with @Decorator.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateOutsideDecorator");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, methodParamDelegateError, constructorParamDelegateError);
+
+        // Test quickfix for method parameter: Remove @Delegate
+        JakartaJavaCodeActionParams methodCodeActionParams = createCodeActionParams(uri, methodParamDelegateError);
+        String methodParamFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import io.openliberty.sample.jakarta.cdi.decorator.PaymentService;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Delegate used on method/constructor parameters outside a decorator class\n" +
+                "@ApplicationScoped\n" +
+                "public class NotADecoratorWithMethodDelegate {\n\n" +
+                "    // Invalid: @Delegate on an initializer method parameter in a non-decorator class\n" +
+                "    @Inject\n" +
+                "    public void init( PaymentService service) {\n" +
+                "    }\n\n" +
+                "    // Invalid: @Delegate on a constructor parameter in a non-decorator class\n" +
+                "    @Inject\n" +
+                "    public NotADecoratorWithMethodDelegate(@Delegate PaymentService ps) {\n" +
+                "    }\n\n" +
+                "}";
+        TextEdit methodParamRemoveDelegateEdit = te(0, 0, 22, 0, methodParamFixedContent + "\n");
+        CodeAction methodParamRemoveDelegateAction = ca(uri, "Remove @Delegate", methodParamDelegateError, methodParamRemoveDelegateEdit);
+        assertJavaCodeAction(methodCodeActionParams, utils, methodParamRemoveDelegateAction);
+
+        // Test quickfix for constructor parameter: Remove @Delegate
+        JakartaJavaCodeActionParams constructorCodeActionParams = createCodeActionParams(uri, constructorParamDelegateError);
+        String constructorParamFixedContent = "package io.openliberty.sample.jakarta.cdi.decorator;\n\n" +
+                "import io.openliberty.sample.jakarta.cdi.decorator.PaymentService;\n" +
+                "import jakarta.decorator.Delegate;\n" +
+                "import jakarta.enterprise.context.ApplicationScoped;\n" +
+                "import jakarta.inject.Inject;\n\n" +
+                "// Invalid: @Delegate used on method/constructor parameters outside a decorator class\n" +
+                "@ApplicationScoped\n" +
+                "public class NotADecoratorWithMethodDelegate {\n\n" +
+                "    // Invalid: @Delegate on an initializer method parameter in a non-decorator class\n" +
+                "    @Inject\n" +
+                "    public void init(@Delegate PaymentService service) {\n" +
+                "    }\n\n" +
+                "    // Invalid: @Delegate on a constructor parameter in a non-decorator class\n" +
+                "    @Inject\n" +
+                "    public NotADecoratorWithMethodDelegate( PaymentService ps) {\n" +
+                "    }\n\n" +
+                "}";
+        TextEdit constructorParamRemoveDelegateEdit = te(0, 0, 22, 0, constructorParamFixedContent + "\n");
+        CodeAction constructorParamRemoveDelegateAction = ca(uri, "Remove @Delegate", constructorParamDelegateError, constructorParamRemoveDelegateEdit);
+        assertJavaCodeAction(constructorCodeActionParams, utils, constructorParamRemoveDelegateAction);
+    }
+
+    /**
+     * Test that a valid @Decorator class with a single @Inject @Delegate field does NOT trigger
+     * any InvalidDelegateOutsideDecorator diagnostic.
+     *
+     * Expected: No InvalidDelegateOutsideDecorator diagnostics.
+     */
+    @Test
+    public void testValidDecoratorWithDelegateNoOutsideDecoratorDiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/ValidDecoratorWithDelegate.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — this is a valid decorator
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    /**
+     * Test that a non-decorator class with @Inject fields but NO @Delegate annotation does NOT
+     * trigger any InvalidDelegateOutsideDecorator diagnostic.
+     *
+     * Expected: No diagnostics.
+     */
+    @Test
+    public void testNonDecoratorWithNoDelegate() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/NonDecoratorNoDelegates.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — no @Delegate present
+        assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
 }
