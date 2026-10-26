@@ -124,6 +124,15 @@ final class CompositeKeyResolver {
                 return type.getCanonicalText();
             }
         }
+        return resolveIdOrEmbeddedIdType(entityType);
+    }
+
+    /**
+     * Returns the FQ type name of the {@code @EmbeddedId} or simple {@code @Id} field or
+     * property of {@code entityType}, without considering {@code @IdClass}.
+     * Returns {@code null} if none can be determined.
+     */
+    static String resolveIdOrEmbeddedIdType(PsiClass entityType) {
         // Check @Id and @EmbeddedId on fields, then on methods
         for (PsiField field : entityType.getFields()) {
             if (AnnotationUtils.hasAnyAnnotation(field, PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID)) {

@@ -219,7 +219,7 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
         if (declaringType == null) {
             return;
         }
-        String ownPkType = CompositeKeyResolver.resolvePkType(declaringType);
+        String ownPkType = CompositeKeyResolver.resolveIdOrEmbeddedIdType(declaringType);
         if (ownPkType != null && !CompositeKeyResolver.typesCompatible(ownPkType, relationalEntityPk.pkFqType)) {
             diagnostics.add(createDiagnostic(member, unit,
                     Messages.getMessage("MapsIdPrimaryKeyTypeMismatch",
