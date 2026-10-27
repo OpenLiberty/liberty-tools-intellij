@@ -44,11 +44,17 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
 
     @Override
-    public void tearDown() throws Exception {
+    public void tearDown() {
         try {
             JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
         } finally {
-            super.tearDown();
+            try {
+                super.tearDown();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
