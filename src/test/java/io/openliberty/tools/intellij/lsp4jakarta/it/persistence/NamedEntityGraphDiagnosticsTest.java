@@ -43,21 +43,6 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
 
-    @Override
-    public void tearDown() {
-        try {
-            JakartaSearchSettings.setSearchEngineDiagnosticsEnabled(true);
-        } finally {
-            try {
-                super.tearDown();
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     /**
      * An entity whose {@code @NamedEntityGraph} name {@code "User.graph"} is also
      * declared on {@code NamedEntityGraphDuplicate2} must produce a diagnostic.
