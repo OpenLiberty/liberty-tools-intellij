@@ -23,6 +23,7 @@ public class Constants {
     /* INTERCEPTOR_FQ_NAME */
     public static final String INTERCEPTOR_FQ_NAME = "jakarta.interceptor.Interceptor";
     public static final String INTERCEPTOR_BINDING_FQ_NAME = "jakarta.interceptor.InterceptorBinding";
+    public static final String INTERCEPTORS_FQ_NAME = "jakarta.interceptor.Interceptors";
     /* Source */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-interceptor";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS = "RemoveInterceptorAnnotationOnAbstractClass";
@@ -34,6 +35,8 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_NEGATIVE_PRIORITY = "InterceptorNegativePriority";
     public static final String DIAGNOSTIC_CODE_DUPLICATE_INTERCEPTOR_METHOD = "InvalidMultipleInterceptorMethodsOfSameType";
     public static final String DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING = "InvalidInterceptorMissingInterceptorBinding";
+    public static final String DIAGNOSTIC_CODE_FINAL_INTERCEPTOR_BINDING_CLASS = "InvalidFinalInterceptorBindingClass";
+    public static final String DIAGNOSTIC_CODE_FINAL_METHOD_ON_INTERCEPTOR_BINDING_CLASS = "InvalidMethodOnInterceptorBindingClass";
 
     private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
