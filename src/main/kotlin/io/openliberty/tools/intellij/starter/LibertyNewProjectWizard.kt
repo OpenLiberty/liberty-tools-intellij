@@ -68,7 +68,7 @@ class LibertyNewProjectWizard : GeneratorNewProjectWizard {
      * link so that each step's [setupUI] is called in order:
      *
      *   [RootNewProjectWizardStep]
-     *   → [LibertyServerUrlStep]   (Server URL row — rendered first)
+     *   → [LibertyServerUrlStep]   (Informational header row — rendered first)
      *   → [NewProjectWizardBaseStep] (Name / Location)
      *   → [LibertyNewProjectWizardStep] (Liberty-specific fields)
      */

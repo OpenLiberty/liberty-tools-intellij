@@ -30,7 +30,7 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 /**
- * Renders the "Server URL" row (with animated spinner) at the very top of the
+ * Renders the informational header row (with animated spinner) at the very top of the
  * wizard page — before the Name / Location rows added by
  * [com.intellij.ide.wizard.NewProjectWizardBaseStep].
  *
@@ -49,7 +49,7 @@ class LibertyServerUrlStep(parent: NewProjectWizardStep) : AbstractNewProjectWiz
         val spinnerLabel = JLabel(AnimatedIcon.Default()).apply { isVisible = true }
         data.putUserData(SPINNER_KEY, spinnerLabel)
 
-        val urlLabel = JLabel("<html><a href=''>${LocalizedResourceUtil.getMessage("liberty.starter.server.url.display")}</a></html>").apply {
+        val infoLabel = JLabel("<html>${LocalizedResourceUtil.getMessage("liberty.starter.info.message")}</html>").apply {
             cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
             addMouseListener(object : java.awt.event.MouseAdapter() {
                 override fun mouseClicked(e: java.awt.event.MouseEvent) {
@@ -58,9 +58,9 @@ class LibertyServerUrlStep(parent: NewProjectWizardStep) : AbstractNewProjectWiz
             })
         }
 
-        // ── Server URL ─────────────────────────────────────────────────────────────
-        builder.row(LocalizedResourceUtil.getMessage("liberty.starter.server.url.label")) {
-            cell(urlLabel)
+        // ── Starter Info ───────────────────────────────────────────────────────────
+        builder.row {
+            cell(infoLabel)
             cell(spinnerLabel)
         }
     }
