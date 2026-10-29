@@ -9,6 +9,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.starter
 
+import com.intellij.ide.projectWizard.NewProjectWizard
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizard
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
@@ -17,11 +18,13 @@ import com.intellij.ide.wizard.NewProjectWizardChainStep
 import com.intellij.ide.wizard.NewProjectWizardStep
 import com.intellij.ide.wizard.RootNewProjectWizardStep
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ui.configuration.ModulesProvider
 import com.intellij.openapi.ui.Messages
 import io.openliberty.tools.intellij.LibertyPluginIcons
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil
@@ -111,6 +114,25 @@ class LibertyNewProjectWizard : GeneratorNewProjectWizard {
 
         const val STARTER_API      = "https://start.openliberty.io/api/start"
         const val STARTER_INFO_API = "https://start.openliberty.io/api/start/info"
+
+        /**
+         * Opens IntelliJ's New Project wizard with the Liberty generator pre-selected.
+         */
+        @JvmStatic
+        fun show(project: Project?) {
+            val wizard = NewProjectWizard(project, ModulesProvider.EMPTY_MODULES_PROVIDER, null)
+            // Must use ModalityState.any() so the lambda executes inside the modal event
+            // loop (while the dialog is open). The default invokeLater uses NON_MODAL and
+            // would only run after the dialog is already closed.
+            //
+            // requestSwitchTo matches by group.id; for our moduleBuilder extension that id
+            // is NPW_PREFIX + "Liberty".
+            ApplicationManager.getApplication().invokeLater({
+                // "NPW" is NewProjectWizardBuilder
+                wizard.wizardContext.requestSwitchTo("NPW.Liberty") {}
+            }, ModalityState.any())
+            wizard.showAndGet()
+        }
 
         /**
          * Calls `GET /api/start/info`, parses the JSON response, and returns a
