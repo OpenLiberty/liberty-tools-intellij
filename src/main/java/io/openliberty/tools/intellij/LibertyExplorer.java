@@ -41,6 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class LibertyExplorer extends SimpleToolWindowPanel {
     private final static Logger LOGGER = Logger.getInstance(LibertyExplorer.class);
@@ -105,38 +106,16 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     public static Tree buildTree(Project project, Color backgroundColor) {
         LibertyModules libertyModules = LibertyModules.getInstance().scanLibertyModules(project);
         // This singleton may contain entries from old projects if you close a project and open another
-        if (libertyModules.getLibertyModules(project).isEmpty()) {
+        if (libertyModules.getTopLevelLibertyModules(project).isEmpty()) {
             return null;
         }
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Root node");
         HashMap<String, ArrayList<Object>> projectMap = new HashMap<>();
 
-        for (LibertyModule libertyModule : libertyModules.getLibertyModules(project)) {
+        for (LibertyModule libertyModule : libertyModules.getTopLevelLibertyModules(project)) {
             LibertyModuleNode node = new LibertyModuleNode(libertyModule);
-
             top.add(node);
-            ArrayList<Object> settings = new ArrayList<Object>();
-            settings.add(libertyModule.getBuildFile());
-            settings.add(libertyModule.getProjectType());
-            projectMap.put(libertyModule.getName(), settings);
-
-            // ordered to align with IntelliJ's right-click menu
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, libertyModule));
-            // check if Liberty Maven Plugin is 3.3-M1+ or Liberty Gradle Plugin is 3.1-M1+
-            // if version is not specified in pom, assume latest version as downloaded from maven central
-            boolean validContainerVersion = libertyModule.isValidContainerVersion();
-            if (validContainerVersion) {
-                node.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, libertyModule));
-            }
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
-            node.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
-            if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
-                node.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
-                node.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
-            } else {
-                node.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
-            }
+            populateModuleNode(node, projectMap);
         }
 
         Tree tree = new Tree(top);
@@ -172,30 +151,36 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                         if (libertyNode.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
                             AnAction viewPomXml = ActionManager.getInstance().getAction(Constants.VIEW_POM_XML_ACTION_ID);
                             group.add(viewPomXml);
-                            AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
-                            group.add(viewIntegrationReport);
-                            AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
-                            group.add(viewUnitTestReport);
-                            group.addSeparator();
+                            if (!libertyNode.getLibertyModule().isParentOfLibertyModule()) {
+                                AnAction viewIntegrationReport = ActionManager.getInstance().getAction(Constants.VIEW_INTEGRATION_TEST_REPORT_ACTION_ID);
+                                group.add(viewIntegrationReport);
+                                AnAction viewUnitTestReport = ActionManager.getInstance().getAction(Constants.VIEW_UNIT_TEST_REPORT_ACTION_ID);
+                                group.add(viewUnitTestReport);
+                                group.addSeparator();
+                            }
                         } else {
                             AnAction viewGradleConfig = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_CONFIG_ACTION_ID);
                             group.add(viewGradleConfig);
-                            AnAction viewTestReport = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
-                            group.add(viewTestReport);
-                            group.addSeparator();
+                            if (!libertyNode.getLibertyModule().isParentOfLibertyModule()) {
+                                AnAction viewTestReport = ActionManager.getInstance().getAction(Constants.VIEW_GRADLE_TEST_REPORT_ACTION_ID);
+                                group.add(viewTestReport);
+                                group.addSeparator();
+                            }
                         }
-                        AnAction startAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
-                        group.add(startAction);
-                        if (libertyNode.isValidContainerVersion()) {
-                            AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
+                        if (!libertyNode.getLibertyModule().isParentOfLibertyModule()) {
+                            AnAction startAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_ACTION_ID);
+                            group.add(startAction);
+                            if (libertyNode.isValidContainerVersion()) {
+                                AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_START_CONTAINER_ACTION_ID);
+                                group.add(customStartAction);
+                            }
+                            AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
                             group.add(customStartAction);
+                            AnAction stopAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
+                            group.add(stopAction);
+                            AnAction runTestsAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
+                            group.add(runTestsAction);
                         }
-                        AnAction customStartAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_CUSTOM_START_ACTION_ID);
-                        group.add(customStartAction);
-                        AnAction stopAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_STOP_ACTION_ID);
-                        group.add(stopAction);
-                        AnAction runTestsAction = ActionManager.getInstance().getAction(Constants.LIBERTY_DEV_TESTS_ACTION_ID);
-                        group.add(runTestsAction);
 
                         ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
 
@@ -233,6 +218,40 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         return tree;
     }
 
+    private static void populateModuleNode(LibertyModuleNode moduleNode, HashMap<String, ArrayList<Object>> projectMap) {
+        LibertyModule libertyModule = moduleNode.getLibertyModule();
+        ArrayList<Object> settings = new ArrayList<>();
+        settings.add(libertyModule.getBuildFile());
+        settings.add(libertyModule.getProjectType());
+        projectMap.put(libertyModule.getName(), settings);
+
+        if (libertyModule.isParentOfLibertyModule()) {
+            List<LibertyModule> childModules = new ArrayList<>(libertyModule.getChildLibertyModules());
+            childModules.sort((m1, m2) -> m1.getName().compareTo(m2.getName()));
+            for (LibertyModule childModule : childModules) {
+                LibertyModuleNode childNode = new LibertyModuleNode(childModule);
+                moduleNode.add(childNode);
+                populateModuleNode(childNode, projectMap);
+            }
+        } else {
+            // ordered to align with IntelliJ's right-click menu
+            moduleNode.add(new LibertyActionNode(Constants.LIBERTY_DEV_START, libertyModule));
+            boolean validContainerVersion = libertyModule.isValidContainerVersion();
+            if (validContainerVersion) {
+                moduleNode.add(new LibertyActionNode(Constants.LIBERTY_DEV_START_CONTAINER, libertyModule));
+            }
+            moduleNode.add(new LibertyActionNode(Constants.LIBERTY_DEV_CUSTOM_START, libertyModule));
+            moduleNode.add(new LibertyActionNode(Constants.LIBERTY_DEV_STOP, libertyModule));
+            moduleNode.add(new LibertyActionNode(Constants.LIBERTY_DEV_TESTS, libertyModule));
+            if (libertyModule.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) {
+                moduleNode.add(new LibertyActionNode(Constants.VIEW_INTEGRATION_TEST_REPORT, libertyModule));
+                moduleNode.add(new LibertyActionNode(Constants.VIEW_UNIT_TEST_REPORT, libertyModule));
+            } else {
+                moduleNode.add(new LibertyActionNode(Constants.VIEW_GRADLE_TEST_REPORT, libertyModule));
+            }
+        }
+    }
+
     static class LibertyTreeRenderer extends DefaultTreeCellRenderer {
         public LibertyTreeRenderer(Color backgroundColor) {
             setBackgroundNonSelectionColor(backgroundColor);
@@ -248,15 +267,13 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
                 boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-            // assign gear icon to action nodes
-            if (leaf) {
+            if (value instanceof LibertyActionNode) {
                 setIcon(LibertyPluginIcons.IntelliJGear);
                 return this;
             }
 
             // select icon for node based on project type
-            if (value instanceof LibertyModuleNode) {
-                LibertyModuleNode moduleNode = (LibertyModuleNode) value;
+            if (value instanceof LibertyModuleNode moduleNode) {
                 if (moduleNode.isGradleProjectType()) {
                     setIcon(LibertyPluginIcons.gradleIcon);
                 } else if (moduleNode.isMavenProjectType()) {

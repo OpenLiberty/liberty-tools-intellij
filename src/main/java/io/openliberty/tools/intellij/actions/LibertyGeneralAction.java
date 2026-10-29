@@ -70,7 +70,7 @@ public abstract class LibertyGeneralAction extends AnAction {
             libertyModule = LibertyModules.getInstance().getLibertyModule(buildFile);
         } else {
             // The action is being driven from the shift-shift dialog.
-            List<LibertyModule> libertyModules = LibertyModules.getInstance().getLibertyModules(project, getSupportedProjectTypes());
+            List<LibertyModule> libertyModules = LibertyModules.getInstance().getTopLevelLibertyModules(project, getSupportedProjectTypes());
             if (!libertyModules.isEmpty()) {
                 if (libertyModules.size() == 1) {
                     libertyModule = libertyModules.get(0);

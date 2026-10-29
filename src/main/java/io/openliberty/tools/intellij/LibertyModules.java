@@ -34,7 +34,18 @@ public class LibertyModules {
     private static LibertyModules instance = null;
 
     // key is build file associated with the Liberty project
-    Map<VirtualFile, LibertyModule> libertyModules;
+    private final Map<VirtualFile, LibertyModule> libertyModules;
+
+    /**
+     * Comparator to sort Liberty modules: Maven projects first, then Gradle projects,
+     * ordered alphabetically by project name.
+     */
+    private static final Comparator<LibertyModule> MODULE_COMPARATOR = (m1, m2) -> {
+        if (!m1.getProjectType().equals(m2.getProjectType())) {
+            return m1.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT) ? -1 : 1;
+        }
+        return m1.getName().compareTo(m2.getName());
+    };
 
     /**
      * Cache of the last-known {@link LibertyModule.AppState} for each build-file path.
@@ -367,17 +378,17 @@ public class LibertyModules {
     }
 
     /**
-     * Returns all build files as a list of strings associated with the Liberty project.
+     * Returns all build files as a list of strings associated with top-level Liberty projects.
      * Used for Liberty run configuration
      *
-     * @param project
+     * @param project current project
      * @return List<String> Liberty project build files as strings
      */
     public List<String> getLibertyBuildFilesAsString(Project project) {
         List<String> sBuildFiles = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {
-                if (project.equals(libertyModule.getProject())) {
+                if (project.equals(libertyModule.getProject()) && libertyModule.getParentModule() == null) {
                     // need to convert to NioPath for OS specific paths
                     sBuildFiles.add(libertyModule.getBuildFile().toNioPath().toString());
                 }
@@ -401,6 +412,7 @@ public class LibertyModules {
                 }
             });
         }
+        supportedLibertyModules.sort(MODULE_COMPARATOR);
         return supportedLibertyModules;
     }
 
@@ -421,7 +433,50 @@ public class LibertyModules {
                 }
             });
         }
+        supportedLibertyModules.sort(MODULE_COMPARATOR);
         return supportedLibertyModules;
+    }
+
+    /**
+     * Returns all top-level Liberty modules for the given project (i.e. modules with no parent module).
+     * Sorted with Maven projects first, then Gradle projects, ordered alphabetically by project name.
+     *
+     * @param project current project
+     * @return top-level Liberty modules for the given project
+     */
+    public List<LibertyModule> getTopLevelLibertyModules(Project project) {
+        ArrayList<LibertyModule> topLevelModules = new ArrayList<>();
+        synchronized (libertyModules) {
+            libertyModules.values().forEach(libertyModule -> {
+                if (project.equals(libertyModule.getProject()) && libertyModule.getParentModule() == null) {
+                    topLevelModules.add(libertyModule);
+                }
+            });
+        }
+        topLevelModules.sort(MODULE_COMPARATOR);
+        return topLevelModules;
+    }
+
+    /**
+     * Returns all top-level Liberty modules with the supported project type(s) for the given project
+     * (i.e. modules with no parent module).
+     * Sorted with Maven projects first, then Gradle projects, ordered alphabetically by project name.
+     *
+     * @param project current project
+     * @param projectTypes supported project types to filter by
+     * @return top-level Liberty modules with the given project type(s)
+     */
+    public List<LibertyModule> getTopLevelLibertyModules(Project project, List<Constants.ProjectType> projectTypes) {
+        ArrayList<LibertyModule> topLevelModules = new ArrayList<>();
+        synchronized (libertyModules) {
+            libertyModules.values().forEach(libertyModule -> {
+                if (project.equals(libertyModule.getProject()) && libertyModule.getParentModule() == null && projectTypes.contains(libertyModule.getProjectType())) {
+                    topLevelModules.add(libertyModule);
+                }
+            });
+        }
+        topLevelModules.sort(MODULE_COMPARATOR);
+        return topLevelModules;
     }
 
     /**
