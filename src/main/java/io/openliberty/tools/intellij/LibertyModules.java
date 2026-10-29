@@ -146,9 +146,8 @@ public class LibertyModules {
      * Builds the multi-module model in a single pass:
      * <ol>
      *   <li>Parse the metadata of every registered Maven Liberty module.</li>
-     *   <li>Collect every other {@code pom.xml} (project POMs plus the POMs found in the
-     *       ancestor directories of each Liberty module, which may lie outside the project)
-     *       and parse each aggregator once.</li>
+     *   <li>Collect every other {@code pom.xml} within the project root and parse each
+     *       aggregator once. Discovery is intentionally limited to project-scoped POMs.</li>
      *   <li>Register every aggregator that reaches a Liberty module, directly or through other
      *       aggregators, so that it does not matter in which order the POMs are visited.</li>
      *   <li>Link each child to the module named in its {@code <parent>} (by {@code groupId:artifactId}),
@@ -180,24 +179,12 @@ public class LibertyModules {
         // Clear stale relationships from any previous scan before re-wiring.
         byDir.values().forEach(LibertyModule::clearMultiModuleRelationships);
 
-        // 2. Every other POM that is an aggregator
+        // 2. Every other POM within the project root that is an aggregator candidate.
+        // Discovery is intentionally limited to project-scoped POMs.
         Map<String, VirtualFile> otherPoms = new TreeMap<>();
         for (VirtualFile pom : LibertyProjectUtil.getAllPomFiles(project)) {
             if (pom.getParent() != null) {
                 otherPoms.put(canonicalPath(new File(pom.getParent().getPath())), pom);
-            }
-        }
-        for (LibertyModule module : new ArrayList<>(byDir.values())) {
-            if (!module.getProjectType().equals(Constants.ProjectType.LIBERTY_MAVEN_PROJECT)) continue;
-            VirtualFile buildFile = module.getBuildFile();
-            for (File dir = new File(buildFile.getParent().getPath()).getParentFile(); dir != null; dir = dir.getParentFile()) {
-                File pom = new File(dir, "pom.xml");
-                if (!pom.isFile()) break;
-                String key = canonicalPath(dir);
-                if (!otherPoms.containsKey(key)) {
-                    VirtualFile pomVFile = LocalFileSystem.getInstance().findFileByPath(pom.getAbsolutePath());
-                    if (pomVFile != null) otherPoms.put(key, pomVFile);
-                }
             }
         }
         Map<String, PomNode> candidates = new TreeMap<>();
