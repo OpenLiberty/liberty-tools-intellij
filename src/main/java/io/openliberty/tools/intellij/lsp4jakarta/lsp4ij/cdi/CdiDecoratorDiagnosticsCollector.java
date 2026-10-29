@@ -82,7 +82,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
         // Validate delegate type assignability (Section 8.1.3 of CDI spec)
         if (delegateElements.size() == 1) {
-            validateDelegateTypeAssignability(type, delegateElements.get(0), unit, diagnostics);
+            validateDelegateTypeAssignability(type, delegateElements.getFirst(), unit, diagnostics);
         }
     }
 
@@ -137,7 +137,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
     /**
      * Validates that the delegate type implements or extends all decorated types of the decorator.
-     *
+     * <p>
      * Per CDI 3.0 specification section 8.1.3:
      * "The delegate type of a decorator must implement or extend every decorated type
      * (with exactly the same type parameters). If the delegate type does not implement
@@ -221,7 +221,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
     /**
      * Gets all decorated types of the decorator (Java interfaces only, excluding java.io.Serializable).
-     *
+     * <p>
      * Per CDI 3.0 specification section 8.1.3:
      * "The set of decorated types of a decorator includes all bean types of the managed bean
      * which are Java interfaces, except for java.io.Serializable. The decorator bean class and
@@ -241,7 +241,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
     /**
      * Validates that a @Delegate injection point is properly annotated with @Inject.
-     *
+     * <p>
      * According to CDI specification, @Delegate must be applied to an injected field,
      * or to a parameter of an initializer or constructor.
      *
