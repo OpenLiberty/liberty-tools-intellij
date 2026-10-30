@@ -109,7 +109,6 @@ public class AddMethodProposal extends ASTRewriteCorrectionProposal {
      *
      * @param label the label shown in the quick-fix menu
      * @param sourceCU the source file (used to produce the workspace edit diff)
-     * @param invocationNode the PSI file containing the class to modify
      * @param binding the {@link PsiClass} to insert the method into
      * @param relevance ordering hint
      * @param methodName simple name of the method (e.g. {@code "notify"})
@@ -118,7 +117,7 @@ public class AddMethodProposal extends ASTRewriteCorrectionProposal {
      * @param annotationFQNames list of fully-qualified annotation names to prepend, or {@code null}
      * @param params list of method parameters, or {@code null} for a no-arg method
      */
-    public AddMethodProposal(String label, PsiFile sourceCU, PsiFile invocationNode,
+    public AddMethodProposal(String label, PsiFile sourceCU,
                              PsiClass binding, int relevance,
                              String methodName, String returnTypeFQName, String modifier,
                              List<String> annotationFQNames, List<MethodParam> params) {

@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
@@ -59,7 +59,7 @@ public class ObserverMethodNotifyTest extends BaseJakartaTest {
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // AuditObserver: "public class AuditObserver" is on line 20 (1-based) = 19 (0-based).
         // "AuditObserver" starts at col 13 and ends at col 26.
@@ -184,7 +184,7 @@ public class ObserverMethodNotifyTest extends BaseJakartaTest {
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
@@ -204,7 +204,7 @@ public class ObserverMethodNotifyTest extends BaseJakartaTest {
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
@@ -224,7 +224,7 @@ public class ObserverMethodNotifyTest extends BaseJakartaTest {
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic rawTypeDiagnostic = d(19, 13, 33,
                 "The class 'AuditObserverRawType' implements ObserverMethod but does not override notify(T) or notify(EventContext<T>). " +
@@ -248,7 +248,7 @@ public class ObserverMethodNotifyTest extends BaseJakartaTest {
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         assertJavaDiagnostics(diagnosticsParams, utils);
     }

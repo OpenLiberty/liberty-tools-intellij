@@ -122,7 +122,6 @@ abstract class InsertNotifyMethodQuickFix implements IJavaCodeActionParticipant 
         ChangeCorrectionProposal proposal = new AddMethodProposal(
                 label,
                 context.getSource().getCompilationUnit(),
-                context.getASTRoot(),
                 parentType,
                 0,
                 "notify",
