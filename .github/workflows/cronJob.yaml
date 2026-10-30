@@ -10,6 +10,7 @@ on:
 
 jobs:
   fetch_all_pull_request_shas:
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij'
     runs-on: ubuntu-latest
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
@@ -90,7 +91,7 @@ jobs:
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
     needs: fetch_all_pull_request_shas
-    if: ${{ needs.fetch_all_pull_request_shas.outputs.is_empty == 'false' }}
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij' && needs.fetch_all_pull_request_shas.outputs.is_empty == 'false'
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
@@ -107,6 +108,7 @@ jobs:
 
   # Run the LTI Tests against lsp4ij main branch
   call-build-workflow-for-lsp4ij-main-branch:
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij'
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
@@ -124,7 +126,7 @@ jobs:
   call-build-workflow-slack-notification:
     runs-on: ubuntu-latest
     needs: [ call-build-workflow-for-lsp4ij-main-branch, call-build-workflow-for-each-merge-commit-sha ]
-    if: always()
+    if: always() && github.repository == 'OpenLiberty/liberty-tools-intellij'
     steps:
       - name: Send Slack Notification
         run: |

@@ -10,13 +10,14 @@ on:
 jobs:
   # Run the LTI Tests on all OS's against lsp4ij main branch for main and feature branches in progress
   call-build-workflow-all-os:
+    if: github.repository == 'OpenLiberty/liberty-tools-intellij'
     uses: ./.github/workflows/build.yaml
     strategy:
       fail-fast: false
       matrix:
         # 'main' plus any feature branches currently in progress.
         # Add or remove branches here as feature work starts or completes.
-        tag: [ 'main' , 'lsp4jakarta-0.3.0-integration', 'lsp4jakarta-0.2.7-release-branch', 'lsp4mp-0.17.0-support', 'multi-module-support-feature-branch', 'open-liberty-starter-integration', ]
+        tag: [ 'main' , 'lsp4jakarta-0.3.0-integration', 'lsp4jakarta-0.2.7-release-branch', 'lsp4mp-0.17.0-support', 'multi-module-support-feature-branch', 'open-liberty-starter-integration', 'terminal-migration-support-feature' ]
     with:
       useLocalPlugin: false
       refLsp4ij: main
