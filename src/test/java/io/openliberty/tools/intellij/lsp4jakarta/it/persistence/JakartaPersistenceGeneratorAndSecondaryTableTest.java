@@ -1,12 +1,12 @@
 /*******************************************************************************
 * Copyright (c) 2026 IBM Corporation and others.
-*
+* <p>
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
 * http://www.eclipse.org/legal/epl-2.0.
-*
+* <p>
 * SPDX-License-Identifier: EPL-2.0
-*
+* <p>
 * Contributors:
 *     IBM Corporation - initial API and implementation
 *******************************************************************************/
@@ -24,12 +24,13 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSIm
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
@@ -47,10 +48,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorEmptyNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic tableGeneratorEmptyNameOnType = d(9, 0, 26,
                 Messages.getMessage("TableGeneratorInvalidEmptyName"),
@@ -73,10 +75,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsMissingTableGeneratorMappingOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic tableGeneratorsMissingMappingOnType = d(9, 0, 20,
                 Messages.getMessage("TableGeneratorsMissingTableGeneratorMapping"),
@@ -100,10 +103,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsEmptyArrayNoEntity.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — class is not annotated with @Entity
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -116,10 +120,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsWithEmptyNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic tableGeneratorEmptyNameOnType = d(10, 19, 45,
                 Messages.getMessage("TableGeneratorInvalidEmptyName"),
@@ -142,10 +147,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsWithMultipleEmptyNamesOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic tableGeneratorFirstEmptyNameOnType = d(10, 19, 48,
                 Messages.getMessage("TableGeneratorInvalidEmptyName"),
@@ -183,10 +189,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorEmptyNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic sequenceGeneratorEmptyNameOnType = d(9, 0, 29,
                 Messages.getMessage("SequenceGeneratorInvalidEmptyName"),
@@ -209,10 +216,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorsMissingSequenceGeneratorMappingOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic sequenceGeneratorsMissingMappingOnType = d(9, 0, 23,
                 Messages.getMessage("SequenceGeneratorsMissingSequenceGeneratorMapping"),
@@ -235,10 +243,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorsWithEmptyNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic sequenceGeneratorEmptyNameOnType = d(10, 22, 51,
                 Messages.getMessage("SequenceGeneratorInvalidEmptyName"),
@@ -261,10 +270,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorsWithMultipleEmptyNamesOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic sequenceGeneratorFirstEmptyNameOnType = d(10, 22, 54,
                 Messages.getMessage("SequenceGeneratorInvalidEmptyName"),
@@ -302,10 +312,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTableEmptyName.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic secondaryTableEmptyName = d(8, 0, 26,
                 Messages.getMessage("SecondaryTableInvalidEmptyName"),
@@ -321,10 +332,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTablesMissingSecondaryTableMapping.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic secondaryTablesMissingMapping = d(8, 0, 20,
                 Messages.getMessage("SecondaryTablesMissingSecondaryTableMapping"),
@@ -340,10 +352,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTablesWithEmptyName.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic secondaryTableEmptyNameInContainer = d(10, 4, 30,
                 Messages.getMessage("SecondaryTableInvalidEmptyName"),
@@ -359,10 +372,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTablesWithMultipleEmptyNames.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic secondaryTableFirstEmptyNameInContainer = d(10, 19, 48,
                 Messages.getMessage("SecondaryTableInvalidEmptyName"),
@@ -386,10 +400,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorValidNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — all @TableGenerator names are non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -402,10 +417,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/TableGeneratorsValidNamesOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — all nested @TableGenerator names are non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -418,10 +434,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorValidNameOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — all @SequenceGenerator names are non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -434,10 +451,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SequenceGeneratorsValidNamesOnTypeFieldMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — all nested @SequenceGenerator names are non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -450,10 +468,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTableValidName.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — @SecondaryTable name is non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
@@ -466,10 +485,11 @@ public class JakartaPersistenceGeneratorAndSecondaryTableTest extends BaseJakart
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/persistence/SecondaryTablesValidNames.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // No diagnostics expected — all nested @SecondaryTable names are non-empty
         assertJavaDiagnostics(diagnosticsParams, utils);
