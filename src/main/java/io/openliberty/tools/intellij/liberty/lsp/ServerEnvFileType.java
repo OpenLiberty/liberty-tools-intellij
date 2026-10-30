@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 IBM Corporation.
+ * Copyright (c) 2022, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,32 +11,25 @@ package io.openliberty.tools.intellij.liberty.lsp;
 
 import javax.swing.Icon;
 
-import com.intellij.openapi.fileTypes.PlainTextLanguage;
+import com.intellij.lang.properties.PropertiesLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.openapi.fileTypes.ex.FileTypeIdentifiableByVirtualFile;
 import com.intellij.openapi.util.NlsContexts;
-import com.intellij.openapi.vfs.VirtualFile;
 
 import io.openliberty.tools.intellij.LibertyPluginIcons;
 
 /**
  * Custom file type for server.env files
  */
-public class ServerEnvFileType extends LanguageFileType implements FileTypeIdentifiableByVirtualFile {
+public class ServerEnvFileType extends LanguageFileType {
 
     public static final ServerEnvFileType INSTANCE = new ServerEnvFileType();
 
 
     private ServerEnvFileType() {
-        super(PlainTextLanguage.INSTANCE);
-    }
-
-    @Override
-    public boolean isMyFileType(@NotNull VirtualFile file) {
-        return file.getPath().endsWith(".env");
+        super(PropertiesLanguage.INSTANCE);
     }
 
     @Override
