@@ -73,6 +73,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerFieldWithTypeVariableAndNonDependentScope";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
     public static final String DIAGNOSTIC_CODE_RAW_EVENT = "InvalidRawEventTypeInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_SPECIALIZES = "InvalidSpecializesAnnotationOnNonBeanSuperclass";
     public static final String EVENT_FQ_NAME = "jakarta.enterprise.event.Event";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
