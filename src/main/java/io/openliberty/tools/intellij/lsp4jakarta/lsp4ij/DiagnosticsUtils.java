@@ -17,7 +17,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
-
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
@@ -235,4 +234,30 @@ public class DiagnosticsUtils {
         }
         return false;
     }
+
+    /**
+     * Returns the fully-qualified name of the first type argument from a parameterised
+     * superinterface on the given class.
+     *
+     * <p>For example, given a class that implements {@code ObserverMethod<AuditEvent>},
+     * this method returns {@code "AuditEvent"} when called with
+     * {@code interfaceFQName = "jakarta.enterprise.inject.spi.ObserverMethod"}.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @param interfaceFQName the fully-qualified name of the superinterface to search for
+     * @return the FQN of the first type argument, or {@code "java.lang.Object"} if not found
+     */
+    public static String resolveTypeArgumentFQName(PsiClass classBinding, String interfaceFQName) {
+        for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
+            PsiClass iface = ifaceType.resolve();
+            if (iface != null && interfaceFQName.equals(iface.getQualifiedName())) {
+                PsiType[] typeArgs = ifaceType.getParameters();
+                if (typeArgs.length > 0) {
+                    return typeArgs[0].getCanonicalText();
+                }
+            }
+        }
+        return "java.lang.Object";
+    }
+
 }
