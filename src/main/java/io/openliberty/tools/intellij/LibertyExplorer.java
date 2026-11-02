@@ -219,6 +219,16 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
         return tree;
     }
 
+    /**
+     * Recursively populates a Liberty module node in the dashboard tree.
+     * If the module is an aggregator (parent of other Liberty modules), its child module nodes
+     * are created, sorted alphabetically by name, and recursively populated under it.
+     * Otherwise, dev mode action nodes (Start, Stop, Run tests, Test reports, etc.) are attached
+     * directly to the leaf module node.
+     *
+     * @param moduleNode the tree node representing the Liberty module
+     * @param projectMap map to store project build file and project type settings for action execution
+     */
     private static void populateModuleNode(LibertyModuleNode moduleNode, HashMap<String, ArrayList<Object>> projectMap) {
         LibertyModule libertyModule = moduleNode.getLibertyModule();
         ArrayList<Object> settings = new ArrayList<>();
