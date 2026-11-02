@@ -40,6 +40,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -227,7 +228,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
 
         if (libertyModule.isParentOfLibertyModule()) {
             List<LibertyModule> childModules = new ArrayList<>(libertyModule.getChildLibertyModules());
-            childModules.sort((m1, m2) -> m1.getName().compareTo(m2.getName()));
+            childModules.sort(Comparator.comparing(LibertyModule::getName));
             for (LibertyModule childModule : childModules) {
                 LibertyModuleNode childNode = new LibertyModuleNode(childModule);
                 moduleNode.add(childNode);
