@@ -41,6 +41,7 @@ import java.util.NoSuchElementException;
 
 import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicatesKt.contains;
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
+import static com.intellij.remoterobot.utils.UtilsKt.hasAnyComponent;
 import static java.awt.event.KeyEvent.*;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -499,9 +500,11 @@ public class UIBotTestUtils {
      * @param remoteRobot The RemoteRobot instance.
      */
     public static void openTerminalWindow(RemoteRobot remoteRobot) {
-        ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(5));
         try {
-            projectFrame.getBaseLabel("Terminal", "5");
+            ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(5));
+            if (!hasAnyComponent(projectFrame, byXpath("//div[@class='BaseLabel' and @text='Terminal']"))) {
+                clickOnWindowPaneStripeButton(remoteRobot, "Terminal");
+            }
         } catch (WaitForConditionTimeoutException e) {
             // The Liberty tool window is closed. Open it.
             clickOnWindowPaneStripeButton(remoteRobot, "Terminal");
@@ -2788,8 +2791,8 @@ public class UIBotTestUtils {
             ProjectFrameFixture.rightClickOnTerminalTab(projectFrame);
             ProjectFrameFixture.clickMenuOption(projectFrame, "action.CloseAllNotifications.text");
 
-            while (true) {
-                ComponentFixture terminateButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@accessiblename='Terminate']"));
+            while (hasAnyComponent(projectFrame, byXpath("//div[@accessiblename='Terminate']"))) {
+                ComponentFixture terminateButton = projectFrame.find(ComponentFixture.class, byXpath("//div[@accessiblename='Terminate']"), Duration.ofSeconds(2));
                 if (terminateButton.callJs("component.isEnabled();", false)) {
                     terminateButton.click();
                     TestUtils.sleepAndIgnoreException(10);
