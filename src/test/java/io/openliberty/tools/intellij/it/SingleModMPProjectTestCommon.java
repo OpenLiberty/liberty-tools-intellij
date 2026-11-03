@@ -1408,7 +1408,7 @@ public abstract class SingleModMPProjectTestCommon {
         ComponentFixture terminal;
         try {
             projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='BlockTerminalPanel']"), Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
         } catch (WaitForConditionTimeoutException w) {
             return; // there is no terminal with a Liberty to stop
         }
@@ -1427,7 +1427,7 @@ public abstract class SingleModMPProjectTestCommon {
         ComponentFixture terminal;
         try {
             projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='BlockTerminalPanel']"), Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
         } catch (WaitForConditionTimeoutException w) {
             return ""; // there is no terminal with a Liberty to stop
         }
@@ -1470,7 +1470,7 @@ public abstract class SingleModMPProjectTestCommon {
         ComponentFixture terminal;
         try {
             projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(10));
-            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='BlockTerminalPanel']"), Duration.ofSeconds(10));
+            terminal = remoteRobot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"), Duration.ofSeconds(10));
         } catch (WaitForConditionTimeoutException w) {
             return; // there is no terminal with a Liberty to stop
         }
