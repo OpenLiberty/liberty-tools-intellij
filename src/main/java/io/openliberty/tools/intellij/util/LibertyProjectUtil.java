@@ -262,6 +262,9 @@ public class LibertyProjectUtil {
                     }
                     // check if valid pom.xml or build.gradle, or if part of Liberty project
                     if (filter.matches(project, buildFile, vFile)) {
+                        if (!buildFile.isValidBuildFile() && isLibertyProject(vFile)) {
+                            buildFile.validContainerVersion = true;
+                        }
                         buildFile.setBuildFile(vFile);
                         buildFile.setProjectType(buildFileType);
                         collectedBuildFiles.add(buildFile);
@@ -343,7 +346,9 @@ public class LibertyProjectUtil {
      */
     private static boolean isLibertyProject(VirtualFile buildFile) {
         String rootDir = buildFile.getParent().getPath();
-        return new File(rootDir, "src/main/liberty/config/server.xml").exists();
+        return new File(rootDir, "src/main/liberty/config/server.xml").exists()
+                || new File(rootDir, "src/main/liberty/config/bootstrap.properties").exists()
+                || new File(rootDir, "src/main/liberty/config/server.env").exists();
     }
 
     /**

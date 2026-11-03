@@ -23,6 +23,10 @@ public class LibertyModuleNode extends DefaultMutableTreeNode {
         this.libertyModule = libertyModule;
     }
 
+    public LibertyModule getLibertyModule() {
+        return libertyModule;
+    }
+
     public String getName() {
         return libertyModule.getName();
     }
