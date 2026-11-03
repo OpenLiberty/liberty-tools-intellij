@@ -378,7 +378,7 @@ public class LibertyModules {
     }
 
     /**
-     * Returns all build files as a list of strings associated with top-level Liberty projects.
+     * Returns all build files as a list of strings associated with the Liberty project.
      * Used for Liberty run configuration
      *
      * @param project current project
@@ -388,7 +388,7 @@ public class LibertyModules {
         List<String> sBuildFiles = new ArrayList<>();
         synchronized (libertyModules) {
             libertyModules.values().forEach(libertyModule -> {
-                if (project.equals(libertyModule.getProject()) && libertyModule.getParentModule() == null) {
+                if (project.equals(libertyModule.getProject())) {
                     // need to convert to NioPath for OS specific paths
                     sBuildFiles.add(libertyModule.getBuildFile().toNioPath().toString());
                 }
