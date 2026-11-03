@@ -13,10 +13,15 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
+import com.redhat.devtools.lsp4ij.LSPIJUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.ExtendedCodeAction;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codeaction.JavaCodeActionContext;
 import org.eclipse.lsp4j.CodeAction;
@@ -122,5 +127,21 @@ public class JDTUtils {
             return fqName.substring(idx + 1);
         }
         return fqName;
+    }
+
+    /**
+     * Returns the URI that identifies the given module as a project on the Jakarta language server.
+     * <p>
+     * The language server uses it to locate the {@code .jakarta-version} file and to find the open files that
+     * belong to the project, so it must be a real directory URI (file:///...). The URI provided by
+     * {@link LSPIJUtils#getProjectUri(Module)} is only the module name and cannot be used for that.
+     *
+     * @param module the module
+     * @return the directory URI of the module, or the module name if the directory cannot be determined
+     */
+    public static String getProjectURI(Module module) {
+        VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
+        VirtualFile dir = contentRoots.length > 0 ? contentRoots[0] : ProjectUtil.guessModuleDir(module);
+        return dir != null ? LSPIJUtils.toUriAsString(dir) : module.getName();
     }
 }

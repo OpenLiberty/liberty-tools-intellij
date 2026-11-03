@@ -179,6 +179,9 @@
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.faces.FacesDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.version.VersionDiagnosticsCollector"/>
 
         <projectLabelProvider
                 implementation="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JakartaProjectLabelProvider"/>
@@ -457,6 +460,12 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-persistence#MixedIdentifierAnnotations"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.RemoveAnnotationConflictForIdentifiersQuickFix"/>
+
+        <!-- Jakarta EE version -->
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-version#MultipleJakartaEEVersions"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.version.ResetVersionQuickFix"/>
 
         <!-- WebSocket -->
         <javaCodeActionParticipant kind="quickfix"

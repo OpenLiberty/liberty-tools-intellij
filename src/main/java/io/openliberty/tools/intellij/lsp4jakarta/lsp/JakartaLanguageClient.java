@@ -12,12 +12,17 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.JSONUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PropertiesManagerForJakarta;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.version.JakartaVersionDetector;
+import io.openliberty.tools.intellij.lsp4jakarta.version.JakartaVersionSelectionDialog;
 import io.openliberty.tools.intellij.lsp4mp.MicroProfileProjectService;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.ProjectLabelManager;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.PropertiesManagerForJava;
@@ -37,7 +42,9 @@ import org.eclipse.lsp4mp.commons.MicroProfileJavaProjectLabelsParams;
 import org.eclipse.lsp4mp.commons.codeaction.CodeActionResolveData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -120,6 +127,29 @@ public final class JakartaLanguageClient extends IndexAwareLanguageClient implem
             monitor -> adapt(PropertiesManagerForJava.getInstance().fileInfo(adapt(jakartaJavaFileInfoParams), utils)), coalesceBy);
   }
 
+  // Support the message "jakarta/selectVersion"
+  @Override
+  @SuppressWarnings("unchecked")
+  public CompletableFuture<String> selectJakartaVersion(Map<String, Object> params) {
+    final String projectUri = (String) params.get("projectUri");
+    final List<String> versions = (List<String>) params.get("versions");
+    final CompletableFuture<String> result = new CompletableFuture<>();
+    if (versions == null || versions.isEmpty()) {
+      result.complete(null);
+      return result;
+    }
+    ApplicationManager.getApplication().invokeLater(() -> {
+      try {
+        final JakartaVersionSelectionDialog dialog = new JakartaVersionSelectionDialog(getProject(), projectUri, versions);
+        // null if the dialog is cancelled
+        result.complete(dialog.showAndGet() ? dialog.getSelectedVersion() : null);
+      } catch (RuntimeException e) {
+        result.completeExceptionally(e);
+      }
+    });
+    return result;
+  }
+
   @Override
   public void libraryUpdated(Library library) {
     // not needed for Jakarta LS
@@ -144,7 +174,14 @@ public final class JakartaLanguageClient extends IndexAwareLanguageClient implem
   }
 
   private ProjectLabelInfoEntry adapt(org.eclipse.lsp4mp.commons.ProjectLabelInfoEntry mpEntry) {
-    return new ProjectLabelInfoEntry(mpEntry.getUri(), mpEntry.getName(), mpEntry.getLabels());
+    // The project label entries are named after their module
+    final Module module = mpEntry.getName() != null ? ModuleManager.getInstance(getProject()).findModuleByName(mpEntry.getName()) : null;
+    if (module == null) {
+      return new ProjectLabelInfoEntry(mpEntry.getUri(), mpEntry.getName(), mpEntry.getLabels(), Collections.emptyList());
+    }
+    // The server needs a directory URI (not the module name) to identify the project and store its version file
+    return new ProjectLabelInfoEntry(JDTUtils.getProjectURI(module), mpEntry.getName(), mpEntry.getLabels(),
+            JakartaVersionDetector.detectVersions(module));
   }
 
   private MicroProfileJavaProjectLabelsParams adapt(JakartaJavaProjectLabelsParams params) {
