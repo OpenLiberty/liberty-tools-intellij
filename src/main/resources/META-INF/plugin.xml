@@ -676,6 +676,10 @@
                 class="io.openliberty.tools.intellij.actions.RemoveLibertyProjectAction"
                 icon="AllIcons.FileTypes.Config"/>
 
+        <action id="io.openliberty.tools.intellij.actions.LibertyStarterAction"
+                class="io.openliberty.tools.intellij.actions.LibertyStarterAction"
+                icon="/icons/OL_logo_16.svg"/>
+
     </actions>
     <!-- Point to LSP xml -->
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="/META-INF/lsp.xml"
