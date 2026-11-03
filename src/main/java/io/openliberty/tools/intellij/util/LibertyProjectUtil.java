@@ -17,20 +17,21 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.terminal.frontend.view.TerminalView;
 import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTab;
 import com.intellij.terminal.frontend.toolwindow.TerminalToolWindowTabsManager;
-import com.intellij.terminal.ui.TerminalWidget;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.sun.istack.Nullable;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.LibertyModules;
 import io.openliberty.tools.intellij.LibertyProjectSettings;
-import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import org.xml.sax.SAXException;
+
+import javax.swing.JComponent;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -145,24 +146,22 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Get the Terminal widget for the corresponding Liberty module, creating a new one if requested.
+     * Get the Terminal view for the corresponding Liberty module, creating a new one if requested.
      *
      * <p>A new Reworked Terminal tab is created via {@link TerminalToolWindowTabsManager}.
-     * The resulting {@link TerminalView} is stored on the module alongside the {@link TerminalWidget}.
+     * The resulting {@link TerminalView} is stored on the module.
      *
      * @param project
      * @param libertyModule
-     * @param createWidget  true if a new widget should be created
-     * @param terminalToolWindowManager
-     * @param widget        existing widget, or {@code null} if none is known
-     * @return TerminalWidget or null if it does not exist
+     * @param createView    true if a new view should be created
+     * @param existingView  existing view, or {@code null} if none is known
+     * @return TerminalView or null if it does not exist
      */
     // TerminalToolWindowTabsManager, TerminalToolWindowTab, TerminalView are @Experimental, but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
     @SuppressWarnings("UnstableApiUsage")
-    public static TerminalWidget getTerminalWidget(Project project, LibertyModule libertyModule, boolean createWidget,
-                                                   TerminalToolWindowManager terminalToolWindowManager, TerminalWidget widget) {
-        if (widget == null && createWidget) {
-            // Create a new Reworked Terminal tab.
+    public static TerminalView getTerminalView(Project project, LibertyModule libertyModule, boolean createView,
+                                               TerminalView existingView) {
+        if (existingView == null && createView) {
             TerminalToolWindowTabsManager tabsManager = TerminalToolWindowTabsManager.getInstance(project);
             TerminalToolWindowTab tab = tabsManager.createTabBuilder()
                     .workingDirectory(project.getBasePath())
@@ -170,61 +169,33 @@ public class LibertyProjectUtil {
                     .requestFocus(true)
                     .createTab();
             TerminalView terminalView = tab.getView();
-
-            // Retrieve the associated TerminalWidget via the tab's Content.
-            ToolWindow toolWindow = terminalToolWindowManager.getToolWindow();
-            if (toolWindow != null) {
-                Content content = findContentForView(tabsManager, terminalView);
-                TerminalWidget newWidget = content != null
-                        ? TerminalToolWindowManager.findWidgetByContent(content) : null;
-                if (newWidget != null) {
-                    libertyModule.setTerminalView(terminalView);
-                    libertyModule.setTerminalWidget(newWidget);
-                    return newWidget;
-                }
-            }
-            // Fallback: store the view and widget from a fresh createShellWidget call.
-            TerminalWidget newTerminal = terminalToolWindowManager.createShellWidget(
-                    project.getBasePath(), libertyModule.getName(), true, true);
-            libertyModule.setTerminalWidget(newTerminal);
-            return newTerminal;
+            libertyModule.setTerminalView(terminalView);
+            return terminalView;
         }
-        return widget;
+        return existingView;
     }
 
-    /** Returns the {@link Content} for the tab hosting the given {@link TerminalView}, or {@code null}. */
     // TerminalToolWindowTabsManager, TerminalToolWindowTab, TerminalView are @Experimental, but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
     @SuppressWarnings("UnstableApiUsage")
-    private static Content findContentForView(TerminalToolWindowTabsManager tabsManager, TerminalView targetView) {
+    public static void setFocusToView(Project project, TerminalView view) {
+        if (view == null) return;
+        TerminalToolWindowTabsManager tabsManager = TerminalToolWindowTabsManager.getInstance(project);
         for (TerminalToolWindowTab tab : tabsManager.getTabs()) {
-            if (tab.getView().equals(targetView)) {
-                return tab.getContent();
-            }
-        }
-        return null;
-    }
-
-    public static void setFocusToWidget(Project project, TerminalWidget widget) {
-        if (widget == null) return;
-        TerminalToolWindowManager manager = TerminalToolWindowManager.getInstance(project);
-        ToolWindow toolWindow = manager.getToolWindow();
-        if (toolWindow == null) return;
-
-        ContentManager contentManager = toolWindow.getContentManager();
-        Content[] contents = contentManager.getContents();
-
-        int index = 0;
-        for (int i = 0; i < contents.length; i++) {
-            // Use TerminalToolWindowManager.findWidgetByContent to map Content -> TerminalWidget.
-            if (widget.equals(TerminalToolWindowManager.findWidgetByContent(contents[i]))) {
-                index = i;
+            if (view.equals(tab.getView())) {
+                Content content = tab.getContent();
+                ContentManager contentManager = content.getManager();
+                if (contentManager != null) {
+                    contentManager.setSelectedContent(content);
+                }
+                ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow("Terminal");
+                if (toolWindow != null && !toolWindow.isActive()) {
+                    toolWindow.activate(null, true, true);
+                }
+                JComponent component = view.getPreferredFocusableComponent();
+                component.requestFocus();
                 break;
             }
-        }
-        if (contents.length > 0) {
-            Content terminalContent = contents[index];
-            contentManager.setSelectedContent(terminalContent);
-            terminalContent.getComponent().requestFocus();
         }
     }
 
@@ -284,25 +255,26 @@ public class LibertyProjectUtil {
     }
 
     /**
-     * Get the Terminal widget for the corresponding Liberty module. Will check if the Terminal widget
-     * exists in the Terminal view.
+     * Get the Terminal view for the corresponding Liberty module. Will check if the Terminal view
+     * exists in the Terminal tool window tabs.
      *
      * @param libertyModule
-     * @param terminalToolWindowManager
-     * @return TerminalWidget or null if it does not exist
+     * @param project
+     * @return TerminalView or null if it does not exist
      */
-    public static TerminalWidget getTerminalWidget(LibertyModule libertyModule, TerminalToolWindowManager terminalToolWindowManager) {
-        TerminalWidget widget = libertyModule.getTerminalWidget();
-        // check if widget still exists in terminal view
-        if (widget != null) {
-            for (TerminalWidget terminalWidget : terminalToolWindowManager.getTerminalWidgets()) {
-                if (widget.equals(terminalWidget)) {
-                    return widget;
+    // TerminalToolWindowTabsManager, TerminalToolWindowTab, TerminalView are @Experimental, but their usage is explicitly recommended by https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
+    public static TerminalView getTerminalView(LibertyModule libertyModule, Project project) {
+        TerminalView view = libertyModule.getTerminalView();
+        if (view != null) {
+            TerminalToolWindowTabsManager tabsManager = TerminalToolWindowTabsManager.getInstance(project);
+            for (TerminalToolWindowTab tab : tabsManager.getTabs()) {
+                if (view.equals(tab.getView())) {
+                    return view;
                 }
             }
         }
-        // Widget is gone – clear both the TerminalWidget and the TerminalView references.
-        libertyModule.setTerminalWidget(null);
+        // Tab is no longer present – clear stored TerminalView reference.
         libertyModule.setTerminalView(null);
         return null;
     }

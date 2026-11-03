@@ -13,7 +13,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.terminal.frontend.view.TerminalView;
 import com.intellij.terminal.frontend.view.TerminalViewSessionState;
-import com.intellij.terminal.ui.TerminalWidget;
 import io.openliberty.tools.intellij.LibertyModule;
 
 public class LibertyActionUtil {
@@ -24,8 +23,7 @@ public class LibertyActionUtil {
      * Returns {@code true} if no Liberty dev mode command is currently running in the terminal
      * tab associated with the given module.
      *
-     * <p>Uses {@link TerminalView#getSessionState()} when a {@link TerminalView} is available
-     * (IntelliJ 2025.3+). Falls back to {@code TerminalWidget.getTtyConnector() == null} otherwise.
+     * <p>Uses {@link TerminalView#getSessionState()} when a {@link TerminalView} is available.
      *
      * @param libertyModule the module to check
      */
@@ -39,33 +37,31 @@ public class LibertyActionUtil {
             TerminalViewSessionState sessionState = view.getSessionState().getValue();
             return !(sessionState instanceof TerminalViewSessionState.Running);
         }
-        // Classic fallback – only reached when no TerminalView is stored.
-        return libertyModule.getTerminalWidget() == null
-                || libertyModule.getTerminalWidget().getTtyConnector() == null;
+        return true;
     }
 
     /**
      * Send two commands sequentially to the terminal associated with the given module.
      * {@code cmd1} is sent first; {@code cmd2} is sent once the terminal session is active.
      *
-     * <p>Uses {@link TerminalView#sendText(String)} when a {@link TerminalView} is
-     * available (IntelliJ 2025.3+). Falls back to
-     * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
+     * <p>Uses {@link TerminalView#sendText(String)} to send commands to the terminal.
      *
      * @param libertyModule the module whose terminal should receive the commands
      * @param cmd1 first command (e.g. {@code cd <project-dir>})
      * @param cmd2 second command (e.g. the Liberty dev mode start command)
      */
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     public static void executeCommand(LibertyModule libertyModule, String cmd1, String cmd2) {
         // Run on a pooled thread so the EDT is never blocked.
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             executeCommand(libertyModule, cmd1);
-            // Wait until the terminal session has an active TTY before sending the second command.
+            // Wait until the terminal session has started before sending the second command.
             // This is required because IntelliJ batches commands and runs them out of order.
             int i = 0;
             try {
-                while (libertyModule.getTerminalWidget() != null
-                        && libertyModule.getTerminalWidget().getTtyConnector() == null) {
+                while (isCommandNotRunning(libertyModule)) {
                     if (i > 100) {
                         LOGGER.error("Timed out waiting to execute command: " + cmd1);
                         return;
@@ -85,9 +81,7 @@ public class LibertyActionUtil {
     /**
      * Send a single command to the terminal associated with the given module.
      *
-     * <p>Uses {@link TerminalView#sendText(String)} when a {@link TerminalView} is
-     * available (IntelliJ 2025.3+). Falls back to
-     * {@link com.intellij.terminal.ui.TerminalWidget#sendCommandToExecute(String)} otherwise.
+     * <p>Uses {@link TerminalView#sendText(String)} to send the command to the terminal.
      *
      * @param libertyModule the module whose terminal should receive the command
      * @param cmd the command to send (a newline is appended to trigger execution)
@@ -98,16 +92,8 @@ public class LibertyActionUtil {
     public static void executeCommand(LibertyModule libertyModule, String cmd) {
         TerminalView view = libertyModule.getTerminalView();
         if (view != null) {
-            // Reworked Terminal path
             // Append newline so the command is executed immediately.
             view.sendText(cmd + "\n");
-            return;
-        }
-        // Classic fallback.
-        TerminalWidget terminalWidget = libertyModule.getTerminalWidget();
-        if (terminalWidget != null) {
-            terminalWidget.requestFocus();
-            terminalWidget.sendCommandToExecute(cmd);
         }
     }
 }

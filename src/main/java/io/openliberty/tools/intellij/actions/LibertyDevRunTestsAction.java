@@ -11,7 +11,7 @@ package io.openliberty.tools.intellij.actions;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.terminal.ui.TerminalWidget;
+import com.intellij.terminal.frontend.view.TerminalView;
 import io.openliberty.tools.intellij.LibertyModule;
 import io.openliberty.tools.intellij.util.LibertyActionUtil;
 import io.openliberty.tools.intellij.util.LocalizedResourceUtil;
@@ -27,12 +27,15 @@ public class LibertyDevRunTestsAction extends LibertyGeneralAction {
         return LocalizedResourceUtil.getMessage("run.tests.liberty.dev");
     }
 
+    // TerminalView is @Experimental, but its usage is explicitly recommended by
+    // https://plugins.jetbrains.com/docs/intellij/embedded-terminal.html
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     protected void executeLibertyAction(LibertyModule libertyModule) {
         Project project = libertyModule.getProject();
         VirtualFile buildFile = libertyModule.getBuildFile();
-        TerminalWidget widget = getTerminalWidgetWithFocus(false, project, buildFile, getActionCommandName());
-        if (widget == null) {
+        TerminalView view = getTerminalViewWithFocus(false, project, buildFile, getActionCommandName());
+        if (view == null) {
             return;
         }
         String runTestsCommand = " ";
