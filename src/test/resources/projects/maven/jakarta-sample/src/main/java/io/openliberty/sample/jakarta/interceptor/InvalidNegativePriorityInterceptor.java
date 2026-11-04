@@ -12,7 +12,11 @@ public class InvalidNegativePriorityInterceptor {
 
     @AroundInvoke
     public Object log(InvocationContext ctx) throws Exception {
-        return ctx.proceed();
+        try {
+            return ctx.proceed();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     // Inner class with negative priority
@@ -23,7 +27,11 @@ public class InvalidNegativePriorityInterceptor {
         
         @AroundInvoke
         public Object log(InvocationContext ctx) throws Exception {
-            return ctx.proceed();
+            try {
+                return ctx.proceed();
+            } catch (Exception e) {
+                throw e;
+            }
         }
     }
 }
