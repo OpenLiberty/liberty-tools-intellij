@@ -48,6 +48,22 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 public class DecoratorDelegateTest extends BaseJakartaTest {
 
     /**
+     * Trailing classes of InvalidDelegateLocations.java (after ValidDelegateOnMethodParam) that are
+     * unchanged by the "Insert @Inject" quickfixes but are included in the whole-file text edit.
+     */
+    private static final String INVALID_LOCATIONS_TAIL = "\n/**\n * Invalid: @Delegate on parameter of an @Inject non-void method (non-initializer).\n" +
+            " * A non-void @Inject method is not an initializer method per CDI spec.\n */\n" +
+            "@Decorator\n@Dependent\nclass DelegateOnNonVoidInjectMethod implements PaymentService {\n\n" +
+            "    @Inject\n    public PaymentService buildDelegate(@Delegate PaymentService delegate) {\n" +
+            "        return delegate;\n    }\n\n" +
+            "    @Override\n    public void processPayment(double amount) {\n    }\n}\n\n" +
+            "/**\n * Invalid: @Delegate on parameter of a static @Inject void method (non-initializer).\n" +
+            " * Static methods cannot be initializer methods per CDI spec.\n */\n" +
+            "@Decorator\n@Dependent\nclass DelegateOnStaticInjectMethod implements PaymentService {\n\n" +
+            "    @Inject\n    public static void setDelegate(@Delegate PaymentService delegate) {\n    }\n\n" +
+            "    @Override\n    public void processPayment(double amount) {\n    }\n}\n";
+
+    /**
      * Test that a decorator with multiple @Delegate fields triggers diagnostics at each field.
      *
      * Expected: Error on each @Delegate field indicating 2 @Delegate injection points found.
@@ -257,8 +273,30 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "jakarta-cdi",
                 "InvalidDelegateInjectionPoint");
 
+        // Other invalid classes in the same file: @Delegate on non-void / static @Inject methods
+        Diagnostic nonVoidMethodDiagnostic = d(127, 26, 39,
+                "@Delegate on a method parameter is only valid if the method is a constructor or an initializer method. An initializer method must be non-static, void, and annotated with @Inject.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateOnNonInjectionPoint");
+
+        Diagnostic staticMethodDiagnostic = d(145, 23, 34,
+                "@Delegate on a method parameter is only valid if the method is a constructor or an initializer method. An initializer method must be non-static, void, and annotated with @Inject.",
+                DiagnosticSeverity.Error,
+                "jakarta-cdi",
+                "InvalidDelegateOnNonInjectionPoint");
+
+        // DI participant: @Inject on a static method is invalid
+        Diagnostic injectOnStaticMethodDiagnostic = d(145, 23, 34,
+                "The @Inject annotation must not define a static method.",
+                DiagnosticSeverity.Error,
+                "jakarta-di",
+                "RemoveInjectOrStatic",
+                "void");
+
         assertJavaDiagnostics(diagnosticsParams, utils, constructorManagedBeanDiagnostic, constructorParamDiagnostic,
-                missingDelegateOnNonInjectedMethodDiagnostic, fieldDiagnostic);
+                missingDelegateOnNonInjectedMethodDiagnostic, fieldDiagnostic,
+                nonVoidMethodDiagnostic, staticMethodDiagnostic, injectOnStaticMethodDiagnostic);
 
         // Test quickfix for void method parameter without @Inject
         JakartaJavaCodeActionParams methodCodeActionParams = createCodeActionParams(uri, missingDelegateOnNonInjectedMethodDiagnostic);
@@ -306,8 +344,9 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
                 "        this.delegate = delegate;\n    }\n\n" +
                 "    @Override\n    public void processPayment(double amount) {\n" +
-                "        delegate.processPayment(amount);\n    }\n}\n";
-        TextEdit methodTextEdit = te(0, 0, 117, 0, methodFixedContent);
+                "        delegate.processPayment(amount);\n    }\n}\n" +
+                INVALID_LOCATIONS_TAIL;
+        TextEdit methodTextEdit = te(0, 0, 152, 0, methodFixedContent);
         CodeAction methodInsertInjectAction = ca(uri, "Insert @Inject", missingDelegateOnNonInjectedMethodDiagnostic, methodTextEdit);
         assertJavaCodeAction(methodCodeActionParams, utils, methodInsertInjectAction);
 
@@ -357,8 +396,9 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
                 "        this.delegate = delegate;\n    }\n\n" +
                 "    @Override\n    public void processPayment(double amount) {\n" +
-                "        delegate.processPayment(amount);\n    }\n}\n";
-        TextEdit fieldTextEdit = te(0, 0, 117, 0, fieldFixedContent);
+                "        delegate.processPayment(amount);\n    }\n}\n" +
+                INVALID_LOCATIONS_TAIL;
+        TextEdit fieldTextEdit = te(0, 0, 152, 0, fieldFixedContent);
         CodeAction fieldInsertInjectAction = ca(uri, "Insert @Inject", fieldDiagnostic, fieldTextEdit);
         assertJavaCodeAction(fieldCodeActionParams, utils, fieldInsertInjectAction);
 
@@ -408,8 +448,9 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "    public void setDelegate(@Delegate PaymentService delegate) {\n" +
                 "        this.delegate = delegate;\n    }\n\n" +
                 "    @Override\n    public void processPayment(double amount) {\n" +
-                "        delegate.processPayment(amount);\n    }\n}\n";
-        TextEdit constructorTextEdit = te(0, 0, 117, 0, constructorFixedContent);
+                "        delegate.processPayment(amount);\n    }\n}\n" +
+                INVALID_LOCATIONS_TAIL;
+        TextEdit constructorTextEdit = te(0, 0, 152, 0, constructorFixedContent);
         CodeAction constructorInsertInjectAction = ca(uri, "Insert @Inject", constructorParamDiagnostic, constructorTextEdit);
         assertJavaCodeAction(constructorCodeActionParams, utils, constructorInsertInjectAction);
     }
@@ -446,6 +487,14 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                 "jakarta-cdi",
                 "InvalidDelegateOnNonInjectionPoint");
 
+        // DI participant: @Inject on a static method is invalid
+        Diagnostic injectOnStaticMethodDiagnostic = d(145, 23, 34,
+                "The @Inject annotation must not define a static method.",
+                DiagnosticSeverity.Error,
+                "jakarta-di",
+                "RemoveInjectOrStatic",
+                "void");
+
         assertJavaDiagnostics(diagnosticsParams, utils,
                 // field and constructor diagnostics from other classes in the file
                 d(51, 11, 48,
@@ -461,7 +510,8 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
                         "@Delegate must be applied to an injected field, or to a parameter of an initializer or constructor method.",
                         DiagnosticSeverity.Error, "jakarta-cdi", "InvalidDelegateInjectionPoint"),
                 invalidDelegateOnNonVoidMethodDiagnostic,
-                invalidDelegateOnStaticMethodDiagnostic);
+                invalidDelegateOnStaticMethodDiagnostic,
+                injectOnStaticMethodDiagnostic);
     }
 
 }
