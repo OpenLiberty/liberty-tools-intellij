@@ -96,13 +96,16 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         // Parse the file bytes directly so the XML parser determines the encoding.
         Document doc = db.parse(pomFile);
 
-        // getTextContent() covers element text and CDATA but not comments, so a "${"
-        // inside a comment does not trigger the effective POM.
-        if (doc.getDocumentElement().getTextContent().contains("${")) {
-            // The POM contains variable references somewhere — variables can affect any
-            // field we read (artifactId, plugin coordinates, skip flag, module names).
-            // Use the effective POM so that all values are fully resolved.
-            LOGGER.debug("POM contains variables, using effective POM for: " + pomFile);
+        // Only trigger the effective-POM subprocess when a variable reference ("${")
+        // appears in the fields that directly affect multi-module relationship wiring:
+        //   - the project's own artifactId
+        //   - the parent's artifactId
+        //   - the declared child <module> paths
+        // Variable references elsewhere in the POM (e.g. in <properties>, plugin
+        // configuration, dependency versions) do not affect multi-module detection
+        // and must not cause a blocking mvn subprocess on every project scan.
+        if (multiModuleFieldsContainVariables(doc)) {
+            LOGGER.debug("POM multi-module fields contain variables, using effective POM for: " + pomFile);
             Document effectiveDoc = resolveEffectivePom(pomDir, project, db);
             if (effectiveDoc != null) {
                 doc = effectiveDoc;
@@ -113,6 +116,53 @@ public class MavenProjectMetadata extends AbstractProjectMetadata {
         }
 
         extractFromDoc(doc);
+    }
+
+    /**
+     * Returns {@code true} when any of the fields that directly affect multi-module
+     * relationship wiring contain an unresolved Maven variable reference ({@code ${}}).
+     *
+     * <p>Only the following fields are checked:</p>
+     * <ul>
+     *   <li>The project's own {@code <artifactId>}</li>
+     *   <li>The {@code <artifactId>} inside {@code <parent>}</li>
+     *   <li>Each {@code <module>} path inside {@code <modules>}</li>
+     * </ul>
+     *
+     * <p>Variable references in {@code <properties>}, plugin configuration, dependency
+     * versions, etc. do not affect multi-module detection and are intentionally ignored
+     * to avoid triggering a blocking {@code mvn help:effective-pom} subprocess on every
+     * ordinary single-module project.</p>
+     */
+    private static boolean multiModuleFieldsContainVariables(Document doc) {
+        Element root = doc.getDocumentElement();
+
+        // Project artifactId
+        if (getDirectChildText(root, "artifactId").contains("${")) {
+            return true;
+        }
+
+        // Parent artifactId
+        NodeList parentNodes = root.getElementsByTagName("parent");
+        if (parentNodes.getLength() > 0) {
+            Element parentEl = (Element) parentNodes.item(0);
+            if (getDirectChildText(parentEl, "artifactId").contains("${")) {
+                return true;
+            }
+        }
+
+        // Module paths inside top-level <modules>
+        Element modulesEl = getDirectChild(root, MODULES_TAG);
+        if (modulesEl != null) {
+            NodeList moduleNodes = modulesEl.getElementsByTagName(MODULE_TAG);
+            for (int i = 0; i < moduleNodes.getLength(); i++) {
+                if (moduleNodes.item(i).getTextContent().contains("${")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /** Returns {@code groupId:artifactId} of this project, or {@code null} when it could not be determined. */
