@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2023, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,6 +26,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
 import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -54,7 +55,7 @@ public class ClasspathResourceChangedManager implements Disposable {
 	private final MessageBusConnection appConnection;
 	private final ClasspathResourceChangedListener listener;
 
-	public static ClasspathResourceChangedManager getInstance(Project project) {
+	public static ClasspathResourceChangedManager getInstance(@NotNull Project project) {
 		return project.getService(ClasspathResourceChangedManager.class);
 	}
 

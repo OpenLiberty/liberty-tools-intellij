@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -129,7 +129,7 @@ public class MicroProfileConfigPropertyInformation {
 	 * @return the property name with any profile information removed
 	 */
 	public static String getPropertyNameWithoutProfile(String propertyNameWithProfile) {
-		if (propertyNameWithProfile.charAt(0) == '%') {
+		if (propertyNameWithProfile.length() > 0 && propertyNameWithProfile.charAt(0) == '%') {
 			int firstPeriodIndex = propertyNameWithProfile.indexOf('.');
 			return propertyNameWithProfile.substring(firstPeriodIndex + 1);
 		} else {

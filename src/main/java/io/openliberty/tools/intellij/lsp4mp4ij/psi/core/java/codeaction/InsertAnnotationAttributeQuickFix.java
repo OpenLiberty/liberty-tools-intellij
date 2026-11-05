@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021, 2024 Red Hat Inc. and others.
+* Copyright (c) 2021, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,7 +19,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.ChangeCorrectionProposal;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.corrections.proposal.InsertAnnotationAttributeProposal;
-import io.openliberty.tools.intellij.util.ExceptionUtil;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
@@ -31,6 +30,7 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -80,7 +80,11 @@ public abstract class InsertAnnotationAttributeQuickFix implements IJavaCodeActi
 		ChangeCorrectionProposal proposal = new InsertAnnotationAttributeProposal(name, context.getCompilationUnit(),
 				annotation, 0, context.getSource().getCompilationUnit(), attributeName);
 
-		ExceptionUtil.executeWithWorkspaceEditHandling(context, proposal, toResolve, LOGGER, "Unable to resolve code action edit for inserting an attribute value");
+		try {
+			toResolve.setEdit(context.convertToWorkspaceEdit(proposal));
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Unable to resolve code action edit for inserting an attribute value", e);
+		}
 		return toResolve;
 	}
 

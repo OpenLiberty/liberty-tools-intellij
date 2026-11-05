@@ -10,11 +10,13 @@
 package io.openliberty.tools.intellij.lsp4mp.lsp;
 
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4mp.ls.api.MicroProfileLanguageServerAPI;
 import com.redhat.devtools.lsp4ij.LanguageServerFactory;
 import com.redhat.devtools.lsp4ij.client.LanguageClientImpl;
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider;
+import org.jetbrains.annotations.NotNull;
 
 public class MicroProfileLanguageServerFactory implements LanguageServerFactory {
     @Override
@@ -30,5 +32,10 @@ public class MicroProfileLanguageServerFactory implements LanguageServerFactory 
     @Override
     public Class<? extends LanguageServer> getServerInterface() {
         return MicroProfileLanguageServerAPI.class;
+    }
+
+    @Override
+    public @NotNull LSPClientFeatures createClientFeatures() {
+        return new MicroProfileClientFeatures();
     }
 }

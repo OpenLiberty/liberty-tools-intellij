@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -49,6 +49,7 @@ public abstract class AbstractTypeDeclarationPropertiesProvider extends Abstract
 			String className = type.getQualifiedName();
 			String[] names = getTypeNames();
 			for (String name : names) {
+				context.getMonitor().checkCanceled();
 				if (name.equals(className)) {
 					try {
 						// Collect properties from the class name and stop the loop.
