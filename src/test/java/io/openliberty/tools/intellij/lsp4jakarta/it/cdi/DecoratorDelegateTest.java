@@ -19,7 +19,6 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.openliberty.tools.intellij.lsp4jakarta.it.core.BaseJakartaTest;
-import io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.ls.PsiUtilsLSImpl;
 import org.eclipse.lsp4j.CodeAction;
@@ -51,17 +50,43 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
      * Trailing classes of InvalidDelegateLocations.java (after ValidDelegateOnMethodParam) that are
      * unchanged by the "Insert @Inject" quickfixes but are included in the whole-file text edit.
      */
-    private static final String INVALID_LOCATIONS_TAIL = "\n/**\n * Invalid: @Delegate on parameter of an @Inject non-void method (non-initializer).\n" +
-            " * A non-void @Inject method is not an initializer method per CDI spec.\n */\n" +
-            "@Decorator\n@Dependent\nclass DelegateOnNonVoidInjectMethod implements PaymentService {\n\n" +
-            "    @Inject\n    public PaymentService buildDelegate(@Delegate PaymentService delegate) {\n" +
-            "        return delegate;\n    }\n\n" +
-            "    @Override\n    public void processPayment(double amount) {\n    }\n}\n\n" +
-            "/**\n * Invalid: @Delegate on parameter of a static @Inject void method (non-initializer).\n" +
-            " * Static methods cannot be initializer methods per CDI spec.\n */\n" +
-            "@Decorator\n@Dependent\nclass DelegateOnStaticInjectMethod implements PaymentService {\n\n" +
-            "    @Inject\n    public static void setDelegate(@Delegate PaymentService delegate) {\n    }\n\n" +
-            "    @Override\n    public void processPayment(double amount) {\n    }\n}\n";
+    private static final String INVALID_LOCATIONS_TAIL = """
+            
+            /**
+             * Invalid: @Delegate on parameter of an @Inject non-void method (non-initializer).
+             * A non-void @Inject method is not an initializer method per CDI spec.
+             */
+            @Decorator
+            @Dependent
+            class DelegateOnNonVoidInjectMethod implements PaymentService {
+            
+                @Inject
+                public PaymentService buildDelegate(@Delegate PaymentService delegate) {
+                    return delegate;
+                }
+            
+                @Override
+                public void processPayment(double amount) {
+                }
+            }
+            
+            /**
+             * Invalid: @Delegate on parameter of a static @Inject void method (non-initializer).
+             * Static methods cannot be initializer methods per CDI spec.
+             */
+            @Decorator
+            @Dependent
+            class DelegateOnStaticInjectMethod implements PaymentService {
+            
+                @Inject
+                public static void setDelegate(@Delegate PaymentService delegate) {
+                }
+            
+                @Override
+                public void processPayment(double amount) {
+                }
+            }
+            """;
 
     /**
      * Test that a decorator with multiple @Delegate fields triggers diagnostics at each field.

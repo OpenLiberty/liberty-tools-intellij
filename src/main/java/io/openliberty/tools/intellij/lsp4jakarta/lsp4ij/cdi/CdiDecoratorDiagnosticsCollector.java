@@ -59,7 +59,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
         // Fields
         for (PsiField field : type.getFields()) {
-            validateDelegate(type, unit, diagnostics, field, field, delegateElements, false);
+            validateDelegate(unit, diagnostics, field, field, delegateElements, false);
         }
 
         // Methods + parameters
@@ -81,7 +81,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
             boolean isNonInjectionPointMethod = !isConstructor && !isInitializerMethod;
 
             for (PsiParameter parameter : method.getParameterList().getParameters()) {
-                validateDelegate(type, unit, diagnostics, method, parameter, delegateElements,
+                validateDelegate(unit, diagnostics, method, parameter, delegateElements,
                         isNonInjectionPointMethod, methodAnnotations);
             }
         }
@@ -92,16 +92,19 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
     /**
      * Unified delegate processing for fields and parameters.
      *
-     * @param owner                    element to report diagnostics on (field or method)
-     * @param element                  actual element annotated with @Delegate
+     * @param unit                      the compilation unit
+     * @param diagnostics               the list to collect diagnostics
+     * @param owner                     element to report diagnostics on (field or method)
+     * @param element                   actual element annotated with @Delegate
+     * @param delegateElements          list to collect delegate elements
      * @param isNonInjectionPointMethod true when the enclosing method is not a valid
-     *                                 injection-point context (not a constructor and not an
-     *                                 @Inject void non-static method). When true the element
-     *                                 is still added to delegateElements but
-     *                                 InvalidDelegateOnNonInjectionPoint is reported instead.
-     * @param reusableAnnots           optional precomputed annotations (e.g. method annotations)
+     *                                  injection-point context (not a constructor and not an
+     *                                  @Inject void non-static method). When true the element
+     *                                  is still added to delegateElements but
+     *                                  InvalidDelegateOnNonInjectionPoint is reported instead.
+     * @param reusableAnnots                    optional precomputed annotations (e.g. method annotations)
      */
-    private void validateDelegate(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
+    private void validateDelegate(PsiJavaFile unit, List<Diagnostic> diagnostics,
                                   PsiElement owner, PsiElement element, List<PsiElement> delegateElements,
                                   boolean isNonInjectionPointMethod, PsiAnnotation... reusableAnnots) {
 
@@ -111,7 +114,7 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
 
         if (isMatchedAnnotation(annotations, ManagedBeanConstants.DELEGATE_FQ_NAME)) {
             delegateElements.add(element);
-            validateDelegateInjectionPoint(type, unit, diagnostics,
+            validateDelegateInjectionPoint(unit, diagnostics,
                     owner,
                     isNonInjectionPointMethod,
                     reusableAnnots.length > 0 ? reusableAnnots : annotations);
@@ -153,14 +156,13 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * - InvalidDelegateOnNonInjectionPoint: @Inject is present but the method is not a valid
      *   injection-point context (non-void, static). No quickfix — user must fix the method.
      *
-     * @param type                     the class containing the delegate injection point
-     * @param unit                     the compilation unit
-     * @param diagnostics              the list to add diagnostics to
-     * @param element                  the element to report the diagnostic on (field or method)
+     * @param unit                      the compilation unit
+     * @param diagnostics               the list to add diagnostics to
+     * @param element                   the element to report the diagnostic on (field or method)
      * @param isNonInjectionPointMethod true when the enclosing method is not a valid injection point
-     * @param annotations              annotations to check for @Inject
+     * @param annotations               annotations to check for @Inject
      */
-    private void validateDelegateInjectionPoint(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics,
+    private void validateDelegateInjectionPoint(PsiJavaFile unit, List<Diagnostic> diagnostics,
                                                 PsiElement element, boolean isNonInjectionPointMethod,
                                                 PsiAnnotation[] annotations) {
         if (!isMatchedAnnotation(annotations, ManagedBeanConstants.INJECT_FQ_NAME)) {
