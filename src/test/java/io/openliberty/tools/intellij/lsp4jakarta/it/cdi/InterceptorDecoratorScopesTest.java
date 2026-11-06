@@ -114,10 +114,11 @@ public class InterceptorDecoratorScopesTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInterceptorOrDecorator",
                 createJsonArray("jakarta.enterprise.context.ApplicationScoped", "io.openliberty.sample.jakarta.cdi.CustomNormalScope"));
 
-        assertJavaDiagnostics(diagnosticsParams, utils, interceptorAppScoped, interceptorSessionScoped,
-                interceptorMultiScopeDecl, interceptorMultiScope, decoratorAppScoped, decoratorSessionScoped,
-                decoratorMultiScopeDecl, decoratorMultiScope, interceptorCustomScope, decoratorCustomScope,
-                interceptorMixedScopes, decoratorMixedScopes);
+        assertJavaDiagnostics(diagnosticsParams, utils, decoratorMixedScopes, interceptorMixedScopes,
+                decoratorCustomScope, interceptorCustomScope, decoratorMultiScopeDecl,
+                decoratorMultiScope, decoratorSessionScoped, decoratorAppScoped,
+                interceptorMultiScopeDecl, interceptorMultiScope,
+                interceptorSessionScoped, interceptorAppScoped);
 
         // Test quickfix for interceptor with @ApplicationScoped (line 41)
         String newText1 = "package io.openliberty.sample.jakarta.cdi;\n\n" +
