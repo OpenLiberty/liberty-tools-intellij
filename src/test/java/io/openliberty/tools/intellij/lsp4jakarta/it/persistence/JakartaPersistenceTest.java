@@ -1168,4 +1168,91 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         // Valid: @Entity + @Inheritance extending @MappedSuperclass — no @Entity ancestor
         assertJavaDiagnostics(diagnosticsParams, utils);
     }
+    @Test
+    public void convertAnnotationMissingConverterOrDisable() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/ConvertAnnotationMissingAttributes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic convertDiagnostic = d(17, 19, 23,
+                "@Convert must specify a converter class or set disableConversion to true.",
+                DiagnosticSeverity.Error, "jakarta-persistence",
+                "InvalidConvertAnnotationMissingConverterOrDisable");
+
+        // disableConversion = false is not equivalent to disableConversion = true
+        Diagnostic disableConversionDiagnostic = d(21, 19, 25,
+                "@Convert must specify a converter class or set disableConversion to true.",
+                DiagnosticSeverity.Error, "jakarta-persistence",
+                "InvalidConvertAnnotationMissingConverterOrDisable");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, convertDiagnostic, disableConversionDiagnostic);
+    }
+
+    @Test
+    public void convertAnnotationOnRestrictedTarget() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/ConvertAnnotationOnRestrictedTarget.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic convertOnIDDiagnostic = d(16, 17, 19,
+                "@Convert must not be applied to an attribute annotated with @Id.",
+                DiagnosticSeverity.Error, "jakarta-persistence",
+                "InvalidConvertAnnotationOnRestrictedTarget");
+
+        Diagnostic convertOnVersionDiagnostic = d(21, 16, 23,
+                "@Convert must not be applied to an attribute annotated with @Version.",
+                DiagnosticSeverity.Error, "jakarta-persistence",
+                "InvalidConvertAnnotationOnRestrictedTarget");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, convertOnIDDiagnostic, convertOnVersionDiagnostic);
+    }
+
+    @Test
+    public void convertAnnotationMultipleOnSameAttribute() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/ConvertAnnotationMultiple.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic diagnostic = d(18, 19, 25,
+                "Multiple @Convert annotations on the same attribute are not supported.",
+                DiagnosticSeverity.Error, "jakarta-persistence",
+                "MultipleConvertAnnotationOnSameAttribute");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, diagnostic);
+    }
+
+    @Test
+    public void convertAnnotationValidUsageNoDiagnostics() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/ConvertAnnotationValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid usage — no diagnostics expected
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
 }
