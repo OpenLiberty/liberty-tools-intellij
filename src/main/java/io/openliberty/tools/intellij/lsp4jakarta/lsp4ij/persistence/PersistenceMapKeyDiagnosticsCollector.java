@@ -166,7 +166,7 @@ public class PersistenceMapKeyDiagnosticsCollector extends AbstractDiagnosticsCo
             PsiNameValuePair[] attributes = convertAnnotation.getParameterList().getAttributes();
 
             boolean hasConverter = Arrays.stream(attributes)
-                    .anyMatch(a -> PersistenceConstants.CONVERTER.equals(a.getName()));
+                    .anyMatch(a -> PersistenceConstants.CONVERTER_ATTRIBUTE.equals(a.getName()));
             boolean hasDisableConversion = Arrays.stream(attributes)
                     .anyMatch(a -> PersistenceConstants.DISABLE_CONVERSION.equals(a.getName())
                             && "true".equals(a.getLiteralValue()));
