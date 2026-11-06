@@ -122,9 +122,6 @@ public class UIBotTestUtils {
                 ApplicationManager.getApplication().invokeLater(openProject);
                 """.formatted(projectFullPath));
 
-        // If another project window is still open, the IDE asks where to open the project. Choose "This Window".
-        handleOpenProjectDialogIfExists(remoteRobot);
-
         // Wait for the project frame to open, and make sure a few basic UI items are showing.
         // Note that at specific points in time, the window pane items will re-arrange themselves
         // as content is displayed. This, has an effect on the location of the items on the frame.
@@ -173,49 +170,14 @@ public class UIBotTestUtils {
                 minimizeWindow(remoteRobot);
             }
             clickOnMainMenu(remoteRobot);
-            // Allow the main menu popup to fully render before searching for menu entries.
-            TestUtils.sleepAndIgnoreException(2);
             // Click on File on the Menu bar.
-            ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "30");
+            ComponentFixture fileMenuEntry = projectFrame.getActionMenu("File", "10");
             fileMenuEntry.moveMouse();
 
             // Click on Close Project in the menu.
             ComponentFixture closeFixture = projectFrame.getActionMenuItem("Close Project");
             closeFixture.click();
         }
-    }
-
-    /**
-     * Handles the "Open Project" dialog if it appears (for example, when opening/importing a project
-     * while another project window is still open). Clicks the "This Window" button.
-     * The dialog is optional and may not always appear.
-     *
-     * @param remoteRobot The RemoteRobot instance.
-     */
-    public static void handleOpenProjectDialogIfExists(RemoteRobot remoteRobot) {
-        DialogFixture dialog;
-        try {
-            dialog = remoteRobot.find(DialogFixture.class, DialogFixture.byTitle("Open Project"), Duration.ofSeconds(3));
-        } catch (Exception e) {
-            // The dialog is optional.
-            return;
-        }
-
-        dialog.getButton("This Window").click();
-
-        // Wait for the dialog to close.
-        RepeatUtilsKt.waitFor(Duration.ofSeconds(5),
-                Duration.ofMillis(500),
-                "Waiting for the Open Project dialog to close",
-                "The Open Project dialog did not close",
-                () -> {
-                    try {
-                        remoteRobot.find(DialogFixture.class, DialogFixture.byTitle("Open Project"), Duration.ofSeconds(1));
-                        return false; // Dialog still present.
-                    } catch (Exception e) {
-                        return true; // Dialog closed.
-                    }
-                });
     }
 
     /**
