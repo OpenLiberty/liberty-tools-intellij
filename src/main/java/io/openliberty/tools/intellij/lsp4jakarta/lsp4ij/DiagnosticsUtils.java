@@ -216,6 +216,24 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Returns the declared type of the given field or method member.
+     * For a {@link PsiField}, the field's type is returned; for a {@link PsiMethod},
+     * the method's return type is returned; for any other kind of member {@code null}
+     * is returned.
+     *
+     * @param member the field or method to inspect; may be {@code null}
+     * @return the {@link PsiType} of the member, or {@code null} if it cannot be determined
+     */
+    public static PsiType getMemberType(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField field) {
+            return field.getType();
+        } else if (member instanceof PsiMethod method) {
+            return method.getReturnType();
+        }
+        return null;
+    }
+
+    /**
      * Returns {@code true} only when {@code keyType} is definitively an enum type.
      * Concrete class types, upper-bounded wildcards whose bound is an enum, and
      * all other forms (raw, unbound wildcard, lower-bounded wildcard, type variable)
