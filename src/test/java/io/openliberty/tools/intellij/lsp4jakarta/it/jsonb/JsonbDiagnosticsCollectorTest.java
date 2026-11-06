@@ -2647,4 +2647,91 @@ public class JsonbDiagnosticsCollectorTest extends BaseJakartaTest {
         CodeAction insertNoArgPubConstructorChild = JakartaForJavaAssert.ca(uri, Messages.getMessage("AddNoArgPublicConstructor"), missingPubOrProConstructorChild, addPublicConstructorChildEdit);
         JakartaForJavaAssert.assertJavaCodeAction(codeActionParams2, utils, insertNoArgProConstructorChild, insertNoArgPubConstructorChild);
     }
+  
+    @Test
+    public void testJsonbFromJsonNullParameters() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbFromJsonNullParameter.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test null first parameter with cast: jsonb.fromJson((String) null, Person.class)
+        Diagnostic nullFirstParamWithCast = JakartaForJavaAssert.d(47, 38, 51,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test null second parameter: jsonb.fromJson(json, null)
+        Diagnostic nullSecondParam = JakartaForJavaAssert.d(57, 46, 50,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test both parameters null: jsonb.fromJson(null, null) - first null
+        Diagnostic nullBothParamsFirst = JakartaForJavaAssert.d(65, 40, 44,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test both parameters null: jsonb.fromJson(null, null) - second null
+        Diagnostic nullBothParamsSecond = JakartaForJavaAssert.d(65, 46, 50,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        // Test null first parameter without cast: jsonb.fromJson(null, Person.class)
+        Diagnostic nullFirstParamNoCast = JakartaForJavaAssert.d(74, 38, 42,
+                "The parameter of the fromJson() method must not be null.",
+                DiagnosticSeverity.Error, "jakarta-jsonb", "InvalidJsonbFromJsonNullParameter");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, nullFirstParamWithCast, nullSecondParam, nullBothParamsFirst, nullBothParamsSecond, nullFirstParamNoCast);
+    }
+
+    @Test
+    public void JsonbLocalInstanceClosable() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbLocalInstanceClosable.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        Diagnostic localExecutorNoCloseDiag = JakartaForJavaAssert.d(18, 16, 45,
+                "Thread source detected in method localJsonbWithExecutorNoClose, but no close() found. Ensure all threads have finished interaction with Jsonb before calling close().",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        Diagnostic localCompletableFutureNoCloseDiag = JakartaForJavaAssert.d(29, 16, 54,
+                "Thread source detected in method localJsonbWithCompletableFutureNoClose, but no close() found. Ensure all threads have finished interaction with Jsonb before calling close().",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        Diagnostic localThreadNoCloseDiag = JakartaForJavaAssert.d(39, 16, 43,
+                "Thread source detected in method localJsonbWithThreadNoClose, but no close() found. Ensure all threads have finished interaction with Jsonb before calling close().",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        Diagnostic localTryWithResourcesDiag = JakartaForJavaAssert.d(68, 16, 46,
+                "Thread source detected in method localJsonbWithTryWithResources, but no close() found. Ensure all threads have finished interaction with Jsonb before calling close().",
+                DiagnosticSeverity.Warning, "jakarta-jsonb", "JsonbClosableCloseWarning");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, localExecutorNoCloseDiag,
+                localCompletableFutureNoCloseDiag, localThreadNoCloseDiag, localTryWithResourcesDiag);
+    }
+
+    @Test
+    public void JsonbGlobalInstanceClosableValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonb/JsonbGlobalInstanceClosableValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }
