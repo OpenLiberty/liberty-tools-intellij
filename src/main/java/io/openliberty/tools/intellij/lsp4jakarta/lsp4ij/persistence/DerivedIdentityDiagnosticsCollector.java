@@ -135,8 +135,8 @@ public class DerivedIdentityDiagnosticsCollector extends AbstractDiagnosticsColl
                                            KeyStrategy keyStrategy, boolean mapsIdHasValue,
                                            PsiJavaFile unit, List<Diagnostic> diagnostics) {
         // Rule 1: @MapsId must be on @OneToOne or @ManyToOne.
-        boolean hasToOne = isMatchedAnnotation(memberAnnotations, PersistenceConstants.ONETOONE)
-                || isMatchedAnnotation(memberAnnotations, PersistenceConstants.MANYTOONE);
+        boolean hasToOne = isMatchedAnnotation(memberAnnotations, PersistenceConstants.ONE_TO_ONE)
+                || isMatchedAnnotation(memberAnnotations, PersistenceConstants.MANY_TO_ONE);
         if (!hasToOne) {
             diagnostics.add(createDiagnostic(member, unit,
                     Messages.getMessage("MapsIdOnInvalidRelationship"),
