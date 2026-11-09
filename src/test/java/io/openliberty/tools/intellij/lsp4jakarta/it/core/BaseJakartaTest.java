@@ -14,6 +14,7 @@
 package io.openliberty.tools.intellij.lsp4jakarta.it.core;
 
 import com.intellij.maven.testFramework.MavenImportingTestCase;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -22,9 +23,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.java.LanguageLevel;
 import com.intellij.testFramework.IndexingTestUtil;
-import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
-import com.intellij.testFramework.builders.ModuleFixtureBuilder;
-import com.intellij.testFramework.fixtures.*;
+import com.intellij.testFramework.PlatformTestUtil;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -32,8 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Modified from:
@@ -42,20 +42,6 @@ import java.util.stream.Collectors;
  *
  */
 public abstract class BaseJakartaTest extends MavenImportingTestCase {
-
-    protected TestFixtureBuilder<IdeaProjectTestFixture> myProjectBuilder;
-
-    @Override
-    protected void setUpFixtures() throws Exception {
-        // Don't call super.setUpFixtures() here, that will create FocusListener leak.
-        myProjectBuilder = IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder(getName());
-        final JavaTestFixtureFactory factory = JavaTestFixtureFactory.getFixtureFactory();
-        ModuleFixtureBuilder moduleBuilder = myProjectBuilder.addModule(JavaModuleFixtureBuilder.class);
-        final var testFixture = factory.createCodeInsightFixture(myProjectBuilder.getFixture());
-        setTestFixture(testFixture);
-        testFixture.setUp();
-        LanguageLevelProjectExtension.getInstance(testFixture.getProject()).setLanguageLevel(LanguageLevel.JDK_1_6);
-    }
 
     private static AtomicInteger counter = new AtomicInteger(0);
 
@@ -66,7 +52,7 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
      * @return the created modules
      */
     protected List<Module> createMavenModules(List<File> projectDirs) throws Exception {
-        Project project = getTestFixture().getProject();
+        Project project = getProject();
         List<VirtualFile> pomFiles = new ArrayList<>();
         for (File projectDir : projectDirs) {
             File moduleDir = new File(project.getBasePath(), projectDir.getName() + counter.getAndIncrement());
@@ -74,10 +60,25 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
             VirtualFile pomFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(moduleDir).findFileByRelativePath("pom.xml");
             pomFiles.add(pomFile);
         }
-        // Calling the non-suspending importProjects method instead of the Kotlin suspending function
-        // importProjectsAsync(file: VirtualFile) to prevent blocking unit tests starting from IntelliJ version 2024.2.
-        importProjects(pomFiles.toArray(VirtualFile[]::new));
-        Module[] modules = ModuleManager.getInstance(getTestFixture().getProject()).getModules();
+        // importProjects() internally calls runBlockingMaybeCancellable{} which deadlocks if called from the
+        // EDT (the test thread). Run it on a pooled thread and wait for completion so the EDT stays free
+        // to process events dispatched by the Maven sync coroutines.
+        VirtualFile[] pomArray = pomFiles.toArray(VirtualFile[]::new);
+        AtomicReference<Exception> importError = new AtomicReference<>();
+        Future<?> importFuture = ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                importProjects(pomArray);
+            } catch (Exception e) {
+                importError.set(e);
+            }
+        });
+        // waitForFuture pumps the IDE event queue while blocking on EDT, preventing deadlock
+        // with Maven sync coroutines that need to dispatch events back to the EDT.
+        PlatformTestUtil.waitForFuture(importFuture);
+        if (importError.get() != null) {
+            throw importError.get();
+        }
+        Module[] modules = ModuleManager.getInstance(getProject()).getModules();
         for (Module module : modules) {
             setupJdkForModule(module.getName());
         }
@@ -90,12 +91,33 @@ public abstract class BaseJakartaTest extends MavenImportingTestCase {
         // ever introduced in the future.
         Thread.sleep(10000L);
         // QuarkusProjectService.getInstance(myTestFixture.getProject()).processModules();
-        return Arrays.asList(modules).stream().skip(1).collect(Collectors.toList());
+        return new ArrayList<>(Arrays.asList(modules));
     }
 
     protected Module createMavenModule(File projectDir) throws Exception {
         List<Module> modules = createMavenModules(Collections.singletonList(projectDir));
         return modules.get(modules.size() - 1);
+    }
+
+    @Override
+    public void setUp() {
+        try {
+            // Call super.setUp() to initialize MavenTestCase infrastructure (myProject, myDir, projects manager, etc.).
+            super.setUp();
+            ApplicationManager.getApplication().runWriteAction(() ->
+                    LanguageLevelProjectExtension.getInstance(getProject()).setLanguageLevel(LanguageLevel.JDK_1_6));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void tearDown() {
+        try {
+            super.tearDown();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
