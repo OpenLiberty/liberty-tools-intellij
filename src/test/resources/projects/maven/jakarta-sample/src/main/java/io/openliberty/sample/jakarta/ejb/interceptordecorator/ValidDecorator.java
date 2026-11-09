@@ -6,9 +6,9 @@ import jakarta.inject.Inject;
 
 // Valid: @Decorator without session bean annotation
 @Decorator
-class ValidDecorator {
+class ValidDecorator implements EjbDecoratorService {
     @Inject @Delegate
-    private Object delegate;
+    private EjbDecoratorService delegate;
 
     public void decorate() {
     }
