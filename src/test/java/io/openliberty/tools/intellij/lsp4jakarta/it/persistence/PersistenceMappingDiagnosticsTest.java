@@ -413,7 +413,7 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         // Line 24 (0-based 23): @AssociationOverride(name = "mentor", ...)
-        Diagnostic mentorNotInPerson = d(23, 4, 92,
+        Diagnostic mentorNotInPerson = d(14, 4, 92,
                 "The name \"mentor\" in @AssociationOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
