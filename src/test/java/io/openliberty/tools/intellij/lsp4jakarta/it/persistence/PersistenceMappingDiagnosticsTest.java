@@ -156,8 +156,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 28 (0-based 27): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
-        Diagnostic zipcodeNotInAddress = d(27, 4, 77,
+        // Line 19 (0-based 18): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
+        Diagnostic zipcodeNotInAddress = d(18, 4, 77,
                 "The name \"zipcode\" in @AttributeOverride does not match any declared field or property in \"Address\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -177,8 +177,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 21 (0-based 20): @AttributeOverride(name = "salary", column = @Column(name = "EMP_SALARY"))
-        Diagnostic salaryNotInPerson = d(20, 0, 74,
+        // Line 12 (0-based 11): @AttributeOverride(name = "salary", column = @Column(name = "EMP_SALARY"))
+        Diagnostic salaryNotInPerson = d(11, 0, 74,
                 "The name \"salary\" in @AttributeOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -198,8 +198,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 24 (0-based 23): @AttributeOverride(name = "bonus", column = @Column(name = "MGR_BONUS"))
-        Diagnostic bonusNotInPerson = d(23, 4, 76,
+        // Line 15 (0-based 14): @AttributeOverride(name = "bonus", column = @Column(name = "MGR_BONUS"))
+        Diagnostic bonusNotInPerson = d(14, 4, 76,
                 "The name \"bonus\" in @AttributeOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -219,8 +219,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "zipcode.postcode", ...)
-        Diagnostic postcodeNotInZipcode = d(28, 4, 85,
+        // Line 20 (0-based 19): @AttributeOverride(name = "zipcode.postcode", ...)
+        Diagnostic postcodeNotInZipcode = d(19, 4, 85,
                 "The name \"zipcode.postcode\" in @AttributeOverride cannot be resolved: \"postcode\" does not exist in \"Zipcode\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -240,8 +240,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "location.zip", ...)
-        Diagnostic locationNotInAddressWithZipcode = d(28, 4, 81,
+        // Line 20 (0-based 19): @AttributeOverride(name = "location.zip", ...)
+        Diagnostic locationNotInAddressWithZipcode = d(19, 4, 81,
                 "The name \"location.zip\" in @AttributeOverride cannot be resolved: \"location\" does not exist in \"AddressWithZipcode\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -261,8 +261,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AttributeOverride(name = "city", column = @Column(name = "PROP_CITY"))
-        Diagnostic cityMissingKeyOrValuePrefix = d(28, 4, 75,
+        // Line 20 (0-based 19): @AttributeOverride(name = "city", column = @Column(name = "PROP_CITY"))
+        Diagnostic cityMissingKeyOrValuePrefix = d(19, 4, 75,
                 "The name \"city\" in @AttributeOverride on a Map @ElementCollection must be prefixed with \"key.\" or \"value.\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -370,8 +370,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 28 (0-based 27): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
-        Diagnostic directorNotInDepartment = d(27, 4, 87,
+        // Line 19 (0-based 18): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+        Diagnostic directorNotInDepartment = d(18, 4, 87,
                 "The name \"director\" in @AssociationOverride does not match any declared field or property in \"Department\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -391,8 +391,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 21 (0-based 20): @AssociationOverride(name = "mentor", joinColumns = @JoinColumn(name = "MENTOR_ID"))
-        Diagnostic mentorNotInPerson = d(20, 0, 84,
+        // Line 12 (0-based 11): @AssociationOverride(name = "mentor", joinColumns = @JoinColumn(name = "MENTOR_ID"))
+        Diagnostic mentorNotInPerson = d(11, 0, 84,
                 "The name \"mentor\" in @AssociationOverride does not match any declared field or property in \"Person\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -433,8 +433,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AssociationOverride(name = "subDept.owner", ...)
-        Diagnostic ownerNotInSubTeam = d(28, 4, 94,
+        // Line 20 (0-based 19): @AssociationOverride(name = "subDept.owner", ...)
+        Diagnostic ownerNotInSubTeam = d(19, 4, 94,
                 "The name \"subDept.owner\" in @AssociationOverride cannot be resolved: \"owner\" does not exist in \"SubTeam\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -454,8 +454,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 29 (0-based 28): @AssociationOverride(name = "division.coordinator", ...)
-        Diagnostic divisionNotInDepartmentWithTeam = d(28, 4, 101,
+        // Line 20 (0-based 19): @AssociationOverride(name = "division.coordinator", ...)
+        Diagnostic divisionNotInDepartmentWithTeam = d(19, 4, 101,
                 "The name \"division.coordinator\" in @AssociationOverride cannot be resolved: \"division\" does not exist in \"DepartmentWithTeam\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
@@ -495,8 +495,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 30 (0-based 29): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
-        Diagnostic zipcodeNotInAddress = d(29, 4, 77,
+        // Line 21 (0-based 20): @AttributeOverride(name = "zipcode", column = @Column(name = "ADDR_ZIP"))
+        Diagnostic zipcodeNotInAddress = d(20, 4, 77,
                 "The name \"zipcode\" in @AttributeOverride does not match any declared field or property in \"Address\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -536,8 +536,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 30 (0-based 29): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
-        Diagnostic directorNotInDepartment = d(29, 4, 87,
+        // Line 21 (0-based 20): @AssociationOverride(name = "director", joinColumns = @JoinColumn(name = "DIR_ID"))
+        Diagnostic directorNotInDepartment = d(20, 4, 87,
                 "The name \"director\" in @AssociationOverride does not match any declared field or property in \"Department\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
 
