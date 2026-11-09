@@ -266,5 +266,3 @@ public class AnnotationValueExpressionUtil {
         return null;
     }
 }
-
-
