@@ -41,12 +41,13 @@ public class PersistenceConstants {
 
     /* Bidirectional relationship annotation constants */
     public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
-    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
     public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
-    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
     public static final String JOIN_TABLE = "jakarta.persistence.JoinTable";
     public static final String JOIN_COLUMN = "jakarta.persistence.JoinColumn";
     public static final String JOIN_COLUMNS = "jakarta.persistence.JoinColumns";
+    public static final String DIAGNOSTIC_CODE_INVERSE_MISSING_MAPPED_BY = "InverseSideMissingMappedBy";
+    public static final String DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE = "JoinTableOnInverseSide";
+    public static final String DIAGNOSTIC_CODE_JOIN_COLUMN_ON_INVERSE = "JoinColumnOnInverseSide";
 
     /** All relationship annotations that support the {@code mappedBy} attribute. */
     public static final String[] INVERSE_CAPABLE_RELATIONSHIP_ANNOTATIONS = {
