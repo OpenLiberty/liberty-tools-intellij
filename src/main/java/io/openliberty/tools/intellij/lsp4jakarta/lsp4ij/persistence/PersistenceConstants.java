@@ -21,6 +21,8 @@ public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String EMBEDDED = "jakarta.persistence.Embedded";
+    public static final String EMBEDDABLE = "jakarta.persistence.Embeddable";
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String IDCLASS = "jakarta.persistence.IdClass";
@@ -37,11 +39,28 @@ public class PersistenceConstants {
     public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
     public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
     public static final String ENUMERATED = "jakarta.persistence.Enumerated";
+    public static final String NAMEDENTITYGRAPH = "jakarta.persistence.NamedEntityGraph";
+    public static final String NAMEDENTITYGRAPHS = "jakarta.persistence.NamedEntityGraphs";
+    public static final String NAMEDQUERY = "jakarta.persistence.NamedQuery";
+    public static final String NAMEDQUERIES = "jakarta.persistence.NamedQueries";
+    public static final String NAMEDNATIVEQUERY = "jakarta.persistence.NamedNativeQuery";
+    public static final String NAMEDNATIVEQUERIES = "jakarta.persistence.NamedNativeQueries";
     public static final String TEMPORAL = "jakarta.persistence.Temporal";
     public static final String CONVERTER = "jakarta.persistence.Converter";
     public static final String ATTRIBUTE_CONVERTER = "jakarta.persistence.AttributeConverter";
     public static final String VERSION = "jakarta.persistence.Version";
     public static final String TEMPORAL_TYPE = "jakarta.persistence.TemporalType";
+    public static final String TABLE_GENERATOR = "jakarta.persistence.TableGenerator";
+    public static final String TABLE_GENERATORS = "jakarta.persistence.TableGenerators";
+    public static final String SEQUENCE_GENERATOR = "jakarta.persistence.SequenceGenerator";
+    public static final String SEQUENCE_GENERATORS = "jakarta.persistence.SequenceGenerators";
+    public static final String SECONDARY_TABLE = "jakarta.persistence.SecondaryTable";
+    public static final String SECONDARY_TABLES = "jakarta.persistence.SecondaryTables";
+
+    public static final String[] GENERATOR_AND_TABLE_ANNOTATIONS = {
+            TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
+    };
+    public static final String VALUE = "value";
 
     /* Type Constants */
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
@@ -71,14 +90,31 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_DUPLICATE_VERSION = "MultipleVersionAnnotations";
     public static final String DIAGNOSTIC_CODE_VERSION_IN_HIERARCHY = "VersionAnnotationInHierarchy";
     public static final String DIAGNOSTIC_CODE_INVALID_VERSION_TYPE = "InvalidVersionFieldOrPropertyType";
+    public static final String DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE = "EmbeddedTypeNotAnnotatedWithEmbeddable";
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
     public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
+
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_MISSING_IN_KEY_CLASS = "IdClassMemberMissingInKeyClass";
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_TYPE_MISMATCH = "IdClassMemberTypeMismatch";
 
+    public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY = "NamedEntityGraphOnNonEntityClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPHS_ON_NON_ENTITY = "NamedEntityGraphsOnNonEntityClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS = "NamedQueryOnInvalidClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS = "NamedQueriesOnInvalidClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS = "NamedNativeQueryOnInvalidClass";
+    public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
+
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
+    
+    /* Generator / SecondaryTable Codes */
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME = "TableGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING = "TableGeneratorsMissingTableGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME = "SequenceGeneratorInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING = "SequenceGeneratorsMissingSequenceGeneratorMapping";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME = "SecondaryTableInvalidEmptyName";
+    public static final String DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING = "SecondaryTablesMissingSecondaryTableMapping";
 
     /* Converter Codes */
     public static final String DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT = "ConverterMustImplementAttributeConverter";
