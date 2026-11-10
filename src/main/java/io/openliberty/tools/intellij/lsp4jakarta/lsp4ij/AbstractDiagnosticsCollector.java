@@ -18,13 +18,14 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.interceptor.Constants;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.IJavaDiagnosticsParticipant;
@@ -174,22 +175,26 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         false otherwise.
      */
     protected static boolean doesImplementInterfaces(PsiClass type, String[] interfaceFQNames) {
-        PsiClass[] interfaces = type.getInterfaces();
-
-        // should check import statements first for the performance?
-
-        // check super hierarchy
-        if (interfaces.length > 0) { // the type implements interface(s)
-            //ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
-            //IType[] interfaces = typeHierarchy.getAllInterfaces();
-            for (PsiClass interfase : interfaces) {
-                String fqName = interfase.getQualifiedName();
-                for (String iName : interfaceFQNames) {
-                    if (fqName.equals(iName)) return true;
-                }
+        // Use InheritanceUtil.isInheritor so that interfaces implemented by a
+        // superclass (inherited implementation) are also considered.
+        for (String interfaceFQName : interfaceFQNames) {
+            if (InheritanceUtil.isInheritor(type, interfaceFQName)) {
+                return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the fully qualified names of all annotations present on the given class.
+     *
+     * @param type the class whose annotation names to extract
+     * @return array of fully qualified annotation names
+     */
+    protected static String[] getAnnotationNames(PsiClass type) {
+        return Stream.of(type.getAnnotations())
+                .map(PsiAnnotation::getQualifiedName)
+                .toArray(String[]::new);
     }
 
     /**
@@ -213,20 +218,35 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     /**
      * Returns matched Java element fully qualified names.
+     * This is the core implementation that accepts Collections for maximum flexibility.
      *
      * @param type               the type representing the class
-     * @param javaElementNames   Java element names
+     * @param javaElementNames   Java element names collection (Set or List)
+     * @param javaElementFQNames given fully qualified name collection (Set or List)
+     * @return matched Java element fully qualified names
+     */
+    protected static List<String> getMatchedJavaElementNames(PsiClass type, Collection<String> javaElementNames,
+                                                             Collection<String> javaElementFQNames) {
+        return javaElementFQNames.stream().filter(fqName -> {
+            boolean anyMatch = javaElementNames.stream().anyMatch(name -> {
+                return isMatchedJavaElement(type, name, fqName);
+            });
+            return anyMatch;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns matched Java element fully qualified names.
+     * Convenience overload that accepts arrays and delegates to the Collection-based method.
+     *
+     * @param type               the type representing the class
+     * @param javaElementNames   Java element names array
      * @param javaElementFQNames given fully qualified name array
      * @return matched Java element fully qualified names
      */
     protected static List<String> getMatchedJavaElementNames(PsiClass type, String[] javaElementNames,
                                                              String[] javaElementFQNames) {
-        return Stream.of(javaElementFQNames).filter(fqName -> {
-            boolean anyMatch = Stream.of(javaElementNames).anyMatch(name -> {
-                return isMatchedJavaElement(type, name, fqName);
-            });
-            return anyMatch;
-        }).collect(Collectors.toList());
+        return getMatchedJavaElementNames(type, Arrays.asList(javaElementNames), Arrays.asList(javaElementFQNames));
     }
 
     /**
@@ -277,10 +297,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
      *
      * @param type     the type to check
-     * @param javaFile the Java file containing the type
      * @return true if the type is an interceptor type or uses interceptor-related features
      */
-    public static boolean isInterceptorTypeReferenced(PsiClass type, PsiJavaFile javaFile) {
+    public static boolean isInterceptorTypeReferenced(PsiClass type) {
         if (type == null) {
             return false;
         }
@@ -375,5 +394,27 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
         
         String fqn = containingClass.getQualifiedName();
         return methodTargetClass.equals(fqn);
+    }
+
+    /**
+     * Checks if a method contains any annotations that match the provided fully qualified annotation names.
+     * Returns a list of matched annotation FQNs found on the method.
+     *
+     * @param type              the class containing the method
+     * @param method            the method to check for annotations
+     * @param annotationFQNames the set of fully qualified annotation names to match against
+     * @return a list of matched fully qualified annotation names, or an empty list if no matches found
+     */
+    public List<String> containsAnyMatchingAnnotations(PsiClass type, PsiMethod method, Set<String> annotationFQNames) {
+        List<String> matchedAnnotations = Arrays.stream(method.getAnnotations())
+                .map(annotation -> getMatchedJavaElementName(
+                        type,
+                        annotation.getQualifiedName(),
+                        annotationFQNames.toArray(String[]::new)
+                ))
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+        return matchedAnnotations;
     }
 }

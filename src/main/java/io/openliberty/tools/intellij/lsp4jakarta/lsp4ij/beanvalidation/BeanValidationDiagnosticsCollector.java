@@ -171,6 +171,13 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
                                 source, DIAGNOSTIC_CODE_INVALID_TYPE, annotationName, DiagnosticSeverity.Error));
                     }
                 }
+                case VALID -> {
+                    if (!isCascadableType(type)) {
+                        String source = Messages.getMessage("InvalidValidAnnotation");
+                        diagnostics.add(createDiagnostic(element, (PsiJavaFile) element.getContainingFile(),
+                                source, DIAGNOSTIC_CODE_INVALID_VALID_ANNOTATION, annotationName, DiagnosticSeverity.Error));
+                    }
+                }
                 default -> LOGGER.log(Level.SEVERE, "Unexpected value for annotation");
             }
         }
@@ -211,6 +218,60 @@ public class BeanValidationDiagnosticsCollector extends AbstractDiagnosticsColle
         return resolvedClass != null && (inheritsFrom(resolvedClass, CHAR_SEQUENCE)
                 || inheritsFrom(resolvedClass, COLLECTION_FQ)
                 || inheritsFrom(resolvedClass, MAP_FQ));
+    }
+
+    /**
+     * isCascadableType
+     * This method checks whether a type is cascadable for @Valid annotation.
+     * Non-cascadable types include: primitives, primitive arrays, boxed types, String, and other simple types.
+     * Cascadable types include: complex objects, object arrays, collections, and maps.
+     *
+     * @param type the type to check
+     * @return true if the type is cascadable, false otherwise
+     */
+    public static boolean isCascadableType(PsiType type) {
+        // Primitive types are not cascadable
+        if (type instanceof PsiPrimitiveType) {
+            return false;
+        }
+
+        // Check arrays: primitive arrays are NOT cascadable, object arrays are cascadable
+        if (type instanceof PsiArrayType) {
+            PsiType componentType = ((PsiArrayType) type).getComponentType();
+            // If the component type is primitive, the array is not cascadable
+            // Object arrays are cascadable
+            return !(componentType instanceof PsiPrimitiveType);
+        }
+
+        // Get the canonical text for comparison
+        String canonicalText = type.getCanonicalText();
+
+        // Boxed primitive types are not cascadable
+        if (WRAPPER_TYPES.contains(canonicalText)) {
+            return false;
+        }
+
+        // Check against known non-cascadable types
+        for (String nonCascadableType : NON_CASCADABLE_TYPES) {
+            if (canonicalText.equals(nonCascadableType)) {
+                return false;
+            }
+        }
+
+        // Enum types are not cascadable
+        PsiClass resolvedClass = PsiUtil.resolveClassInClassTypeOnly(type);
+        if (resolvedClass != null && resolvedClass.isEnum()) {
+            return false;
+        }
+
+        // Collections and Maps are cascadable
+        if (resolvedClass != null && (inheritsFrom(resolvedClass, COLLECTION_FQ) ||
+                                      inheritsFrom(resolvedClass, MAP_FQ))) {
+            return true;
+        }
+
+        // All other complex types (custom classes, etc.) are cascadable
+        return true;
     }
 
     private void checkStringOnly(PsiElement element, List<Diagnostic> diagnostics, String annotationName,

@@ -41,6 +41,7 @@ public class BeanValidationConstants {
     public static final String PATTERN = "jakarta.validation.constraints.Pattern";
     public static final String SIZE = "jakarta.validation.constraints.Size";
     public static final String NOT_EMPTY = "jakarta.validation.constraints.NotEmpty";
+    public static final String VALID = "jakarta.validation.Valid";
 
     /* Types */
     public static final String THAI_BUDDHIST_DATE = "java.time.chrono.ThaiBuddhistDate";
@@ -63,6 +64,9 @@ public class BeanValidationConstants {
     public static final String STRING = "java.lang.String";
     public static final String BIG_INTEGER = "java.math.BigInteger";
     public static final String BIG_DECIMAL = "java.math.BigDecimal";
+    public static final String UUID = "java.util.UUID";
+    public static final String URI = "java.net.URI";
+    public static final String URL = "java.net.URL";
     public static final String COLLECTION_FQ = "java.util.Collection";
     public static final String MAP_FQ = "java.util.Map";
 
@@ -70,13 +74,33 @@ public class BeanValidationConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "FixTypeOfElement";
     public static final String DIAGNOSTIC_CODE_STATIC = "MakeNotStatic";
     public static final String DIAGNOSTIC_CODE_CONFLICTING_CONSTRAINTS = "ConflictingConstraints";
+    public static final String DIAGNOSTIC_CODE_INVALID_VALID_ANNOTATION = "InvalidValidAnnotationOnNonCascadableType";
 
     public final static Set<String> SET_OF_ANNOTATIONS = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(ASSERT_TRUE, ASSERT_FALSE, DIGITS, DECIMAL_MAX,
                     DECIMAL_MIN, EMAIL, PAST_OR_PRESENT, FUTURE_OR_PRESENT, PAST, FUTURE, MIN, MAX, NEGATIVE_OR_ZERO,
-                    POSITIVE_OR_ZERO, NEGATIVE, POSITIVE, NOT_BLANK, PATTERN, SIZE, NOT_EMPTY)));
+                    POSITIVE_OR_ZERO, NEGATIVE, POSITIVE, NOT_BLANK, PATTERN, SIZE, NOT_EMPTY, VALID)));
     public final static Set<String> SET_OF_DATE_TYPES = Collections
             .unmodifiableSet(new HashSet<String>(Arrays.asList(THAI_BUDDHIST_DATE, MINGUO_DATE, JAPANESE_DATE,
                     HIJRAH_DATE, ZONED_DATE_TIME, YEAR_MONTH, YEAR, OFFSET_TIME, OFFSET_DATE_TIME, MONTH_DAY,
                     LOCAL_TIME, LOCAL_DATE_TIME, LOCAL_DATE, INSTANT, CALENDAR, DATE)));
+
+    public final static String[] NON_CASCADABLE_TYPES = { STRING, CHAR_SEQUENCE, BIG_DECIMAL, BIG_INTEGER,
+                                                          DATE, CALENDAR, INSTANT, LOCAL_DATE,
+                                                          LOCAL_DATE_TIME, LOCAL_TIME, MONTH_DAY,
+                                                          OFFSET_DATE_TIME, OFFSET_TIME, YEAR,
+                                                          YEAR_MONTH, ZONED_DATE_TIME, HIJRAH_DATE,
+                                                          JAPANESE_DATE, MINGUO_DATE, THAI_BUDDHIST_DATE,
+                                                          UUID, URI, URL };
+
+    public final static Set<String> WRAPPER_TYPES = Set.of(
+            "java.lang.Boolean",
+            "java.lang.Byte",
+            "java.lang.Character",
+            "java.lang.Short",
+            "java.lang.Integer",
+            "java.lang.Long",
+            "java.lang.Float",
+            "java.lang.Double"
+    );
 }
