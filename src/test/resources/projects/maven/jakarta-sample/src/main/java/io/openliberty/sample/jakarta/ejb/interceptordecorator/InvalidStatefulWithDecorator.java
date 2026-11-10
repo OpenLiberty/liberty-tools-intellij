@@ -8,9 +8,9 @@ import jakarta.inject.Inject;
 // Invalid: @Stateful with @Decorator
 @Stateful
 @Decorator
-class InvalidStatefulWithDecorator {
+class InvalidStatefulWithDecorator implements EjbDecoratorService {
     @Inject @Delegate
-    private Object delegate;
+    private EjbDecoratorService delegate;
 
     public void businessMethod() {
     }
