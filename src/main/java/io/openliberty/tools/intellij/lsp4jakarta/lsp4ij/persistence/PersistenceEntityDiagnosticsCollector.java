@@ -13,6 +13,13 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
@@ -21,12 +28,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author ankushsharma
@@ -57,9 +58,32 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 PsiAnnotation EntityAnnotation = null;
                 PsiAnnotation idClassAnnotation = null;
                 PsiAnnotation inheritanceAnnotation = null;
+                PsiAnnotation MappedSuperclassAnnotation = null;
+                PsiAnnotation NamedEntityGraphAnnotation = null;
+                PsiAnnotation NamedEntityGraphsAnnotation = null;
+                PsiAnnotation NamedQueryAnnotation = null;
+                PsiAnnotation NamedQueriesAnnotation = null;
+                PsiAnnotation NamedNativeQueryAnnotation = null;
+                PsiAnnotation NamedNativeQueriesAnnotation = null;
+
                 for (PsiAnnotation annotation : allAnnotations) {
-                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.ENTITY)) {
+                    String qualifiedName = annotation.getQualifiedName();
+                    if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.ENTITY)) {
                         EntityAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.MAPPEDSUPERCLASS)) {
+                        MappedSuperclassAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDENTITYGRAPH)) {
+                        NamedEntityGraphAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDENTITYGRAPHS)) {
+                        NamedEntityGraphsAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDQUERY)) {
+                        NamedQueryAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDQUERIES)) {
+                        NamedQueriesAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDNATIVEQUERY)) {
+                        NamedNativeQueryAnnotation = annotation;
+                    } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.NAMEDNATIVEQUERIES)) {
+                        NamedNativeQueriesAnnotation = annotation;
                     }
                     if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.IDCLASS)) {
                         idClassAnnotation = annotation;
@@ -69,7 +93,38 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     }
                 }
 
+                boolean hasEntity = EntityAnnotation != null;
+                boolean hasMappedSuperclass = MappedSuperclassAnnotation != null;
+
+                // Validate named JPA annotations are on correct class types
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedEntityGraphAnnotation, !hasEntity,
+                        PersistenceConstants.NAMEDENTITYGRAPH, "NamedEntityGraphOnNonEntityClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedEntityGraphsAnnotation, !hasEntity,
+                        PersistenceConstants.NAMEDENTITYGRAPHS, "NamedEntityGraphsOnNonEntityClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPHS_ON_NON_ENTITY, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedQueryAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDQUERY, "NamedQueryOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedQueriesAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDQUERIES, "NamedQueriesOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedNativeQueryAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDNATIVEQUERY, "NamedNativeQueryOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS, unit, diagnostics);
+
+                addNamedJPAAnnotationDiagnosticIfNeeded(NamedNativeQueriesAnnotation, !hasEntity && !hasMappedSuperclass,
+                        PersistenceConstants.NAMEDNATIVEQUERIES, "NamedNativeQueriesOnInvalidClass",
+                        PersistenceConstants.DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS, unit, diagnostics);
+
                 if (EntityAnnotation != null) {
+                    // TYPE-level: @SecondaryTable/s, @TableGenerator/s, @SequenceGenerator/s
+                    Arrays.stream(allAnnotations).forEach(annotation -> validateGeneratorAnnotation(annotation, type, unit, diagnostics));
+
                     // Define boolean requirements for the diagnostics
                     boolean hasPublicOrProtectedNoArgConstructor = false;
                     boolean hasArgConstructor = false;
@@ -81,6 +136,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                     // Get the Methods of the annotated Class
                     for (PsiMethod method : type.getMethods()) {
+                        // FIELD/METHOD-level: @TableGenerator/s, @SequenceGenerator/s
+                        Arrays.stream(method.getAnnotations()).forEach(annotation -> validateGeneratorAnnotation(annotation, type, unit, diagnostics));
                         // find @Version annotation usage on methods
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(method);
@@ -91,6 +148,11 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.ID)) {
                             // Validate @Id method return type
                             validateFieldOrMethodType(method, unit, diagnostics, PersistenceConstants.ID, idClassAnnotation != null);
+                        }
+
+                        // Validate @Embedded property accessor: return type must be annotated with @Embeddable
+                        if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.EMBEDDED)) {
+                            validateEmbeddedType(method, unit, diagnostics);
                         }
 
                         if (isConstructorMethod(method)) {
@@ -134,6 +196,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
 
                     // Go through the instance variables and make sure no instance vars are final
                     for (PsiField field : type.getFields()) {
+                        // FIELD/METHOD-level: @TableGenerator/s, @SequenceGenerator/s
+                        Arrays.stream(field.getAnnotations()).forEach(annotation -> validateGeneratorAnnotation(annotation, type, unit, diagnostics));
                         // find @Version annotation usage on fields
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.VERSION)) {
                             versionAnnotatedElements.add(field);
@@ -144,6 +208,11 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.ID)) {
                             // Validate @Id field type
                             validateFieldOrMethodType(field, unit, diagnostics, PersistenceConstants.ID, idClassAnnotation != null);
+                        }
+
+                        // Validate @Embedded field: declared type must be annotated with @Embeddable
+                        if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.EMBEDDED)) {
+                            validateEmbeddedType(field, unit, diagnostics);
                         }
 
                         // If a field is static, we do not care about it, we care about all other field
@@ -285,6 +354,30 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
         // We do not do anything if the found unit is null
     }
 
+
+    /**
+     * Adds a diagnostic for a named JPA annotation if the given condition is true.
+     *
+     * @param annotation     the named JPA annotation (e.g. @NamedEntityGraph), or null if not present
+     * @param condition      true if the diagnostic should be added (i.e. class does not meet requirements)
+     * @param annotationFQN  the fully qualified annotation name, used as diagnostic data
+     * @param messageKey     the message key for the diagnostic message
+     * @param diagnosticCode the diagnostic code
+     * @param unit           the compilation unit
+     * @param diagnostics    the list to add the diagnostic to
+     */
+    private void addNamedJPAAnnotationDiagnosticIfNeeded(PsiAnnotation annotation, boolean condition,
+                                                         String annotationFQN, String messageKey,
+                                                         String diagnosticCode, PsiJavaFile unit,
+                                                         List<Diagnostic> diagnostics) {
+        if (annotation != null && condition) {
+            JsonArray diagnosticsData = new JsonArray();
+            diagnosticsData.add(annotationFQN);
+            diagnostics.add(createDiagnostic(annotation, unit,
+                    Messages.getMessage(messageKey),
+                    diagnosticCode, diagnosticsData, DiagnosticSeverity.Error));
+        }
+    }
 
     /**
      * Validates @Version annotation usage in entity classes.
@@ -577,5 +670,166 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             }
         }
 
+    }
+
+    /**
+     * Validates that a field or method annotated with @Embedded has a declared type
+     * that is itself annotated with @Embeddable.
+     * For fields: validates the field type's class
+     * For methods: validates the method's return type's class
+     *
+     * @param element     the field or method annotated with @Embedded
+     * @param unit        compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     */
+    private void validateEmbeddedType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiClass embeddedClass = null;
+
+        if (element instanceof PsiField field) {
+            if (field.getType() instanceof PsiClassType classType) {
+                embeddedClass = classType.resolve();
+            }
+        } else if (element instanceof PsiMethod method) {
+            PsiType returnType = method.getReturnType();
+            if (returnType instanceof PsiClassType classType) {
+                embeddedClass = classType.resolve();
+            }
+        }
+
+        if (embeddedClass == null) {
+            return;
+        }
+
+        if (!isMatchedAnnotation(embeddedClass.getAnnotations(), PersistenceConstants.EMBEDDABLE)) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage(PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE, embeddedClass.getName()),
+                    PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_NOT_EMBEDDABLE, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Dispatches validation for a single annotation found on a type, field, or method.
+     *
+     * <p>Singular annotations are validated for a non-empty {@code name} attribute.
+     * Container annotations are validated for a non-empty {@code value} array and,
+     * when present, each nested annotation is validated for a non-empty {@code name}
+     * attribute.
+     *
+     * @param annotation  the annotation to validate
+     * @param type        the enclosing type used for matching imported or qualified annotation names
+     * @param unit        the Java file containing the annotation
+     * @param diagnostics the list to populate with discovered diagnostics
+     */
+    private void validateGeneratorAnnotation(PsiAnnotation annotation, PsiClass type,
+                                             PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        String matched = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                PersistenceConstants.GENERATOR_AND_TABLE_ANNOTATIONS);
+        if (matched == null) {
+            return;
+        }
+        switch (matched) {
+            case PersistenceConstants.TABLE_GENERATOR:
+                validateGeneratorNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SEQUENCE_GENERATOR:
+                validateGeneratorNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SECONDARY_TABLE:
+                validateGeneratorNameAttribute(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.TABLE_GENERATORS:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SEQUENCE_GENERATORS:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATORS_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SEQUENCE_GENERATOR_INVALID_EMPTY_NAME);
+                break;
+            case PersistenceConstants.SECONDARY_TABLES:
+                validateNonEmptyMappingArray(annotation, unit, diagnostics,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLES_MISSING_MAPPING,
+                        PersistenceConstants.DIAGNOSTIC_CODE_SECONDARY_TABLE_INVALID_EMPTY_NAME);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Validates that the given annotation declares a non-empty {@code name} attribute.
+     *
+     * <p>A diagnostic is added when the {@code name} attribute is missing, not a string
+     * literal, an empty string literal, or contains only whitespace.
+     *
+     * @param annotation  the annotation whose {@code name} attribute is validated
+     * @param unit        the Java file containing the annotation
+     * @param diagnostics the list to populate with discovered diagnostics
+     * @param errorCode   the diagnostic code to assign when validation fails; also used
+     *                    as the message bundle key for the diagnostic message
+     */
+    private void validateGeneratorNameAttribute(PsiAnnotation annotation, PsiJavaFile unit,
+                                                List<Diagnostic> diagnostics,
+                                                String errorCode) {
+        PsiAnnotationMemberValue mappingName = annotation.findAttributeValue(PersistenceConstants.NAME);
+        boolean nameIsEmpty = true;
+        if (mappingName instanceof PsiLiteralExpression literal) {
+            Object mappingNameValue = literal.getValue();
+            if (mappingNameValue instanceof String str && !str.isBlank()) {
+                nameIsEmpty = false;
+            }
+        }
+        if (nameIsEmpty) {
+            diagnostics.add(createDiagnostic(annotation, unit,
+                    Messages.getMessage(errorCode),
+                    errorCode, null, DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Validates a container annotation such as {@code @TableGenerators},
+     * {@code @SequenceGenerators}, or {@code @SecondaryTables}.
+     *
+     * <p>If the {@code value} attribute is absent or resolves to an empty array, a
+     * container-level diagnostic is added and nested validation stops. Otherwise, each
+     * nested annotation is validated for a non-empty {@code name} attribute.
+     *
+     * @param annotation       the container annotation to validate
+     * @param unit             the Java file containing the annotation
+     * @param diagnostics      the list to populate with discovered diagnostics
+     * @param emptyMappingCode the diagnostic code for a missing or empty container mapping;
+     *                         also used as the message bundle key for the diagnostic message
+     * @param emptyNameCode    the diagnostic code for an invalid nested annotation name;
+     *                         also used as the message bundle key for the nested diagnostic message
+     */
+    private void validateNonEmptyMappingArray(PsiAnnotation annotation, PsiJavaFile unit,
+                                              List<Diagnostic> diagnostics,
+                                              String emptyMappingCode, String emptyNameCode) {
+        PsiAnnotationMemberValue mappingArrayValue = annotation.findAttributeValue(PersistenceConstants.VALUE);
+        boolean isEmpty = (mappingArrayValue == null) || (mappingArrayValue instanceof PsiArrayInitializerMemberValue array
+                && array.getInitializers().length == 0);
+        if (isEmpty) {
+            diagnostics.add(createDiagnostic(annotation, unit,
+                    Messages.getMessage(emptyMappingCode),
+                    emptyMappingCode, null, DiagnosticSeverity.Error));
+            return;
+        }
+        // Iterate nested annotations inside the container's value array
+        PsiAnnotationMemberValue[] elements;
+        if (mappingArrayValue instanceof PsiArrayInitializerMemberValue array) {
+            elements = array.getInitializers();
+        } else {
+            elements = new PsiAnnotationMemberValue[]{ mappingArrayValue };
+        }
+        for (PsiAnnotationMemberValue element : elements) {
+            if (element instanceof PsiAnnotation nested) {
+                validateGeneratorNameAttribute(nested, unit, diagnostics, emptyNameCode);
+            }
+        }
     }
 }
