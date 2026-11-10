@@ -84,17 +84,14 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
     public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
-
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_MISSING_IN_KEY_CLASS = "IdClassMemberMissingInKeyClass";
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_TYPE_MISMATCH = "IdClassMemberTypeMismatch";
-
     public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY = "NamedEntityGraphOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPHS_ON_NON_ENTITY = "NamedEntityGraphsOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS = "NamedQueryOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS = "NamedQueriesOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS = "NamedNativeQueryOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
-
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
     
@@ -159,6 +156,5 @@ public class PersistenceConstants {
     public static final String UTIL_DATE = "java.util.Date";
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
-
     public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
 }
