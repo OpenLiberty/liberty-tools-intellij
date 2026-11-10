@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat, Inc.
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,10 +10,8 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
@@ -52,51 +50,49 @@ public final class CompletionHandler {
      * @return the CompletionItems for the given the completion item params
      */
     public CompletionList completion(MicroProfileJavaCompletionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<CompletionList>) () -> {
-            try {
-                String uri = params.getUri();
-                PsiFile typeRoot = resolveTypeRoot(uri, utils);
-                if (typeRoot == null) {
-                    return null;
-                }
-
-                Module module = utils.getModule(uri);
-                if (module == null) {
-                    return null;
-                }
-
-                Position completionPosition = params.getPosition();
-                int completionOffset = utils.toOffset(typeRoot, completionPosition.getLine(),
-                        completionPosition.getCharacter());
-
-                List<CompletionItem> completionItems = new ArrayList<>();
-                JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
-
-                List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.getExtensionList()
-                        .stream()
-                        .filter(definition -> group.equals(definition.getGroup()))
-                        .filter(completion -> completion.isAdaptedForCompletion(completionContext))
-                        .collect(Collectors.toList());
-
-                if (completions.isEmpty()) {
-                    return null;
-                }
-
-                completions.forEach(completion -> {
-                    List<? extends CompletionItem> collectedCompletionItems = completion.collectCompletionItems(completionContext);
-                    if (collectedCompletionItems != null) {
-                        completionItems.addAll(collectedCompletionItems);
-                    }
-                });
-
-                CompletionList completionList = new CompletionList();
-                completionList.setItems(completionItems);
-                return completionList;
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+        try {
+            String uri = params.getUri();
+            PsiFile typeRoot = resolveTypeRoot(uri, utils);
+            if (typeRoot == null) {
                 return null;
             }
-        });
+
+            Module module = utils.getModule(uri);
+            if (module == null) {
+                return null;
+            }
+
+            Position completionPosition = params.getPosition();
+            int completionOffset = utils.toOffset(typeRoot, completionPosition.getLine(),
+                    completionPosition.getCharacter());
+
+            List<CompletionItem> completionItems = new ArrayList<>();
+            JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
+
+            List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.getExtensionList()
+                    .stream()
+                    .filter(definition -> group.equals(definition.getGroup()))
+                    .filter(completion -> completion.isAdaptedForCompletion(completionContext))
+                    .collect(Collectors.toList());
+
+            if (completions.isEmpty()) {
+                return null;
+            }
+
+            completions.forEach(completion -> {
+                List<? extends CompletionItem> collectedCompletionItems = completion.collectCompletionItems(completionContext);
+                if (collectedCompletionItems != null) {
+                    completionItems.addAll(collectedCompletionItems);
+                }
+            });
+
+            CompletionList completionList = new CompletionList();
+            completionList.setItems(completionItems);
+            return completionList;
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            return null;
+        }
     }
 
     /**
