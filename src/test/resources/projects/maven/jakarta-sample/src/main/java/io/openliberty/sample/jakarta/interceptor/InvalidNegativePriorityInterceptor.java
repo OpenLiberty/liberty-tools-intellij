@@ -5,6 +5,7 @@ import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
+@Monitored
 @Interceptor
 @Priority(-2100)
 public class InvalidNegativePriorityInterceptor {
@@ -15,6 +16,7 @@ public class InvalidNegativePriorityInterceptor {
     }
 
     // Inner class with negative priority
+    @Monitored
     @Interceptor
     @Priority(-500)
     public static class InnerInvalidPriorityInterceptor {

@@ -17,8 +17,6 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quic
 
 import java.util.List;
 
-import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpleName;
-
 /**
  * Quickfix for InvalidInterceptorOrDecorator diagnostic.
  * Replaces all invalid scope annotations with @Dependent.
@@ -45,27 +43,7 @@ public class ReplaceInvalidScopesWithDependentQuickFix extends ReplaceAnnotation
      */
     @Override
     protected String getCodeActionLabel(List<String> annotationsToRemove) {
-        String formattedNames = formatAnnotationNames(annotationsToRemove);
-        return Messages.getMessage("ReplaceInvalidScopesWithDependent", formattedNames);
-    }
-
-    /**
-     * Formats a list of fully qualified annotation names for display.
-     * Extracts simple names and joins them with commas, prefixed with @.
-     *
-     * @param annotationFqNames List of fully qualified annotation names
-     * @return Formatted string (e.g., "@ApplicationScoped, @RequestScoped")
-     */
-    private String formatAnnotationNames(List<String> annotationFqNames) {
-        List<String> names = annotationFqNames.stream()
-                .map(fqName -> "@" + getSimpleName(fqName))
-                .toList();
-
-        if (names.isEmpty()) return "";
-        if (names.size() == 1) return names.get(0);
-
-        String allButLast = String.join(", ", names.subList(0, names.size() - 1));
-        return String.join(" and ", allButLast, names.getLast());
+        return Messages.getMessage("ReplaceAnnotationWith", formatAnnotationNames(annotationsToRemove), "@Dependent");
     }
 }
 

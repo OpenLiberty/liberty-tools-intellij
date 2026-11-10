@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AnnotationUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.DiagnosticsUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.ASTUtils;
@@ -59,6 +60,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		PsiClass[] alltypes;
 		alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
+			// Check 693: component class with class-level interceptor binding constraints
+			checkInterceptorBindingConstraints(type, unit, diagnostics);
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
@@ -75,6 +78,9 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
 				for (PsiMethod method : allMethods) {
 					List<String> interceptorTypeMethodAnnotations = detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
+					if(interceptorTypeMethodAnnotations.isEmpty()) {
+						continue;
+					}
 					boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
 					boolean isAbstract = method.hasModifierProperty(PsiModifier.ABSTRACT);
 					boolean isStatic = method.hasModifierProperty(PsiModifier.STATIC);
@@ -161,7 +167,8 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 						Messages.getMessage("InvalidInterceptorAbstractClass", type.getName()),
 						DIAGNOSTIC_CODE_INTERCEPTOR_ON_ABSTRACT_CLASS, null,
 						DiagnosticSeverity.Error));
-			} else {
+			}
+		else {
 			for (PsiMethod method : type.getMethods()) {
 				//Checks if method is a constructor and has valid no-args constructor
 				constructorInfo.mergeConstructorInfo(ConstructorInfoDiagnosticHelper.getConstructorInfo(method));
@@ -172,6 +179,10 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 						Messages.getMessage("InterceptorNoArgConstructorMissing", type.getName()),
 						DIAGNOSTIC_CODE_INTERCEPTOR_ON_NO_ARGS_CONSTRUCTOR, null,
 						DiagnosticSeverity.Error));
+			}
+			//Checks if the interceptor class has interceptor binding annotation
+			if (isInterceptorType(type)) {
+				checkInterceptorBinding(type, unit, diagnostics);
 			}
 		}
 	}
@@ -309,4 +320,83 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		}
 		return interceptorTypeMethodAnnotations;
   }
+  
+	   /**
+	    * Checks if an interceptor class has at least one interceptor binding annotation.
+	    * According to Jakarta Interceptors 2.0 specification, an interceptor declared using
+	    * interceptor annotation must specify at least one interceptor binding annotation to
+	    * enable the container to match it with target components.
+		* 
+		* @param type the class to check
+		* @param unit the Java file containing the class
+		* @param diagnostics the list to add diagnostics to
+		*/
+	private void checkInterceptorBinding(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		boolean hasInterceptorBinding = false;
+		PsiAnnotation[] annotations = type.getAnnotations();
+		
+		for (PsiAnnotation annotation : annotations) {
+			if (AnnotationUtil.hasMetaAnnotation(annotation, type, INTERCEPTOR_BINDING_FQ_NAME)) {
+				hasInterceptorBinding = true;
+				break;
+			}
+		}
+		
+		if (!hasInterceptorBinding) {
+			Range range = PositionUtils.toNameRange(type.getNameIdentifier());
+			String msg = Messages.getMessage("InvalidInterceptorMissingInterceptorBinding");
+			Diagnostic diagnostic = new Diagnostic(range, msg);
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Warning);
+			diagnostics.add(diagnostic);
+		}
+	}
+
+	/**
+		* Checks constraints imposed by the Jakarta Interceptors 2.0 specification on a component
+		* class that declares or inherits a class-level interceptor binding:
+		* <ul>
+		*   <li>The class must not be declared {@code final}.</li>
+		*   <li>No non-static, non-private method may be declared {@code final}.</li>
+		* </ul>
+		* Does nothing if the class has no class-level interceptor binding.
+		*
+		* @param type        the class to check
+		* @param unit        the compilation unit
+		* @param diagnostics the list to add diagnostics to
+		*/
+	private void checkInterceptorBindingConstraints(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		if (!hasClassLevelInterceptorBinding(type)) {
+			return;
+		}
+		if (type.hasModifierProperty(PsiModifier.FINAL)) {
+			diagnostics.add(createDiagnostic(type, unit,
+					Messages.getMessage("InvalidFinalInterceptorBindingClass"),
+					DIAGNOSTIC_CODE_FINAL_INTERCEPTOR_BINDING_CLASS, null,
+					DiagnosticSeverity.Error));
+		}
+		for (PsiMethod method : type.getMethods()) {
+			if (method.hasModifierProperty(PsiModifier.FINAL)
+					&& !method.hasModifierProperty(PsiModifier.STATIC)
+					&& !method.hasModifierProperty(PsiModifier.PRIVATE)) {
+				diagnostics.add(createDiagnostic(method, unit,
+						Messages.getMessage("InvalidMethodOnInterceptorBindingClass", method.getName()),
+						DIAGNOSTIC_CODE_FINAL_METHOD_ON_INTERCEPTOR_BINDING_CLASS, null,
+						DiagnosticSeverity.Error));
+			}
+		}
+	}
+
+	/**
+		* Returns {@code true} if the given class has a class-level interceptor binding, meaning it
+		* carries {@code @Interceptors(...)} or a custom annotation meta-annotated with
+		* {@code @InterceptorBinding}.
+		*
+		* @param type the class to check
+		* @return {@code true} if a class-level interceptor binding is present
+		*/
+	private boolean hasClassLevelInterceptorBinding(PsiClass type) {
+		return Arrays.stream(type.getAnnotations()).anyMatch(annotation ->
+				isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTORS_FQ_NAME)
+				|| AnnotationUtil.hasMetaAnnotation(annotation, type, INTERCEPTOR_BINDING_FQ_NAME));
+	}
 }

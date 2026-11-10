@@ -44,6 +44,25 @@ public abstract class ReplaceAnnotationsQuickFix extends InsertAnnotationMissing
     private static final Logger LOGGER = Logger.getLogger(ReplaceAnnotationsQuickFix.class.getName());
 
     /**
+     * Formats a list of fully qualified annotation names for display.
+     * Extracts simple names and joins them with commas and "and" before the last one, prefixed with @.
+     *
+     * @param annotationFqNames List of fully qualified annotation names
+     * @return Formatted string (e.g., "@RequestScoped" or "@RequestScoped and @SessionScoped")
+     */
+    protected String formatAnnotationNames(List<String> annotationFqNames) {
+        List<String> names = annotationFqNames.stream()
+                .map(fqName -> "@" + getSimpleName(fqName))
+                .toList();
+
+        if (names.isEmpty()) return "";
+        if (names.size() == 1) return names.get(0);
+
+        String allButLast = String.join(", ", names.subList(0, names.size() - 1));
+        return String.join(" and ", allButLast, names.getLast());
+    }
+
+    /**
      * Constructor.
      *
      * @param annotation The fully qualified name of the annotation to insert

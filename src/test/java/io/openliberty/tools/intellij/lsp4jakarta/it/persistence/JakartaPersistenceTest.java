@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.it.persistence;
 
+import com.google.gson.JsonArray;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -846,7 +847,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
 
         // Test quickfix for removing @MapKeyTemporal annotation
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uriInvalid, invalidStringKeyField);
-        
+
         String newText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
                 "import java.util.Map;\n\n" +
                 "import jakarta.persistence.ElementCollection;\n" +
@@ -882,10 +883,10 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "    @MapKeyTemporal(TemporalType.DATE)\n" +
                 "    private Map<java.lang.String, String> fqnStringEvents;\n" +
                 "}\n";
-        
+
         TextEdit te = te(0, 0, 45, 0, newText);
         CodeAction ca = ca(uriInvalid, "Remove @MapKeyTemporal", invalidStringKeyField, te);
-        
+
         assertJavaCodeAction(codeActionParams, utils, ca);
 
         // Test valid cases - should have no diagnostics
@@ -899,4 +900,845 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParamsValid, utils);
     }
 
+    @Test
+    public void testInvalidIdTypeOnField() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdType.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id field types
+        Diagnostic customClassIdDiagnostic = d(14, 24, 32,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic listIdDiagnostic = d(18, 25, 31,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic arrayIdDiagnostic = d(22, 18, 25,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic stringArrayIdDiagnostic = d(26, 21, 34,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic uuidIdDiagnostic = d(30, 17, 23,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic setIdDiagnostic = d(33, 24, 29,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic mapIdDiagnostic = d(36, 32, 37,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassIdDiagnostic, listIdDiagnostic,
+                arrayIdDiagnostic, stringArrayIdDiagnostic, uuidIdDiagnostic, setIdDiagnostic, mapIdDiagnostic);
+    }
+
+    @Test
+    public void testInvalidIdTypeOnMethod() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityInvalidIdTypeOnMethod.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test diagnostics for invalid @Id method return types
+        Diagnostic customClassMethodDiagnostic = d(17, 29, 40,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        Diagnostic listMethodDiagnostic = d(23, 24, 33,
+                "The @Id annotation must use a valid identifier type (primitives, wrapper types, String, Date types, BigDecimal, or BigInteger).",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidIdType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, customClassMethodDiagnostic, listMethodDiagnostic);
+    }
+
+    @Test
+    public void testValidIdTypes() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/EntityValidIdTypes.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Test that no diagnostics are generated for valid @Id types
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testMapKeyEnumeratedInvalid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyEnumeratedInvalid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Invalid: map key is String, not an enum (field stringKeyMap, line 22)
+        Diagnostic stringKeyMapNonEnumD = d(21, 32, 44,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: map key is Integer, not an enum (field intKeyMap, line 27)
+        Diagnostic intKeyMapNonEnumD = d(26, 33, 42,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: field type is List, not Map (field listField, line 32)
+        Diagnostic listFieldNonMapD = d(31, 25, 34,
+                "@MapKeyEnumerated can only be applied to a field or property of type java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonMapType");
+
+        // Invalid: raw Map — key type not verifiable as enum (field rawMap, line 37)
+        Diagnostic rawMapNonEnumD = d(36, 16, 22,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: unbounded wildcard key — cannot guarantee enum (field wildcardKeyMap, line 42)
+        Diagnostic wildcardKeyMapNonEnumD = d(41, 27, 41,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        // Invalid: method return type is String, not Map (method getStringField, line 47)
+        Diagnostic stringReturnNonMapD = d(46, 18, 32,
+                "@MapKeyEnumerated can only be applied to a field or property of type java.util.Map.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonMapType");
+
+        // Invalid: method returns Map with non-enum key (method getStringKeyMap, line 54)
+        Diagnostic stringKeyMethodNonEnumD = d(53, 31, 46,
+                "@MapKeyEnumerated can only be applied to a field or property that maps to a java.util.Map whose key type is an enum.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "MapKeyEnumeratedOnNonEnumType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils,
+                stringKeyMapNonEnumD, intKeyMapNonEnumD, listFieldNonMapD,
+                rawMapNonEnumD, wildcardKeyMapNonEnumD, stringReturnNonMapD, stringKeyMethodNonEnumD);
+    }
+
+    @Test
+    public void testMapKeyEnumeratedValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/MapKeyEnumeratedValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // No diagnostics expected — all @MapKeyEnumerated usages have enum map keys
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    // =========================================================================
+    // @Inheritance Diagnostic Tests
+    // =========================================================================
+
+    @Test
+    public void testInheritanceOnPlainClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Inheritance without @Entity on a plain abstract class — Diagnostic 1
+        Diagnostic inheritanceOnNonEntityError = d(7, 22, 44,
+                "A class using the @Inheritance annotation must also be annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonEntityClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonEntityError);
+    }
+
+    @Test
+    public void testInheritanceOnMappedSuperclass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnMappedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @MappedSuperclass is not @Entity — @Inheritance must not appear here — Diagnostic 1
+        Diagnostic inheritanceOnMappedSuperclassError = d(10, 22, 51,
+                "A class using the @Inheritance annotation must also be annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonEntityClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnMappedSuperclassError);
+    }
+
+    @Test
+    public void testInheritanceOnNonRootEntity() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonRootEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Entity + @Inheritance but a direct @Entity parent exists — Diagnostic 2
+        Diagnostic inheritanceOnNonRootError = d(10, 13, 39,
+                "A class using the @Inheritance annotation must be the root of the entity class hierarchy.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonRootEntity");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonRootError);
+    }
+
+    @Test
+    public void testInheritanceOnNonRootEntityWithAbstractGap() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnNonRootEntityWithGap.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @Entity + @Inheritance but @Entity ancestor is hidden behind a non-entity
+        // abstract gap — requires full superclass chain traversal — Diagnostic 2
+        Diagnostic inheritanceOnNonRootWithGapError = d(11, 13, 46,
+                "A class using the @Inheritance annotation must be the root of the entity class hierarchy.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InheritanceAnnotationOnNonRootEntity");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, inheritanceOnNonRootWithGapError);
+    }
+
+    @Test
+    public void testInheritanceOnRootEntityIsValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnRootEntity.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @Entity + @Inheritance on the root class with no @Entity ancestor
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testInheritanceOnRootEntityExtendsMappedSuperclassIsValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/InheritanceOnRootEntityExtendsMappedSuperclass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Valid: @Entity + @Inheritance extending @MappedSuperclass — no @Entity ancestor
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedEntityGraphOnValidEntityClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphOnValidEntityClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedEntityGraphOnNonEntityClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphOnNonEntityClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedEntityGraphData = new JsonArray();
+        namedEntityGraphData.add("jakarta.persistence.NamedEntityGraph");
+        Diagnostic expectedDiagnostic = d(4, 0, 38,
+                "@NamedEntityGraph must only be applied to a class annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedEntityGraphOnNonEntityClass", namedEntityGraphData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertNewText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.NamedEntityGraph;\n\n" +
+                "@Entity\n" +
+                "@NamedEntityGraph(name = \"Graph.User\")\n" +
+                "public class NamedEntityGraphOnNonEntityClass {\n}\n";
+        TextEdit insertTE = te(0, 0, 7, 0, insertNewText);
+        CodeAction insertCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertTE);
+
+        String removeNewText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedEntityGraph;\n\n" +
+                "public class NamedEntityGraphOnNonEntityClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 7, 0, removeNewText);
+        CodeAction removeCA = ca(uri, "Remove @NamedEntityGraph", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertCA, removeCA);
+    }
+
+    @Test
+    public void testNamedQueryOnValidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedQueryOnValidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedQueryOnInvalidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedQueryOnInvalidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedQueryData = new JsonArray();
+        namedQueryData.add("jakarta.persistence.NamedQuery");
+        Diagnostic expectedDiagnostic = d(4, 0, 66,
+                "@NamedQuery must only be applied to a class annotated with @Entity or @MappedSuperclass.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedQueryOnInvalidClass", namedQueryData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertEntityText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedQuery;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedQuery(name = \"User.findAll\", query = \"SELECT u FROM User u\")\n" +
+                "public class NamedQueryOnInvalidClass {\n}\n";
+        TextEdit insertEntityTE = te(0, 0, 7, 0, insertEntityText);
+        CodeAction insertEntityCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertEntityTE);
+
+        String insertMappedSuperclassText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedQuery;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedQuery(name = \"User.findAll\", query = \"SELECT u FROM User u\")\n" +
+                "public class NamedQueryOnInvalidClass {\n}\n";
+        TextEdit insertMappedSuperclassTE = te(0, 0, 7, 0, insertMappedSuperclassText);
+        CodeAction insertMappedSuperclassCA = ca(uri, "Insert @MappedSuperclass", expectedDiagnostic, insertMappedSuperclassTE);
+
+        String removeText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedQuery;\n\n" +
+                "public class NamedQueryOnInvalidClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 7, 0, removeText);
+        CodeAction removeCA = ca(uri, "Remove @NamedQuery", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertEntityCA, insertMappedSuperclassCA, removeCA);
+    }
+
+    @Test
+    public void testNamedNativeQueryOnValidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedNativeQueryOnValidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedNativeQueryOnInvalidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedNativeQueryOnInvalidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedNativeQueryData = new JsonArray();
+        namedNativeQueryData.add("jakarta.persistence.NamedNativeQuery");
+        Diagnostic expectedDiagnostic = d(4, 0, 136,
+                "@NamedNativeQuery must only be applied to a class annotated with @Entity or @MappedSuperclass.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedNativeQueryOnInvalidClass", namedNativeQueryData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertEntityText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedNativeQuery(name = \"User.findById\", query = \"SELECT * FROM USER WHERE ID = ?\", resultClass = NamedNativeQueryOnInvalidClass.class)\n" +
+                "public class NamedNativeQueryOnInvalidClass {\n}\n";
+        TextEdit insertEntityTE = te(0, 0, 7, 0, insertEntityText);
+        CodeAction insertEntityCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertEntityTE);
+
+        String insertMappedSuperclassText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedNativeQuery(name = \"User.findById\", query = \"SELECT * FROM USER WHERE ID = ?\", resultClass = NamedNativeQueryOnInvalidClass.class)\n" +
+                "public class NamedNativeQueryOnInvalidClass {\n}\n";
+        TextEdit insertMappedSuperclassTE = te(0, 0, 7, 0, insertMappedSuperclassText);
+        CodeAction insertMappedSuperclassCA = ca(uri, "Insert @MappedSuperclass", expectedDiagnostic, insertMappedSuperclassTE);
+
+        String removeText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n\n" +
+                "public class NamedNativeQueryOnInvalidClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 7, 0, removeText);
+        CodeAction removeCA = ca(uri, "Remove @NamedNativeQuery", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertEntityCA, insertMappedSuperclassCA, removeCA);
+    }
+
+    @Test
+    public void testNamedEntityGraphsOnValidEntityClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphsOnValidEntityClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedEntityGraphsOnNonEntityClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphsOnNonEntityClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedEntityGraphsData = new JsonArray();
+        namedEntityGraphsData.add("jakarta.persistence.NamedEntityGraphs");
+        Diagnostic expectedDiagnostic = d(5, 0, 101,
+                "@NamedEntityGraphs must only be applied to a class annotated with @Entity.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedEntityGraphsOnNonEntityClass", namedEntityGraphsData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertEntityText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.NamedEntityGraph;\n" +
+                "import jakarta.persistence.NamedEntityGraphs;\n\n" +
+                "@Entity\n" +
+                "@NamedEntityGraphs({@NamedEntityGraph(name = \"Graph.User\"), @NamedEntityGraph(name = \"Graph.Order\")})\n" +
+                "public class NamedEntityGraphsOnNonEntityClass {\n}\n";
+        TextEdit insertEntityTE = te(0, 0, 8, 0, insertEntityText);
+        CodeAction insertEntityCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertEntityTE);
+
+        String removeText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedEntityGraph;\n" +
+                "import jakarta.persistence.NamedEntityGraphs;\n\n" +
+                "public class NamedEntityGraphsOnNonEntityClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 8, 0, removeText);
+        CodeAction removeCA = ca(uri, "Remove @NamedEntityGraphs", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertEntityCA, removeCA);
+    }
+
+    @Test
+    public void testNamedQueriesOnValidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedQueriesOnValidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedQueriesOnInvalidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedQueriesOnInvalidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedQueriesData = new JsonArray();
+        namedQueriesData.add("jakarta.persistence.NamedQueries");
+        Diagnostic expectedDiagnostic = d(5, 0, 169,
+                "@NamedQueries must only be applied to a class annotated with @Entity or @MappedSuperclass.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedQueriesOnInvalidClass", namedQueriesData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertEntityText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedQuery;\n" +
+                "import jakarta.persistence.NamedQueries;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedQueries({@NamedQuery(name = \"User.findAll\", query = \"SELECT u FROM User u\"), @NamedQuery(name = \"User.findById\", query = \"SELECT u FROM User u WHERE u.id = :id\")})\n" +
+                "public class NamedQueriesOnInvalidClass {\n}\n";
+        TextEdit insertEntityTE = te(0, 0, 8, 0, insertEntityText);
+        CodeAction insertEntityCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertEntityTE);
+
+        String insertMappedSuperclassText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedQuery;\n" +
+                "import jakarta.persistence.NamedQueries;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedQueries({@NamedQuery(name = \"User.findAll\", query = \"SELECT u FROM User u\"), @NamedQuery(name = \"User.findById\", query = \"SELECT u FROM User u WHERE u.id = :id\")})\n" +
+                "public class NamedQueriesOnInvalidClass {\n}\n";
+        TextEdit insertMappedSuperclassTE = te(0, 0, 8, 0, insertMappedSuperclassText);
+        CodeAction insertMappedSuperclassCA = ca(uri, "Insert @MappedSuperclass", expectedDiagnostic, insertMappedSuperclassTE);
+
+        String removeText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedQuery;\n" +
+                "import jakarta.persistence.NamedQueries;\n\n" +
+                "public class NamedQueriesOnInvalidClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 8, 0, removeText);
+        CodeAction removeCA = ca(uri, "Remove @NamedQueries", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertEntityCA, insertMappedSuperclassCA, removeCA);
+    }
+
+    @Test
+    public void testNamedNativeQueriesOnValidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedNativeQueriesOnValidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testNamedNativeQueriesOnInvalidClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedNativeQueriesOnInvalidClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        JsonArray namedNativeQueriesData = new JsonArray();
+        namedNativeQueriesData.add("jakarta.persistence.NamedNativeQueries");
+        Diagnostic expectedDiagnostic = d(5, 0, 233,
+                "@NamedNativeQueries must only be applied to a class annotated with @Entity or @MappedSuperclass.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "NamedNativeQueriesOnInvalidClass", namedNativeQueriesData);
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+
+        // test quick fixes
+        JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
+
+        String insertEntityText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n" +
+                "import jakarta.persistence.NamedNativeQueries;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedNativeQueries({@NamedNativeQuery(name = \"User.findAll\", query = \"SELECT * FROM USER\"), @NamedNativeQuery(name = \"User.findById\", query = \"SELECT * FROM USER WHERE ID = ?\", resultClass = NamedNativeQueriesOnInvalidClass.class)})\n" +
+                "public class NamedNativeQueriesOnInvalidClass {\n}\n";
+        TextEdit insertEntityTE = te(0, 0, 8, 0, insertEntityText);
+        CodeAction insertEntityCA = ca(uri, "Insert @Entity", expectedDiagnostic, insertEntityTE);
+
+        String insertMappedSuperclassText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.Entity;\n" +
+                "import jakarta.persistence.MappedSuperclass;\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n" +
+                "import jakarta.persistence.NamedNativeQueries;\n\n" +
+                "@MappedSuperclass\n" +
+                "@Entity\n" +
+                "@NamedNativeQueries({@NamedNativeQuery(name = \"User.findAll\", query = \"SELECT * FROM USER\"), @NamedNativeQuery(name = \"User.findById\", query = \"SELECT * FROM USER WHERE ID = ?\", resultClass = NamedNativeQueriesOnInvalidClass.class)})\n" +
+                "public class NamedNativeQueriesOnInvalidClass {\n}\n";
+        TextEdit insertMappedSuperclassTE = te(0, 0, 8, 0, insertMappedSuperclassText);
+        CodeAction insertMappedSuperclassCA = ca(uri, "Insert @MappedSuperclass", expectedDiagnostic, insertMappedSuperclassTE);
+
+        String removeText = "package io.openliberty.sample.jakarta.persistence;\n\n" +
+                "import jakarta.persistence.NamedNativeQuery;\n" +
+                "import jakarta.persistence.NamedNativeQueries;\n\n" +
+                "public class NamedNativeQueriesOnInvalidClass {\n}\n";
+        TextEdit removeTE = te(0, 0, 8, 0, removeText);
+        CodeAction removeCA = ca(uri, "Remove @NamedNativeQueries", expectedDiagnostic, removeTE);
+
+        assertJavaCodeAction(codeActionParams, utils, insertEntityCA, insertMappedSuperclassCA, removeCA);
+    }
+
+    @Test
+    public void testIdClassMemberAlignmentValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberAlignmentValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id fields perfectly match key class members by name and type — no diagnostics expected.
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testIdClassMemberNameMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberNameMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id field "firstName" has no match in key class — single diagnostic on the @Id field.
+        Diagnostic firstNameMissingInKeyClassDiagnostic = d(28, 19, 28,
+                "The entity @Id field or property 'firstName' does not have a corresponding member in the @IdClass key class.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberMissingInKeyClass");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, firstNameMissingInKeyClassDiagnostic);
+    }
+
+    @Test
+    public void testIdClassMemberTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassMemberTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Entity @Id field "firstName" is String but key class field is int.
+        Diagnostic typeMismatchDiagnostic = d(28, 19, 28,
+                "The type of @Id field or property 'firstName' in the entity ('java.lang.String') does not match the type of the corresponding member in the @IdClass key class ('int').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, typeMismatchDiagnostic);
+    }
+
+    @Test
+    public void testIdClassManyToOneValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "dept" resolves to Department's PK type (int),
+        // and the key class holds int — types match, no diagnostics expected.
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testIdClassManyToOneTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "dept" resolves to Department's PK type (int),
+        // but the key class holds String — type mismatch expected.
+        Diagnostic deptTypeMismatchDiagnostic = d(37, 23, 27,
+                "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        // Entity @Id field "active" is boolean but key class field is String.
+        Diagnostic activeTypeMismatchDiagnostic = d(40, 20, 26,
+                "The type of @Id field or property 'active' in the entity ('boolean') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic, activeTypeMismatchDiagnostic);
+    }
+
+    @Test
+    public void testIdClassSingleIdManyToOneTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassSingleIdManyToOne.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Derived identity: the entity has a single @Id (@ManyToOne "dept") alongside @IdClass.
+        // Alignment must still be validated: Department's PK type is int, key class holds String.
+        Diagnostic deptTypeMismatchDiagnostic = d(31, 23, 27,
+                "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
+    }
+
+    @Test
+    public void testIdClassOneToOneValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassOneToOneValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @OneToOne @Id field "dept" resolves to Department's PK type (int),
+        // and the key class holds int — types match, no diagnostics expected.
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
+
+    @Test
+    public void testIdClassOneToOneTypeMismatch() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassOneToOneTypeMismatch.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @OneToOne @Id field "dept" resolves to Department's PK type (int),
+        // but the key class holds String — type mismatch expected.
+        Diagnostic deptTypeMismatchDiagnostic = d(35, 23, 27,
+                "The type of @Id field or property 'dept' in the entity ('int') does not match the type of the corresponding member in the @IdClass key class ('java.lang.String').",
+                DiagnosticSeverity.Error, "jakarta-persistence", "IdClassMemberTypeMismatch");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, deptTypeMismatchDiagnostic);
+    }
+
+    @Test
+    public void testIdClassManyToOneEmbeddedIdValid() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/idclass/IdClassManyToOneEmbeddedIdValid.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // @ManyToOne @Id field "order" points to OrderWithEmbeddedId, which uses @EmbeddedId
+        // of type OrderEmbeddedId. The key class holds OrderEmbeddedId for that field — types
+        // match, so no type-mismatch diagnostic is expected (spec §2.4.1.1, third bullet).
+        assertJavaDiagnostics(diagnosticsParams, utils);
+    }
 }

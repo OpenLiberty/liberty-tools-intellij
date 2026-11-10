@@ -12,6 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.security;
 
+import com.google.gson.Gson;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
@@ -96,7 +97,7 @@ public class SecurityIdentityStoreDiagnosticsCollector extends AbstractDiagnosti
                                 null,
                                 DiagnosticSeverity.Error));
                     } else {
-                        // Has wrong scope annotation
+                        // Has wrong scope annotation — pass the FQ names as data for the replace quickfix
                         diagnostics.add(createDiagnostic(
                                 type,
                                 unit,
@@ -104,7 +105,7 @@ public class SecurityIdentityStoreDiagnosticsCollector extends AbstractDiagnosti
                                         identityStoreAnnotationName,
                                         wrongScope),
                                 Constants.DIAGNOSTIC_CODE_INVALID_SCOPE,
-                                null,
+                                new Gson().toJsonTree(foundScopes),
                                 DiagnosticSeverity.Error));
                     }
                 }
