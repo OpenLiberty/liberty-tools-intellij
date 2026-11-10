@@ -206,7 +206,8 @@ public class CdiTypedAnnotationTest extends BaseJakartaTest {
     @Test
     public void typedAnnotationOnProducerMethodWithGenericReturnTypeIsValid() throws Exception {
         // @Typed(Object.class) on a method returning a type variable T — the return type
-        // cannot be resolved to a concrete PSI class, so no diagnostic should be raised.
+        // cannot be resolved to a concrete PSI class, so no @Typed diagnostic should be raised.
+        // The only expected diagnostic is the (separate) bare type variable producer rule.
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
@@ -214,7 +215,12 @@ public class CdiTypedAnnotationTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        assertJavaDiagnostics(diagnosticsParams, utils);
+        Diagnostic bareTypeVariable = d(18, 13, 20,
+                "A producer method return type must not be a type variable or an array whose component type is a type variable.",
+                DiagnosticSeverity.Error, "jakarta-cdi",
+                "InvalidProducerMethodWithBareTypeVariableReturnType");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, bareTypeVariable);
     }
 
     // ── Quickfix tests ────────────────────────────────────────────────────────
