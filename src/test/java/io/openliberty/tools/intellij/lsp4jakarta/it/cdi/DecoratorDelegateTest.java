@@ -27,12 +27,14 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
@@ -415,12 +417,12 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
     /**
      * Test that decorators with invalid delegate type assignability trigger diagnostics.
-     *
+     * <p>
      * The file contains multiple test cases:
      * - InvalidDelegateType: delegate type (Logger) doesn't implement PaymentService (field-level)
      * - InvalidDelegateTypePrimitive: delegate type (String) doesn't implement PaymentService (field-level)
      * - InvalidDelegateTypeOnMethod: delegate type (Logger) doesn't implement PaymentService (method-level)
-     *
+     * <p>
      * Expected: Errors on delegate fields and method parameter indicating type mismatch.
      */
     @Test
@@ -430,10 +432,11 @@ public class DecoratorDelegateTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
                 + "/src/main/java/io/openliberty/sample/jakarta/cdi/decorator/DecoratorDelegateTypeAssignability.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // Expected diagnostic on InvalidDelegateType class (field-level)
         // Line 22 (0-based: 21), field name "delegate" starts at column 19, ends at column 27
