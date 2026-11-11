@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation.
+ * Copyright (c) 2023, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,8 +22,11 @@ import static com.intellij.remoterobot.utils.UtilsKt.hasAnyComponent;
 
 /**
  * Welcome page view fixture.
+ * Before IntelliJ 2026.3 the Welcome page is a FlatWelcomeFrame. Starting with 2026.3 it is an
+ * IdeFrameImpl that contains the WelcomeScreenLeftToolbarPanel.
  */
-@DefaultXpath(by = "FlatWelcomeFrame type", xpath = "//div[@class='FlatWelcomeFrame']")
+@DefaultXpath(by = "Welcome frame type",
+        xpath = "//div[@class='FlatWelcomeFrame' or (@class='IdeFrameImpl' and .//div[@class='WelcomeScreenLeftToolbarPanel'])]")
 @FixtureName(name = "Welcome Frame")
 public class WelcomeFrameFixture extends CommonContainerFixture {
 

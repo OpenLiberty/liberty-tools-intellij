@@ -29,8 +29,11 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 /**
  * Project IDE frame.
+ * Starting with IntelliJ 2026.3 the Welcome page is also an IdeFrameImpl, so frames that contain
+ * the WelcomeScreenLeftToolbarPanel are excluded.
  */
-@DefaultXpath(by = "IdeFrameImpl type", xpath = "//div[@class='IdeFrameImpl']")
+@DefaultXpath(by = "IdeFrameImpl type",
+        xpath = "//div[@class='IdeFrameImpl' and not(.//div[@class='WelcomeScreenLeftToolbarPanel'])]")
 @FixtureName(name = "Project Frame")
 public class ProjectFrameFixture extends CommonContainerFixture {
 
