@@ -27,8 +27,6 @@ public class PersistenceConstants {
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
     public static final String ID = "jakarta.persistence.Id";
     public static final String IDCLASS = "jakarta.persistence.IdClass";
-    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
-    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
     public static final String ELEMENT_COLLECTION = "jakarta.persistence.ElementCollection";
@@ -46,6 +44,12 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String CONVERT = "jakarta.persistence.Convert";
+    public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
+    public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
+    public static final String MANY_TO_ONE = "jakarta.persistence.ManyToOne";
+    public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
+    public static final String ENUMERATED = "jakarta.persistence.Enumerated";
     public static final String NAMEDENTITYGRAPH = "jakarta.persistence.NamedEntityGraph";
     public static final String NAMEDENTITYGRAPHS = "jakarta.persistence.NamedEntityGraphs";
     public static final String NAMEDQUERY = "jakarta.persistence.NamedQuery";
@@ -76,6 +80,13 @@ public class PersistenceConstants {
     /* Annotation Fields */
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
+    public static final String CONVERTER_ATTRIBUTE = "converter";
+    public static final String DISABLE_CONVERSION = "disableConversion";
+
+    /* @Convert restricted-target annotations */
+    public static final String[] CONVERT_RESTRICTED_ANNOTATIONS = {
+        ID, VERSION, ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY, ENUMERATED, TEMPORAL
+    };
 
     /* String search constants */
     public static final int NOT_FOUND = -1;
@@ -142,6 +153,10 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_PERSISTENCE_CONTEXT_NOT_IN_MANAGED_COMPONENT = "PersistenceContextNotInManagedComponent";
     public static final String DIAGNOSTIC_CODE_EXTENDED_CONTEXT_IN_NON_STATEFUL = "ExtendedPersistenceContextInNonStatefulBean";
 
+    /* @Convert Codes */
+    public static final String DIAGNOSTIC_CODE_CONVERT_MISSING_CONVERTER_OR_DISABLE = "InvalidConvertAnnotationMissingConverterOrDisable";
+    public static final String DIAGNOSTIC_CODE_CONVERT_ON_RESTRICTED_TARGET = "InvalidConvertAnnotationOnRestrictedTarget";
+    public static final String DIAGNOSTIC_CODE_CONVERT_MULTIPLE_ON_SAME_ATTRIBUTE = "MultipleConvertAnnotationOnSameAttribute";
     /* primitive → wrapper FQ name mapping for derived-identity type checks (spec §2.4) */
     public static final Map<String, String> PRIMITIVE_TO_WRAPPER = Map.of(
             "int",     "java.lang.Integer",
