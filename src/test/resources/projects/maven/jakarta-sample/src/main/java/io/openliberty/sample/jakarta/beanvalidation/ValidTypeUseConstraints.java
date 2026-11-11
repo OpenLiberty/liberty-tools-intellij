@@ -1,15 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2026 IBM Corporation and others.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
 package io.openliberty.sample.jakarta.beanvalidation;
 
 import java.math.BigDecimal;
@@ -23,6 +11,7 @@ import jakarta.validation.constraints.*;
  * Test resource for valid TYPE_USE constraint annotations — no diagnostics expected.
  * Each field has a constraint on a generic type argument that IS compatible with the constraint.
  */
+@SuppressWarnings("unused")
 public class ValidTypeUseConstraints {
 
     // @AssertTrue / @AssertFalse on Boolean type arg — valid

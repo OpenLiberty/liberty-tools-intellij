@@ -1,15 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2026 IBM Corporation and others.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
 package io.openliberty.sample.jakarta.beanvalidation;
 
 import java.util.List;
@@ -24,67 +12,67 @@ import jakarta.validation.constraints.*;
  */
 public class TypeUseConstraintValidation {
 
-    // line 27 — @AssertTrue on Integer (not boolean/Boolean) → error
+    // line 15 — @AssertTrue on Integer (not boolean/Boolean) → error
     private List<@AssertTrue Integer> assertTrueOnInteger;
 
-    // line 30 — @AssertFalse on String (not boolean/Boolean) → error
+    // line 18 — @AssertFalse on String (not boolean/Boolean) → error
     private List<@AssertFalse String> assertFalseOnString;
 
-    // line 33 — @DecimalMax on Boolean (not numeric/CharSequence) → error
+    // line 21 — @DecimalMax on Boolean (not numeric/CharSequence) → error
     private List<@DecimalMax("10") Boolean> decimalMaxOnBoolean;
 
-    // line 36 — @DecimalMin on Boolean → error
+    // line 24 — @DecimalMin on Boolean → error
     private List<@DecimalMin("1") Boolean> decimalMinOnBoolean;
 
-    // line 39 — @Digits on Boolean → error
+    // line 27 — @Digits on Boolean → error
     private List<@Digits(integer = 3, fraction = 0) Boolean> digitsOnBoolean;
 
-    // line 42 — @Email on Integer (not String/CharSequence) → error
+    // line 30 — @Email on Integer (not String/CharSequence) → error
     private List<@Email Integer> emailOnInteger;
 
-    // line 45 — @Future on String (not a date type) → error
+    // line 33 — @Future on String (not a date type) → error
     private List<@Future String> futureOnString;
 
-    // line 48 — @FutureOrPresent on Integer → error
+    // line 36 — @FutureOrPresent on Integer → error
     private List<@FutureOrPresent Integer> futureOrPresentOnInteger;
 
-    // line 51 — @Past on Boolean → error
+    // line 39 — @Past on Boolean → error
     private List<@Past Boolean> pastOnBoolean;
 
-    // line 54 — @PastOrPresent on String → error
+    // line 42 — @PastOrPresent on String → error
     private List<@PastOrPresent String> pastOrPresentOnString;
 
-    // line 57 — @Min on Boolean (not numeric) → error
+    // line 45 — @Min on Boolean (not numeric) → error
     private List<@Min(1) Boolean> minOnBoolean;
 
-    // line 60 — @Max on String → error
+    // line 48 — @Max on String → error
     private List<@Max(100) String> maxOnString;
 
-    // line 63 — @Negative on Boolean → error
+    // line 51 — @Negative on Boolean → error
     private List<@Negative Boolean> negativeOnBoolean;
 
-    // line 66 — @NegativeOrZero on String → error
+    // line 54 — @NegativeOrZero on String → error
     private List<@NegativeOrZero String> negativeOrZeroOnString;
 
-    // line 69 — @Positive on Boolean → error
+    // line 57 — @Positive on Boolean → error
     private List<@Positive Boolean> positiveOnBoolean;
 
-    // line 72 — @PositiveOrZero on String → error
+    // line 60 — @PositiveOrZero on String → error
     private List<@PositiveOrZero String> positiveOrZeroOnString;
 
-    // line 75 — @NotBlank on Integer (not String/CharSequence) → error
+    // line 63 — @NotBlank on Integer (not String/CharSequence) → error
     private List<@NotBlank Integer> notBlankOnInteger;
 
-    // line 78 — @Pattern on Integer → error
+    // line 66 — @Pattern on Integer → error
     private List<@Pattern(regexp = ".*") Integer> patternOnInteger;
 
-    // line 81 — @Size on Boolean (not CharSequence/Collection/Map/Array) → error
+    // line 69 — @Size on Boolean (not CharSequence/Collection/Map/Array) → error
     private Map<String, @Size Boolean> sizeOnBoolean;
 
-    // line 84 — @NotEmpty on Boolean → error
+    // line 72 — @NotEmpty on Boolean → error
     private List<@NotEmpty Boolean> notEmptyOnBoolean;
 
-    // line 87 — nested: inner type arg @Email on Integer → error on outer field
+    // line 75 — nested: inner type arg @Email on Integer → error on outer field
     private Map<String, List<@Email Integer>> nestedEmailOnInteger;
 
     public List<Integer> getAssertTrueOnInteger() {
