@@ -59,6 +59,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER = "InvalidInterceptorOrDecoratorWithDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
     public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_ON_NON_INJECTION_POINT = "InvalidDelegateOnNonInjectionPoint";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY = "InvalidDecoratorDelegateTypeAssignability";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES = "InvalidDecoratorWithNoDecoratedTypes";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
