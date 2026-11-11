@@ -21,6 +21,8 @@ public class ManagedBeanConstants {
     /* Annotation Constants */
     public static final String PRODUCES_FQ_NAME = "jakarta.enterprise.inject.Produces";
     public static final String INJECT_FQ_NAME = "jakarta.inject.Inject";
+    public static final String CDI_DEFAULT_FQ_NAME = "jakarta.enterprise.inject.Default";
+    public static final String CDI_ANY_FQ_NAME = "jakarta.enterprise.inject.Any";
     public static final String DISPOSES_FQ_NAME = "jakarta.enterprise.inject.Disposes";
     public static final String OBSERVES_FQ_NAME = "jakarta.enterprise.event.Observes";
     public static final String OBSERVES_ASYNC_FQ_NAME = "jakarta.enterprise.event.ObservesAsync";
@@ -31,10 +33,13 @@ public class ManagedBeanConstants {
     public static final String APPLICATION_SCOPED_FQ_NAME = "jakarta.enterprise.context.ApplicationScoped";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
     public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
+    public static final String NORMAL_SCOPE_PASSIVATING_ATTR = "passivating";
+    public static final String SERIALIZABLE_FQ_NAME = "java.io.Serializable";
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
-    public static final String SERIALIZABLE_FQ_NAME = "java.io.Serializable";
+    public static final String USER_TRANSACTION_FQ_NAME = "jakarta.transaction.UserTransaction";
+    public static final String QUALIFIER_FQ_NAME = "jakarta.inject.Qualifier";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -45,6 +50,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
     public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
     public static final String DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED = "InvalidSpecializedBeanWithNamedAnnotation";
+    public static final String DIAGNOSTIC_CODE_PASSIVATING_SCOPE_WITHOUT_SERIALIZABLE = "InvalidPassivatingScopedBeanWithoutSerializable";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -57,6 +63,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER = "InvalidInterceptorOrDecoratorWithDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
     public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_ON_NON_INJECTION_POINT = "InvalidDelegateOnNonInjectionPoint";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY = "InvalidDecoratorDelegateTypeAssignability";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES = "InvalidDecoratorWithNoDecoratedTypes";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
@@ -81,6 +88,7 @@ public class ManagedBeanConstants {
     public static final String EVENT_CONTEXT_FQ_NAME = "jakarta.enterprise.inject.spi.EventContext";
     public static final String NOTIFY_METHOD_NAME = "notify";
     public static final String DIAGNOSTIC_CODE_OBSERVER_METHOD_WITHOUT_NOTIFY = "InvalidObserverMethodWithoutNotify";
+    public static final String DIAGNOSTIC_CODE_INVALID_USER_TRANSACTION_INJECT = "InvalidUserTransactionInjectionInCDIBean";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
@@ -102,6 +110,11 @@ public class ManagedBeanConstants {
             "jakarta.enterprise.context.ConversationScoped",
             "jakarta.enterprise.context.NormalScope",
             "jakarta.enterprise.context.RequestScoped"
+    };
+
+    public static final String[] BUILT_IN_PASSIVATING_SCOPE_FQ_NAMES = {
+            "jakarta.enterprise.context.SessionScoped",
+            "jakarta.enterprise.context.ConversationScoped"
     };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
