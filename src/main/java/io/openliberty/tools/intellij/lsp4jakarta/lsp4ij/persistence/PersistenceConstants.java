@@ -75,8 +75,6 @@ public class PersistenceConstants {
     public static final String VALUE = "value";
 
     /* Bidirectional relationship annotation constants */
-    public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
-    public static final String MANY_TO_MANY = "jakarta.persistence.ManyToMany";
     public static final String JOIN_TABLE = "jakarta.persistence.JoinTable";
     public static final String JOIN_COLUMN = "jakarta.persistence.JoinColumn";
     public static final String JOIN_COLUMNS = "jakarta.persistence.JoinColumns";
