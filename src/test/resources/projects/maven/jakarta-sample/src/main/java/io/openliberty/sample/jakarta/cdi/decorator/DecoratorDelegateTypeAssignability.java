@@ -191,4 +191,3 @@ class DecoratorWithDelegateButNoDecoratedTypes {
     @Delegate
     private PaymentService delegate;
 }
-

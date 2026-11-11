@@ -60,6 +60,8 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
     public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY = "InvalidDecoratorDelegateTypeAssignability";
+    public static final String DIAGNOSTIC_CODE_DELEGATE_TYPE_PARAM_MISMATCH = "InvalidDecoratorDelegateTypeParamMismatch";
+    public static final String DIAGNOSTIC_CODE_DELEGATE_MUST_BE_IN_DECORATOR = "DelegateMustBeInDecorator";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES = "InvalidDecoratorWithNoDecoratedTypes";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
     public static final String DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS = "InvalidMultipleObserverParams";
@@ -69,6 +71,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT_METHOD = "InvalidWildcardTypeInInjectMethod";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
     public static final String DIAGNOSTIC_CODE_PRODUCER_METHOD_BARE_TYPE_VAR = "InvalidProducerMethodWithBareTypeVariableReturnType";
     public static final String DIAGNOSTIC_CODE_PRODUCER_METHOD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerMethodWithTypeVariableAndNonDependentScope";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_BARE_TYPE_VAR = "InvalidProducerFieldWithBareTypeVariableType";
