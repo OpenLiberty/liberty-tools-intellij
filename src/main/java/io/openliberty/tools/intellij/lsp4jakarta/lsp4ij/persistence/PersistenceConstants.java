@@ -22,6 +22,7 @@ public class PersistenceConstants {
     /* Annotation Constants */
     public static final String OBJECT = "java.lang.Object";
     public static final String ENTITY = "jakarta.persistence.Entity";
+    public static final String ENTITY_LISTENERS = "jakarta.persistence.EntityListeners";
     public static final String EMBEDDED = "jakarta.persistence.Embedded";
     public static final String EMBEDDABLE = "jakarta.persistence.Embeddable";
     public static final String INHERITANCE = "jakarta.persistence.Inheritance";
@@ -72,7 +73,6 @@ public class PersistenceConstants {
     public static final String[] GENERATOR_AND_TABLE_ANNOTATIONS = {
             TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
     };
-    public static final String VALUE = "value";
 
     /* Bidirectional relationship annotation constants */
     public static final String JOIN_TABLE = "jakarta.persistence.JoinTable";
@@ -103,6 +103,7 @@ public class PersistenceConstants {
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
 
     /* Annotation Fields */
+    public static final String VALUE = "value";
     public static final String NAME = "name";
     public static final String REFERENCEDCOLUMNNAME = "referencedColumnName";
     public static final String CONVERTER_ATTRIBUTE = "converter";
@@ -155,6 +156,10 @@ public class PersistenceConstants {
 
     /* Converter Codes */
     public static final String DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT = "ConverterMustImplementAttributeConverter";
+
+    /* EntityListeners Codes */
+    public static final String DIAGNOSTIC_CODE_INVALID_CONSTRUCTOR_IN_ENTITY_LISTENER = "InvalidConstructorInEntityListener";
+    public static final String DIAGNOSTIC_CODE_INVALID_ENTITY_LISTENER_TYPE = "InvalidEntityListenerType";
 
     /* MapKey Codes */
     public static final String DIAGNOSTIC_CODE_MAPKEYENUMERATED_NON_MAP = "MapKeyEnumeratedOnNonMapType";
@@ -228,6 +233,5 @@ public class PersistenceConstants {
     public static final String UTIL_DATE = "java.util.Date";
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
-
     public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
 }
