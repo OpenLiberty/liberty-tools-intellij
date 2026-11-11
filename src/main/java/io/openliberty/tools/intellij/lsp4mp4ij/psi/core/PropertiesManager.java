@@ -188,7 +188,9 @@ public class PropertiesManager {
                 }
             }
         }
-        return new UniqueResultsQuery<>(query);
+        // Differs from the upstream Quarkus code, which always wraps 'query' in a UniqueResultsQuery.
+        // Return null when no provider supplied a query, matching the @Nullable contract and the caller's null check.
+        return query != null ? new UniqueResultsQuery<>(query) : null;
     }
 
     @NotNull
