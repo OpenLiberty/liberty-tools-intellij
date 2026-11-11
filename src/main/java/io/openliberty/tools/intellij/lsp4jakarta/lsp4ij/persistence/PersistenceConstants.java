@@ -13,6 +13,7 @@
 
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,16 @@ public class PersistenceConstants {
     public static final String IDCLASS = "jakarta.persistence.IdClass";
     public static final String EMBEDDEDID = "jakarta.persistence.EmbeddedId";
     public static final String MAPPEDSUPERCLASS = "jakarta.persistence.MappedSuperclass";
+    public static final String ELEMENT_COLLECTION = "jakarta.persistence.ElementCollection";
+    public static final String ATTRIBUTE_OVERRIDE = "jakarta.persistence.AttributeOverride";
+    public static final String ATTRIBUTE_OVERRIDES = "jakarta.persistence.AttributeOverrides";
+    public static final String ASSOCIATION_OVERRIDE = "jakarta.persistence.AssociationOverride";
+    public static final String ASSOCIATION_OVERRIDES = "jakarta.persistence.AssociationOverrides";
+
+    /* @ElementCollection map prefix constants */
+    public static final String MAP_KEY_PREFIX = "key.";
+    public static final String MAP_VALUE_PREFIX = "value.";
+
     public static final String MAPKEY = "jakarta.persistence.MapKey";
     public static final String MAPKEYCLASS = "jakarta.persistence.MapKeyClass";
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
@@ -56,6 +67,7 @@ public class PersistenceConstants {
     public static final String SEQUENCE_GENERATORS = "jakarta.persistence.SequenceGenerators";
     public static final String SECONDARY_TABLE = "jakarta.persistence.SecondaryTable";
     public static final String SECONDARY_TABLES = "jakarta.persistence.SecondaryTables";
+    public static final String MAPSID = "jakarta.persistence.MapsId";
 
     public static final String[] GENERATOR_AND_TABLE_ANNOTATIONS = {
             TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
@@ -76,6 +88,9 @@ public class PersistenceConstants {
         ID, VERSION, ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY, ENUMERATED, TEMPORAL
     };
 
+    /* String search constants */
+    public static final int NOT_FOUND = -1;
+
     /* Source */
     public static final String DIAGNOSTIC_SOURCE = "jakarta-persistence";
 
@@ -94,17 +109,14 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_ID_TYPE = "InvalidIdType";
     public static final String DIAGNOSTIC_CODE_MULTIPLE_EMBEDDED_ID = "MultipleEmbeddedIdAnnotations";
     public static final String DIAGNOSTIC_CODE_MIXED_IDENTIFIER = "MixedIdentifierAnnotations";
-
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_MISSING_IN_KEY_CLASS = "IdClassMemberMissingInKeyClass";
     public static final String DIAGNOSTIC_CODE_IDCLASS_MEMBER_TYPE_MISMATCH = "IdClassMemberTypeMismatch";
-
     public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPH_ON_NON_ENTITY = "NamedEntityGraphOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_NAMED_ENTITY_GRAPHS_ON_NON_ENTITY = "NamedEntityGraphsOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_NAMED_QUERY_ON_INVALID_CLASS = "NamedQueryOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS = "NamedQueriesOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS = "NamedNativeQueryOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
-
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
     
@@ -131,6 +143,10 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_INVALID_TYPE = "InvalidTypeOfField";
     public static final String DIAGNOSTIC_CODE_INVALID_MAPKEYTEMPORAL_TYPE = "MapKeyTemporalNotOnTemporalType";
 
+    /* AttributeOverride / AssociationOverride Codes */
+    public static final String DIAGNOSTIC_CODE_INVALID_ATTRIBUTE_OVERRIDE_NAME = "InvalidAttributeOverrideName";
+    public static final String DIAGNOSTIC_CODE_INVALID_ASSOCIATION_OVERRIDE_NAME = "InvalidAssociationOverrideName";
+
     /* PersistenceContext Codes */
     public static final String PERSISTENCE_CONTEXT = "jakarta.persistence.PersistenceContext";
     public static final String PERSISTENCE_CONTEXT_TYPE_EXTENDED = "PersistenceContextType.EXTENDED";
@@ -141,6 +157,23 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_CONVERT_MISSING_CONVERTER_OR_DISABLE = "InvalidConvertAnnotationMissingConverterOrDisable";
     public static final String DIAGNOSTIC_CODE_CONVERT_ON_RESTRICTED_TARGET = "InvalidConvertAnnotationOnRestrictedTarget";
     public static final String DIAGNOSTIC_CODE_CONVERT_MULTIPLE_ON_SAME_ATTRIBUTE = "MultipleConvertAnnotationOnSameAttribute";
+    /* primitive → wrapper FQ name mapping for derived-identity type checks (spec §2.4) */
+    public static final Map<String, String> PRIMITIVE_TO_WRAPPER = Map.of(
+            "int",     "java.lang.Integer",
+            "long",    "java.lang.Long",
+            "short",   "java.lang.Short",
+            "byte",    "java.lang.Byte",
+            "char",    "java.lang.Character",
+            "boolean", "java.lang.Boolean",
+            "float",   "java.lang.Float",
+            "double",  "java.lang.Double");
+
+    /* Derived Identity error codes */
+    public static final String DIAGNOSTIC_CODE_MAPSID_ON_INVALID_RELATIONSHIP = "MapsIdOnInvalidRelationship";
+    public static final String DIAGNOSTIC_CODE_MAPSID_REQUIRES_COMPOSITE_KEY   = "MapsIdRequiresCompositeKey";
+    public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_NOT_IN_EMBEDDEDID  = "MapsIdValueNotInEmbeddedIdClass";
+    public static final String DIAGNOSTIC_CODE_MAPSID_VALUE_TYPE_MISMATCH      = "MapsIdValueTypeMismatch";
+    public static final String DIAGNOSTIC_CODE_MAPSID_PK_TYPE_MISMATCH         = "MapsIdPrimaryKeyTypeMismatch";
 
     public final static String[] SET_OF_PERSISTENCE_ANNOTATIONS = {MAPKEY, MAPKEYCLASS, MAPKEYJOINCOLUMN, MAPKEYENUMERATED};
     public static final String[] SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS = { ID, TEMPORAL };
