@@ -12,12 +12,15 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.persistence.idclass;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
  * Key class for {@link IdClassSingleIdManyToOne}: holds String dept instead of int,
  * which mismatches the parent entity's PK type.
  */
+@Embeddable
 public class IdClassSingleIdManyToOnePK implements Serializable {
 
     private static final long serialVersionUID = 1L;

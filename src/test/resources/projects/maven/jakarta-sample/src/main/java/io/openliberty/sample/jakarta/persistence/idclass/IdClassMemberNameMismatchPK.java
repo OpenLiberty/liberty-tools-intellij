@@ -12,11 +12,14 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.persistence.idclass;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
  * Key class for {@link IdClassMemberNameMismatch}: declares "empId" instead of "firstName".
  */
+@Embeddable
 public class IdClassMemberNameMismatchPK implements Serializable {
 
     private static final long serialVersionUID = 1L;
