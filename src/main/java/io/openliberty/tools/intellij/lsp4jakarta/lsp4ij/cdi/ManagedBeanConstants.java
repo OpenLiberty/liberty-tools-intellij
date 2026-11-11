@@ -31,6 +31,8 @@ public class ManagedBeanConstants {
     public static final String APPLICATION_SCOPED_FQ_NAME = "jakarta.enterprise.context.ApplicationScoped";
     public static final String STATELESS_FQ_NAME = "jakarta.ejb.Stateless";
     public static final String NORMAL_SCOPE_FQ_NAME = "jakarta.enterprise.context.NormalScope";
+    public static final String NORMAL_SCOPE_PASSIVATING_ATTR = "passivating";
+    public static final String SERIALIZABLE_FQ_NAME = "java.io.Serializable";
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
@@ -44,6 +46,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED = "InvalidProducerFieldWithNamedAnnotation";
     public static final String DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION = "InvalidNamedAnnotationOnNonFieldInjectionPoint";
     public static final String DIAGNOSTIC_CODE_SPECIALIZED_BEAN_NAMED = "InvalidSpecializedBeanWithNamedAnnotation";
+    public static final String DIAGNOSTIC_CODE_PASSIVATING_SCOPE_WITHOUT_SERIALIZABLE = "InvalidPassivatingScopedBeanWithoutSerializable";
 
     public static final String CONSTRUCTOR_DIAGNOSTIC_CODE = "InvalidManagedBeanConstructor";
 
@@ -56,14 +59,31 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER = "InvalidInterceptorOrDecoratorWithDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE = "InvalidDecoratorDelegateInjectionPoints";
     public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT = "InvalidDelegateInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_DELEGATE_ON_NON_INJECTION_POINT = "InvalidDelegateOnNonInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE_TYPE_ASSIGNABILITY = "InvalidDecoratorDelegateTypeAssignability";
+    public static final String DIAGNOSTIC_CODE_INVALID_DECORATOR_WITH_NO_DECORATED_TYPES = "InvalidDecoratorWithNoDecoratedTypes";
     public static final String DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER = "InvalidDependentScopeWithConditionalObserver";
     public static final String DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS = "InvalidMultipleObserverParams";
     public static final String DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE = "InvalidInterceptorOrDecorator";
     public static final String DIAGNOSTIC_CODE_REDUNDANT_DISPOSES = "RemoveExtraDisposes";
     public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT = "InvalidWildcardTypeInInjectField";
+    public static final String DIAGNOSTIC_CODE_WILDCARD_INJECT_METHOD = "InvalidWildcardTypeInInjectMethod";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_FIELD = "InvalidWildcardTypeInProducerField";
     public static final String DIAGNOSTIC_CODE_WILDCARD_PRODUCER_METHOD = "InvalidWildcardTypeInProducerMethod";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_METHOD_BARE_TYPE_VAR = "InvalidProducerMethodWithBareTypeVariableReturnType";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_METHOD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerMethodWithTypeVariableAndNonDependentScope";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_BARE_TYPE_VAR = "InvalidProducerFieldWithBareTypeVariableType";
+    public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerFieldWithTypeVariableAndNonDependentScope";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
+    public static final String DIAGNOSTIC_CODE_RAW_EVENT = "InvalidRawEventTypeInjectionPoint";
+    public static final String DIAGNOSTIC_CODE_INVALID_SPECIALIZES = "InvalidSpecializesAnnotationOnNonBeanSuperclass";
+    public static final String EVENT_FQ_NAME = "jakarta.enterprise.event.Event";
+
+    // ObserverMethod notify validation
+    public static final String OBSERVER_METHOD_FQ_NAME = "jakarta.enterprise.inject.spi.ObserverMethod";
+    public static final String EVENT_CONTEXT_FQ_NAME = "jakarta.enterprise.inject.spi.EventContext";
+    public static final String NOTIFY_METHOD_NAME = "notify";
+    public static final String DIAGNOSTIC_CODE_OBSERVER_METHOD_WITHOUT_NOTIFY = "InvalidObserverMethodWithoutNotify";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
@@ -85,6 +105,11 @@ public class ManagedBeanConstants {
             "jakarta.enterprise.context.ConversationScoped",
             "jakarta.enterprise.context.NormalScope",
             "jakarta.enterprise.context.RequestScoped"
+    };
+
+    public static final String[] BUILT_IN_PASSIVATING_SCOPE_FQ_NAMES = {
+            "jakarta.enterprise.context.SessionScoped",
+            "jakarta.enterprise.context.ConversationScoped"
     };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);

@@ -8,6 +8,9 @@ package io.openliberty.sample.jakarta.persistence;
  */
 class InvalidIdClass {
 
+    public String firstName;
+    public String lastName;
+
     private InvalidIdClass(String value) {
     }
 }

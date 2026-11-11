@@ -10,6 +10,9 @@ import java.io.Serializable;
  */
 public class PartialInvalidIdClass extends SerializableBaseKey {
 
+    public String firstName;
+    public String lastName;
+
     public PartialInvalidIdClass() {
     }
 

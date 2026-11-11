@@ -10,6 +10,9 @@ public class ImplicitConstructorIdClass implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public String firstName;
+    public String lastName;
+
     @Override
     public boolean equals(Object other) {
         return other instanceof ImplicitConstructorIdClass;

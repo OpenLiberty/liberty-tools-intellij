@@ -17,7 +17,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
-
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
@@ -256,5 +256,70 @@ public class DiagnosticsUtils {
             return null;
         }
         return ((PsiClassType) type).resolve();
+    }
+
+    /**
+     * Returns the JavaBeans property name for the given method if it qualifies as
+     * a property getter: a non-static, no-argument method whose name follows
+     * {@code get<Name>} or {@code is<Name>} conventions and whose return type is
+     * not {@code void}. Returns {@code null} if any condition is not met.
+     *
+     * @param method the method to inspect
+     * @return the property name (e.g. {@code "name"}), or {@code null} if not a getter
+     */
+    public static String getterPropertyName(PsiMethod method) {
+        if (method.getParameterList().getParametersCount() != 0
+                || method.hasModifierProperty(PsiModifier.STATIC)
+                || PsiTypeUtils.isVoidReturnType(method)) {
+            return null;
+        }
+        return getterPropertyName(method.getName());
+    }
+
+    /**
+     * Derives a Java bean property name from a method name using
+     * {@link Introspector#decapitalize}.
+     * Returns {@code null} if the name does not follow getter conventions
+     * ({@code get<Name>} or {@code is<Name>}).
+     *
+     * @param methodName the method name (e.g. {@code "getName"}, {@code "isActive"})
+     * @return the property name (e.g. {@code "name"}, {@code "active"}), or {@code null}
+     */
+    public static String getterPropertyName(String methodName) {
+        if (methodName == null) {
+            return null;
+        }
+        if (methodName.startsWith("get") && methodName.length() > 3) {
+            return Introspector.decapitalize(methodName.substring(3));
+        }
+        if (methodName.startsWith("is") && methodName.length() > 2) {
+            return Introspector.decapitalize(methodName.substring(2));
+        }
+        return null;
+    }
+
+    /**
+     * Returns the fully-qualified name of the first type argument from a parameterised
+     * superinterface on the given class.
+     *
+     * <p>For example, given a class that implements {@code ObserverMethod<AuditEvent>},
+     * this method returns {@code "AuditEvent"} when called with
+     * {@code interfaceFQName = "jakarta.enterprise.inject.spi.ObserverMethod"}.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @param interfaceFQName the fully-qualified name of the superinterface to search for
+     * @return the FQN of the first type argument, or {@code "java.lang.Object"} if not found
+     */
+    public static String resolveTypeArgumentFQName(PsiClass classBinding, String interfaceFQName) {
+        for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
+            PsiClass iface = ifaceType.resolve();
+            if (iface != null && interfaceFQName.equals(iface.getQualifiedName())) {
+                PsiType[] typeArgs = ifaceType.getParameters();
+                if (typeArgs.length > 0) {
+                    return typeArgs[0].getCanonicalText();
+                }
+            }
+        }
+        return "java.lang.Object";
     }
 }

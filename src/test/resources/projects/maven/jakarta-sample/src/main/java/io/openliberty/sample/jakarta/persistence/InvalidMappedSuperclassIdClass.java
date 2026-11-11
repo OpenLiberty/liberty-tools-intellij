@@ -8,6 +8,9 @@ package io.openliberty.sample.jakarta.persistence;
  */
 class InvalidMappedSuperclassIdClass {
 
+    public String firstName;
+    public String lastName;
+
     private InvalidMappedSuperclassIdClass(String value) {
     }
 }
