@@ -718,6 +718,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidObserverMethodWithoutNotify"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.InsertNotifyMethodQuickFix$NotifyEventContext"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidUserTransactionInjectionInCDIBean"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.codeAction.proposal.quickfix.RemoveInjectAnnotationQuickFix"/>
 
         <!-- Interceptor -->
         <javaCodeActionParticipant kind="quickfix"
