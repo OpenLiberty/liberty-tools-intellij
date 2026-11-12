@@ -169,25 +169,16 @@ public class DiagnosticsUtils {
 
     /**
      * Returns {@code true} if {@code method} directly overrides a method in the
-     * <em>direct</em> (immediate) superclass of {@code type}, and that overridden
-     * method carries {@code annotationFQName}.
-     *
-     * <p>Uses {@link PsiMethod#findSuperMethods(PsiClass)} which is the IntelliJ
-     * PSI equivalent of {@code MethodOverrideTester.findOverriddenMethodInType()} —
-     * it performs a correct override check including generic type substitution,
-     * rather than a simple name + arity comparison.</p>
-     *
-     * <p>Only the <em>direct</em> superclass is inspected — grandparents are not
+     * direct(immediate) superclass of {@code type}, and that overridden
+     * method carries.
+     * <p>Only the direct superclass is inspected — grandparents are not
      * considered.</p>
      *
      * @param type             the declaring class of the method being validated
      * @param method           the method to check for a direct override of an annotated superclass method
      * @param annotationFQName the fully-qualified annotation name the overridden superclass
-     *                         method must carry (e.g. {@code "jakarta.enterprise.inject.Produces"})
-     * @return {@code true} if {@code method} directly overrides a method in the direct
-     *         superclass that carries {@code annotationFQName}; {@code false} if there is
-     *         no direct superclass, no override exists, or the overridden method does not
-     *         carry the annotation
+     *                         method must carry
+     * @return boolean
      */
     public static boolean isDirectlyOverridingAnnotatedMethodInSuperclass(PsiClass type, PsiMethod method,
                                                                            String annotationFQName) {
