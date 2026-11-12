@@ -37,10 +37,10 @@ import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAs
 @RunWith(JUnit4.class)
 public class InconsistentSpecializationTest extends BaseJakartaTest {
 
-    private static String msg(String beanName, String baseTypeFqName) {
+    private static String msg(String beanName) {
         return "Inconsistent specialization: bean '" + beanName
                 + "' and at least one other bean both specialize the same base type '"
-                + baseTypeFqName + "'. Only one bean may specialize a given base bean.";
+                + "io.openliberty.sample.jakarta.cdi.specializes.BaseBean" + "'. Only one bean may specialize a given base bean.";
     }
 
     /** No diagnostic expected on a base bean that does not carry @Specializes. */
@@ -91,12 +91,12 @@ public class InconsistentSpecializationTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic expecteDiagnostic = d(8, 13, 25,
-                msg("SpecializerA",
-                        "io.openliberty.sample.jakarta.cdi.specializes.BaseBean"),
+        Diagnostic expectedDiagnostic = d(8, 13, 25,
+                msg("SpecializerA"
+                ),
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInconsistentSpecialization");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, expecteDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
     }
 
     /** Diagnostic expected on SpecializerB when SpecializerA also specializes BaseBean. */
@@ -113,12 +113,12 @@ public class InconsistentSpecializationTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        Diagnostic expecteDiagnostic = d(8, 13, 25,
-                msg("SpecializerB",
-                        "io.openliberty.sample.jakarta.cdi.specializes.BaseBean"),
+        Diagnostic expectedDiagnostic = d(8, 13, 25,
+                msg("SpecializerB"
+                ),
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidInconsistentSpecialization");
 
-        assertJavaDiagnostics(diagnosticsParams, utils, expecteDiagnostic);
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
     }
 
     /**
