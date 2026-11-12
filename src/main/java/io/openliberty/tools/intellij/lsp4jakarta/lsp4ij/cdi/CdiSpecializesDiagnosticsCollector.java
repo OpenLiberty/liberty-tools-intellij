@@ -37,7 +37,7 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanCo
 
 /**
  * CDI diagnostics collector that validates specialization.
- *
+ * <p>
  * Per CDI spec section 3.1.4: a class annotated with @Specializes must directly
  * extend a managed bean (one whose immediate superclass carries a CDI scope annotation,
  * including custom @NormalScope-annotated scopes). A scoped grandparent does NOT
@@ -135,7 +135,7 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
 
     /**
      * Validates that a class annotated with @Specializes directly extends a valid bean.
-     *
+     * <p>
      * Per CDI spec 3.1.4: "the bean class of X must directly extend the bean class
      * of another managed bean Y". Only the immediate superclass is checked — a scoped
      * grandparent does NOT satisfy this requirement.
