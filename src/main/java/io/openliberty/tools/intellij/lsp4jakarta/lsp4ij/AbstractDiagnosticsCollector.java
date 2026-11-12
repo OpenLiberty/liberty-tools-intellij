@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -167,6 +168,20 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
+     * Returns true if the given Java class implements the given interface and
+     * false otherwise. Checks the full inheritance hierarchy, so inherited
+     * implementations (via a superclass) are also recognised.
+     *
+     * @param type            Java class.
+     * @param interfaceFQName fully qualified name of the interface.
+     * @return true if the Java class implements the given interface and
+     *         false otherwise.
+     */
+    protected static boolean doesImplementInterfaces(PsiClass type, String interfaceFQName) {
+        return InheritanceUtil.isInheritor(type, interfaceFQName);
+    }
+
+    /**
      * Returns true if the given Java class implements one of the given interfaces
      * and false otherwise.
      *
@@ -176,14 +191,8 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      *         false otherwise.
      */
     protected static boolean doesImplementInterfaces(PsiClass type, String[] interfaceFQNames) {
-        // Use InheritanceUtil.isInheritor so that interfaces implemented by a
-        // superclass (inherited implementation) are also considered.
-        for (String interfaceFQName : interfaceFQNames) {
-            if (InheritanceUtil.isInheritor(type, interfaceFQName)) {
-                return true;
-            }
-        }
-        return false;
+        return interfaceFQNames != null && Arrays.stream(interfaceFQNames)
+                .anyMatch(interfaceFQName -> doesImplementInterfaces(type, interfaceFQName));
     }
 
     /**
@@ -292,10 +301,13 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * Checks if type is of Interceptor type or uses interceptor-related features.
      * Returns true if:
      * - The type has @Interceptor annotation
-     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundConstruct, AroundTimeout)
+     * - The type or its methods use interceptor-specific annotations (AroundInvoke, AroundTimeout)
      * - The type or its methods use @Interceptors annotation
      *
      * Note: This excludes PostConstruct and PreDestroy as they belong to the annotations module.
+     * Note: AroundConstruct is intentionally excluded — per spec it may only appear in interceptor
+     * classes and their superclasses, so the check for its misuse in target classes is handled
+     * independently in InterceptorDiagnosticsParticipant.
      *
      * @param type     the type to check
      * @return true if the type is an interceptor type or uses interceptor-related features
@@ -322,7 +334,7 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
 
     /**
      * Checks if the type has any methods annotated with interceptor-specific annotations.
-     * Checks for: @AroundInvoke, @AroundConstruct, @AroundTimeout
+     * Checks for: @AroundInvoke, @AroundTimeout
      *
      * @param type    the type to check
      * @param methods the methods array (pre-fetched to avoid redundant calls)

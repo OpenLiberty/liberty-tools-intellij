@@ -59,5 +59,93 @@ public class PsiUtils {
             collectAllClasses(clazz.getInnerClasses(), allClasses);
         }
     }
+
+    /**
+     * Returns the canonical type name of a field or getter method.
+     *
+     * @param member the field or method to inspect
+     * @return canonical type name, or {@code null}
+     */
+    public static String resolvedTypeName(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField field) {
+            return field.getType().getCanonicalText();
+        }
+        if (member instanceof PsiMethod method) {
+            PsiType rt = method.getReturnType();
+            return rt != null ? rt.getCanonicalText() : null;
+        }
+        return null;
+    }
+
+    /**
+     * Returns {@code true} if the given fully qualified class name is imported
+     * (explicitly or via on-demand) in the given Java file.
+     *
+     * <p>This mirrors {@code DiagnosticUtils.isImportedJavaElement} from lsp4jakarta,
+     * and is intended as the canonical import-check utility for LTI diagnostics.
+     *
+     * @param unit          the Java file to inspect
+     * @param javaElementFQName the fully qualified name to look for
+     * @return {@code true} if the name is imported; {@code false} otherwise
+     */
+    public static boolean isImportedJavaElement(PsiJavaFile unit, String javaElementFQName) {
+        PsiImportList importList = unit.getImportList();
+        if (importList == null) {
+            return false;
+        }
+        String packageName = javaElementFQName.substring(0, javaElementFQName.lastIndexOf('.'));
+        for (PsiImportStatement stmt : importList.getImportStatements()) {
+            String name = stmt.getQualifiedName();
+            if (name == null) continue;
+            if (javaElementFQName.equals(name)) return true;
+            if (stmt.isOnDemand() && packageName.equals(name)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if the given {@link PsiType} is the raw (unparameterized)
+     * {@code Event} type from {@code jakarta.enterprise.event}.
+     *
+     * <p>A raw {@code Event} has no type arguments. Parameterized forms such as
+     * {@code Event<String>} are valid and return {@code false}.
+     *
+     * <p>Callers should guard by checking that {@code jakarta.enterprise.event.Event}
+     * is imported in the file before calling this method, to avoid false positives
+     * from user-defined classes named {@code Event}.
+     *
+     * @param type the PSI type to check
+     * @return {@code true} if the type is a raw {@code Event}; {@code false} otherwise
+     */
+    public static boolean isRawEventType(PsiType type) {
+        if (!(type instanceof PsiClassType)) {
+            return false;
+        }
+        PsiClassType classType = (PsiClassType) type;
+        // Raw type has no type arguments
+        if (classType.getParameterCount() != 0) {
+            return false;
+        }
+        // Import confirmed by caller — check simple name only
+        return "Event".equals(classType.getClassName());
+    }
+
+    /**
+     * Returns the declared type of a field or the return type of a method.
+     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
+     */
+    public static PsiType getMemberType(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField) {
+            return ((PsiField) member).getType();
+        } else if (member instanceof PsiMethod) {
+            return ((PsiMethod) member).getReturnType();
+        }
+        return null;
+    }
+
+    /** Returns {@code true} if {@code type} declares a field with the given simple name. */
+    public static boolean hasFieldInType(PsiClass type, String fieldName) {
+        return type.findFieldByName(fieldName, false) != null;
+    }
 }
 
