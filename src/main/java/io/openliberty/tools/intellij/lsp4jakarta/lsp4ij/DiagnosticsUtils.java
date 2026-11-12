@@ -18,6 +18,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
+
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
+
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
@@ -237,6 +240,28 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Resolves the {@link PsiClass} referenced by a class-literal attribute of an annotation.
+     * For example, given {@code @IdClass(MyKey.class)}, calling this with attribute name
+     * {@code "value"} returns the {@code PsiClass} for {@code MyKey}.
+     *
+     * @param annotation    the annotation to inspect
+     * @param attributeName the annotation attribute name (e.g. {@code "value"})
+     * @return the resolved {@link PsiClass}, or {@code null} if the attribute is absent,
+     *         not a class literal, or cannot be resolved
+     */
+    public static PsiClass resolveClassFromAnnotationAttribute(PsiAnnotation annotation, String attributeName) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (!(value instanceof PsiClassObjectAccessExpression)) {
+            return null;
+        }
+        PsiType type = ((PsiClassObjectAccessExpression) value).getOperand().getType();
+        if (!(type instanceof PsiClassType)) {
+            return null;
+        }
+        return ((PsiClassType) type).resolve();
+    }
+
+    /**
      * Returns the JavaBeans property name for the given method if it qualifies as
      * a property getter: a non-static, no-argument method whose name follows
      * {@code get<Name>} or {@code is<Name>} conventions and whose return type is
@@ -275,6 +300,7 @@ public class DiagnosticsUtils {
         }
         return null;
     }
+
     /**
      * Returns the fully-qualified name of the first type argument from a parameterised
      * superinterface on the given class.
@@ -298,5 +324,50 @@ public class DiagnosticsUtils {
             }
         }
         return "java.lang.Object";
+    }
+
+    /**
+     * Returns {@code true} if the given annotation array represents an injection point that uses
+     * the {@code @Default} qualifier (explicitly or implicitly).
+     *
+     * <p>An injection point has the {@code @Default} qualifier when:
+     * <ul>
+     *   <li>No qualifier annotations are present other than {@code @Default} itself
+     *       (the container implicitly adds {@code @Default} and {@code @Any}), OR</li>
+     *   <li>{@code @Default} is explicitly declared.</li>
+     * </ul>
+     * An injection point does <em>not</em> have {@code @Default} when a custom qualifier
+     * (i.e. any qualifier other than {@code @Default} or {@code @Any}) is present.
+     *
+     * @param type        the declaring class (used for import resolution)
+     * @param annotations the annotations on the injection point
+     * @return {@code true} if the injection point has the {@code @Default} qualifier
+     */
+    public static boolean hasDefaultQualifier(PsiClass type, PsiAnnotation[] annotations) {
+        boolean hasExplicitDefault = false;
+        boolean hasCustomQualifier = false;
+
+        for (PsiAnnotation annotation : annotations) {
+            String fqn = annotation.getQualifiedName();
+            if (fqn == null) {
+                continue; // unresolved annotation — skip
+            }
+            // @Inject is not a qualifier; @Any is a built-in qualifier but not a custom one — skip both
+            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.INJECT_FQ_NAME)
+                    || isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_ANY_FQ_NAME)) {
+                continue;
+            }
+            if (isMatchedJavaElement(type, fqn, ManagedBeanConstants.CDI_DEFAULT_FQ_NAME)) {
+                hasExplicitDefault = true;
+            } else {
+                // Check if this annotation is a CDI qualifier (meta-annotated with @Qualifier)
+                if (AnnotationUtil.hasMetaAnnotation(annotation, type, ManagedBeanConstants.QUALIFIER_FQ_NAME)) {
+                    hasCustomQualifier = true;
+                }
+            }
+        }
+
+        // If a custom qualifier is present, @Default is not implicitly added
+        return !hasCustomQualifier || hasExplicitDefault;
     }
 }

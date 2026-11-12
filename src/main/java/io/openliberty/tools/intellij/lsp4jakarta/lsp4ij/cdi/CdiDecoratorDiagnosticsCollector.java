@@ -245,6 +245,11 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * According to CDI specification, @Delegate must be applied to an injected field,
      * or to a parameter of an initializer or constructor.
      *
+     * <p>
+     * Per CDI spec §3.7 / §8.1.2, {@code @Delegate} is only valid on injection points:
+     * fields, bean constructor parameters, or initializer method parameters. An initializer
+     * method is a non-constructor, non-static, void method annotated with {@code @Inject}.
+     *
      * @param type the class containing the delegate injection point
      * @param unit the compilation unit
      * @param diagnostics the list to add diagnostics to
@@ -255,19 +260,33 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
                                                 PsiModifierListOwner element) {
         PsiAnnotation[] injectAnnotations;
         PsiElement reportTarget;
+        boolean isNonInjectionPointMethod = false;
         if (element instanceof PsiParameter) {
             PsiMethod method = (PsiMethod) element.getParent().getParent();
             injectAnnotations = method.getAnnotations();
             reportTarget = method;
+            boolean isConstructor = isConstructorMethod(method);
+            boolean isInitializerMethod = !isConstructor
+                    && !method.hasModifierProperty(PsiModifier.STATIC)
+                    && PsiTypes.voidType().equals(method.getReturnType())
+                    && isMatchedAnnotation(injectAnnotations, ManagedBeanConstants.INJECT_FQ_NAME);
+            isNonInjectionPointMethod = !isConstructor && !isInitializerMethod;
         } else {
             injectAnnotations = element.getAnnotations();
             reportTarget = element;
         }
 
         if (!isMatchedAnnotation(injectAnnotations, ManagedBeanConstants.INJECT_FQ_NAME)) {
+            // @Inject missing — offer quickfix regardless of method kind
             diagnostics.add(createDiagnostic(reportTarget, unit,
                     Messages.getMessage("InvalidDelegateInjectionPoint"),
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT, null,
+                    DiagnosticSeverity.Error));
+        } else if (isNonInjectionPointMethod) {
+            // @Inject present but method is not a valid injection-point context (non-void or static)
+            diagnostics.add(createDiagnostic(reportTarget, unit,
+                    Messages.getMessage("InvalidDelegateOnNonInjectionPoint"),
+                    ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DELEGATE_ON_NON_INJECTION_POINT, null,
                     DiagnosticSeverity.Error));
         }
     }
