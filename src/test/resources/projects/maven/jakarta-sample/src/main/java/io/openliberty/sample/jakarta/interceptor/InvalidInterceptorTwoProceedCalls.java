@@ -1,6 +1,7 @@
 package io.openliberty.sample.jakarta.interceptor;
 
 import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 /**
@@ -8,6 +9,8 @@ import jakarta.interceptor.InvocationContext;
  * a try/catch but the second is outside, in an if/else branch.
  * The diagnostic must fire for the unprotected second call.
  */
+@Monitored
+@Interceptor
 public class InvalidInterceptorTwoProceedCalls {
 
     @AroundInvoke
