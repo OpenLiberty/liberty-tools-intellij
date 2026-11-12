@@ -1841,15 +1841,11 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Invalid: @AroundConstruct declared in a non-interceptor superclass whose
+        // Valid: @AroundConstruct declared in a non-interceptor superclass whose
         // @Interceptor-annotated subclass is in the SAME compilation unit.
-        // hasInterceptorSubclass() filters out same-file subtypes (PsiFile equality check),
-        // so the @Interceptor subclass is not discovered and the diagnostic must still fire.
-        Diagnostic aroundConstructInSameFileSuperclass = JakartaForJavaAssert.d(17, 16, 25,
-                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
-                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
-
-        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, aroundConstructInSameFileSuperclass);
+        // hasInterceptorSubclass() discovers the same-file @Interceptor subclass,
+        // so the InvalidAroundConstructInTargetClass diagnostic is suppressed.
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils);
     }
 
     @Test
@@ -1972,23 +1968,21 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         diagnosticsParams.setUris(Arrays.asList(uri));
 
         String signatureMsg = "Lifecycle callback interceptor methods declared in an interceptor class or its superclass must have one of the signatures: void <METHOD>(InvocationContext) or Object <METHOD>(InvocationContext).";
-        String proceedMsg = "Interceptor methods must always call the InvocationContext.proceed method.";
 
-        // InterceptorSuperClassBase has @AroundConstruct so it is interceptor-referenced;
-        // the lifecycle signature check fires directly on its own methods.
-        // Engine order: line 28 (AroundConstruct), line 22 (PostConstruct), line 18 sig + proceed (PreDestroy)
+        // InterceptorSuperClassBase is not interceptor-referenced (@AroundConstruct, @PostConstruct and
+        // @PreDestroy are excluded), but it has an @Interceptor subclass, so only the lifecycle
+        // signature check fires on its methods. No proceed-missing diagnostic is reported.
+        // Engine order: line 28 (AroundConstruct), line 22 (PostConstruct), line 18 (PreDestroy)
         Diagnostic aroundConstructInvalidReturn = JakartaForJavaAssert.d(28, 18, 46, signatureMsg,
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
         Diagnostic postConstructInvalidReturn = JakartaForJavaAssert.d(22, 18, 44, signatureMsg,
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
         Diagnostic preDestroyWrongParamSig = JakartaForJavaAssert.d(18, 16, 36, signatureMsg,
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
-        Diagnostic preDestroyWrongParamProceed = JakartaForJavaAssert.d(18, 16, 36, proceedMsg,
-                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
                 aroundConstructInvalidReturn, postConstructInvalidReturn,
-                preDestroyWrongParamSig, preDestroyWrongParamProceed);
+                preDestroyWrongParamSig);
     }
 
     @Test
@@ -2029,10 +2023,6 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         Diagnostic preDestroyWrongParam = JakartaForJavaAssert.d(19, 16, 36, signatureMsg,
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
 
-        Diagnostic missingProceed = JakartaForJavaAssert.d(19, 16, 36,
-                "Interceptor methods must always call the InvocationContext.proceed method.",
-                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidInterceptorMethodsProceedMissing");
-
         // @PostConstruct with String return type (line 23, method name "postConstructInvalidReturn")
         Diagnostic postConstructInvalidReturn = JakartaForJavaAssert.d(23, 18, 44, signatureMsg,
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
@@ -2042,7 +2032,7 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackInterceptorMethodSignature");
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
-                preDestroyWrongParam, missingProceed, postConstructInvalidReturn, aroundConstructInvalidReturn);
+                preDestroyWrongParam, postConstructInvalidReturn, aroundConstructInvalidReturn);
     }
 
     @Test
