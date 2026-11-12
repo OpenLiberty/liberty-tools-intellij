@@ -45,6 +45,7 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String SERIALIZABLE = "java.io.Serializable";
     public static final String CONVERT = "jakarta.persistence.Convert";
     public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
     public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
@@ -120,7 +121,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
-    
+
     /* Generator / SecondaryTable Codes */
     public static final String DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME = "TableGeneratorInvalidEmptyName";
     public static final String DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING = "TableGeneratorsMissingTableGeneratorMapping";
@@ -132,6 +133,13 @@ public class PersistenceConstants {
     /* Converter Codes */
     public static final String DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT = "ConverterMustImplementAttributeConverter";
 
+    /* IdClass Codes */
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_PUBLIC = "IdClassMustBePublic";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_HAVE_PUBLIC_NO_ARG_CONSTRUCTOR = "IdClassMustHavePublicNoArgConstructor";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_SERIALIZABLE = "IdClassMustBeSerializable";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_EQUALS = "IdClassMustDeclareEquals";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_HASHCODE = "IdClassMustDeclareHashCode";
+    
     /* EntityListeners Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_CONSTRUCTOR_IN_ENTITY_LISTENER = "InvalidConstructorInEntityListener";
     public static final String DIAGNOSTIC_CODE_INVALID_ENTITY_LISTENER_TYPE = "InvalidEntityListenerType";
