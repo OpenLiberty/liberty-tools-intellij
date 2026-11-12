@@ -129,5 +129,23 @@ public class PsiUtils {
         // Import confirmed by caller — check simple name only
         return "Event".equals(classType.getClassName());
     }
+
+    /**
+     * Returns the declared type of a field or the return type of a method.
+     * Returns {@code null} for any other {@link PsiJvmModifiersOwner} subtype.
+     */
+    public static PsiType getMemberType(PsiJvmModifiersOwner member) {
+        if (member instanceof PsiField) {
+            return ((PsiField) member).getType();
+        } else if (member instanceof PsiMethod) {
+            return ((PsiMethod) member).getReturnType();
+        }
+        return null;
+    }
+
+    /** Returns {@code true} if {@code type} declares a field with the given simple name. */
+    public static boolean hasFieldInType(PsiClass type, String fieldName) {
+        return type.findFieldByName(fieldName, false) != null;
+    }
 }
 

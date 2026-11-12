@@ -159,6 +159,23 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     }
                 }
 
+                /**
+                 * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#additional_builtin_beans
+                 *
+                 * UserTransaction is a built-in bean. Injection of UserTransaction is invalid in a
+                 * CDI-managed bean (i.e. a bean with a scope annotation) when the injection point uses
+                 * the @Default qualifier (explicitly or implicitly). The container treats this as a
+                 * definition error.
+                 */
+                if (isManagedBean && isInjectField
+                        && field.getType().getCanonicalText().equals(USER_TRANSACTION_FQ_NAME)
+                        && DiagnosticsUtils.hasDefaultQualifier(type, field.getAnnotations())) {
+                    diagnostics.add(createDiagnostic(field, unit,
+                            Messages.getMessage("InvalidUserTransactionInjectionInCDIBean"),
+                            DIAGNOSTIC_CODE_INVALID_USER_TRANSACTION_INJECT, null,
+                            DiagnosticSeverity.Error));
+                }
+
             }
 
             PsiMethod[] methods = type.getMethods();
@@ -290,6 +307,27 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                             DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION, null,
                                             DiagnosticSeverity.Error));
                                 }
+                            }
+                        }
+                    }
+
+                    /**
+                     * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#additional_builtin_beans
+                     *
+                     * Injection of UserTransaction via @Inject in a constructor or initializer method parameter
+                     * is invalid in a CDI-managed bean when the injection point uses the @Default qualifier.
+                     * Diagnostic is placed on the method (not the parameter) because the quickfix removes
+                     * the @Inject annotation from the method declaration.
+                     */
+                    if (isManagedBean) {
+                        for (PsiParameter param : method.getParameterList().getParameters()) {
+                            if (param.getType().getCanonicalText().equals(USER_TRANSACTION_FQ_NAME)
+                                    && DiagnosticsUtils.hasDefaultQualifier(type, param.getAnnotations())) {
+                                diagnostics.add(createDiagnostic(method, unit,
+                                        Messages.getMessage("InvalidUserTransactionInjectionInCDIBean"),
+                                        DIAGNOSTIC_CODE_INVALID_USER_TRANSACTION_INJECT, null,
+                                        DiagnosticSeverity.Error));
+                                break;
                             }
                         }
                     }
