@@ -99,15 +99,9 @@ public class CdiSpecializesDiagnosticsCollector extends AbstractDiagnosticsColle
 
     /**
      * Validates a producer method annotated with {@code @Specializes}.
-     *
-     * <p>Per CDI spec §specialize_producer_method, the method must:</p>
-     * <ol>
-     *   <li>Be non-static</li>
-     *   <li>Directly override another producer method (annotated with {@code @Produces})
-     *       in the direct superclass</li>
-     * </ol>
-     *
-     * <p>Both violations are reported independently.</p>
+     * Per CDI spec §specialize_producer_method, the method must be non-static
+     * and directly override another producer method in the direct superclass.
+     * Both violations are reported independently.
      *
      * @param method      the producer method to validate
      * @param type        the declaring class
