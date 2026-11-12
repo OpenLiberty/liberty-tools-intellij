@@ -260,8 +260,6 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         }
     }
 
-
-
     /**
      * Handles {@code @ElementCollection} map fields: requires {@code "key."} or
      * {@code "value."} prefix, then resolves the suffix against the corresponding
