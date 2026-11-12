@@ -1263,7 +1263,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphOnValidEntityClass.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphUnique.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -1290,7 +1290,12 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "@NamedEntityGraph must only be applied to a class annotated with @Entity.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "NamedEntityGraphOnNonEntityClass", namedEntityGraphData);
 
-        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+        // "Graph.User" is also declared in other sample files, so the uniqueness rule flags it too.
+        Diagnostic duplicateDiagnostic = d(4, 0, 38,
+                "The @NamedEntityGraph name 'Graph.User' must be unique within the persistence unit.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "DuplicateNamedEntityGraphName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic, duplicateDiagnostic);
 
         // test quick fixes
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
@@ -1457,7 +1462,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphsOnValidEntityClass.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphsContainerUnique.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -1484,7 +1489,15 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
                 "@NamedEntityGraphs must only be applied to a class annotated with @Entity.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "NamedEntityGraphsOnNonEntityClass", namedEntityGraphsData);
 
-        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic);
+        // "Graph.User" and "Graph.Order" are also declared in other sample files, so the uniqueness rule flags them too.
+        Diagnostic duplicateUser = d(5, 20, 58,
+                "The @NamedEntityGraph name 'Graph.User' must be unique within the persistence unit.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "DuplicateNamedEntityGraphName");
+        Diagnostic duplicateOrder = d(5, 60, 99,
+                "The @NamedEntityGraph name 'Graph.Order' must be unique within the persistence unit.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "DuplicateNamedEntityGraphName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, expectedDiagnostic, duplicateUser, duplicateOrder);
 
         // test quick fixes
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
