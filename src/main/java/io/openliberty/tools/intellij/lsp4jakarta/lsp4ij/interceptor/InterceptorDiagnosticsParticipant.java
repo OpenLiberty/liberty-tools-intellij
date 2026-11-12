@@ -133,6 +133,16 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
+		// Report on the proceed() call itself, so a protected call in the same method is not flagged.
+		for (PsiMethod m : allMethodDeclarations) {
+			for (PsiMethodCallExpression proceedCall : ASTUtils.findMethodInvocationsOutsideTryCatch(m, Constants.PROCEED, Constants.JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT)) {
+				PsiElement proceedName = proceedCall.getMethodExpression().getReferenceNameElement();
+				Range range = PositionUtils.toNameRange(proceedName != null ? proceedName : proceedCall);
+				Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorProceedNotInTryCatch"));
+				completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_PROCEED_NOT_IN_TRY_CATCH, DiagnosticSeverity.Warning);
+				diagnostics.add(diagnostic);
+			}
+		}
 	}
 
 	/**
