@@ -41,22 +41,22 @@ public class ASTUtils {
     }
 
     /**
-     * Checks whether the given method contains a call to the specified method on the specified parent type,
-     * and that call is NOT enclosed within a try statement (i.e., not inside a try/catch or try/finally block).
+     * Finds the calls to the specified method on the specified parent type, within the given method,
+     * that are NOT enclosed within a try statement (i.e., not inside a try/catch or try/finally block).
      *
      * <p>A method may contain multiple matching invocations (e.g. one inside a try and one
-     * outside). This method returns {@code true} if <em>any</em> of the matching invocations
-     * is outside a try statement, because each such call is unprotected.
+     * outside). Each invocation outside a try statement is unprotected and is returned, so that a
+     * diagnostic can be reported on the call itself; an invocation inside a try statement is not.
      *
      * @param psiMethod the method to inspect
      * @param targetMethod the method name to look for (e.g. "proceed")
      * @param parentFQN the fully qualified name of the declaring class (e.g. "jakarta.interceptor.InvocationContext")
-     * @return true if at least one matching invocation exists AND is not inside a try statement;
-     *         false if there are no matching invocations or all of them are inside a try statement
+     * @return the matching invocations that are not inside a try statement, in source order;
+     *         empty if there are no matching invocations or all of them are inside a try statement
      */
-    public static boolean isMethodInvocationOutsideTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
-        Collection<PsiMethodCallExpression> matches = collectMethodInvocations(psiMethod, targetMethod, parentFQN, false);
-        for (PsiMethodCallExpression match : matches) {
+    public static List<PsiMethodCallExpression> findMethodInvocationsOutsideTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
+        List<PsiMethodCallExpression> unprotected = new ArrayList<>();
+        for (PsiMethodCallExpression match : collectMethodInvocations(psiMethod, targetMethod, parentFQN, false)) {
             PsiElement parent = match.getParent();
             boolean insideTry = false;
             while (parent != null && parent != psiMethod) {
@@ -67,10 +67,10 @@ public class ASTUtils {
                 parent = parent.getParent();
             }
             if (!insideTry) {
-                return true;
+                unprotected.add(match);
             }
         }
-        return false;
+        return unprotected;
     }
 
     /**
