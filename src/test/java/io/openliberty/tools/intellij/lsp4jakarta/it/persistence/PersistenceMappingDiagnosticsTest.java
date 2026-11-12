@@ -672,8 +672,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 23 (0-based 22): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
-        Diagnostic cityNotInheritedFromMappedSuperclass = d(22, 0, 70,
+        // Line 14 (0-based 13): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
+        Diagnostic cityNotInheritedFromMappedSuperclass = d(13, 0, 70,
                 "The name \"city\" in @AttributeOverride does not match any declared field or property in \"InvalidOverrideNoSuperclass\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
@@ -693,8 +693,8 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
         diagnosticsParams.setUris(Arrays.asList(uri));
 
-        // Line 23 (0-based 22): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
-        Diagnostic cityInNonMappedSuperclass = d(22, 0, 70,
+        // Line 14 (0-based 13): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
+        Diagnostic cityInNonMappedSuperclass = d(13, 0, 70,
                 "The name \"city\" in @AttributeOverride does not match any declared field or property in \"PlainBase\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
