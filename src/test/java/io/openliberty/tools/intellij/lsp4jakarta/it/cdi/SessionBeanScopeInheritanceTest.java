@@ -57,8 +57,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Singleton — inherits invalid @RequestScoped from direct superclass
     // File: SingletonInheritsRequestScope.java
-    // @Singleton on line 8, class decl on line 9
-    // "public class SingletonInheritsRequestScope" -> col 13..42
     // -----------------------------------------------------------------------
     @Test
     public void testSingletonInheritsRequestScope() throws Exception {
@@ -105,8 +103,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Singleton — inherits invalid @SessionScoped from direct superclass
     // File: SingletonInheritsSessionScope.java
-    // @Singleton on line 8, class decl on line 9
-    // "public class SingletonInheritsSessionScope" -> col 13..42
     // -----------------------------------------------------------------------
     @Test
     public void testSingletonInheritsSessionScope() throws Exception {
@@ -129,8 +125,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Singleton — inherits @RequestScoped transitively (grandparent -> intermediate -> child)
     // File: SingletonInheritsRequestScopeTransitively.java
-    // @Singleton on line 9, class decl on line 10
-    // "public class SingletonInheritsRequestScopeTransitively" -> col 13..54
     // -----------------------------------------------------------------------
     @Test
     public void testSingletonInheritsRequestScopeTransitively() throws Exception {
@@ -165,8 +159,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Stateless — inherits invalid @RequestScoped from direct superclass
     // File: StatelessInheritsRequestScope.java
-    // @Stateless on line 8, class decl on line 9
-    // "public class StatelessInheritsRequestScope" -> col 13..42
     // -----------------------------------------------------------------------
     @Test
     public void testStatelessInheritsRequestScope() throws Exception {
@@ -201,8 +193,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Stateless — inherits invalid @ApplicationScoped from direct superclass
     // File: StatelessInheritsApplicationScope.java
-    // @Stateless on line 8, class decl on line 9
-    // "public class StatelessInheritsApplicationScope" -> col 13..46
     // -----------------------------------------------------------------------
     @Test
     public void testStatelessInheritsApplicationScope() throws Exception {
@@ -225,8 +215,6 @@ public class SessionBeanScopeInheritanceTest extends BaseJakartaTest {
     // -----------------------------------------------------------------------
     // @Stateless — inherits @RequestScoped transitively (grandparent -> intermediate -> child)
     // File: StatelessInheritsRequestScopeTransitively.java
-    // @Stateless on line 9, class decl on line 10
-    // "public class StatelessInheritsRequestScopeTransitively" -> col 13..54
     // -----------------------------------------------------------------------
     @Test
     public void testStatelessInheritsRequestScopeTransitively() throws Exception {

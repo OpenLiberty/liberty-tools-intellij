@@ -335,9 +335,6 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                 }
             }
 
-            /**
-             * If a managed bean class is of generic type, it must be annotated with @Dependent
-             */
             boolean isStateless = isMatchedAnnotation(typeAnnotations, STATELESS_FQ_NAME);
             boolean isSingleton = isMatchedAnnotation(typeAnnotations, SINGLETON_FQ_NAME);
             boolean isClassGeneric = type.getTypeParameters().length != 0;
@@ -359,6 +356,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DiagnosticSeverity.Error));
                     }
                 }
+                /**
+                 * If a managed bean class is of generic type, it must be annotated with @Dependent
+                 */
                 if (isClassGeneric && (!isDependent || hasMultipleScopes)) {
                     diagnostics.add(createDiagnostic(type, unit, Messages.getMessage("ManagedBeanGenericType"),
                             DIAGNOSTIC_CODE, null, DiagnosticSeverity.Error));
@@ -523,8 +523,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
     }
 
     /**
-     * Walks the full superclass chain of {@code type} and returns the FQ name of the first
-     * invalid annotation found in any ancestor, or {@code null} if none is found.
+     * Walks the full superclass chain of {@code type} and returns a two-element array
+     * {@code [annotationFQName, declaringClassName]} for the first ancestor that carries
+     * any of the given annotations, or {@code null} if none is found.
      *
      * <p>The type itself is skipped — only superclasses are examined. Every level of the
      * hierarchy is checked; the walk stops early when a match is found.</p>
@@ -532,13 +533,9 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
      * @param type the root type whose superclass chain is searched
      * @param invalidAnnotationFQNames the fully-qualified names of the annotations to treat
      *            as invalid (e.g. the scopes that are not permitted for this bean type)
-     * @return the matched annotation FQ name if any ancestor carries one of the invalid
-     *         annotations; {@code null} if no such ancestor exists
-     */
-    /**
-     * Walks the superclass chain of {@code type} and returns a two-element array
-     * {@code [annotationFQName, declaringClassName]} for the first ancestor that carries
-     * any of the given annotations, or {@code null} if none is found.
+     * @return a two-element array {@code [annotationFQName, declaringClassName]} for the
+     *         first ancestor carrying one of the invalid annotations; {@code null} if no
+     *         such ancestor exists
      */
     private String[] findSupertypeWithAnyAnnotation(PsiClass type, Set<String> invalidAnnotationFQNames) {
         PsiClass superclass = type.getSuperClass();
