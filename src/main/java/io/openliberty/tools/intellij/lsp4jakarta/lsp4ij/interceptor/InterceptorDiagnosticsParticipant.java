@@ -57,9 +57,11 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		if (unit == null)
 			return;
 
-		PsiClass[] alltypes;
-		alltypes = unit.getClasses();
+		// Validate all types in the current file.
+		PsiClass[] alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
+			// Check 693: component class with class-level interceptor binding constraints
+			checkInterceptorBindingConstraints(type, unit, diagnostics);
 			if (isInterceptorTypeReferenced(type)) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
@@ -76,6 +78,9 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				Map<String, List<PsiMethod>> methodsByAnnotationType = new HashMap<>();
 				for (PsiMethod method : allMethods) {
 					List<String> interceptorTypeMethodAnnotations = detectInterceptorMethodsAndDuplicates(type, method, methodsByAnnotationType);
+					if(interceptorTypeMethodAnnotations.isEmpty()) {
+						continue;
+					}
 					boolean isFinal = method.hasModifierProperty(PsiModifier.FINAL);
 					boolean isAbstract = method.hasModifierProperty(PsiModifier.ABSTRACT);
 					boolean isStatic = method.hasModifierProperty(PsiModifier.STATIC);
@@ -103,18 +108,26 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
-				
+	
 				// Process inner classes for duplicate interceptor method annotations
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
 				}
+	
+			}
+	
+			// @AroundConstruct is only valid in classes declared with @Interceptor (and their superclasses).
+			// A class with @AroundInvoke or @AroundTimeout but no @Interceptor is still a target class
+			// for this check — only @Interceptor annotation exempts @AroundConstruct usage.
+			if (!isInterceptorType(type)) {
+				checkAroundConstructInTargetClass(type, unit, diagnostics);
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
-		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
+		for (PsiMethod invokeMethod : methodsMissingProceedInvocation) {
 			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
@@ -127,7 +140,7 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_PROCEED_NOT_IN_TRY_CATCH, DiagnosticSeverity.Warning);
 			diagnostics.add(diagnostic);
 		}
-			 }
+	}
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
@@ -351,5 +364,89 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING, DiagnosticSeverity.Warning);
 			diagnostics.add(diagnostic);
 		}
+	}
+
+	/**
+		* Checks constraints imposed by the Jakarta Interceptors 2.0 specification on a component
+		* class that declares or inherits a class-level interceptor binding:
+		* <ul>
+		*   <li>The class must not be declared {@code final}.</li>
+		*   <li>No non-static, non-private method may be declared {@code final}.</li>
+		* </ul>
+		* Does nothing if the class has no class-level interceptor binding.
+		*
+		* @param type        the class to check
+		* @param unit        the compilation unit
+		* @param diagnostics the list to add diagnostics to
+		*/
+	private void checkInterceptorBindingConstraints(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		if (!hasClassLevelInterceptorBinding(type)) {
+			return;
+		}
+		if (type.hasModifierProperty(PsiModifier.FINAL)) {
+			diagnostics.add(createDiagnostic(type, unit,
+					Messages.getMessage("InvalidFinalInterceptorBindingClass"),
+					DIAGNOSTIC_CODE_FINAL_INTERCEPTOR_BINDING_CLASS, null,
+					DiagnosticSeverity.Error));
+		}
+		for (PsiMethod method : type.getMethods()) {
+			if (method.hasModifierProperty(PsiModifier.FINAL)
+					&& !method.hasModifierProperty(PsiModifier.STATIC)
+					&& !method.hasModifierProperty(PsiModifier.PRIVATE)) {
+				diagnostics.add(createDiagnostic(method, unit,
+						Messages.getMessage("InvalidMethodOnInterceptorBindingClass", method.getName()),
+						DIAGNOSTIC_CODE_FINAL_METHOD_ON_INTERCEPTOR_BINDING_CLASS, null,
+						DiagnosticSeverity.Error));
+			}
+		}
+	}
+
+	/**
+		* Returns {@code true} if the given class has a class-level interceptor binding, meaning it
+		* carries {@code @Interceptors(...)} or a custom annotation meta-annotated with
+		* {@code @InterceptorBinding}.
+		*
+		* @param type the class to check
+		* @return {@code true} if a class-level interceptor binding is present
+		*/
+	private boolean hasClassLevelInterceptorBinding(PsiClass type) {
+		return Arrays.stream(type.getAnnotations()).anyMatch(annotation ->
+				isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTORS_FQ_NAME)
+				|| AnnotationUtil.hasMetaAnnotation(annotation, type, INTERCEPTOR_BINDING_FQ_NAME));
+	}
+
+	// =========================================================================
+	// Validation — @AroundConstruct in target classes
+	// =========================================================================
+
+	/**
+	 * Checks if a non-interceptor class declares a method annotated with
+	 * {@code @AroundConstruct}, which is forbidden by the Jakarta Interceptors 2.0
+	 * specification. The diagnostic is suppressed when the class has at least one
+	 * {@code @Interceptor}-annotated subclass declared in a different source file
+	 * (spec permits {@code @AroundConstruct} in interceptor superclasses).
+	 *
+	 * @param type        the non-interceptor type to check
+	 * @param unit        the PSI Java file
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
+												   List<Diagnostic> diagnostics) {
+		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
+		// result is constant across all methods of the same type.
+		if (hasInterceptorSubclass(type, unit)) {
+			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
+			return;
+		}
+		Arrays.stream(type.getMethods())
+			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
+				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
+			.forEach(method -> {
+				Range range = PositionUtils.toNameRange(method);
+				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
+				Diagnostic diagnostic = new Diagnostic(range, msg);
+				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
+				diagnostics.add(diagnostic);
+			});
 	}
 }
