@@ -240,6 +240,28 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Resolves the {@link PsiClass} referenced by a class-literal attribute of an annotation.
+     * For example, given {@code @IdClass(MyKey.class)}, calling this with attribute name
+     * {@code "value"} returns the {@code PsiClass} for {@code MyKey}.
+     *
+     * @param annotation    the annotation to inspect
+     * @param attributeName the annotation attribute name (e.g. {@code "value"})
+     * @return the resolved {@link PsiClass}, or {@code null} if the attribute is absent,
+     *         not a class literal, or cannot be resolved
+     */
+    public static PsiClass resolveClassFromAnnotationAttribute(PsiAnnotation annotation, String attributeName) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (!(value instanceof PsiClassObjectAccessExpression)) {
+            return null;
+        }
+        PsiType type = ((PsiClassObjectAccessExpression) value).getOperand().getType();
+        if (!(type instanceof PsiClassType)) {
+            return null;
+        }
+        return ((PsiClassType) type).resolve();
+    }
+
+    /**
      * Returns the JavaBeans property name for the given method if it qualifies as
      * a property getter: a non-static, no-argument method whose name follows
      * {@code get<Name>} or {@code is<Name>} conventions and whose return type is
