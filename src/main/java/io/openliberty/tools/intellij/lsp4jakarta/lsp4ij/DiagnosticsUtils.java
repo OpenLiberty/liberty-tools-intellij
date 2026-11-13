@@ -18,11 +18,12 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
-
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -164,6 +165,33 @@ public class DiagnosticsUtils {
             current = current.getSuperClass();
         }
         return superClasses;
+    }
+
+    /**
+     * Returns {@code true} if {@code method} directly overrides a method in the
+     * direct(immediate) superclass of {@code type}, and that overridden
+     * method carries.
+     * <p>Only the direct superclass is inspected — grandparents are not
+     * considered.</p>
+     *
+     * @param type             the declaring class of the method being validated
+     * @param method           the method to check for a direct override of an annotated superclass method
+     * @param annotationFQName the fully-qualified annotation name the overridden superclass
+     *                         method must carry
+     * @return boolean
+     */
+    public static boolean isDirectlyOverridingAnnotatedMethodInSuperclass(PsiClass type, PsiMethod method,
+                                                                           String annotationFQName) {
+        PsiClass superclass = type.getSuperClass();
+        if (superclass == null) {
+            return false;
+        }
+        // findSuperMethods(PsiClass) walks the whole hierarchy; we restrict to methods
+        // whose declaring class is exactly the direct superclass so that an annotation
+        // on a grandparent method does not satisfy the requirement.
+        return Arrays.stream(method.findSuperMethods(superclass))
+                     .filter(superMethod -> superclass.equals(superMethod.getContainingClass()))
+                     .anyMatch(superMethod -> AnnotationUtils.hasAnnotation(superMethod, annotationFQName));
     }
 
     /**

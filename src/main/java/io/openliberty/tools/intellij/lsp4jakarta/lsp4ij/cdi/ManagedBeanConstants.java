@@ -85,6 +85,8 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_RAW_EVENT = "InvalidRawEventTypeInjectionPoint";
     public static final String DIAGNOSTIC_CODE_INVALID_SPECIALIZES = "InvalidSpecializesAnnotationOnNonBeanSuperclass";
     public static final String EVENT_FQ_NAME = "jakarta.enterprise.event.Event";
+    public static final String DIAGNOSTIC_CODE_SPECIALIZES_STATIC_PRODUCER = "InvalidSpecializesStaticProducerMethod";
+    public static final String DIAGNOSTIC_CODE_SPECIALIZES_PRODUCER_NOT_OVERRIDING = "InvalidSpecializesProducerMethodNotOverriding";
 
     // ObserverMethod notify validation
     public static final String OBSERVER_METHOD_FQ_NAME = "jakarta.enterprise.inject.spi.ObserverMethod";
