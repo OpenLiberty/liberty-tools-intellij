@@ -29,6 +29,15 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 
 /**
  * CDI diagnostics collector that validates decorator delegate injection points.
+ *
+ * <p>For classes annotated with {@code @Decorator}: validates that exactly one injection
+ * point is annotated with {@code @Delegate}, that it is also annotated with {@code @Inject},
+ * and that its type implements all decorated types.
+ *
+ * <p>For all other classes: reports an error on any injection point annotated with
+ * {@code @Delegate}, per CDI 3.0 spec §8.1.3.
+ *
+ * @see <a href="https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#delegate_attribute">CDI 3.0 §8.1.3</a>
  */
 public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollector {
 
@@ -46,112 +55,79 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
         }
 
         for (PsiClass type : unit.getClasses()) {
-            validateDecorator(type, unit, diagnostics);
+            if (isMatchedAnnotation(type.getAnnotations(), ManagedBeanConstants.DECORATOR_FQ_NAME)) {
+                validateDecorator(type, unit, diagnostics);
+            } else {
+                validateDelegateNotInDecorator(type, unit, diagnostics);
+            }
         }
     }
 
     /**
-     * Validates that a decorator class declares exactly one @Delegate injection point.
+     * Collects all elements (fields or parameters) that are annotated with {@code @Delegate}.
      *
-     * @param type       the class being validated
-     * @param unit       the compilation unit
-     * @param diagnostics list to collect diagnostics
+     * @param elements    the elements to scan
+     * @param collected   list to add matching elements into
      */
-    private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        if (!isMatchedAnnotation(type.getAnnotations(), ManagedBeanConstants.DECORATOR_FQ_NAME)) {
-            return;
-        }
-
-        List<PsiElement> delegateElements = new ArrayList<>();
-
-        // Fields
-        for (PsiField field : type.getFields()) {
-            validateDelegate(unit, diagnostics, field, field, delegateElements, false);
-        }
-
-        // Methods + parameters
-        for (PsiMethod method : type.getMethods()) {
-            PsiAnnotation[] methodAnnotations = method.getAnnotations();
-
-            // Per CDI spec §3.7 / §8.1.2, @Delegate is only valid on injection points:
-            // fields, bean constructor parameters, or initializer method parameters.
-            // An initializer method is a non-constructor, non-static, void method
-            // annotated with @Inject.
-            boolean isConstructor = isConstructorMethod(method);
-            boolean isInitializerMethod = !isConstructor
-                    && !method.hasModifierProperty(PsiModifier.STATIC)
-                    && PsiTypes.voidType().equals(method.getReturnType())
-                    && isMatchedAnnotation(methodAnnotations, ManagedBeanConstants.INJECT_FQ_NAME);
-            // True when the method is not a valid @Delegate injection-point context.
-            // Parameters of such methods still need to be scanned so that any @Delegate
-            // annotation on them produces InvalidDelegateOnNonInjectionPoint.
-            boolean isNonInjectionPointMethod = !isConstructor && !isInitializerMethod;
-
-            for (PsiParameter parameter : method.getParameterList().getParameters()) {
-                validateDelegate(unit, diagnostics, method, parameter, delegateElements,
-                        isNonInjectionPointMethod, methodAnnotations);
+    private void collectDelegates(PsiModifierListOwner[] elements, List<PsiModifierListOwner> collected) {
+        for (PsiModifierListOwner element : elements) {
+            if (isMatchedAnnotation(element.getAnnotations(), ManagedBeanConstants.DELEGATE_FQ_NAME)) {
+                collected.add(element);
             }
         }
+    }
+
+    /**
+     * Collects all {@code @Delegate}-annotated fields and method parameters from a class.
+     *
+     * @param type the class to scan
+     * @return list of all matching elements
+     */
+    private List<PsiModifierListOwner> collectAllDelegates(PsiClass type) {
+        List<PsiModifierListOwner> delegateElements = new ArrayList<>();
+        collectDelegates(type.getFields(), delegateElements);
+        for (PsiMethod method : type.getMethods()) {
+            collectDelegates(method.getParameterList().getParameters(), delegateElements);
+        }
+        return delegateElements;
+    }
+
+    /**
+     * Validates a class annotated with {@code @Decorator}:
+     * <ul>
+     *   <li>Must declare exactly one {@code @Delegate} injection point.</li>
+     *   <li>That injection point must also be annotated with {@code @Inject}.</li>
+     *   <li>The delegate type must implement or extend all decorated types.</li>
+     * </ul>
+     */
+    private void validateDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        List<PsiModifierListOwner> delegateElements = collectAllDelegates(type);
 
         reportInvalidDelegateCountDiagnostics(type, unit, diagnostics, delegateElements);
 
-        // Validate delegate type assignability (Section 8.1.3 of CDI spec)
         if (delegateElements.size() == 1) {
-            validateDelegateTypeAssignability(type, delegateElements.getFirst(), unit, diagnostics);
+            PsiModifierListOwner delegate = delegateElements.get(0);
+            validateDelegateInjectionPoint(type, unit, diagnostics, delegate);
+            validateDelegateTypeAssignability(type, delegate, unit, diagnostics);
         }
     }
 
     /**
-     * Unified delegate processing for fields and parameters.
-     *
-     * @param unit                      the compilation unit
-     * @param diagnostics               the list to collect diagnostics
-     * @param owner                     element to report diagnostics on (field or method)
-     * @param element                   actual element annotated with @Delegate
-     * @param delegateElements          list to collect delegate elements
-     * @param isNonInjectionPointMethod true when the enclosing method is not a valid
-     *                                  injection-point context (not a constructor and not an
-     *                                  @Inject void non-static method). When true the element
-     *                                  is still added to delegateElements but
-     *                                  InvalidDelegateOnNonInjectionPoint is reported instead.
-     * @param reusableAnnots                    optional precomputed annotations (e.g. method annotations)
+     * Reports diagnostics when a decorator has an invalid number of {@code @Delegate}
+     * injection points (zero or more than one).
      */
-    private void validateDelegate(PsiJavaFile unit, List<Diagnostic> diagnostics,
-                                  PsiElement owner, PsiElement element, List<PsiElement> delegateElements,
-                                  boolean isNonInjectionPointMethod, PsiAnnotation... reusableAnnots) {
-
-        PsiAnnotation[] annotations = (element instanceof PsiModifierListOwner)
-                ? ((PsiModifierListOwner) element).getAnnotations()
-                : new PsiAnnotation[0];
-
-        if (isMatchedAnnotation(annotations, ManagedBeanConstants.DELEGATE_FQ_NAME)) {
-            delegateElements.add(element);
-            validateDelegateInjectionPoint(unit, diagnostics,
-                    owner,
-                    isNonInjectionPointMethod,
-                    reusableAnnots.length > 0 ? reusableAnnots : annotations);
-        }
-    }
-
-    /**
-     * reportInvalidDelegateCountDiagnostics
-     * Reports diagnostics when a decorator has an invalid number of @Delegate injection points.
-     *
-     * @param type
-     * @param unit
-     * @param diagnostics
-     * @param delegateElements
-     */
-    private void reportInvalidDelegateCountDiagnostics(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics, List<PsiElement> delegateElements) {
+    private void reportInvalidDelegateCountDiagnostics(PsiClass type, PsiJavaFile unit,
+                                                       List<Diagnostic> diagnostics,
+                                                       List<PsiModifierListOwner> delegateElements) {
         int delegateCount = delegateElements.size();
         if (delegateCount == 0) {
             diagnostics.add(createDiagnostic(type, unit,
                     Messages.getMessage("MissingDelegateInDecorator"),
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
                     DiagnosticSeverity.Error));
-        } else if(delegateCount > 1) {
+        } else if (delegateCount > 1) {
             String message = Messages.getMessage("DecoratorWithMultipleDelegates", delegateCount);
-            for (PsiElement delegateElement : delegateElements) {
+            for (PsiModifierListOwner delegateElement : delegateElements) {
                 diagnostics.add(createDiagnostic(delegateElement, unit, message,
                         ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DECORATOR_DELEGATE, null,
                         DiagnosticSeverity.Error));
@@ -269,28 +245,62 @@ public class CdiDecoratorDiagnosticsCollector extends AbstractDiagnosticsCollect
      * According to CDI specification, @Delegate must be applied to an injected field,
      * or to a parameter of an initializer or constructor.
      *
-     * @param unit                      the compilation unit
-     * @param diagnostics               the list to add diagnostics to
-     * @param element                   the element to report the diagnostic on (field or method)
-     * @param isNonInjectionPointMethod true when the enclosing method is not a valid injection point
-     * @param annotations               annotations to check for @Inject
+     * <p>
+     * Per CDI spec §3.7 / §8.1.2, {@code @Delegate} is only valid on injection points:
+     * fields, bean constructor parameters, or initializer method parameters. An initializer
+     * method is a non-constructor, non-static, void method annotated with {@code @Inject}.
+     *
+     * @param type the class containing the delegate injection point
+     * @param unit the compilation unit
+     * @param diagnostics the list to add diagnostics to
+     * @param element the element annotated with @Delegate (field or parameter); for a parameter the enclosing method's annotations are checked
      */
-    private void validateDelegateInjectionPoint(PsiJavaFile unit, List<Diagnostic> diagnostics,
-                                                PsiElement element, boolean isNonInjectionPointMethod,
-                                                PsiAnnotation[] annotations) {
-        if (!isMatchedAnnotation(annotations, ManagedBeanConstants.INJECT_FQ_NAME)) {
+    private void validateDelegateInjectionPoint(PsiClass type, PsiJavaFile unit,
+                                                List<Diagnostic> diagnostics,
+                                                PsiModifierListOwner element) {
+        PsiAnnotation[] injectAnnotations;
+        PsiElement reportTarget;
+        boolean isNonInjectionPointMethod = false;
+        if (element instanceof PsiParameter) {
+            PsiMethod method = (PsiMethod) element.getParent().getParent();
+            injectAnnotations = method.getAnnotations();
+            reportTarget = method;
+            boolean isConstructor = isConstructorMethod(method);
+            boolean isInitializerMethod = !isConstructor
+                    && !method.hasModifierProperty(PsiModifier.STATIC)
+                    && PsiTypes.voidType().equals(method.getReturnType())
+                    && isMatchedAnnotation(injectAnnotations, ManagedBeanConstants.INJECT_FQ_NAME);
+            isNonInjectionPointMethod = !isConstructor && !isInitializerMethod;
+        } else {
+            injectAnnotations = element.getAnnotations();
+            reportTarget = element;
+        }
+
+        if (!isMatchedAnnotation(injectAnnotations, ManagedBeanConstants.INJECT_FQ_NAME)) {
             // @Inject missing — offer quickfix regardless of method kind
-            diagnostics.add(createDiagnostic(element, unit,
+            diagnostics.add(createDiagnostic(reportTarget, unit,
                     Messages.getMessage("InvalidDelegateInjectionPoint"),
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DELEGATE_INJECTION_POINT, null,
                     DiagnosticSeverity.Error));
         } else if (isNonInjectionPointMethod) {
             // @Inject present but method is not a valid injection-point context (non-void or static)
-            diagnostics.add(createDiagnostic(element, unit,
+            diagnostics.add(createDiagnostic(reportTarget, unit,
                     Messages.getMessage("InvalidDelegateOnNonInjectionPoint"),
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_DELEGATE_ON_NON_INJECTION_POINT, null,
                     DiagnosticSeverity.Error));
         }
     }
-}
 
+    /**
+     * Validates that a non-decorator class has no injection points annotated with
+     * {@code @Delegate}, per CDI 3.0 spec §8.1.3.
+     */
+    private void validateDelegateNotInDecorator(PsiClass type, PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        for (PsiModifierListOwner element : collectAllDelegates(type)) {
+            diagnostics.add(createDiagnostic(element, unit,
+                    Messages.getMessage("InvalidDelegateOutsideDecorator"),
+                    ManagedBeanConstants.DIAGNOSTIC_CODE_DELEGATE_OUTSIDE_DECORATOR, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+}
