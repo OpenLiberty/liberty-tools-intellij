@@ -39,6 +39,7 @@ public class ManagedBeanConstants {
     public static final String NAMED_FQ_NAME = "jakarta.inject.Named";
     public static final String SPECIALIZES_FQ_NAME = "jakarta.enterprise.inject.Specializes";
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
     public static final String USER_TRANSACTION_FQ_NAME = "jakarta.transaction.UserTransaction";
     public static final String QUALIFIER_FQ_NAME = "jakarta.inject.Qualifier";
 
@@ -82,6 +83,7 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_BARE_TYPE_VAR = "InvalidProducerFieldWithBareTypeVariableType";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerFieldWithTypeVariableAndNonDependentScope";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
+    public static final String DIAGNOSTIC_CODE_INCONSISTENT_SPECIALIZATION = "InvalidInconsistentSpecialization";
     public static final String DIAGNOSTIC_CODE_RAW_EVENT = "InvalidRawEventTypeInjectionPoint";
     public static final String DIAGNOSTIC_CODE_INVALID_SPECIALIZES = "InvalidSpecializesAnnotationOnNonBeanSuperclass";
     public static final String EVENT_FQ_NAME = "jakarta.enterprise.event.Event";
