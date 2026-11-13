@@ -37,8 +37,9 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_MISSING_INTERCEPTOR_BINDING = "InvalidInterceptorMissingInterceptorBinding";
     public static final String DIAGNOSTIC_CODE_FINAL_INTERCEPTOR_BINDING_CLASS = "InvalidFinalInterceptorBindingClass";
     public static final String DIAGNOSTIC_CODE_FINAL_METHOD_ON_INTERCEPTOR_BINDING_CLASS = "InvalidMethodOnInterceptorBindingClass";
+    public static final String DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS = "InvalidAroundConstructInTargetClass";
 
-    private static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
+    public static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 
     private static final String POST_CONSTRUCT_FQ_NAME = "jakarta.annotation.PostConstruct";
 
@@ -53,7 +54,7 @@ public class Constants {
     /**
      * Interceptor-specific method annotations (excludes PostConstruct and PreDestroy as they belong to annotations module)
      */
-    public static final Set<String> INTERCEPTOR_REFERENCES = Set.of(AROUND_INVOKE_FQ_NAME, AROUND_CONSTRUCT_FQ_NAME, AROUND_TIMEOUT_FQ_NAME);
+    public static final Set<String> INTERCEPTOR_REFERENCES = Set.of(AROUND_INVOKE_FQ_NAME, AROUND_TIMEOUT_FQ_NAME);
 
     public static final String JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT = "jakarta.interceptor.InvocationContext";
 
@@ -62,5 +63,14 @@ public class Constants {
     public static final Set<String> LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS = Set.of(AROUND_CONSTRUCT_FQ_NAME, PRE_DESTROY_FQ_NAME, POST_CONSTRUCT_FQ_NAME);
 
     public static final String PRIORITY_FQ_NAME = "jakarta.annotation.Priority";
+
+    /* Diagnostic code for invalid lifecycle callback interceptor method signature */
+    public static final String DIAGNOSTIC_CODE_INVALID_LIFECYCLE_CALLBACK_SIGNATURE = "InvalidLifecycleCallbackInterceptorMethodSignature";
+
+    /* Fully qualified name of java.lang.Object */
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
+
+    /* Fully qualified name of void (as used by PsiType) */
+    public static final String VOID_TYPE = "void";
 
 }

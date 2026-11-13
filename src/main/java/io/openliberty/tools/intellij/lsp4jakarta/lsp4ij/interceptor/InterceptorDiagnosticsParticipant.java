@@ -57,12 +57,13 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		if (unit == null)
 			return;
 
-		PsiClass[] alltypes;
-		alltypes = unit.getClasses();
+		// Validate all types in the current file.
+		PsiClass[] alltypes = unit.getClasses();
 		for (PsiClass type : alltypes) {
 			// Check 693: component class with class-level interceptor binding constraints
 			checkInterceptorBindingConstraints(type, unit, diagnostics);
-			if (isInterceptorTypeReferenced(type)) {
+			boolean isInterceptorType = isInterceptorTypeReferenced(type);
+			if (isInterceptorType) {
 				//Build the diagnostics if the parent class is Interceptor type and is abstract.
 				// Also, checks for missing public no-args constructor.
 				validateAbstractClassAndNoArgsConstructor(unit, diagnostics, type);
@@ -105,27 +106,46 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 						addInvalidModifierDiagnostic(method, unit, diagnostics, interceptorTypeMethodAnnotations,
 								messageKey, DIAGNOSTIC_CODE_INTERCEPTOR_STATIC, severity);
 					}
+					// Validate lifecycle callback method signatures
+					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
 				}
 				// Check for duplicate interceptor method annotations
 				validateDuplicateInterceptorMethods(methodsByAnnotationType, unit, diagnostics);
-				
+	
 				// Process inner classes for duplicate interceptor method annotations
 				for (PsiClass innerClass : type.getInnerClasses()) {
 					if (isInterceptorTypeReferenced(innerClass)) {
 						validateDuplicateInterceptorMethodsForClass(innerClass, unit, diagnostics);
 					}
 				}
+	
+			}
+	
+			// @AroundConstruct is only valid in classes declared with @Interceptor (and their superclasses).
+			// A class with @AroundInvoke or @AroundTimeout but no @Interceptor is still a target class
+			// for this check — only @Interceptor annotation exempts @AroundConstruct usage.
+			if (!isInterceptorType(type)) {
+				checkAroundConstructInTargetClass(type, unit, diagnostics);
+			}
+
+			// When a non-interceptor type is a superclass of an @Interceptor class in a
+			// different file, its lifecycle callback methods must still satisfy the spec
+			// signature constraint (Jakarta Interceptors 2.0).
+			if (!isInterceptorType && hasInterceptorSubclass(type, unit)) {
+				for (PsiMethod method : type.getMethods()) {
+					validateLifecycleCallbackMethodSignature(type, method, unit, diagnostics);
+				}
 			}
 		}
 		Collection<PsiMethod> allMethodDeclarations = ASTUtils.getAllMethodDeclarations(unit);
 		List<PsiMethod> methodsMissingProceedInvocation = allMethodDeclarations.stream().filter(m -> missingInterceptorMethodProceedInvocation(m, unit)).collect(Collectors.toList());
-		for(PsiMethod invokeMethod: methodsMissingProceedInvocation){
+		for (PsiMethod invokeMethod : methodsMissingProceedInvocation) {
 			Range range = PositionUtils.toNameRange(invokeMethod);
 			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidInterceptorMethodsProceedMissing"));
 			completeDiagnostic(diagnostic, Constants.DIAGNOSTIC_CODE_INTERCEPTOR_METHOD_MISSING_PROCEED);
 			diagnostics.add(diagnostic);
 		}
-    }
+	}
 
 	/**
 	 * Checks if an interceptor method is missing the required proceed() invocation.
@@ -398,5 +418,83 @@ public class InterceptorDiagnosticsParticipant extends AbstractDiagnosticsCollec
 		return Arrays.stream(type.getAnnotations()).anyMatch(annotation ->
 				isMatchedJavaElement(type, annotation.getQualifiedName(), INTERCEPTORS_FQ_NAME)
 				|| AnnotationUtil.hasMetaAnnotation(annotation, type, INTERCEPTOR_BINDING_FQ_NAME));
+	}
+
+	// =========================================================================
+	// Validation — @AroundConstruct in target classes
+	// =========================================================================
+
+	/**
+	 * Checks if a non-interceptor class declares a method annotated with
+	 * {@code @AroundConstruct}, which is forbidden by the Jakarta Interceptors 2.0
+	 * specification. The diagnostic is suppressed when the class has at least one
+	 * {@code @Interceptor}-annotated subclass declared in a different source file
+	 * (spec permits {@code @AroundConstruct} in interceptor superclasses).
+	 *
+	 * @param type        the non-interceptor type to check
+	 * @param unit        the PSI Java file
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void checkAroundConstructInTargetClass(PsiClass type, PsiJavaFile unit,
+												   List<Diagnostic> diagnostics) {
+		// Evaluate once for the type — ClassInheritorsSearch is expensive and the
+		// result is constant across all methods of the same type.
+		if (hasInterceptorSubclass(type, unit)) {
+			// Spec allows @AroundConstruct in interceptor superclasses; nothing to flag.
+			return;
+		}
+		Arrays.stream(type.getMethods())
+			.filter(method -> Arrays.stream(method.getModifierList().getAnnotations())
+				.anyMatch(annotation -> isMatchedJavaElement(type, annotation.getQualifiedName(), AROUND_CONSTRUCT_FQ_NAME)))
+			.forEach(method -> {
+				Range range = PositionUtils.toNameRange(method);
+				String msg = Messages.getMessage("InvalidAroundConstructInTargetClass");
+				Diagnostic diagnostic = new Diagnostic(range, msg);
+				completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS, DiagnosticSeverity.Error);
+				diagnostics.add(diagnostic);
+			});
+	}
+
+	/**
+	 * Validates that a lifecycle callback interceptor method has the required signature.
+	 * According to Jakarta Interceptors specification, lifecycle callback interceptor methods
+	 * declared in an interceptor class or superclass must have one of the signatures:
+	 * <ul>
+	 * <li>{@code void <METHOD>(InvocationContext)}</li>
+	 * <li>{@code Object <METHOD>(InvocationContext)}</li>
+	 * </ul>
+	 *
+	 * @param type        the declaring class
+	 * @param method      the method to validate
+	 * @param unit        the compilation unit
+	 * @param diagnostics the list to add diagnostics to
+	 */
+	private void validateLifecycleCallbackMethodSignature(PsiClass type, PsiMethod method,
+														   PsiJavaFile unit, List<Diagnostic> diagnostics) {
+		// Only validate lifecycle callback annotations (@PreDestroy, @PostConstruct, @AroundConstruct)
+		List<String> lifecycleAnnotations = containsAnyMatchingAnnotations(type, method, LIFECYCLE_CALLBACK_INTERCEPTOR_METHODS);
+		if (lifecycleAnnotations.isEmpty()) {
+			return;
+		}
+
+		boolean validSignature = false;
+		PsiParameter[] params = method.getParameterList().getParameters();
+		if (params.length == 1) {
+			String paramType = params[0].getType().getCanonicalText();
+			if (JAKARTA_INTERCEPTOR_INVOCATION_CONTEXT.equals(paramType)) {
+				PsiType returnType = method.getReturnType();
+				if (returnType != null) {
+					String returnTypeName = returnType.getCanonicalText();
+					validSignature = VOID_TYPE.equals(returnTypeName) || JAVA_LANG_OBJECT.equals(returnTypeName);
+				}
+			}
+		}
+
+		if (!validSignature) {
+			Range range = PositionUtils.toNameRange(method);
+			Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("InvalidLifecycleCallbackInterceptorMethodSignature"));
+			completeDiagnostic(diagnostic, DIAGNOSTIC_CODE_INVALID_LIFECYCLE_CALLBACK_SIGNATURE, DiagnosticSeverity.Error);
+			diagnostics.add(diagnostic);
+		}
 	}
 }
