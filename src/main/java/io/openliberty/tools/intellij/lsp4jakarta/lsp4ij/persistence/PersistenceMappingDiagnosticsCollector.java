@@ -15,6 +15,7 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence;
 import com.intellij.psi.*;
 import com.intellij.psi.util.InheritanceUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.AnnotationValueExpressionUtil;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
@@ -163,11 +164,16 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
 
     /**
      * Returns a human-readable name for the first {@code @MappedSuperclass} in the
-     * supertype chain, falling back to the immediate superclass name.
+     * supertype chain, falling back to the immediate superclass name. When the class
+     * has no explicit superclass (i.e. it implicitly extends {@code java.lang.Object}),
+     * the class's own name is returned.
      */
     private String resolveSuperclassChainName(PsiClass type) {
-        String superclassName = type.getSuperClass()!=null?type.getSuperClass().getName():null;
-        return superclassName != null ? superclassName : type.getQualifiedName();
+        PsiClass superClass = type.getSuperClass();
+        if (superClass == null || PersistenceConstants.OBJECT.equals(superClass.getQualifiedName())) {
+            return type.getName();
+        }
+        return superClass.getName();
     }
 
     // -----------------------------------------------------------------------
@@ -175,27 +181,56 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     // -----------------------------------------------------------------------
 
     /**
-     * Validates override annotations on a field or method (property-based access).
+     * Validates override annotations on a field or getter method (property-based access).
+     *
+     * <p>For {@code @AttributeOverride} / {@code @AttributeOverrides}: if the member
+     * lacks {@code @Embedded}, {@code @EmbeddedId}, or {@code @ElementCollection},
+     * a diagnostic is emitted for each such annotation — the override has no valid target.
      */
     private void validateOverridesOnMember(PsiJvmModifiersOwner member, PsiClass declaringType,
                                            PsiJavaFile unit, OverrideDescriptor desc,
                                            List<Diagnostic> diagnostics) {
         PsiAnnotation[] annotations = member.getAnnotations();
         boolean hasEmbedded = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDED);
+        boolean hasEmbeddedId = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDEDID);
         boolean hasElementCollection = isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION);
+        boolean hasValidTarget = hasEmbedded || hasEmbeddedId || hasElementCollection;
 
-        if (!hasEmbedded && !hasElementCollection) {
-            return;
-        }
+        // Only @AttributeOverride carries the @Embedded/@EmbeddedId/@ElementCollection
+        // restriction at the field/method level.
+        boolean isAttributeOverrideDesc = PersistenceConstants.ATTRIBUTE_OVERRIDE.equals(desc.singleFqn);
 
         for (PsiAnnotation annotation : annotations) {
             String fqn = annotation.getQualifiedName();
-            if (isMatchedJavaElement(declaringType, fqn, desc.singleFqn)) {
+            boolean isSingle = isMatchedJavaElement(declaringType, fqn, desc.singleFqn);
+            boolean isContainer = isMatchedJavaElement(declaringType, fqn, desc.containerFqn);
+
+            if (!isSingle && !isContainer) {
+                continue;
+            }
+
+            if (isAttributeOverrideDesc && !hasValidTarget) {
+                // @AttributeOverride / @AttributeOverrides on a field or method that is not
+                // @Embedded, @EmbeddedId, or @ElementCollection — no valid override target.
+                diagnostics.add(createDiagnostic(annotation, unit,
+                        Messages.getMessage("AttributeOverrideOnNonEmbeddedField", JDTUtils.getSimpleName(fqn)),
+                        PersistenceConstants.DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED,
+                        null, DiagnosticSeverity.Error));
+                // Skip name-resolution: there is no embeddable type to resolve against.
+                continue;
+            }
+
+            if (!hasEmbedded && !hasElementCollection) {
+                // For @AssociationOverride: member has no supported target annotation — skip.
+                continue;
+            }
+
+            if (isSingle) {
                 String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
                     validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
                 }
-            } else if (isMatchedJavaElement(declaringType, fqn, desc.containerFqn)) {
+            } else {
                 for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
                     String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
@@ -334,5 +369,4 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClass nestedClass = ((PsiClassType) nestedField.getType()).resolve();
         return nestedClass != null && fieldExistsInType(nestedClass, name.substring(dot + 1));
     }
-
 }

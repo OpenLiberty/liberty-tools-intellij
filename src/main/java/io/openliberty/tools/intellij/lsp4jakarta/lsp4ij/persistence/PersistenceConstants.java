@@ -159,6 +159,7 @@ public class PersistenceConstants {
     /* AttributeOverride / AssociationOverride Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_ATTRIBUTE_OVERRIDE_NAME = "InvalidAttributeOverrideName";
     public static final String DIAGNOSTIC_CODE_INVALID_ASSOCIATION_OVERRIDE_NAME = "InvalidAssociationOverrideName";
+    public static final String DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED = "AttributeOverrideOnNonEmbeddedField";
 
     /* PersistenceContext Codes */
     public static final String PERSISTENCE_CONTEXT = "jakarta.persistence.PersistenceContext";
