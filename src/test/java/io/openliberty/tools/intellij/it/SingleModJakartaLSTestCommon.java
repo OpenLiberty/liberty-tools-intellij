@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 IBM Corporation.
+ * Copyright (c) 2023, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -75,8 +75,9 @@ public abstract class SingleModJakartaLSTestCommon {
     @Test
     @Video
     public void testInsertJakartaCodeSnippetIntoJavaPart() {
-        String snippetStr = "res";
-        String snippetChooser = "class";
+        // LSP4Jakarta 0.2.7 renamed the "rest_class" snippet prefix to "jakarta_rest_class".
+        String snippetStr = "jakarta_rest";
+        String snippetChooser = "_class";
         String insertedCode = "public String methodname() {";
 
         // get focus on file tab prior to copy
