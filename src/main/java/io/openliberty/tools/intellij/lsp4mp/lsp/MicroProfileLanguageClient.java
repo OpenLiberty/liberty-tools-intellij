@@ -77,7 +77,9 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     @Override
     public void dispose() {
         super.dispose();
-        connection.disconnect();
+        if (connection != null) {
+            connection.disconnect();
+        }
         UserDefinedMicroProfileSettings.getInstance(getProject()).removeChangeHandler(getDidChangeConfigurationListener());
     }
 
@@ -207,13 +209,13 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     @Override
     public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectLabels(MicroProfileJavaProjectLabelsParams javaParams) {
         var coalesceBy = new CoalesceByKey("microprofile/java/projectLabels", javaParams.getUri(), javaParams.getTypes());
-        return runAsBackground("Computing Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+        return runAsBackground("Computing Java projects labels", monitor -> ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
     }
 
     @Override
     public CompletableFuture<List<ProjectLabelInfoEntry>> getAllJavaProjectLabels() {
         var coalesceBy = new CoalesceByKey("microprofile/java/workspaceLabels");
-        return runAsBackground("Computing All Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
+        return runAsBackground("Computing All Java projects labels", monitor -> ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
     }
 
     @Override

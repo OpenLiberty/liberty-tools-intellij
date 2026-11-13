@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 Red Hat Inc. and others.
+* Copyright (c) 2019, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -56,6 +56,7 @@ public abstract class AbstractAnnotationTypeReferencePropertiesProvider extends 
 			String[] names = getAnnotationNames();
 			PsiAnnotation[] annotations = psiElement.getAnnotations();
 			for (PsiAnnotation annotation : annotations) {
+				context.getMonitor().checkCanceled();
 				for (String annotationName : names) {
 					if (AnnotationUtils.isMatchAnnotation(annotation, annotationName)) {
 						processAnnotation(psiElement, annotation, annotationName, context);
