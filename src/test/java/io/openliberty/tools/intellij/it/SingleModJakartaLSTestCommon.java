@@ -76,8 +76,8 @@ public abstract class SingleModJakartaLSTestCommon {
     @Video
     public void testInsertJakartaCodeSnippetIntoJavaPart() {
         // LSP4Jakarta 0.2.7 renamed the "rest_class" snippet prefix to "jakarta_rest_class".
-        String snippetStr = "jakarta_rest_class";
-        String snippetChooser = "jakarta_rest_class";
+        String snippetStr = "jakarta_rest";
+        String snippetChooser = "_class";
         String insertedCode = "public String methodname() {";
 
         // get focus on file tab prior to copy
