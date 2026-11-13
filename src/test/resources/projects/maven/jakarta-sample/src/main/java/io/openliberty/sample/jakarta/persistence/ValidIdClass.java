@@ -1,5 +1,7 @@
 package io.openliberty.sample.jakarta.persistence;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
@@ -7,6 +9,7 @@ import java.io.Serializable;
  * implements Serializable, and declares both equals and hashCode.
  * No diagnostics expected when this class is referenced by @IdClass.
  */
+@Embeddable
 public class ValidIdClass implements Serializable {
 
     private static final long serialVersionUID = 1L;
