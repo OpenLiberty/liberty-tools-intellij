@@ -136,6 +136,9 @@
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.CdiSpecializesDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.CdiTypedAnnotationDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.di.DependencyInjectionDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
@@ -155,6 +158,9 @@
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityDiagnosticsCollector"/>
+        <javaDiagnosticsParticipant
+                group="jakarta"
+                implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.NamedEntityGraphDiagnosticsCollector"/>
         <javaDiagnosticsParticipant
                 group="jakarta"
                 implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.persistence.PersistenceEntityListenersDiagnosticsCollector"/>
@@ -589,6 +595,10 @@
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#InvalidManagedBeanConstructor"
                                    implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstructorQuickFix"/>
+        <javaCodeActionParticipant kind="quickfix"
+                                   group="jakarta"
+                                   targetDiagnostic="jakarta-cdi#InvalidTypedAnnotationNonMatchingBeanType"
+                                   implementationClass="io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.RemoveTypedAnnotationQuickFix"/>
         <javaCodeActionParticipant kind="quickfix"
                                    group="jakarta"
                                    targetDiagnostic="jakarta-cdi#RemoveProducesOrConflictedAnnotations"

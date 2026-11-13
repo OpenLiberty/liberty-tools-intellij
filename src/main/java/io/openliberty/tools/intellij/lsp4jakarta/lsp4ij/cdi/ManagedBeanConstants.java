@@ -19,6 +19,7 @@ import java.util.Set;
 
 public class ManagedBeanConstants {
     /* Annotation Constants */
+    public static final String TYPED_FQ_NAME = "jakarta.enterprise.inject.Typed";
     public static final String PRODUCES_FQ_NAME = "jakarta.enterprise.inject.Produces";
     public static final String INJECT_FQ_NAME = "jakarta.inject.Inject";
     public static final String CDI_DEFAULT_FQ_NAME = "jakarta.enterprise.inject.Default";
@@ -40,6 +41,8 @@ public class ManagedBeanConstants {
     public static final String DELEGATE_FQ_NAME = "jakarta.decorator.Delegate";
     public static final String USER_TRANSACTION_FQ_NAME = "jakarta.transaction.UserTransaction";
     public static final String QUALIFIER_FQ_NAME = "jakarta.inject.Qualifier";
+
+    public static final String OBJECT_FQ_NAME = "java.lang.Object";
 
     public static final String DIAGNOSTIC_SOURCE = "jakarta-cdi";
     public static final String DIAGNOSTIC_CODE = "InvalidManagedBeanAnnotation";
@@ -89,6 +92,7 @@ public class ManagedBeanConstants {
     public static final String NOTIFY_METHOD_NAME = "notify";
     public static final String DIAGNOSTIC_CODE_OBSERVER_METHOD_WITHOUT_NOTIFY = "InvalidObserverMethodWithoutNotify";
     public static final String DIAGNOSTIC_CODE_INVALID_USER_TRANSACTION_INJECT = "InvalidUserTransactionInjectionInCDIBean";
+    public static final String DIAGNOSTIC_CODE_TYPED_NON_MATCHING_BEAN_TYPE = "InvalidTypedAnnotationNonMatchingBeanType";
     //Added as part of fix that adds two quick fixes which are mutually exclusive issue #540
     public static final String[] INVALID_DISPOSER_FQ_PARAMS = { DISPOSES_FQ_NAME };
     public static final String[] INVALID_DISPOSER_FQ_CONFLICTED_PARAMS = { OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME };
@@ -118,6 +122,4 @@ public class ManagedBeanConstants {
     };
 
     public static final Set<String> INVALID_OBSERVES_OBSERVES_ASYNC_CONFLICTED_PARAMS = Set.of(OBSERVES_FQ_NAME, OBSERVES_ASYNC_FQ_NAME);
-
-    public static final String OBJECT_FQ_NAME = "java.lang.Object";
 }
