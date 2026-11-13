@@ -87,7 +87,8 @@ public class CdiWildcardDiagnosticsCollector extends AbstractDiagnosticsCollecto
             for (PsiMethod method : type.getMethods()) {
                 if (AnnotationUtils.hasAnnotation(method, INJECT_FQ_NAME)) {
                     for (PsiParameter param : method.getParameterList().getParameters()) {
-                        if (containsWildcard(param.getType())) {
+                        PsiType paramType = param.getType();
+                        if (containsWildcard(paramType)) {
                             diagnostics.add(createDiagnostic(param, unit,
                                     Messages.getMessage("InvalidWildcardTypeInInjectMethod"),
                                     DIAGNOSTIC_CODE_WILDCARD_INJECT_METHOD, null, DiagnosticSeverity.Error));
