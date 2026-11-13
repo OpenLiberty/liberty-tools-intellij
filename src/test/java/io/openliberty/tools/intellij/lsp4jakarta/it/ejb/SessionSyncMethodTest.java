@@ -27,12 +27,14 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaCodeActionParams;
 import org.eclipse.lsp4jakarta.commons.JakartaJavaDiagnosticsParams;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.openliberty.tools.intellij.lsp4jakarta.it.core.JakartaForJavaAssert.*;
 
@@ -313,23 +315,25 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         // QuickFix: insert "boolean committed" as the single parameter
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
-        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
-                + "\n"
-                + "import jakarta.ejb.Stateful;\n"
-                + "import jakarta.ejb.AfterCompletion;\n"
-                + "\n"
-                + "/**\n"
-                + " * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.\n"
-                + " * This class has no parameters (missing the required boolean).\n"
-                + " */\n"
-                + "@Stateful\n"
-                + "public class InvalidAfterCompletionNoParam {\n"
-                + "\n"
-                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
-                + "    @AfterCompletion\n"
-                + "    public void afterCompletion(boolean committed) {\n"
-                + "    }\n"
-                + "}\n";
+        String newText = """
+                package io.openliberty.sample.jakarta.ejb.session_synchronization_method;
+                
+                import jakarta.ejb.Stateful;
+                import jakarta.ejb.AfterCompletion;
+                
+                /**
+                 * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.
+                 * This class has no parameters (missing the required boolean).
+                 */
+                @Stateful
+                public class InvalidAfterCompletionNoParam {
+                
+                    // Error: @AfterCompletion method must have exactly one boolean parameter
+                    @AfterCompletion
+                    public void afterCompletion(boolean committed) {
+                    }
+                }
+                """;
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
         CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
@@ -358,23 +362,25 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         // QuickFix: change type of "String status" to "boolean status"
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
-        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
-                + "\n"
-                + "import jakarta.ejb.Stateful;\n"
-                + "import jakarta.ejb.AfterCompletion;\n"
-                + "\n"
-                + "/**\n"
-                + " * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.\n"
-                + " * This class has a parameter of the wrong type (String instead of boolean).\n"
-                + " */\n"
-                + "@Stateful\n"
-                + "public class InvalidAfterCompletionWrongParam {\n"
-                + "\n"
-                + "    // Error: @AfterCompletion method parameter must be boolean\n"
-                + "    @AfterCompletion\n"
-                + "    public void afterCompletion(boolean status) {\n"
-                + "    }\n"
-                + "}\n";
+        String newText = """
+                package io.openliberty.sample.jakarta.ejb.session_synchronization_method;
+                
+                import jakarta.ejb.Stateful;
+                import jakarta.ejb.AfterCompletion;
+                
+                /**
+                 * Invalid session bean - @AfterCompletion method must declare exactly one boolean parameter.
+                 * This class has a parameter of the wrong type (String instead of boolean).
+                 */
+                @Stateful
+                public class InvalidAfterCompletionWrongParam {
+                
+                    // Error: @AfterCompletion method parameter must be boolean
+                    @AfterCompletion
+                    public void afterCompletion(boolean status) {
+                    }
+                }
+                """;
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
         CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
@@ -388,10 +394,11 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
                 ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamWithBoolean.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // Line 14 (0-based): "    public void afterCompletion(String status, boolean committed, int extra) {"
         // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
@@ -403,23 +410,25 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         // QuickFix: remove "String status" and "int extra", keep "boolean committed"
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
-        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
-                + "\n"
-                + "import jakarta.ejb.Stateful;\n"
-                + "import jakarta.ejb.AfterCompletion;\n"
-                + "\n"
-                + "/**\n"
-                + " * Invalid session bean - @AfterCompletion method has multiple params, one of which is boolean.\n"
-                + " * QuickFix should remove all non-boolean params and keep the boolean one.\n"
-                + " */\n"
-                + "@Stateful\n"
-                + "public class InvalidAfterCompletionMultiParamWithBoolean {\n"
-                + "\n"
-                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
-                + "    @AfterCompletion\n"
-                + "    public void afterCompletion(boolean committed) {\n"
-                + "    }\n"
-                + "}\n";
+        String newText = """
+                package io.openliberty.sample.jakarta.ejb.session_synchronization_method;
+                
+                import jakarta.ejb.Stateful;
+                import jakarta.ejb.AfterCompletion;
+                
+                /**
+                 * Invalid session bean - @AfterCompletion method has multiple params, one of which is boolean.
+                 * QuickFix should remove all non-boolean params and keep the boolean one.
+                 */
+                @Stateful
+                public class InvalidAfterCompletionMultiParamWithBoolean {
+                
+                    // Error: @AfterCompletion method must have exactly one boolean parameter
+                    @AfterCompletion
+                    public void afterCompletion(boolean committed) {
+                    }
+                }
+                """;
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
         CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
@@ -433,10 +442,11 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
                 ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamNoBoolean.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // Line 14 (0-based): "    public void afterCompletion(String status, int extra) {"
         // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
@@ -448,23 +458,25 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         // QuickFix: keep first param but change "String status" -> "boolean status", remove "int extra"
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, expectedDiagnostic);
-        String newText = "package io.openliberty.sample.jakarta.ejb.session_synchronization_method;\n"
-                + "\n"
-                + "import jakarta.ejb.Stateful;\n"
-                + "import jakarta.ejb.AfterCompletion;\n"
-                + "\n"
-                + "/**\n"
-                + " * Invalid session bean - @AfterCompletion method has multiple params, none of which is boolean.\n"
-                + " * QuickFix should keep the first param but change its type to boolean, and remove the rest.\n"
-                + " */\n"
-                + "@Stateful\n"
-                + "public class InvalidAfterCompletionMultiParamNoBoolean {\n"
-                + "\n"
-                + "    // Error: @AfterCompletion method must have exactly one boolean parameter\n"
-                + "    @AfterCompletion\n"
-                + "    public void afterCompletion(boolean status) {\n"
-                + "    }\n"
-                + "}\n";
+        String newText = """
+                package io.openliberty.sample.jakarta.ejb.session_synchronization_method;
+                
+                import jakarta.ejb.Stateful;
+                import jakarta.ejb.AfterCompletion;
+                
+                /**
+                 * Invalid session bean - @AfterCompletion method has multiple params, none of which is boolean.
+                 * QuickFix should keep the first param but change its type to boolean, and remove the rest.
+                 */
+                @Stateful
+                public class InvalidAfterCompletionMultiParamNoBoolean {
+                
+                    // Error: @AfterCompletion method must have exactly one boolean parameter
+                    @AfterCompletion
+                    public void afterCompletion(boolean status) {
+                    }
+                }
+                """;
         TextEdit expectedTextEdit = te(0, 0, 17, 0, newText);
         CodeAction expectedCodeAction = ca(uri, "Change @AfterCompletion method parameter to boolean",
                 expectedDiagnostic, expectedTextEdit);
@@ -478,10 +490,11 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
                 ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidAfterCompletionMultiParamAllBoolean.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         // Line 14 (0-based): "    public void afterCompletion(boolean committed, boolean extra1, boolean extra2) {"
         // "    public void " = 16 chars -> method name "afterCompletion" starts at col 16, ends at col 31
@@ -527,10 +540,11 @@ public class SessionSyncMethodTest extends BaseJakartaTest {
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
                 ModuleUtilCore.getModuleDirPath(module) + BASE_PATH + "InvalidMixedModifiersSessionSyncMethod.java");
+        Assert.assertNotNull(javaFile);
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
-        diagnosticsParams.setUris(Arrays.asList(uri));
+        diagnosticsParams.setUris(Collections.singletonList(uri));
 
         Diagnostic finalOnBeginSync = d(16, 29, 43,
                 "@AfterBegin session synchronization method must not be declared as final.",
