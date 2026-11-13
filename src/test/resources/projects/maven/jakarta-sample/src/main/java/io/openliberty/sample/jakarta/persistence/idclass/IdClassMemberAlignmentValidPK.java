@@ -12,11 +12,14 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.persistence.idclass;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
  * Key class for {@link IdClassMemberAlignmentValid}: all members match by name and type.
  */
+@Embeddable
 public class IdClassMemberAlignmentValidPK implements Serializable {
 
     private static final long serialVersionUID = 1L;

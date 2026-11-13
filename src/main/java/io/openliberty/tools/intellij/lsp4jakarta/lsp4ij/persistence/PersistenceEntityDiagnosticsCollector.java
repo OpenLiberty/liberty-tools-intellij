@@ -66,6 +66,7 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                 PsiAnnotation NamedNativeQueryAnnotation = null;
                 PsiAnnotation NamedNativeQueriesAnnotation = null;
 
+
                 for (PsiAnnotation annotation : allAnnotations) {
                     String qualifiedName = annotation.getQualifiedName();
                     if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.ENTITY)) {
@@ -89,6 +90,13 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                     } else if (isMatchedJavaElement(type, qualifiedName, PersistenceConstants.INHERITANCE)) {
                         inheritanceAnnotation = annotation;
                     }
+                    if (isMatchedJavaElement(type, annotation.getQualifiedName(), PersistenceConstants.IDCLASS)) {
+                        idClassAnnotation = annotation;
+                    }
+                }
+
+                if (idClassAnnotation != null) {
+                    validateIdClassType(idClassAnnotation, unit, diagnostics);
                 }
 
                 boolean hasEntity = EntityAnnotation != null;
@@ -185,6 +193,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         // Track @EmbeddedId and @Id members for identifier conflict checks
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
                             embeddedIdMembers.add(method);
+                            // Check @EmbeddedId on methods
+                            validateEmbeddableReferenceType(method, unit, diagnostics);
                         }
                         if (isMatchedAnnotation(method.getAnnotations(), PersistenceConstants.ID)) {
                             idMembers.add(method);
@@ -238,6 +248,8 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
                         // Track @EmbeddedId and @Id members for identifier conflict checks
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.EMBEDDEDID)) {
                             embeddedIdMembers.add(field);
+                            // Check @EmbeddedId on fields
+                            validateEmbeddableReferenceType(field, unit, diagnostics);
                         }
                         if (isMatchedAnnotation(field.getAnnotations(), PersistenceConstants.ID)) {
                             idMembers.add(field);
@@ -506,35 +518,25 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      */
     private void validatePKDateTemporal(PsiJvmModifiersOwner fieldOrProperty, PsiClass type, List<Diagnostic> diagnostics, PsiJavaFile unit) {
 
-        PsiAnnotation[] annotations = null;
+        PsiAnnotation[] annotations = fieldOrProperty.getAnnotations();
         PsiAnnotation id = null, temporal = null;
         String typeFQ = null;
 
-        if (fieldOrProperty instanceof PsiMethod method) {
-            annotations = method.getAnnotations();
-            if (method.getReturnType() instanceof PsiClassType classType) {
-                PsiClass psiClass = classType.resolve();
-                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
-            }
-        } else if (fieldOrProperty instanceof PsiField field) {
-            annotations = field.getAnnotations();
-            if (field.getType() instanceof PsiClassType classType) {
-                PsiClass psiClass = classType.resolve();
-                typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
-            }
+        PsiType memberType = DiagnosticsUtils.getMemberType(fieldOrProperty);
+        if (memberType instanceof PsiClassType classType) {
+            PsiClass psiClass = classType.resolve();
+            typeFQ = psiClass != null ? psiClass.getQualifiedName() : "";
         }
 
-        if (annotations != null) {
-            for (PsiAnnotation annotation : annotations) {
-                String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
-                        PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
+        for (PsiAnnotation annotation : annotations) {
+            String matchedAnnotation = getMatchedJavaElementName(type, annotation.getQualifiedName(),
+                    PersistenceConstants.SET_OF_PRIMARY_KEY_DATE_ANNOTATIONS);
 
-                if (matchedAnnotation != null) {
-                    if (matchedAnnotation.equals(PersistenceConstants.ID)) {
-                        id = annotation;
-                    } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
-                        temporal = annotation;
-                    }
+            if (matchedAnnotation != null) {
+                if (matchedAnnotation.equals(PersistenceConstants.ID)) {
+                    id = annotation;
+                } else if (matchedAnnotation.equals(PersistenceConstants.TEMPORAL)) {
+                    temporal = annotation;
                 }
             }
         }
@@ -630,16 +632,10 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
      * @param diagnostics list to add diagnostics to
      * @param candidate Check @Id/@Version
      */
+
     private void validateFieldOrMethodType(PsiJvmModifiersOwner element, PsiJavaFile unit, List<Diagnostic> diagnostics,
                                            String candidate, boolean entityHasIdClass) {
-        PsiType elementType = null;
-
-        // Get the type based on whether it's a field or method
-        if (element instanceof PsiField) {
-            elementType = ((PsiField) element).getType();
-        } else if (element instanceof PsiMethod) {
-            elementType = ((PsiMethod) element).getReturnType();
-        }
+        PsiType elementType = DiagnosticsUtils.getMemberType(element);
 
         // If we couldn't determine the type, skip validation
         if (elementType == null) {
@@ -922,6 +918,76 @@ public class PersistenceEntityDiagnosticsCollector extends AbstractDiagnosticsCo
             if (element instanceof PsiAnnotation nested) {
                 validateGeneratorNameAttribute(nested, unit, diagnostics, emptyNameCode);
             }
+        }
+    }
+
+    /**
+     * Validates that a field or method annotated with @EmbeddedId references a type
+     * that is annotated with @Embeddable.
+     * Specification: Jakarta Persistence 3.0, Section 11.1.14, #a14687
+     *
+     * @param member      the field or method to validate
+     * @param unit        compilation unit of Java class
+     * @param diagnostics list to add diagnostics to
+     */
+    private void validateEmbeddableReferenceType(PsiJvmModifiersOwner member,
+                                                 PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiType memberType = DiagnosticsUtils.getMemberType(member);
+
+        if (!(memberType instanceof PsiClassType classType)) {
+            return;
+        }
+
+        PsiClass referencedClass = classType.resolve();
+        if (referencedClass == null) {
+            return;
+        }
+
+        boolean hasEmbeddable = isMatchedAnnotation(referencedClass.getAnnotations(), PersistenceConstants.EMBEDDABLE);
+        if (!hasEmbeddable) {
+            String simpleName = referencedClass.getName();
+            diagnostics.add(createDiagnostic(member, unit,
+                    Messages.getMessage("EmbeddedIdTypeNotAnnotatedWithEmbeddable", simpleName),
+                    PersistenceConstants.DIAGNOSTIC_CODE_EMBEDDED_ID_TYPE_NOT_EMBEDDABLE, null,
+                    DiagnosticSeverity.Error));
+        }
+    }
+
+    /**
+     * Validates that the primary key class referenced by @IdClass is annotated with @Embeddable.
+     * Specification: Jakarta Persistence 3.0, Section 11.1.14, #a14687
+     *
+     * @param idClassAnnotation the @IdClass annotation
+     * @param unit              compilation unit of Java class
+     * @param diagnostics       list to add diagnostics to
+     */
+    private void validateIdClassType(PsiAnnotation idClassAnnotation,
+                                     PsiJavaFile unit, List<Diagnostic> diagnostics) {
+        PsiAnnotationMemberValue valueAttr = idClassAnnotation.findAttributeValue("value");
+        if (valueAttr == null) {
+            return;
+        }
+
+        // The value is a class literal expression, e.g. OrderId.class
+        PsiType keyType = null;
+        if (valueAttr instanceof PsiClassObjectAccessExpression classLiteral) {
+            keyType = classLiteral.getOperand().getType();
+        }
+        if (!(keyType instanceof PsiClassType classType)) {
+            return;
+        }
+
+        PsiClass keyClass = classType.resolve();
+        if (keyClass == null) {
+            return;
+        }
+
+        boolean hasEmbeddable = isMatchedAnnotation(keyClass.getAnnotations(), PersistenceConstants.EMBEDDABLE);
+        if (!hasEmbeddable) {
+            diagnostics.add(createDiagnostic(idClassAnnotation, unit,
+                    Messages.getMessage("IdClassTypeNotAnnotatedWithEmbeddable", keyClass.getName()),
+                    PersistenceConstants.DIAGNOSTIC_CODE_IDCLASS_TYPE_NOT_EMBEDDABLE, null,
+                    DiagnosticSeverity.Error));
         }
     }
 }

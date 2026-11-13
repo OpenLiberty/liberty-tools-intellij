@@ -1,5 +1,7 @@
 package io.openliberty.sample.jakarta.persistence;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,7 @@ import java.io.Serializable;
  * takes PartialInvalidIdClass instead of Object, so it does not override Object.equals.
  * Expected diagnostics (1): no equals(Object).
  */
+@Embeddable
 public class PartialInvalidIdClass extends SerializableBaseKey {
 
     public String firstName;

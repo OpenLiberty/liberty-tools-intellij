@@ -12,12 +12,15 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.persistence.idclass;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
  * Key class for {@link IdClassOneToOneValid}: holds String empName and int dept,
  * matching the parent entity's PK type for the relationship field.
  */
+@Embeddable
 public class IdClassOneToOneValidPK implements Serializable {
 
     private static final long serialVersionUID = 1L;

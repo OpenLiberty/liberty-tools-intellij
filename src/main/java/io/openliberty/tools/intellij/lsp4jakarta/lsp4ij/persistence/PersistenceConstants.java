@@ -144,6 +144,8 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_NAMED_QUERIES_ON_INVALID_CLASS = "NamedQueriesOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERY_ON_INVALID_CLASS = "NamedNativeQueryOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
+    public static final String DIAGNOSTIC_CODE_EMBEDDED_ID_TYPE_NOT_EMBEDDABLE = "EmbeddedIdTypeNotAnnotatedWithEmbeddable";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_TYPE_NOT_EMBEDDABLE = "IdClassTypeNotAnnotatedWithEmbeddable";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
 

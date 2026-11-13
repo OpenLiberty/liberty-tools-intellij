@@ -12,6 +12,8 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.persistence.idclass;
 
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 /**
@@ -19,6 +21,7 @@ import java.io.Serializable;
  * and {@link OrderEmbeddedId} order, matching the embeddable PK type of the
  * related entity's {@code @EmbeddedId} field.
  */
+@Embeddable
 public class IdClassManyToOneEmbeddedIdValidPK implements Serializable {
 
     private static final long serialVersionUID = 1L;
