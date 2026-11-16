@@ -13,11 +13,13 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.jsonb.JsonbConstants;
 
 
@@ -57,5 +59,16 @@ public class JsonPropertyUtils {
             value = value.substring(1, value.length() - 1);
         }
         return value;
+    }
+
+    /**
+     * Method used to get method binding in a cache approach, if absent it computes, otherwise takes it from the Map.
+     *
+     * @param mi
+     * @param methodCache
+     * @return
+     */
+    public static PsiMethod getResolvedMethod(PsiMethodCallExpression mi, Map<PsiMethodCallExpression, PsiMethod> methodCache) {
+        return methodCache.computeIfAbsent(mi, m -> m.resolveMethod());
     }
 }

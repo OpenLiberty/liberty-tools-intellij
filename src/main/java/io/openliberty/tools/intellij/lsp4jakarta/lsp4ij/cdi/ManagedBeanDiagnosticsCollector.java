@@ -14,11 +14,16 @@
 package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.AnnotationUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -30,6 +35,8 @@ import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.JDTUtils.getSimpl
 import static io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.cdi.ManagedBeanConstants.*;
 
 public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollector {
+
+    private static final Logger LOGGER = Logger.getLogger(ManagedBeanDiagnosticsCollector.class.getName());
 
     public ManagedBeanDiagnosticsCollector() {
         super();
@@ -45,9 +52,12 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         if (unit == null)
             return;
 
-        PsiClass[] types = unit.getClasses();
+        // Get all classes including nested classes
+        List<PsiClass> allTypes = new ArrayList<>();
+        PsiUtils.collectAllClasses(unit.getClasses(), allTypes);
+
         String[] scopeFQNames = SCOPE_FQ_NAMES.toArray(String[]::new);
-        for (PsiClass type : types) {
+        for (PsiClass type : allTypes) {
             PsiAnnotation[] typeAnnotations = type.getAnnotations();
             List<String> managedBeanAnnotations = getMatchedJavaElementNames(type, Stream.of(typeAnnotations)
                             .map(annotation -> annotation.getQualifiedName()).toArray(String[]::new),
@@ -62,6 +72,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                             INTERCEPTOR_FQ_NAME,
                             DECORATOR_FQ_NAME
                     }).isEmpty();
+
             String[] injectAnnotations = { PRODUCES_FQ_NAME, INJECT_FQ_NAME };
             PsiField fields[] = type.getFields();
             boolean nonStaticPublicFieldPresent = false;
@@ -127,6 +138,25 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     diagnostics.add(createDiagnostic(field, unit,
                             Messages.getMessage("ManagedBeanProducesAndInject"),
                             ManagedBeanConstants.DIAGNOSTIC_CODE_PRODUCES_INJECT, null, DiagnosticSeverity.Error));
+                }
+
+                /**
+                 * Producer fields must not declare a bean name using @Named annotation.
+                 *
+                 * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0.html#declaring_producer_field
+                 * Section 3.3.2: A producer field may have a bean name, specified using the @Named qualifier.
+                 * However, the specification states that producer fields must not declare a bean name using @Named.
+                 */
+                if (isProducerField) {
+                    for (PsiAnnotation annotation : field.getAnnotations()) {
+                        if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                            diagnostics.add(createDiagnostic(annotation, unit,
+                                    Messages.getMessage("ProducerFieldWithNamedAnnotation", field.getName()),
+                                    DIAGNOSTIC_CODE_PRODUCER_FIELD_NAMED, null,
+                                    DiagnosticSeverity.Error));
+                            break;
+                        }
+                    }
                 }
 
             }
@@ -217,7 +247,7 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     // A method cannot have more than one parameter annotated with @Observes or @ObservesAsync
                     String paramNames = paramsWithObserverAnnotations.stream()
                             .map(PsiParameter::getName)
-                            .collect(java.util.stream.Collectors.joining(", "));
+                            .collect(Collectors.joining(", "));
                     diagnostics.add(createDiagnostic(method, unit, Messages.getMessage("ManagedBeanMultipleObserverParams", paramNames),
                             DIAGNOSTIC_MULTIPLE_OBSERVER_PARAMS, null, DiagnosticSeverity.Error));
                 } else if (isDependent && hasConditionalObserverAnnotation(type, method)) {
@@ -228,6 +258,41 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                     diagnostics.add(createDiagnostic(method, unit,
                             Messages.getMessage("ManagedBeanDependentScopeConditionalObserver", method.getName()),
                             DIAGNOSTIC_CODE_DEPENDENT_CONDITIONAL_OBSERVER, null, DiagnosticSeverity.Error));
+                }
+                // Check for @Disposes in interceptors/decorators
+                if (interceptorOrDecorator) {
+                    List<String> disposesParams = getDisposesParamNames(type, method);
+                    if (!disposesParams.isEmpty()) {
+                        String paramNames = String.join(", ", disposesParams);
+                        diagnostics.add(createDiagnostic(method, unit,
+                                Messages.getMessage("InvalidInterceptorOrDecoratorWithDisposerMethod", paramNames),
+                                DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_DISPOSER, null, DiagnosticSeverity.Error));
+                    }
+                }
+
+
+                /**
+                 * Validate @Named annotation on constructor and method parameters
+                 *
+                 * According to CDI specification, @Named on non-field injection points
+                 * (constructor or method parameters) must specify a value attribute.
+                 *
+                 * https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#named_at_injection_point
+                 */
+                if (isConstructorMethod(method) || isInjectMethod) {
+                    for (PsiParameter param : method.getParameterList().getParameters()) {
+                        for (PsiAnnotation annotation : param.getAnnotations()) {
+                            if (isMatchedJavaElement(type, annotation.getQualifiedName(), NAMED_FQ_NAME)) {
+                                String namedValue = AnnotationUtils.getAnnotationMemberValue(annotation, "value");
+                                if (namedValue == null || namedValue.trim().isEmpty()) {
+                                    diagnostics.add(createDiagnostic(annotation, unit,
+                                            Messages.getMessage("InvalidNamedAnnotationOnNonFieldInjectionPoint"),
+                                            DIAGNOSTIC_CODE_INVALID_NAMED_ANNOTATION, null,
+                                            DiagnosticSeverity.Error));
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -317,7 +382,18 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
              */
             invalidParamsCheck(unit, diagnostics, type, INJECT_FQ_NAME,
                     ManagedBeanConstants.DIAGNOSTIC_CODE_INVALID_INJECT_PARAM);
-
+            // Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+            // They should only use @Dependent scope
+            if (interceptorOrDecorator) {
+                List<String> foundInvalidScopes = validateInterceptorDecoratorScopes(type, typeAnnotations);
+                if (!foundInvalidScopes.isEmpty()) {
+                    diagnostics.add(createDiagnostic(type, unit,
+                            Messages.getMessage("InterceptorOrDecoratorWithIllegalScope"),
+                            DIAGNOSTIC_CODE_INTERCEPTOR_DECORATOR_ILLEGAL_SCOPE,
+                            new Gson().toJsonTree(foundInvalidScopes),
+                            DiagnosticSeverity.Error));
+                }
+            }
             if (isManagedBean) {
                 /*
                  * ========= Produces and Disposes, Observes, ObservesAsync Annotations Checks=========
@@ -369,6 +445,11 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
                                 DiagnosticSeverity.Error));
                     }
                 }
+
+                // A disposer method is only valid if the bean class declares a producer
+                // method or field whose return type is assignable to the @Disposes parameter.
+                // https://jakarta.ee/specifications/cdi/3.0/jakarta-cdi-spec-3.0#disposer_method_resolution
+                checkOrphanDisposerMethods(unit, diagnostics, type, methods, fields);
             }
         }
     }
@@ -450,6 +531,74 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         }
     }
 
+    /**
+     * Checks whether any non-constructor method in the type has exactly one {@code @Disposes}
+     * parameter whose erased type has no matching {@code @Produces} producer (method or field)
+     * in the same class. Such a disposer is an orphan and the container must treat it as a
+     * definition error.
+     *
+     * <p>Methods with more than one {@code @Disposes} parameter are skipped — they are already
+     * flagged by {@code DIAGNOSTIC_CODE_REDUNDANT_DISPOSES}.
+     *
+     * @param unit        the PSI Java file
+     * @param diagnostics the list to add diagnostic errors to
+     * @param type        the bean class being analysed
+     * @param methods     all methods declared on the type
+     * @param fields      all fields declared on the type
+     */
+    private void checkOrphanDisposerMethods(PsiJavaFile unit, List<Diagnostic> diagnostics,
+                                            PsiClass type, PsiMethod[] methods, PsiField[] fields) {
+        // Collect the FQ type names produced by @Produces methods and fields.
+        // Uses isMatchedJavaElement directly — same pattern as getDisposesParamNames.
+        Set<String> producerTypes = new HashSet<>();
+        for (PsiMethod m : methods) {
+            if (!isConstructorMethod(m) && hasProducesAnnotation(type, m.getAnnotations())) {
+                String fqn = m.getReturnType() != null ? m.getReturnType().getCanonicalText() : null;
+                if (fqn != null) producerTypes.add(fqn);
+            }
+        }
+        for (PsiField f : fields) {
+            if (hasProducesAnnotation(type, f.getAnnotations())) {
+                producerTypes.add(f.getType().getCanonicalText());
+            }
+        }
+
+        // Flag disposer methods whose @Disposes parameter type has no matching producer.
+        for (PsiMethod method : methods) {
+            if (isConstructorMethod(method)) continue;
+
+            // Reuse getDisposesParamNames to find @Disposes parameters; skip if 0 or >1 (>1 is a separate error).
+            List<String> disposesNames = getDisposesParamNames(type, method);
+            if (disposesNames.size() != 1) continue;
+
+            // Locate the ILocalVariable for the single @Disposes param to read its type.
+            PsiParameter disposesParam = Stream.of(method.getParameterList().getParameters())
+                    .filter(p -> p.getName().equals(disposesNames.get(0)))
+                    .findFirst().orElse(null);
+            if (disposesParam == null) continue;
+
+            String fqn = disposesParam.getType().getCanonicalText();
+            if (!producerTypes.contains(fqn)) {
+                diagnostics.add(createDiagnostic(method, unit,
+                        Messages.getMessage("InvalidOrphanDisposerMethod"),
+                        DIAGNOSTIC_CODE_ORPHAN_DISPOSER, null, DiagnosticSeverity.Error));
+            }
+        }
+    }
+
+    /**
+     * Returns {@code true} if any annotation in the array resolves to
+     * {@code jakarta.enterprise.inject.Produces} via {@link #isMatchedJavaElement}.
+     */
+    private boolean hasProducesAnnotation(PsiClass type, PsiAnnotation[] annotations) {
+        for (PsiAnnotation ann : annotations) {
+            if (isMatchedJavaElement(type, ann.getQualifiedName(), PRODUCES_FQ_NAME)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String createInvalidInjectLabel(Set<String> invalidAnnotations) {
         return Messages.getMessage("ManagedBeanInvalidInject", String.join(", ", invalidAnnotations)); // assuming comma delimited list is ok
     }
@@ -509,5 +658,69 @@ public class ManagedBeanDiagnosticsCollector extends AbstractDiagnosticsCollecto
         return Stream.of(method.getParameterList().getParameters())
                 .flatMap(param -> Stream.of(param.getAnnotations()))
                 .anyMatch(annotation -> isConditionalObserver(type, annotation));
+    }
+
+    /**
+     * getDisposesParamNames
+     * Returns a list of parameter names that are annotated with @Disposes.
+     *
+     * @param type   the type
+     * @param method the method to check
+     * @return list of parameter names annotated with @Disposes
+     */
+    private List<String> getDisposesParamNames(PsiClass type, PsiMethod method) {
+        List<String> paramNames = new ArrayList<>();
+        for (PsiParameter param : method.getParameterList().getParameters()) {
+            for (PsiAnnotation annotation : param.getAnnotations()) {
+                if (isMatchedJavaElement(type, annotation.getQualifiedName(), DISPOSES_FQ_NAME)) {
+                    paramNames.add(param.getName());
+                    break;
+                }
+            }
+        }
+        return paramNames;
+    }
+
+    /**
+     * validateInterceptorDecoratorScopes
+     * Validates that interceptors and decorators do not declare invalid scope annotations.
+     * Interceptors and decorators must not have normal scopes (ApplicationScoped, SessionScoped, etc.)
+     * and should only use @Dependent scope. Detects both built-in CDI scopes and custom @NormalScope annotations.
+     *
+     * @param type the Java type being validated
+     * @param typeAnnotations the annotations on the type
+     * @return list of invalid scope annotation fully qualified names
+     */
+    private List<String> validateInterceptorDecoratorScopes(PsiClass type, PsiAnnotation[] typeAnnotations) {
+        List<String> foundInvalidScopes = new ArrayList<>();
+
+        // Check each annotation to see if it's an invalid scope
+        for (PsiAnnotation annotation : typeAnnotations) {
+            String annotationName = annotation.getQualifiedName();
+            // Check if it's a built-in invalid scope
+            String matchedBuiltInScope = getMatchedJavaElementName(type, annotationName,
+                    INVALID_INTERCEPTOR_DECORATOR_SCOPES);
+            if (matchedBuiltInScope != null) {
+                foundInvalidScopes.add(matchedBuiltInScope);
+                // Skip @Interceptor, @Decorator, and @Dependent annotations - these are not scopes we're checking
+            } else if (null == getMatchedJavaElementName(type, annotationName,
+                    new String[] {
+                            INTERCEPTOR_FQ_NAME,
+                            DECORATOR_FQ_NAME,
+                            DEPENDENT_FQ_NAME
+                    })) {
+                // Check if it's a custom @NormalScope annotation using AnnotationUtil
+                try {
+                    PsiClass annotationType = JavaPsiFacade.getInstance(type.getProject())
+                            .findClass(annotationName, type.getResolveScope());
+                    if (annotationType != null && AnnotationUtil.isAnnotated(annotationType, NORMAL_SCOPE_FQ_NAME, 0)) {
+                        foundInvalidScopes.add(annotationName);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Exception during annotation type resolution for: " + annotationName, e);
+                }
+            }
+        }
+        return foundInvalidScopes;
     }
 }

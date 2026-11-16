@@ -29,8 +29,11 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 /**
  * Project IDE frame.
+ * Starting with IntelliJ 2026.3 the Welcome page is also an IdeFrameImpl, so frames that contain
+ * the WelcomeScreenLeftToolbarPanel are excluded.
  */
-@DefaultXpath(by = "IdeFrameImpl type", xpath = "//div[@class='IdeFrameImpl']")
+@DefaultXpath(by = "IdeFrameImpl type",
+        xpath = "//div[@class='IdeFrameImpl' and not(.//div[@class='WelcomeScreenLeftToolbarPanel'])]")
 @FixtureName(name = "Project Frame")
 public class ProjectFrameFixture extends CommonContainerFixture {
 
@@ -313,14 +316,15 @@ public class ProjectFrameFixture extends CommonContainerFixture {
     }
 
     /**
-     * Returns the ContainerFixture object associated with the JBTextArea class.
+     * Returns the ContainerFixture object associated with the JEditorPane class used
+     * in the Liberty tool window empty-state panel.
      *
      * @param xpathVars The Locator custom variables: waitTime(seconds)
-     * @return The ContainerFixture object associated with the JBTextArea class.
+     * @return The ContainerFixture object associated with the JEditorPane class.
      */
     public ContainerFixture getTextArea(String... xpathVars) {
         String waitTime = xpathVars[0];
-        return find(ContainerFixture.class, byXpath("//div[@class='JBTextArea']"), Duration.ofSeconds(Integer.parseInt(waitTime)));
+        return find(ContainerFixture.class, byXpath("(//div[@class='JEditorPane'])[1]"), Duration.ofSeconds(Integer.parseInt(waitTime)));
     }
 
     /**

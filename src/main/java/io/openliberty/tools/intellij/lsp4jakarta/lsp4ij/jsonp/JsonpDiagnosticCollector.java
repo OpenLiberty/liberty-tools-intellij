@@ -18,10 +18,10 @@ import java.util.Collection;
 import java.util.List;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import org.apache.commons.lang3.StringUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.AbstractDiagnosticsCollector;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
+import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiJsonBJsonPMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
@@ -49,13 +49,13 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         List<PsiMethodCallExpression> createArrayBuilderMethodInvocations = new ArrayList<>();
 
         for (PsiMethodCallExpression mi : allMethodInvocations) {
-            if (isMatchedMethodFQName(mi, JsonpConstants.JSON_FQ_NAME)) {
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JSON_FQ_NAME)) {
                 createPointerInvocations.add(mi);
             }
-            if (isMatchedMethodFQName(mi, JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_FQ_NAME)){
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JAKARTA_JSON_OBJECT_BUILDER_FQ_NAME)){
                 createObjectBuilderMethodInvocations.add(mi);
             }
-            if (isMatchedMethodFQName(mi, JsonpConstants.JAKARTA_JSON_ARRAY_BUILDER_FQ_NAME)){
+            if (PsiJsonBJsonPMethodCallUtils.isMatchedJsonBJsonPMethodsFQName(mi, JsonpConstants.JAKARTA_JSON_ARRAY_BUILDER_FQ_NAME)){
                 createArrayBuilderMethodInvocations.add(mi);
             }
         }
@@ -94,15 +94,15 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
                                                        List<PsiMethodCallExpression> builderMethodInvocations,
                                                        String msg, String errCode) {
         for(PsiMethodCallExpression m: builderMethodInvocations){
-            if(getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
+            if(PsiJsonBJsonPMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.CREATE_POINTER)){
                 PsiExpression arg = m.getArgumentList().getExpressions()[0];
                 if(isInvalidArgumentCreatePointer(arg)) {
                     buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                 }
-            } else if(getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
+            } else if(PsiJsonBJsonPMethodCallUtils.getMethodName(m.resolveMethod()).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
                 PsiExpression[] args = m.getArgumentList().getExpressions();
                 for(PsiExpression arg : args) {
-                    if(isInvalidNullArgument(arg)) {
+                    if(PsiJsonBJsonPMethodCallUtils.isInvalidNullArgument(arg)) {
                         buildInvalidArgumentDiagnostic(diagnostics, msg, errCode, arg);
                     }
                 }
@@ -123,51 +123,6 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         Diagnostic diagnostic = new Diagnostic(range, msg);
         completeDiagnostic(diagnostic, errCode);
         diagnostics.add(diagnostic);
-    }
-
-    /**
-     * Method is used to check if value of arg passed or Cast Expression inside passed arg is null
-     *
-     * @param arg
-     * @return
-     */
-    private boolean isInvalidNullArgument(PsiExpression arg) {
-        return (arg instanceof PsiLiteralExpression lit && lit.getValue() == null)
-                || (arg instanceof PsiTypeCastExpression cast
-                && cast.getOperand() instanceof PsiLiteralExpression
-                && ((PsiLiteralExpression) cast.getOperand()).getValue() == null);
-    }
-
-    /**
-     * isMatchedMethodFQName
-     * Method is used to identify passed method invocations
-     *
-     * @param mce
-     * @param methodParentTypeFQ
-     * @return boolean
-     */
-    private boolean isMatchedMethodFQName(PsiMethodCallExpression mce, String methodParentTypeFQ) {
-        PsiMethod method = mce.resolveMethod();
-        if(getMethodName(method).equals(JsonpConstants.CREATE_POINTER)){
-            return mce.getArgumentList().getExpressionCount() == JsonpConstants.EXPRESSION_COUNT_CREATE_POINTER
-                    && methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
-        } else if(getMethodName(method).equals(JsonpConstants.JAKARTA_JSON_BUILDER_ADD_METHOD)){
-            return methodParentTypeFQ.equals(method.getContainingClass().getQualifiedName());
-        }
-        return false;
-    }
-
-    /**
-     * Check if valid method exists
-     *
-     * @param method
-     * @return
-     */
-    private String getMethodName(PsiMethod method) {
-        if(method != null && method.getClass() != null){
-           return method.getName();
-        }
-        return StringUtils.EMPTY;
     }
 
     private boolean isInvalidArgumentCreatePointer(PsiExpression arg) {

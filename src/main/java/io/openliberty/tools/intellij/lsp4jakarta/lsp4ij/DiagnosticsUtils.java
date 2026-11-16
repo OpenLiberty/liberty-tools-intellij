@@ -16,10 +16,11 @@ package io.openliberty.tools.intellij.lsp4jakarta.lsp4ij;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-
+import com.intellij.psi.tree.IElementType;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for common IntelliJ PSI-based diagnostic logic.
@@ -160,4 +161,103 @@ public class DiagnosticsUtils {
         }
         return superClasses;
     }
+
+    /**
+     * Returns {@code true} if the given {@code @Priority} annotation carries a
+     * negative integer value.
+     *
+     * <p>Handles two PSI representations of a negative integer literal:
+     * <ul>
+     *   <li>A {@link PsiPrefixExpression} with a {@code MINUS} operator wrapping a
+     *       {@link PsiLiteralExpression} (e.g. {@code -1}).</li>
+     *   <li>A raw text value that can be parsed as a negative integer.</li>
+     * </ul>
+     *
+     * @param priorityAnnotation the {@code @Priority} annotation to inspect;
+     *                           must not be {@code null}
+     * @return {@code true} if the priority value is negative; {@code false} otherwise
+     */
+    public static boolean isNegativePriorityValue(PsiAnnotation priorityAnnotation) {
+        PsiAnnotationMemberValue valueAttr = priorityAnnotation.findAttributeValue("value");
+        if (valueAttr == null) {
+            return false;
+        }
+
+        // Case 1: literal negative integer written as -<number> (PsiPrefixExpression)
+        if (valueAttr instanceof PsiPrefixExpression prefix) {
+            IElementType op = prefix.getOperationSign().getTokenType();
+            if (JavaTokenType.MINUS.equals(op) && prefix.getOperand() instanceof PsiLiteralExpression literal) {
+                return literal.getValue() instanceof Integer;
+            }
+        }
+
+        // Case 2: fall back to text-based parsing (covers numeric constant expressions)
+        try {
+            return Integer.parseInt(valueAttr.getText()) < 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Converts a list of fully-qualified annotation names into a comma-separated
+     * string of simple names with the given prefix, removing duplicates.
+     *
+     * @param fqAnnotationNames list of fully-qualified annotation names
+     * @param prefix            prefix to prepend to each simple name (e.g. {@code "@"})
+     * @return comma-separated display string, e.g. {@code "@AfterBegin, @BeforeCompletion"}
+     */
+    public static String getSimpleAnnotationNames(List<String> fqAnnotationNames, String prefix) {
+        return fqAnnotationNames.stream()
+                .map(fq -> prefix + JDTUtils.getSimpleName(fq))
+                .distinct()
+                .collect(Collectors.joining(", "));
+    }
+
+    /**
+     * Returns {@code true} only when {@code keyType} is definitively an enum type.
+     * Concrete class types, upper-bounded wildcards whose bound is an enum, and
+     * all other forms (raw, unbound wildcard, lower-bounded wildcard, type variable)
+     * return {@code false}.
+     */
+    public static boolean isEnumKeyType(PsiType keyType) {
+        if (keyType instanceof PsiClassType keyClassType) {
+            PsiClass keyClass = keyClassType.resolve();
+            return keyClass != null && keyClass.isEnum();
+        }
+        if (keyType instanceof PsiWildcardType wildcardType && wildcardType.isExtends()) {
+            PsiType bound = wildcardType.getBound();
+            if (bound instanceof PsiClassType boundClassType) {
+                PsiClass boundClass = boundClassType.resolve();
+                return boundClass != null && boundClass.isEnum();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the fully-qualified name of the first type argument from a parameterised
+     * superinterface on the given class.
+     *
+     * <p>For example, given a class that implements {@code ObserverMethod<AuditEvent>},
+     * this method returns {@code "AuditEvent"} when called with
+     * {@code interfaceFQName = "jakarta.enterprise.inject.spi.ObserverMethod"}.
+     *
+     * @param classBinding the class whose {@code implements} list is inspected
+     * @param interfaceFQName the fully-qualified name of the superinterface to search for
+     * @return the FQN of the first type argument, or {@code "java.lang.Object"} if not found
+     */
+    public static String resolveTypeArgumentFQName(PsiClass classBinding, String interfaceFQName) {
+        for (PsiClassType ifaceType : classBinding.getImplementsListTypes()) {
+            PsiClass iface = ifaceType.resolve();
+            if (iface != null && interfaceFQName.equals(iface.getQualifiedName())) {
+                PsiType[] typeArgs = ifaceType.getParameters();
+                if (typeArgs.length > 0) {
+                    return typeArgs[0].getCanonicalText();
+                }
+            }
+        }
+        return "java.lang.Object";
+    }
+
 }
