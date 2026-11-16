@@ -25,23 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Generic PSI proposal that replaces a method's parameter list so it contains
- * exactly one parameter of a caller-specified primitive type.
- *
- * <p>The four cases handled automatically:
- * <ol>
- *   <li><b>No params</b> &rarr; inserts one parameter of the required type
- *       with the caller-supplied default name</li>
- *   <li><b>Single param, wrong type</b> &rarr; changes its type to the
- *       required type (name kept as-is)</li>
- *   <li><b>Multiple params, one already the required type</b> &rarr; removes
- *       all others; keeps the matching one</li>
- *   <li><b>Multiple params, none the required type</b> &rarr; keeps the first
- *       param but changes its type; removes all others</li>
- * </ol>
- *
- * <p>This proposal is annotation-agnostic. Callers supply the required
- * primitive type name (e.g. {@code "boolean"}) and default parameter name.
+ * Code action proposal for replacing a method's parameter list with a single parameter
  */
 public class ReplaceParametersWithSingleParamProposal extends ChangeCorrectionProposal {
 
@@ -133,8 +117,6 @@ public class ReplaceParametersWithSingleParamProposal extends ChangeCorrectionPr
      * required type name, or an empty {@link OptionalInt} if none matches.
      *
      * @param params the method's parameter list
-     * @return an {@link OptionalInt} with the zero-based index of the first
-     *         matching parameter, or empty if none is found
      */
     private OptionalInt findMatchingParamIndex(List<PsiParameter> params) {
         return IntStream.range(0, params.size())

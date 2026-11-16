@@ -30,20 +30,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Generic abstract quickfix that replaces a method's parameter list so it
- * contains exactly one parameter of a subclass-specified primitive type.
- *
- * <p>Subclasses supply:
- * <ul>
- *   <li>{@link #getRequiredTypeName()} — Java keyword for the required type
- *       (e.g. {@code "boolean"})</li>
- *   <li>{@link #getDefaultParamName()} — the name used when inserting a
- *       brand-new parameter</li>
- *   <li>{@link #getLabel()} — the label shown to the user</li>
- * </ul>
- *
- * <p>Delegates all PSI rewriting to
- * {@link ReplaceParametersWithSingleParamProposal}.
+ * Quickfix for replacing a method's parameter list with a single parameter
  */
 public abstract class ReplaceParametersWithSingleParamQuickFix implements IJavaCodeActionParticipant {
 
