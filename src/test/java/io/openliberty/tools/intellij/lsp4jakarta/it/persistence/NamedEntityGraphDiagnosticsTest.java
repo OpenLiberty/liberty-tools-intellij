@@ -47,9 +47,6 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
      * An entity whose {@code @NamedEntityGraph} name {@code "User.graph"} is also
      * declared on {@code NamedEntityGraphDuplicate2} must produce a diagnostic.
      *
-     * <p>The annotation {@code @NamedEntityGraph(name = "User.graph")} is at
-     * 0-based line 7, cols 0–38 in the test resource file.
-     *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
      */
@@ -184,11 +181,6 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
      * {@code "User.graph"} (also declared in {@code NamedEntityGraphDuplicate1}
      * and {@code NamedEntityGraphDuplicate2}).
      *
-     * <p>The inner {@code @NamedEntityGraph(name = "User.graph")} is at
-     * 0-based line 9, cols 8–46 in the test resource file.
-     * The inner {@code @NamedEntityGraph(name = "Container.uniqueGraph")} is unique
-     * and must not produce a diagnostic.
-     *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
      */
@@ -239,10 +231,6 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
      * Entity using {@code @NamedEntityGraphs} where both inner graphs share the
      * same name {@code "Self.duplicate"} — both must produce a diagnostic.
      *
-     * <p>Both inner annotations are at 0-based lines 9 and 10, each starting
-     * at col 8. {@code @NamedEntityGraph(name = "Self.duplicate")} = 42 chars
-     * → cols 8–50.
-     *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662
      */
@@ -276,9 +264,6 @@ public class NamedEntityGraphDiagnosticsTest extends BaseJakartaTest {
     /**
      * An entity with an invalid attribute in {@code @NamedAttributeNode} must produce
      * a diagnostic.
-     *
-     * <p>The attribute node {@code @NamedAttributeNode("nonExistentField")} is at
-     * 0-based line 12, cols 8–47 in the test resource file.
      *
      * Spec §3.7.4:
      * https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html#a13662

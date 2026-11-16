@@ -172,14 +172,9 @@ public class DiagnosticsUtils {
      * least one field on {@code psiClass} directly carries {@code @Id} or
      * {@code @EmbeddedId}.
      *
-     * <p>JPA access type is determined by the placement of {@code @Id} on the
-     * declaring entity — no superclass walk is needed here.
-     *
      * @param psiClass     the entity class to inspect
      * @param idFQ         the fully-qualified name of {@code @Id}
      * @param embeddedIdFQ the fully-qualified name of {@code @EmbeddedId}
-     * @return {@code true} if any field on {@code psiClass} is annotated with
-     *         {@code @Id} or {@code @EmbeddedId}
      */
     public static boolean isFieldBasedAccess(PsiClass psiClass, String idFQ, String embeddedIdFQ) {
         return Arrays.stream(psiClass.getFields())
@@ -201,16 +196,11 @@ public class DiagnosticsUtils {
     }
 
     /**
-     * Returns the values of an array-valued annotation member, normalizing PSI's
-     * two representations into a single list.
-     *
-     * <p>PSI represents the member as a {@link PsiArrayInitializerMemberValue} when
-     * array notation is used (e.g. {@code {@A, @B}}), but as the bare element when a
-     * single value is given without braces (e.g. {@code @A}). Both forms are handled.</p>
+     * Returns the values of an annotation member as a list.
      *
      * @param annotation  the annotation to inspect
      * @param memberName  the member/attribute name
-     * @param elementType the expected type of each element; elements of other types are skipped
+     * @param elementType the expected type of each element
      * @return the matching elements, or an empty list if the member is absent
      */
     public static <T extends PsiAnnotationMemberValue> List<T> getAnnotationMemberValues(
