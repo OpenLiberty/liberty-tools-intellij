@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 Red Hat Inc. and others.
+* Copyright (c) 2023, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,8 +22,9 @@ public enum MicroProfileGraphQLErrorCode implements IJavaErrorCode {
 
 	NO_VOID_QUERIES,
 	NO_VOID_MUTATIONS,
-	WRONG_DIRECTIVE_PLACEMENT
-	;
+	WRONG_DIRECTIVE_PLACEMENT,
+	SUBSCRIPTION_MUST_RETURN_MULTI,
+	SINGLE_RESULT_OPERATION_MUST_NOT_RETURN_MULTI;
 
 	@Override
 	public String getCode() {

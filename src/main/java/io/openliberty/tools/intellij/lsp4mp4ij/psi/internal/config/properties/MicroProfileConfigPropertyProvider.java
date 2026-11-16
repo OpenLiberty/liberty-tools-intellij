@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 Red Hat Inc. and others.
+* Copyright (c) 2019, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -12,10 +12,8 @@ package io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.config.properties;
 import com.intellij.lang.jvm.JvmMember;
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.AbstractAnnotationTypeReferencePropertiesProvider;
-import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.IPropertiesCollector;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.SearchContext;
 import org.apache.commons.lang3.StringUtils;
 
@@ -120,41 +118,8 @@ public class MicroProfileConfigPropertyProvider extends AbstractAnnotationTypeRe
 	}
 
 
-	private void oldMethod(PsiModifierListOwner psiElement, PsiAnnotation configPropertyAnnotation, SearchContext context) {
-		IPropertiesCollector collector = context.getCollector();
-		String name = getAnnotationMemberValue(configPropertyAnnotation,
-				"");
-		if (StringUtils.isNotEmpty(name)) {
-			String propertyTypeName = "";
-			if (psiElement instanceof PsiField) {
-				propertyTypeName = getResolvedTypeName((PsiField) psiElement);
-			} else if (psiElement instanceof PsiMethod) {
-				propertyTypeName = getResolvedResultTypeName((PsiMethod) psiElement);
-			} else if (psiElement instanceof PsiVariable) {
-				propertyTypeName = getResolvedTypeName((PsiVariable) psiElement);
-			}
-			PsiClass fieldClass = JavaPsiFacade.getInstance(psiElement.getProject()).findClass(propertyTypeName, GlobalSearchScope.allScope(psiElement.getProject()));
-
-			String type = getPropertyType(fieldClass, propertyTypeName);
-			String description = null;
-			String sourceType = getSourceType(psiElement);
-			String sourceField = null;
-			String sourceMethod = null;
-			if (psiElement instanceof PsiField || psiElement instanceof PsiMethod) {
-				sourceField = getSourceField((PsiMember) psiElement);
-			} else if (psiElement instanceof PsiParameter) {
-				PsiMethod method = (PsiMethod) ((PsiParameter) psiElement).getDeclarationScope();
-					sourceMethod = getSourceMethod(method);
-			}
-			String defaultValue = getAnnotationMemberValue(configPropertyAnnotation,
-					"");
-			String extensionName = null;
-
-			super.updateHint(collector, fieldClass);
-
-			addItemMetadata(collector, name, type, description, sourceType, sourceField, sourceMethod, defaultValue,
-					extensionName, isBinary(psiElement));
-		}
-	}
+	// NOTE: A private, unused 'oldMethod' was removed from this class. It was an earlier, pre-refactor
+	// copy of the property collection logic (superseded by collectProperty(...) above) and was never
+	// called.
 
 }

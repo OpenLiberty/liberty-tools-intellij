@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Red Hat, Inc.
+ * Copyright (c) 2019, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -305,5 +305,43 @@ public class PsiTypeUtils {
      */
     public static boolean isVoidReturnType(PsiMethod method) {
         return PsiTypes.voidType().equals(method.getReturnType());
+    }
+
+    /**
+     * Extracts a string value from a PSI annotation member value.
+     *
+     * Supports:
+     *  - String literals: "hello"
+     *  - Compile-time constant expressions: "a" + "b"
+     *  - Fallback to source text
+     *
+     * @param value PSI annotation member value
+     * @return best possible string representation, never null
+     */
+    public static @Nullable String extractStringValue(PsiAnnotationMemberValue value) {
+        if (value == null) {
+            return null;
+        }
+
+        // 1. Direct string literal: "hello"
+        if (value instanceof PsiLiteralExpression literal
+                && literal.getValue() instanceof String s) {
+            return s;
+        }
+
+        // 2. Compile-time constant expression: "a" + "b", MY_CONST, etc.
+        if (value instanceof PsiExpression expr) {
+            Object constantValue =
+                    JavaPsiFacade.getInstance(expr.getProject())
+                            .getConstantEvaluationHelper()
+                            .computeConstantExpression(expr);
+
+            if (constantValue instanceof String s) {
+                return s;
+            }
+        }
+
+        // 3. Fallback: Java source representation
+        return value.getText();
     }
 }

@@ -969,6 +969,22 @@ public class UIBotTestUtils {
      * @param completeWithPopup        use popup to complete value selection or type in an entire provided value string
      */
     public static void insertConfigIntoMPConfigPropertiesFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup) {
+        insertConfigIntoMPConfigPropertiesFile(remoteRobot, fileName, configNameSnippet, configNameChooserSnippet, configValueSnippet, completeWithPopup, "false");
+    }
+
+    /**
+     * Inserts a configuration name value pair into a config file via text typing
+     * and popup menu completion (if required).
+     *
+     * @param remoteRobot                  The RemoteRobot instance.
+     * @param fileName                     The string path to the config file
+     * @param configNameSnippet            the portion of the name to type
+     * @param configNameChooserSnippet     the portion of the name to use for selecting from popup menu
+     * @param configValueSnippet           the value to type into keyboard - could be a snippet or a whole word
+     * @param completeWithPopup            use popup to complete value selection or type in an entire provided value string
+     * @param defaultAutoCompletedValue    the default value auto-inserted by the LS after name completion (e.g. "false" for boolean, first enum constant for enum types)
+     */
+    public static void insertConfigIntoMPConfigPropertiesFile(RemoteRobot remoteRobot, String fileName, String configNameSnippet, String configNameChooserSnippet, String configValueSnippet, boolean completeWithPopup, String defaultAutoCompletedValue) {
         ProjectFrameFixture projectFrame = remoteRobot.find(ProjectFrameFixture.class, Duration.ofSeconds(30));
         clickOnFileTab(remoteRobot, fileName);
         EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
@@ -1001,7 +1017,7 @@ public class UIBotTestUtils {
                 // now choose the specific item based on the chooser string
                 namePopupWindow.findText(contains(configNameChooserSnippet)).doubleClick();
 
-                editorNew.findText("false").doubleClick();
+                editorNew.findText(defaultAutoCompletedValue).doubleClick();
                 keyboard.hotKey(VK_DELETE);
 
                 keyboard.enterText(configValueSnippet);
@@ -1039,6 +1055,54 @@ public class UIBotTestUtils {
         // Report the last error if there is one.
         if (error != null) {
             throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using text: " + configNameSnippet, error);
+        }
+    }
+
+    /**
+     * Inserts a full "key=value" line directly into a microprofile-config.properties file
+     * by typing the complete entry without relying on LS autocompletion for the key name.
+     * This is suitable for testing diagnostics and quick-fixes on custom @ConfigProperty
+     * fields (e.g. enum types) where the key is not a well-known built-in property.
+     *
+     * @param remoteRobot The RemoteRobot instance.
+     * @param fileName    The name of the config file tab to use.
+     * @param configKey   The full property key (e.g. "app.mode").
+     * @param configValue The property value to type (e.g. "invalid").
+     */
+    public static void insertConfigIntoMPConfigPropertiesFileDirect(RemoteRobot remoteRobot, String fileName, String configKey, String configValue) {
+        clickOnFileTab(remoteRobot, fileName);
+        EditorFixture editorNew = remoteRobot.find(EditorFixture.class, EditorFixture.Companion.getLocator());
+        Exception error = null;
+
+        editorNew.click();
+
+        for (int i = 0; i < 10; i++) {
+            error = null;
+            try {
+                Keyboard keyboard = new Keyboard(remoteRobot);
+                // Move to the end of the file and add a new line
+                keyboard.hotKey(VK_CONTROL, VK_END);
+                keyboard.enter();
+
+                // Type the full key=value entry directly, bypassing LS autocomplete
+                keyboard.enterText(configKey + "=" + configValue);
+
+                // Save the file
+                if (remoteRobot.isMac()) {
+                    keyboard.hotKey(VK_META, VK_S);
+                } else {
+                    keyboard.hotKey(VK_CONTROL, VK_S);
+                }
+                break;
+            } catch (WaitForConditionTimeoutException wftoe) {
+                error = wftoe;
+                UIBotTestUtils.pasteOnActiveWindow(remoteRobot);
+                TestUtils.sleepAndIgnoreException(2);
+            }
+        }
+
+        if (error != null) {
+            throw new RuntimeException("Unable to insert entry in config file : " + fileName + " using key: " + configKey, error);
         }
     }
 

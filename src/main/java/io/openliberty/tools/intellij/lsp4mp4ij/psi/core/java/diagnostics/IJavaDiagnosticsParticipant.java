@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -57,13 +57,11 @@ public interface IJavaDiagnosticsParticipant {
 
 	/**
 	 * Collect diagnostics according to the context.
-	 * 
-	 * @param context the java diagnostics context
 	 *
-	 * @return diagnostics list and null otherwise.
+	 * @param context the java diagnostics context.
 	 * 
 	 */
-	List<Diagnostic> collectDiagnostics(JavaDiagnosticsContext context);
+	void collectDiagnostics(JavaDiagnosticsContext context);
 
 	/**
 	 * End diagnostics collection.

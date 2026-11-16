@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 * All rights reserved. This program and the accompanying materials
 * which accompanies this distribution, and is available at
 * https://www.eclipse.org/legal/epl-v20.html
@@ -21,6 +21,7 @@ import com.intellij.util.messages.MessageBusConnection;
 import io.openliberty.tools.intellij.lsp4mp4ij.classpath.ClasspathResourceChangedManager;
 import io.openliberty.tools.intellij.util.LibertyToolPluginDisposable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 				if (isConfigSource(file)) {
 					// A microprofile config file properties file source has been updated, evict the cache of the properties
 					Module javaProject = pair.getSecond();
-					PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject);
+					PsiMicroProfileProject mpProject = getMicroProfileProject(javaProject, false);
 					if (mpProject != null) {
 						mpProject.evictConfigSourcesCache(file);
 					}
@@ -89,11 +90,13 @@ public final class PsiMicroProfileProjectManager implements Disposable {
 		connection.subscribe(ModuleListener.TOPIC, microprofileProjectListener);
 	}
 
-	public PsiMicroProfileProject getMicroProfileProject(Module project) {
+	@NotNull
+	public PsiMicroProfileProject getMicroProfileProject(@NotNull Module project) {
 		return getMicroProfileProject(project, true);
 	}
 
-	private PsiMicroProfileProject getMicroProfileProject(Module javaProject, boolean create) {
+	@Nullable
+	private PsiMicroProfileProject getMicroProfileProject(@NotNull Module javaProject, boolean create) {
 		PsiMicroProfileProject mpProject = javaProject.getUserData(KEY);
 		if (mpProject == null) {
 			if (!create) {

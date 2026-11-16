@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -77,7 +77,9 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     @Override
     public void dispose() {
         super.dispose();
-        connection.disconnect();
+        if (connection != null) {
+            connection.disconnect();
+        }
         UserDefinedMicroProfileSettings.getInstance(getProject()).removeChangeHandler(getDidChangeConfigurationListener());
     }
 
@@ -207,13 +209,13 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     @Override
     public CompletableFuture<ProjectLabelInfoEntry> getJavaProjectLabels(MicroProfileJavaProjectLabelsParams javaParams) {
         var coalesceBy = new CoalesceByKey("microprofile/java/projectLabels", javaParams.getUri(), javaParams.getTypes());
-        return runAsBackground("Computing Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
+        return runAsBackground("Computing Java projects labels", monitor -> ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(javaParams, PsiUtilsLSImpl.getInstance(getProject())), coalesceBy);
     }
 
     @Override
     public CompletableFuture<List<ProjectLabelInfoEntry>> getAllJavaProjectLabels() {
         var coalesceBy = new CoalesceByKey("microprofile/java/workspaceLabels");
-        return runAsBackground("Computing All Java projects labels", monitor -> ProjectLabelManager.getInstance().getProjectLabelInfo(PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
+        return runAsBackground("Computing All Java projects labels", monitor -> ProjectLabelManager.getInstance(getProject()).getProjectLabelInfo(PsiUtilsLSImpl.getInstance(getProject())),coalesceBy);
     }
 
     @Override
@@ -277,5 +279,11 @@ public class MicroProfileLanguageClient extends IndexAwareLanguageClient impleme
     public CompletableFuture<String> getPropertyDocumentation(MicroProfilePropertyDocumentationParams params) {
         // Requires porting https://github.com/eclipse/lsp4mp/issues/321 / https://github.com/eclipse/lsp4mp/pull/329
         return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<List<InlayHint>> getJavaInlayHint(MicroProfileJavaInlayHintParams javaParams) {
+        var coalesceBy = new CoalesceByKey("microprofile/java/inlayHint", javaParams.getUri());
+        return runAsBackground("Computing Java inlayHint", monitor -> PropertiesManagerForJava.getInstance().inlayHint(javaParams, PsiUtilsLSImpl.getInstance(getProject()), monitor), coalesceBy);
     }
 }

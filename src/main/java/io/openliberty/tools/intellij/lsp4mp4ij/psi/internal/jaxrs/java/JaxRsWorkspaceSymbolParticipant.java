@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2024, 2025 Red Hat Inc. and others.
+* Copyright (c) 2024, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -31,10 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +50,7 @@ public class JaxRsWorkspaceSymbolParticipant implements IJavaWorkspaceSymbolsPar
 
 		JaxRsContext jaxrsContext = new JaxRsContext(project);
 		Set<PsiClass> jaxrsTypes = getAllJaxRsTypes(project, utils, monitor);
-		if (jaxrsTypes == null || monitor.isCanceled()) {
+		if (monitor.isCanceled()) {
 			return;
 		}
 		List<JaxRsMethodInfo> methodsInfo = new ArrayList<>();
@@ -102,7 +99,7 @@ public class JaxRsWorkspaceSymbolParticipant implements IJavaWorkspaceSymbolsPar
 		for (IJaxRsInfoProvider provider : JaxRsInfoProviderRegistry.getInstance().getProviders()) {
 			jaxrsTypes.addAll(provider.getAllJaxRsClasses(javaProject, utils,monitor));
 			if (monitor.isCanceled()) {
-				return null;
+				return Collections.emptySet();
 			}
 		}
 		return jaxrsTypes;

@@ -17,6 +17,10 @@ public class ConfigTestController {
     @ConfigProperty(name = "injected.value")
     private String injectedValue;
 
+    @Inject
+    @ConfigProperty(name = "app.mode")
+    private AppMode appMode;
+
     @Path("/injected")
     @GET
     public String getInjectedConfigValue() {

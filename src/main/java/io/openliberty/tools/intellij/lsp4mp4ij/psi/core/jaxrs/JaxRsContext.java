@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 Red Hat Inc. and others.
+* Copyright (c) 2020, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,7 +21,6 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLe
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.PsiTypeUtils;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsUtils.getJaxRsApplicationPathValue;
 import static io.openliberty.tools.intellij.lsp4mp4ij.psi.core.jaxrs.JaxRsConstants.JAKARTA_WS_RS_APPLICATIONPATH_ANNOTATION;
@@ -111,6 +110,7 @@ public class JaxRsContext {
 	 */
 	public void setApplicationPath(String applicationPath) {
 		this.applicationPath = applicationPath;
+		this.applicationPathLoaded = applicationPath != null;
 	}
 
 	public static JaxRsContext getJaxRsContext(JavaCodeLensContext context) {
@@ -157,7 +157,7 @@ public class JaxRsContext {
 
 		Query<PsiClass> pattern = AnnotatedElementsSearch.searchElements(annotationType, javaProject.getModuleWithDependenciesScope(),
 				PsiClass.class);
-		pattern.forEach((Consumer<? super PsiClass>) match -> collectApplicationPath(match, applicationPathRef));
+		pattern.findAll().forEach(match -> collectApplicationPath(match, applicationPathRef));
 		return applicationPathRef.get();
 	}
 

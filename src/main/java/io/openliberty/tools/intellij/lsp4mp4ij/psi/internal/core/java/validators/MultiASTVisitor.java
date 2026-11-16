@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2021 Red Hat Inc. and others.
+* Copyright (c) 2021, 2026 Red Hat Inc. and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 public class MultiASTVisitor extends JavaRecursiveElementVisitor {
 
 	private static final Logger LOGGER = Logger.getLogger(MultiASTVisitor.class.getName());
-	private final Collection<JavaASTValidator> visitors;
+	private final Collection<JavaRecursiveElementVisitor> visitors;
 
-	public MultiASTVisitor(Collection<JavaASTValidator> visitors) {
+	public MultiASTVisitor(Collection<JavaRecursiveElementVisitor> visitors) {
 		this.visitors = visitors;
 	}
 

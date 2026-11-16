@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat, Inc.
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,12 +11,10 @@
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
 import com.intellij.lang.jvm.JvmParameter;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -25,6 +23,8 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.codelens.JavaCodeLe
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion.CompletionHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.IJavaDefinitionParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.definition.JavaDefinitionContext;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.inlayhint.IJavaInlayHintsParticipant;
+import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.inlayhint.JavaInlayHintsContext;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.symbols.IJavaWorkspaceSymbolsParticipant;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.diagnostics.DiagnosticsHandler;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.hover.IJavaHoverParticipant;
@@ -33,6 +33,7 @@ import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.internal.core.java.codeaction.CodeActionHandler;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4mp.commons.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,43 +78,47 @@ public final class PropertiesManagerForJava {
      * Returns the Java file information (ex : package name) from the given file URI
      * and null otherwise.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaFileInfo()}).</p>
+     *
      * @param params  the file information parameters.
      * @param utils   the utilities class
      * @return the Java file information (ex : package name) from the given file URI
      *         and null otherwise.
      */
     public JavaFileInfo fileInfo(MicroProfileJavaFileInfoParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<JavaFileInfo>) () -> {
-            String uri = params.getUri();
-            final PsiFile unit = utils.resolveCompilationUnit(uri);
-            if (unit != null && unit.isValid() && unit instanceof PsiJavaFile) {
-                JavaFileInfo fileInfo = new JavaFileInfo();
-                String packageName = ((PsiJavaFile) unit).getPackageName();
-                fileInfo.setPackageName(packageName);
-                return fileInfo;
-            }
-            return null;
-        });
+        String uri = params.getUri();
+        final PsiFile unit = utils.resolveCompilationUnit(uri);
+        if (unit != null && unit.isValid() && unit instanceof PsiJavaFile) {
+            JavaFileInfo fileInfo = new JavaFileInfo();
+            String packageName = ((PsiJavaFile) unit).getPackageName();
+            fileInfo.setPackageName(packageName);
+            return fileInfo;
+        }
+        return null;
     }
 
     /**
      * Returns the codelens list according the given codelens parameters.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCodelens()}).</p>
      *
      * @param params  the codelens parameters
      * @param utils   the utilities class
      * @return the codelens list according the given codelens parameters.
      */
     public List<? extends CodeLens> codeLens(MicroProfileJavaCodeLensParams params, IPsiUtils utils,  ProgressIndicator monitor) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeLens>>) () -> {
-            String uri = params.getUri();
-            PsiFile typeRoot = resolveTypeRoot(uri, utils);
-            if (typeRoot == null) {
-                return Collections.emptyList();
-            }
-            List<CodeLens> lenses = new ArrayList<>();
-            collectCodeLens(uri, typeRoot, utils, params, lenses, monitor);
-            return lenses;
-        });
+        String uri = params.getUri();
+        PsiFile typeRoot = resolveTypeRoot(uri, utils);
+        if (typeRoot == null) {
+            return Collections.emptyList();
+        }
+        List<CodeLens> lenses = new ArrayList<>();
+        collectCodeLens(uri, typeRoot, utils, params, lenses, monitor);
+        return lenses;
     }
 
     private void collectCodeLens(String uri, PsiFile typeRoot, IPsiUtils utils, MicroProfileJavaCodeLensParams params,
@@ -148,7 +153,61 @@ public final class PropertiesManagerForJava {
     }
 
     /**
+     * Returns the inlayHint list according the given inlayHint parameters.
+     *
+     * @param params the inlayHint parameters
+     * @param utils  the utilities class
+     * @return the inlayHint list according the given inlayHint parameters.
+     */
+    public List<InlayHint> inlayHint(@NotNull MicroProfileJavaInlayHintParams params,
+                                     @NotNull IPsiUtils utils,
+                                     @NotNull ProgressIndicator monitor) {
+        String uri = params.getUri();
+        PsiFile typeRoot = resolveTypeRoot(uri, utils);
+        if (typeRoot == null) {
+            return Collections.emptyList();
+        }
+        List<InlayHint> inlayHints = new ArrayList<>();
+        collectInlayHints(uri, typeRoot, utils, params, inlayHints, monitor);
+        return inlayHints;
+    }
+
+    private void collectInlayHints(@NotNull String uri,
+                                   @NotNull PsiFile typeRoot,
+                                   @NotNull IPsiUtils utils,
+                                   @NotNull MicroProfileJavaInlayHintParams params,
+                                   @NotNull List<InlayHint> inlayHints,
+                                   @NotNull ProgressIndicator monitor) {
+        // Collect all adapted inlayHint participant
+        try {
+            Module module = utils.getModule(uri);
+            if (module == null) {
+                return;
+            }
+            JavaInlayHintsContext context = new JavaInlayHintsContext(uri, typeRoot, utils, module, params, inlayHints);
+            List<IJavaInlayHintsParticipant> definitions = IJavaInlayHintsParticipant.EP_NAME.getExtensionList()
+                    .stream()
+                    .filter(definition -> definition.isAdaptedForInlayHint(context, monitor))
+                    .toList();
+            if (definitions.isEmpty()) {
+                return;
+            }
+
+            // Begin, collect, end participants
+            definitions.forEach(definition -> definition.beginInlayHint(context, monitor));
+            definitions.forEach(definition -> definition.collectInlayHint(context, monitor));
+            definitions.forEach(definition -> definition.endInlayHint(context, monitor));
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
      * Returns the CompletionItems given the completion item params
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCompletion()}).</p>
      *
      * @param params  the completion item params
      * @param utils   the IJDTUtils
@@ -161,27 +220,29 @@ public final class PropertiesManagerForJava {
     /**
      * Returns the definition list according the given definition parameters.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaDefinition()}).</p>
+     *
      * @param params  the definition parameters
      * @param utils   the utilities class
      * @return the definition list according the given definition parameters.
      */
     public List<MicroProfileDefinition> definition(MicroProfileJavaDefinitionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<MicroProfileDefinition>>)() -> {
-            String uri = params.getUri();
-            PsiFile typeRoot = resolveTypeRoot(uri, utils);
-            if (typeRoot == null) {
-                return Collections.emptyList();
-            }
+        String uri = params.getUri();
+        PsiFile typeRoot = resolveTypeRoot(uri, utils);
+        if (typeRoot == null) {
+            return Collections.emptyList();
+        }
 
-            Position hyperlinkedPosition = params.getPosition();
-            int definitionOffset = utils.toOffset(typeRoot, hyperlinkedPosition.getLine(),
-                    hyperlinkedPosition.getCharacter());
-            PsiElement hyperlinkedElement = getHoveredElement(typeRoot, definitionOffset);
+        Position hyperlinkedPosition = params.getPosition();
+        int definitionOffset = utils.toOffset(typeRoot, hyperlinkedPosition.getLine(),
+                hyperlinkedPosition.getCharacter());
+        PsiElement hyperlinkedElement = getHoveredElement(typeRoot, definitionOffset);
 
-            List<MicroProfileDefinition> locations = new ArrayList<>();
-            collectDefinition(uri, typeRoot, hyperlinkedElement, utils, hyperlinkedPosition, locations);
-            return locations;
-        });
+        List<MicroProfileDefinition> locations = new ArrayList<>();
+        collectDefinition(uri, typeRoot, hyperlinkedElement, utils, hyperlinkedPosition, locations);
+        return locations;
     }
 
     private void collectDefinition(String uri, PsiFile typeRoot, PsiElement hyperlinkedElement, IPsiUtils utils,
@@ -223,6 +284,10 @@ public final class PropertiesManagerForJava {
     /**
      * Returns diagnostics for the given uris list.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaDiagnostics()}).</p>
+     *
      * @param params the diagnostics parameters
      * @param utils  the utilities class
      * @return diagnostics for the given uris list.
@@ -234,41 +299,47 @@ public final class PropertiesManagerForJava {
     /**
      * Returns the hover information according to the given <code>params</code>
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaHover()}).</p>
+     *
      * @param params  the hover parameters
      * @param utils   the utilities class
      * @return the hover information according to the given <code>params</code>
      */
     public Hover hover(MicroProfileJavaHoverParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<Hover>) () -> {
-            String uri = params.getUri();
-            PsiFile typeRoot = resolveTypeRoot(uri, utils);
-            if (typeRoot == null) {
-                return null;
-            }
-            Document document = PsiDocumentManager.getInstance(typeRoot.getProject()).getDocument(typeRoot);
-            if (document == null) {
-                return null;
-            }
-            Position hoverPosition = params.getPosition();
-            int hoveredOffset = utils.toOffset(document, hoverPosition.getLine(), hoverPosition.getCharacter());
-            PsiElement hoverElement = getHoveredElement(typeRoot, hoveredOffset);
-            if (hoverElement == null) return null;
+        String uri = params.getUri();
+        PsiFile typeRoot = resolveTypeRoot(uri, utils);
+        if (typeRoot == null) {
+            return null;
+        }
+        Document document = PsiDocumentManager.getInstance(typeRoot.getProject()).getDocument(typeRoot);
+        if (document == null) {
+            return null;
+        }
+        Position hoverPosition = params.getPosition();
+        int hoveredOffset = utils.toOffset(document, hoverPosition.getLine(), hoverPosition.getCharacter());
+        PsiElement hoverElement = getHoveredElement(typeRoot, hoveredOffset);
+        if (hoverElement == null) return null;
 
-            DocumentFormat documentFormat = params.getDocumentFormat();
-            boolean surroundEqualsWithSpaces = params.isSurroundEqualsWithSpaces();
-            List<Hover> hovers = new ArrayList<>();
-            collectHover(uri, typeRoot, hoverElement, utils, hoverPosition, documentFormat, surroundEqualsWithSpaces,
-                    hovers);
-            if (hovers.isEmpty()) {
-                return null;
-            }
-            // TODO : aggregate the hover
-            return hovers.get(0);
-        });
+        DocumentFormat documentFormat = params.getDocumentFormat();
+        boolean surroundEqualsWithSpaces = params.isSurroundEqualsWithSpaces();
+        List<Hover> hovers = new ArrayList<>();
+        collectHover(uri, typeRoot, hoverElement, utils, hoverPosition, documentFormat, surroundEqualsWithSpaces,
+                hovers);
+        if (hovers.isEmpty()) {
+            return null;
+        }
+        // TODO : aggregate the hover
+        return hovers.get(0);
     }
 
     /**
      * Returns the cursor context for the given file and cursor position.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCursorContext()}).</p>
      *
      * @param params  the completion params that provide the file and cursor
      *                position to get the context for
@@ -368,27 +439,31 @@ public final class PropertiesManagerForJava {
     /**
      * Returns the codeAction list according the given codeAction parameters.
      *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code getJavaCodeAction()}).</p>
+     *
      * @param params  the codeAction parameters
      * @param utils   the utilities class
      * @return the codeAction list according the given codeAction parameters.
      */
     public List<? extends CodeAction> codeAction(MicroProfileJavaCodeActionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<? extends CodeAction>>) () -> {
-            return codeActionHandler.codeAction(params, utils);
-        });
+        return codeActionHandler.codeAction(params, utils);
     }
 
     /**
      * Returns the codeAction list according the given codeAction parameters.
+     *
+     * <p>Note: this method does not acquire its own read action; it relies on the
+     * {@code ReadAction.nonBlocking()} already established by {@code runAsBackground()}
+     * in the caller (e.g. {@code resolveCodeAction()}).</p>
      *
      * @param unresolved the CodeAction to resolve
      * @param utils      the utilities class
      * @return the codeAction list according the given codeAction parameters.
      */
     public CodeAction resolveCodeAction(CodeAction unresolved, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<CodeAction>) () -> {
-            return codeActionHandler.resolveCodeAction(unresolved, utils);
-        });
+        return codeActionHandler.resolveCodeAction(unresolved, utils);
     }
 
     /**

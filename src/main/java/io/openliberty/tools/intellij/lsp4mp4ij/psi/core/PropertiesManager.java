@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2025 Red Hat, Inc.
+ * Copyright (c) 2019, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,6 +10,7 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -104,14 +104,17 @@ public class PropertiesManager {
         PropertiesCollector collector = new PropertiesCollector(info, scopes);
         if (module != null) {
             SearchScope scope = createSearchScope(module, scopes, classpathKind == ClasspathKind.TEST);
-            SearchContext context = new SearchContext(module, scope, collector, utils, documentFormat);
-            Query<PsiModifierListOwner> query = createSearchQuery(context);
+            SearchContext context = new SearchContext(module, scope, collector, utils, documentFormat, monitor);
+            Query<PsiModifierListOwner> query = createSearchQuery(context, monitor);
             if (query != null) {
                 try {
                     beginSearch(context, monitor);
-                    query.forEach((Consumer<? super PsiModifierListOwner>) psiMember -> collectProperties(psiMember, context, monitor));
-                }
-                finally {
+                    query.findAll().forEach(psiMember -> {
+                        // Check if the operation has been cancelled
+                        monitor.checkCanceled();
+                        collectProperties(psiMember, context, monitor);
+                    });
+                } finally {
                     endSearch(context, monitor);
                 }
             }
@@ -171,10 +174,11 @@ public class PropertiesManager {
         return searchScope;
     }
 
-    private @Nullable Query<PsiModifierListOwner> createSearchQuery(SearchContext context) {
+    private @Nullable Query<PsiModifierListOwner> createSearchQuery(SearchContext context, @NotNull ProgressIndicator monitor) {
         Query<PsiModifierListOwner> query = null;
 
         for (IPropertiesProvider provider : getPropertiesProviders()) {
+            monitor.checkCanceled();
             Query<PsiModifierListOwner> providerQuery = provider.createSearchPattern(context);
             if (providerQuery != null) {
                 if (query == null) {
@@ -184,7 +188,9 @@ public class PropertiesManager {
                 }
             }
         }
-        return new UniqueResultsQuery<>(query);
+        // Differs from the upstream Quarkus code, which always wraps 'query' in a UniqueResultsQuery.
+        // Return null when no provider supplied a query, matching the @Nullable contract and the caller's null check.
+        return query != null ? new UniqueResultsQuery<>(query) : null;
     }
 
     @NotNull
@@ -218,7 +224,8 @@ public class PropertiesManager {
     }
 
     public Location findPropertyLocation(Module module, String sourceType, String sourceField, String sourceMethod, IPsiUtils utils) {
-        PsiMember fieldOrMethod = findDeclaredProperty(module, sourceType, sourceField, sourceMethod, utils);
+        PsiMember fieldOrMethod = ReadAction
+                .compute(() -> findDeclaredProperty(module, sourceType, sourceField, sourceMethod, utils));
         if (fieldOrMethod != null) {
             PsiFile classFile = fieldOrMethod.getContainingFile();
             if (classFile != null) {
@@ -227,7 +234,10 @@ public class PropertiesManager {
                     utils.discoverSource(classFile);
                 }
             }
-            return utils.toLocation(fieldOrMethod);
+            if (utils != null) {
+                return ReadAction
+                        .compute(() -> utils.toLocation(fieldOrMethod));
+            }
         }
         return null;
     }

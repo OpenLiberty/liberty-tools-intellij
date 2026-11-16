@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat, Inc.
+ * Copyright (c) 2020, 2026 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,10 +10,8 @@
  ******************************************************************************/
 package io.openliberty.tools.intellij.lsp4mp4ij.psi.core.java.completion;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.openliberty.tools.intellij.lsp4mp4ij.psi.core.utils.IPsiUtils;
@@ -52,51 +50,49 @@ public final class CompletionHandler {
      * @return the CompletionItems for the given the completion item params
      */
     public CompletionList completion(MicroProfileJavaCompletionParams params, IPsiUtils utils) {
-        return ApplicationManager.getApplication().runReadAction((Computable<CompletionList>) () -> {
-            try {
-                String uri = params.getUri();
-                PsiFile typeRoot = resolveTypeRoot(uri, utils);
-                if (typeRoot == null) {
-                    return null;
-                }
-
-                Module module = utils.getModule(uri);
-                if (module == null) {
-                    return null;
-                }
-
-                Position completionPosition = params.getPosition();
-                int completionOffset = utils.toOffset(typeRoot, completionPosition.getLine(),
-                        completionPosition.getCharacter());
-
-                List<CompletionItem> completionItems = new ArrayList<>();
-                JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
-
-                List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.getExtensionList()
-                        .stream()
-                        .filter(definition -> group.equals(definition.getGroup()))
-                        .filter(completion -> completion.isAdaptedForCompletion(completionContext))
-                        .collect(Collectors.toList());
-
-                if (completions.isEmpty()) {
-                    return null;
-                }
-
-                completions.forEach(completion -> {
-                    List<? extends CompletionItem> collectedCompletionItems = completion.collectCompletionItems(completionContext);
-                    if (collectedCompletionItems != null) {
-                        completionItems.addAll(collectedCompletionItems);
-                    }
-                });
-
-                CompletionList completionList = new CompletionList();
-                completionList.setItems(completionItems);
-                return completionList;
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+        try {
+            String uri = params.getUri();
+            PsiFile typeRoot = resolveTypeRoot(uri, utils);
+            if (typeRoot == null) {
                 return null;
             }
-        });
+
+            Module module = utils.getModule(uri);
+            if (module == null) {
+                return null;
+            }
+
+            Position completionPosition = params.getPosition();
+            int completionOffset = utils.toOffset(typeRoot, completionPosition.getLine(),
+                    completionPosition.getCharacter());
+
+            List<CompletionItem> completionItems = new ArrayList<>();
+            JavaCompletionContext completionContext = new JavaCompletionContext(uri, typeRoot, utils, module, completionOffset);
+
+            List<JavaCompletionDefinition> completions = JavaCompletionDefinition.EP_NAME.getExtensionList()
+                    .stream()
+                    .filter(definition -> group.equals(definition.getGroup()))
+                    .filter(completion -> completion.isAdaptedForCompletion(completionContext))
+                    .collect(Collectors.toList());
+
+            if (completions.isEmpty()) {
+                return null;
+            }
+
+            completions.forEach(completion -> {
+                List<? extends CompletionItem> collectedCompletionItems = completion.collectCompletionItems(completionContext);
+                if (collectedCompletionItems != null) {
+                    completionItems.addAll(collectedCompletionItems);
+                }
+            });
+
+            CompletionList completionList = new CompletionList();
+            completionList.setItems(completionItems);
+            return completionList;
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            return null;
+        }
     }
 
     /**
@@ -139,21 +135,19 @@ public final class CompletionHandler {
             PsiElement firstClass = javaFile.getClasses()[0];
 
             if (completionOffset <= firstClass.getTextOffset()) {
-                return JavaCursorContextKind.BEFORE_CLASS;
+                return JavaCursorContextKind.BEFORE_TOP_LEVEL_CLASS;
             }
 
             return JavaCursorContextKind.NONE;
         }
 
-        if (parent instanceof PsiClass) {
-            PsiClass psiClass = (PsiClass) parent;
+        if (parent instanceof PsiClass psiClass ) {
             return getContextKindFromClass(completionOffset, psiClass, element);
         }
-        if (parent instanceof PsiAnnotation) {
-            PsiAnnotation psiAnnotation = (PsiAnnotation) parent;
+        if (parent instanceof PsiAnnotation psiAnnotation) {
             @Nullable PsiAnnotationOwner annotationOwner = psiAnnotation.getOwner();
             if (annotationOwner instanceof PsiClass) {
-                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_CLASS:JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
+                return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_INNER_CLASS:JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
             }
             if (annotationOwner instanceof PsiMethod){
                 return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_METHOD:JavaCursorContextKind.IN_METHOD_ANNOTATIONS;
@@ -162,8 +156,7 @@ public final class CompletionHandler {
                 return (psiAnnotation.getStartOffsetInParent() == 0)? JavaCursorContextKind.BEFORE_FIELD:JavaCursorContextKind.IN_FIELD_ANNOTATIONS;
             }
         }
-        if (parent instanceof PsiMethod) {
-            PsiMethod psiMethod = (PsiMethod) parent;
+        if (parent instanceof PsiMethod psiMethod) {
             if (completionOffset == psiMethod.getTextRange().getStartOffset()) {
                 return JavaCursorContextKind.BEFORE_METHOD;
             }
@@ -196,14 +189,14 @@ public final class CompletionHandler {
     @NotNull
     private static JavaCursorContextKind getContextKindFromClass(int completionOffset, PsiClass psiClass, PsiElement element) {
         if (completionOffset <= psiClass.getTextRange().getStartOffset()) {
-            return JavaCursorContextKind.BEFORE_CLASS;
+            return JavaCursorContextKind.BEFORE_TOP_LEVEL_CLASS;
         }
         int classStartOffset = getClassStartOffset(psiClass);
         if (completionOffset <= classStartOffset) {
             if (psiClass.getAnnotations().length > 0) {
                 return JavaCursorContextKind.IN_CLASS_ANNOTATIONS;
             }
-            return JavaCursorContextKind.BEFORE_CLASS;
+            return JavaCursorContextKind.BEFORE_INNER_CLASS;
         }
 
         PsiElement nextElement = element.getNextSibling();
@@ -215,7 +208,7 @@ public final class CompletionHandler {
             return JavaCursorContextKind.BEFORE_METHOD;
         }
         if (nextElement instanceof  PsiClass) {
-            return JavaCursorContextKind.BEFORE_CLASS;
+            return JavaCursorContextKind.BEFORE_INNER_CLASS;
         }
 
         return JavaCursorContextKind.IN_CLASS;
