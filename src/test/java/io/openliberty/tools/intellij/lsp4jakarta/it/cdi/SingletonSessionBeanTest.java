@@ -64,7 +64,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         JsonArray dataRequestScoped = new JsonArray();
         dataRequestScoped.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic illegalRequestScope = d(8, 13, 33,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @RequestScoped present in the class SingletonSessionBean. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataRequestScoped);
 
         assertJavaDiagnostics(diagnosticsParams, utils, illegalRequestScope);
@@ -102,7 +102,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         JsonArray dataSessionScoped = new JsonArray();
         dataSessionScoped.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic illegalSessionScope = d(8, 13, 38,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @SessionScoped present in the class SingletonWithSessionScope. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataSessionScoped);
         Diagnostic missingSerializable = d(8, 13, 38,
                 "A managed bean in a passivating scope must implement java.io.Serializable.",
@@ -144,7 +144,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         dataInvalidScope.add("jakarta.enterprise.context.ApplicationScoped");
         dataInvalidScope.add("jakarta.enterprise.context.RequestScoped");
         Diagnostic illegalScopeWithApplication = d(10, 13, 58,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @RequestScoped present in the class SingletonWithMixedInvalidAndApplicationScoped. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataInvalidScope);
 
         JsonArray dataMultipleScopes = new JsonArray();
@@ -196,7 +196,7 @@ public class SingletonSessionBeanTest extends BaseJakartaTest {
         dataInvalidScope.add("jakarta.enterprise.context.Dependent");
         dataInvalidScope.add("jakarta.enterprise.context.SessionScoped");
         Diagnostic illegalScopeWithDependent = d(10, 13, 50,
-                "A singleton session bean must be annotated with either @ApplicationScoped or @Dependent.",
+                "Invalid scope @SessionScoped present in the class SingletonWithMixedInvalidAndDependent. A singleton session bean belongs to the @ApplicationScoped or @Dependent scope. Any other scope is invalid.",
                 DiagnosticSeverity.Error, "jakarta-cdi", "InvalidSingletonSessionBeanScope", dataInvalidScope);
 
         JsonArray dataMultipleScopes = new JsonArray();
