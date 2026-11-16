@@ -96,7 +96,7 @@ public class LibertyExplorer extends SimpleToolWindowPanel {
     }
 
     /**
-     * Builds the Open Liberty Tools Dashboard tree
+     * Builds the Liberty Tools Dashboard tree
      *
      * @param project         current project
      * @param backgroundColor

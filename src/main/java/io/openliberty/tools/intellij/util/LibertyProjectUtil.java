@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -263,11 +263,16 @@ public class LibertyProjectUtil {
         return collectedBuildFiles;
     }
 
-    // Wrap the search for files in a executeOnPooledThread() method to handle the slow operations on EDT issue
-    // and in a runReadAction() to handle the read action required problem.
+    // Wrap the search for files in a runReadAction() to handle the read action required problem.
+    // On the EDT, run it in an executeOnPooledThread() method to handle the slow operations on EDT issue.
+    // On any other thread, run it directly: waiting on another pooled thread that needs its own read lock
+    // can deadlock when the caller already holds a read lock and a write action is queued.
     private static Collection<VirtualFile> readIndex(Project project, String name) {
+        Computable<Collection<VirtualFile>> virtualFilesComputation = () -> FilenameIndex.getVirtualFilesByName(name, GlobalSearchScope.projectScope(project));
+        if (!ApplicationManager.getApplication().isDispatchThread()) {
+            return ApplicationManager.getApplication().runReadAction(virtualFilesComputation);
+        }
         try {
-            Computable<Collection<VirtualFile>> virtualFilesComputation = () -> FilenameIndex.getVirtualFilesByName(name, GlobalSearchScope.projectScope(project));
             Callable<Collection<VirtualFile>> readAction = () -> ApplicationManager.getApplication().runReadAction(virtualFilesComputation);
             Future<Collection<VirtualFile>> filesFuture = ApplicationManager.getApplication().executeOnPooledThread(readAction);
             return filesFuture.get();
