@@ -268,6 +268,28 @@ public class DiagnosticsUtils {
     }
 
     /**
+     * Resolves the {@link PsiClass} referenced by a class-literal attribute of an annotation.
+     * For example, given {@code @IdClass(MyKey.class)}, calling this with attribute name
+     * {@code "value"} returns the {@code PsiClass} for {@code MyKey}.
+     *
+     * @param annotation    the annotation to inspect
+     * @param attributeName the annotation attribute name (e.g. {@code "value"})
+     * @return the resolved {@link PsiClass}, or {@code null} if the attribute is absent,
+     *         not a class literal, or cannot be resolved
+     */
+    public static PsiClass resolveClassFromAnnotationAttribute(PsiAnnotation annotation, String attributeName) {
+        PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+        if (!(value instanceof PsiClassObjectAccessExpression)) {
+            return null;
+        }
+        PsiType type = ((PsiClassObjectAccessExpression) value).getOperand().getType();
+        if (!(type instanceof PsiClassType)) {
+            return null;
+        }
+        return ((PsiClassType) type).resolve();
+    }
+
+    /**
      * Returns the JavaBeans property name for the given method if it qualifies as
      * a property getter: a non-static, no-argument method whose name follows
      * {@code get<Name>} or {@code is<Name>} conventions and whose return type is
@@ -306,6 +328,43 @@ public class DiagnosticsUtils {
         }
         return null;
     }
+
+    /**
+     * Resolves the element {@link PsiClass} from a {@link PsiType}.
+     *
+     * <p>For a parameterized collection type ({@code List<Employee>}) the first type
+     * argument is resolved. For a plain class type ({@code Department}) the type itself
+     * is resolved directly.
+     *
+     * @param psiType the PSI type to inspect
+     * @return the resolved {@link PsiClass}, or {@code null} if it cannot be resolved
+     */
+    public static PsiClass resolveElementType(PsiType psiType) {
+        if (!(psiType instanceof PsiClassType classType)) {
+            return null;
+        }
+        PsiType[] typeArguments = classType.getParameters();
+        if (typeArguments.length > 0 && typeArguments[0] instanceof PsiClassType argType) {
+            return argType.resolve();
+        }
+        return classType.resolve();
+    }
+
+    /**
+     * Extracts the simple class name from a {@link PsiType}.
+     *
+     * <p>For a plain class type ({@code Department}) returns the class's simple name.
+     * For a parameterized collection type ({@code List<Employee>}) returns the simple
+     * name of the first type argument.
+     *
+     * @param psiType the PSI type to inspect
+     * @return the simple class name, or {@code null} if it cannot be extracted
+     */
+    public static String getElementTypeSimpleName(PsiType psiType) {
+        PsiClass resolved = resolveElementType(psiType);
+        return resolved != null ? resolved.getName() : null;
+    }
+
     /**
      * Returns the fully-qualified name of the first type argument from a parameterised
      * superinterface on the given class.
