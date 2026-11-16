@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 IBM Corporation.
+ * Copyright (c) 2020, 2026 IBM Corporation.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,9 +9,9 @@
  *******************************************************************************/
 package io.openliberty.tools.intellij.actions;
 
-import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
+import io.openliberty.tools.intellij.LibertyExplorer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -82,7 +82,8 @@ public class RunLibertyDevTask extends AnAction {
                                 } else {
                                     // calls selected action
                                     AnAction action = ActionManager.getInstance().getAction(Constants.FULL_ACTIONS_MAP.get(lastPathComponent));
-                                    AnActionEvent event = new AnActionEvent(DataManager.getInstance().getDataContext(libertyTree), e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance());
+                                    DataContext dataContext = LibertyExplorer.buildDataContext(libertyTree);
+                                    AnActionEvent event = new AnActionEvent(dataContext, e.getPresentation(), e.getPlace(), ActionUiKind.NONE, null, 0, ActionManager.getInstance());
                                     ActionUtil.performActionDumbAwareWithCallbacks(action, event);
                                 }
                             }

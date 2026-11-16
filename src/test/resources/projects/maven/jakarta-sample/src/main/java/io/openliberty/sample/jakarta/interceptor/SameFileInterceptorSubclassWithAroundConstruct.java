@@ -27,6 +27,4 @@ class SameFileSuperclassWithAroundConstruct {
 @Monitored
 @Interceptor
 public class SameFileInterceptorSubclassWithAroundConstruct extends SameFileSuperclassWithAroundConstruct {
-    // Subclass is a proper @Interceptor — but lives in the same compilation unit
-    // as the superclass, so hasInterceptorSubclass() returns false for the superclass.
 }
