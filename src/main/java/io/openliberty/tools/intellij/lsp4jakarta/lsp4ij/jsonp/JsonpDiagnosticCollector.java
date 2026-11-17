@@ -23,6 +23,7 @@ import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.Messages;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.PositionUtils;
 import io.openliberty.tools.intellij.lsp4jakarta.lsp4ij.util.PsiJsonBJsonPMethodCallUtils;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 
 public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
@@ -77,6 +78,27 @@ public class JsonpDiagnosticCollector extends AbstractDiagnosticsCollector {
         createDiagnosticsForMethodInvocations(diagnostics, createArrayBuilderMethodInvocations,
                 Messages.getMessage("ErrorMessageJsonPArrayValueNonNull"),
                 JsonpConstants.DIAGNOSTIC_CODE_INVALID_ARRAY_BUILDER_VALUE);
+
+        collectManualMappingDiagnostics(diagnostics, allMethodInvocations);
+    }
+
+    /**
+     * Reports a warning on JsonReader.readObject() when its values are copied field by field into an object.
+     * See {@link ManualJsonMappingAnalyzer}.
+     *
+     * @param diagnostics the list to add diagnostics to
+     * @param allMethodInvocations all method call expressions in the file
+     */
+    private void collectManualMappingDiagnostics(List<Diagnostic> diagnostics,
+                                                 Collection<PsiMethodCallExpression> allMethodInvocations) {
+        for (PsiMethodCallExpression readObject : ManualJsonMappingAnalyzer.findManualMappings(allMethodInvocations)) {
+            PsiElement nameElement = readObject.getMethodExpression().getReferenceNameElement();
+            Range range = PositionUtils.toNameRange(nameElement != null ? nameElement : readObject);
+            Diagnostic diagnostic = new Diagnostic(range, Messages.getMessage("UseJsonbInsteadOfManualMapping"));
+            completeDiagnostic(diagnostic, JsonpConstants.DIAGNOSTIC_CODE_USE_JSONB_INSTEAD_OF_MANUAL_MAPPING,
+                    DiagnosticSeverity.Warning);
+            diagnostics.add(diagnostic);
+        }
     }
 
     /**
