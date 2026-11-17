@@ -194,11 +194,10 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         boolean hasEmbedded = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDED);
         boolean hasEmbeddedId = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDEDID);
         boolean hasElementCollection = isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION);
-        boolean hasValidTarget = hasEmbedded || hasEmbeddedId || hasElementCollection;
-
-        // Only @AttributeOverride carries the @Embedded/@EmbeddedId/@ElementCollection
-        // restriction at the field/method level.
+        boolean hasValidAttributeOverrideTarget = hasEmbedded || hasEmbeddedId || hasElementCollection;
+        boolean hasValidAssociationOverrideTarget = hasEmbedded || hasElementCollection;
         boolean isAttributeOverrideDesc = PersistenceConstants.ATTRIBUTE_OVERRIDE.equals(desc.singleFqn);
+        boolean isAssociationOverrideDesc = PersistenceConstants.ASSOCIATION_OVERRIDE.equals(desc.singleFqn);
 
         for (PsiAnnotation annotation : annotations) {
             String fqn = annotation.getQualifiedName();
@@ -209,7 +208,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                 continue;
             }
 
-            if (isAttributeOverrideDesc && !hasValidTarget) {
+            if (isAttributeOverrideDesc && !hasValidAttributeOverrideTarget) {
                 // @AttributeOverride / @AttributeOverrides on a field or method that is not
                 // @Embedded, @EmbeddedId, or @ElementCollection — no valid override target.
                 diagnostics.add(createDiagnostic(annotation, unit,
@@ -220,8 +219,8 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
                 continue;
             }
 
-            if (!hasEmbedded && !hasElementCollection) {
-                // For @AssociationOverride: member has no supported target annotation — skip.
+            if (isAssociationOverrideDesc && !hasValidAssociationOverrideTarget) {
+                // For @AssociationOverride: member has no supported target annotation — skip. Maybe we should introduce new diagnostics here.
                 continue;
             }
 
