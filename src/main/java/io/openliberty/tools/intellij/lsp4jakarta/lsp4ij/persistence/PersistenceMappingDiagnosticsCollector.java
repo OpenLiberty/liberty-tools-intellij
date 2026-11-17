@@ -42,15 +42,18 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         final String msgNotFound;
         final String msgDotInvalid;
         final String msgMapPrefix;
+        final String msgNoMappedSuperclass;
 
         OverrideDescriptor(String singleFqn, String containerFqn, String errorCode,
-                           String msgNotFound, String msgDotInvalid, String msgMapPrefix) {
+                           String msgNotFound, String msgDotInvalid, String msgMapPrefix,
+                           String msgNoMappedSuperclass) {
             this.singleFqn = singleFqn;
             this.containerFqn = containerFqn;
             this.errorCode = errorCode;
             this.msgNotFound = msgNotFound;
             this.msgDotInvalid = msgDotInvalid;
             this.msgMapPrefix = msgMapPrefix;
+            this.msgNoMappedSuperclass = msgNoMappedSuperclass;
         }
     }
 
@@ -60,7 +63,8 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ATTRIBUTE_OVERRIDE_NAME,
             "AttributeOverrideNameNotFound",
             "AttributeOverrideDotNotationInvalid",
-            "AttributeOverrideMissingMapPrefix");
+            "AttributeOverrideMissingMapPrefix",
+            "AttributeOverrideNoMappedSuperclass");
 
     private static final OverrideDescriptor ASSOCIATION_DESC = new OverrideDescriptor(
             PersistenceConstants.ASSOCIATION_OVERRIDE,
@@ -68,7 +72,8 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             PersistenceConstants.DIAGNOSTIC_CODE_INVALID_ASSOCIATION_OVERRIDE_NAME,
             "AssociationOverrideNameNotFound",
             "AssociationOverrideDotNotationInvalid",
-            "AssociationOverrideMissingMapPrefix");
+            "AssociationOverrideMissingMapPrefix",
+            "AssociationOverrideNoMappedSuperclass");
 
     public PersistenceMappingDiagnosticsCollector() {
         super();
@@ -128,52 +133,32 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
     }
 
     /**
-     * Walks the {@code @MappedSuperclass} chain of {@code type} and checks that
-     * {@code name} resolves to a field declared in some superclass. Emits a
-     * diagnostic if the name cannot be resolved in any superclass.
+     * Walks the supertype chain of {@code type} once and checks that {@code name}
+     * (dot-notation supported) resolves to a field declared in a
+     * {@code @MappedSuperclass}. If it does not, emits a diagnostic: a dedicated
+     * message when the hierarchy contains no {@code @MappedSuperclass} at all,
+     * otherwise the generic "not found" message.
      */
     private void validateNameOnSuperclassChain(String name, PsiAnnotation annotation,
                                                PsiClass type, OverrideDescriptor desc,
                                                PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        PsiClass mappedSuperClass = findMappedSuperclassWithField(type, name);
-        if (mappedSuperClass==null) {
-            String targetName = resolveSuperclassChainName(type);
-            diagnostics.add(createDiagnostic(annotation, unit,
-                    Messages.getMessage(desc.msgNotFound, name, targetName),
-                    desc.errorCode, null, DiagnosticSeverity.Error));
-        }
-    }
-
-    /**
-     * Returns {@code true} if a field named {@code name} (supporting dot-notation)
-     * exists anywhere in the {@code @MappedSuperclass} supertype chain of {@code type}.
-     */
-    private PsiClass findMappedSuperclassWithField(PsiClass type, String name) {
+        boolean hasMappedSuperclass = false;
         PsiClass current = type.getSuperClass();
         while (current != null
                 && !PersistenceConstants.OBJECT.equals(current.getQualifiedName())) {
             if (isMatchedAnnotation(current.getAnnotations(), PersistenceConstants.MAPPEDSUPERCLASS)) {
                 if (fieldExistsInType(current, name)) {
-                    return current;
+                    return;
                 }
+                hasMappedSuperclass = true;
             }
             current = current.getSuperClass();
         }
-        return null;
-    }
-
-    /**
-     * Returns a human-readable name for the first {@code @MappedSuperclass} in the
-     * supertype chain, falling back to the immediate superclass name. When the class
-     * has no explicit superclass (i.e. it implicitly extends {@code java.lang.Object}),
-     * the class's own name is returned.
-     */
-    private String resolveSuperclassChainName(PsiClass type) {
-        PsiClass superClass = type.getSuperClass();
-        if (superClass == null || PersistenceConstants.OBJECT.equals(superClass.getQualifiedName())) {
-            return type.getName();
-        }
-        return superClass.getName();
+        String message = hasMappedSuperclass
+                ? Messages.getMessage(desc.msgNotFound, name, type.getSuperClass().getName())
+                : Messages.getMessage(desc.msgNoMappedSuperclass, name, type.getName());
+        diagnostics.add(createDiagnostic(annotation, unit, message,
+                desc.errorCode, null, DiagnosticSeverity.Error));
     }
 
     // -----------------------------------------------------------------------

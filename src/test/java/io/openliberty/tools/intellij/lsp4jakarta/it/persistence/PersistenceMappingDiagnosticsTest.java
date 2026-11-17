@@ -714,7 +714,7 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         // Line 14 (0-based 13): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
         Diagnostic cityNotInheritedFromMappedSuperclass = d(13, 0, 70,
-                "The name \"city\" in @AttributeOverride does not match any declared field or property in \"InvalidOverrideNoSuperclass\".",
+                "The name \"city\" in @AttributeOverride cannot be resolved: no @MappedSuperclass was found in the superclass hierarchy of \"InvalidOverrideNoSuperclass\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
         assertJavaDiagnostics(diagnosticsParams, utils, cityNotInheritedFromMappedSuperclass);
@@ -735,7 +735,7 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         // Line 14 (0-based 13): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
         Diagnostic cityInNonMappedSuperclass = d(13, 0, 70,
-                "The name \"city\" in @AttributeOverride does not match any declared field or property in \"PlainBase\".",
+                "The name \"city\" in @AttributeOverride cannot be resolved: no @MappedSuperclass was found in the superclass hierarchy of \"InvalidOverrideNonMappedSuperclass\".",
                 DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAttributeOverrideName");
 
         assertJavaDiagnostics(diagnosticsParams, utils, cityInNonMappedSuperclass);
