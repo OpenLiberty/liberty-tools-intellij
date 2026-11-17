@@ -184,8 +184,9 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
      * Validates override annotations on a field or getter method (property-based access).
      *
      * <p>For {@code @AttributeOverride} / {@code @AttributeOverrides}: if the member
-     * lacks {@code @Embedded}, {@code @EmbeddedId}, or {@code @ElementCollection},
-     * a diagnostic is emitted for each such annotation — the override has no valid target.
+     * lacks {@code @Embedded}, {@code @EmbeddedId}, {@code @ElementCollection}, and is not a
+     * {@code Map}-typed {@code @OneToMany} / {@code @ManyToMany}, a diagnostic is emitted for
+     * each such annotation — the override has no valid target.
      */
     private void validateOverridesOnMember(PsiJvmModifiersOwner member, PsiClass declaringType,
                                            PsiJavaFile unit, OverrideDescriptor desc,
@@ -194,7 +195,9 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         boolean hasEmbedded = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDED);
         boolean hasEmbeddedId = isMatchedAnnotation(annotations, PersistenceConstants.EMBEDDEDID);
         boolean hasElementCollection = isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION);
-        boolean hasValidAttributeOverrideTarget = hasEmbedded || hasEmbeddedId || hasElementCollection;
+        boolean isMapOverrideTarget = isMapOverrideTarget(member, annotations);
+        boolean hasValidAttributeOverrideTarget = hasEmbedded || hasEmbeddedId || hasElementCollection
+                || isMapOverrideTarget;
         boolean hasValidAssociationOverrideTarget = hasEmbedded || hasElementCollection;
         boolean isAttributeOverrideDesc = PersistenceConstants.ATTRIBUTE_OVERRIDE.equals(desc.singleFqn);
         boolean isAssociationOverrideDesc = PersistenceConstants.ASSOCIATION_OVERRIDE.equals(desc.singleFqn);
@@ -210,7 +213,8 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
 
             if (isAttributeOverrideDesc && !hasValidAttributeOverrideTarget) {
                 // @AttributeOverride / @AttributeOverrides on a field or method that is not
-                // @Embedded, @EmbeddedId, or @ElementCollection — no valid override target.
+                // @Embedded, @EmbeddedId, @ElementCollection, or Map @OneToMany/@ManyToMany —
+                // no valid override target.
                 diagnostics.add(createDiagnostic(annotation, unit,
                         Messages.getMessage("AttributeOverrideOnNonEmbeddedField", JDTUtils.getSimpleName(fqn)),
                         PersistenceConstants.DIAGNOSTIC_CODE_ATTRIBUTE_OVERRIDE_ON_NON_EMBEDDED,
@@ -227,21 +231,40 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
             if (isSingle) {
                 String name = AnnotationValueExpressionUtil.getAnnotationStringValue(annotation, PersistenceConstants.NAME);
                 if (name != null) {
-                    validateNameOnMember(name, annotation, member, hasElementCollection, desc, unit, diagnostics);
+                    validateNameOnMember(name, annotation, member, isMapOverrideTarget, desc, unit, diagnostics);
                 }
             } else {
                 for (PsiAnnotation nested : AnnotationValueExpressionUtil.getNestedAnnotations(annotation)) {
                     String name = AnnotationValueExpressionUtil.getAnnotationStringValue(nested, PersistenceConstants.NAME);
                     if (name != null) {
-                        validateNameOnMember(name, nested, member, hasElementCollection, desc, unit, diagnostics);
+                        validateNameOnMember(name, nested, member, isMapOverrideTarget, desc, unit, diagnostics);
                     }
                 }
             }
         }
     }
 
+    /**
+     * Returns {@code true} if the member is a {@code java.util.Map} annotated with
+     * {@code @ElementCollection}, {@code @OneToMany} or {@code @ManyToMany}. Per Jakarta
+     * Persistence 3.0 §11.1.4, {@code @AttributeOverride} may be applied to "a map collection
+     * whose key and/or value is an embeddable class" — not limited to {@code @ElementCollection} —
+     * and such names must be prefixed with {@code "key."} or {@code "value."}.
+     */
+    private boolean isMapOverrideTarget(PsiJvmModifiersOwner member, PsiAnnotation[] annotations) {
+        if (!isMatchedAnnotation(annotations, PersistenceConstants.ELEMENT_COLLECTION)
+                && !isMatchedAnnotation(annotations, PersistenceConstants.ONE_TO_MANY)
+                && !isMatchedAnnotation(annotations, PersistenceConstants.MANY_TO_MANY)) {
+            return false;
+        }
+        PsiType memberType = PsiUtils.getMemberType(member);
+        return memberType instanceof PsiClassType
+                && InheritanceUtil.isInheritor(((PsiClassType) memberType).resolve(),
+                        PersistenceConstants.MAP_INTERFACE_FQDN);
+    }
+
     private void validateNameOnMember(String name, PsiAnnotation annotation,
-                                      PsiJvmModifiersOwner member, boolean isElementCollection,
+                                      PsiJvmModifiersOwner member, boolean isMapOverrideTarget,
                                       OverrideDescriptor desc, PsiJavaFile unit,
                                       List<Diagnostic> diagnostics) {
         PsiType memberType = PsiUtils.getMemberType(member);
@@ -251,8 +274,7 @@ public class PersistenceMappingDiagnosticsCollector extends AbstractDiagnosticsC
         PsiClassType classType = (PsiClassType) memberType;
         PsiClass resolvedClass = classType.resolve();
 
-        if (isElementCollection
-                && InheritanceUtil.isInheritor(resolvedClass, PersistenceConstants.MAP_INTERFACE_FQDN)) {
+        if (isMapOverrideTarget) {
             validateNameOnMapField(name, annotation, classType, desc, unit, diagnostics);
         } else if (resolvedClass != null) {
             validateNameAgainstType(name, name, annotation, resolvedClass, desc, unit, diagnostics);

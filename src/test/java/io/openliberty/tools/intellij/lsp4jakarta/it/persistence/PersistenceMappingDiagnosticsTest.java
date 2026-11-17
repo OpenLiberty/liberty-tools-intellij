@@ -158,6 +158,23 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
     }
 
+    @Test
+    public void validMapRelationshipOverride_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/ValidMapRelationshipOverride.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
+
     // -----------------------------------------------------------------------
     // @AttributeOverride — invalid cases (diagnostic expected)
     // -----------------------------------------------------------------------
@@ -582,7 +599,7 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         // Line 18 (0-based 17): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
         Diagnostic overrideOnPlainField = d(17, 4, 74,
-                "@AttributeOverride is only valid on a field or property annotated with @Embedded, @EmbeddedId or @ElementCollection.",
+                "@AttributeOverride is only valid on a field or property annotated with @Embedded, @EmbeddedId, @ElementCollection, or on a Map annotated with @OneToMany or @ManyToMany.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "AttributeOverrideOnNonEmbeddedField");
 
         assertJavaDiagnostics(diagnosticsParams, utils, overrideOnPlainField);
@@ -626,7 +643,7 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         // Line 17 (0-based 16): @AttributeOverrides({  ... line 19 (0-based 18): })
         Diagnostic overrideContainerOnIdField = d(16, 4, 18, 6,
-                "@AttributeOverrides is only valid on a field or property annotated with @Embedded, @EmbeddedId or @ElementCollection.",
+                "@AttributeOverrides is only valid on a field or property annotated with @Embedded, @EmbeddedId, @ElementCollection, or on a Map annotated with @OneToMany or @ManyToMany.",
                 DiagnosticSeverity.Error, "jakarta-persistence", "AttributeOverrideOnNonEmbeddedField");
 
         assertJavaDiagnostics(diagnosticsParams, utils, overrideContainerOnIdField);
@@ -653,6 +670,29 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
         TextEdit removeAttributeOverrides = te(0, 0, 21, 0, newText);
         CodeAction removeAttributeOverridesAction = ca(uri, "Remove @AttributeOverrides", overrideContainerOnIdField, removeAttributeOverrides);
         assertJavaCodeAction(codeActionParams, utils, removeAttributeOverridesAction);
+    }
+
+    @Test
+    public void attributeOverrideOnNonMapRelationship_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/attributeoverride/InvalidAttributeOverrideOnNonMapRelationship.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 20 (0-based 19): @AttributeOverride(name = "city", column = @Column(name = "EMP_CITY"))
+        // on a @OneToMany List — only Map-typed relationships are valid override targets.
+        Diagnostic overrideOnListRelationship = d(19, 4, 74,
+                "@AttributeOverride is only valid on a field or property annotated with @Embedded, @EmbeddedId, @ElementCollection, or on a Map annotated with @OneToMany or @ManyToMany.",
+                DiagnosticSeverity.Error, "jakarta-persistence", "AttributeOverrideOnNonEmbeddedField");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, overrideOnListRelationship);
     }
 
     // -----------------------------------------------------------------------
