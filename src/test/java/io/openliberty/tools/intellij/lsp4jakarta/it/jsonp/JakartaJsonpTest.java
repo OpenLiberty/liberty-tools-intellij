@@ -111,4 +111,41 @@ public class JakartaJsonpTest extends BaseJakartaTest {
 
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, invalidArrayBuilderStringNull, invalidArrayBuilderNull, invalidArrayBuilderTwoParamString);
     }
+
+    @Test
+    public void manualJsonMappingToPojo() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/jsonp/ManualJsonMappingToPojo.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        String message = "JSON values are copied into an object field by field. Consider using Jakarta JSON Binding (Jsonb.fromJson) for type-safe binding with less boilerplate code.";
+
+        Diagnostic mappedThroughVariable = JakartaForJavaAssert.d(48, 33, 43, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        Diagnostic mappedThroughChainedCall = JakartaForJavaAssert.d(58, 74, 84, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        Diagnostic mappedThroughConstructor = JakartaForJavaAssert.d(69, 33, 43, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        Diagnostic mappedThroughFieldAssignment = JakartaForJavaAssert.d(76, 33, 43, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        Diagnostic mappedSingleValue = JakartaForJavaAssert.d(93, 33, 43, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        Diagnostic mappedThroughJsonValues = JakartaForJavaAssert.d(130, 33, 43, message,
+                DiagnosticSeverity.Warning, "jakarta-jsonp", "UseJsonbInsteadOfManualMapping");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, mappedThroughVariable,
+                mappedThroughChainedCall, mappedThroughConstructor, mappedThroughFieldAssignment,
+                mappedSingleValue, mappedThroughJsonValues);
+    }
 }
