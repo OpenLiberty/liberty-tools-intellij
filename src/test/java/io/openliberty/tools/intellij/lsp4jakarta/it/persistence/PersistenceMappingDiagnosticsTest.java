@@ -756,4 +756,69 @@ public class PersistenceMappingDiagnosticsTest extends BaseJakartaTest {
 
         assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
     }
+
+    // -----------------------------------------------------------------------
+    // Class-level @AssociationOverride — association must be inherited from a @MappedSuperclass
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void classLevelAssociationOverrideNoSuperclass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidOverrideNoSuperclass.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 15 (0-based 14): @AssociationOverride(name = "supervisor", joinColumns = @JoinColumn(name = "SUPER_ID"))
+        Diagnostic supervisorNotInheritedFromMappedSuperclass = d(14, 0, 87,
+                "The name \"supervisor\" in @AssociationOverride cannot be resolved: no @MappedSuperclass was found in the superclass hierarchy of \"InvalidOverrideNoSuperclass\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, supervisorNotInheritedFromMappedSuperclass);
+    }
+
+    @Test
+    public void classLevelAssociationOverrideNonMappedSuperclass_diagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/InvalidOverrideNonMappedSuperclass.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 14 (0-based 13): @AssociationOverride(name = "supervisor", joinColumns = @JoinColumn(name = "SUPER_ID"))
+        Diagnostic supervisorInNonMappedSuperclass = d(13, 0, 87,
+                "The name \"supervisor\" in @AssociationOverride cannot be resolved: no @MappedSuperclass was found in the superclass hierarchy of \"InvalidOverrideNonMappedSuperclass\".",
+                DiagnosticSeverity.Error, "jakarta-persistence", "InvalidAssociationOverrideName");
+
+        assertJavaDiagnostics(diagnosticsParams, utils, supervisorInNonMappedSuperclass);
+    }
+
+    @Test
+    public void classLevelAssociationOverrideThroughNonMappedIntermediate_nodiagnostic() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(
+                ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/associationoverride/ValidOverrideThroughNonMappedIntermediate.java");
+        assertNotNull(javaFile);
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        assertJavaDiagnostics(diagnosticsParams, utils /* no diagnostics expected */);
+    }
 }
