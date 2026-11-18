@@ -154,11 +154,6 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
                 PersistenceConstants.ID, PersistenceConstants.EMBEDDEDID);
 
         for (PsiAnnotation annotation : psiClass.getAnnotations()) {
-            String qualifiedName = annotation.getQualifiedName();
-            if (!PersistenceConstants.NAMED_ENTITY_GRAPH.equals(qualifiedName)
-                    && !PersistenceConstants.NAMED_ENTITY_GRAPHS.equals(qualifiedName)) {
-                continue;
-            }
             forEachGraph(annotation, inner -> validateEntityGraph(inner, psiClass, fieldBased, unit,
                     graphNameOccurrences, diagnostics));
         }
@@ -191,7 +186,9 @@ public class NamedEntityGraphDiagnosticsCollector extends AbstractDiagnosticsCol
 
     private void validateAttributeNodes(PsiAnnotation graphAnnotation, PsiClass psiClass,
                                         PsiJavaFile unit, List<Diagnostic> diagnostics) {
-        for (PsiAnnotation attributeNode : DiagnosticsUtils.getAnnotationMemberValues(graphAnnotation, "attributeNodes", PsiAnnotation.class)) {
+        List<PsiAnnotation> attributeNodes = DiagnosticsUtils.getAnnotationMemberValues(
+                graphAnnotation, "attributeNodes", PsiAnnotation.class);
+        for (PsiAnnotation attributeNode : attributeNodes) {
             validateSingleAttributeNode(attributeNode, psiClass, unit, diagnostics);
         }
     }
