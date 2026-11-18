@@ -45,6 +45,7 @@ public class PersistenceConstants {
     public static final String MAPKEYJOINCOLUMN = "jakarta.persistence.MapKeyJoinColumn";
     public static final String MAPKEYENUMERATED = "jakarta.persistence.MapKeyEnumerated";
     public static final String MAPKEYTEMPORAL = "jakarta.persistence.MapKeyTemporal";
+    public static final String SERIALIZABLE = "java.io.Serializable";
     public static final String CONVERT = "jakarta.persistence.Convert";
     public static final String ONE_TO_ONE = "jakarta.persistence.OneToOne";
     public static final String ONE_TO_MANY = "jakarta.persistence.OneToMany";
@@ -73,6 +74,31 @@ public class PersistenceConstants {
     public static final String[] GENERATOR_AND_TABLE_ANNOTATIONS = {
             TABLE_GENERATOR, TABLE_GENERATORS, SEQUENCE_GENERATOR, SEQUENCE_GENERATORS, SECONDARY_TABLE, SECONDARY_TABLES
     };
+
+    /* Bidirectional relationship annotation constants */
+    public static final String JOIN_TABLE = "jakarta.persistence.JoinTable";
+    public static final String JOIN_COLUMN = "jakarta.persistence.JoinColumn";
+    public static final String JOIN_COLUMNS = "jakarta.persistence.JoinColumns";
+    public static final String DIAGNOSTIC_CODE_INVERSE_MISSING_MAPPED_BY = "InverseSideMissingMappedBy";
+    public static final String DIAGNOSTIC_CODE_JOIN_TABLE_ON_INVERSE = "JoinTableOnInverseSide";
+    public static final String DIAGNOSTIC_CODE_JOIN_COLUMN_ON_INVERSE = "JoinColumnOnInverseSide";
+
+    /** All relationship annotations that support the {@code mappedBy} attribute. */
+    public static final String[] INVERSE_CAPABLE_RELATIONSHIP_ANNOTATIONS = {
+            ONE_TO_MANY, ONE_TO_ONE, MANY_TO_MANY
+    };
+
+    /**
+     * Annotations that are only valid on the owning side of a relationship
+     * and must not appear on the inverse side (i.e. the side that carries
+     * {@code mappedBy}).
+     */
+    public static final String[] OWNER_ONLY_ANNOTATIONS = {
+            JOIN_TABLE, JOIN_COLUMN, JOIN_COLUMNS
+    };
+
+    /** Annotation attribute name for the owning-side field reference. */
+    public static final String MAPPED_BY = "mappedBy";
 
     /* Type Constants */
     public static final String MAP_INTERFACE_FQDN = "java.util.Map";
@@ -120,7 +146,7 @@ public class PersistenceConstants {
     public static final String DIAGNOSTIC_CODE_NAMED_NATIVE_QUERIES_ON_INVALID_CLASS = "NamedNativeQueriesOnInvalidClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ENTITY = "InheritanceAnnotationOnNonEntityClass";
     public static final String DIAGNOSTIC_CODE_INHERITANCE_ON_NON_ROOT = "InheritanceAnnotationOnNonRootEntity";
-    
+
     /* Generator / SecondaryTable Codes */
     public static final String DIAGNOSTIC_CODE_TABLE_GENERATOR_INVALID_EMPTY_NAME = "TableGeneratorInvalidEmptyName";
     public static final String DIAGNOSTIC_CODE_TABLE_GENERATORS_MISSING_MAPPING = "TableGeneratorsMissingTableGeneratorMapping";
@@ -132,6 +158,13 @@ public class PersistenceConstants {
     /* Converter Codes */
     public static final String DIAGNOSTIC_CODE_CONVERTER_MUST_IMPLEMENT = "ConverterMustImplementAttributeConverter";
 
+    /* IdClass Codes */
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_PUBLIC = "IdClassMustBePublic";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_HAVE_PUBLIC_NO_ARG_CONSTRUCTOR = "IdClassMustHavePublicNoArgConstructor";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_BE_SERIALIZABLE = "IdClassMustBeSerializable";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_EQUALS = "IdClassMustDeclareEquals";
+    public static final String DIAGNOSTIC_CODE_IDCLASS_MUST_DECLARE_HASHCODE = "IdClassMustDeclareHashCode";
+    
     /* EntityListeners Codes */
     public static final String DIAGNOSTIC_CODE_INVALID_CONSTRUCTOR_IN_ENTITY_LISTENER = "InvalidConstructorInEntityListener";
     public static final String DIAGNOSTIC_CODE_INVALID_ENTITY_LISTENER_TYPE = "InvalidEntityListenerType";
@@ -210,4 +243,9 @@ public class PersistenceConstants {
     public static final String UTIL_CALENDAR = "java.util.Calendar";
     public static final String TEMPORAL_TYPE_DATE = "TemporalType.DATE";
     public static final String HTTP_SERVLET_FQ_NAME = "jakarta.servlet.http.HttpServlet";
+
+    /* NamedEntityGraph Codes */
+    public static final String NAMED_ENTITY_GRAPH = "jakarta.persistence.NamedEntityGraph";
+    public static final String NAMED_ENTITY_GRAPHS = "jakarta.persistence.NamedEntityGraphs";
+    public static final String DIAGNOSTIC_CODE_DUPLICATE_NAMED_ENTITY_GRAPH = "DuplicateNamedEntityGraphName";
 }
