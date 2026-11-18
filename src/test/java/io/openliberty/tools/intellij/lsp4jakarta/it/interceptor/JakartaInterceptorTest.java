@@ -2325,6 +2325,30 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
     }
 
     @Test
+    public void testInterceptorProceedInCatchAndFinallyBlocksTest() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidInterceptorProceedInCatchFinally.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // proceed() in the try block is protected; the calls in the catch and finally blocks
+        // are not protected by that try statement, so each must be reported.
+        Diagnostic catchBlockWarning = JakartaForJavaAssert.d(20, 23, 30,
+                PROCEED_NOT_IN_TRY_CATCH_MSG,
+                DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorProceedNotInTryCatch");
+        Diagnostic finallyBlockWarning = JakartaForJavaAssert.d(22, 16, 23,
+                PROCEED_NOT_IN_TRY_CATCH_MSG,
+                DiagnosticSeverity.Warning, "jakarta-interceptor", "InvalidInterceptorProceedNotInTryCatch");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, catchBlockWarning, finallyBlockWarning);
+    }
+
+    @Test
     public void testValidInterceptorProceedInTryCatchAllFormsTest() throws Exception {
         Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());

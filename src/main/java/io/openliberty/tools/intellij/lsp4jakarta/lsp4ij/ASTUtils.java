@@ -42,28 +42,35 @@ public class ASTUtils {
 
     /**
      * Finds the calls to the specified method on the specified parent type, within the given method,
-     * that are NOT enclosed within a try statement (i.e., not inside a try/catch or try/finally block).
+     * that are NOT protected by a try statement. A call is protected only when it is inside the
+     * try block (or the resource list of a try-with-resources) of some enclosing try statement;
+     * a call inside a catch or finally block is not protected by that try statement.
      *
      * <p>A method may contain multiple matching invocations (e.g. one inside a try and one
-     * outside). Each invocation outside a try statement is unprotected and is returned, so that a
-     * diagnostic can be reported on the call itself; an invocation inside a try statement is not.
+     * outside). Each unprotected invocation is returned, so that a diagnostic can be reported on
+     * the call itself; a protected invocation is not.
      *
      * @param psiMethod the method to inspect
      * @param targetMethod the method name to look for (e.g. "proceed")
      * @param parentFQN the fully qualified name of the declaring class (e.g. "jakarta.interceptor.InvocationContext")
-     * @return the matching invocations that are not inside a try statement, in source order;
-     *         empty if there are no matching invocations or all of them are inside a try statement
+     * @return the matching invocations that are not protected by a try statement, in source order;
+     *         empty if there are no matching invocations or all of them are protected
      */
     public static List<PsiMethodCallExpression> findMethodInvocationsOutsideTryCatch(PsiMethod psiMethod, String targetMethod, String parentFQN) {
         List<PsiMethodCallExpression> unprotected = new ArrayList<>();
         for (PsiMethodCallExpression match : collectMethodInvocations(psiMethod, targetMethod, parentFQN, false)) {
+            PsiElement child = match;
             PsiElement parent = match.getParent();
             boolean insideTry = false;
             while (parent != null && parent != psiMethod) {
                 if (parent instanceof PsiTryStatement) {
-                    insideTry = true;
-                    break;
+                    PsiTryStatement tryStatement = (PsiTryStatement) parent;
+                    if (child == tryStatement.getTryBlock() || child == tryStatement.getResourceList()) {
+                        insideTry = true;
+                        break;
+                    }
                 }
+                child = parent;
                 parent = parent.getParent();
             }
             if (!insideTry) {
