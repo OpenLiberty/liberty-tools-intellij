@@ -82,6 +82,8 @@ public class ManagedBeanConstants {
     public static final String DIAGNOSTIC_CODE_PRODUCER_METHOD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerMethodWithTypeVariableAndNonDependentScope";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_BARE_TYPE_VAR = "InvalidProducerFieldWithBareTypeVariableType";
     public static final String DIAGNOSTIC_CODE_PRODUCER_FIELD_TYPE_VAR_NON_DEPENDENT = "InvalidProducerFieldWithTypeVariableAndNonDependentScope";
+    public static final String DIAGNOSTIC_CODE_BARE_TYPE_VAR_INJECT_FIELD = "InvalidBareTypeVariableInInjectField";
+    public static final String DIAGNOSTIC_CODE_BARE_TYPE_VAR_INJECT_METHOD_PARAM = "InvalidBareTypeVariableInInjectMethodParam";
     public static final String DIAGNOSTIC_CODE_ORPHAN_DISPOSER = "InvalidOrphanDisposerMethod";
     public static final String DIAGNOSTIC_CODE_INCONSISTENT_SPECIALIZATION = "InvalidInconsistentSpecialization";
     public static final String DIAGNOSTIC_CODE_RAW_EVENT = "InvalidRawEventTypeInjectionPoint";
