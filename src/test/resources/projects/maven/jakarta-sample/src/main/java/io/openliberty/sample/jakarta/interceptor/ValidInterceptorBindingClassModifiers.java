@@ -12,20 +12,20 @@
  *******************************************************************************/
 package io.openliberty.sample.jakarta.interceptor;
 
-import jakarta.interceptor.AroundInvoke;
-import jakarta.interceptor.InvocationContext;
-
 /**
  * Valid dataset for issue #693:
  * A component class that declares or inherits a class-level interceptor binding
- * (@Monitored) with no final class modifier and valid methods.
+ * (@Monitored is meta-annotated with @InterceptorBinding) must not be declared
+ * final, or have any non-static, non-private, final methods.
  */
+
+// VALID: no final modifier on class or non-private/non-static methods - no diagnostic expected
 @Monitored
 public class ValidInterceptorBindingClassModifiers {
 
-    @AroundInvoke
-    public Object intercept(InvocationContext ctx) throws Exception {
-        return ctx.proceed();
+    // Valid: public non-final method
+    public Object intercept() {
+        return null;
     }
 
     // Valid: public non-final method
