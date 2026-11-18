@@ -1263,7 +1263,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphUnique.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitygraph/NamedEntityGraphUnique.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
@@ -1462,7 +1462,7 @@ public class JakartaPersistenceTest extends BaseJakartaTest {
         IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
 
         VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
-                + "/src/main/java/io/openliberty/sample/jakarta/persistence/NamedEntityGraphsContainerUnique.java");
+                + "/src/main/java/io/openliberty/sample/jakarta/persistence/entitygraph/NamedEntityGraphsContainerUnique.java");
         String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
 
         JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
