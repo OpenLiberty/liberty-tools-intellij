@@ -186,9 +186,7 @@ public class DiagnosticsUtils {
         if (superclass == null) {
             return false;
         }
-        // findSuperMethods(PsiClass) walks the whole hierarchy; we restrict to methods
-        // whose declaring class is exactly the direct superclass so that an annotation
-        // on a grandparent method does not satisfy the requirement.
+        // Overridden methods declared in 'superclass' itself.
         return Arrays.stream(method.findSuperMethods(superclass))
                      .filter(superMethod -> superclass.equals(superMethod.getContainingClass()))
                      .anyMatch(superMethod -> AnnotationUtils.hasAnnotation(superMethod, annotationFQName));
