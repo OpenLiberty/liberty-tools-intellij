@@ -38,6 +38,7 @@ public class Constants {
     public static final String DIAGNOSTIC_CODE_FINAL_INTERCEPTOR_BINDING_CLASS = "InvalidFinalInterceptorBindingClass";
     public static final String DIAGNOSTIC_CODE_FINAL_METHOD_ON_INTERCEPTOR_BINDING_CLASS = "InvalidMethodOnInterceptorBindingClass";
     public static final String DIAGNOSTIC_CODE_AROUND_CONSTRUCT_IN_TARGET_CLASS = "InvalidAroundConstructInTargetClass";
+    public static final String DIAGNOSTIC_CODE_LIFECYCLE_CALLBACK_SIGNATURE = "InvalidLifecycleCallbackMethodSignatureInTargetClass";
 
     public static final String AROUND_CONSTRUCT_FQ_NAME = "jakarta.interceptor.AroundConstruct";
 

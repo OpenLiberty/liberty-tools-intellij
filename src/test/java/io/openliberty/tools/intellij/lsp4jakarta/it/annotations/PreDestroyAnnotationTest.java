@@ -56,6 +56,11 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
         
         Diagnostic d1 = d(24, 16, 28, "A method with the @PreDestroy annotation must not have any parameters.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyParams");
+
+        // @PreDestroy with params also violates lifecycle callback signature rule
+        Diagnostic hasParamsSignature = d(24, 16, 28,
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
         
         Diagnostic d2 = d(30, 20, 31, "A method with the @PreDestroy annotation must not be static.",
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyStatic");
@@ -73,7 +78,18 @@ public class PreDestroyAnnotationTest extends BaseJakartaTest {
                 DiagnosticSeverity.Error, "jakarta-annotations", "PreDestroyException");
         d5.setData(new Gson().toJsonTree(List.of("java.io.IOException")));
 
-        assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3, d4, d5);
+        // Line 19: getStudentId() has non-void return -- violates lifecycle callback signature in target class
+        Diagnostic nonVoidReturnSignature = d(19, 16, 28,
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
+
+        // Expected diagnostics:
+        // - Line 30: makeUnhappy() violates @PreDestroy static modifier rule (d2)
+        // - Line 24: getHappiness() violates @PreDestroy parameter rule (d1)
+        // - Lines 55, 35, 50: methods throwing checked exceptions (d3, d4, d5)
+        // - Line 24: getHappiness() violates interceptor lifecycle signature (hasParamsSignature)
+        // - Line 19: getStudentId() violates interceptor lifecycle signature (nonVoidReturnSignature)
+        assertJavaDiagnostics(diagnosticsParams, utils, d2, d1, d3, d4, d5, hasParamsSignature, nonVoidReturnSignature);
 
         JakartaJavaCodeActionParams codeActionParams = createCodeActionParams(uri, d1);
         String newText = "package io.openliberty.sample.jakarta.annotations;\n\nimport jakarta.annotation.PreDestroy;\n" +

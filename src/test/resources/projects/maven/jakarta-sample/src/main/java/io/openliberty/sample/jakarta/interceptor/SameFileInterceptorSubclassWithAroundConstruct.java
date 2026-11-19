@@ -8,8 +8,8 @@ import jakarta.interceptor.InvocationContext;
  * Valid: @AroundConstruct declared in a non-interceptor superclass whose
  * @Interceptor-annotated subclass lives in the SAME compilation unit.
  *
- * hasInterceptorSubclass() discovers same-file @Interceptor subclasses, so the
- * diagnostic is suppressed on the superclass.
+ * hasInterceptorSubclass() includes same-file subtypes, so the @Interceptor
+ * subclass below IS discovered and both diagnostics are suppressed.
  */
 class SameFileSuperclassWithAroundConstruct {
 
@@ -21,6 +21,8 @@ class SameFileSuperclassWithAroundConstruct {
 
 /**
  * The @Interceptor subclass is in the same file as the superclass above.
+ * hasInterceptorSubclass() discovers it, so the superclass is treated as
+ * an interceptor superclass and no diagnostic fires.
  */
 @Monitored
 @Interceptor

@@ -247,7 +247,7 @@ public class AnnotationDiagnosticsCollector extends AbstractDiagnosticsCollector
      * @return {@code true} if annotation parameter/return-type checks must be suppressed
      */
     private boolean isInterceptorContextType(PsiClass type, PsiJavaFile unit) {
-        return isInterceptorTypeReferenced(type) || hasInterceptorSubclass(type, unit);
+        return isInterceptorTypeReferenced(type) || hasInterceptorSubclass(type);
     }
 
     /**

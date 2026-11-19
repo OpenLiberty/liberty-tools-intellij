@@ -483,9 +483,9 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
     }
 
     /**
-     * Returns {@code true} if {@code type} has at least one subclass (anywhere in the
-     * project, including within the same source file) that is annotated with
-     * {@code @Interceptor}.
+     * Returns {@code true} if {@code type} has at least one subclass (in any source
+     * that is annotated with {@code @Interceptor}, whether in the same file or
+     * a different file.
      *
      * <p>Uses {@link ClassInheritorsSearch} to discover subtypes without a full
      * project scan.
@@ -496,16 +496,12 @@ public abstract class AbstractDiagnosticsCollector implements DiagnosticsCollect
      * is also validated correctly.
      *
      * @param type the type whose subtype hierarchy is to be searched
-     * @param unit the PSI Java file that contains {@code type}
-     * @return {@code true} if an {@code @Interceptor} subclass exists anywhere in the project
+     * @return {@code true} if an {@code @Interceptor} subclass exists
      */
-    public static boolean hasInterceptorSubclass(PsiClass type, PsiJavaFile unit) {
+    public static boolean hasInterceptorSubclass(PsiClass type) {
         GlobalSearchScope scope = GlobalSearchScope.allScope(type.getProject());
         return ClassInheritorsSearch.search(type, scope, true)
-                .anyMatch(subtype -> {
-                    PsiFile subFile = subtype.getContainingFile();
-                    return subFile != null && !subtype.equals(type) && isInterceptorType(subtype);
-                });
+                .anyMatch(subtype -> isInterceptorType(subtype));
     }
 
     /**
