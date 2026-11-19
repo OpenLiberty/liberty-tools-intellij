@@ -2213,4 +2213,63 @@ public class JakartaInterceptorTest extends BaseJakartaTest {
         JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
                 preDestroyNonVoid, postConstructParamsAnnotation, postConstructWithParam);
     }
+
+    /**
+     * Target-class checks must apply to nested classes at any depth (equivalent to the JDT
+     * side iterating unit.getAllTypes()). The outer class and Level1 (first nesting level)
+     * and Level2 (second nesting level) are all non-interceptor target classes.
+     */
+    @Test
+    public void testTargetClassChecksInNestedClasses() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InvalidTargetClassChecksInNestedClasses.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 17 (0-based, Level1): @AroundConstruct in a nested target class.
+        // The signature void construct() is valid, so only the AroundConstruct diagnostic is reported.
+        Diagnostic nestedAroundConstruct = JakartaForJavaAssert.d(17, 20, 29,
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        // Line 27 (0-based, Level2, two levels deep): @PreDestroy with a non-void return type.
+        Diagnostic deeplyNestedPreDestroy = JakartaForJavaAssert.d(27, 26, 33,
+                "Lifecycle callback interceptor methods declared in a target class or in a superclass of a target class must be of type void and have no parameters.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidLifecycleCallbackMethodSignatureInTargetClass");
+
+        // Level1.init() (@PostConstruct void init()) is valid: no diagnostic expected.
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils,
+                nestedAroundConstruct, deeplyNestedPreDestroy);
+    }
+
+    /**
+     * A static nested class declared inside an @Interceptor class is not itself annotated with
+     * @Interceptor, so it is treated as a target class (matching the JDT side). The outer
+     * interceptor's own @AroundConstruct method remains valid.
+     */
+    @Test
+    public void testNestedTargetClassInsideInterceptorClass() throws Exception {
+        Module module = createMavenModule(new File("src/test/resources/projects/maven/jakarta-sample"));
+        IPsiUtils utils = PsiUtilsLSImpl.getInstance(getProject());
+
+        VirtualFile javaFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(ModuleUtilCore.getModuleDirPath(module)
+                + "/src/main/java/io/openliberty/sample/jakarta/interceptor/InterceptorWithNestedTargetClass.java");
+        String uri = VfsUtilCore.virtualToIoFile(javaFile).toURI().toString();
+
+        JakartaJavaDiagnosticsParams diagnosticsParams = new JakartaJavaDiagnosticsParams();
+        diagnosticsParams.setUris(Arrays.asList(uri));
+
+        // Line 23 (0-based): @AroundConstruct in the nested (non-@Interceptor) class. The outer
+        // @AroundConstruct at line 16 is valid and must not be flagged.
+        Diagnostic nestedAroundConstruct = JakartaForJavaAssert.d(23, 20, 35,
+                "Around-construct interceptor methods may be only declared in interceptor classes and/or their superclasses.",
+                DiagnosticSeverity.Error, "jakarta-interceptor", "InvalidAroundConstructInTargetClass");
+
+        JakartaForJavaAssert.assertJavaDiagnostics(diagnosticsParams, utils, nestedAroundConstruct);
+    }
 }
